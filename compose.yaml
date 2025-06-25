@@ -1,10 +1,13 @@
 services:
   mysql:
-    image: 'mysql:latest'
+    image: 'mysql:8.0'
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
+      - 'MYSQL_DATABASE=checkmo_db'
+      - 'MYSQL_ROOT_PASSWORD=checkmo123'
     ports:
-      - '3306'
+      - '3309:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
