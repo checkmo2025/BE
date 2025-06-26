@@ -8,16 +8,6 @@ services:
       - '3309:3306'
     volumes:
       - mysql_data:/var/lib/mysql
-  app:
-    build: .
-    ports:
-      - '8080:8080'
-    depends_on:
-      - mysql
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - checkmo-network
 
 networks:
   checkmo-network:
