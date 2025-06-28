@@ -5,9 +5,13 @@ services:
       MYSQL_DATABASE: checkmo_db
       MYSQL_ROOT_PASSWORD: checkmo123
     ports:
-      - 3309:3306
+      - 3306:3306
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
 
 networks:
   checkmo-network:
