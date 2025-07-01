@@ -1,33 +1,11 @@
 services:
-  mysql:
-    image: 'mysql:8.0'
-    environment:
-      MYSQL_DATABASE: checkmo_db
-      MYSQL_ROOT_PASSWORD: checkmo123
-    ports:
-      - 3306:3306
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping" ]
-      interval: 5s
-      retries: 10
-
   app:
-    build: .
+    image: nginx #ecr 주소 추가 예정 (지금은 아무거나 넣어놓음)
+    container_name: checkmo
     ports:
-      - 8080:8080
-    depends_on:
-      mysql:
-        condition: service_healthy
+      - "8080:8080"
+    env_file:
+      - .env
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-    networks:
-      - checkmo-network
-
-networks:
-  checkmo-network:
-    driver: bridge
-
-volumes:
-  mysql_data:
+      SPRING_PROFILES_ACTIVE: prod
+    restart: unless-stopped
