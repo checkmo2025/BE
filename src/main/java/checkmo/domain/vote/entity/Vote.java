@@ -1,6 +1,7 @@
 package checkmo.domain.vote.entity;
 
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.Meeting;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,4 +47,8 @@ public class Vote {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
     private Club club;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meeting_id")
+    private Meeting meeting;
 }
