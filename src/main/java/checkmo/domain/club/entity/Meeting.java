@@ -49,7 +49,4 @@ public class Meeting extends BaseEntity {
 
     @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
     private Notice notice;
-
-    @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
-    private Vote vote;
 }
