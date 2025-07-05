@@ -1,5 +1,6 @@
 package checkmo.domain.book.entity;
 
+import checkmo.domain.club.entity.Meeting;
 import checkmo.domain.club.entity.MemberTeam;
 import checkmo.domain.team.entity.TeamTopic;
 import checkmo.global.entity.BaseEntity;
@@ -23,8 +24,8 @@ public class Topic extends BaseEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @JoinColumn(name = "meeting_id", nullable = false)
+    private Meeting meeting;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_team_id")
