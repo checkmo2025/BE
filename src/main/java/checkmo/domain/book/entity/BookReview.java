@@ -1,6 +1,7 @@
 package checkmo.domain.book.entity;
 
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.entity.Meeting;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +26,6 @@ public class BookReview extends BaseEntity {
     private ClubMember clubMember;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @JoinColumn(name = "meeting_id")
+    private Meeting meeting;
 }
