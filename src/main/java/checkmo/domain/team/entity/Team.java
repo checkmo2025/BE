@@ -1,6 +1,7 @@
 package checkmo.domain.team.entity;
 
 import checkmo.domain.club.entity.Meeting;
+import checkmo.domain.club.entity.MemberTeam;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,4 +32,8 @@ public class Team extends BaseEntity {
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     @Builder.Default
     private List<TeamTopic> teamTopics = new ArrayList<>();
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<MemberTeam> memberTeams = new ArrayList<>();
 }
