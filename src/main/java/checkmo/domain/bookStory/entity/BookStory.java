@@ -41,5 +41,5 @@ public class BookStory extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL)
-    private List<BookStoryLiked> bookStoryLikeds = new ArrayList<>();
+    private List<BookStoryLiked> bookStoryLikedList = new ArrayList<>();
 }

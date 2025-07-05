@@ -1,7 +1,14 @@
 package checkmo.domain.member.entity;
 
+import checkmo.domain.bookStory.entity.BookStory;
+import checkmo.domain.bookStory.entity.BookStoryLiked;
+import checkmo.domain.bookStory.entity.Comment;
+import checkmo.domain.category.entity.MemberCategory;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.follow.entity.Follow;
 import checkmo.domain.member.entity.enums.Role;
+import checkmo.domain.notification.entity.Notification;
+import checkmo.domain.vote.entity.MemberVote;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,4 +55,34 @@ public class Member extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
     private List<Follow> followings = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<BookStory> bookStories = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<BookStoryLiked> bookStoryLikedList = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    private List<Notification> receivedNotifications = new ArrayList<>();
+
+    // 사용자 입장에서 자신이 보낸(sender) 알림은 필요하지 않으므로 제외
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<MemberCategory> memberCategories = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<ClubMember> clubMembers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<MemberVote> memberVotes = new ArrayList<>();
 }
