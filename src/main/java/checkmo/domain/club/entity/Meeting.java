@@ -3,6 +3,7 @@ package checkmo.domain.club.entity;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.notice.entity.Notice;
 import checkmo.domain.team.entity.Team;
+import checkmo.domain.vote.entity.Vote;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,4 +49,7 @@ public class Meeting extends BaseEntity {
 
     @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
     private Notice notice;
+
+    @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
+    private Vote vote;
 }
