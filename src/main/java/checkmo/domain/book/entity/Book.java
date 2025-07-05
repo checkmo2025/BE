@@ -29,20 +29,4 @@ public class Book extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private List<BookStory> bookStories = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<BookRecommend> bookRecommends = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<BookReview> bookReviews = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<Topic> topics = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<Meeting> meetings = new ArrayList<>();
 }
