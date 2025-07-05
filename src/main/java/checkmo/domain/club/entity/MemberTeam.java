@@ -1,16 +1,20 @@
 package checkmo.domain.club.entity;
 
+import checkmo.domain.book.entity.Topic;
 import checkmo.domain.team.entity.Team;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class ClubTeam extends BaseEntity {
+public class MemberTeam extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +27,8 @@ public class ClubTeam extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "memberTeam", cascade = CascadeType.ALL)
+    private List<Topic> topics = new ArrayList<>();
 }

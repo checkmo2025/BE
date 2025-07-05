@@ -1,6 +1,6 @@
 package checkmo.domain.book.entity;
 
-import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.entity.MemberTeam;
 import checkmo.domain.team.entity.TeamTopic;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -27,8 +27,8 @@ public class Topic extends BaseEntity {
     private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_member_id")
-    private ClubMember clubMember;
+    @JoinColumn(name = "member_team_id")
+    private MemberTeam memberTeam;
 
     @Builder.Default
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)

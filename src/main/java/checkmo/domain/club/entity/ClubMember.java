@@ -2,7 +2,6 @@ package checkmo.domain.club.entity;
 
 import checkmo.domain.book.entity.BookRecommend;
 import checkmo.domain.book.entity.BookReview;
-import checkmo.domain.book.entity.Topic;
 import checkmo.domain.club.entity.enums.ClubMemberRole;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.entity.BaseEntity;
@@ -48,9 +47,5 @@ public class ClubMember extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
-    private List<Topic> topics = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
-    private List<ClubTeam> clubTeams = new ArrayList<>();
+    private List<MemberTeam> memberTeams = new ArrayList<>();
 }
