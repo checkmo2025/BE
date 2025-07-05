@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -41,8 +42,9 @@ public class Meeting extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Book book; // null 허용
 
+    @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
-    private List<Team> teams;
+    private List<Team> teams = new ArrayList<>();
 
     @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
     private Notice notice;

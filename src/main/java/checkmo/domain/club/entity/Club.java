@@ -6,6 +6,7 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,15 +37,19 @@ public class Club extends BaseEntity {
 
     private String kakao;
 
+    @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<ClubMember> clubMembers;
+    private List<ClubMember> clubMembers = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<ClubCategory> clubCategories;
+    private List<ClubCategory> clubCategories = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<Meeting> meetings;
+    private List<Meeting> meetings = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<Vote> votes;
+    private List<Vote> votes = new ArrayList<>();
 }

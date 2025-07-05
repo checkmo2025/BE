@@ -5,6 +5,9 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -29,4 +32,9 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment; // 부모 댓글
+
+    @Builder.Default
+    @OneToMany(mappedBy = "parentComment")
+    @OrderBy("createdAt DESC")
+    private List<Comment> children = new ArrayList<>();
 }

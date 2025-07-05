@@ -4,6 +4,7 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -20,9 +21,11 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
+    @Builder.Default
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<MemberCategory> memberCategories;
+    private List<MemberCategory> memberCategories = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<ClubCategory> clubCategories;
+    private List<ClubCategory> clubCategories = new ArrayList<>();
 }

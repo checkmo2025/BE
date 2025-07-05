@@ -6,6 +6,7 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -34,9 +35,11 @@ public class BookStory extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Book book;
 
+    @Builder.Default
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL)
-    private List<BookStoryLiked> bookStoryLikeds;
+    private List<BookStoryLiked> bookStoryLikeds = new ArrayList<>();
 }

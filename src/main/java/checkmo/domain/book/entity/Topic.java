@@ -6,6 +6,7 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -29,6 +30,7 @@ public class Topic extends BaseEntity {
     @JoinColumn(name = "club_member_id")
     private ClubMember clubMember;
 
+    @Builder.Default
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
-    private List<TeamTopic> teamTopics;
+    private List<TeamTopic> teamTopics = new ArrayList<>();
 }

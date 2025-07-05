@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -38,8 +39,9 @@ public class Vote {
 
     private LocalDateTime endTime;
 
+    @Builder.Default
     @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL)
-    private List<MemberVote> memberVotes;
+    private List<MemberVote> memberVotes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")

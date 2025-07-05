@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -40,9 +41,11 @@ public class Member extends BaseEntity {
 
     private LocalDateTime deactivated;
 
+    @Builder.Default
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
-    private List<Follow> followers;
+    private List<Follow> followers = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
-    private List<Follow> followings;
+    private List<Follow> followings = new ArrayList<>();
 }

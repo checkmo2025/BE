@@ -6,6 +6,7 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -25,18 +26,23 @@ public class Book extends BaseEntity {
 
     private String imgUrl;
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<BookStory> bookStories;
+    private List<BookStory> bookStories = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<BookRecommend> bookRecommends;
+    private List<BookRecommend> bookRecommends = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<BookReview> bookReviews;
+    private List<BookReview> bookReviews = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<Topic> topics;
+    private List<Topic> topics = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<Meeting> meetings;
+    private List<Meeting> meetings = new ArrayList<>();
 }
