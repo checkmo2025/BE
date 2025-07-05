@@ -1,9 +1,10 @@
 package checkmo.domain.club.entity;
 
 import checkmo.domain.book.entity.Book;
+import checkmo.domain.book.entity.BookReview;
+import checkmo.domain.book.entity.Topic;
 import checkmo.domain.notice.entity.Notice;
 import checkmo.domain.team.entity.Team;
-import checkmo.domain.vote.entity.Vote;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,4 +50,12 @@ public class Meeting extends BaseEntity {
 
     @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
     private Notice notice;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
+    private List<Topic> topics = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
+    private List<BookReview> bookReviews = new ArrayList<>();
 }
