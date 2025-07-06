@@ -1,4 +1,4 @@
 spring:
   profiles:
     include:
-      - db
+      - db # 배포 후에는 prod로 변경
