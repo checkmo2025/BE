@@ -1,6 +1,5 @@
-package checkmo.domain.team.entity;
+package checkmo.domain.member.entity;
 
-import checkmo.domain.book.entity.Topic;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,17 +9,17 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class TeamTopic extends BaseEntity {
+public class Follow extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "topic_id")
-    private Topic topic;
+    @JoinColumn(name = "follower_id")
+    private Member follower;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
-    private Team team;
+    @JoinColumn(name = "following_id")
+    private Member following;
 }

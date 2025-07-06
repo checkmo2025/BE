@@ -5,10 +5,8 @@ import checkmo.domain.bookStory.entity.BookStoryLiked;
 import checkmo.domain.bookStory.entity.Comment;
 import checkmo.domain.category.entity.MemberCategory;
 import checkmo.domain.club.entity.ClubMember;
-import checkmo.domain.follow.entity.Follow;
-import checkmo.domain.member.entity.enums.Role;
 import checkmo.domain.notification.entity.Notification;
-import checkmo.domain.vote.entity.MemberVote;
+import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,6 +21,10 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Member extends BaseEntity {
+
+    public enum Role {
+        USER, ADMIN
+    }
 
     @Id
     @Column(nullable = false, unique = true)

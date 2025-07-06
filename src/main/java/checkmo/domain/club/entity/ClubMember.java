@@ -1,8 +1,7 @@
 package checkmo.domain.club.entity;
 
-import checkmo.domain.book.entity.BookRecommend;
-import checkmo.domain.book.entity.BookReview;
-import checkmo.domain.club.entity.enums.ClubMemberRole;
+import checkmo.domain.club.entity.meeting.BookReview;
+import checkmo.domain.club.entity.meeting.MemberTeam;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -18,12 +17,16 @@ import java.util.List;
 @Entity
 public class ClubMember extends BaseEntity {
 
+    public enum ClubMemberRole {
+        MEMBER, STAFF
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private boolean isApproved= false;
+    private boolean isApproved = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

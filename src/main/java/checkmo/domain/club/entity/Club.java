@@ -1,7 +1,8 @@
 package checkmo.domain.club.entity;
 
 import checkmo.domain.category.entity.ClubCategory;
-import checkmo.domain.vote.entity.Vote;
+import checkmo.domain.club.entity.announcement.Vote;
+import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

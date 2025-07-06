@@ -1,10 +1,8 @@
-package checkmo.domain.club.entity;
+package checkmo.domain.club.entity.meeting;
 
 import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.entity.BookReview;
-import checkmo.domain.book.entity.Topic;
-import checkmo.domain.notice.entity.Notice;
-import checkmo.domain.team.entity.Team;
+import checkmo.domain.club.entity.*;
+import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

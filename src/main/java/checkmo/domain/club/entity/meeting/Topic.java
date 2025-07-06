@@ -1,7 +1,5 @@
-package checkmo.domain.club.entity;
+package checkmo.domain.club.entity.meeting;
 
-import checkmo.domain.book.entity.Topic;
-import checkmo.domain.team.entity.Team;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,21 +12,23 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class MemberTeam extends BaseEntity {
+public class Topic extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_member_id")
-    private ClubMember clubMember;
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
-    private Team team;
+    @JoinColumn(name = "meeting_id", nullable = false)
+    private Meeting meeting;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_team_id")
+    private MemberTeam memberTeam;
 
     @Builder.Default
-    @OneToMany(mappedBy = "memberTeam", cascade = CascadeType.ALL)
-    private List<Topic> topics = new ArrayList<>();
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    private List<TeamTopic> teamTopics = new ArrayList<>();
 }

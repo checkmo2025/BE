@@ -1,7 +1,6 @@
-package checkmo.domain.follow.entity;
+package checkmo.domain.club.entity.announcement;
 
 import checkmo.domain.member.entity.Member;
-import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,17 +9,23 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Follow extends BaseEntity {
+public class MemberVote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "follower_id")
-    private Member follower;
+    private boolean item1;
+    private boolean item2;
+    private boolean item3;
+    private boolean item4;
+    private boolean item5;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "following_id")
-    private Member following;
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vote_id")
+    private Vote vote;
 }

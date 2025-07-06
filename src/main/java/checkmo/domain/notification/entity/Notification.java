@@ -1,7 +1,6 @@
 package checkmo.domain.notification.entity;
 
 import checkmo.domain.member.entity.Member;
-import checkmo.domain.notification.entity.enums.NotificationType;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,6 +11,10 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Notification extends BaseEntity {
+
+    public enum NotificationType {
+        LIKE, SUBSCRIBE
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
