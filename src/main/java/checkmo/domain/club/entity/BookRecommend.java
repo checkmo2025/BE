@@ -18,7 +18,7 @@ public class BookRecommend extends BaseEntity {
 
     private String content;
 
-    private Integer rate;
+    private double rate;
 
     private boolean isCheck;
 

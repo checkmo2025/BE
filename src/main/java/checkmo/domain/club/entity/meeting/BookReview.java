@@ -18,7 +18,7 @@ public class BookReview extends BaseEntity {
 
     private String description;
 
-    private Integer rate;
+    private double rate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
