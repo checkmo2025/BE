@@ -18,7 +18,7 @@ import java.util.List;
 public class ClubMember extends BaseEntity {
 
     public enum ClubMemberRole {
-        MEMBER, STAFF
+        MEMBER, STAFF, PENDING, BLOCKED
     }
 
     @Id
