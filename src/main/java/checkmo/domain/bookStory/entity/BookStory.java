@@ -25,6 +25,7 @@ public class BookStory extends BaseEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
