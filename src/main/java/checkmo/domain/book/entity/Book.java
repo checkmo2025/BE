@@ -25,6 +25,10 @@ public class Book extends BaseEntity {
 
     private String imgUrl;
 
+    private String publisher;
+
+    private String description;
+
     @Builder.Default
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private List<BookStory> bookStories = new ArrayList<>();
