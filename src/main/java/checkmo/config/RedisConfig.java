@@ -51,8 +51,7 @@ public class RedisConfig {
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = Map.of(
                 "emailVerification", defaultConfig.entryTtl(Duration.ofMinutes(10)),
-                "refreshToken", defaultConfig.entryTtl(Duration.ofDays(14)),
-                "userCache", defaultConfig.entryTtl(Duration.ofMinutes(30))
+                "refreshToken", defaultConfig.entryTtl(Duration.ofDays(14))
         );
 
         return RedisCacheManager.builder(connectionFactory)
