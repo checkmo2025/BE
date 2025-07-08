@@ -8,9 +8,26 @@ services:
       - 3306:3306
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - checkmo-network
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping" ]
       interval: 5s
+      retries: 10
+
+  redis:
+    image: 'redis:7.2-alpine'
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes --requirepass checkmo123
+    volumes:
+      - redis_data:/data
+    networks:
+      - checkmo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "checkmo123", "ping"]
+      interval: 5s
+      timeout: 3s
       retries: 10
 
 networks:
@@ -19,3 +36,4 @@ networks:
 
 volumes:
   mysql_data:
+  redis_data:
