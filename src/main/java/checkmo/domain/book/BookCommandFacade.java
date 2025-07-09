@@ -1,4 +1,4 @@
 package checkmo.domain.book;
 
-public class BookCommandFacade {
+public interface BookCommandFacade {
 }

@@ -1,4 +1,4 @@
 package checkmo.domain.club;
 
-public class ClubCommandFacade {
+public interface ClubCommandFacade {
 }

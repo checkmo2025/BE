@@ -1,4 +1,4 @@
 package checkmo.domain.member;
 
-public class MemberCommandFacade {
+public interface MemberCommandFacade {
 }
