@@ -24,7 +24,7 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(50);
         executor.setThreadNamePrefix("email-");
 
-        executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
 
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
