@@ -19,6 +19,11 @@ import java.util.List;
 @Entity
 public class Meeting extends BaseEntity {
 
+    public enum MeetingStatus {
+        IN_PROGRESS, // 진행 중
+        COMPLETED // 완료
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,6 +38,12 @@ public class Meeting extends BaseEntity {
 
     @Column(nullable = false)
     private int generation;
+
+    private MeetingStatus meetingStatus;
+
+    private String tag;
+
+    private double sumRate; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
@@ -56,4 +67,20 @@ public class Meeting extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     private List<BookReview> bookReviews = new ArrayList<>();
+
+    public void calculateSumRate(double rate) {
+        if (this.sumRate == 0) {
+            this.sumRate = rate;
+        } else {
+            this.sumRate += rate;
+        }
+    }
+
+    public void calculateAverageRate() {
+        if (this.bookReviews.isEmpty()) {
+            this.sumRate = 0;
+        } else {
+            this.sumRate /= this.bookReviews.size();
+        }
+    }
 }

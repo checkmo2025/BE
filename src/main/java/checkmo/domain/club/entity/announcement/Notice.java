@@ -26,5 +26,7 @@ public class Notice extends BaseEntity {
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;
 
+    private LocalDateTime startTime;
+
     private LocalDateTime deadline;
 }

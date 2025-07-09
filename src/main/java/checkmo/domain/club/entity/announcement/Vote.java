@@ -37,7 +37,9 @@ public class Vote {
     @Column(nullable = false)
     private boolean isDuplication;
 
-    private LocalDateTime endTime;
+    private LocalDateTime startTime;
+
+    private LocalDateTime deadline;
 
     @Builder.Default
     @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL)

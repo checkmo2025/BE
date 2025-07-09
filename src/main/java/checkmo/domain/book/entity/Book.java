@@ -16,7 +16,6 @@ import java.util.List;
 public class Book extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;

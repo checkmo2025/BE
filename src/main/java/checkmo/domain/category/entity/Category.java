@@ -19,7 +19,7 @@ public class Category extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String title;
+    private String name;
 
     @Builder.Default
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)

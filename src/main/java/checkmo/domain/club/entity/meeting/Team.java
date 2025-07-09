@@ -20,8 +20,7 @@ public class Team extends BaseEntity {
 
     private String name;
 
-    @Column(nullable = false)
-    private Integer TeamNumber = 0;
+    private Integer TeamNumber = null;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)

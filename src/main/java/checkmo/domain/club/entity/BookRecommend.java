@@ -23,6 +23,8 @@ public class BookRecommend extends BaseEntity {
 
     private boolean isCheck;
 
+    private String tag; // 추천 태그
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
     private ClubMember clubMember;
