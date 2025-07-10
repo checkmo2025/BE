@@ -8,14 +8,26 @@ import checkmo.domain.club.dto.bookshelf.BookShelfResponseDTO;
  * 독서 모임 내에서의 활동(예: 독서 기록,추천 도서, 한줄평 등)에 대한 조회 기능을 담당
  */
 public interface ClubBookShelfQueryService {
+
     /**
-     * 모임의 모든 활동 조회
+     * 모임의 책장 리스트로 조회
      *
-     * @param clubId 모임 ID
-     * @param generation 필터링할 기수 번호 (null이면 가장 최근 기수 조회)
-     * @return 모임의 활동 정보가 담긴 List
+     * 피그마 참고 페이지 : #독서모임(사용자) - 책장 홈화면
      *
-     * 서비스 내부에서 조회할 때 ActivityListDTO에 담길 Meeting은 MeetingStatus가 COMPLETE인 것만 조회
+     * @param clubId 독서 클럽 ID
+     * @return 모임의 책장 정보가 담긴 BookShelfListDTO
      */
-     BookShelfResponseDTO.ActivityListDTO getMeetingListByGeneration(Long clubId, Integer generation);
+    BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId);
+
+    /**
+     * 책장 상세 조회 (특정 Meeting의 상세 정보)
+     *
+     * 피그마 참고 페이지 : #독서모임(사용자) - 책장 [특정 책] 클릭시
+     *
+     * @param meetingId Meeting ID
+     * @return 책장 상세 정보가 담긴 BookShelfDetailDTO
+     */
+    BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId);
+
+
 }
