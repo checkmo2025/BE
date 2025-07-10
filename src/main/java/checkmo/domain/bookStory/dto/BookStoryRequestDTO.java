@@ -16,7 +16,7 @@ public class BookStoryRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class BookStoryUpdateRequestDTO {
-        private String bookStoryId;
+        private Long bookStoryId;
         private String description;
     }
 }
