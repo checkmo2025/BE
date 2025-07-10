@@ -12,7 +12,7 @@ public interface BookStoryQueryService {
      * @param bookStoryId 조회할 책 이야기의 ID
      * @return 조회된 책 이야기의 DTO
      */
-    BookStoryResponseDTO.BookStoryResponse getBookStory(String bookStoryId);
+    BookStoryResponseDTO.BookStoryResponse getBookStory(Long bookStoryId);
 
     /**
      * 책 이야기 목록 조회

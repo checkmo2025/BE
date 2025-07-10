@@ -13,7 +13,7 @@ public interface BookStorySocialCommandService {
      * @param bookStoryId 토글할 책이야기의 ID
      * @return 좋아요가 토글된 책이야기의 ID
      */
-    Long toggleLikeOnBookStory(Long userId, String bookStoryId);
+    Long toggleLikeOnBookStory(Long userId, Long bookStoryId);
 
 /*
     아래 두개 메소드는 private으로 구현해서 사용하기
@@ -26,7 +26,7 @@ public interface BookStorySocialCommandService {
      * @return 좋아요가 추가된 책이야기의 ID
      *//*
 
-    Long addLikeToBookStory(Long userId, String bookStoryId);
+    Long addLikeToBookStory(Long userId, Long bookStoryId);
 
     */
 /**
@@ -37,7 +37,7 @@ public interface BookStorySocialCommandService {
      * @return 좋아요가 제거된 책이야기의 ID
      *//*
 
-    Long removeLikeFromBookStory(Long userId, String bookStoryId);
+    Long removeLikeFromBookStory(Long userId, Long bookStoryId);
 
 */
 }
