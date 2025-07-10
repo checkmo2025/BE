@@ -11,14 +11,12 @@ public class MeetingRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class MeetingCreateRequestDTO {
-
         private String title;
         private String content; // 모임 내용 설명 (공지사항 내용)
         private LocalDateTime meetingTime; // 미팅 날짜, 시간
         private String location; // 모임 장소
         private String isbn; // 사용하는 책 ISBN
         private int generation; // 기수
-        private List<String> nicknameList; // 참여 인원들 (닉네임 리스트)
     }
 
     @Getter
@@ -29,7 +27,7 @@ public class MeetingRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class MeetingTeamDTO {
+    public static class TeamManageDTO {
         private List<TeamMemberDTO> teamMemberDTOList;
     }
 
@@ -40,4 +38,10 @@ public class MeetingRequestDTO {
         private List<String> nicknameList; // 팀원들의 닉네임 리스트
     }
 
+    @Getter
+    @NoArgsConstructor
+    public static class TopicManageDTO {
+        private Long topicId; // 발제 ID
+        private Integer teamNumber; // 팀 번호
+    }
 }
