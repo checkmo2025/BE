@@ -55,4 +55,24 @@ public class MemberResponseDTO {
         private String description;
         private String imgUrl;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SignUpResponseDTO {
+        private String email;
+        private boolean isProfileCompleted;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class otherProfileResponseDTO {
+        private String nickName;
+        private String description;
+        private String imgUrl;
+        private boolean isFollowed;
+    }
 }
