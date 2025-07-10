@@ -50,6 +50,8 @@ public class Member extends BaseEntity {
 
     private LocalDateTime deactivated;
 
+    private boolean isProfileCompleted;
+
     @Builder.Default
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
     private List<Follow> followers = new ArrayList<>();
