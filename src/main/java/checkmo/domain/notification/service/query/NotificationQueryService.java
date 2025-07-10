@@ -17,7 +17,7 @@ public interface NotificationQueryService {
      * @param memberId receiver ID
      * @return 전체 알림 목록
      */
-    List<NotificationResponseDTO.NotificationListResponseDTO> getAllNotifications(Long memberId, Long cursorId);
+    List<NotificationResponseDTO.NotificationListResponseDTO> getNotifications(Long memberId, Long cursorId);
 
     /**
      * size개의 알림 목록 조회
@@ -26,5 +26,5 @@ public interface NotificationQueryService {
      * @param size 몇개를 조회할지
      * @return 알림 목록 size개
      */
-    List<NotificationResponseDTO.NotificationListResponseDTO> getRecentNotifications(Long memberId, int size);
+    List<NotificationResponseDTO.NotificationListResponseDTO> getNotifications(Long memberId, int size);
 }
