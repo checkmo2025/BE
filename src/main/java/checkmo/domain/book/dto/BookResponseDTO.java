@@ -14,7 +14,7 @@ public class BookResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookInfoDetailResponseDTO {
-        private String id; // ISBN 번호
+        private String isbn; // ISBN 번호
         private String title; // 책 제목
         private String author; // 저자
         private String imgUrl; // 책 이미지 URL
