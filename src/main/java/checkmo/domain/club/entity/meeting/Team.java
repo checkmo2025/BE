@@ -18,7 +18,8 @@ public class Team extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer TeamNumber = null;
+    @Column(nullable = false)
+    private Integer TeamNumber; // 팀 번호
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
