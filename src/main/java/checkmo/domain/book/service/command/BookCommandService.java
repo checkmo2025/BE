@@ -16,7 +16,6 @@ public interface BookCommandService {
      */
     void saveBookFromAladin(BookRequestDTO.Aladin2BookDTO request);
     // 책 고유번호는 ISBN 13자리로
-    //
 
     /**
      * 책 정보를 삭제
