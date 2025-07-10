@@ -42,4 +42,9 @@ public interface MemberFollowQueryService {
      * @return 팔로잉 목록
      */
     MemberResponseDTO.FollowingListResponseDTO getFollowing(Long memberId, int size);
+
+    /**
+     * 특정 회원의 팔로우 여부 확인
+     */
+    boolean isFollowing(String memberId, String targetMemberNickname);
 }
