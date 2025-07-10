@@ -17,13 +17,14 @@ public interface NotificationQueryService {
      * @param memberId receiver ID
      * @return 전체 알림 목록
      */
-    List<NotificationResponseDTO.NotificationListResponseDTO> getAllNotifications(Long memberId);
+    List<NotificationResponseDTO.NotificationListResponseDTO> getAllNotifications(Long memberId, Long cursorId);
 
     /**
-     * 10개의 알림 목록 조회
+     * size개의 알림 목록 조회
      *
      * @param memberId receiver ID
-     * @return 알림 목록 10개
+     * @param size 몇개를 조회할지
+     * @return 알림 목록 size개
      */
-    List<NotificationResponseDTO.NotificationListResponseDTO> getRecentNotifications(Long memberId);
+    List<NotificationResponseDTO.NotificationListResponseDTO> getRecentNotifications(Long memberId, int size);
 }
