@@ -16,7 +16,7 @@ public interface MemberProfileCommandService {
      *
      * @param memberId 수정할 회원의 ID
      * @param request 수정할 프로필 정보 DTO - 프로필 이미지, 간단 소개, 관심 카테고리 (닉네임은 변경 불가!!)
-     * @return 수정된 회원 프로필 정보 DTO
+     * @return 수정된 회원 프로필 정보 DTO - 이때는 관심 카테고리 정보 DTO에 포함 X , -> 반드시 CategoryQueryFacade를 통해 조회해야 함
      */
     MemberResponseDTO.MemberProfileResponseDTO updateMemberProfile(
             String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request
