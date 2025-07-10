@@ -9,10 +9,10 @@ import java.util.List;
  */
 public interface BookQueryService {
     /**
-     * 책의 목록 조회
+     * 책 단건 조회
      *
      * @param bookId 책 ID
-     * @return 책 목록
+     * @return 책 정보 DTO
      */
-    List<BookResponseDTO.BookInfoDetailResponseDTO> findBooksByCategory(List<String> bookId);
+    BookResponseDTO.BookInfoDetailResponseDTO findBook(String bookId);
 }
