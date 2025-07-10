@@ -13,7 +13,7 @@ import lombok.*;
 public class Notification extends BaseEntity {
 
     public enum NotificationType {
-        LIKE, SUBSCRIBE
+        LIKE, FOLLOW
     }
 
     @Id
@@ -26,6 +26,9 @@ public class Notification extends BaseEntity {
 
     @Column(nullable = false)
     private boolean isRead = false;
+
+    @Column(nullable = false)
+    private String redirectId; // 알림 클릭 시 이동할 페이지의 ID
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")

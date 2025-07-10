@@ -18,8 +18,6 @@ public class Team extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
     private Integer TeamNumber = null;
 
     @ManyToOne(fetch = FetchType.LAZY)
