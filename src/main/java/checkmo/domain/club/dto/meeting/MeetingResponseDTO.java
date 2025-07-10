@@ -19,8 +19,8 @@ public class MeetingResponseDTO {
     @Builder
     public static class InProgressMeetingDetailDTO {
         private MeetingInfoDTO meetingInfoDTO;
-        private List<TopicDTO> topics; // 모임의 토픽 목록
-        private List<ParticipantDTO> participants; // 모임 참여자 목록
+        private List<TopicDTO> topics; // 모임의 토픽 목록 -> 최신순 최대 4개 담기
+        private List<TeamDTO> teams; // 모임의 팀 별 토픽 목록 -> 최신순 최대 4개 담기
     }
 
     @Getter
@@ -30,7 +30,7 @@ public class MeetingResponseDTO {
     public static class CompletedMeetingDetailDTO {
         private MeetingInfoDTO meetingInfoDTO;
         private List<TopicDTO> topics; // 모임의 토픽 목록
-        private List<ParticipantDTO> participants; // 모임 참여자 목록
+        private List<MemberDTO> participantInfoList; // 모임 참여자 목록
         private List<TeamDTO> teams; // 모임의 팀 목록
     }
 
@@ -42,7 +42,7 @@ public class MeetingResponseDTO {
     public static class MeetingListDTO {
         private List<MeetingInfoDTO> meetingInfoList; // 모임 정보 목록
         private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
+        private Long nextCursor; // 다음 페이지 커서
         private int pageSize; // 현재 페이지 크기
     }
 
@@ -70,7 +70,7 @@ public class MeetingResponseDTO {
     public static class TopicListDTO {
         private List<TopicDTO> topics; // 토픽 목록
         private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
+        private Long nextCursor; // 다음 페이지 커서
         private int pageSize; // 현재 페이지 크기
     }
 
@@ -81,8 +81,8 @@ public class MeetingResponseDTO {
     public static class TopicDTO {
         private Long topicId; // 토픽 ID
         private String content; // 토픽 내용
-        private ParticipantDTO author; // 작성자 정보
-        private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록
+        private MemberDTO authorInfo; // 작성자 정보
+        private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TopicListDTO-TopicDTO,TeamDTO-TopicDTO에서는 이 필드 NULL
     }
 
     @Getter
@@ -90,6 +90,16 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookInfoDTO {
+        private String title; // 책 제목
+        private String author; // 저자
+        private String coverImageUrl; // 책 표지 이미지 URL
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookDetailInfoDTO {
         private String title; // 책 제목
         private String author; // 저자
         private String coverImageUrl; // 책 표지 이미지 URL
@@ -101,9 +111,8 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ParticipantDTO {
-        private Integer teamNumber; //null이면 아직 Team이 정해지지 않은 상태
-        private String userId; // 참여자 ID
+    public static class MemberDTO {
+        private Integer teamNumber; //TopicDTO-ParticipantDTO에서는 이 필드 NULL, BookShelfDetailDTO-BookReviewDTO-ParticipantDTO에서는 이 필드 NULL
         private String nickname; // 참여자 닉네임
         private String profileImageUrl; // 참여자 프로필 이미지 URL
         // TODO: 만약 운영진만 보여주고 싶다면, 운영진 여부를 나타내는 필드 추가
@@ -116,6 +125,6 @@ public class MeetingResponseDTO {
     public static class TeamDTO {
         private Integer teamNumber; // 팀 번호
         private List<TopicDTO> topics; // 해당 팀이 선택한 토픽 목록
-        private List<ParticipantDTO> participants; // 팀원 목록
+        private List<MemberDTO> participantInfoList; // 팀원 목록, InProgressMeetingDetailDTO-TeamDTO에서는 이 필드 NULL
     }
 }
