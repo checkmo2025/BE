@@ -11,24 +11,19 @@ import checkmo.domain.club.dto.meeting.MeetingResponseDTO;
 public interface ClubMeetingQueryService {
 
     /**
-     * 독서 모임의 미팅 참석자 목록을 조회합니다.
+     * 독서 모임의 특정 미팅을 조회합니다. -
      *
-     * @param memberId 조회하는 사람 ID -> 운영진만 조회 가능
-     * @param meetingId 미팅 ID
-     * @return 조회한 미팅 정보 DTO
-     */
-    MeetingResponseDTO.ParticipantDTO findMeetingAttendees(Long memberId, Long meetingId);
-
-    /**
-     * 독서 모임의 특정 미팅을 조회합니다.
+     * 피그마 참고 페이지 : #독서모임 - 운영진 화면 - 등록 완료시 나오는 화면 - 등록된 모임 상세보기
      *
      * @param meetingId 미팅 ID
-     * @return 조회한 미팅 정보 DTO -> 발제는 4개, 각 조당 인원은 4개씩만 담기
+     * @return 조회한 미팅 정보 DTO -> 전체 발제는 최대 4개, 각 조별 발제들 최대 4개 (전부 최신 내림차순 정렬)
      */
     MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId);
 
     /**
-     * 독서 모임의 모든 미팅을 조회합니다.
+     * 독서 모임의 모든 미팅을 조회합니다. (책장 아님) - 이 페이지에서는 발제 작성 불가 및, 한줄평 조회 불가
+     *
+     * 피그마 참고 페이지 : #독서모임 - 모임 생성 후, 모임 리스트
      *
      * @param clubId 독서 모임 ID
      * @return 모든 미팅 정보 DTO 리스트
@@ -36,7 +31,9 @@ public interface ClubMeetingQueryService {
     MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId);
 
     /**
-     * 독서 모임의 미팅 토픽을 조회합니다.
+     * 특정 미팅의 전체 토픽을 조회합니다.
+     *
+     * 피그마 참고 페이지 : #독서모임(사용자) - 책장 [특정 책]에서 [발제] 클릭시
      *
      * @param meetingId 미팅 ID
      * @return 조회한 토픽 정보 DTO
@@ -45,6 +42,8 @@ public interface ClubMeetingQueryService {
 
     /**
      * 독서 모임의 미팅의 팀별 인원 조회 (해당 팀이 선택한 발제 리스트도 포함)
+     *
+     * 피그마 참고 페이지 : #독서모임 - 운영진 화면 모임 - 특정 조 전체보기 클릭시
      *
      * @param meetingId 미팅 ID
      * @param teamNumber 팀 번호 (1, 2, 3, 4 팀 -> 실제로 프론트에서는 A, B, C, D로 표시)
