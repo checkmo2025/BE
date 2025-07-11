@@ -48,7 +48,7 @@ public class BookShelfResponseDTO {
     public static class BookShelfDetailDTO {
         private MeetingResponseDTO.BookDetailInfoDTO bookDetailInfoDTO; // 책 정보 재사용
         private MeetingInfoDTO meetingInfoDTO; // Meeting 기본 정보
-        private List<BookReviewDTO> bookReviewList; // 한줄평+평점 리스트 (COMPLETED일 때만)
+        private List<BookReviewDTO> bookReviewList; // 한줄평+평점 리스트
     }
 
     @Getter
