@@ -1,5 +1,6 @@
 package checkmo.domain.club.dto.meeting;
 
+import checkmo.domain.club.dto.club.ClubRequestDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +16,7 @@ public class MeetingRequestDTO {
         private String content;  // 모임 내용 설명 (공지사항 내용)
         private LocalDateTime meetingTime; // 미팅 날짜, 시간
         private String location; // 모임 장소
-        private String isbn;     // 사용하는 책 ISBN
+        private ClubRequestDTO.BookDetailDTO bookDetail; // 책 정보
         private int generation;  // 기수
     }
 
