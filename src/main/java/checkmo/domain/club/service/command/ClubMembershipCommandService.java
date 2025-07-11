@@ -19,7 +19,7 @@ public interface ClubMembershipCommandService {
      * @param request 가입 신청 메시지 DTO
      * @return 가입 신청 후의 독서모임 정보 DTO : 공개인 경우는 ID 사용해 프론트에서 리다이렉트.
      */
-    ClubResponseDTO.ClubInfoDTO joinClub(String clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request);
+    ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request);
 
     /**
      * 독서모임의 가입 신청을 승인합니다.
@@ -30,5 +30,5 @@ public interface ClubMembershipCommandService {
      * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
      * @param ClubMemberId 가입 승인 해줄 멤버의 id DTO (그 멤버 자체의 id 아님!! , ClubMember의 id임)
      */
-    void approveJoinRequest(String clubId, String memberId, String ClubMemberId);
+    void approveJoinRequest(Long clubId, String memberId, Long ClubMemberId);
 }
