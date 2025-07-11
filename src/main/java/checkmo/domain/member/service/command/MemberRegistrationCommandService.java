@@ -21,14 +21,6 @@ public interface MemberRegistrationCommandService {
      */
 
     /**
-     * 이메일 중복 확인
-     *
-     * @param email 확인할 이메일
-     * @return 중복 여부 (true: 중복됨, false: 사용 가능)
-     */
-    boolean isEmailDuplicated(String email);
-
-    /**
      * 닉네임 중복 확인
      *
      * @param nickname 확인할 닉네임
@@ -49,7 +41,9 @@ public interface MemberRegistrationCommandService {
      * @param request 이메일 인증 요청 DTO
      * @return 인증 성공 여부
      */
-    boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request);
+    boolean verifyEmailCode(
+            MemberRequestDTO.EmailVerificationRequestDTO request
+    );
 
     /**
      * 회원 가입 - 이 정보를 전달받으면 Access Token, RefreshToken 생성
