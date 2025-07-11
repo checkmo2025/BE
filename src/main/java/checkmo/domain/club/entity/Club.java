@@ -34,6 +34,8 @@ public class Club extends BaseEntity {
 
     private String participants;
 
+    private String region;
+
     private String insta;
 
     private String kakao;
