@@ -1,7 +1,5 @@
 package checkmo.domain.member.service.authenticate;
 
-import checkmo.domain.member.dto.MemberResponseDTO;
-
 /**
  * 로그인/로그아웃 로직
  *
