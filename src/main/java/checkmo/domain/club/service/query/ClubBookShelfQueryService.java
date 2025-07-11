@@ -15,9 +15,10 @@ public interface ClubBookShelfQueryService {
      * 피그마 참고 페이지 : #독서모임(사용자) - 책장 홈화면
      *
      * @param clubId 독서 클럽 ID
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
      * @return 모임의 책장 정보가 담긴 BookShelfListDTO
      */
-    BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId);
+    BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId);
 
     /**
      * 책장 상세 조회 (특정 Meeting의 상세 정보)
