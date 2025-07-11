@@ -91,10 +91,21 @@ public interface ClubQueryService {
      * 공지사항 최신순으로 전체 조회
      *
      * 피그마 참고 페이지 : #독서모임(운영진) - 공지사항 홈화면
+     *
      * @param clubId 독서모임 ID
      * @param memberId 회원의 ID   -> 해당 독서 클럽에만 포함되면 전부 조회 가능
      * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
      * @return 전체 공지사항 목록 DTO
      */
     ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId);
+
+    /**
+     * 공지사항 상세 보기
+     *
+     * 피그마 참고 페이지 : #독서모임(운영진) - 공지사항 홈화면 - 공지사항 클릭시
+     *
+     * @param clubId 독서모임 ID
+     * @param noticeId 공지사항 ID
+     */
+    ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId);
 }
