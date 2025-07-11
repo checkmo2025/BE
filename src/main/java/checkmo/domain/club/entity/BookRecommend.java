@@ -21,8 +21,6 @@ public class BookRecommend extends BaseEntity {
 
     private double rate;
 
-    private boolean isCheck;
-
     private String tag; // 추천 태그
 
     @ManyToOne(fetch = FetchType.LAZY)
