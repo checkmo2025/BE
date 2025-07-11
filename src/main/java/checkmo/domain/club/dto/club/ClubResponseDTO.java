@@ -1,5 +1,6 @@
 package checkmo.domain.club.dto.club;
 
+import checkmo.domain.club.dto.meeting.MeetingResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -75,5 +76,71 @@ public class ClubResponseDTO {
         private String profileImgUrl; // 회원의 프로필 이미지 URL
         private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
         private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubNoticeListDTO {
+        List<NoticeItem> noticeList; // 꼭 PureNoticeDTO, MeetingNoticeDTO, VoteDTO만 담아야 합니다!!
+        private boolean hasNext; // 다음 페이지 존재 여부
+        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
+        private int pageSize; // 현재 페이지 크기
+    }
+
+    public sealed interface NoticeItem
+            permits PureNoticeDTO, MeetingNoticeDTO, VoteDTO {
+
+        Long getId();
+        String getTitle();
+        boolean isImportant();
+        String getTag();
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static final class PureNoticeDTO implements NoticeItem {
+        private Long id; // 공지사항 ID
+        private String title; // 공지사항 제목
+        private String content; // 공지사항 내용
+        private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+        private String tag = "공지";
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static final class MeetingNoticeDTO implements NoticeItem {
+        private Long id; // 공지사항 ID
+        private String title; // 공지사항 제목
+        private String content; // 공지사항 내용
+        private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+        private String tag = "모임"; // 공지사항 태그 (예: "공지", "이벤트")
+        private MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO; // 모임 정보 DTO
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static final class VoteDTO implements NoticeItem {
+        private Long id; // 투표 ID
+        private String title; // 공지사항 제목
+        private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+        private String tag = "투표";
+        private List<EachItemDTO> items; // 투표 항목 목록
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class EachItemDTO {
+        private String item;
+        private boolean isSelected;
     }
 }
