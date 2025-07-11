@@ -143,4 +143,38 @@ public class ClubResponseDTO {
         private String item;
         private boolean isSelected;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubNoticeDetailDTO {
+        private NoticeItem noticeItem; // 공지사항 아이템 (PureNoticeDTO, MeetingNoticeDTO, VoteDTO 중 하나)
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookRecommendListDTO {
+        private List<BookRecommendDetailDTO> bookRecommendList; // 추천 책 목록
+        private boolean hasNext; // 다음 페이지 존재 여부
+        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
+        private int pageSize; // 현재 페이지 크기
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookRecommendDetailDTO {
+        private Long id; // 추천 책 ID
+        private String content; // 추천 내용
+        private double rate; // 평점
+        private String tag; // 추천 태그
+        private MeetingResponseDTO.BookInfoDTO bookInfoDTO; // 책 정보 DTO
+        private MeetingResponseDTO.MemberDTO authorInfoDTO; // 추천책 작성한 회원 정보 DTO
+    }
+
+
 }
