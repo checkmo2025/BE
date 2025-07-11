@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 public class ClubMember extends BaseEntity {
 
-    public enum ClubMemberRole {
+    public enum ClubMemberStatus {
         MEMBER, STAFF, PENDING, BLOCKED
     }
 
@@ -25,12 +25,11 @@ public class ClubMember extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private boolean isApproved = false;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ClubMemberRole clubMemberRole;
+    private ClubMemberStatus clubMemberStatus;
+
+    private String joinMessage;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
