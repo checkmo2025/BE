@@ -48,7 +48,7 @@ public class ClubResponseDTO {
         private String clubName;     // 모임 이름
         private String description;  // 모임 소개
         private String participants; // 모임 대상
-        private String category;     // 모임 카테고리
+        private List<String> category;     // 모임 카테고리
         private String region;       // 모임 장소
         private String insta;        // 모임 인스타그램 URL
         private String kakao;        // 모임 카카오톡 URL
