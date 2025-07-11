@@ -19,11 +19,6 @@ import java.util.List;
 @Entity
 public class Meeting extends BaseEntity {
 
-    public enum MeetingStatus {
-        IN_PROGRESS, // 진행 중
-        COMPLETED // 완료
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,8 +33,6 @@ public class Meeting extends BaseEntity {
 
     @Column(nullable = false)
     private int generation;
-
-    private MeetingStatus meetingStatus;
 
     private String tag;
 
