@@ -1,4 +1,4 @@
-package checkmo.domain.member.service.security;
+package checkmo.domain.member.service.security.jwt;
 
 /**
  * JWT 토큰 기반 인증 필터

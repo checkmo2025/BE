@@ -1,4 +1,4 @@
-package checkmo.domain.member.service.security;
+package checkmo.domain.member.service.security.auth;
 
 /**
  * Spring Security UserDetailsService 구현체

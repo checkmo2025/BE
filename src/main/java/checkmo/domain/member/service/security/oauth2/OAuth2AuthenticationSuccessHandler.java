@@ -1,4 +1,4 @@
-package checkmo.domain.member.service.security;
+package checkmo.domain.member.service.security.oauth2;
 
 /**
  * 소셜 로그인 성공 후의 성공 처리 핸들러

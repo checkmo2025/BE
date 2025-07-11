@@ -1,4 +1,4 @@
-package checkmo.domain.member.service.security;
+package checkmo.domain.member.service.security.oauth2;
 
 /**
  * Spring Security DefaultOAuth2UserService 구현체
