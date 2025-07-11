@@ -5,8 +5,6 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Builder
 @AllArgsConstructor
@@ -22,11 +20,11 @@ public class Notice extends BaseEntity {
 
     private String content;
 
+    private boolean important;
+
+    private String tag; //TODO: "공지", "모임" 2개 값만 가능
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;
-
-    private LocalDateTime startTime;
-
-    private LocalDateTime deadline;
 }
