@@ -60,6 +60,7 @@ public class MeetingResponseDTO {
         private String location; // 모임 장소
         private int generation; // 기수
         private String tag;
+        private String content; // 모임 내용, ClubNoticeDetailDTO-MeetingNoticeDTO-MeetingInfoDTO 에서만 이 필드에 값 넣고 나머지에선 다 NULL
         private BookInfoDTO bookInfoDTO;
     }
 
@@ -81,7 +82,7 @@ public class MeetingResponseDTO {
     public static class TopicDTO {
         private Long topicId; // 토픽 ID
         private String content; // 토픽 내용
-        private MemberDTO authorInfo; // 작성자 정보
+        private MemberTeamDTO authorInfo; // 작성자 정보
         private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TopicListDTO-TopicDTO,TeamDTO-TopicDTO에서는 이 필드 NULL
     }
 
@@ -112,7 +113,17 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MemberDTO {
-        private Integer teamNumber; //TopicDTO-ParticipantDTO에서는 이 필드 NULL, BookShelfDetailDTO-BookReviewDTO-ParticipantDTO에서는 이 필드 NULL
+        private String nickname; // 참여자 닉네임
+        private String profileImageUrl; // 참여자 프로필 이미지 URL
+        // TODO: 만약 운영진만 보여주고 싶다면, 운영진 여부를 나타내는 필드 추가
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberTeamDTO {
+        private Integer teamNumber;
         private String nickname; // 참여자 닉네임
         private String profileImageUrl; // 참여자 프로필 이미지 URL
         // TODO: 만약 운영진만 보여주고 싶다면, 운영진 여부를 나타내는 필드 추가
