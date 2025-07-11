@@ -1,5 +1,6 @@
 package checkmo.domain.club.service.command;
 
+import checkmo.domain.club.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.dto.meeting.MeetingRequestDTO;
 
 /**
@@ -33,7 +34,7 @@ public interface ClubMeetingCommandService {
     Long createTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicDTO request);
 
     /**
-     * 독서모임의 발제를 선택하고 해제합니다.
+     * 독서모임의 특정 팀이 발제를 선택하고 해제합니다.
      *
      * 피그마 참고 페이지: #독서모임 - 운영진 화면 모임 - 발제 전체보기 클릭시
      *
@@ -44,6 +45,28 @@ public interface ClubMeetingCommandService {
      */
     Long toggleTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request);
 
+    /**
+     * 독서모임의 특정 팀이 발제를 수정합니다.
+     *
+     * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책]에서 [발제]추 시
+     * @param memberId 발제 작성자의 ID -> 발제 작성자인지 확인하는 용도
+     * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
+     * @param topicId 발제 ID
+     * @param request 수정된 발제 내용 DTO
+     * @return 수정한 발제 ID
+     */
+    Long updateTopic(Long memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request);
+
+    /**
+     * 독서모임의 특정 팀이 발제를 삭제합니다.
+     *
+     * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책]에서 [발제]추 시
+     *
+     * @param memberId 발제 작성자의 ID -> 발제 작성자인지 확인하는 용도
+     * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
+     * @param topicId 발제 ID
+     */
+    void deleteTopic(Long memberId, Long meetingId, Long topicId);
 
     /**
      * 독서모임의 팀을 구성합니다.
@@ -60,12 +83,36 @@ public interface ClubMeetingCommandService {
     /**
      * 독서모임의 한줄평을 작성합니다.
      *
-     * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책]에서 [한줄평]추가 클릭시
+     * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책]에서 한줄평 및 평점 추가 하기
      *
-     * @param memberId 한줄평 작성자의 ID -> 해당 독서 클럽에만 포함되면 전부 작성 가능
-     * @param meetingId ���팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
-     * @param request 한줄평 내용 DTO
+     * @param memberId 한줄평 작성자의 ID -> 독서 토론 참여한 사람만 작성 가능 -> Meeting 참여자 조회해서 비교
+     * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
+     * @param request 한줄평 내용 DTO (내용 + 평점)
      * @return 생성한 한줄평 ID
      */
+    Long createBookReview(Long memberId, Long meetingId, BookShelfRequestDTO.BookReviewDTO request);
+
+    /**
+     * 독서모임의 한줄평을 수정합니다.
+     *
+     * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책]에서 한줄평 및 평점 등록시
+     *
+     * @param memberId 한줄평 작성자의 ID -> 독서 토론 참여한 사람만 작성 가능 -> Meeting 참여자 조회해서 비교
+     * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
+     * @param reviewId 한줄평 ID
+     * @param request 한줄평 내용 DTO (내용 + 평점)
+     */
+    Long updateBookReview(Long memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request);
+
+    /**
+     * 독서모임의 한줄평을 삭제합니다.
+     *
+     * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책]에서 한줄평 및 평점 등록시
+     *
+     * @param memberId 한줄평 작성자의 ID -> 독서 토론 참여한 사람만 작성 가능 -> Meeting 참여자 조회해서 비교
+     * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
+     * @param reviewId 한줄평 ID
+     */
+    void deleteBookReview(Long memberId, Long meetingId, Long reviewId);
 
 }
