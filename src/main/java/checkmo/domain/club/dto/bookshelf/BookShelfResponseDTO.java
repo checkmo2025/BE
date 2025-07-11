@@ -59,7 +59,7 @@ public class BookShelfResponseDTO {
         private Long bookReviewId; // BookReview ID
         private String description; // 한줄평 내용
         private double rate; // 평점
-        private MeetingResponseDTO.MemberDTO authorInfo; // 작성자 정보 (기존 DTO 재사용)
+        private MeetingResponseDTO.MemberTeamDTO authorInfo; // 작성자 정보 (기존 DTO 재사용)
     }
 
 }
