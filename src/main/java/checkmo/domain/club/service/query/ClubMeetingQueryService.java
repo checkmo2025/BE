@@ -26,9 +26,10 @@ public interface ClubMeetingQueryService {
      * 피그마 참고 페이지 : #독서모임 - 모임 생성 후, 모임 리스트
      *
      * @param clubId 독서 모임 ID
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
      * @return 모든 미팅 정보 DTO 리스트
      */
-    MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId);
+    MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId, Long cursorId);
 
     /**
      * 특정 미팅의 전체 토픽을 조회합니다.
@@ -38,7 +39,7 @@ public interface ClubMeetingQueryService {
      * @param meetingId 미팅 ID
      * @return 조회한 토픽 정보 DTO
      */
-    MeetingResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId);
+    MeetingResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId);
 
     /**
      * 독서 모임의 미팅의 팀별 인원 조회 (해당 팀이 선택한 발제 리스트도 포함)
