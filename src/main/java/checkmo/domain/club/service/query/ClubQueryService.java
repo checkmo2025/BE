@@ -39,4 +39,16 @@ public interface ClubQueryService {
      * @return 내가 가입한 독서 클럽 목록 DTO
      */
     ClubResponseDTO.MyClubListDTO getMyClubList(String memberId, int size);
+
+    /**
+     * 독서모임의 멤버 리스트를 조회합니다. (상태별로 조회 가능)
+     *
+     * 피그마 참고 페이지 : #
+     *
+     * @param clubId 독서모임 ID
+     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
+     * @param clubMemberStatus 검색할 회원들의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
+     * @return 검색한 독서모임 멤버 목록 DTO (승인 안된 상태의 독서 모임 멤버도 포함될 수 있음)
+     */
+    ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(String clubId, String memberId, String clubMemberStatus);
 }
