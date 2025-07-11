@@ -51,4 +51,25 @@ public interface ClubQueryService {
      * @return 검색한 독서모임 멤버 목록 DTO (승인 안된 상태의 독서 모임 멤버도 포함될 수 있음)
      */
     ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(String clubId, String memberId, String clubMemberStatus);
+
+    /**
+     * 독서모임의 상세 정보를 조회합니다.
+     *
+     * 피그마 참고 페이지 : #독서모임 - 모임 검색하기 - 특정 모임 클릭시
+     *
+     * @param clubId 독서모임 ID
+     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
+     * @return 독서 클럽 상세 정보 DTO
+     */
+    ClubResponseDTO.ClubDetailDTO getClubInfo(String clubId, String memberId);
+
+    /**
+     * 독서모임의 이름 중복 여부를 확인 합니다.
+     *
+     * 피그마 참고 페이지 : #독서모임 - 모임 생성하기 첫화면 첫스크롤
+     *
+     * @param clubName 독서모임 이름
+     * @return 중복 여부 (true: 중복, false: 중복 아님)
+     */
+    boolean isDuplicateClubName(String clubName);
 }
