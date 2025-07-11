@@ -18,8 +18,24 @@ public interface ClubMeetingCommandService {
      * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
      * @param request 미팅 생성 요청 DTO
      * @result 생성한 미팅 ID
+     *
+     * ‼️ 내부에서 공지사항 자동으로 연결해서 생성해주는 로직 반드시 필요
      */
-     Long createMeeting(Long clubId, Long memberId, MeetingRequestDTO.MeetingCreateRequestDTO request);
+     Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request);
+
+    /**
+     * 독서모임의 미팅을 수정합니다.
+     *
+     * 피그마 참고 페이지 : 피그마 페이지 없음
+     *
+     * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
+     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
+     * @param request 미팅 수정 요청 DTO
+     * @result 수정한 미팅 ID
+     *
+     * ‼️ 내부에서 공지사항 자동으로 연결해서 기존 공지사항 삭제하고 재생성해주는 로직 반드시 필요
+     */
+    Long updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request);
 
     /**
      * 독서모임의 발제를 작성합니다.
@@ -43,7 +59,7 @@ public interface ClubMeetingCommandService {
      * @param request 발제 관리 요청 DTO
      * @return 관리한 발제 ID
      */
-    Long toggleTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request);
+    Long toggleTopic(String memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request);
 
     /**
      * 독서모임의 특정 팀이 발제를 수정합니다.
@@ -55,7 +71,7 @@ public interface ClubMeetingCommandService {
      * @param request 수정된 발제 내용 DTO
      * @return 수정한 발제 ID
      */
-    Long updateTopic(Long memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request);
+    Long updateTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request);
 
     /**
      * 독서모임의 특정 팀이 발제를 삭제합니다.
@@ -66,7 +82,7 @@ public interface ClubMeetingCommandService {
      * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
      * @param topicId 발제 ID
      */
-    void deleteTopic(Long memberId, Long meetingId, Long topicId);
+    void deleteTopic(String memberId, Long meetingId, Long topicId);
 
     /**
      * 독서모임의 팀을 구성합니다.
@@ -78,7 +94,7 @@ public interface ClubMeetingCommandService {
      * @param request 팀 구성 요청 DTO
      * @return 해당 미팅의 ID
      */
-    Long manageTeam(Long memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request);
+    Long manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request);
 
     /**
      * 독서모임의 한줄평을 작성합니다.
@@ -90,7 +106,7 @@ public interface ClubMeetingCommandService {
      * @param request 한줄평 내용 DTO (내용 + 평점)
      * @return 생성한 한줄평 ID
      */
-    Long createBookReview(Long memberId, Long meetingId, BookShelfRequestDTO.BookReviewDTO request);
+    Long createBookReview(String memberId, Long meetingId, BookShelfRequestDTO.BookReviewDTO request);
 
     /**
      * 독서모임의 한줄평을 수정합니다.
@@ -102,7 +118,7 @@ public interface ClubMeetingCommandService {
      * @param reviewId 한줄평 ID
      * @param request 한줄평 내용 DTO (내용 + 평점)
      */
-    Long updateBookReview(Long memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request);
+    Long updateBookReview(String memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request);
 
     /**
      * 독서모임의 한줄평을 삭제합니다.
@@ -113,6 +129,6 @@ public interface ClubMeetingCommandService {
      * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
      * @param reviewId 한줄평 ID
      */
-    void deleteBookReview(Long memberId, Long meetingId, Long reviewId);
+    void deleteBookReview(String memberId, Long meetingId, Long reviewId);
 
 }
