@@ -19,6 +19,12 @@ public class Vote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String title;
+
+    private String tag = "투표";
+
+    private boolean important;
+
     @Column(nullable = false)
     private String item1;
 
