@@ -51,9 +51,9 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MemberProfileResponseDTO {
-        private String nickName;
+        private String nickname;
         private String description;
-        private String imgUrl;
+        private String profileImageUrl;
     }
 
     @Getter
@@ -70,9 +70,9 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class otherProfileResponseDTO {
-        private String nickName;
+        private String nickname;
         private String description;
-        private String imgUrl;
+        private String profileImageUrl;
         private boolean isFollowed;
     }
 }
