@@ -28,5 +28,4 @@ public class NotificationEventHandler {
         // 이벤트 처리 로직
 
     }
-
 }
