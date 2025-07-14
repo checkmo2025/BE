@@ -24,7 +24,7 @@ public interface MemberQueryService {
      * @param memberId 조회하는 회원 ID (팔로우 여부 확인용)
      * @return targetMember의 프로필 정보 DTO - 이때는 관심 카테고리 정보 DTO에 포함 X , -> 반드시 CategoryQueryFacade를 통해 조회해야 함
      */
-    MemberResponseDTO.otherProfileResponseDTO getProfile(String targetMemberNickname, String memberId);
+    MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId);
 
     /**
      * 닉네임으로 회원 ID 조회
