@@ -31,5 +31,4 @@ public class BookResponseDTO {
         private boolean hasNext;        // 다음 페이지 존재 여부
         private int currentPage;           // 현재 페이지 번호
     }
-
 }
