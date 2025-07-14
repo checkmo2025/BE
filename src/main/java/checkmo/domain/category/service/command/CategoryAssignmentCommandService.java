@@ -3,8 +3,6 @@ package checkmo.domain.category.service.command;
 import checkmo.domain.category.dto.CategoryRequestDTO;
 import checkmo.domain.category.dto.CategoryResponseDTO;
 
-import java.util.List;
-
 /**
  * 회원-카테고리, 모임-카테고리 간의 관계 설정을 처리
  */
