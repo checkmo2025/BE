@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MemberResponseDTO {
@@ -74,5 +75,20 @@ public class MemberResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean isFollowed;
+        private List<BookStoryPreviewDTO> bookStories;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookStoryPreviewDTO {
+        private Long bookStoryId;
+        private String bookStoryTitle;
+        private String bookTitle;
+        private String bookImageUrl;
+        private int likes;
+        private LocalDateTime createdAt;
+        private boolean isLiked; // 조회하는 사람의 좋아요 여부
     }
 }
