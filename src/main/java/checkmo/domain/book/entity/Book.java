@@ -16,7 +16,7 @@ import java.util.List;
 public class Book extends BaseEntity {
 
     @Id
-    private Long id;
+    private String id;
 
     private String title;
 
