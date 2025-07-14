@@ -22,6 +22,7 @@ public class BookStoryResponseDTO {
         private String bookStoryTitle;
         private String description;
         private int likes;
+        private boolean isLiked;
         private LocalDateTime createdAt;
 
         @Getter
