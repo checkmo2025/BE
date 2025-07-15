@@ -33,5 +33,6 @@ public class NotificationResponseDTO {
         private String receiverNickname;
         private boolean isRead;
         private LocalDateTime createdAt;
+        private String redirectPath;
     }
 }
