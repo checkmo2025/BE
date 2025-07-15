@@ -28,7 +28,7 @@ public class Notification extends BaseEntity {
     private boolean isRead = false;
 
     @Column(nullable = false)
-    private String redirectId; // 알림 클릭 시 이동할 페이지의 ID
+    private String redirectPath; // 알림 클릭 시 이동할 페이지의 경로
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
