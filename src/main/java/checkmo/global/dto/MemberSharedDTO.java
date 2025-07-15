@@ -11,7 +11,7 @@ public class MemberSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BasicInfo {
+    public static class BasicInfoDTO {
         private String nickname;        // 회원 닉네임
         private String profileImageUrl; // 프로필 이미지 URL
     }
@@ -20,7 +20,7 @@ public class MemberSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class WithFollowStatus {
+    public static class WithFollowStatusDTO {
         private String nickname;
         private String profileImageUrl;
         private boolean isFollowing;    // 조회하는 사람 기준으로 팔로우 여부

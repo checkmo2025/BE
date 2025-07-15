@@ -11,7 +11,7 @@ public class BookSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BasicInfo {
+    public static class BasicInfoDTO {
         private String bookId;          // ISBN을 책 Id로 사용
         private String title;           // 책 제목
         private String author;          // 저자명
@@ -22,7 +22,7 @@ public class BookSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class DetailInfo {
+    public static class DetailInfoDTO {
         private String bookId;
         private String title;
         private String author;
