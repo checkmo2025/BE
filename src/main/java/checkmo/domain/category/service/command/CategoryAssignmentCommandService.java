@@ -14,7 +14,7 @@ public interface CategoryAssignmentCommandService {
      * @param request  추가할 카테고리 ID 목록
      * @return 추가된 카테고리 정보가 담긴 DTO
      */
-    CategoryResponseDTO.CategoryListResponseDTO modifyCategoriesToMember(Long memberId, CategoryRequestDTO.CategoryListRequestDTO request);
+    CategoryResponseDTO.CategoryListResponseDTO modifyMemberCategories(Long memberId, CategoryRequestDTO.CategoryListRequestDTO request);
 
     /**
      * Club의 관심 카테고리 수정 - 이미 추가되어있는 관심 카테고리는 서비스 로직 구현 시 제외하고 새로운 카테고리만 추가 or 제거
@@ -23,5 +23,5 @@ public interface CategoryAssignmentCommandService {
      * @param request  추가할 카테고리 ID 목록
      * @return 추가된 카테고리 정보가 담긴 DTO
      */
-    CategoryResponseDTO.CategoryListResponseDTO modifyCategoriesToClub(Long clubId, CategoryRequestDTO.CategoryListRequestDTO request);
+    CategoryResponseDTO.CategoryListResponseDTO modifyClubCategories(Long clubId, CategoryRequestDTO.CategoryListRequestDTO request);
 }
