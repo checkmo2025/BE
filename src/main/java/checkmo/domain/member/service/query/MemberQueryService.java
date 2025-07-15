@@ -10,6 +10,14 @@ import checkmo.domain.member.dto.MemberResponseDTO;
 public interface MemberQueryService {
 
     /**
+     * 닉네임 중복 확인
+     *
+     * @param nickname 확인할 닉네임
+     * @return 중복 여부 (true: 중복됨, false: 사용 가능)
+     */
+    boolean isNicknameDuplicated(String nickname);
+
+    /**
      * 회원 기본 정보 조회
      *
      * @param memberId 회원 ID

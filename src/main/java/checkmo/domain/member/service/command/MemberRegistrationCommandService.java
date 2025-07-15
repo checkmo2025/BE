@@ -21,14 +21,6 @@ public interface MemberRegistrationCommandService {
      */
 
     /**
-     * 닉네임 중복 확인
-     *
-     * @param nickname 확인할 닉네임
-     * @return 중복 여부 (true: 중복됨, false: 사용 가능)
-     */
-    boolean isNicknameDuplicated(String nickname);
-
-    /**
      * 이메일 인증 요청
      *
      * @param email 인증할 이메일
