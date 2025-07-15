@@ -1,6 +1,8 @@
 package checkmo.domain.club.dto.club;
 
 import checkmo.domain.club.dto.meeting.MeetingResponseDTO;
+import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -172,9 +174,7 @@ public class ClubResponseDTO {
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그
-        private MeetingResponseDTO.BookInfoDTO bookInfoDTO; // 책 정보 DTO
-        private MeetingResponseDTO.MemberDTO authorInfoDTO; // 추천책 작성한 회원 정보 DTO
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.BasicInfo authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
     }
-
-
 }

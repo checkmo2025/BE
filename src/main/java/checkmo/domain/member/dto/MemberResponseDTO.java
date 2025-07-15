@@ -1,5 +1,6 @@
 package checkmo.domain.member.dto;
 
+import checkmo.global.dto.BookSharedDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -85,8 +86,7 @@ public class MemberResponseDTO {
     public static class BookStoryPreviewDTO {
         private Long bookStoryId;
         private String bookStoryTitle;
-        private String bookTitle;
-        private String bookImageUrl;
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
         private int likes;
         private LocalDateTime createdAt;
         private boolean isLiked; // 조회하는 사람의 좋아요 여부

@@ -1,6 +1,7 @@
 package checkmo.domain.club.dto.bookshelf;
 
 import checkmo.domain.club.dto.meeting.MeetingResponseDTO;
+import checkmo.global.dto.BookSharedDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,7 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfListDTO {
-        List<BookShelfInfoDTO> bookShelfInfoDTOList;
+        List<BookShelfInfoDTO> bookShelfInfoList;
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
         private int pageSize; // 현재 페이지 크기
@@ -26,8 +27,8 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfInfoDTO {
-        private MeetingResponseDTO.BookInfoDTO bookInfoDTO;
-        private MeetingInfoDTO meetingInfoDTO;
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MeetingInfoDTO meetingInfo;
     }
 
     @Getter
@@ -46,8 +47,8 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfDetailDTO {
-        private MeetingResponseDTO.BookDetailInfoDTO bookDetailInfoDTO; // 책 정보 재사용
-        private MeetingInfoDTO meetingInfoDTO; // Meeting 기본 정보
+        private BookSharedDTO.DetailInfo bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
+        private MeetingInfoDTO meetingInfo; // Meeting 기본 정보
         private List<BookReviewDTO> bookReviewList; // 한줄평+평점 리스트
     }
 

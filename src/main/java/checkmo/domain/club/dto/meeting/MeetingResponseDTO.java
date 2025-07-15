@@ -1,5 +1,7 @@
 package checkmo.domain.club.dto.meeting;
 
+import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +20,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class InProgressMeetingDetailDTO {
-        private MeetingInfoDTO meetingInfoDTO;
+        private MeetingInfoDTO meetingInfo;
         private List<TopicDTO> topics; // 모임의 토픽 목록 -> 최신순 최대 4개 담기
         private List<TeamDTO> teams; // 모임의 팀 별 토픽 목록 -> 최신순 최대 4개 담기
     }
@@ -28,9 +30,9 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class CompletedMeetingDetailDTO {
-        private MeetingInfoDTO meetingInfoDTO;
+        private MeetingInfoDTO meetingInfo;
         private List<TopicDTO> topics; // 모임의 토픽 목록
-        private List<MemberDTO> participantInfoList; // 모임 참여자 목록
+        private List<MemberSharedDTO.BasicInfo> participantInfoList; // 모임 참여자 목록 - 공용 DTO 사용
         private List<TeamDTO> teams; // 모임의 팀 목록
     }
 
@@ -61,7 +63,7 @@ public class MeetingResponseDTO {
         private int generation; // 기수
         private String tag;
         private String content; // 모임 내용, ClubNoticeDetailDTO-MeetingNoticeDTO-MeetingInfoDTO 에서만 이 필드에 값 넣고 나머지에선 다 NULL
-        private BookInfoDTO bookInfoDTO;
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
     }
 
     @Getter
@@ -90,42 +92,9 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookInfoDTO {
-        private String title; // 책 제목
-        private String author; // 저자
-        private String coverImageUrl; // 책 표지 이미지 URL
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class BookDetailInfoDTO {
-        private String title; // 책 제목
-        private String author; // 저자
-        private String coverImageUrl; // 책 표지 이미지 URL
-        private String publisher; // 출판사
-        private String description; // 책 설명
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MemberDTO {
-        private String nickname; // 참여자 닉네임
-        private String profileImageUrl; // 참여자 프로필 이미지 URL
-        // TODO: 만약 운영진만 보여주고 싶다면, 운영진 여부를 나타내는 필드 추가
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     public static class MemberTeamDTO {
         private Integer teamNumber;
-        private String nickname; // 참여자 닉네임
-        private String profileImageUrl; // 참여자 프로필 이미지 URL
+        private MemberSharedDTO.BasicInfo memberInfo; // 기본 회원 정보 (닉네임, 프로필 이미지 URL) - 공용 DTO
         // TODO: 만약 운영진만 보여주고 싶다면, 운영진 여부를 나타내는 필드 추가
     }
 
@@ -136,6 +105,6 @@ public class MeetingResponseDTO {
     public static class TeamDTO {
         private Integer teamNumber; // 팀 번호
         private List<TopicDTO> topics; // 해당 팀이 선택한 토픽 목록
-        private List<MemberDTO> participantInfoList; // 팀원 목록, InProgressMeetingDetailDTO-TeamDTO에서는 이 필드 NULL
+        private List<MemberSharedDTO.BasicInfo> participantInfoList; // 팀원 목록, InProgressMeetingDetailDTO-TeamDTO에서는 이 필드 NULL
     }
 }
