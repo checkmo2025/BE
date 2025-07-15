@@ -29,8 +29,8 @@ public class BookStoryResponseDTO {
     @Builder
     public static class BookStoryResponse {
         private String bookStoryId;
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.WithFollowStatusDTO authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
         private String description;
         private int likes;

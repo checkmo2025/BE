@@ -32,7 +32,7 @@ public class MeetingResponseDTO {
     public static class CompletedMeetingDetailDTO {
         private MeetingInfoDTO meetingInfo;
         private List<TopicDTO> topics; // 모임의 토픽 목록
-        private List<MemberSharedDTO.BasicInfo> participantInfoList; // 모임 참여자 목록 - 공용 DTO 사용
+        private List<MemberSharedDTO.BasicInfoDTO> participantInfoList; // 모임 참여자 목록 - 공용 DTO 사용
         private List<TeamDTO> teams; // 모임의 팀 목록
     }
 
@@ -63,7 +63,7 @@ public class MeetingResponseDTO {
         private int generation; // 기수
         private String tag;
         private String content; // 모임 내용, ClubNoticeDetailDTO-MeetingNoticeDTO-MeetingInfoDTO 에서만 이 필드에 값 넣고 나머지에선 다 NULL
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
     }
 
     @Getter
@@ -94,7 +94,7 @@ public class MeetingResponseDTO {
     @Builder
     public static class MemberTeamDTO {
         private Integer teamNumber;
-        private MemberSharedDTO.BasicInfo memberInfo; // 기본 회원 정보 (닉네임, 프로필 이미지 URL) - 공용 DTO
+        private MemberSharedDTO.BasicInfoDTO memberInfo; // 기본 회원 정보 (닉네임, 프로필 이미지 URL) - 공용 DTO
         // TODO: 만약 운영진만 보여주고 싶다면, 운영진 여부를 나타내는 필드 추가
     }
 
@@ -105,6 +105,6 @@ public class MeetingResponseDTO {
     public static class TeamDTO {
         private Integer teamNumber; // 팀 번호
         private List<TopicDTO> topics; // 해당 팀이 선택한 토픽 목록
-        private List<MemberSharedDTO.BasicInfo> participantInfoList; // 팀원 목록, InProgressMeetingDetailDTO-TeamDTO에서는 이 필드 NULL
+        private List<MemberSharedDTO.BasicInfoDTO> participantInfoList; // 팀원 목록, InProgressMeetingDetailDTO-TeamDTO에서는 이 필드 NULL
     }
 }

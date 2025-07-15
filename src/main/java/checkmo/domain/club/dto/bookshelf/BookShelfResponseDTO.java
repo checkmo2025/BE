@@ -27,7 +27,7 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfInfoDTO {
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
         private MeetingInfoDTO meetingInfo;
     }
 
@@ -47,7 +47,7 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfDetailDTO {
-        private BookSharedDTO.DetailInfo bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
+        private BookSharedDTO.DetailInfoDTO bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
         private MeetingInfoDTO meetingInfo; // Meeting 기본 정보
         private List<BookReviewDTO> bookReviewList; // 한줄평+평점 리스트
     }

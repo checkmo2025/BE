@@ -174,7 +174,7 @@ public class ClubResponseDTO {
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.BasicInfo authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.BasicInfoDTO authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
     }
 }
