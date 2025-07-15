@@ -15,10 +15,20 @@ public interface BookStoryQueryService {
     BookStoryResponseDTO.BookStoryResponse getBookStory(Long bookStoryId);
 
     /**
-     * 책 이야기 목록 조회
+     * 특정 회원의 책 이야기 목록을 커서 기반으로 조회합니다.
      *
-     * @param bookId 조회할 책의 ID
-     * @return 조회된 책 이야기 목록의 DTO 리스트
+     * @param memberId 조회할 회원의 ID
+     * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
+     * @return 조회된 책 이야기 목록 DTO
      */
-    BookStoryResponseDTO.BookStoryListResponse getBookStoriesByBookId(String bookId);
+    BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, Long cursorId);
+
+    /**
+     * 특정 회원의 책 이야기 목록을 size 개수만큼 조회합니다.
+     *
+     * @param memberId 조회할 회원의 ID
+     * @param size     조회할 개수
+     * @return 조회된 책 이야기 목록 DTO
+     */
+    BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, int size);
 }
