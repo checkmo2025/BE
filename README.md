@@ -1,4 +1,4 @@
-# 💻 Backend Members 
+# 💻 Backend Members
 
 | [**모두까기** / **임경표**](https://github.com/MODUGGAGI) |  [**채이** / **이채은**](https://github.com/chaechaen)  | [**송글송글** / **신지윤**](https://github.com/Yoon0221) | [**지니** / **정효정**](https://github.com/zjhj0814) |
 |:----------------------:|:----------------------:|:----------------------:|:--------------------:|
@@ -68,3 +68,32 @@
     * 예: `user_name`, `product_price`, `created_at`
 * **상수**: `UPPER_CASE` : 모든 단어를 대문자로 표기하고, 단어를 언더바(_) 로 연결하는 방법
     * 예: `MAX_RETRIES`, `DEFAULT_PAGE_SIZE`
+
+---
+# ⚙️ 개발 환경 설정
+
+## 1. 환경 변수 (.env)
+
+프로젝트에 필요한 주요 정보(DB 접속 정보, JWT 시크릿 키 등)는 **환경 변수**로 관리합니다.
+
+1.  프로젝트 루트 디렉토리에 `.env` 파일을 생성하고 해당 파일에 환경변수들을 추가해주세요. (`.gitignore`에 등록되어 있어 원격 저장소에는 올라가지 않습니다.)
+2.  백엔드 `[Notion 페이지]` -> `[필요한 자료들]` -> `.env` 페이지에 추가한 환경 변수들을 업데이트해주세요.
+
+## 2. Spring 설정 파일 (application.yml)
+
+새로운 설정 정보(예: `aws`, `oauth`)를 추가할 때는 `application.yml`에 직접 작성하지 말아주세요.
+
+1.  `src/main/resources` 경로에 `application-OOO.yml` 형식으로 새로운 설정 파일을 생성합니다. (예: `application-aws.yml`)
+2.  생성한 파일을 `application.yml`의 `spring.profiles.include` 부분에 추가하여 적용합니다.
+
+**예시:**
+
+```yaml
+# application.yml
+
+spring:
+  profiles:
+    include:
+      - db
+      - redis
+      - aws   # 새로 추가된 설정
