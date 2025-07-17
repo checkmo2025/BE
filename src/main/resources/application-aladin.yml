@@ -5,7 +5,7 @@ aladin:
       item-search: /ItemSearch.aspx
       item-lookup: /ItemLookUp.aspx
     auth:
-      ttb-key: ttbcheckmo20252249001
+      ttb-key: ${ALADIN_TTB_KEY}
       version: 20131101
     search:
       query-type: Keyword
