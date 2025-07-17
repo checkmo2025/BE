@@ -8,6 +8,7 @@ aladin:
       ttb-key: ttbcheckmo20252249001
       version: 20131101
     search:
+      query-type: Keyword
       output: xml
       max-results: 10
       item-id-type: ISBN13

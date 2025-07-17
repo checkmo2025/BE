@@ -52,6 +52,9 @@ public class AladinProperties {
     @Setter
     public static class Search {
 
+        @NotBlank(message = "검색 타입은 필수입니다")
+        private String queryType;
+
         @NotBlank(message = "출력 형식은 필수입니다")
         private String output;
 
