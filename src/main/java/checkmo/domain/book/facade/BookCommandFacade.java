@@ -1,6 +1,6 @@
 package checkmo.domain.book.facade;
 
-import checkmo.domain.book.web.dto.BookRequestDTO;
+import checkmo.global.dto.BookSharedDTO;
 
 /**
  * Book Domain Command Facade
@@ -9,11 +9,11 @@ import checkmo.domain.book.web.dto.BookRequestDTO;
 public interface BookCommandFacade {
 
     /**
-     * 알라딘 API로부터 얻은 책 정보를 저장합니다. (내부용)
+     * 알라딘 API로부터 얻은 책 정보를 저장합니다. (외부용)
      *
      * @param request 저장할 책 정보 DTO
      */
-    void saveBookFromAladin(BookRequestDTO.Aladin2BookDTO request); //
+    void saveBookFromAladin(BookSharedDTO.BookCreateRequestDTO request); //
 
     /**
      * 특정 책 정보를 삭제합니다. (내부용)
