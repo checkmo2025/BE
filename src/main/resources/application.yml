@@ -3,3 +3,4 @@ spring:
     include:
       - db # 배포 후에는 prod로 변경
       - redis # TODO: 배포시 Redis를 EC2 내부에서 쓸 지, Elasticache를 쓸 지 결정
+      - aladin

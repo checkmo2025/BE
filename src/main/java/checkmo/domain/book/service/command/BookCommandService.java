@@ -1,6 +1,6 @@
 package checkmo.domain.book.service.command;
 
-import checkmo.domain.book.dto.BookRequestDTO;
+import checkmo.global.dto.BookSharedDTO;
 
 /**
  *  알라딘 API에서 책 정보를 가져와 저장
@@ -11,10 +11,11 @@ public interface BookCommandService {
 
     /**
      * 책 정보를 알라딘 API에서 가져와 저장
+     * 이 메소드의 파라미터는 BookStory, BookRecommed, Meeting 등 책을 검색하고 해당 객체 생성할 때 전달된다.
      *
      * @param request 알라딘 책 DTO
      */
-    void saveBookFromAladin(BookRequestDTO.Aladin2BookDTO request);
+    void saveBook(BookSharedDTO.BookCreateRequestDTO request);
     // 책 고유번호는 ISBN 13자리로
 
     /**

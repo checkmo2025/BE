@@ -1,8 +1,6 @@
 package checkmo.domain.book.service.query;
 
-import checkmo.domain.book.dto.BookResponseDTO;
-
-import java.util.List;
+import checkmo.domain.book.web.dto.BookResponseDTO;
 
 /**
  * 책 관련 모든 조회 기능
@@ -14,5 +12,5 @@ public interface BookQueryService {
      * @param bookId 책 ID
      * @return 책 정보 DTO
      */
-    BookResponseDTO.BookInfoDetailResponseDTO findBook(String bookId);
+    BookResponseDTO.BookInfoDetailResponse findBook(String bookId);
 }

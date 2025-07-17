@@ -1,0 +1,15 @@
+aladin:
+  api:
+    url:
+      base: http://www.aladin.co.kr/ttb/api
+      item-search: /ItemSearch.aspx
+      item-lookup: /ItemLookUp.aspx
+    auth:
+      ttb-key: ${ALADIN_TTB_KEY}
+      version: 20131101
+    search:
+      query-type: Keyword
+      output: xml
+      max-results: 10
+      item-id-type: ISBN13
+      timeout-ms: 5000
