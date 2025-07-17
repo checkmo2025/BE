@@ -11,6 +11,19 @@ public class BookSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class BookCreateRequestDTO {
+        private String isbn;
+        private String title;
+        private String author;
+        private String imgUrl;
+        private String publisher;
+        private String description;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class BasicInfoDTO {
         private String bookId;          // ISBN을 책 Id로 사용
         private String title;           // 책 제목
