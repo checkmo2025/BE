@@ -21,7 +21,7 @@ public class AladinApiServiceImpl implements AladinApiService {
     private final AladinProperties aladinProperties;
 
     @Override
-    public BookResponseDTO.BookListResponseDTO getBookInfoFromAladin(String keyword, int page) {
+    public BookResponseDTO.BookListResponseDTO searchBookFromAladin(String keyword, int page) {
         try {
 
             String url = buildHttpUrl(keyword, page);
@@ -41,6 +41,26 @@ public class AladinApiServiceImpl implements AladinApiService {
         }
     }
 
+    @Override
+    public BookResponseDTO.BookInfoDetailResponseDTO getBookDetailInfoFromAladin(String isbn) {
+        try {
+            String url = buildHttpUrl(isbn);
+
+            log.info("알라딘 API 요청 URL: {}", url);
+
+            var response = restTemplate.getForObject(
+                    url,
+                    AladinApiResponseDTO.AladinApiResponse.class
+            );
+
+            return BookConverter.fromAladinApiResponse(response);
+
+        } catch (Exception e) {
+            log.error("알라딘 API 호출 중 오류 발생", e);
+            throw new RuntimeException("알라딘 API 호출 실패", e);
+        }
+    }
+
     private String buildHttpUrl(String keyword, int page) {
         return UriComponentsBuilder
                 .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemSearch())
@@ -48,6 +68,18 @@ public class AladinApiServiceImpl implements AladinApiService {
                 .queryParam("Query", keyword)
                 .queryParam("MaxResults", aladinProperties.getSearch().getMaxResults())
                 .queryParam("start", page)
+                .queryParam("output", aladinProperties.getSearch().getOutput())
+                .queryParam("Version", aladinProperties.getAuth().getVersion())
+                .build()
+                .toUriString();
+    }
+
+    private String buildHttpUrl(String isbn) {
+        return UriComponentsBuilder
+                .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemLookup())
+                .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
+                .queryParam("itemIdType", aladinProperties.getSearch().getItemIdType())
+                .queryParam("ItemId", isbn)
                 .queryParam("output", aladinProperties.getSearch().getOutput())
                 .queryParam("Version", aladinProperties.getAuth().getVersion())
                 .build()
