@@ -1,0 +1,13 @@
+aladin:
+  api:
+    url:
+      base: http://www.aladin.co.kr/ttb/api
+      item-search: /ItemSearch.aspx
+      item-lookup: /ItemLookUp.aspx
+    auth:
+      ttb-key: ttbcheckmo20252249001  # 실제 발급받은 키로 변경하세요
+      version: 20131101
+    search:
+      output: xml
+      max-results: 10
+      timeout-ms: 5000
