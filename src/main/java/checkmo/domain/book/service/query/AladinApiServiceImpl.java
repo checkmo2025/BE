@@ -1,5 +1,7 @@
 package checkmo.domain.book.service.query;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.config.properties.AladinProperties;
 import checkmo.domain.book.converter.BookConverter;
 import checkmo.domain.book.web.dto.AladinApiResponseDTO;
@@ -36,7 +38,7 @@ public class AladinApiServiceImpl implements AladinApiService {
             return BookConverter.fromAladinApiResponse(response, page);
 
         } catch (Exception e) {
-            log.error("알라딘 API 호출 중 오류 발생", e);
+            log.error("알라딘 API 호출 중 오류 발생: {}", e.getMessage());
             throw new RuntimeException("알라딘 API 호출 실패", e);
         }
     }
@@ -53,10 +55,17 @@ public class AladinApiServiceImpl implements AladinApiService {
                     AladinApiResponseDTO.AladinApiResponse.class
             );
 
+            if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+                throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
+            }
+
             return BookConverter.fromAladinApiResponse(response);
 
+        } catch (GeneralException e) {
+            log.error("알라딘 API 호출 중 오류 발생: {}", e.getMessage());
+            throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
         } catch (Exception e) {
-            log.error("알라딘 API 호출 중 오류 발생", e);
+            log.error("알라딘 API 호출 중 오류 발생: {}", e.getMessage());
             throw new RuntimeException("알라딘 API 호출 실패", e);
         }
     }
