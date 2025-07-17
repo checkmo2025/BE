@@ -20,7 +20,7 @@ public class BookController {
     @GetMapping("/search")
     public ApiResponse<BookResponseDTO.BookListResponseDTO> searchBook(
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "1") int page
+            @RequestParam(required = false, defaultValue = "1") int page
     ) {
         BookResponseDTO.BookListResponseDTO result = bookQueryFacade.getBookInfoFromAladin(keyword, page);
         return ApiResponse.onSuccess(result);
