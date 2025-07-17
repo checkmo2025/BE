@@ -1,7 +1,9 @@
 package checkmo.domain.book.converter;
 
+import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.web.dto.AladinApiResponseDTO;
 import checkmo.domain.book.web.dto.BookResponseDTO;
+import checkmo.global.dto.BookSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.util.HtmlUtils;
@@ -10,6 +12,19 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookConverter {
+
+    public static Book fromBookCreateRequestDTO(
+            BookSharedDTO.BookCreateRequestDTO request
+    ) {
+        return Book.builder()
+                .id(request.getIsbn())
+                .title(request.getTitle())
+                .author(request.getAuthor())
+                .imgUrl(request.getImgUrl())
+                .publisher(request.getPublisher())
+                .description(request.getDescription())
+                .build();
+    }
 
     public static BookResponseDTO.BookInfoDetailResponseDTO fromAladinBookItem(
             AladinApiResponseDTO.AladinBookItem item
