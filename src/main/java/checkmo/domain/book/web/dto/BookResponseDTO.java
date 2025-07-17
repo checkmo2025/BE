@@ -27,7 +27,7 @@ public class BookResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookListResponse {
-        List<BookInfoDetailResponse> bookInfoDetailResponseList; // 책 정보 목록
+        private List<BookInfoDetailResponse> bookInfoDetailResponseList; // 책 정보 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Integer currentPage;           // 현재 페이지 번호
     }
