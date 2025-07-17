@@ -86,6 +86,7 @@ public class MeetingResponseDTO {
         private String content; // 토픽 내용
         private MemberTeamDTO authorInfo; // 작성자 정보
         private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TopicListDTO-TopicDTO,TeamDTO-TopicDTO에서는 이 필드 NULL
+        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 
     @Getter

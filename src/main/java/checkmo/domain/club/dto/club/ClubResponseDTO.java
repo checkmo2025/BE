@@ -176,5 +176,6 @@ public class ClubResponseDTO {
         private String tag; // 추천 태그
         private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
         private MemberSharedDTO.BasicInfoDTO authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
+        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 }

@@ -36,5 +36,6 @@ public class BookStoryResponseDTO {
         private int likes;
         private boolean isLiked;
         private LocalDateTime createdAt;
+        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 }
