@@ -13,7 +13,7 @@ public interface BookCommandFacade {
      *
      * @param request 저장할 책 정보 DTO
      */
-    void saveBookFromAladin(BookSharedDTO.BookCreateRequestDTO request); //
+    void saveBook(BookSharedDTO.BookCreateRequestDTO request); //
 
     /**
      * 특정 책 정보를 삭제합니다. (내부용)
