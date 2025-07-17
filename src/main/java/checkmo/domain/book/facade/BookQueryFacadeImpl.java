@@ -1,6 +1,8 @@
 package checkmo.domain.book.facade;
 
+import checkmo.domain.book.converter.BookConverter;
 import checkmo.domain.book.service.query.AladinApiService;
+import checkmo.domain.book.service.query.BookQueryService;
 import checkmo.domain.book.web.dto.BookResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookQueryFacadeImpl implements BookQueryFacade {
 
     private final AladinApiService aladinApiService;
+    private final BookQueryService bookQueryService;
 
     @Override
     public BookResponseDTO.BookInfoDetailResponseDTO findBook(String bookId) {
@@ -26,11 +29,15 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
 
     @Override
     public BookSharedDTO.BasicInfoDTO getBookBasicInfoForShare(String bookId) {
-        return null;
+        var book = bookQueryService.findBook(bookId);
+
+        return BookConverter.fromBookDTOToBasicInfoDTO(book);
     }
 
     @Override
     public BookSharedDTO.DetailInfoDTO getBookDetailInfoForShare(String bookId) {
-        return null;
+        var book = bookQueryService.findBook(bookId);
+
+        return BookConverter.fromBookDTOToDetailInfoDTO(book);
     }
 }
