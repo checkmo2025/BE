@@ -4,6 +4,7 @@ import checkmo.domain.book.web.dto.AladinApiResponseDTO;
 import checkmo.domain.book.web.dto.BookResponseDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -13,13 +14,15 @@ public class BookConverter {
     public static BookResponseDTO.BookInfoDetailResponseDTO fromAladinBookItem(
             AladinApiResponseDTO.AladinBookItem item
     ) {
+        String decodedDescription = HtmlUtils.htmlUnescape(item.getDescription());
+
         return BookResponseDTO.BookInfoDetailResponseDTO.builder()
                 .isbn(item.getIsbn13())
                 .title(item.getTitle())
                 .author(item.getAuthor())
                 .imgUrl(item.getCover())
                 .publisher(item.getPublisher())
-                .description(item.getDescription())
+                .description(decodedDescription)
                 .build();
     }
 
