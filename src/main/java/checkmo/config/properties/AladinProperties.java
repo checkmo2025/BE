@@ -60,6 +60,9 @@ public class AladinProperties {
         @Max(value = 100, message = "최대 결과 수는 100 이하여야 합니다")
         private int maxResults;
 
+        @NotBlank(message = "아이템 ID 타입은 필수입니다")
+        private String itemIdType;
+
         @Positive(message = "타임아웃은 양수여야 합니다")
         @Min(value = 1000, message = "타임아웃은 1000ms 이상이어야 합니다")
         private int timeoutMs;
