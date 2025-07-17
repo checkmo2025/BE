@@ -1,5 +1,7 @@
 package checkmo.domain.book.converter;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.web.dto.AladinApiResponseDTO;
 import checkmo.domain.book.web.dto.BookResponseDTO;
@@ -114,7 +116,7 @@ public class BookConverter {
             return createEmptyBookListResponse();
         }
 
-        List<BookResponseDTO.BookInfoDetailResponseDTO> books = convertToBookList(aladinApiResponse.getItems());
+        var books = convertToBookList(aladinApiResponse.getItems());
         boolean hasNext = calculateHasNext(aladinApiResponse);
 
         return BookResponseDTO.BookListResponseDTO.builder()
@@ -124,8 +126,26 @@ public class BookConverter {
                 .build();
     }
 
+    /**
+     * 알라딘 API 응답 → BookInfoDetailResponseDTO 변환
+     */
+    public static BookResponseDTO.BookInfoDetailResponseDTO fromAladinApiResponse(
+            AladinApiResponseDTO.AladinApiResponse aladinApiResponse
+    ) {
+        var book = fromAladinBookItem(aladinApiResponse.getItems().getFirst());
+
+        return BookResponseDTO.BookInfoDetailResponseDTO.builder()
+                .isbn(book.getIsbn())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .imgUrl(book.getImgUrl())
+                .publisher(book.getPublisher())
+                .description(book.getDescription())
+                .build();
+    }
+
     // =====================================================
-    // Private Helper Methods
+    // Private Methods
     // =====================================================
 
     /**
@@ -150,7 +170,8 @@ public class BookConverter {
      * 알라딘 API 아이템 리스트 → BookResponseDTO 리스트 변환
      */
     private static List<BookResponseDTO.BookInfoDetailResponseDTO> convertToBookList(
-            List<AladinApiResponseDTO.AladinBookItem> items) {
+            List<AladinApiResponseDTO.AladinBookItem> items
+    ) {
         return items.stream()
                 .map(BookConverter::fromAladinBookItem)
                 .toList();
