@@ -11,7 +11,7 @@ public interface AladinApiService {
      * @param page 페이지 번호
      * @return 책 정보 List DTO
      */
-    BookResponseDTO.BookListResponseDTO searchBookFromAladin(String keyword, int page);
+    BookResponseDTO.BookListResponse searchBookFromAladin(String keyword, int page);
 
     /**
      * 알라딘 API를 통해 특정 책을 조회하는 메서드
@@ -19,5 +19,5 @@ public interface AladinApiService {
      * @param isbn 책의 13자리 ISBN
      * @return 책 정보 DTO
      */
-    BookResponseDTO.BookInfoDetailResponseDTO getBookDetailInfoFromAladin(String isbn);
+    BookResponseDTO.BookInfoDetailResponse getBookDetailInfoFromAladin(String isbn);
 }

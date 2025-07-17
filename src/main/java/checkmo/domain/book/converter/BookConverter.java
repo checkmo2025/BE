@@ -1,7 +1,5 @@
 package checkmo.domain.book.converter;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.web.dto.AladinApiResponseDTO;
 import checkmo.domain.book.web.dto.BookResponseDTO;
@@ -23,7 +21,7 @@ public class BookConverter {
      * BookResponseDTO → BasicInfoDTO 변환 (기본 정보만)
      */
     public static BookSharedDTO.BasicInfoDTO fromBookDTOToBasicInfoDTO(
-            BookResponseDTO.BookInfoDetailResponseDTO book
+            BookResponseDTO.BookInfoDetailResponse book
     ) {
         return BookSharedDTO.BasicInfoDTO.builder()
                 .bookId(book.getIsbn())
@@ -37,7 +35,7 @@ public class BookConverter {
      * BookResponseDTO → DetailInfoDTO 변환 (상세 정보 포함)
      */
     public static BookSharedDTO.DetailInfoDTO fromBookDTOToDetailInfoDTO(
-            BookResponseDTO.BookInfoDetailResponseDTO book
+            BookResponseDTO.BookInfoDetailResponse book
     ) {
         return BookSharedDTO.DetailInfoDTO.builder()
                 .bookId(book.getIsbn())
@@ -56,8 +54,8 @@ public class BookConverter {
     /**
      * Book 엔티티 → BookResponseDTO 변환
      */
-    public static BookResponseDTO.BookInfoDetailResponseDTO fromBook(Book book) {
-        return BookResponseDTO.BookInfoDetailResponseDTO.builder()
+    public static BookResponseDTO.BookInfoDetailResponse fromBook(Book book) {
+        return BookResponseDTO.BookInfoDetailResponse.builder()
                 .isbn(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -90,12 +88,12 @@ public class BookConverter {
     /**
      * 알라딘 API 책 아이템 → BookResponseDTO 변환
      */
-    public static BookResponseDTO.BookInfoDetailResponseDTO fromAladinBookItem(
+    public static BookResponseDTO.BookInfoDetailResponse fromAladinBookItem(
             AladinApiResponseDTO.AladinBookItem item
     ) {
         String decodedDescription = HtmlUtils.htmlUnescape(item.getDescription());
 
-        return BookResponseDTO.BookInfoDetailResponseDTO.builder()
+        return BookResponseDTO.BookInfoDetailResponse.builder()
                 .isbn(item.getIsbn13())
                 .title(item.getTitle())
                 .author(item.getAuthor())
@@ -108,7 +106,7 @@ public class BookConverter {
     /**
      * 알라딘 API 응답 → BookListResponseDTO 변환
      */
-    public static BookResponseDTO.BookListResponseDTO fromAladinApiResponse(
+    public static BookResponseDTO.BookListResponse fromAladinApiResponse(
             AladinApiResponseDTO.AladinApiResponse aladinApiResponse,
             int page
     ) {
@@ -119,8 +117,8 @@ public class BookConverter {
         var books = convertToBookList(aladinApiResponse.getItems());
         boolean hasNext = calculateHasNext(aladinApiResponse);
 
-        return BookResponseDTO.BookListResponseDTO.builder()
-                .bookInfoDetailResponseDTOs(books)
+        return BookResponseDTO.BookListResponse.builder()
+                .bookInfoDetailResponseList(books)
                 .hasNext(hasNext)
                 .currentPage(page)
                 .build();
@@ -129,12 +127,12 @@ public class BookConverter {
     /**
      * 알라딘 API 응답 → BookInfoDetailResponseDTO 변환
      */
-    public static BookResponseDTO.BookInfoDetailResponseDTO fromAladinApiResponse(
+    public static BookResponseDTO.BookInfoDetailResponse fromAladinApiResponse(
             AladinApiResponseDTO.AladinApiResponse aladinApiResponse
     ) {
         var book = fromAladinBookItem(aladinApiResponse.getItems().getFirst());
 
-        return BookResponseDTO.BookInfoDetailResponseDTO.builder()
+        return BookResponseDTO.BookInfoDetailResponse.builder()
                 .isbn(book.getIsbn())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -158,9 +156,9 @@ public class BookConverter {
     /**
      * 빈 BookListResponseDTO 생성
      */
-    private static BookResponseDTO.BookListResponseDTO createEmptyBookListResponse() {
-        return BookResponseDTO.BookListResponseDTO.builder()
-                .bookInfoDetailResponseDTOs(List.of())
+    private static BookResponseDTO.BookListResponse createEmptyBookListResponse() {
+        return BookResponseDTO.BookListResponse.builder()
+                .bookInfoDetailResponseList(List.of())
                 .hasNext(false)
                 .currentPage(null)
                 .build();
@@ -169,7 +167,7 @@ public class BookConverter {
     /**
      * 알라딘 API 아이템 리스트 → BookResponseDTO 리스트 변환
      */
-    private static List<BookResponseDTO.BookInfoDetailResponseDTO> convertToBookList(
+    private static List<BookResponseDTO.BookInfoDetailResponse> convertToBookList(
             List<AladinApiResponseDTO.AladinBookItem> items
     ) {
         return items.stream()

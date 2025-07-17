@@ -23,7 +23,7 @@ public class AladinApiServiceImpl implements AladinApiService {
     private final AladinProperties aladinProperties;
 
     @Override
-    public BookResponseDTO.BookListResponseDTO searchBookFromAladin(String keyword, int page) {
+    public BookResponseDTO.BookListResponse searchBookFromAladin(String keyword, int page) {
         try {
 
             String url = buildHttpUrl(keyword, page);
@@ -44,7 +44,7 @@ public class AladinApiServiceImpl implements AladinApiService {
     }
 
     @Override
-    public BookResponseDTO.BookInfoDetailResponseDTO getBookDetailInfoFromAladin(String isbn) {
+    public BookResponseDTO.BookInfoDetailResponse getBookDetailInfoFromAladin(String isbn) {
         try {
             String url = buildHttpUrl(isbn);
 
@@ -75,6 +75,7 @@ public class AladinApiServiceImpl implements AladinApiService {
                 .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemSearch())
                 .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
                 .queryParam("Query", keyword)
+                .queryParam("QueryType", aladinProperties.getSearch().getQueryType())
                 .queryParam("MaxResults", aladinProperties.getSearch().getMaxResults())
                 .queryParam("start", page)
                 .queryParam("output", aladinProperties.getSearch().getOutput())

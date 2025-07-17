@@ -12,5 +12,5 @@ public interface BookQueryService {
      * @param bookId 책 ID
      * @return 책 정보 DTO
      */
-    BookResponseDTO.BookInfoDetailResponseDTO findBook(String bookId);
+    BookResponseDTO.BookInfoDetailResponse findBook(String bookId);
 }

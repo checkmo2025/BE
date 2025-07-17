@@ -16,7 +16,7 @@ public class BookQueryServiceImpl implements BookQueryService {
     private final BookRepository bookRepository;
 
     @Override
-    public BookResponseDTO.BookInfoDetailResponseDTO findBook(String bookId) {
+    public BookResponseDTO.BookInfoDetailResponse findBook(String bookId) {
 
         Book book = bookRepository.findById(bookId).orElseThrow(
                 () -> new IllegalArgumentException("책을 찾을 수 없습니다. bookId: " + bookId)
