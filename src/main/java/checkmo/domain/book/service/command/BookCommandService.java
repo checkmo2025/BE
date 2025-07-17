@@ -1,6 +1,6 @@
 package checkmo.domain.book.service.command;
 
-import checkmo.domain.book.dto.BookRequestDTO;
+import checkmo.domain.book.web.dto.BookRequestDTO;
 
 /**
  *  알라딘 API에서 책 정보를 가져와 저장

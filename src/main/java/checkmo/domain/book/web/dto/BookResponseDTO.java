@@ -1,4 +1,4 @@
-package checkmo.domain.book.dto;
+package checkmo.domain.book.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +29,6 @@ public class BookResponseDTO {
     public static class BookListResponseDTO {
         List<BookInfoDetailResponseDTO> bookInfoDetailResponseDTOs; // 책 정보 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
-        private int currentPage;           // 현재 페이지 번호
+        private Integer currentPage;           // 현재 페이지 번호
     }
 }

@@ -1,4 +1,4 @@
-package checkmo.domain.book.dto;
+package checkmo.domain.book.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

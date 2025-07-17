@@ -1,8 +1,6 @@
 package checkmo.domain.book.service.query;
 
-import checkmo.domain.book.dto.BookResponseDTO;
-
-import java.util.List;
+import checkmo.domain.book.web.dto.BookResponseDTO;
 
 /**
  * 책 관련 모든 조회 기능
