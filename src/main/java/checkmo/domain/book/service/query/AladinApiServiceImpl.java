@@ -1,0 +1,56 @@
+package checkmo.domain.book.service.query;
+
+import checkmo.config.properties.AladinProperties;
+import checkmo.domain.book.converter.BookConverter;
+import checkmo.domain.book.web.dto.AladinApiResponseDTO;
+import checkmo.domain.book.web.dto.BookResponseDTO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class AladinApiServiceImpl implements AladinApiService {
+
+    private final RestTemplate restTemplate;
+    private final AladinProperties aladinProperties;
+
+    @Override
+    public BookResponseDTO.BookListResponseDTO getBookInfoFromAladin(String keyword, int page) {
+        try {
+
+            String url = buildHttpUrl(keyword, page);
+
+            log.info("알라딘 API 요청 URL: {}", url);
+
+            var response = restTemplate.getForObject(
+                    url,
+                    AladinApiResponseDTO.AladinApiResponse.class
+            );
+
+            return BookConverter.fromAladinApiResponse(response, page);
+
+        } catch (Exception e) {
+            log.error("알라딘 API 호출 중 오류 발생", e);
+            throw new RuntimeException("알라딘 API 호출 실패", e);
+        }
+    }
+
+    private String buildHttpUrl(String keyword, int page) {
+        return UriComponentsBuilder
+                .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemSearch())
+                .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
+                .queryParam("Query", keyword)
+                .queryParam("MaxResults", aladinProperties.getSearch().getMaxResults())
+                .queryParam("start", page)
+                .queryParam("output", aladinProperties.getSearch().getOutput())
+                .queryParam("Version", aladinProperties.getAuth().getVersion())
+                .build()
+                .toUriString();
+    }
+}
