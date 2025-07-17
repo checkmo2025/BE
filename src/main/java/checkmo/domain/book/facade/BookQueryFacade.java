@@ -15,7 +15,7 @@ public interface BookQueryFacade {
      * @param bookId 책 ID (ISBN)
      * @return 책 상세 정보 DTO
      */
-    BookResponseDTO.BookInfoDetailResponseDTO findBook(String bookId); //
+    BookResponseDTO.BookInfoDetailResponseDTO getBookDetailFromAladin(String bookId); //
 
     /**
      * 알라딘 API를 통해 책 정보를 검색합니다. (내부용)

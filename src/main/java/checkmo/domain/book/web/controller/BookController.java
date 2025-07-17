@@ -49,7 +49,7 @@ public class BookController {
     @GetMapping({"/{isbn}"})
     public ApiResponse<BookResponseDTO.BookInfoDetailResponseDTO> getBookDetail(@PathVariable String isbn) {
 
-        BookResponseDTO.BookInfoDetailResponseDTO result = bookQueryFacade.findBook(isbn);
+        BookResponseDTO.BookInfoDetailResponseDTO result = bookQueryFacade.getBookDetailFromAladin(isbn);
         return ApiResponse.onSuccess(result);
     }
 }
