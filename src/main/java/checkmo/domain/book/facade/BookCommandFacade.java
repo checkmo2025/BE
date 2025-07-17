@@ -1,4 +1,4 @@
-package checkmo.domain.book;
+package checkmo.domain.book.facade;
 
 import checkmo.domain.book.dto.BookRequestDTO;
 
