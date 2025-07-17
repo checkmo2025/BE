@@ -23,7 +23,7 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
     }
 
     @Override
-    public BookResponseDTO.BookListResponseDTO getBookInfoFromAladin(String keyword, int page) {
+    public BookResponseDTO.BookListResponseDTO searchBookFromAladin(String keyword, int page) {
         return aladinApiService.getBookInfoFromAladin(keyword, page);
     }
 

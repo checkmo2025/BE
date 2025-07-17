@@ -22,7 +22,7 @@ public class BookController {
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "1") int page
     ) {
-        BookResponseDTO.BookListResponseDTO result = bookQueryFacade.getBookInfoFromAladin(keyword, page);
+        BookResponseDTO.BookListResponseDTO result = bookQueryFacade.searchBookFromAladin(keyword, page);
         return ApiResponse.onSuccess(result);
     }
 }
