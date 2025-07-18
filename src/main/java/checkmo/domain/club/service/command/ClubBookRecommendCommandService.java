@@ -1,6 +1,6 @@
 package checkmo.domain.club.service.command;
 
-import checkmo.domain.club.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 
 public interface ClubBookRecommendCommandService {
 

@@ -1,6 +1,6 @@
 package checkmo.domain.member.service.query;
 
-import checkmo.domain.member.dto.MemberResponseDTO;
+import checkmo.domain.member.web.dto.MemberResponseDTO;
 
 /**
  * 회원 기본 정보 조회 서비스

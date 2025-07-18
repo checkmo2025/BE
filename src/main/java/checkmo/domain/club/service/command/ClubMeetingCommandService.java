@@ -1,7 +1,7 @@
 package checkmo.domain.club.service.command;
 
-import checkmo.domain.club.dto.bookshelf.BookShelfRequestDTO;
-import checkmo.domain.club.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 
 /**
  * 독서모임의 미팅 생성, 발제 작성, 팀 구성, 독서 후기 등등

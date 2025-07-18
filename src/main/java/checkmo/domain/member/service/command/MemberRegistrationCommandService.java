@@ -1,7 +1,7 @@
 package checkmo.domain.member.service.command;
 
-import checkmo.domain.member.dto.MemberRequestDTO;
-import checkmo.domain.member.dto.MemberResponseDTO;
+import checkmo.domain.member.web.dto.MemberRequestDTO;
+import checkmo.domain.member.web.dto.MemberResponseDTO;
 
 /**
  * 회원 가입 서비스

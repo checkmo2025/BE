@@ -1,6 +1,6 @@
 package checkmo.domain.club.service.query;
 
-import checkmo.domain.club.dto.club.ClubResponseDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 
 public interface ClubBookRecommendQueryService {
     /**

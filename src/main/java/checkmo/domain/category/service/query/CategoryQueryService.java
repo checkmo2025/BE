@@ -1,6 +1,6 @@
 package checkmo.domain.category.service.query;
 
-import checkmo.domain.category.dto.CategoryResponseDTO;
+import checkmo.domain.category.web.dto.CategoryResponseDTO;
 
 /**
  * 카테고리 조회 서비스

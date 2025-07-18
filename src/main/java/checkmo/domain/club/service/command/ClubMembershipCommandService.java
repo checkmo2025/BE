@@ -1,7 +1,7 @@
 package checkmo.domain.club.service.command;
 
-import checkmo.domain.club.dto.club.ClubRequestDTO;
-import checkmo.domain.club.dto.club.ClubResponseDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 
 /**
  * 독서모임의 가입 신청, 승인, 탈퇴, 권한 변경 등등

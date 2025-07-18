@@ -1,6 +1,6 @@
 package checkmo.domain.member.service.query;
 
-import checkmo.domain.member.dto.MemberResponseDTO;
+import checkmo.domain.member.web.dto.MemberResponseDTO;
 
 /**
  * 팔로우/팔로잉 조회 서비스

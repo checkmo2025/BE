@@ -1,6 +1,6 @@
 package checkmo.domain.club.service.query;
 
-import checkmo.domain.club.dto.meeting.MeetingResponseDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 /**
  * 독서 모임의 토론 조회 서비스

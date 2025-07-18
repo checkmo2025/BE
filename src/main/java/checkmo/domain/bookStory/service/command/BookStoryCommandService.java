@@ -1,6 +1,6 @@
 package checkmo.domain.bookStory.service.command;
 
-import checkmo.domain.bookStory.dto.BookStoryRequestDTO;
+import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
 
 /**
  * 책이야기 작성, 수정, 삭제

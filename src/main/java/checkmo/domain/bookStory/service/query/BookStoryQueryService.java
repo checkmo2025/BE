@@ -1,6 +1,6 @@
 package checkmo.domain.bookStory.service.query;
 
-import checkmo.domain.bookStory.dto.BookStoryResponseDTO;
+import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
 
 /**
  * 책 이야기 조회 서비스

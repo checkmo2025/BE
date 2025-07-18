@@ -1,6 +1,6 @@
 package checkmo.domain.notification.service.command;
 
-import checkmo.domain.notification.dto.NotificationRequestDTO;
+import checkmo.domain.notification.web.dto.NotificationRequestDTO;
 
 /**
  * 알림 생성, 수정, 삭제 서비스

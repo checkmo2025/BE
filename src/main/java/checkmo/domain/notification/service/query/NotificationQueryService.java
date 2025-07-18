@@ -1,8 +1,6 @@
 package checkmo.domain.notification.service.query;
 
-import checkmo.domain.notification.dto.NotificationResponseDTO;
-
-import java.util.List;
+import checkmo.domain.notification.web.dto.NotificationResponseDTO;
 
 /**
  * 알림 조회 서비스

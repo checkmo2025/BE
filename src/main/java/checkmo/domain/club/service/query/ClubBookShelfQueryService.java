@@ -1,6 +1,6 @@
 package checkmo.domain.club.service.query;
 
-import checkmo.domain.club.dto.bookshelf.BookShelfResponseDTO;
+import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 
 /**
  * 특정 독서 모임내부의 활동에 대한 조회 서비스

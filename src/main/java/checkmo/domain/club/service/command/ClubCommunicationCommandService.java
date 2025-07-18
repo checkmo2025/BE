@@ -1,6 +1,6 @@
 package checkmo.domain.club.service.command;
 
-import checkmo.domain.club.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 
 /**
  * 독서 모임의 커뮤니케이션 관련 기능을 처리

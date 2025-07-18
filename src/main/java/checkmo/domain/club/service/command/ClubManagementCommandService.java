@@ -1,6 +1,6 @@
 package checkmo.domain.club.service.command;
 
-import checkmo.domain.club.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 
 /**
  * 독서 모임 자체의 생성, 수정, 삭제 등등
