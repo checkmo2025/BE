@@ -15,9 +15,15 @@ public class TeamTopic extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "topic_id", insertable = false, updatable = false)
+    private Long topicId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
     private Topic topic;
+
+    @Column(name = "team_id", insertable = false, updatable = false)
+    private Long teamId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")

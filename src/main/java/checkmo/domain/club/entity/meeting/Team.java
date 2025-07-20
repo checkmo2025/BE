@@ -21,6 +21,9 @@ public class Team extends BaseEntity {
     @Column(nullable = false)
     private Integer TeamNumber; // 팀 번호
 
+    @Column(name = "meeting_id", insertable = false, updatable = false)
+    private Long meetingId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;

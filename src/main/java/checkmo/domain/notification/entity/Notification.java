@@ -30,9 +30,15 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private String redirectPath; // 알림 클릭 시 이동할 페이지의 경로
 
+    @Column(name = "receiver_id", insertable = false, updatable = false)
+    private String receiverId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     private Member receiver;
+
+    @Column(name = "sender_id", insertable = false, updatable = false)
+    private String senderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")

@@ -23,9 +23,15 @@ public class BookRecommend extends BaseEntity {
 
     private String tag; // 추천 태그
 
+    @Column(name = "club_member_id", insertable = false, updatable = false)
+    private Long clubMemberId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
     private ClubMember clubMember;
+
+    @Column(name = "book_id", insertable = false, updatable = false)
+    private String bookId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")

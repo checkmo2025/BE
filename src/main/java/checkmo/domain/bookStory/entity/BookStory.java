@@ -28,9 +28,15 @@ public class BookStory extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "member_id", insertable = false, updatable = false)
+    private String memberId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Column(name = "book_id", insertable = false, updatable = false)
+    private String bookId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")

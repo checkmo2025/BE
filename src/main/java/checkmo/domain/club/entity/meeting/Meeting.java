@@ -38,9 +38,15 @@ public class Meeting extends BaseEntity {
 
     private double sumRate; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
 
+    @Column(name = "club_id", insertable = false, updatable = false)
+    private Long clubId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
     private Club club;
+
+    @Column(name = "book_id", insertable = false, updatable = false)
+    private String bookId; // null 허용
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")

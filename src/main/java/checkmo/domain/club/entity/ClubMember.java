@@ -31,9 +31,15 @@ public class ClubMember extends BaseEntity {
 
     private String joinMessage;
 
+    @Column(name = "club_id", insertable = false, updatable = false)
+    private Long clubId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
     private Club club;
+
+    @Column(name = "member_id", insertable = false, updatable = false)
+    private String memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")

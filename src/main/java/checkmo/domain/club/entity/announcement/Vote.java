@@ -47,11 +47,15 @@ public class Vote {
 
     private LocalDateTime deadline;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL)
-    private List<MemberVote> memberVotes = new ArrayList<>();
+    @Column(name = "club_id", insertable = false, updatable = false)
+    private Long clubId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
     private Club club;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL)
+    private List<MemberVote> memberVotes = new ArrayList<>();
+
 }

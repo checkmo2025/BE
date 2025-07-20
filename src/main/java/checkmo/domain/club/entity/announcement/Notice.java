@@ -24,6 +24,9 @@ public class Notice extends BaseEntity {
 
     private String tag; //TODO: "공지", "모임" 2개 값만 가능
 
+    @Column(name = "meeting_id", insertable = false, updatable = false)
+    private Long meetingId;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;

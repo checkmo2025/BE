@@ -16,9 +16,15 @@ public class BookStoryLiked extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "member_id", insertable = false, updatable = false)
+    private String memberId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Column(name = "book_story_id", insertable = false, updatable = false)
+    private Long bookStoryId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_story_id")

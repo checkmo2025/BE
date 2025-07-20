@@ -21,9 +21,15 @@ public class MemberVote {
     private boolean item4;
     private boolean item5;
 
+    @Column(name = "member_id", insertable = false, updatable = false)
+    private String memberId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Column(name = "vote_id", insertable = false, updatable = false)
+    private Long voteId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")

@@ -20,9 +20,15 @@ public class Topic extends BaseEntity {
 
     private String description;
 
+    @Column(name = "meeting_id", insertable = false, updatable = false)
+    private Long meetingId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
+
+    @Column(name = "member_team_id", insertable = false, updatable = false)
+    private Long memberTeamId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_team_id")

@@ -21,13 +21,22 @@ public class Comment extends BaseEntity {
 
     private String content;
 
+    @Column(name = "member_id", insertable = false, updatable = false)
+    private String memberId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Column(name = "book_story_id", insertable = false, updatable = false)
+    private Long bookStoryId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_story_id")
     private BookStory bookStory;
+
+    @Column(name = "parent_comment_id", insertable = false, updatable = false)
+    private Long parentCommentId; // 부모 댓글 ID (대댓글의 경우)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")

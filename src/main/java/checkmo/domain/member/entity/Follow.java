@@ -15,9 +15,15 @@ public class Follow extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "follower_id", insertable = false, updatable = false)
+    private String followerId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id")
     private Member follower;
+
+    @Column(name = "following_id", insertable = false, updatable = false)
+    private String followingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id")
