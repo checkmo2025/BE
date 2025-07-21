@@ -56,7 +56,7 @@ public class ClubController {
 
     @Operation(
             summary = "모임 이름 중복 확인 API",
-            description = "입력한 모임 이름이 이미 존재하는지 확인합니다."
+            description = "입력한 모임 이름이 이미 존재하는지 확인합니다. (true : 이미 있음 / false : 사용 가능 )"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "중복 여부 반환"),
