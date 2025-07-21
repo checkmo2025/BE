@@ -108,4 +108,13 @@ public interface ClubQueryService {
      * @param noticeId 공지사항 ID
      */
     ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId);
+
+    /**
+     * 독서 클럽이 존재하는지 검증합니다.
+     *
+     * @param clubId 독서 클럽 ID
+     * @return Club 검증된 독서 클럽 객체
+     * @throws GeneralException 클럽이 존재하지 않는 경우
+     */
+    Club validateClub(Long clubId) throws GeneralException;
 }

@@ -1,5 +1,8 @@
 package checkmo.domain.club.service.query;
 
+import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.club.entity.ClubMember;
+
 /**
  * 독서클럽 회원에 대한 조회 서비스
  * <p>
@@ -12,17 +15,9 @@ public interface ClubMemberQueryService {
      *
      * @param clubId   독서동아리 id
      * @param memberId 회원 id
-     * @return true: 독서동아리 회원, false: 회원 아님
+     * @return ClubMember 객체
+     * @throws GeneralException 클럽 회원이 존재하지 않을 경우
      */
-    boolean isClubMember(Long clubId, String memberId);
-
-    /**
-     * 독서클럽의 특정 회원이 운영진(STAFF)인지 확인합니다.(권한 확인용)
-     *
-     * @param clubId
-     * @param memberId
-     * @return true: 운영진, false: 운영진 아님
-     */
-    boolean isClubStaff(Long clubId, String memberId);
+    ClubMember validateClubMember(Long clubId, String memberId) throws GeneralException;
 
 }
