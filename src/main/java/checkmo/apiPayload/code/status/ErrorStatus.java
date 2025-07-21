@@ -25,7 +25,13 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "회원을 찾을 수 없습니다."),
 
     // 카테고리
-    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY404", "해당 카테고리를 찾을 수 없습니다.");
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY404", "해당 카테고리를 찾을 수 없습니다."),
+
+    // 클럽
+    CLUB_NAME_DUPLICATED(HttpStatus.CONFLICT, "CLUB409", "이미 존재하는 클럽 이름입니다.")
+
+
+    ;
 
 
     private final HttpStatus httpStatus;

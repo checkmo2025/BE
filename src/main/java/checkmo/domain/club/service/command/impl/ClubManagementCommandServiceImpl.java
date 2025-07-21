@@ -1,5 +1,7 @@
 package checkmo.domain.club.service.command.impl;
 
+import checkmo.apiPayload.exception.GeneralException;
+import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.domain.category.facade.CategoryCommandFacade;
 import checkmo.domain.category.web.dto.CategoryRequestDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
@@ -31,20 +33,25 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
     @Override
     public Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
         // 1. Member 존재 확인
-        memberQueryFacade.getMemberBasicInfoForShare(memberId);
+       memberQueryFacade.getMemberBasicInfoForShare(memberId);
 
-        // 2. Club 생성 및 저장
+        // 2. 클럽 이름 중복 체크
+        if (clubRepository.existsByName(request.getName())) {
+            throw new GeneralException(ErrorStatus.CLUB_NAME_DUPLICATED);
+        }
+
+        // 3. Club 생성 및 저장
         Club club = ClubConverter.toEntity(request, memberId);
         Club savedClub = clubRepository.save(club);
 
-        // 3. 카테고리 연관관계 설정
+        // 4. 카테고리 연관관계 설정
         List<Long> categoryIds = request.getCategory();
         if (categoryIds != null && !categoryIds.isEmpty()) {
             CategoryRequestDTO.CategoryListRequestDTO dto = new CategoryRequestDTO.CategoryListRequestDTO(categoryIds);
             categoryCommandFacade.modifyClubCategories(savedClub.getId(), dto);
         }
 
-        // 4. 생성자를 운영진으로 등록
+        // 5. 생성자를 운영진으로 등록
         ClubMember clubMember = ClubConverter.toMemberEntity(savedClub, memberId, ClubMember.ClubMemberStatus.STAFF);
         clubMemberRepository.save(clubMember);
 
