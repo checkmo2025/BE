@@ -103,7 +103,7 @@ public interface ClubQueryFacade {
      * @param size     조회할 개수
      * @return 모든 클럽의 최신 소식이 통합된 미리보기 DTO
      */
-    ClubSharedDTO.ClubUpdatePreviewListDTO getHomeFeedForShare(String memberId, int size);
+    ClubSharedDTO.ClubUpdatePreviewListDTO getNoticeForHome(String memberId, int size);
 
     /**
      * ClubQueryService
