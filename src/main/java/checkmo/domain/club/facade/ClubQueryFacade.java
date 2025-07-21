@@ -200,7 +200,7 @@ public interface ClubQueryFacade {
      * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
      *
      * 이 메소드는 구현할 때 단순히
-     * return clubRepository.getReferenceById(clubId);만 하면 됨
+     * {@code return clubRepository.getReferenceById(clubId);}만 하면 됨
      *
      * @param clubId 참조할 클럽의 ID
      * @return Club 엔티티의 프록시 객체

@@ -113,7 +113,7 @@ public interface MemberQueryFacade {
      * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
      *
      * 이 메소드는 구현할 때 단순히
-     * return memberRepository.getReferenceById(memberId);만 하면 됨
+     * {@code return memberRepository.getReferenceById(memberId);}만 하면 됨
      *
      * @param memberId 참조할 회원의 ID
      * @return Member 엔티티의 프록시 객체

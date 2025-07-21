@@ -42,7 +42,7 @@ public interface CategoryQueryFacade {
      * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
      *
      * 이 메소드는 구현할 때 단순히
-     * return categoryRepository.getReferenceById(categoryId);만 하면 됨
+     * {@code return categoryRepository.getReferenceById(categoryId);}만 하면 됨
      *
      * @param categoryId 참조할 카테고리의 ID
      * @return Category 엔티티의 프록시 객체
