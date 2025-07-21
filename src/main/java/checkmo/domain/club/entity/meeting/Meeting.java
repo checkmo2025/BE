@@ -36,7 +36,8 @@ public class Meeting extends BaseEntity {
 
     private String tag;
 
-    private double sumRate; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
+    @Builder.Default
+    private double sumRate = 0; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
 
     @Column(name = "club_id", insertable = false, updatable = false)
     private Long clubId;
