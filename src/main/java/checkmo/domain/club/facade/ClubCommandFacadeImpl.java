@@ -1,0 +1,128 @@
+package checkmo.domain.club.facade;
+
+import checkmo.domain.club.service.command.ClubMeetingCommandService;
+import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ClubCommandFacadeImpl implements ClubCommandFacade {
+    private final ClubMeetingCommandService clubMeetingCommandService;
+
+    @Override
+    public ClubResponseDTO.ClubDetailDTO createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
+        return null;
+    }
+
+    @Override
+    public ClubResponseDTO.ClubDetailDTO updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request) {
+        return null;
+    }
+
+    @Override
+    public ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request) {
+        return null;
+    }
+
+    @Override
+    public void approveJoinRequest(Long clubId, String memberId, Long clubMemberId) {
+
+    }
+
+    @Override
+    public ClubResponseDTO.ClubNoticeDetailDTO createNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request) {
+        return null;
+    }
+
+    @Override
+    public void deleteNotice(Long clubId, String memberId, Long noticeId) {
+
+    }
+
+    @Override
+    public ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request) {
+        return null;
+    }
+
+    @Override
+    public void deleteVote(Long clubId, String memberId, Long voteId) {
+
+    }
+
+    @Override
+    public ClubResponseDTO.ClubNoticeDetailDTO participateInPoll(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request) {
+        return null;
+    }
+
+    @Override
+    public ClubResponseDTO.BookRecommendDetailDTO recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommendDTO request) {
+        return null;
+    }
+
+    @Override
+    public ClubResponseDTO.BookRecommendDetailDTO updateBookRecommend(Long clubId, String memberId, Long bookRecommendId, ClubRequestDTO.UpdateBookRecommendDTO request) {
+        return null;
+    }
+
+    @Override
+    public void deleteRecommendedBook(Long clubId, String memberId, Long bookRecommendId) {
+
+    }
+
+    @Override
+    public Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request) {
+        return clubMeetingCommandService.createMeeting(clubId, memberId, request);
+    }
+
+    @Override
+    public MeetingResponseDTO.InProgressMeetingDetailDTO updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request) {
+        return null;
+    }
+
+    @Override
+    public MeetingResponseDTO.TopicDTO createTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicDTO request) {
+        return null;
+    }
+
+    @Override
+    public MeetingResponseDTO.TopicDTO updateTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request) {
+        return null;
+    }
+
+    @Override
+    public void deleteTopic(String memberId, Long meetingId, Long topicId) {
+
+    }
+
+    @Override
+    public void toggleTopic(String memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request) {
+
+    }
+
+    @Override
+    public void manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request) {
+
+    }
+
+    @Override
+    public Long createBookReview(String memberId, Long meetingId, BookShelfRequestDTO.BookReviewDTO request) {
+        return 0L;
+    }
+
+    @Override
+    public Long updateBookReview(String memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request) {
+        return 0L;
+    }
+
+    @Override
+    public void deleteBookReview(String memberId, Long meetingId, Long reviewId) {
+
+    }
+}
