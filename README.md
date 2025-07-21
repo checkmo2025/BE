@@ -5,95 +5,29 @@
 |       팀장 🧑🏻‍💻       |       팀원 👩🏻‍💻       |       팀원 👩🏻‍💻       |      팀원 👩🏻‍💻      |
 
 ---
-# 🚀 백엔드 개발 컨벤션
+## 🏛️ Architecture
+
+우리 프로젝트는 MSA의 설계 사상을 모방한 모놀리식 아키텍처를 지향합니다. 각 도메인은 **Facade 패턴**을 통해 명확히 분리되며, 이는 코드의 유지보수성과 확장성을 극대화하는 핵심적인 설계 원칙입니다.
+
+프로젝트의 상세한 설계 철학과 규칙은 아래 문서들을 참고해주세요.
+
+* **[➡️ Facade 패턴 설계 원칙](./docs/01_facade_pattern.md)**
+* **[➡️ 아키텍처 관련 FAQ](./docs/02_facade_faq.md)**
 
 ---
 
-## 🌳 깃 브랜치 전략
+## 🤝 Development Conventions
 
-* `main` 브랜치:
-    * **디폴트 브랜치**
-    * 👑 팀장만 직접 관리하고 머지
-* `develop` 브랜치:
-    * 🛠️ **개발이 완료된 기능**들이 통합되는 브랜치
-    * 새로운 기능 개발 시 이 브랜치를 source로 만들기!
-* **새로운 브랜치 명명 규칙**:
-    * `feat/[이슈 번호]/[기능명]` (예: `feat/123/user-login`)
-        * 💡 **새로운 기능**을 개발할 때 사용
-        * Lable 중 `✨ feature` 사용
-    * `refactor/[이슈 번호]/[기능명]` (예: `refactor/456/user-service`)
-        * ♻️ **코드 리팩토링**을 진행할 때 사용
-        * Lable 중 `♻️ refactor` 사용
-    * `bug/[이슈 번호]/[기능명]` (예: `bug/789/null-pointer-exception`)
-        * 🐞 **버그 수정**을 진행할 때 사용
-        * Lable 중 `🐛 bug` 사용
+프로젝트의 원활한 협업을 위해 Git 브랜치 전략, 커밋 메시지, 코드 스타일 등 통일된 개발 컨벤션을 따르고 있습니다. 자세한 내용은 아래 문서를 참고해주세요.
 
-## 📝 커밋 컨벤션
-
-커밋 메시지 양식, gitmoji 사용해도 좋아용
-
-* ✨`feat`: **새로운 기능 추가**
-    * (예: `feat: 사용자 로그인 기능 구현`)
-* ♻️`refactor`: **코드 리팩토링**
-    * (예: `refactor: User 엔티티 필드명 개선`)
-* 🐛`bug`: **버그 수정**
-    * (예: `bug: 회원 가입 시 비밀번호 유효성 검사 오류 수정`)
-* 📝`docs`: **문서 수정**
-    * (예: `docs: README.md 업데이트`)
-* ✅`test`: **테스트 코드 추가/수정**
-    * (예: `test: UserService 단위 테스트 추가`)
-* 📦`build`: **빌드 시스템 또는 외부 의존성 관련 변경**
-    * (예: `build: Spring Boot 버전 업데이트`)
-* 🚀`ci`: **CI 설정 파일 변경**
-    * (예: `ci: GitHub Actions 설정 추가`)
-* 🔨`chore`: **그 외 자잘한 변경 사항**
-    * (예: `chore: 불필요한 콘솔 로그 제거`)
-* 🎨`style`: **코드 포맷팅, 세미콜론 누락 등 코드 동작에 영향을 주지 않는 변경**
-    * (예: `style: 코드 컨벤션에 맞게 포맷팅 적용`)
-
-## 🤝 PR (Pull Request) 전략
-
-* `main` 브랜치 PR:
-    * 👑 **팀장만 승인 및 머지** 가능
-* **그 외 브랜치 PR**:
-    * 👥 `main` 브랜치 외 다른 브랜치로 머지할 때는 **최소 1명 이상의 추가 승인** 후 머지 가능
-
-## 🧑‍💻 코드 컨벤션 (Java)
-
-* **클래스명**: `PascalCase` : 첫글자와 이어지는 단어의 첫글자를 대문자로 표기하는 방법
-    * 예: `UserService`, `ProductRepository`
-* **변수명**: `camelCase` : 첫단어는 소문자로 표기하지만, 이어지는 단어의 첫글자는 대문자로 표기하는 방법
-    * 예: `userName`, `orderId`, `totalAmount`
-* **DB 컬럼명**: `snake_case` : 모든 단어를 소문자로 표기하고, 단어를 언더바(_) 로 연결하는 방법
-    * 예: `user_name`, `product_price`, `created_at`
-* **상수**: `UPPER_CASE` : 모든 단어를 대문자로 표기하고, 단어를 언더바(_) 로 연결하는 방법
-    * 예: `MAX_RETRIES`, `DEFAULT_PAGE_SIZE`
+* **[➡️ 팀 개발 컨벤션 바로가기](./docs/CONVENTIONS.md)**
 
 ---
-# ⚙️ 개발 환경 설정
 
-## 1. 환경 변수 (.env)
+## ⚙️ Development Environment
 
-프로젝트에 필요한 주요 정보(DB 접속 정보, JWT 시크릿 키 등)는 **환경 변수**로 관리
+프로젝트 실행에 필요한 환경 변수(.env) 설정 및 Spring 설정 파일(`application.yml`) 관리 규칙은 아래 문서를 참고해주세요.
 
-1.  프로젝트 루트 디렉토리에 `.env` 파일을 생성하고 해당 파일에 환경변수들을 추가하기. (`.gitignore`에 등록되어 있어 깃허브에는 따로 올라가지 않음.)
-2.  백엔드 `[Notion 페이지]` -> `[필요한 자료들]` -> `.env` 페이지에 추가한 환경 변수들 업데이트하기.
+* **[➡️ 개발 환경 설정 가이드](./docs/ENVIRONMENT_SETUP.md)**
 
-## 2. Spring 설정 파일 (application.yml)
-
-새로운 설정 정보(예: `aws`, `oauth`)를 추가할 때는 `application.yml`에 직접 작성하지 않기
-
-1.  `src/main/resources` 경로에 `application-OOO.yml` 형식으로 새로운 설정 파일을 생성. (예: `application-aws.yml`)
-2.  생성한 파일을 `application.yml`의 `spring.profiles.include` 부분에 추가하여 적용.
-
-**예시:**
-
-```yaml
-# application.yml
-
-spring:
-  profiles:
-    include:
-      - db
-      - redis
-      - aws   # 새로 추가된 설정
+---
