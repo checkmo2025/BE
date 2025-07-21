@@ -2,7 +2,10 @@ package checkmo.domain.club.web.dto.club;
 
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -91,6 +94,16 @@ public class ClubResponseDTO {
         private int pageSize; // 현재 페이지 크기
     }
 
+    @JsonTypeInfo(
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "tag",
+            visible = true)
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = ClubSharedDTO.MeetingNoticePreviewDTO.class, name = "모임"),
+            @JsonSubTypes.Type(value = ClubSharedDTO.VotePreviewDTO.class, name = "투표"),
+            @JsonSubTypes.Type(value = ClubSharedDTO.PureNoticePreviewDTO.class, name = "공지")
+    })
     public sealed interface NoticeItem
             permits PureNoticeDTO, MeetingNoticeDTO, VoteDTO {
 
