@@ -49,4 +49,14 @@ public class BookStory extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL)
     private List<BookStoryLiked> bookStoryLikedList = new ArrayList<>();
+
+    public void addLike() {
+        this.likes++;
+    }
+
+    public void removeLike() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
 }
