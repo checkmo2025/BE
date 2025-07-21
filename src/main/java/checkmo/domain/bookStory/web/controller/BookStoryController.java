@@ -27,7 +27,7 @@ public class BookStoryController {
     public ApiResponse<Long> createBookStory(
             @RequestBody BookStoryRequestDTO.BookStoryCreateRequestDTO request
     ) {
-        // TODO: 구현 예정
+        // TODO: 구현 예정, 커밋 테스트
         return null;
     }
 
