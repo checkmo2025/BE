@@ -13,6 +13,7 @@
 
 * **[🏛️ Facade 패턴 설계 원칙](./docs/01_facade_pattern.md)**
 * **[🏛️ 아키텍처 관련 FAQ](./docs/02_facade_faq.md)**
+* **[🏛️ 객체 생성 시 Entity 관계 설계](./docs/03_entity_relations.md)**
 
 ---
 

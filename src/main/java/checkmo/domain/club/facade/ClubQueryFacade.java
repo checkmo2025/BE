@@ -1,5 +1,6 @@
 package checkmo.domain.club.facade;
 
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
@@ -192,4 +193,17 @@ public interface ClubQueryFacade {
      * @return 해당 팀의 정보 DTO
      */
     MeetingResponseDTO.TeamDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber);
+
+    /**
+     * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)
+     * ‼️ 이 메소드는 실제 DB 조회를 발생시키지 않는 메소드!!!
+     * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
+     *
+     * 이 메소드는 구현할 때 단순히
+     * {@code return clubRepository.getReferenceById(clubId);}만 하면 됨
+     *
+     * @param clubId 참조할 클럽의 ID
+     * @return Club 엔티티의 프록시 객체
+     */
+    Club findClubReferenceById(Long clubId);
 }

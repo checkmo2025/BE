@@ -1,6 +1,8 @@
 package checkmo.domain.book.facade;
 
 import checkmo.domain.book.converter.BookConverter;
+import checkmo.domain.book.entity.Book;
+import checkmo.domain.book.repository.BookRepository;
 import checkmo.domain.book.service.query.AladinApiService;
 import checkmo.domain.book.service.query.BookQueryService;
 import checkmo.domain.book.web.dto.BookResponseDTO;
@@ -16,6 +18,7 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
 
     private final AladinApiService aladinApiService;
     private final BookQueryService bookQueryService;
+    private final BookRepository bookRepository;
 
     @Override
     public BookResponseDTO.BookInfoDetailResponse getBookDetailFromAladin(String bookId) {
@@ -39,5 +42,10 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
         var book = bookQueryService.findBook(bookId);
 
         return BookConverter.fromBookDTOToDetailInfoDTO(book);
+    }
+
+    @Override
+    public Book findBookReferenceById(String bookId) {
+        return bookRepository.getReferenceById(bookId);
     }
 }
