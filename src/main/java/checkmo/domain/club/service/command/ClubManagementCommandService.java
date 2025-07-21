@@ -18,4 +18,11 @@ public interface ClubManagementCommandService {
      */
     Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request);
 
+    /**
+     * 입력된 모임 이름의 중복 여부를 확인합니다.
+     *
+     * @param clubName 확인할 모임 이름
+     * @return true: 중복됨 / false: 사용 가능
+     */
+    boolean isClubNameDuplicate(String clubName);
 }

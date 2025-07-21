@@ -53,4 +53,22 @@ public class ClubController {
         return ApiResponse.onSuccess(clubInfoDTO);
     }
 
+
+    @Operation(
+            summary = "모임 이름 중복 확인 API",
+            description = "입력한 모임 이름이 이미 존재하는지 확인합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "중복 여부 반환"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+    })
+    @GetMapping("/checkName")
+    public ApiResponse<Boolean> checkClubNameDuplicate(
+            @Parameter(description = "중복 여부 확인할 모임 이름", required = true, example = "독서모임A")
+            @RequestParam String clubName) {
+
+        boolean isDuplicate = clubManagementCommandService.isClubNameDuplicate(clubName);
+
+        return ApiResponse.onSuccess(isDuplicate);
+    }
 }
