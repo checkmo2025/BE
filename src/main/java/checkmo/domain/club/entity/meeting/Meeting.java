@@ -1,7 +1,7 @@
 package checkmo.domain.club.entity.meeting;
 
 import checkmo.domain.book.entity.Book;
-import checkmo.domain.club.entity.*;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -43,6 +43,7 @@ public class Meeting extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
+    @Setter
     private Club club;
 
     @Column(name = "book_id", insertable = false, updatable = false)
@@ -50,6 +51,7 @@ public class Meeting extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
+    @Setter
     private Book book; // null 허용
 
     @Builder.Default
@@ -82,4 +84,10 @@ public class Meeting extends BaseEntity {
             this.sumRate /= this.bookReviews.size();
         }
     }
+
+    public void addNotice(Notice notice) {
+        this.notice = notice;
+        notice.setMeeting(this); // 주인 쪽에도 세팅
+    }
+
 }

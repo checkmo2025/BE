@@ -29,5 +29,7 @@ public class Notice extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
+    @Setter
     private Meeting meeting;
+    
 }

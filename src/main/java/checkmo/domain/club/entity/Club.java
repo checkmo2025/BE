@@ -55,4 +55,9 @@ public class Club extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
+
+    public void addMeeting(Meeting meeting) {
+        this.meetings.add(meeting);
+        meeting.setClub(this);
+    }
 }
