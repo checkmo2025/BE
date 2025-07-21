@@ -1,5 +1,6 @@
 package checkmo.domain.member.facade;
 
+import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.MemberSharedDTO;
 
@@ -105,4 +106,17 @@ public interface MemberQueryFacade {
      * @return MemberSharedDTO.WithFollowStatus
      */
     MemberSharedDTO.WithFollowStatusDTO getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId);
+
+    /**
+     * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)
+     * ‼️ 이 메소드는 실제 DB 조회를 발생시키지 않는 메소드!!!
+     * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
+     *
+     * 이 메소드는 구현할 때 단순히
+     * return memberRepository.getReferenceById(memberId);만 하면 됨
+     *
+     * @param memberId 참조할 회원의 ID
+     * @return Member 엔티티의 프록시 객체
+     */
+    Member findMemberReferenceById(String memberId);
 }

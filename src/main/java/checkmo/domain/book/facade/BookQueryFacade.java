@@ -1,5 +1,6 @@
 package checkmo.domain.book.facade;
 
+import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.web.dto.BookResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 
@@ -41,4 +42,14 @@ public interface BookQueryFacade {
      * @return 공유용 상세 책 정보 DTO
      */
     BookSharedDTO.DetailInfoDTO getBookDetailInfoForShare(String bookId);
+
+    /**
+     * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)
+     * ‼️ 이 메소드는 실제 DB 조회를 발생시키지 않는 메소드!!!
+     * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
+     *
+     * @param bookId 참조할 책의 ID (ISBN)
+     * @return Book 엔티티의 프록시 객체
+     */
+    Book findBookReferenceById(String bookId);
 }
