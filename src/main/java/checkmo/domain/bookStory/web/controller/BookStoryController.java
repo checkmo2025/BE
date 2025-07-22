@@ -112,11 +112,12 @@ public class BookStoryController {
     })
     @PatchMapping("/{bookStoryId}")
     public ApiResponse<Long> updateBookStory(
+            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
             @PathVariable Long bookStoryId,
             @RequestBody BookStoryRequestDTO.BookStoryUpdateRequestDTO request
     ) {
-        // TODO: 구현 예정
-        return null;
+        Long updateBookStoryId = bookStoryCommandFacade.updateBookStory(memberId, bookStoryId, request);
+        return ApiResponse.onSuccess(updateBookStoryId);
     }
 
     @Operation(summary = "책 이야기 삭제 API", description = "작성한 책 이야기를 삭제합니다.")
@@ -128,10 +129,11 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @DeleteMapping("/{bookStoryId}")
-    public ApiResponse<Long> deleteBookStory(
+    public ApiResponse<String> deleteBookStory(
+            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
             @PathVariable Long bookStoryId
     ) {
-        // TODO: 구현 예정
-        return null;
+        bookStoryCommandFacade.deleteBookStory(memberId, bookStoryId);
+        return ApiResponse.onSuccess("책 이야기가 성공적으로 삭제되었습니다.");
     }
 }
