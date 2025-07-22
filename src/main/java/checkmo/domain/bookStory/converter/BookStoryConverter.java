@@ -87,9 +87,9 @@ public class BookStoryConverter {
                 .bookStoryTitle(bookStory.getTitle())
                 .description(bookStory.getDescription())
                 .likes(bookStory.getLikes())
-                .isLiked(isLiked)
+                .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
-                .isAuthor(bookStory.getMemberId().equals(currentMemberId))
+                .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
                 .build();
     }
 }
