@@ -23,14 +23,14 @@ public class BookStoryCommandFacadeImpl implements BookStoryCommandFacade {
 
     @Override
     @Transactional
-    public Long updateBookStory(String memberId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request) {
-        return 0L;
+    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request) {
+        return bookStoryCommandService.updateBookStory(memberId, bookStoryId, request);
     }
 
     @Override
     @Transactional
-    public Long deleteBookStory(String memberId, Long bookStoryId) {
-        return 0L;
+    public void deleteBookStory(String memberId, Long bookStoryId) {
+        bookStoryCommandService.deleteBookStory(memberId, bookStoryId);
     }
 
     @Override
