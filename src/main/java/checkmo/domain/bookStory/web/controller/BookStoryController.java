@@ -43,6 +43,7 @@ public class BookStoryController {
                     name = "scope",
                     description = "조회 범위:\n" +
                             "• ALL: 전체 책이야기\n" +
+                            "• FOLLOWING: 팔로우한 회원의 책이야기\n" +
                             "• MY: 내 책이야기\n" +
                             "• CLUB: 특정 클럽 책이야기 (clubId 필수)",
                     required = true,
