@@ -25,8 +25,8 @@ public class BookStoryController {
     @Operation(summary = "책 이야기 업로드 API", description = "새로운 책 이야기를 작성합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
     @PostMapping
     public ApiResponse<Long> createBookStory(
@@ -54,7 +54,8 @@ public class BookStoryController {
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
     @GetMapping
     public ApiResponse<BookStoryResponseDTO.BookStoryListResponse> getBookStories(
@@ -75,6 +76,8 @@ public class BookStoryController {
     @Parameter(name = "bookStoryId", description = "조회할 책 이야기 ID", required = true, example = "1")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
@@ -90,7 +93,8 @@ public class BookStoryController {
     @Parameter(name = "bookStoryId", description = "좋아요를 누를 책 이야기 ID", required = true, example = "1")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @PostMapping("/{bookStoryId}/like")
@@ -105,10 +109,10 @@ public class BookStoryController {
     @Parameter(name = "bookStoryId", description = "수정할 책 이야기 ID", required = true, example = "1")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "수정 권한 없음"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "책 이야기의 수정 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없습니다.")
     })
     @PatchMapping("/{bookStoryId}")
     public ApiResponse<Long> updateBookStory(
@@ -124,9 +128,10 @@ public class BookStoryController {
     @Parameter(name = "bookStoryId", description = "삭제할 책 이야기 ID", required = true, example = "1")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "삭제 권한 없음"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "책 이야기의 삭제 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없습니다.")
     })
     @DeleteMapping("/{bookStoryId}")
     public ApiResponse<String> deleteBookStory(
