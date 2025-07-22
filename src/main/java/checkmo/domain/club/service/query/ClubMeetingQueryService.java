@@ -1,5 +1,7 @@
 package checkmo.domain.club.service.query;
 
+import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 /**
@@ -51,4 +53,13 @@ public interface ClubMeetingQueryService {
      * @return 조회한 팀 정보 DTO
      */
     MeetingResponseDTO.TeamDTO findTeamsByMeeting(Long meetingId, Integer teamNumber);
+
+    /**
+     * 독서모임이 존재하는지 확인합니다.
+     *
+     * @param meetingId 미팅 ID
+     * @return Meeting 존재하는 미팅 객체
+     * @throws GeneralException 미팅이 존재하지 않을 경우
+     */
+    Meeting validateMeeting(Long meetingId) throws GeneralException;
 }
