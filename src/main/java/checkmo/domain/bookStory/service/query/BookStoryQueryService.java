@@ -1,5 +1,6 @@
 package checkmo.domain.bookStory.service.query;
 
+import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
 
 /**
@@ -31,4 +32,20 @@ public interface BookStoryQueryService {
      * @return 조회된 책 이야기 목록 DTO
      */
     BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, int size);
+
+    /**
+     * scope에 따라 책 이야기 목록을 조회합니다.
+     *
+     * @param memberId 조회하는 회원의 ID
+     * @param scope    조회 범위 (ALL, MY, CLUB)
+     * @param clubId   클럽 ID (scope가 CLUB일 때 필수)
+     * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
+     * @return scope에 따른 책 이야기 목록 DTO
+     */
+    BookStoryResponseDTO.BookStoryListResponse getBookStoriesByScope(
+            String memberId,
+            BookStoryRequestDTO.BookStoryScope scope,
+            Long clubId,
+            Long cursorId
+    );
 }
