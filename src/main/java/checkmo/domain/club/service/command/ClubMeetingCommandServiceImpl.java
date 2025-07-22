@@ -11,6 +11,7 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.repository.meeting.MeetingRepository;
+import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
@@ -29,7 +30,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final BookQueryFacade bookQueryFacade;
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
-    private final ClubCommunicationCommandService clubCommunicationCommandService;
+    private final ClubMeetingQueryService clubMeetingQueryService;
     private final MeetingRepository meetingRepository;
 
     @Override
@@ -74,7 +75,27 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     @Override
     public Long updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request) {
-        return 0L;
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        meeting.updateMeeting(
+                request.getTitle(),
+                request.getMeetingTime(),
+                request.getLocation(),
+                request.getContent(),
+                request.getGeneration(),
+                request.getTag()
+        );
+
+        Notice newNotice = ClubConverter.fromMeetingToNotice(meeting);
+        meeting.replaceNotice(newNotice);
+
+        meetingRepository.save(meeting);
+
+        return meeting.getId();
     }
 
     @Override

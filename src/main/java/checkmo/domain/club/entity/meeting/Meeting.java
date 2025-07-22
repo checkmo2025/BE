@@ -86,6 +86,16 @@ public class Meeting extends BaseEntity {
         }
     }
 
+    public void updateMeeting(String title, LocalDateTime meetingTime,
+                              String location, String content, int generation, String tag) {
+        this.title = title;
+        this.meetingTime = meetingTime;
+        this.location = location;
+        this.content = content;
+        this.generation = generation;
+        this.tag = tag;
+    }
+
     public void addNotice(Notice notice) {
         this.notice = notice;
         notice.setMeeting(this); // 주인 쪽에도 세팅
