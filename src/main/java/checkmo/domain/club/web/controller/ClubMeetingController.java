@@ -40,6 +40,26 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(meetingId);
     }
 
+    @Operation(summary = "정기 독서모임 수정 API", description = "정기 독서모임을 수정합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "수정할 정기 독서 모임 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @PatchMapping("/api/meetings/{meetingId}")
+    public ApiResponse<Long> updateMeeting(
+            @PathVariable Long meetingId,
+            @RequestBody @Valid MeetingRequestDTO.MeetingUpdateRequestDTO request,
+            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+    ) {
+        Long updateMeetingId = clubCommandFacade.updateMeeting(meetingId, memberId, request);
+        return ApiResponse.onSuccess(updateMeetingId);
+    }
+
     // GET /api/clubs/{clubId}/meetings - Meeting 전체 보기
     // GET /api/meetings/{meetingId} - Meeting 상세 보기
 
