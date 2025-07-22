@@ -59,7 +59,7 @@ public class Meeting extends BaseEntity {
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     private List<Team> teams = new ArrayList<>();
 
-    @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private Notice notice;
 
     @Builder.Default
@@ -99,6 +99,18 @@ public class Meeting extends BaseEntity {
     public void addNotice(Notice notice) {
         this.notice = notice;
         notice.setMeeting(this); // 주인 쪽에도 세팅
+    }
+
+    public void replaceNotice(Notice newNotice) {
+        // 기존 Notice 연결 끊기 (orphanRemoval = true면 자동 삭제됨)
+        if (this.notice != null) {
+            this.notice.setMeeting(null);
+        }
+
+        this.notice = newNotice;
+        if (newNotice != null) {
+            newNotice.setMeeting(this);
+        }
     }
 
 }
