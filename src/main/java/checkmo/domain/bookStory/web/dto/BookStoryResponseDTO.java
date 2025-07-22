@@ -1,6 +1,7 @@
 package checkmo.domain.bookStory.web.dto;
 
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -18,10 +19,21 @@ public class BookStoryResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookStoryListResponse {
+        private ScopeInfo scopeInfo;    // 현재 선택된 범위 정보
+        private ClubSharedDTO.MyClubListDTO memberClubList; // 사용자가 속한 클럽 목록
         private List<BookStoryResponse> bookStoryResponses;
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
         private int pageSize;           // 현재 페이지 크기
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ScopeInfo {
+        private BookStoryRequestDTO.BookStoryScope scope; // 현재 범위 (ALL, MY, CLUB)
+        private ClubSharedDTO.MyClubInfoDTO selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
     }
 
     @Getter
