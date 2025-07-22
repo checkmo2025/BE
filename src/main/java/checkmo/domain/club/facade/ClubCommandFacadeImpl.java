@@ -82,8 +82,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public MeetingResponseDTO.InProgressMeetingDetailDTO updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request) {
-        return null;
+    public Long updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request) {
+        return clubMeetingCommandService.updateMeeting(meetingId, memberId, request);
     }
 
     @Override
