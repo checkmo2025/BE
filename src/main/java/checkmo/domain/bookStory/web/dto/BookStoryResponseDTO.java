@@ -2,6 +2,7 @@ package checkmo.domain.bookStory.web.dto;
 
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,13 +29,15 @@ public class BookStoryResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookStoryResponse {
-        private String bookStoryId;
+        private Long bookStoryId;
         private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
         private MemberSharedDTO.WithFollowStatusDTO authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
         private String description;
         private int likes;
         private boolean isLiked;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
         private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
