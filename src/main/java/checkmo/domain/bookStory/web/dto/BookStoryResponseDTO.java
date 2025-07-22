@@ -47,10 +47,12 @@ public class BookStoryResponseDTO {
         private String bookStoryTitle;
         private String description;
         private int likes;
-        private boolean isLiked;
+
+        private boolean likedByMe; // 내가 좋아요를 눌렀는지 여부 (true: 눌렀음, false: 안누름)
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
-        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+
+        private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 }
