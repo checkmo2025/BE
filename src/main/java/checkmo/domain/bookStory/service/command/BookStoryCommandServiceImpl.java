@@ -42,13 +42,27 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
     @Override
     @Transactional
-    public Long updateBookStory(String memberId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request) {
-        return 0L;
+    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request) {
+        BookStory bookStory = bookStoryRepository.findById(bookStoryId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 책이야기가 존재하지 않습니다."));
+
+        if (!bookStory.getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("해당 책이야기를 수정할 권한이 없습니다.");
+        }
+
+        return bookStory.updateDescription(request.getDescription());
     }
 
     @Override
     @Transactional
-    public Long deleteBookStory(String memberId, Long bookStoryId) {
-        return 0L;
+    public void deleteBookStory(String memberId, Long bookStoryId) {
+        BookStory bookStory = bookStoryRepository.findById(bookStoryId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 책이야기가 존재하지 않습니다."));
+
+        if (!bookStory.getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("해당 책이야기를 삭제할 권한이 없습니다.");
+        }
+
+        bookStoryRepository.delete(bookStory);
     }
 }
