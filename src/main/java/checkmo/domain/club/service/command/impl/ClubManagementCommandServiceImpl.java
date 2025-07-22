@@ -51,9 +51,4 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         return savedClub.getId();
     }
 
-    @Override
-    public boolean isClubNameDuplicate(String clubName) {
-        return clubRepository.existsByName(clubName);
-    }
-
 }

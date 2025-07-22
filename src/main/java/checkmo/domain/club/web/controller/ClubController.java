@@ -1,7 +1,8 @@
 package checkmo.domain.club.web.controller;
 
 import checkmo.apiPayload.ApiResponse;
-import checkmo.domain.club.service.command.ClubManagementCommandService;
+import checkmo.domain.club.facade.ClubCommandFacade;
+import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "독서 모임", description = "독서 모임 생성, 검색, 가입, 기본 정보 관리 API")
 public class ClubController {
 
-    private final ClubManagementCommandService clubManagementCommandService;
+    private final ClubCommandFacade clubCommandFacade;
+    private final ClubQueryFacade clubQueryFacade;
 
     @Operation(
             summary = "독서 모임 생성 API",
@@ -30,7 +32,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "정보를 찾을 수 없음")
     })
     @PostMapping
-    public ApiResponse<ClubResponseDTO.ClubInfoDTO> createClub(
+    public ApiResponse<ClubResponseDTO.ClubDetailDTO> createClub(
             @Parameter(
                     name = "MemberId",
                     description = "회원 ID (시큐리티 구현 후 삭제 예정)",
@@ -42,15 +44,7 @@ public class ClubController {
             @Valid
             @RequestBody ClubRequestDTO.ClubDetailDTO request
     ) {
-        Long clubId = clubManagementCommandService.createClub(memberId, request);
-
-        ClubResponseDTO.ClubInfoDTO clubInfoDTO = ClubResponseDTO.ClubInfoDTO.builder()
-                .clubId(clubId)
-                .clubName(null)
-                .isOpen(null)
-                .build();
-
-        return ApiResponse.onSuccess(clubInfoDTO);
+        return ApiResponse.onSuccess(clubCommandFacade.createClub(memberId, request));
     }
 
 
@@ -67,8 +61,6 @@ public class ClubController {
             @Parameter(description = "중복 여부 확인할 모임 이름", required = true, example = "독서모임A")
             @RequestParam String clubName) {
 
-        boolean isDuplicate = clubManagementCommandService.isClubNameDuplicate(clubName);
-
-        return ApiResponse.onSuccess(isDuplicate);
+        return ApiResponse.onSuccess(clubQueryFacade.isDuplicateClubName(clubName));
     }
 }

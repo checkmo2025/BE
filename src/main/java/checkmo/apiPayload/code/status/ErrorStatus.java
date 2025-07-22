@@ -28,7 +28,10 @@ public enum ErrorStatus implements BaseErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY404", "해당 카테고리를 찾을 수 없습니다."),
 
     // 클럽
-    CLUB_NAME_DUPLICATED(HttpStatus.CONFLICT, "CLUB409", "이미 존재하는 클럽 이름입니다.")
+    CLUB_NAME_DUPLICATED(HttpStatus.CONFLICT, "CLUB409", "이미 존재하는 클럽 이름입니다."),
+    CLUB_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB404", "클럽을 찾을 수 없습니다."),
+    CLUB_MEMBER_FORBIDDEN(HttpStatus.FORBIDDEN, "CLUB_MEMBER_FORBIDDEN", "해당 클럽 정보에 대한 접근 권한이 없습니다.")
+
 
 
     ;

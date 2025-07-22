@@ -3,6 +3,7 @@ package checkmo.domain.club.converter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -38,6 +39,31 @@ public class ClubConverter {
                 .club(club)
                 .memberId(memberId)
                 .clubMemberStatus(status)
+                .build();
+    }
+
+
+    // =====================================================
+    // Entity → DTO 변환
+    // =====================================================
+
+    /**
+     * Club 엔티티 → ClubDetailDTO 변환
+     */
+    public static ClubResponseDTO.ClubDetailDTO toClubDetailDTO(Club club) {
+        return ClubResponseDTO.ClubDetailDTO.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .description(club.getDescription())
+                .profileImgUrl(club.getProfileImgUrl())
+                .isOpen(club.isOpen())
+                .region(club.getRegion())
+                .participants(club.getParticipants())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
+                .category(club.getClubCategories().stream()
+                        .map(cc -> cc.getCategory().getName()) // category는 이름 리스트로
+                        .toList())
                 .build();
     }
 

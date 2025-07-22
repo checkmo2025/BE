@@ -1,7 +1,8 @@
-package checkmo.domain.club.service.query;
+package checkmo.domain.club.service.query.impl;
 
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
+import checkmo.domain.club.service.query.ClubMemberQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
