@@ -19,7 +19,11 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
-    BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK404", "책을 찾을 수 없습니다.");
+    BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK404", "책을 찾을 수 없습니다."),
+
+    EMAIL_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "EMAIL_401", "인증번호가 만료되었습니다."),
+    EMAIL_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, "EMAIL_402", "잘못된 인증번호입니다."),
+    EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL_403", "이미 인증된 이메일입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

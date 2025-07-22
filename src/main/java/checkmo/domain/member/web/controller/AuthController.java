@@ -30,9 +30,13 @@ public class AuthController {
         return ApiResponse.onSuccess("인증번호가 이메일로 발송되었습니다.");
     }
 
-    // 이메일 인증 관련
-    // POST /api/auth/email-verification - 이메일 인증 요청
-    // POST /api/auth/email-verification/confirm - 이메일 인증 확인
+    // 이메일 인증 확인
+    @Operation(summary = "이메일 인증번호 확인", description = "이메일 인증번호를 확인합니다.")
+    @PostMapping("/email-verification/confirm")
+    public ApiResponse<Boolean> verifyEmailCode(@Valid @RequestBody MemberRequestDTO.EmailVerificationRequestDTO request) {
+        boolean isVerified = memberCommandFacade.verifyEmailCode(request);
+        return ApiResponse.onSuccess(isVerified);
+    }
 
     // 회원가입 관련
     // POST /api/auth/signup - 회원가입

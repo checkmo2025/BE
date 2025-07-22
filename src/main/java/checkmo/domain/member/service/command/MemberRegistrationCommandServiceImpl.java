@@ -70,8 +70,32 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request){
-        //TODO: 이메일 인증 확인 로직 구현
-        throw new UnsupportedOperationException("추후 구현 예정");
+
+        String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
+
+        // redis에서 인증 정보 조회
+        String storedCode = (String) redisTemplate.opsForHash().get(redisKey, "code");
+        Boolean isVerified = (Boolean) redisTemplate.opsForHash().get(redisKey, "verified");
+
+        // 인증번호가 만료된 경우
+        if (storedCode == null) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_EXPIRED);
+        }
+
+        // 인증번호가 일치하지 않는 경우
+        if (!request.getVerificationCode().equals(storedCode)) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_INVALID);
+        }
+
+        // 이미 인증된 경우
+        if (Boolean.TRUE.equals(isVerified)) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED);
+        }
+
+        // 인증 성공 시 verified 상태 업데이트
+        redisTemplate.opsForHash().put(redisKey, "verified", true);
+
+        return true;
     }
 
     @Override
