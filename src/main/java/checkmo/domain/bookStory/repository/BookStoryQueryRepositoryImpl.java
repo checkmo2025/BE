@@ -12,6 +12,7 @@ import java.util.List;
 
 import static checkmo.domain.bookStory.entity.QBookStory.bookStory;
 import static checkmo.domain.club.entity.QClubMember.clubMember;
+import static checkmo.domain.member.entity.QFollow.follow;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return switch (scope) {
             case ALL -> findAllBookStories(cursorId, pageSize);
             case MY -> findMyBookStories(memberId, cursorId, pageSize);
+            case FOLLOWING -> findFollowBookStories(memberId, cursorId, pageSize);
             case CLUB -> findClubBookStories(memberId, clubId, cursorId, pageSize);
         };
     }
@@ -36,6 +38,24 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             .orderBy(bookStory.id.desc())
             .limit(pageSize)
             .fetch();
+    }
+
+    private List<BookStory> findFollowBookStories(String memberId, Long cursorId, int pageSize) {
+        List<String> followingMemberIds = getFollowingMemberIds(memberId);
+
+        if (followingMemberIds.isEmpty()) {
+            return List.of();
+        }
+
+        return JpaQueryFactory
+                .selectFrom(bookStory)
+                .where(
+                        createCursorExp(cursorId),
+                        bookStory.memberId.in(followingMemberIds)
+                )
+                .orderBy(bookStory.id.desc())
+                .limit(pageSize)
+                .fetch();
     }
 
     private List<BookStory> findMyBookStories(String memberId, Long cursorId, int pageSize) {
@@ -89,6 +109,14 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                     ClubMember.ClubMemberStatus.STAFF
                 )))
             .fetchFirst() != null;
+    }
+
+    private List<String> getFollowingMemberIds(String memberId) {
+        return JpaQueryFactory
+            .select(follow.followingId)
+            .from(follow)
+            .where(follow.followerId.eq(memberId))
+            .fetch();
     }
 
     private List<String> getClubMemberIds(Long clubId) {
