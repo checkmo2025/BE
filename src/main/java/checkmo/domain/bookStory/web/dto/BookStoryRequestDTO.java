@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 
 public class BookStoryRequestDTO {
 
+    public enum BookStoryScope {
+        ALL, MY, CLUB
+    }
+
     @Getter
     @NoArgsConstructor
     public static class BookStoryCreateRequestDTO {
