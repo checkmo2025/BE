@@ -29,6 +29,7 @@ public class MeetingRequestDTO {
         @NotBlank(message = "독서모임 태그는 null, 빈 문자열(\"\"), 공백 문자(\" \")까지도 모두 허용하지 않습니다.")
         private String tag; // 태그
         @Valid
+        @NotNull(message = "책 정보는 null이 될 수 없습니다.")
         private ClubRequestDTO.BookDetailDTO bookDetail; // 책 정보
     }
 
