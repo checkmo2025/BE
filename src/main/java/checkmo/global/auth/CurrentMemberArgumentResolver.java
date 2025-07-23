@@ -1,3 +1,4 @@
+/*
 package checkmo.global.auth;
 
 import checkmo.domain.member.entity.Member;
@@ -80,3 +81,4 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
         return null;
     }
 }
+ */

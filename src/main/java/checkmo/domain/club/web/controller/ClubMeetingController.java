@@ -1,9 +1,16 @@
 package checkmo.domain.club.web.controller;
 
+import checkmo.apiPayload.ApiResponse;
+import checkmo.domain.club.facade.ClubCommandFacade;
+import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping()
@@ -11,8 +18,48 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모임 토론", description = "독서 모임 미팅, 발제, 토론조 관리 API")
 public class ClubMeetingController {
 
-    // 미팅 관리
-    // POST /api/clubs/{clubId}/meetings - Meeting 생성
+    private final ClubCommandFacade clubCommandFacade;
+
+    @Operation(summary = "정기 독서모임 생성 API", description = "정기 독서모임을 생성합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "정기 독서 모임을 생성할 독서클럽 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
+    })
+    @PostMapping("/api/clubs/{clubId}/meetings")
+    public ApiResponse<Long> createMeeting(
+            @PathVariable Long clubId,
+            @RequestBody @Valid MeetingRequestDTO.MeetingCreateRequestDTO request,
+            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+    ) {
+        Long meetingId = clubCommandFacade.createMeeting(clubId, memberId, request);
+        return ApiResponse.onSuccess(meetingId);
+    }
+
+    @Operation(summary = "정기 독서모임 수정 API", description = "정기 독서모임을 수정합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "수정할 정기 독서 모임 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @PatchMapping("/api/meetings/{meetingId}")
+    public ApiResponse<Long> updateMeeting(
+            @PathVariable Long meetingId,
+            @RequestBody @Valid MeetingRequestDTO.MeetingUpdateRequestDTO request,
+            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+    ) {
+        Long updateMeetingId = clubCommandFacade.updateMeeting(meetingId, memberId, request);
+        return ApiResponse.onSuccess(updateMeetingId);
+    }
+
     // GET /api/clubs/{clubId}/meetings - Meeting 전체 보기
     // GET /api/meetings/{meetingId} - Meeting 상세 보기
 

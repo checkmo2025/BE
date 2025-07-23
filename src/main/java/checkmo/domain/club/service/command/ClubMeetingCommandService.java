@@ -21,7 +21,7 @@ public interface ClubMeetingCommandService {
      *
      * ‼️ 내부에서 공지사항 자동으로 연결해서 생성해주는 로직 반드시 필요
      */
-     Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request);
+    Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request);
 
     /**
      * 독서모임의 미팅을 수정합니다.
@@ -65,6 +65,7 @@ public interface ClubMeetingCommandService {
      * 독서모임의 특정 팀이 발제를 수정합니다.
      *
      * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책]에서 [발제]추 시
+     *
      * @param memberId 발제 작성자의 ID -> 발제 작성자인지 확인하는 용도
      * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
      * @param topicId 발제 ID

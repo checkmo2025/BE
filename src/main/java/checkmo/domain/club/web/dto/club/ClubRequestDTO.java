@@ -1,5 +1,6 @@
 package checkmo.domain.club.web.dto.club;
 
+import checkmo.global.dto.BookSharedDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -73,21 +74,10 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class CreateBookRecommendDTO {
         private String title;
-        private BookDetailDTO bookDetail; // 책 정보
+        private BookSharedDTO.BookCreateRequestDTO bookDetail; // 책 정보
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그
-    }
-
-    @Getter
-    @NoArgsConstructor
-    public static class BookDetailDTO {
-        private String isbn; // ISBN 번호
-        private String title; // 책 제목
-        private String author; // 저자
-        private String imgUrl; // 책 이미지 URL
-        private String publisher; // 출판사
-        private String description; // 책 설명
     }
 
     @Getter
