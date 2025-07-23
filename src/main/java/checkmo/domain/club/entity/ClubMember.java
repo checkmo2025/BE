@@ -48,6 +48,11 @@ public class ClubMember extends BaseEntity {
         return this.clubMemberStatus == ClubMemberStatus.STAFF;
     }
 
+    public void addBookReview(BookReview bookReview) {
+        this.bookReviews.add(bookReview);
+        bookReview.setClubMember(this);
+    }
+
     public enum ClubMemberStatus {
         MEMBER, STAFF, PENDING, BLOCKED
     }

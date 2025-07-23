@@ -113,16 +113,16 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     @Override
     public Long createBookReview(String memberId, Long meetingId, BookShelfRequestDTO.BookReviewDTO request) {
-        return 0L;
+        return clubMeetingCommandService.createBookReview(memberId, meetingId, request);
     }
 
     @Override
     public Long updateBookReview(String memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request) {
-        return 0L;
+        return clubMeetingCommandService.updateBookReview(memberId, meetingId, reviewId, request);
     }
 
     @Override
     public void deleteBookReview(String memberId, Long meetingId, Long reviewId) {
-
+        clubMeetingCommandService.deleteBookReview(memberId, meetingId, reviewId);
     }
 }
