@@ -15,9 +15,7 @@ import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
-import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
-import checkmo.global.dto.BookSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,18 +41,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         }
 
         // 2. 책 저장 후 프록시 가져오기
-        ClubRequestDTO.BookDetailDTO bookDetail = request.getBookDetail();
-        bookCommandFacade.saveBook(
-                BookSharedDTO.BookCreateRequestDTO.builder()
-                        .isbn(bookDetail.getIsbn())
-                        .title(bookDetail.getTitle())
-                        .author(bookDetail.getAuthor())
-                        .imgUrl(bookDetail.getImgUrl())
-                        .publisher(bookDetail.getPublisher())
-                        .description(bookDetail.getDescription())
-                        .build()
-        );
-        Book proxyBook = bookQueryFacade.findBookReferenceById(bookDetail.getIsbn());
+        bookCommandFacade.saveBook(request.getBookInfo());
+        Book proxyBook = bookQueryFacade.findBookReferenceById(request.getBookInfo().getIsbn());
 
         // 3. 미팅 생성 후 Book 연결
         Meeting meeting = ClubConverter.fromMeetingCreateRequestDTOToMeeting(request);

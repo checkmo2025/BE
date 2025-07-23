@@ -30,7 +30,7 @@ public class MeetingRequestDTO {
         private String tag; // 태그
         @Valid
         @NotNull(message = "책 정보는 null이 될 수 없습니다.")
-        private ClubRequestDTO.BookDetailDTO bookDetail; // 책 정보
+        private BookSharedDTO.BookCreateRequestDTO bookInfo;
     }
 
     @Getter
