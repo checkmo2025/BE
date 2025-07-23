@@ -29,13 +29,18 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     @Override
     public void sendEmailVerification(String email) {
 
+        // 이미 인증번호가 Redis에 존재하면 예외 처리
+        String redisKey = EMAIL_VERIFICATION_PREFIX + email;
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_SENT);
+        }
+
         // TODO: 이미 회원가입이 완료된 이메일인지 확인하는 로직 추가
 
         // 6자리 랜덤 인증번호 생성
         String verificationCode = String.format("%06d", secureRandom.nextInt(1000000));
 
         // Redis에 인증번호 저장
-        String redisKey = EMAIL_VERIFICATION_PREFIX + email;
         Map<String, Object> verificationData = new HashMap<>();
         verificationData.put("code", verificationCode);
         verificationData.put("verified", false);
