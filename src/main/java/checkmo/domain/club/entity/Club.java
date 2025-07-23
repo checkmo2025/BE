@@ -53,7 +53,7 @@ public class Club extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "club_participants", joinColumns = @JoinColumn(name = "club_id"))
     @Column(name = "participant_type")
-    private List<ParticipantType> participants = new ArrayList<>();
+    private List<ParticipantType> participantTypes = new ArrayList<>();
 
     private String region;
 
@@ -81,4 +81,18 @@ public class Club extends BaseEntity {
         this.meetings.add(meeting);
         meeting.setClub(this);
     }
+
+    public void addCategories(List<ClubCategory> categories) {
+        this.clubCategories.clear();
+        for (ClubCategory category : categories) {
+            category.setClub(this);
+            this.clubCategories.add(category);
+        }
+    }
+
+    public void addClubMember(ClubMember clubMember) {
+        this.clubMembers.add(clubMember);
+        clubMember.setClub(this);
+    }
+
 }
