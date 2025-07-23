@@ -30,6 +30,9 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     public void sendEmailVerification(String email) {
+
+        // TODO: 이미 회원가입이 완료된 이메일인지 확인하는 로직 추가
+
         // 6자리 랜덤 인증번호 생성
         String verificationCode = String.format("%06d", secureRandom.nextInt(1000000));
 
@@ -57,7 +60,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
             message.setTo(email); // 받는 사람 이메일
             message.setSubject("책모 회원가입 인증번호"); // 이메일 제목
             message.setText("인증번호: " + verificationCode + "\n\n" +
-                            "인증번호는 5분간 유효합니다."); // 이메일 본문
+                "인증번호는 10분간 유효합니다."); // 이메일 본문
 
             // 이메일 발송
             javaMailSender.send(message);
@@ -69,7 +72,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     }
 
     @Override
-    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request){
+    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request) {
 
         String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
 
