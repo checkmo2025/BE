@@ -14,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     private final ClubMemberRepository clubMemberRepository;
-    
+
     @Override
     public ClubMember validateClubMember(Long clubId, String memberId) throws GeneralException {
         return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_ONLY));
     }
 
 }

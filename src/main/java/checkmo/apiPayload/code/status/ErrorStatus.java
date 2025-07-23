@@ -23,7 +23,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     CLUB_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB404", "독서클럽을 찾을 수 없습니다."),
 
-    CLUB_MEMBER_NOT_FOUND(HttpStatus.FORBIDDEN, "CLUB_MEMBER403", "해당 클럽의 회원이 아닙니다."),
+    CLUB_MEMBER_ONLY(HttpStatus.FORBIDDEN, "CLUB_MEMBER403", "해당 클럽의 회원이 아닙니다."),
     CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_STAFF403", "독서클럽 운영진만 접근할 수 있습니다."),
 
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING404", "독서모임을 찾을 수 없습니다."),
