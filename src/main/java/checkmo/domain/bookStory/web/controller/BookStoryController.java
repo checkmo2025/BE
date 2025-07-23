@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,7 @@ public class BookStoryController {
     @PostMapping
     public ApiResponse<Long> createBookStory(
             @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
-            @RequestBody BookStoryRequestDTO.BookStoryCreateRequestDTO request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequestDTO request
     ) {
         Long bookStoryId = bookStoryCommandFacade.createBookStory(memberId, request);
         return ApiResponse.onSuccess(bookStoryId);
@@ -118,7 +119,7 @@ public class BookStoryController {
     public ApiResponse<Long> updateBookStory(
             @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
             @PathVariable Long bookStoryId,
-            @RequestBody BookStoryRequestDTO.BookStoryUpdateRequestDTO request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequestDTO request
     ) {
         Long updateBookStoryId = bookStoryCommandFacade.updateBookStory(memberId, bookStoryId, request);
         return ApiResponse.onSuccess(updateBookStoryId);
