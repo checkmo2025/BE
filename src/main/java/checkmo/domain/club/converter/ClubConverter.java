@@ -1,5 +1,6 @@
 package checkmo.domain.club.converter;
 
+import checkmo.domain.book.entity.Book;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
@@ -21,7 +22,8 @@ public class ClubConverter {
      * MeetingCreateRequestDTO -> Meeting 엔티티 변환
      */
     public static Meeting fromMeetingCreateRequestDTOToMeeting(
-            MeetingRequestDTO.MeetingCreateRequestDTO request
+            MeetingRequestDTO.MeetingCreateRequestDTO request,
+            Book proxyBook
     ) {
         return Meeting.builder()
                 .title(request.getTitle())
@@ -30,6 +32,7 @@ public class ClubConverter {
                 .content(request.getContent())
                 .generation(request.getGeneration())
                 .tag(request.getTag())
+                .book(proxyBook)
                 .build();
     }
 

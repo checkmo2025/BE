@@ -44,9 +44,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         bookCommandFacade.saveBook(request.getBookInfo());
         Book proxyBook = bookQueryFacade.findBookReferenceById(request.getBookInfo().getIsbn());
 
-        // 3. 미팅 생성 후 Book 연결
-        Meeting meeting = ClubConverter.fromMeetingCreateRequestDTOToMeeting(request);
-        meeting.setBook(proxyBook);
+        // 3. 미팅 생성 후 proxyBook 연결
+        Meeting meeting = ClubConverter.fromMeetingCreateRequestDTOToMeeting(request, proxyBook);
 
         // 4. 공지 생성
         Notice notice = ClubConverter.fromMeetingToNotice(meeting);
