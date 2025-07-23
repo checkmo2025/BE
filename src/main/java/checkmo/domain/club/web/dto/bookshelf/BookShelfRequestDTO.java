@@ -1,5 +1,8 @@
 package checkmo.domain.club.web.dto.bookshelf;
 
+import checkmo.domain.club.validation.ValidRate;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,10 +12,12 @@ public class BookShelfRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class BookReviewDTO {
-        @Size(max = 20, message = "한줄평은 20자 이하로 입력해주세요")
+        @NotBlank(message = "한줄평은 필수 입력입니다.")
+        @Size(max = 20, message = "한줄평은 20자 이하로 입력해주세요.")
         private String description; // 책에 대한 한줄평 내용
 
-        @Size(min = 1, max = 5, message = "평점은 1.0에서 5.0 사이의 값을 입력해주세요")
-        private double rate; // 책 평점 (1.0~5.0)
+        @NotNull(message = "평점은 null이 될 수 없습니다.")
+        @ValidRate
+        private Double rate; // 책에 대한 평점
     }
 }
