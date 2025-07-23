@@ -52,6 +52,12 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         // 4. ClubCategory 생성
         List<ClubCategory> categories = new ArrayList<>();
         for (Long categoryId : request.getCategory()) {
+
+            // 카테고리 ID 유효성 검사 -> 1 ~ 15 사이의 값이어야 함 (변경이 거의 없으므로 하드 코딩)
+            if (categoryId < 1 || categoryId > 15) {
+                throw new GeneralException(ErrorStatus.CLUB_CATEGORY_NOT_FOUND, "카테고리 ID " + categoryId + " 는 유효하지 않습니다.");
+            }
+
             // Category 프록시 객체 조회
             Category categoryProxy = categoryQueryFacade.findCategoryReferenceById(categoryId);
 

@@ -27,6 +27,7 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUB_DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "CLUB_4001", "이미 존재하는 독서클럽 이름입니다."),
     CLUB_MEMBER_ONLY(HttpStatus.FORBIDDEN, "CLUB_4002", "해당 클럽의 회원이 아닙니다."),
     CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_4005", "독서클럽 운영진만 접근할 수 있습니다."),
+    CLUB_CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CLUB_4003", "존재하지 않는 카테고리입니다. (1 ~ 15 사이의 값이어야 함)"),
 
     // 미팅
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_4004", "독서모임을 찾을 수 없습니다."),
