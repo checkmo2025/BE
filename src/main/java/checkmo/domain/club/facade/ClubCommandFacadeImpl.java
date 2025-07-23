@@ -1,6 +1,8 @@
 package checkmo.domain.club.facade;
 
+import checkmo.domain.club.service.command.ClubManagementCommandService;
 import checkmo.domain.club.service.command.ClubMeetingCommandService;
+import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
@@ -14,16 +16,23 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class ClubCommandFacadeImpl implements ClubCommandFacade {
-    private final ClubMeetingCommandService clubMeetingCommandService;
 
+    private final ClubMeetingCommandService clubMeetingCommandService;
+    private final ClubManagementCommandService clubManagementCommandService;
+    private final ClubQueryService clubQueryService;
+
+    /**
+     * ClubManagementCommandService
+     * 새로운 독서 모임을 생성합니다. (내부용)
+     *
+     * @param memberId  생성자 회원 ID
+     * @param request   모임 생성 요청 정보 DTO
+     * @return 생성된 독서 모임의 상세 정보 DTO
+     */
     @Override
     public ClubResponseDTO.ClubDetailDTO createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
-        return null;
-    }
-
-    @Override
-    public ClubResponseDTO.ClubDetailDTO updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request) {
-        return null;
+        Long clubId = clubManagementCommandService.createClub(memberId, request); // 클럽 생성 후 해당 클럽 id 반환
+        return clubQueryService.getClubInfo(clubId, memberId);
     }
 
     @Override

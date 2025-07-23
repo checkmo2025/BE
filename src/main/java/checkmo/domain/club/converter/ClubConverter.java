@@ -6,11 +6,13 @@ import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -54,6 +56,25 @@ public class ClubConverter {
                 .insta(dto.getInsta())
                 .kakao(dto.getKakao())
                 .participantTypes(participantTypes)
+                .build();
+    }
+
+    /**
+     * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
+     */
+    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club) {
+        return ClubResponseDTO.ClubDetailDTO.builder()
+                .name(club.getName())
+                .description(club.getDescription())
+                .profileImageUrl(club.getProfileImgUrl())
+                .isOpen(club.isOpen())
+                .category(club.getClubCategories().stream()
+                        .map(clubCategory -> clubCategory.getCategory().getId())
+                        .collect(Collectors.toList()))
+                .region(club.getRegion())
+                .participantTypes(club.getParticipantTypes())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
                 .build();
     }
 

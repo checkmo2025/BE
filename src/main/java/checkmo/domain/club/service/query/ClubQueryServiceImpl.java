@@ -2,7 +2,9 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubQueryServiceImpl implements ClubQueryService {
 
     private final ClubRepository clubRepository;
+    private final ClubMemberQueryService clubMemberQueryService;
 
     @Override
     public ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId) {
@@ -36,9 +39,30 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         return null;
     }
 
+    /**
+     * 독서모임의 상세 정보를 조회합니다.
+     *
+     * 피그마 참고 페이지 : #독서모임 - 모임 검색하기 - 특정 모임 클릭시
+     *
+     * @param clubId 독서모임 ID
+     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
+     * @return 독서 클럽 상세 정보 DTO
+     */
     @Override
+    @Transactional(readOnly = true)
     public ClubResponseDTO.ClubDetailDTO getClubInfo(Long clubId, String memberId) {
-        return null;
+
+        // 1. 클럽 유효성 검증
+        Club club = validateClub(clubId);
+
+        // 2. 운영진 권한 확인
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 3. Club 엔티티 → DTO 변환
+        return ClubConverter.fromClubToClubDetailDTO(club);
     }
 
     /**
