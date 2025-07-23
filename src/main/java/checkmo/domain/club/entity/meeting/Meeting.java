@@ -1,7 +1,7 @@
 package checkmo.domain.club.entity.meeting;
 
 import checkmo.domain.book.entity.Book;
-import checkmo.domain.club.entity.*;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -36,13 +36,15 @@ public class Meeting extends BaseEntity {
 
     private String tag;
 
-    private double sumRate; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
+    @Builder.Default
+    private double sumRate = 0; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
 
     @Column(name = "club_id", insertable = false, updatable = false)
     private Long clubId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
+    @Setter
     private Club club;
 
     @Column(name = "book_id", insertable = false, updatable = false)
@@ -50,13 +52,14 @@ public class Meeting extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
+    @Setter
     private Book book; // null 허용
 
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     private List<Team> teams = new ArrayList<>();
 
-    @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private Notice notice;
 
     @Builder.Default
@@ -82,4 +85,32 @@ public class Meeting extends BaseEntity {
             this.sumRate /= this.bookReviews.size();
         }
     }
+
+    public void updateMeeting(String title, LocalDateTime meetingTime,
+                              String location, String content, int generation, String tag) {
+        this.title = title;
+        this.meetingTime = meetingTime;
+        this.location = location;
+        this.content = content;
+        this.generation = generation;
+        this.tag = tag;
+    }
+
+    public void addNotice(Notice notice) {
+        this.notice = notice;
+        notice.setMeeting(this); // 주인 쪽에도 세팅
+    }
+
+    public void replaceNotice(Notice newNotice) {
+        // 기존 Notice 연결 끊기 (orphanRemoval = true면 자동 삭제됨)
+        if (this.notice != null) {
+            this.notice.setMeeting(null);
+        }
+
+        this.notice = newNotice;
+        if (newNotice != null) {
+            newNotice.setMeeting(this);
+        }
+    }
+
 }

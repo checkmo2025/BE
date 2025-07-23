@@ -3,8 +3,8 @@ package checkmo.domain.club.repository;
 import checkmo.domain.club.entity.ClubMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
-    boolean existsByClubIdAndMemberId(Long clubId, String memberId);
+import java.util.Optional;
 
-    boolean existsByClubIdAndMemberIdAndClubMemberStatus(Long clubId, String memberId, ClubMember.ClubMemberStatus clubMemberStatus);
+public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
+    Optional<ClubMember> findByClubIdAndMemberId(Long clubId, String memberId);
 }

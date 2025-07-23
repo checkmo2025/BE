@@ -151,7 +151,7 @@ public interface ClubCommandFacade {
      * @param request  미팅 생성 요청 DTO
      * @return 생성된 미팅의 상세 정보 DTO
      */
-    MeetingResponseDTO.InProgressMeetingDetailDTO createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request);
+    Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request);
 
     /**
      * ClubMeetingCommandService
@@ -162,7 +162,7 @@ public interface ClubCommandFacade {
      * @param request   미팅 수정 요청 DTO
      * @return 수정된 미팅의 상세 정보 DTO
      */
-    MeetingResponseDTO.InProgressMeetingDetailDTO updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request);
+    Long updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request);
 
     /**
      * ClubMeetingCommandService

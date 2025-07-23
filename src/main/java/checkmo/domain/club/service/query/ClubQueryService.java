@@ -1,5 +1,7 @@
 package checkmo.domain.club.service.query;
 
+import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 
 /**
@@ -26,6 +28,7 @@ public interface ClubQueryService {
      * 내가 가입한 독서 클럽 목록을 전체 조회합니다.
      *
      * 피그마 참고 페이지 : #독서모임 - 내 모임 바로가기
+     *
      * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
      * @return 내가 가입한 독서 클럽 목록 DTO
      */
@@ -35,6 +38,7 @@ public interface ClubQueryService {
      * 내가 가입한 독서 클럽 목록을 size 개수만큼 조회합니다.
      *
      * 피그마 참고 페이지 : #독서모임 - 내 모임 바로가기
+     *
      * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
      * @param size 조회할 개수
      * @return 내가 가입한 독서 클럽 목록 DTO
@@ -108,4 +112,13 @@ public interface ClubQueryService {
      * @param noticeId 공지사항 ID
      */
     ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId);
+
+    /**
+     * 독서 클럽이 존재하는지 검증합니다.
+     *
+     * @param clubId 독서 클럽 ID
+     * @return Club 검증된 독서 클럽 객체
+     * @throws GeneralException 클럽이 존재하지 않는 경우
+     */
+    Club validateClub(Long clubId) throws GeneralException;
 }
