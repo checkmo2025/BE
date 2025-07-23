@@ -1,5 +1,6 @@
 package checkmo.domain.club.web.dto.club;
 
+import checkmo.domain.club.entity.Club;
 import checkmo.global.dto.BookSharedDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -25,8 +26,7 @@ public class ClubRequestDTO {
         private boolean isOpen;
         private List<Long> category;
         private String region;
-        private String purpose;
-        private String participants;
+        private List<Club.ParticipantType> participantTypes;
         private String insta;
         private String kakao;
     }

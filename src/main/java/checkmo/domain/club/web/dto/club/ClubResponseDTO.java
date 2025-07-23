@@ -1,5 +1,6 @@
 package checkmo.domain.club.web.dto.club;
 
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
@@ -50,15 +51,15 @@ public class ClubResponseDTO {
     @Builder
     public static class ClubDetailDTO {
         private Long clubId;         // 모임 ID
-        private String profileImgUrl;// 모임 프로필 이미지 URL
-        private String clubName;     // 모임 이름
-        private String description;  // 모임 소개
-        private String participants; // 모임 대상
-        private List<String> category;     // 모임 카테고리
-        private String region;       // 모임 장소
-        private String insta;        // 모임 인스타그램 URL
-        private String kakao;        // 모임 카카오톡 URL
-        private boolean isOpen;      // 모임 공개 여부 (true: 공개, false: 비공개)
+        private String name;
+        private String description;
+        private String profileImageUrl;
+        private boolean isOpen;
+        private List<Long> category;
+        private String region;
+        private List<Club.ParticipantType> participantTypes;
+        private String insta;
+        private String kakao;
     }
 
     @Getter

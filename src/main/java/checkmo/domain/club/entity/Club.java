@@ -17,6 +17,25 @@ import java.util.List;
 @Entity
 public class Club extends BaseEntity {
 
+    public enum ParticipantType {
+        STUDENT("대학생"),
+        WORKER("직장인"),
+        ONLINE("온라인"),
+        CLUB("동아리"),
+        MEETING("모임"),
+        OFFLINE("대면");
+
+        private final String description;
+
+        ParticipantType(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,9 +49,11 @@ public class Club extends BaseEntity {
 
     private boolean isOpen = false;
 
-    private String purpose;
-
-    private String participants;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "club_participants", joinColumns = @JoinColumn(name = "club_id"))
+    @Column(name = "participant_type")
+    private List<ParticipantType> participants = new ArrayList<>();
 
     private String region;
 
