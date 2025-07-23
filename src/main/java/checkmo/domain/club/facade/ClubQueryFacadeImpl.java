@@ -32,9 +32,17 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return null;
     }
 
+    /**
+     * ClubQueryService
+     * 독서 모임의 상세 정보를 조회합니다. (내부용)
+     *
+     * @param clubId   조회할 모임 ID
+     * @param memberId 조회자 회원 ID
+     * @return 모임 상세 정보 DTO
+     */
     @Override
     public ClubResponseDTO.ClubDetailDTO getClubInfo(Long clubId, String memberId) {
-        return null;
+        return clubQueryService.getClubInfo(clubId, memberId);
     }
 
     @Override

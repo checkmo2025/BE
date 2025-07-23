@@ -19,7 +19,6 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubManagementCommandService clubManagementCommandService;
-    private final ClubQueryService clubQueryService;
 
     /**
      * ClubManagementCommandService
@@ -30,9 +29,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * @return 생성된 독서 모임의 상세 정보 DTO
      */
     @Override
-    public ClubResponseDTO.ClubDetailDTO createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
-        Long clubId = clubManagementCommandService.createClub(memberId, request); // 클럽 생성 후 해당 클럽 id 반환
-        return clubQueryService.getClubInfo(clubId, memberId);
+    public Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
+        return clubManagementCommandService.createClub(memberId, request);
     }
 
     @Override

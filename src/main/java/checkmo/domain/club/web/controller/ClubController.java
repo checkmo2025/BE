@@ -66,7 +66,8 @@ public class ClubController {
             @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request
     ) {
         // 추후 - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
-        ClubResponseDTO.ClubDetailDTO result = clubCommandFacade.createClub(memberId, request);
+        Long clubId = clubCommandFacade.createClub(memberId, request);
+        ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
         return ApiResponse.onSuccess(result);
     }
 

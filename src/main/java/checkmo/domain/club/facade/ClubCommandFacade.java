@@ -21,7 +21,7 @@ public interface ClubCommandFacade {
      * @param request   모임 생성 요청 정보 DTO
      * @return 생성된 독서 모임의 상세 정보 DTO
      */
-    ClubResponseDTO.ClubDetailDTO createClub(String memberId, ClubRequestDTO.ClubDetailDTO request); //
+    Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request); //
 
     /**
      * ClubMembershipCommandService
