@@ -1,11 +1,16 @@
 package checkmo.domain.club.converter;
 
 import checkmo.domain.book.entity.Book;
+import checkmo.domain.category.entity.ClubCategory;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -35,6 +40,23 @@ public class ClubConverter {
                 .book(proxyBook)
                 .build();
     }
+
+    /**
+     * ClubRequestDTO.ClubDetailDTO -> Club 엔티티 변환
+     */
+    public static Club fromClubDetailDTOToClub(ClubRequestDTO.ClubDetailDTO dto, List<Club.ParticipantType> participantTypes) {
+        return Club.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .profileImgUrl(dto.getProfileImageUrl())
+                .isOpen(dto.isOpen())
+                .region(dto.getRegion())
+                .insta(dto.getInsta())
+                .kakao(dto.getKakao())
+                .participantTypes(participantTypes)
+                .build();
+    }
+
 
     // =====================================================
     // 기타 메서드
