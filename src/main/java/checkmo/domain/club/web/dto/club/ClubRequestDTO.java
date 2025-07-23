@@ -23,7 +23,7 @@ public class ClubRequestDTO {
         private String name;
         private String description;
         private String profileImageUrl;
-        private boolean isOpen;
+        private boolean open;
         private List<Long> category;
         private String region;
         private List<Club.ParticipantType> participantTypes;

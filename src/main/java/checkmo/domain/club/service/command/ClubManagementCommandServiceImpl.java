@@ -11,6 +11,8 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.facade.MemberQueryFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
     private final ClubRepository clubRepository;
     private final ClubQueryService clubQueryService;
     private final CategoryQueryFacade categoryQueryFacade;
+    private final MemberQueryFacade memberQueryFacade;
 
     /**
      * 독서모임을 생성합니다.
@@ -43,13 +46,10 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
             throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
         }
 
-        // 2. 참여 대상 List
-        List<Club.ParticipantType> participantTypes = request.getParticipantTypes();
+        // 2. 클럽 엔티티 우선 생성 (카테고리는 이후 설정하므로 비워둠)
+        Club club = ClubConverter.fromClubDetailDTOToClub(request);
 
-        // 3. 클럽 엔티티 우선 생성 (카테고리는 이후 설정하므로 비워둠)
-        Club club = ClubConverter.fromClubDetailDTOToClub(request, participantTypes);
-
-        // 4. ClubCategory 생성
+        // 3. ClubCategory 생성
         List<ClubCategory> categories = new ArrayList<>();
         for (Long categoryId : request.getCategory()) {
 
@@ -70,22 +70,24 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
             categories.add(clubCategory);
         }
 
-        // 5. 연관관계 설정 (Club -> ClubCategory)
+        // 4. 연관관계 설정 (Club -> ClubCategory)
         club.addCategories(categories);
 
-        // 6. 클럽 생성자 - ClubMember 생성 및 연관관계 설정
+        // 5. 클럽 생성자 - ClubMember 생성 및 연관관계 설정
+        Member memberProxy = memberQueryFacade.findMemberReferenceById(memberId); // Member 엔티티 프록시 조회
+
         ClubMember clubMember = ClubMember.builder()
                 .club(club)
-                .memberId(memberId)
+                .member(memberProxy)
                 .clubMemberStatus(ClubMember.ClubMemberStatus.STAFF)
                 .build();
 
         club.addClubMember(clubMember); // Club -> ClubMember 양방향 연관관계 설정
 
-        // 7. 클럽 저장
+        // 6. 클럽 저장
         clubRepository.save(club);
 
-        // 8. 생성된 클럽의 ID 반환
+        // 7. 생성된 클럽의 ID 반환
         return club.getId();
     }
 

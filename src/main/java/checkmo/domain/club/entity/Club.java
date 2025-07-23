@@ -47,7 +47,8 @@ public class Club extends BaseEntity {
 
     private String profileImgUrl;
 
-    private boolean isOpen = false;
+    @Column(nullable = false)
+    private boolean open;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)

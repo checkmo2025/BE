@@ -46,16 +46,16 @@ public class ClubConverter {
     /**
      * ClubRequestDTO.ClubDetailDTO -> Club 엔티티 변환
      */
-    public static Club fromClubDetailDTOToClub(ClubRequestDTO.ClubDetailDTO dto, List<Club.ParticipantType> participantTypes) {
+    public static Club fromClubDetailDTOToClub(ClubRequestDTO.ClubDetailDTO dto) {
         return Club.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .profileImgUrl(dto.getProfileImageUrl())
-                .isOpen(dto.isOpen())
+                .open(dto.isOpen())
                 .region(dto.getRegion())
                 .insta(dto.getInsta())
                 .kakao(dto.getKakao())
-                .participantTypes(participantTypes)
+                .participantTypes(dto.getParticipantTypes())
                 .build();
     }
 
@@ -64,10 +64,11 @@ public class ClubConverter {
      */
     public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club) {
         return ClubResponseDTO.ClubDetailDTO.builder()
+                .clubId(club.getId())
                 .name(club.getName())
                 .description(club.getDescription())
                 .profileImageUrl(club.getProfileImgUrl())
-                .isOpen(club.isOpen())
+                .open(club.isOpen())
                 .category(club.getClubCategories().stream()
                         .map(clubCategory -> clubCategory.getCategory().getId())
                         .collect(Collectors.toList()))
