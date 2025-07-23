@@ -1,6 +1,7 @@
 package checkmo.domain.club.facade;
 
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ClubQueryFacadeImpl implements ClubQueryFacade {
+
+    private final ClubQueryService clubQueryService;
 
     @Override
     public ClubSharedDTO.MyClubListDTO getMyClubListForShare(String memberId) {
@@ -39,9 +42,16 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return null;
     }
 
+    /**
+     * ClubQueryService
+     * 모임 이름의 중복 여부를 확인합니다. (내부용)
+     *
+     * @param clubName 확인할 모임 이름
+     * @return 중복 시 true
+     */
     @Override
     public boolean isDuplicateClubName(String clubName) {
-        return false;
+        return clubQueryService.isDuplicateClubName(clubName);
     }
 
     @Override
