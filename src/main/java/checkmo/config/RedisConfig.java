@@ -32,7 +32,6 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        // yml 파일에서 읽어온 값으로 설정
         config.setHostName(redisProperties.getHost());
         config.setPort(redisProperties.getPort());
         config.setPassword(redisProperties.getPassword());
