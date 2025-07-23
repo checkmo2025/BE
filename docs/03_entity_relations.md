@@ -88,30 +88,31 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 @Transactional
 public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
-    private final BookStoryRepository bookStoryRepository;
-    private final MemberQueryFacade memberQueryFacade; // 다른 도메인의 Facade와 소통
-    private final BookQueryFacade bookQueryFacade;     // 다른 도메인의 Facade와 소통
+  private final BookStoryRepository bookStoryRepository;
+  private final MemberQueryFacade memberQueryFacade; // 다른 도메인의 Facade와 소통
+  private final BookQueryFacade bookQueryFacade;     // 다른 도메인의 Facade와 소통
 
-    @Override
-    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequestDTO request) {
+  @Override
+  public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequestDTO request) {
 
-        // 1. Facade를 통해 다른 도메인의 프록시 객체를 얻어옵니다.
-        //    이 과정에서 DB SELECT 쿼리는 발생하지 않습니다.
-        Member authorProxy = memberQueryFacade.findMemberReferenceById(memberId);
-        Book bookProxy = bookQueryFacade.findBookReferenceById(request.getBookInfo().getIsbn());
+    // 1. Facade를 통해 관계 설정을 위한 프록시 객체들을 가져옵니다.
+    Member authorProxy = memberQueryFacade.findMemberReferenceById(memberId);
+    Book bookProxy = bookQueryFacade.findBookReferenceById(request.getBookInfo().getIsbn());
 
-        // 2. 새로운 BookStory 엔티티를 생성하고,
-        BookStory newBookStory = BookStoryConverter.toBookStory(request);
+    // 2. Builder를 사용하여 객체 생성과 관계 설정을 한 번에 끝냅니다.
+    //    - DTO의 값과 프록시 객체들을 빌더의 각 필드에 직접 전달합니다.
+    BookStory newBookStory = BookStory.builder()
+            .title(request.getTitle())
+            .description(request.getDescription())
+            .member(authorProxy) // <- 빌더에 프록시 객체를 바로 전달
+            .book(bookProxy)     // <- 빌더에 프록시 객체를 바로 전달
+            .build();
 
-        // 3. 프록시 객체를 사용하여 안전하게 관계를 설정합니다.
-        newBookStory.setAuthor(authorProxy);
-        newBookStory.setBook(bookProxy);
+    // 3. 엔티티를 저장합니다.
+    bookStoryRepository.save(newBookStory);
 
-        // 4. 엔티티를 저장합니다.
-        bookStoryRepository.save(newBookStory);
-
-        return newBookStory.getId();
-    }
+    return newBookStory.getId();
+  }
 }
 ```
 

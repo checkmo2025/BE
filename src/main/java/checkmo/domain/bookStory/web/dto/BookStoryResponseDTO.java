@@ -1,7 +1,9 @@
 package checkmo.domain.bookStory.web.dto;
 
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +19,8 @@ public class BookStoryResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookStoryListResponse {
+        private ScopeInfo scopeInfo;    // 현재 선택된 범위 정보
+        private ClubSharedDTO.MyClubListDTO memberClubList; // 사용자가 속한 클럽 목록
         private List<BookStoryResponse> bookStoryResponses;
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
@@ -27,15 +31,28 @@ public class BookStoryResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class ScopeInfo {
+        private BookStoryRequestDTO.BookStoryScope scope; // 현재 범위 (ALL, MY, CLUB)
+        private ClubSharedDTO.MyClubInfoDTO selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class BookStoryResponse {
-        private String bookStoryId;
+        private Long bookStoryId;
         private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
         private MemberSharedDTO.WithFollowStatusDTO authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
         private String description;
         private int likes;
-        private boolean isLiked;
+
+        private boolean likedByMe; // 내가 좋아요를 눌렀는지 여부 (true: 눌렀음, false: 안누름)
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
-        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+
+        private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 }

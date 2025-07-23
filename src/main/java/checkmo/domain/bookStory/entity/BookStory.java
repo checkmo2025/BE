@@ -50,6 +50,11 @@ public class BookStory extends BaseEntity {
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL)
     private List<BookStoryLiked> bookStoryLikedList = new ArrayList<>();
 
+    public Long updateDescription(String description) {
+        this.description = description;
+        return this.id;
+    }
+
     public void addLike() {
         this.likes++;
     }

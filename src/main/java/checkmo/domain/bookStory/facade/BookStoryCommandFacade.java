@@ -21,19 +21,19 @@ public interface BookStoryCommandFacade {
      * 기존 책 이야기를 수정합니다. (내부용)
      *
      * @param memberId    수정 요청 회원 ID
+     * @param bookStoryId 수정할 책 이야기의 ID
      * @param request     수정할 책 이야기 정보 DTO
      * @return 수정된 책 이야기의 ID
      */
-    Long updateBookStory(String memberId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request);
+    Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request);
 
     /**
      * 책 이야기를 삭제합니다. (내부용)
      *
      * @param memberId    삭제 요청 회원 ID
      * @param bookStoryId 삭제할 책 이야기의 ID
-     * @return 삭제된 책 이야기의 ID
      */
-    Long deleteBookStory(String memberId, Long bookStoryId);
+    void deleteBookStory(String memberId, Long bookStoryId);
 
     /**
      * 책 이야기의 '좋아요'를 토글(추가/삭제)합니다. (내부용)

@@ -1,23 +1,32 @@
 package checkmo.domain.bookStory.web.dto;
 
 import checkmo.global.dto.BookSharedDTO;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class BookStoryRequestDTO {
 
+    public enum BookStoryScope {
+        ALL, MY, FOLLOWING, CLUB
+    }
+
     @Getter
     @NoArgsConstructor
     public static class BookStoryCreateRequestDTO {
         private BookSharedDTO.BookCreateRequestDTO bookInfo; // 책 정보
+
+        @NotBlank(message = "책 이야기에 제목을 입력해주세요.")
         private String title;
+
+        @NotBlank(message = "책 이야기에 내용을 입력해주세요.")
         private String description;
     }
 
     @Getter
     @NoArgsConstructor
     public static class BookStoryUpdateRequestDTO {
-        private Long bookStoryId;
+        @NotBlank(message = "책 이야기에 수정할 내용을 입력해주세요.")
         private String description;
     }
 }
