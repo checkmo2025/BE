@@ -1,7 +1,9 @@
 package checkmo.domain.member.facade;
 
+import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
+import checkmo.domain.member.service.query.MemberQueryService;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
-    private final MemberRepository memberRepository;
+    private final MemberRepository memberRepository; // 프록시용
+    private final MemberQueryService memberQueryService;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -60,9 +63,15 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
         return false;
     }
 
+    /**
+     * 공유용 기본 회원 정보 조회 (외부용)
+     * @param memberId 조회할 회원 ID
+     * @return MemberSharedDTO.BasicInfo
+     */
     @Override
     public MemberSharedDTO.BasicInfoDTO getMemberBasicInfoForShare(String memberId) {
-        return null;
+        var profile = memberQueryService.getMemberBasicInfo(memberId);
+        return MemberConverter.toBasicInfoDTO(profile);
     }
 
     @Override
