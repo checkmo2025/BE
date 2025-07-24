@@ -8,6 +8,7 @@ import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.global.dto.CategorySharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -62,16 +63,14 @@ public class ClubConverter {
     /**
      * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
      */
-    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club) {
+    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, List<Long> categoryIds) {
         return ClubResponseDTO.ClubDetailDTO.builder()
                 .clubId(club.getId())
                 .name(club.getName())
                 .description(club.getDescription())
                 .profileImageUrl(club.getProfileImgUrl())
                 .open(club.isOpen())
-                .category(club.getClubCategories().stream()
-                        .map(clubCategory -> clubCategory.getCategory().getId())
-                        .collect(Collectors.toList()))
+                .category(categoryIds)
                 .region(club.getRegion())
                 .participantTypes(club.getParticipantTypes())
                 .insta(club.getInsta())

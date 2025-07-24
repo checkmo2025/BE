@@ -83,14 +83,6 @@ public class Club extends BaseEntity {
         meeting.setClub(this);
     }
 
-    public void addCategories(List<ClubCategory> categories) {
-        this.clubCategories.clear();
-        for (ClubCategory category : categories) {
-            category.setClub(this);
-            this.clubCategories.add(category);
-        }
-    }
-
     public void addClubMember(ClubMember clubMember) {
         this.clubMembers.add(clubMember);
         clubMember.setClub(this);
