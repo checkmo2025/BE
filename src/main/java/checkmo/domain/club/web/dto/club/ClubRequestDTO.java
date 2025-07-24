@@ -1,5 +1,6 @@
 package checkmo.domain.club.web.dto.club;
 
+import checkmo.domain.category.web.dto.CategoryRequestDTO;
 import checkmo.domain.club.entity.Club;
 import checkmo.global.dto.BookSharedDTO;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +30,12 @@ public class ClubRequestDTO {
         private List<Club.ParticipantType> participantTypes;
         private String insta;
         private String kakao;
+
+        public CategoryRequestDTO.CategoryListRequestDTO toCategoryListRequestDTO() {
+            return CategoryRequestDTO.CategoryListRequestDTO.builder()
+                    .categoryIdList(this.category)
+                    .build();
+        }
     }
 
     @Getter

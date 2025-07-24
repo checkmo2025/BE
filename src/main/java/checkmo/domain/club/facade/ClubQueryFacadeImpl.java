@@ -1,6 +1,7 @@
 package checkmo.domain.club.facade;
 
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     private final ClubQueryService clubQueryService;
+    private final ClubRepository clubRepository; // 프록시용
 
     @Override
     public ClubSharedDTO.MyClubListDTO getMyClubListForShare(String memberId) {
@@ -124,6 +126,6 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public Club findClubReferenceById(Long clubId) {
-        return null;
+        return clubRepository.getReferenceById(clubId);
     }
 }
