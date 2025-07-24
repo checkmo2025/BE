@@ -1,6 +1,7 @@
 package checkmo.domain.club.service.command;
 
 import checkmo.domain.book.entity.Book;
+import checkmo.domain.book.facade.BookCommandFacade;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
@@ -21,6 +22,7 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final BookQueryFacade bookQueryFacade;
+    private final BookCommandFacade bookCommandFacade;
     private final BookRecommendRepository bookRecommendRepository;
 
     /**
@@ -39,7 +41,8 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 2. 책 프록시 조회
+        // 2. 책 저장 후 프록시 가져오기
+        bookCommandFacade.saveBook(request.getBookDetail());
         Book bookProxy = bookQueryFacade.findBookReferenceById(request.getBookDetail().getIsbn());
 
         // 3. 책 추천 엔티티 생성
