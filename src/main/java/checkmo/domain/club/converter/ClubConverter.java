@@ -3,6 +3,7 @@ package checkmo.domain.club.converter;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
@@ -12,6 +13,8 @@ import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -60,6 +63,22 @@ public class ClubConverter {
     }
 
     /**
+     * ClubRequestDTO.ClubDetailDTO -> Club 엔티티 변환
+     */
+    public static Club fromClubDetailDTOToClub(ClubRequestDTO.ClubDetailDTO dto) {
+        return Club.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .profileImgUrl(dto.getProfileImageUrl())
+                .open(dto.isOpen())
+                .region(dto.getRegion())
+                .insta(dto.getInsta())
+                .kakao(dto.getKakao())
+                .participantTypes(dto.getParticipantTypes())
+                .build();
+    }
+
+    /**
      * BookRecommend 엔티티 → BookRecommendDetailDTO
      */
     public static ClubResponseDTO.BookRecommendDetailDTO toBookRecommendDetailDTO(
@@ -76,6 +95,24 @@ public class ClubConverter {
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
                 .isAuthor(authorInfo.getNickname().equals(currentMemberNickname))
+                .build();
+    }
+
+    /**
+     * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
+     */
+    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, List<Long> categoryIds) {
+        return ClubResponseDTO.ClubDetailDTO.builder()
+                .clubId(club.getId())
+                .name(club.getName())
+                .description(club.getDescription())
+                .profileImageUrl(club.getProfileImgUrl())
+                .open(club.isOpen())
+                .category(categoryIds)
+                .region(club.getRegion())
+                .participantTypes(club.getParticipantTypes())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
                 .build();
     }
 
