@@ -19,7 +19,7 @@ public interface BookStoryQueryFacade {
     BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId);
 
     /**
-     * 특정 회원의 책 이야기 목록을 커서 기반으로 조회합니다. (내부용)
+     * 특정 회원의 책 이야기 목록을 커서 기반으로 조회합니다. (외부용)
      * 여기서 특정 회원은 나 일수도, 다른 회원일 수도 있습니다.
      *
      * @param memberId 조회하는 회원의 ID
@@ -27,7 +27,7 @@ public interface BookStoryQueryFacade {
      * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
      * @return 조회된 책 이야기 목록 DTO
      */
-    BookStorySharedDTO.BookStoryListResponse getMyBookStories(String memberId, String targetMemberNickname, Long cursorId);
+    BookStorySharedDTO.BookStoryListResponse getBookStoriesByNickname(String memberId, String targetMemberNickname, Long cursorId);
 
     /**
      * scope에 따라 책 이야기 목록을 조회합니다. (내부용)
