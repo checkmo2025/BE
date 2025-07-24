@@ -53,7 +53,7 @@ public class ClubController {
      */
     @Operation(summary = "독서 모임 생성 API", description = "새로운 독서 모임을 생성합니다.")
     @Parameters({
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_117")
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
