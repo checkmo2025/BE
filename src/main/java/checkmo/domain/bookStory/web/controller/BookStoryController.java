@@ -90,7 +90,7 @@ public class BookStoryController {
         return null;
     }
 
-    @Operation(summary = "책 이야기 좋아요 누르기 API", description = "특정 책 이야기에 좋아요를 추가하거나 취소합니다.")
+    @Operation(summary = "책 이야기 좋아요/취소 API", description = "특정 책 이야기에 좋아요를 추가하거나 취소합니다.")
     @Parameter(name = "bookStoryId", description = "좋아요를 누를 책 이야기 ID", required = true, example = "1")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -100,10 +100,16 @@ public class BookStoryController {
     })
     @PostMapping("/{bookStoryId}/like")
     public ApiResponse<Long> toggleLikeBookStory(
+            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
             @PathVariable Long bookStoryId
     ) {
-        // TODO: 구현 예정
-        return null;
+        boolean isLiked = bookStoryCommandFacade.toggleLikeOnBookStory(memberId, bookStoryId);
+
+        if (isLiked) {
+            return ApiResponse.onSuccess("좋아요가 추가되었습니다.", bookStoryId);
+        } else {
+            return ApiResponse.onSuccess("좋아요가 취소되었습니다.", bookStoryId);
+        }
     }
 
     @Operation(summary = "책 이야기 수정 API", description = "작성한 책 이야기를 수정합니다.")
