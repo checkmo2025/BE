@@ -9,11 +9,11 @@ public interface BookStorySocialCommandService {
      * 책이야기에 좋아요를 토글(추가/제거)
      * 이미 좋아요가 있으면 제거, 없으면 추가
      *
-     * @param userId 토글하는 사용자의 ID
+     * @param memberId 토글하는 사용자의 ID
      * @param bookStoryId 토글할 책이야기의 ID
-     * @return 좋아요가 토글된 책이야기의 ID
+     * @return 좋아요가 추가됐는지/제거됐는지 여부
      */
-    Long toggleLikeOnBookStory(Long userId, Long bookStoryId);
+    boolean toggleLikeOnBookStory(String memberId, Long bookStoryId);
 
 /*
     아래 두개 메소드는 private으로 구현해서 사용하기
