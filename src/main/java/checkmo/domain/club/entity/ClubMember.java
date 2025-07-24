@@ -20,26 +20,36 @@ public class ClubMember extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ClubMemberStatus clubMemberStatus;
+
     private String joinMessage;
+
     @Column(name = "club_id", insertable = false, updatable = false)
     private Long clubId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
+    @Setter
     private Club club;
+
     @Column(name = "member_id", insertable = false, updatable = false)
     private String memberId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
     private List<BookReview> bookReviews = new ArrayList<>();
+
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
     private List<BookRecommend> bookRecommends = new ArrayList<>();
+
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
     private List<MemberTeam> memberTeams = new ArrayList<>();

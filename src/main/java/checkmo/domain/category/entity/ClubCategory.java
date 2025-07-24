@@ -21,6 +21,7 @@ public class ClubCategory extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
+    @Setter
     private Club club;
 
     @Column(name = "category_id", insertable = false, updatable = false)
