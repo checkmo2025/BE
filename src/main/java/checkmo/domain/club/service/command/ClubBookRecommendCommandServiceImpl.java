@@ -1,5 +1,7 @@
 package checkmo.domain.club.service.command;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.facade.BookCommandFacade;
 import checkmo.domain.book.facade.BookQueryFacade;
@@ -54,9 +56,36 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         return savedRecommend.getId();
     }
 
+    /**
+     * 독서모임에 추천 책을 수정합니다.
+     *
+     * @param clubId 독서모임 ID
+     * @param memberId 추천하는 회원 ID -> 클럽 회원인지 확인하는 로직 필요
+     * @param bookRecommendId 수정할 추천 책의 ID
+     * @param request 수정할 추천책의 정보 DTO
+     * @return 수정한 추천 책의 ID
+     */
     @Override
+    @Transactional
     public Long updateBookRecommend(Long clubId, String memberId, Long bookRecommendId, ClubRequestDTO.UpdateBookRecommendDTO request) {
-        return null;
+
+        // 1. 클럽 및 클럽 멤버 유효성 검증
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 추천 책 조회 및 존재 여부 검증
+        BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+
+        // 3. 작성자 권한 확인
+        if (!bookRecommend.getClubMember().equals(clubMember)) {
+            throw new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
+        }
+
+        // 4. 값 수정 (책 자체는 변경 불가)
+        bookRecommend.updateRecommendInfo(request.getContent(), request.getRate(), request.getTag());
+
+        return bookRecommend.getId();
     }
 
     @Override

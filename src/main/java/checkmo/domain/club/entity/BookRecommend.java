@@ -36,4 +36,11 @@ public class BookRecommend extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book;
+
+    public void updateRecommendInfo(String content, double rate, String tag) {
+        this.content = content;
+        this.rate = rate;
+        this.tag = tag;
+    }
+
 }

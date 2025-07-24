@@ -86,9 +86,20 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, bookRecommendId);
     }
 
+    /**
+     * ClubBookRecommendCommandService
+     * 추천한 책 정보를 수정합니다. (내부용)
+     *
+     * @param clubId          모임 ID
+     * @param memberId        요청자 회원 ID
+     * @param bookRecommendId 수정할 추천 책 ID
+     * @param request         수정할 정보 DTO
+     * @return 수정된 책의 상세 정보 DTO
+     */
     @Override
     public ClubResponseDTO.BookRecommendDetailDTO updateBookRecommend(Long clubId, String memberId, Long bookRecommendId, ClubRequestDTO.UpdateBookRecommendDTO request) {
-        return null;
+        Long updateBookRecommendId = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId, bookRecommendId, request);
+        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, updateBookRecommendId);
     }
 
     @Override
