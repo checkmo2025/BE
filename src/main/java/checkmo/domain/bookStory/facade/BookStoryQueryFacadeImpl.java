@@ -48,18 +48,19 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
         }
 
         // 3. Service를 통해 나머지 정보들을 가져옴
-        Map<Long, Boolean> likesMap = bookStoryQueryService.checkLikesForBookStories(memberId, bookStories);
-        Map<String, BookSharedDTO.BasicInfoDTO> bookInfosMap = bookStoryQueryService.findBookInfos(bookStories);
-        Map<String, MemberSharedDTO.WithFollowStatusDTO> authorInfosMap = bookStoryQueryService.findAuthorInfos(memberId, bookStories);
+        Map<Long, Boolean> isLikedMap = bookStoryQueryService.checkLikesForBookStories(memberId, bookStories);
+        Map<String, BookSharedDTO.BasicInfoDTO> bookInfoMap = bookStoryQueryService.findBookInfos(bookStories);
+        Map<String, MemberSharedDTO.WithFollowStatusDTO> authorInfoMap = bookStoryQueryService.findAuthorInfos(memberId, bookStories);
 
         // 4. DTO 변환
-        var list = bookStories.stream().map(story -> BookStoryConverter.fromBookStoryToResponse(
-                story,
-                memberId,
-                bookInfosMap.get(story.getBookId()),
-                authorInfosMap.get(story.getMemberId()),
-                likesMap.getOrDefault(story.getId(), false)
-        )).toList();
+        var list = bookStories.stream()
+                .map(bookStory -> BookStoryConverter.fromBookStoryToResponse(
+                        bookStory,
+                        memberId,
+                        bookInfoMap.get(bookStory.getBookId()),
+                        authorInfoMap.get(bookStory.getMemberId()),
+                        isLikedMap.getOrDefault(bookStory.getId(), false)
+                )).toList();
 
         // 5. 클럽 정보 조회 (책 이야기 페이지에서 맨 위에 보여줄 정보)
         var myClubList = bookStoryQueryService.findMyClubs(memberId);
