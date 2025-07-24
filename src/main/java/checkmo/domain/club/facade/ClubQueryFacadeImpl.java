@@ -2,6 +2,7 @@ package checkmo.domain.club.facade;
 
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.repository.ClubRepository;
+import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     private final ClubQueryService clubQueryService;
+    private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubRepository clubRepository; // 프록시용
 
     @Override
@@ -84,14 +86,30 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return null;
     }
 
+    /**
+     * ClubBookRecommendQueryService
+     * 모임의 추천 책 목록을 조회합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param cursorId 페이징 커서 ID
+     * @return 추천 책 목록 DTO
+     */
     @Override
-    public ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId) {
-        return null;
+    public ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
+        return clubBookRecommendQueryService.getRecommendedBooks(clubId, cursorId, memberId);
     }
 
+    /**
+     * ClubBookRecommendQueryService
+     * 추천 책의 상세 정보를 조회합니다. (내부용)
+     *
+     * @param clubId          모임 ID
+     * @param bookRecommendId 추천 책 ID
+     * @return 추천 책 상세 정보 DTO
+     */
     @Override
-    public ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId) {
-        return null;
+    public ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId, String memberId) {
+        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, bookRecommendId);
     }
 
     @Override
