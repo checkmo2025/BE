@@ -22,9 +22,52 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
 
+    /**
+     * 독서모임의 추천 책 목록을 조회합니다.
+     *
+     * 피그마 참고 페이지 : #검색하기 - 첫화면, 검색시
+     *
+     * @param clubId 독서모임 ID
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @return 추천 책 목록 DTO
+     */
     @Override
-    public ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId) {
-        return null;
+    public ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
+
+        // 1. 클럽 존재 여부 검증
+        clubQueryService.validateClub(clubId);
+
+        // 2. 클럽 멤버 여부 검증
+        clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 3. 커서 초기화
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 4. 커서 기반 추천 도서 리스트 조회
+        var bookRecommends = bookRecommendRepository.findTop10ByClubMember_Club_IdAndIdLessThanOrderByIdDesc(clubId, cursor);
+
+        // 5. 멤버 조회 (작성자 여부)
+        var currentMemberNickname = memberQueryFacade.getMemberBasicInfoForShare(memberId).getNickname();
+
+        // 6. dto 변환
+        var dtoList = bookRecommends.stream()
+                .map(bookRecommend -> {
+                    var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBook().getId());
+                    var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMember().getId());
+                    return ClubConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo, currentMemberNickname);
+                }).toList();
+
+        // 7. 다음 커서 설정
+        Long lastId = bookRecommends.isEmpty() ? null : bookRecommends.get(bookRecommends.size() - 1).getId();
+
+        // 8. 다음 페이지 존재 여부 체크
+        boolean hasNext = false;
+        if (lastId != null) {
+            hasNext = bookRecommendRepository.existsByClubMember_Club_IdAndIdLessThan(clubId, lastId);
+        }
+
+        // 9. DTO 변환 후 반환
+        return ClubConverter.toBookRecommendListDTO(dtoList, hasNext, lastId);
     }
 
     /**

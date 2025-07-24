@@ -116,6 +116,21 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * BookRecommendDTO 리스트 → BookRecommendListDTO 변환
+     */
+    public static ClubResponseDTO.BookRecommendListDTO toBookRecommendListDTO(
+            List<ClubResponseDTO.BookRecommendDetailDTO> dtoList,
+            boolean hasNext,
+            Long lastCursorId
+    ) {
+        return ClubResponseDTO.BookRecommendListDTO.builder()
+                .bookRecommendList(dtoList)
+                .hasNext(hasNext)
+                .nextCursor(lastCursorId)
+                .pageSize(dtoList.size())
+                .build();
+    }
 
     // =====================================================
     // 기타 메서드
