@@ -35,7 +35,7 @@ public class BookStoryCommandFacadeImpl implements BookStoryCommandFacade {
 
     @Override
     @Transactional
-    public Long toggleLikeOnBookStory(Long userId, Long bookStoryId) {
-        return 0L;
+    public boolean toggleLikeOnBookStory(String memberId, Long bookStoryId) {
+        return bookStorySocialCommandService.toggleLikeOnBookStory(memberId, bookStoryId);
     }
 }
