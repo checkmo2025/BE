@@ -2,7 +2,6 @@ package checkmo.domain.club.facade;
 
 import checkmo.domain.club.service.command.ClubManagementCommandService;
 import checkmo.domain.club.service.command.ClubMeetingCommandService;
-import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
