@@ -23,5 +23,6 @@ public interface ClubBookRecommendQueryService {
      * @param bookRecommendId 추천 책 ID
      * @return 추천 책 상세 정보 DTO
      */
-    ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId);
+    ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, String memberId, Long bookRecommendId);
+
 }
