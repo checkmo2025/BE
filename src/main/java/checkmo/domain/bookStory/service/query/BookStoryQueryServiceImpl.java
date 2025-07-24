@@ -32,17 +32,21 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     private final BookStoryLikedRepository bookStoryLikedRepository;
 
     @Override
-    public BookStoryResponseDTO.BookStoryResponse getBookStory(Long bookStoryId) {
-        return null;
+    public BookStoryResponseDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
+        BookStory bookStory = bookStoryRepository.findById(bookStoryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 책 이야기입니다."));
+
+        return BookStoryConverter.fromBookStoryToResponse(
+                bookStory,
+                memberId,
+                bookQueryFacade.getBookBasicInfoForShare(bookStory.getBookId()),
+                memberQueryFacade.getMemberWithFollowStatusForShare(bookStory.getMemberId(), memberId),
+                bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStory.getId())
+        );
     }
 
     @Override
-    public BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, Long cursorId) {
-        return null;
-    }
-
-    @Override
-    public BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, int size) {
+    public BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, String targetMemberNickname, Long cursorId) {
         return null;
     }
 
