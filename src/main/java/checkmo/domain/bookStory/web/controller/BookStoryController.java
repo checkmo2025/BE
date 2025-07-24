@@ -86,8 +86,8 @@ public class BookStoryController {
             @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
             @PathVariable Long bookStoryId
     ) {
-        // TODO: 구현 예정
-        return null;
+        var bookStory = bookStoryQueryFacade.getBookStory(memberId, bookStoryId);
+        return ApiResponse.onSuccess(bookStory);
     }
 
     @Operation(summary = "책 이야기 좋아요/취소 API", description = "특정 책 이야기에 좋아요를 추가하거나 취소합니다.")
