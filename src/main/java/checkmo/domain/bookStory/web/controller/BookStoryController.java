@@ -4,7 +4,7 @@ import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.bookStory.facade.BookStoryCommandFacade;
 import checkmo.domain.bookStory.facade.BookStoryQueryFacade;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
+import checkmo.global.dto.BookStorySharedDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -59,7 +59,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
     @GetMapping
-    public ApiResponse<BookStoryResponseDTO.BookStoryListResponse> getBookStories(
+    public ApiResponse<BookStorySharedDTO.BookStoryListResponse> getBookStories(
             @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
             @RequestParam(required = false, defaultValue = "ALL") BookStoryRequestDTO.BookStoryScope scope,
             @RequestParam(required = false) Long clubId,
@@ -82,7 +82,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
-    public ApiResponse<BookStoryResponseDTO.BookStoryResponse> getBookStory(
+    public ApiResponse<BookStorySharedDTO.BookStoryResponse> getBookStory(
             @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
             @PathVariable Long bookStoryId
     ) {

@@ -1,7 +1,6 @@
 package checkmo.domain.bookStory.facade;
 
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.global.dto.BookStorySharedDTO;
 
 /**
@@ -17,7 +16,7 @@ public interface BookStoryQueryFacade {
      * @param bookStoryId 조회할 책 이야기 ID
      * @return 조회된 책 이야기 상세 정보 DTO
      */
-    BookStoryResponseDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId);
+    BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId);
 
     /**
      * 특정 회원의 책 이야기 목록을 커서 기반으로 조회합니다. (내부용)
@@ -28,7 +27,7 @@ public interface BookStoryQueryFacade {
      * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
      * @return 조회된 책 이야기 목록 DTO
      */
-    BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, String targetMemberNickname, Long cursorId);
+    BookStorySharedDTO.BookStoryListResponse getMyBookStories(String memberId, String targetMemberNickname, Long cursorId);
 
     /**
      * scope에 따라 책 이야기 목록을 조회합니다. (내부용)
@@ -40,5 +39,5 @@ public interface BookStoryQueryFacade {
      * @param cursorId     페이지 번호 (1부터 시작)
      * @return scope에 따른 책 이야기 목록 DTO
      */
-    BookStoryResponseDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId);
+    BookStorySharedDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId);
 }

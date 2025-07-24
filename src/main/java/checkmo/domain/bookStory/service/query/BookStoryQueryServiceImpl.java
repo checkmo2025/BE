@@ -6,7 +6,7 @@ import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.repository.BookStoryLikedRepository;
 import checkmo.domain.bookStory.repository.BookStoryRepository;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
+import checkmo.global.dto.BookStorySharedDTO;
 import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
@@ -32,7 +32,7 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     private final BookStoryLikedRepository bookStoryLikedRepository;
 
     @Override
-    public BookStoryResponseDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
+    public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 책 이야기입니다."));
 
@@ -46,12 +46,12 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     }
 
     @Override
-    public BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, String targetMemberNickname, Long cursorId) {
+    public BookStorySharedDTO.BookStoryListResponse getMyBookStories(String memberId, String targetMemberNickname, Long cursorId) {
         return null;
     }
 
     @Override
-    public BookStoryResponseDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId) {
+    public BookStorySharedDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId) {
 
         List<BookStory> bookStories = bookStoryRepository.searchBookStories(memberId, scope, clubId, cursorId, DEFAULT_PAGE_SIZE + 1);
 
