@@ -1,18 +1,23 @@
 package checkmo.domain.club.service.query;
 
+import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+
+import java.util.List;
 
 public interface ClubBookRecommendQueryService {
 
     /**
-     * 독서모임의 추천 책 목록을 커서 기반으로 조회합니다.
+     * 순수하게 BookRecommend 엔티티들만 조회 (페이징 없음)
      *
      * @param clubId   독서모임 ID
      * @param cursorId 커서 ID (페이징용, 처음 조회 시 null 또는 0)
      * @param memberId 회원 ID
-     * @return 추천 책 목록 DTO 리스트
+     * @return 추천 책 목록 리스트
      */
-    ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId, String memberId);
+    List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, String memberId);
+
+    boolean hasNextPage(Long clubId, Long lastId);
 
     /**
      * 독서모임의 추천 책 상세 정보를 조회합니다.
