@@ -102,9 +102,17 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, updateBookRecommendId);
     }
 
+    /**
+     * ClubBookRecommendCommandService
+     * 추천한 책을 삭제합니다. (내부용)
+     *
+     * @param clubId          모임 ID
+     * @param memberId        요청자 회원 ID
+     * @param bookRecommendId 삭제할 추천 책 ID
+     */
     @Override
     public void deleteRecommendedBook(Long clubId, String memberId, Long bookRecommendId) {
-
+        clubBookRecommendCommandService.deleteRecommendedBook(clubId, memberId, bookRecommendId);
     }
 
     @Override

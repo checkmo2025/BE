@@ -88,7 +88,31 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         return bookRecommend.getId();
     }
 
+    /**
+     * 독서모임에서 추천한 책을 삭제합니다.
+     *
+     * @param clubId 독서모임 ID
+     * @param memberId 삭제하는 회원 ID -> 클럽 회원인지 확인하는 로직 필요
+     * @param bookRecommendId 삭제할 추천 책의 ID
+     */
     @Override
     public void deleteRecommendedBook(Long clubId, String memberId, Long bookRecommendId) {
+
+        // 1. 클럽 및 클럽 멤버 유효성 검증
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 추천 책 조회 및 존재 여부 검증
+        BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+
+        // 3. 작성자 권한 확인
+        if (!bookRecommend.getClubMember().equals(clubMember)) {
+            throw new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
+        }
+
+        // 4. 삭제
+        bookRecommendRepository.delete(bookRecommend);
     }
+
 }

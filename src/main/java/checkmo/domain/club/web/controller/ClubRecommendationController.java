@@ -88,4 +88,23 @@ public class ClubRecommendationController {
         return ApiResponse.onSuccess(clubQueryFacade.getRecommendedBookDetail(clubId, recommendId, memberId));
     }
 
+    @Operation(summary = "추천 책 삭제", description = "추천 책을 삭제합니다. 작성자만 삭제할 수 있습니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "작성자가 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "추천 책 또는 클럽을 찾을 수 없음")
+    })
+    @DeleteMapping("/{recommendId}")
+    public ApiResponse<Void> deleteRecommendation(
+            @PathVariable Long clubId,
+            @PathVariable Long recommendId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        clubCommandFacade.deleteRecommendedBook(clubId, memberId, recommendId);
+        return ApiResponse.onSuccess(null);
+    }
+
+
 }
