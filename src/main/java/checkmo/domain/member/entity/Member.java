@@ -92,8 +92,8 @@ public class Member extends BaseEntity {
 
     // 프로필 추가 정보 업데이트
     public void updateAdditionalInfo(String nickName, String description, String imgUrl) {
-        this.nickName = nickName;
-        this.description = description;
+        this.nickName = nickName != null ? nickName : "";
+        this.description = description != null ? description : "";
         this.imgUrl = imgUrl != null ? imgUrl : "";
     }
 
