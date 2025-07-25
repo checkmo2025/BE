@@ -93,6 +93,7 @@ public class ClubConverter {
                 .tag(request.getTag())
                 .clubMember(clubMember)
                 .book(proxyBook)
+                .bookId(proxyBook.getId())
                 .build();
     }
 
