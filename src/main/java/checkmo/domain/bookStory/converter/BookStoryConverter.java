@@ -3,7 +3,7 @@ package checkmo.domain.bookStory.converter;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
+import checkmo.global.dto.BookStorySharedDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
@@ -39,15 +39,15 @@ public class BookStoryConverter {
     /**
      * BookStoryResponseDTO -> BookStoryListResponse 변환
      */
-    public static BookStoryResponseDTO.BookStoryListResponse fromBookStoryResponses(
-            List<BookStoryResponseDTO.BookStoryResponse> bookStoryResponses,
+    public static BookStorySharedDTO.BookStoryListResponse fromBookStoryResponses(
+            List<BookStorySharedDTO.BookStoryResponse> bookStoryResponses,
             boolean hasNext,
             Long nextCursor,
             int pageSize,
-            BookStoryResponseDTO.ScopeInfo scopeInfo,
+            BookStorySharedDTO.ScopeInfo scopeInfo,
             ClubSharedDTO.MyClubListDTO myClubList
     ) {
-        return BookStoryResponseDTO.BookStoryListResponse.builder()
+        return BookStorySharedDTO.BookStoryListResponse.builder()
                 .scopeInfo(scopeInfo)
                 .memberClubList(myClubList)
                 .bookStoryResponses(bookStoryResponses)
@@ -60,11 +60,11 @@ public class BookStoryConverter {
     /**
      * BookStoryScope + MyClubInfoDTO -> ScopeInfo 변환
      */
-    public static BookStoryResponseDTO.ScopeInfo fromScopeInfo(
+    public static BookStorySharedDTO.ScopeInfo fromScopeInfo(
             BookStoryRequestDTO.BookStoryScope scope,
             ClubSharedDTO.MyClubInfoDTO selectedClub
     ) {
-        return BookStoryResponseDTO.ScopeInfo.builder()
+        return BookStorySharedDTO.ScopeInfo.builder()
                 .scope(scope)
                 .selectedClub(selectedClub)
                 .build();
@@ -73,14 +73,14 @@ public class BookStoryConverter {
     /**
      * BookStory -> BookStoryResponseDTO 변환
      */
-    public static BookStoryResponseDTO.BookStoryResponse fromBookStoryToResponse(
+    public static BookStorySharedDTO.BookStoryResponse fromBookStoryToResponse(
             BookStory bookStory,
             String currentMemberId,
             BookSharedDTO.BasicInfoDTO bookInfo,
             MemberSharedDTO.WithFollowStatusDTO authorInfo,
             boolean isLiked
     ) {
-        return BookStoryResponseDTO.BookStoryResponse.builder()
+        return BookStorySharedDTO.BookStoryResponse.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)

@@ -1,20 +1,110 @@
 package checkmo.domain.club.web.controller;
 
+import checkmo.apiPayload.ApiResponse;
+import checkmo.domain.club.facade.ClubCommandFacade;
+import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/api/clubs/{clubId}/recommendations")
 @RequiredArgsConstructor
 @Tag(name = "모임 추천 책", description = "독서 모임 내 책 추천 및 관리 API")
 public class ClubRecommendationController {
 
-    // 추천 책 관리
-    // POST /api/clubs/{clubId}/recommendations - 추천 책 작성
-    // PATCH /api/clubs/{clubId}/recommendations/{recommendId} - 추천 책 수정
-    // DELETE /api/clubs/{clubId}/recommendations/{recommendId} - 추천 책 삭제
-    // GET /api/clubs/{clubId}/recommendations - 추천 책 전체 조회
-    // GET /api/clubs/{clubId}/recommendations/{recommendId} - 추천 책 상세 조회
+    private final ClubCommandFacade clubCommandFacade;
+    private final ClubQueryFacade clubQueryFacade;
+
+    @Operation(summary = "추천 책 작성", description = "특정 모임에 추천 책을 작성합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "입력 값이 유효하지 않음")
+    })
+    @PostMapping
+    public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> createRecommendation(
+            @PathVariable Long clubId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId,
+            @RequestBody @Valid ClubRequestDTO.CreateBookRecommendDTO request
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        return ApiResponse.onSuccess(clubCommandFacade.recommendBook(clubId, memberId, request));
+    }
+
+    @Operation(summary = "추천 책 수정", description = "추천 책의 소개 이유, 별점, 태그를 수정합니다. 책 자체는 변경할 수 없습니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "추천 책 또는 클럽을 찾을 수 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "작성자가 아님")
+    })
+    @PatchMapping("/{recommendId}")
+    public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> updateRecommendation(
+            @PathVariable Long clubId,
+            @PathVariable Long recommendId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId,
+            @RequestBody @Valid ClubRequestDTO.UpdateBookRecommendDTO request
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        return ApiResponse.onSuccess(clubCommandFacade.updateBookRecommend(clubId, memberId, recommendId, request));
+    }
+
+    @Operation(summary = "추천 책 전체 조회", description = "해당 독서모임의 추천 책 목록을 커서 기반으로 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "클럽을 찾을 수 없음")
+    })
+    @GetMapping
+    public ApiResponse<ClubResponseDTO.BookRecommendListDTO> getAllRecommendations(
+            @PathVariable Long clubId,
+            @RequestParam(required = false) Long cursorId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        return ApiResponse.onSuccess(clubQueryFacade.getRecommendedBooks(clubId, cursorId, memberId));
+    }
+
+    @Operation(summary = "추천 책 상세 조회", description = "추천 책 ID를 기반으로 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "추천 책 또는 클럽을 찾을 수 없음")
+    })
+    @GetMapping("/{recommendId}")
+    public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> getRecommendationDetail(
+            @PathVariable Long clubId,
+            @PathVariable Long recommendId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        return ApiResponse.onSuccess(clubQueryFacade.getRecommendedBookDetail(clubId, recommendId, memberId));
+    }
+
+    @Operation(summary = "추천 책 삭제", description = "추천 책을 삭제합니다. 작성자만 삭제할 수 있습니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "작성자가 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "추천 책 또는 클럽을 찾을 수 없음")
+    })
+    @DeleteMapping("/{recommendId}")
+    public ApiResponse<Void> deleteRecommendation(
+            @PathVariable Long clubId,
+            @PathVariable Long recommendId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        clubCommandFacade.deleteRecommendedBook(clubId, memberId, recommendId);
+        return ApiResponse.onSuccess(null);
+    }
+
+
 }

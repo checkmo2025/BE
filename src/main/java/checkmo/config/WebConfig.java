@@ -1,4 +1,3 @@
-/*
 package checkmo.config;
 
 import checkmo.global.auth.CurrentMemberArgumentResolver;
@@ -20,4 +19,3 @@ public class WebConfig implements WebMvcConfigurer {
         resolvers.add(currentMemberArgumentResolver);
     }
 }
- */

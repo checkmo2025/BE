@@ -1,11 +1,15 @@
 package checkmo.domain.club.facade;
 
-import checkmo.domain.club.converter.ClubConverter;
-import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
+import checkmo.domain.book.facade.BookQueryFacade;
+import checkmo.domain.club.converter.ClubConverter;
+import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.repository.ClubRepository;
+import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
+import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
@@ -24,7 +28,12 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     private final ClubMeetingQueryService clubMeetingQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
+    private final ClubQueryService clubQueryService;
+    private final ClubBookRecommendQueryService clubBookRecommendQueryService;
+    private final ClubRepository clubRepository; // 프록시용
+
     private final MemberQueryFacade memberQueryFacade;
+    private final BookQueryFacade bookQueryFacade;
 
     @Override
     public ClubSharedDTO.MyClubListDTO getMyClubListForShare(String memberId) {
@@ -41,9 +50,17 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return null;
     }
 
+    /**
+     * ClubQueryService
+     * 독서 모임의 상세 정보를 조회합니다. (내부용)
+     *
+     * @param clubId   조회할 모임 ID
+     * @param memberId 조회자 회원 ID
+     * @return 모임 상세 정보 DTO
+     */
     @Override
     public ClubResponseDTO.ClubDetailDTO getClubInfo(Long clubId, String memberId) {
-        return null;
+        return clubQueryService.getClubInfo(clubId, memberId);
     }
 
     @Override
@@ -51,9 +68,16 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return null;
     }
 
+    /**
+     * ClubQueryService
+     * 모임 이름의 중복 여부를 확인합니다. (내부용)
+     *
+     * @param clubName 확인할 모임 이름
+     * @return 중복 시 true
+     */
     @Override
     public boolean isDuplicateClubName(String clubName) {
-        return false;
+        return clubQueryService.isDuplicateClubName(clubName);
     }
 
     @Override
@@ -76,14 +100,51 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return null;
     }
 
+    /**
+     * ClubBookRecommendQueryService
+     * 모임의 추천 책 목록을 조회합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param cursorId 페이징 커서 ID
+     * @return 추천 책 목록 DTO
+     */
     @Override
-    public ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId) {
-        return null;
+    public ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
+
+        // 1. 커서 초기화 (페이징 로직)
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 2. ServiceImpl에서 순수 엔티티 조회
+        var bookRecommends = clubBookRecommendQueryService.getRecommendedBooks(clubId, cursor, memberId);
+
+        // 3. 외부 도메인 정보 조합 (Facade에서 처리)
+        var currentMemberNickname = memberQueryFacade.getMemberBasicInfoForShare(memberId).getNickname();
+
+        var dtoList = bookRecommends.stream()
+                .map(bookRecommend -> {
+                    var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBookId());
+                    var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
+                    return ClubConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo, currentMemberNickname);
+                }).toList();
+
+        // 4. 페이징 처리 (Facade에서)
+        Long lastId = bookRecommends.isEmpty() ? null : bookRecommends.get(bookRecommends.size() - 1).getId();
+        boolean hasNext = clubBookRecommendQueryService.hasNextPage(clubId, lastId);
+
+        return ClubConverter.toBookRecommendListDTO(dtoList, hasNext, lastId);
     }
 
+    /**
+     * ClubBookRecommendQueryService
+     * 추천 책의 상세 정보를 조회합니다. (내부용)
+     *
+     * @param clubId          모임 ID
+     * @param bookRecommendId 추천 책 ID
+     * @return 추천 책 상세 정보 DTO
+     */
     @Override
-    public ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId) {
-        return null;
+    public ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId, String memberId) {
+        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, bookRecommendId);
     }
 
     @Override
@@ -141,6 +202,6 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public Club findClubReferenceById(Long clubId) {
-        return null;
+        return clubRepository.getReferenceById(clubId);
     }
 }

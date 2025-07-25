@@ -124,7 +124,7 @@ public interface ClubQueryFacade {
      * @param cursorId 페이징 커서 ID
      * @return 추천 책 목록 DTO
      */
-    ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId);
+    ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId, String memberId);
 
     /**
      * ClubBookRecommendQueryService
@@ -134,7 +134,7 @@ public interface ClubQueryFacade {
      * @param bookRecommendId 추천 책 ID
      * @return 추천 책 상세 정보 DTO
      */
-    ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId);
+    ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId, String memberId);
 
     /**
      * ClubBookShelfQueryService

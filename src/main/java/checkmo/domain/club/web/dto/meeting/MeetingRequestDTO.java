@@ -1,5 +1,6 @@
 package checkmo.domain.club.web.dto.meeting;
 
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.global.dto.BookSharedDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

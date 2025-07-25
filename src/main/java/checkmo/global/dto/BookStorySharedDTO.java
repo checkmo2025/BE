@@ -1,5 +1,7 @@
 package checkmo.global.dto;
 
+import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,39 +10,47 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * 북스토리 도메인과 관련된 공유 DTO 클래스
- * 다른 도메인에서 북스토리 정보를 참조할 때 사용
- */
 public class BookStorySharedDTO {
 
-    /**
-     * 북스토리 미리보기 목록 응답 DTO
-     * 외부 도메인에서 북스토리 특정 개수만큼 조회할 때 사용
-     */
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookStoryPreviewListDTO {
-        private List<BookStoryPreviewDTO> bookStoryPreviews;
+    public static class BookStoryListResponse {
+        private ScopeInfo scopeInfo;    // 현재 선택된 범위 정보
+        private ClubSharedDTO.MyClubListDTO memberClubList; // 사용자가 속한 클럽 목록
+        private List<BookStoryResponse> bookStoryResponses;
+        private boolean hasNext;        // 다음 페이지 존재 여부
+        private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
+        private int pageSize;           // 현재 페이지 크기
     }
 
-    /**
-     * 북스토리 미리보기 정보 DTO
-     * 북스토리의 기본 정보와 관련 책 정보, 좋아요 수 등을 포함
-     * 피드나 목록 화면에서 북스토리를 간략히 표시할 때 사용
-     */
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookStoryPreviewDTO {
+    public static class ScopeInfo {
+        private BookStoryRequestDTO.BookStoryScope scope; // 현재 범위 (ALL, MY, CLUB)
+        private ClubSharedDTO.MyClubInfoDTO selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookStoryResponse {
         private Long bookStoryId;
+        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.WithFollowStatusDTO authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
-        private BookSharedDTO.BasicInfoDTO bookInfo; // Book 도메인의 공유 DTO
+        private String description;
         private int likes;
+
+        private boolean likedByMe; // 내가 좋아요를 눌렀는지 여부 (true: 눌렀음, false: 안누름)
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
-        private boolean isLiked; // 조회하는 사람의 좋아요 여부
+
+        private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 }

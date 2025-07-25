@@ -6,24 +6,26 @@ import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.repository.BookStoryLikedRepository;
 import checkmo.domain.bookStory.repository.BookStoryRepository;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
+import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.BookStorySharedDTO;
 import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookStoryQueryServiceImpl implements BookStoryQueryService {
-
-    public static final int DEFAULT_PAGE_SIZE = 20;
 
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
@@ -32,57 +34,66 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     private final BookStoryLikedRepository bookStoryLikedRepository;
 
     @Override
-    public BookStoryResponseDTO.BookStoryResponse getBookStory(Long bookStoryId) {
-        return null;
+    public List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId, int pageSize) {
+        // TODO: 현재 내부에서 외부 도메인의 Q클래스를 호출해서 QueryDSL 사용하고 있는데, 이 부분도 리팩토링 필요
+        return bookStoryRepository.searchBookStories(memberId, scope, clubId, cursorId, pageSize + 1);
     }
 
     @Override
-    public BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, Long cursorId) {
-        return null;
+    public Map<Long, Boolean> checkLikesForBookStories(String memberId, List<BookStory> bookStories) {
+        // TODO: 나중에 리팩토링으로 N+1 문제 해결
+        return bookStories.stream()
+                .collect(Collectors.toMap(
+                        BookStory::getId,
+                        story -> bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, story.getId())
+                ));
     }
 
     @Override
-    public BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, int size) {
-        return null;
+    public ClubSharedDTO.MyClubListDTO findMyClubs(String memberId) {
+        return clubQueryFacade.getMyClubListForShare(memberId);
     }
 
     @Override
-    public BookStoryResponseDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId) {
+    public Map<String, BookSharedDTO.BasicInfoDTO> findBookInfos(List<BookStory> bookStories) {
+        // TODO: 나중에 리팩토링으로 N+1 문제 해결, 외부 도메인이라 QueryDSL에서 fetchJoin 사용 하지않고 하려니 장난 아니게 어려움..
+        return bookStories.stream()
+                .map(BookStory::getBookId)
+                .distinct()
+                .collect(Collectors.toMap(
+                        bookId -> bookId,
+                        bookQueryFacade::getBookBasicInfoForShare
+                ));
+    }
 
-        List<BookStory> bookStories = bookStoryRepository.searchBookStories(memberId, scope, clubId, cursorId, DEFAULT_PAGE_SIZE + 1);
+    @Override
+    public Map<String, MemberSharedDTO.WithFollowStatusDTO> findAuthorInfos(String currentMemberId, List<BookStory> bookStories) {
+        // TODO: 나중에 리팩토링으로 N+1 문제 해결, 외부 도메인이라 QueryDSL에서 fetchJoin 사용 하지않고 하려니 장난 아니게 어려움..
+        return bookStories.stream()
+                .map(BookStory::getMemberId)
+                .distinct()
+                .collect(Collectors.toMap(
+                        authorId -> authorId,
+                        authorId -> memberQueryFacade.getMemberWithFollowStatusForShare(authorId, currentMemberId)
+                ));
+    }
 
-        boolean hasNext = bookStories.size() > DEFAULT_PAGE_SIZE;
-        Long nextCursor = null;
+    @Override
+    public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
+        BookStory bookStory = bookStoryRepository.findById(bookStoryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 책 이야기입니다."));
 
-        if (hasNext) {
-            bookStories.removeLast();
-            nextCursor = bookStories.getLast().getId();
-        }
+        return BookStoryConverter.fromBookStoryToResponse(
+                bookStory,
+                memberId,
+                bookQueryFacade.getBookBasicInfoForShare(bookStory.getBookId()),
+                memberQueryFacade.getMemberWithFollowStatusForShare(bookStory.getMemberId(), memberId),
+                bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStory.getId())
+        );
+    }
 
-        var list = bookStories.stream().map(
-                bookStory ->
-                        BookStoryConverter.fromBookStoryToResponse(
-                                bookStory,
-                                memberId,
-                                bookQueryFacade.getBookBasicInfoForShare(bookStory.getBookId()),
-                                memberQueryFacade.getMemberWithFollowStatusForShare(bookStory.getMemberId(), memberId),
-                                bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStory.getId())
-                        )).toList();
-
-        var myClubList = clubQueryFacade.getMyClubListForShare(memberId);
-        
-        ClubSharedDTO.MyClubInfoDTO myClubInfoDTO = null;
-        
-        // CLUB scope일 때만 선택된 클럽 정보를 찾음
-        if (scope == BookStoryRequestDTO.BookStoryScope.CLUB) {
-            myClubInfoDTO = myClubList.getClubList().stream()
-                    .filter(club -> club.getClubId().equals(clubId))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클럽이거나 가입하지 않은 클럽입니다."));
-        }
-
-        var scopeInfo = BookStoryConverter.fromScopeInfo(scope, myClubInfoDTO);
-
-        return BookStoryConverter.fromBookStoryResponses(list, hasNext, nextCursor, DEFAULT_PAGE_SIZE, scopeInfo, myClubList);
+    @Override
+    public BookStorySharedDTO.BookStoryListResponse getMyBookStoriesByNickname(String memberId, String targetMemberNickname, Long cursorId) {
+        return null;
     }
 }

@@ -1,5 +1,7 @@
 package checkmo.domain.category.web.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +11,9 @@ public class CategoryRequestDTO {
 
     @Getter
     @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class CategoryListRequestDTO {
-        private List<Long> categoryId;
+        private List<Long> categoryIdList;
     }
 }
