@@ -8,6 +8,7 @@ import checkmo.domain.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -51,8 +52,8 @@ public class AuthController {
     // 회원가입
     @Operation(summary = "회원가입", description = "이메일 인증 완료 후 회원가입을 진행합니다.")
     @PostMapping("/signup")
-    public ApiResponse<MemberResponseDTO.SignUpResponseDTO> signUp(@Valid @RequestBody MemberRequestDTO.SignUpRequestDTO request) {
-        return ApiResponse.onSuccess(memberCommandFacade.signUp(request));
+    public ApiResponse<MemberResponseDTO.SignUpResponseDTO> signUp(@Valid @RequestBody MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
+        return ApiResponse.onSuccess(memberCommandFacade.signUp(request, response));
     }
 
     // 회원 추가 정보 입력

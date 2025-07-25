@@ -13,6 +13,7 @@ import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
+import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
@@ -106,7 +107,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     @Transactional
-    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request) {
+    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
 
         // 이메일 중복 확인
         if (memberRepository.existsByEmail(request.getEmail())) {
@@ -127,7 +128,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         memberRepository.save(newMember);
         redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
 
-        memberAuthenticationService.login(request.getEmail(), request.getPassword());
+        memberAuthenticationService.login(request.getEmail(), request.getPassword(), response);
 
         return MemberConverter.fromMember(newMember);
     }

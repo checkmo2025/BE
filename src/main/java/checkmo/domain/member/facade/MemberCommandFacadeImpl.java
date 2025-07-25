@@ -4,6 +4,7 @@ import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.command.MemberRegistrationCommandService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,8 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request) {
-        return memberRegistrationCommandService.signUp(request);
+    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
+        return memberRegistrationCommandService.signUp(request, response);
     }
 
     @Override
@@ -37,8 +38,8 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public void login(String email, String password) {
-        memberAuthenticationService.login(email, password);
+    public void login(String email, String password, HttpServletResponse response) {
+        memberAuthenticationService.login(email, password, response);
     }
 
     @Override

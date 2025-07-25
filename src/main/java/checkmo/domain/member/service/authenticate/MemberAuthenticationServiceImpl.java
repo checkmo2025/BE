@@ -17,10 +17,9 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final HttpServletResponse response;
 
     @Override
-    public void login(String email, String password) {
+    public void login(String email, String password, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(email, password);
@@ -35,8 +34,8 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
         // JWT 토큰 생성
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
-        addTokenToCookie("accessToken", jwtToken.getAccessToken());
-        addTokenToCookie("refreshToken", jwtToken.getRefreshToken());
+        addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), 2 * 60 * 60); // 2시간 유효
+        addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), 14 * 24 * 60 * 60); // 14일 유효
 
         // TODO: Redis에 리프레시 토큰 저장 로직 추가
     }
@@ -51,12 +50,12 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
         // TODO: 계정 복구 로직 구현
     }
 
-    private void addTokenToCookie(String cookieName, String token) {
+    private void addTokenToCookie(HttpServletResponse response, String cookieName, String token, int maxAge) {
         Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true); // 클라이언트 스크립트에서 접근 불가
         cookie.setAttribute("SameSite", "Strict"); // CSRF 공격 방지
         cookie.setPath("/"); // 모든 경로에서 접근 가능
-        cookie.setMaxAge(14 * 24 * 60 * 60); // 14일 동안 유효
+        cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
     }
 }
