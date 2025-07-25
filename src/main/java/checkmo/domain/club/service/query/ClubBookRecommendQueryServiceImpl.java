@@ -52,8 +52,8 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
         // 6. dto 변환
         var dtoList = bookRecommends.stream()
                 .map(bookRecommend -> {
-                    var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBook().getId());
-                    var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMember().getId());
+                    var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBookId());
+                    var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
                     return ClubConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo, currentMemberNickname);
                 }).toList();
 
@@ -96,8 +96,8 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
 
         // 4. 책 및 작성자 정보 (프록시로 id 조회)
-        var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBook().getId());
-        var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMember().getId());
+        var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBookId());
+        var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
 
         // 5. 현재 사용자 정보 조회 → 닉네임
         var currentMemberInfo = memberQueryFacade.getMemberBasicInfoForShare(memberId);
