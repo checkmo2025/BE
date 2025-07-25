@@ -54,7 +54,9 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private void addTokenToCookie(String cookieName, String token) {
         Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true); // 클라이언트 스크립트에서 접근 불가
+        cookie.setAttribute("SameSite", "Strict"); // CSRF 공격 방지
         cookie.setPath("/"); // 모든 경로에서 접근 가능
+        cookie.setMaxAge(14 * 24 * 60 * 60); // 14일 동안 유효
         response.addCookie(cookie);
     }
 }
