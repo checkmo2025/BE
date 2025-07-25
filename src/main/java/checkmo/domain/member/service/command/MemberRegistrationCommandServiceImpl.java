@@ -2,29 +2,37 @@ package checkmo.domain.member.service.command;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.member.converter.MemberConverter;
+import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.repository.MemberRepository;
+import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.common.EmailSender;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberRegistrationCommandServiceImpl implements MemberRegistrationCommandService {
 
+    private final MemberRepository memberRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final EmailSender emailSender;
+    private final MemberAuthenticationService memberAuthenticationService;
 
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
     private static final SecureRandom secureRandom = new SecureRandom();
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void sendEmailVerification(String email) {
@@ -35,7 +43,10 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
             throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_SENT);
         }
 
-        // TODO: 이미 회원가입이 완료된 이메일인지 확인하는 로직 추가
+        // 이미 회원가입이 완료된 이메일인지 확인하는 로직
+        if (memberRepository.existsByEmail(email)) {
+            throw new GeneralException(ErrorStatus.MEMBER_ALREADY_EXISTS);
+        }
 
         // 6자리 랜덤 인증번호 생성
         String verificationCode = String.format("%06d", secureRandom.nextInt(1000000));
@@ -86,8 +97,29 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request) {
-        // TODO: 회원 가입 로직 구현
-        throw new UnsupportedOperationException("추후 구현 예정");
+
+        // 이메일 중복 확인
+        if (memberRepository.existsByEmail(request.getEmail())) {
+            throw new GeneralException(ErrorStatus.MEMBER_ALREADY_EXISTS);
+        }
+
+        // 이메일 인증 여부 확인
+        String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
+        Boolean isVerified = (Boolean) redisTemplate.opsForHash().get(redisKey, "verified");
+        if (!Boolean.TRUE.equals(isVerified)) {
+            throw new GeneralException(ErrorStatus.EMAIL_NOT_VERIFIED);
+        }
+
+        // 회원 정보 저장
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        Member newMember = MemberConverter.fromSignUpRequestDTO(request, encodedPassword);
+
+        memberRepository.save(newMember);
+        redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
+
+        memberAuthenticationService.login(request.getEmail(), request.getPassword());
+
+        return MemberConverter.fromMember(newMember);
     }
 
     @Override

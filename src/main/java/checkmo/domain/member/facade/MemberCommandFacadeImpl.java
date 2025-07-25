@@ -1,5 +1,6 @@
 package checkmo.domain.member.facade;
 
+import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.command.MemberRegistrationCommandService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
     private final MemberRegistrationCommandService memberRegistrationCommandService;
+    private final MemberAuthenticationService memberAuthenticationService;
 
     @Override
     public void sendEmailVerification(String email) {
@@ -26,7 +28,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
     @Override
     public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+        return memberRegistrationCommandService.signUp(request);
     }
 
     @Override
@@ -36,6 +38,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
     @Override
     public void login(String email, String password) {
+        memberAuthenticationService.login(email, password);
     }
 
     @Override
