@@ -1,7 +1,6 @@
 package checkmo.domain.bookStory.facade;
 
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.domain.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.global.dto.BookStorySharedDTO;
 
 /**
@@ -13,21 +12,22 @@ public interface BookStoryQueryFacade {
     /**
      * 특정 책 이야기의 상세 정보를 조회합니다. (내부용)
      *
+     * @param memberId 조회하는 회원의 ID
      * @param bookStoryId 조회할 책 이야기 ID
      * @return 조회된 책 이야기 상세 정보 DTO
      */
-    BookStoryResponseDTO.BookStoryResponse getBookStory(Long bookStoryId);
+    BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId);
 
     /**
-     * 특정 회원의 책 이야기 목록을 커서 기반으로 조회합니다. (내부용)
+     * 특정 회원의 책 이야기 목록을 커서 기반으로 조회합니다. (외부용)
      * 여기서 특정 회원은 나 일수도, 다른 회원일 수도 있습니다.
      *
      * @param memberId 조회하는 회원의 ID
-     * @param targetMemberId 조회할 회원의 ID
+     * @param targetMemberNickname 조회할 회원의 닉네임
      * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
      * @return 조회된 책 이야기 목록 DTO
      */
-    BookStoryResponseDTO.BookStoryListResponse getMyBookStories(String memberId, String targetMemberId, Long cursorId);
+    BookStorySharedDTO.BookStoryListResponse getBookStoriesByNickname(String memberId, String targetMemberNickname, Long cursorId);
 
     /**
      * scope에 따라 책 이야기 목록을 조회합니다. (내부용)
@@ -39,17 +39,5 @@ public interface BookStoryQueryFacade {
      * @param cursorId     페이지 번호 (1부터 시작)
      * @return scope에 따른 책 이야기 목록 DTO
      */
-    BookStoryResponseDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId);
-
-    /**
-     * 특정 회원의 책 이야기 미리보기 목록을 조회합니다. (외부용)
-     * 홈 화면, 마이페이지 등 다른 도메인/서비스에서 사용합니다.
-     * 여기서 특정 회원은 나 일수도, 다른 회원일 수도 있습니다.
-     *
-     * @param memberId 조회하는 회원의 ID
-     * @param targetMemberId 조회할 회원의 ID
-     * @param size     조회할 개수
-     * @return 책 이야기 미리보기 정보가 담긴 공유 DTO
-     */
-    BookStorySharedDTO.BookStoryPreviewListDTO getBookStoryPreviews(String memberId, String targetMemberId, int size);
+    BookStorySharedDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId);
 }
