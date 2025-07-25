@@ -37,4 +37,16 @@ public class CategorySharedDTO {
         private Long id;   // 카테고리 ID
         private String name; // 카테고리 이름
     }
+
+    /**
+     * 카테고리 ID 목록 요청 DTO
+     * 회원가입 시 카테고리 설정할 때 사용
+     */
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CategoryIdListDTO {
+        private List<Long> categoryIdList;
+    }
 }

@@ -1,6 +1,7 @@
 package checkmo.domain.category.converter;
 
 import checkmo.domain.category.entity.ClubCategory;
+import checkmo.domain.category.entity.MemberCategory;
 import checkmo.domain.category.web.dto.CategoryResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
 import lombok.AccessLevel;
@@ -66,6 +67,19 @@ public class CategoryConverter {
         return CategoryResponseDTO.CategoryListResponseDTO.builder()
                 .categoryList(dtoList)
                 .build();
+    }
+
+    public static CategoryResponseDTO.CategoryListResponseDTO toMemberCategoryListResponseDTO(List<MemberCategory> mcList) {
+        List<CategoryResponseDTO.CategoryInfoResponseDTO> dtoList = mcList.stream()
+                                                                          .map(mc -> CategoryResponseDTO.CategoryInfoResponseDTO.builder()
+                                                                                                                                .id(mc.getCategory().getId())
+                                                                                                                                .name(mc.getCategory().getName())
+                                                                                                                                .build())
+                                                                          .collect(Collectors.toList());
+
+        return CategoryResponseDTO.CategoryListResponseDTO.builder()
+                                                          .categoryList(dtoList)
+                                                          .build();
     }
 
 }

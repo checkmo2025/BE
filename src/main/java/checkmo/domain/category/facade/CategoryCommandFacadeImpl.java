@@ -17,8 +17,9 @@ public class CategoryCommandFacadeImpl implements CategoryCommandFacade {
     private final CategoryAssignmentCommandService categoryAssignmentCommandService;
 
     @Override
-    public CategorySharedDTO.CategoryInfoListDTO modifyMemberCategories(Long memberId, CategoryRequestDTO.CategoryListRequestDTO request) {
-        return null;
+    public CategorySharedDTO.CategoryInfoListDTO modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request) {
+        CategoryResponseDTO.CategoryListResponseDTO response = categoryAssignmentCommandService.modifyMemberCategories(memberId, request);
+        return CategoryConverter.toCategoryInfoListDTO(response);
     }
 
     /**
