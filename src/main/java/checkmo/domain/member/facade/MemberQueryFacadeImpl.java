@@ -76,7 +76,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public MemberSharedDTO.WithFollowStatusDTO getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId) {
-        return null;
+        return MemberSharedDTO.WithFollowStatusDTO.builder().build();
     }
 
     @Override
