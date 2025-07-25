@@ -5,7 +5,10 @@ import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
+import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
+import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
@@ -45,6 +48,15 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * BookReviewDTO <-> BookReview 엔티티 변환
+     */
+    public static BookReview fromBookReviewDTOToBookReview(BookShelfRequestDTO.BookReviewDTO request) {
+        return BookReview.builder()
+                .description(request.getDescription())
+                .rate(request.getRate())
+                .build();
+    }
     /**
      * ClubRequestDTO.ClubDetailDTO -> Club 엔티티 변환
      */
@@ -117,6 +129,20 @@ public class ClubConverter {
     }
 
     /**
+     * BookReview 엔티티 + MemberSharedDTO -> BookReviewDTO 변환
+     */
+    public static BookShelfResponseDTO.BookReviewDTO fromBookReviewAndMemberSharedDTOToBookReviewDTO(
+            BookReview bookReview,
+            MemberSharedDTO.BasicInfoDTO memberSharedDTO
+    ) {
+        return BookShelfResponseDTO.BookReviewDTO.builder()
+                .bookReviewId(bookReview.getId())
+                .description(bookReview.getDescription())
+                .rate(bookReview.getRate())
+                .authorInfo(memberSharedDTO)
+                .build();
+    }
+    /**
      * BookRecommendDTO 리스트 → BookRecommendListDTO 변환
      */
     public static ClubResponseDTO.BookRecommendListDTO toBookRecommendListDTO(
@@ -133,11 +159,11 @@ public class ClubConverter {
     }
 
     // =====================================================
-    // 기타 메서드
+    // Entity -> Entity 변환
     // =====================================================
 
     /**
-     * Meeting 엔티티로부터 Notice 엔티티 변환(자동 생성)
+     * Meeting 엔티티 -> Notice 엔티티 변환 (자동 생성)
      */
     public static Notice fromMeetingToNotice(Meeting meeting) {
         return Notice.builder()
@@ -145,6 +171,25 @@ public class ClubConverter {
                 .content(meeting.getContent())
                 .important(true)
                 .tag("모임")
+                .build();
+    }
+
+    // =====================================================
+    // DTO -> DTO 변환
+    // =====================================================
+
+    /**
+     * BookReviewDTO 리스트 -> BookReviewListDTO 변환
+     */
+    public static BookShelfResponseDTO.BookReviewListDTO fromBookReviewDTOListToBookReviewListDTO(
+            List<BookShelfResponseDTO.BookReviewDTO> bookReviewList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return BookShelfResponseDTO.BookReviewListDTO.builder()
+                .bookReviewList(bookReviewList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
                 .build();
     }
 
