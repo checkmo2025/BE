@@ -2,13 +2,17 @@ package checkmo.domain.member.service.command;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.category.facade.CategoryCommandFacade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.common.EmailSender;
+import checkmo.domain.member.service.query.MemberQueryService;
+import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import checkmo.global.dto.CategorySharedDTO;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
@@ -16,8 +20,11 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -28,6 +35,8 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     private final RedisTemplate<String, Object> redisTemplate;
     private final EmailSender emailSender;
     private final MemberAuthenticationService memberAuthenticationService;
+    private final MemberQueryService memberQueryService;
+    private final CategoryCommandFacade categoryCommandFacade;
 
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
@@ -96,6 +105,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     }
 
     @Override
+    @Transactional
     public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request) {
 
         // 이메일 중복 확인
@@ -123,8 +133,49 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     }
 
     @Override
+    @Transactional
     public void addAdditionalInfo(MemberRequestDTO.AdditionalInfoDTO request) {
-        // TODO: 회원 추가 정보 입력 로직 구현
-        throw new UnsupportedOperationException("추후 구현 예정");
+
+        // 현재 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new GeneralException(ErrorStatus.MEMBER_UNAUTHORIZED);
+        }
+
+        // 사용자 정보 추출
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        String memberId = principalDetails.getMember().getId();
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        // 이미 프로필이 완성된 경우 예외
+        if (member.isProfileCompleted()) {
+            throw new GeneralException(ErrorStatus.MEMBER_PROFILE_ALREADY_COMPLETED);
+        }
+
+        // --추가 정보 업데이트 하기--
+
+        // 일단 닉네임 중복 체크
+        if (memberQueryService.isNicknameDuplicated(request.getNickname())) {
+            throw new GeneralException(ErrorStatus.NICKNAME_ALREADY_EXISTS);
+        }
+
+        // 멤버 엔티티 업데이트 (일단 카테고리 빼고)
+        member.updateAdditionalInfo(
+                request.getNickname(),
+                request.getDescription(),
+                request.getImgUrl()
+        );
+
+        // 관심 카테고리 저장
+        categoryCommandFacade.modifyMemberCategories(memberId, CategorySharedDTO.CategoryIdListDTO.builder()
+                                                     .categoryIdList(request.getCategoryIds())
+                                                     .build());
+
+        // 프로필 완료 상태로 변경
+        member.completeProfile();
+
     }
 }

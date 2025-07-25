@@ -33,7 +33,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
     @Override
     public void addAdditionalInfo(MemberRequestDTO.AdditionalInfoDTO request) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+        memberRegistrationCommandService.addAdditionalInfo(request);
     }
 
     @Override
