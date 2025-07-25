@@ -38,9 +38,9 @@ public interface BookStoryCommandFacade {
     /**
      * 책 이야기의 '좋아요'를 토글(추가/삭제)합니다. (내부용)
      *
-     * @param userId      요청 사용자 ID
+     * @param memberId      요청 사용자 ID
      * @param bookStoryId 대상 책 이야기 ID
-     * @return 처리된 책 이야기의 ID
+     * @return 책이야기에 좋아요가 추가됐는지/제거됐는지 여부
      */
-    Long toggleLikeOnBookStory(Long userId, Long bookStoryId);
+    boolean toggleLikeOnBookStory(String memberId, Long bookStoryId);
 }

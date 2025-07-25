@@ -1,11 +1,19 @@
 package checkmo.domain.club.converter;
 
 import checkmo.domain.book.entity.Book;
+import checkmo.domain.category.entity.ClubCategory;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.global.dto.CategorySharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -35,6 +43,41 @@ public class ClubConverter {
                 .book(proxyBook)
                 .build();
     }
+
+    /**
+     * ClubRequestDTO.ClubDetailDTO -> Club 엔티티 변환
+     */
+    public static Club fromClubDetailDTOToClub(ClubRequestDTO.ClubDetailDTO dto) {
+        return Club.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .profileImgUrl(dto.getProfileImageUrl())
+                .open(dto.isOpen())
+                .region(dto.getRegion())
+                .insta(dto.getInsta())
+                .kakao(dto.getKakao())
+                .participantTypes(dto.getParticipantTypes())
+                .build();
+    }
+
+    /**
+     * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
+     */
+    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, List<Long> categoryIds) {
+        return ClubResponseDTO.ClubDetailDTO.builder()
+                .clubId(club.getId())
+                .name(club.getName())
+                .description(club.getDescription())
+                .profileImageUrl(club.getProfileImgUrl())
+                .open(club.isOpen())
+                .category(categoryIds)
+                .region(club.getRegion())
+                .participantTypes(club.getParticipantTypes())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
+                .build();
+    }
+
 
     // =====================================================
     // 기타 메서드
