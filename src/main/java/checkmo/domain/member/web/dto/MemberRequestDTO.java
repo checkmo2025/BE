@@ -65,6 +65,7 @@ public class MemberRequestDTO {
         @NotBlank(message = "닉네임은 필수입니다")
         @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
                 message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")
+        @Schema(description = "닉네임(영어 소문자 및 특수문자 최대 6자", example = "nick")
         private String nickname;
 
         @Size(max = 30, message = "소개는 30자 이하여야 합니다")
