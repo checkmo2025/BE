@@ -1,18 +1,23 @@
 package checkmo.domain.club.service.query;
 
+import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 
+import java.util.List;
+
 public interface ClubBookRecommendQueryService {
+
     /**
-     * 독서모임의 추천 책 목록을 조회합니다.
+     * 순수하게 BookRecommend 엔티티들만 조회 (페이징 없음)
      *
-     * 피그마 참고 페이지 : #검색하기 - 첫화면, 검색시
-     *
-     * @param clubId 독서모임 ID
-     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
-     * @return 추천 책 목록 DTO
+     * @param clubId   독서모임 ID
+     * @param cursorId 커서 ID (페이징용, 처음 조회 시 null 또는 0)
+     * @param memberId 회원 ID
+     * @return 추천 책 목록 리스트
      */
-    ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId);
+    List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, String memberId);
+
+    boolean hasNextPage(Long clubId, Long lastId);
 
     /**
      * 독서모임의 추천 책 상세 정보를 조회합니다.
@@ -23,5 +28,5 @@ public interface ClubBookRecommendQueryService {
      * @param bookRecommendId 추천 책 ID
      * @return 추천 책 상세 정보 DTO
      */
-    ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId);
+    ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, String memberId, Long bookRecommendId);
 }

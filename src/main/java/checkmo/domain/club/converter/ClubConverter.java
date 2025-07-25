@@ -1,19 +1,20 @@
 package checkmo.domain.club.converter;
 
 import checkmo.domain.book.entity.Book;
-import checkmo.domain.category.entity.ClubCategory;
+import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
-import checkmo.global.dto.CategorySharedDTO;
+import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -78,6 +79,58 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * CreateBookRecommendDTO -> BookRecommend 엔티티
+     */
+    public static BookRecommend fromCreateBookRecommendDTOToEntity(
+            ClubRequestDTO.CreateBookRecommendDTO request,
+            Book proxyBook,
+            ClubMember clubMember
+    ) {
+        return BookRecommend.builder()
+                .content(request.getContent())
+                .rate(request.getRate())
+                .tag(request.getTag())
+                .clubMember(clubMember)
+                .book(proxyBook)
+                .build();
+    }
+
+    /**
+     * BookRecommend 엔티티 → BookRecommendDetailDTO
+     */
+    public static ClubResponseDTO.BookRecommendDetailDTO toBookRecommendDetailDTO(
+            BookRecommend bookRecommend,
+            BookSharedDTO.BasicInfoDTO bookInfo,
+            MemberSharedDTO.BasicInfoDTO authorInfo,
+            String currentMemberNickname
+    ) {
+        return ClubResponseDTO.BookRecommendDetailDTO.builder()
+                .id(bookRecommend.getId())
+                .content(bookRecommend.getContent())
+                .rate(bookRecommend.getRate())
+                .tag(bookRecommend.getTag())
+                .bookInfo(bookInfo)
+                .authorInfo(authorInfo)
+                .isAuthor(authorInfo.getNickname().equals(currentMemberNickname))
+                .build();
+    }
+
+    /**
+     * BookRecommendDTO 리스트 → BookRecommendListDTO 변환
+     */
+    public static ClubResponseDTO.BookRecommendListDTO toBookRecommendListDTO(
+            List<ClubResponseDTO.BookRecommendDetailDTO> dtoList,
+            boolean hasNext,
+            Long lastCursorId
+    ) {
+        return ClubResponseDTO.BookRecommendListDTO.builder()
+                .bookRecommendList(dtoList)
+                .hasNext(hasNext)
+                .nextCursor(lastCursorId)
+                .pageSize(dtoList.size())
+                .build();
+    }
 
     // =====================================================
     // 기타 메서드
