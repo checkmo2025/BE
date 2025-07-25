@@ -32,7 +32,7 @@ public class SecurityConfig {
                 )
             .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll() // Swagger UI 접근 허용
-                        .requestMatchers("/**").permitAll() // 추후 삭제 예정
+                        .requestMatchers("/**").permitAll() // TODO: 로그인 구현 후 삭제 필수
                     .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
