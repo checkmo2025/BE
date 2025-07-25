@@ -27,13 +27,15 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUB_DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "CLUB_4001", "이미 존재하는 독서클럽 이름입니다."),
     CLUB_MEMBER_ONLY(HttpStatus.FORBIDDEN, "CLUB_4002", "해당 클럽의 회원이 아닙니다."),
     CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_4005", "독서클럽 운영진만 접근할 수 있습니다."),
-    CLUB_CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CLUB_4003", "존재하지 않는 카테고리입니다. (1 ~ 15 사이의 값이어야 함)"),
+    CLUB_BOOK_RECOMMEND_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4014", "추천 책을 찾을 수 없습니다."),
+    CLUB_BOOK_RECOMMEND_FORBIDDEN(HttpStatus.FORBIDDEN, "CLUB_4015", "해당 추천 책에 대한 권한이 없습니다."),
 
     // 회원  
     EMAIL_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "EMAIL_401", "인증번호가 만료되었습니다."),
     EMAIL_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, "EMAIL_402", "잘못된 인증번호입니다."),
     EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL_403", "이미 인증된 이메일입니다."),
     EMAIL_VERIFICATION_CODE_ALREADY_SENT(HttpStatus.BAD_REQUEST, "EMAIL_404", "이미 인증번호가 발송되었습니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_4004", "회원 정보를 찾을 수 없습니다."),
 
     // 미팅
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_4004", "독서모임을 찾을 수 없습니다."),

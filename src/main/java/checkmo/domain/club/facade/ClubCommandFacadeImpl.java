@@ -1,7 +1,9 @@
 package checkmo.domain.club.facade;
 
+import checkmo.domain.club.service.command.ClubBookRecommendCommandService;
 import checkmo.domain.club.service.command.ClubManagementCommandService;
 import checkmo.domain.club.service.command.ClubMeetingCommandService;
+import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
@@ -18,6 +20,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubManagementCommandService clubManagementCommandService;
+    private final ClubBookRecommendCommandService clubBookRecommendCommandService;
+    private final ClubBookRecommendQueryService clubBookRecommendQueryService;
 
     /**
      * ClubManagementCommandService
@@ -67,19 +71,48 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         return null;
     }
 
+    /**
+     * ClubBookRecommendCommandService
+     * 모임에 책을 추천합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 추천자 회원 ID
+     * @param request  추천 책 정보 DTO
+     * @return 추천된 책의 상세 정보 DTO
+     */
     @Override
     public ClubResponseDTO.BookRecommendDetailDTO recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommendDTO request) {
-        return null;
+        Long bookRecommendId = clubBookRecommendCommandService.recommendBook(clubId, memberId, request);
+        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, bookRecommendId);
     }
 
+    /**
+     * ClubBookRecommendCommandService
+     * 추천한 책 정보를 수정합니다. (내부용)
+     *
+     * @param clubId          모임 ID
+     * @param memberId        요청자 회원 ID
+     * @param bookRecommendId 수정할 추천 책 ID
+     * @param request         수정할 정보 DTO
+     * @return 수정된 책의 상세 정보 DTO
+     */
     @Override
     public ClubResponseDTO.BookRecommendDetailDTO updateBookRecommend(Long clubId, String memberId, Long bookRecommendId, ClubRequestDTO.UpdateBookRecommendDTO request) {
-        return null;
+        Long updateBookRecommendId = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId, bookRecommendId, request);
+        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, updateBookRecommendId);
     }
 
+    /**
+     * ClubBookRecommendCommandService
+     * 추천한 책을 삭제합니다. (내부용)
+     *
+     * @param clubId          모임 ID
+     * @param memberId        요청자 회원 ID
+     * @param bookRecommendId 삭제할 추천 책 ID
+     */
     @Override
     public void deleteRecommendedBook(Long clubId, String memberId, Long bookRecommendId) {
-
+        clubBookRecommendCommandService.deleteRecommendedBook(clubId, memberId, bookRecommendId);
     }
 
     @Override
