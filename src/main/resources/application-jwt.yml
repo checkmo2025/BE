@@ -1,0 +1,5 @@
+jwt:
+  secret: ${JWT_SECRET}
+  token-validity:
+    access-token: 604800000  # 7 days in milliseconds
+    refresh-token: 1209600000  # 14 days in milliseconds
