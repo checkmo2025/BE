@@ -101,6 +101,11 @@ public class Meeting extends BaseEntity {
         notice.setMeeting(this); // 주인 쪽에도 세팅
     }
 
+    public void addBookReview(BookReview bookReview) {
+        this.bookReviews.add(bookReview);
+        bookReview.setMeeting(this); // 주인 쪽에도 세팅
+    }
+
     public void replaceNotice(Notice newNotice) {
         // 기존 Notice 연결 끊기 (orphanRemoval = true면 자동 삭제됨)
         if (this.notice != null) {
@@ -112,5 +117,4 @@ public class Meeting extends BaseEntity {
             newNotice.setMeeting(this);
         }
     }
-
 }

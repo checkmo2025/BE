@@ -43,6 +43,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // 카테고리
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_4004", "카테고리를 찾을 수 없습니다."),
 
+    // 한줄평
+    BOOK_REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_REVIEW403", "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
+    BOOK_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_REVIEW404", "한줄평을 찾을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
