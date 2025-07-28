@@ -1,5 +1,7 @@
 package checkmo.domain.member.service.authenticate;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 /**
  * 로그인/로그아웃 로직
  *
@@ -15,7 +17,7 @@ public interface MemberAuthenticationService {
      * @param email 사용자의 이메일
      * @param password 사용자의 비밀번호
      */
-    void login(String email, String password);
+    void login(String email, String password, HttpServletResponse response);
 
     /**
      * 로그아웃 처리 - JWT 토큰을 무효화하고 쿠키 삭제

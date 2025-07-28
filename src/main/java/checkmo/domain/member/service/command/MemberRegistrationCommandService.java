@@ -2,6 +2,7 @@ package checkmo.domain.member.service.command;
 
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 회원 가입 서비스
@@ -45,7 +46,7 @@ public interface MemberRegistrationCommandService {
      * @return 회원 가입 응답 DTO
      */
     MemberResponseDTO.SignUpResponseDTO signUp(
-            MemberRequestDTO.SignUpRequestDTO request
+            MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response
     );
 
     /**

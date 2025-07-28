@@ -20,7 +20,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
-        return false;
+        return memberQueryService.isNicknameDuplicated(nickname);
     }
 
     @Override

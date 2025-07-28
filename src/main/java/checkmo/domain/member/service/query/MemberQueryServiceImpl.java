@@ -17,7 +17,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
-        return false;
+        return memberRepository.existsByNickName(nickname);
     }
 
     /**
