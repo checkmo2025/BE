@@ -22,6 +22,10 @@ public enum ErrorStatus implements BaseErrorCode {
     // 책
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_4004", "책을 찾을 수 없습니다."),
 
+    //책이야기
+    BOOK_STORY_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_STORY_4004", "책 이야기를 찾을 수 없습니다."),
+    BOOK_STORY_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "BOOK_STORY_4005", "책 이야기 수정/삭제 권한이 없습니다."),
+
     // 모임
     CLUB_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4004", "독서클럽을 찾을 수 없습니다."),
     CLUB_DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "CLUB_4001", "이미 존재하는 독서클럽 이름입니다."),

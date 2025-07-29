@@ -4,6 +4,7 @@ import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.bookStory.facade.BookStoryCommandFacade;
 import checkmo.domain.bookStory.facade.BookStoryQueryFacade;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.global.auth.CurrentId;
 import checkmo.global.dto.BookStorySharedDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,7 +32,7 @@ public class BookStoryController {
     })
     @PostMapping
     public ApiResponse<Long> createBookStory(
-            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
+            @CurrentId String memberId,
             @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequestDTO request
     ) {
         Long bookStoryId = bookStoryCommandFacade.createBookStory(memberId, request);
@@ -46,11 +47,13 @@ public class BookStoryController {
                             "• ALL: 전체 책이야기\n" +
                             "• FOLLOWING: 팔로우한 회원의 책이야기\n" +
                             "• MY: 내 책이야기\n" +
-                            "• CLUB: 특정 클럽 책이야기 (clubId 필수)",
+                            "• CLUB: 특정 클럽 책이야기 (clubId 필수)\n" +
+                            "• TARGET: 특정 회원의 책이야기 (targetMemberNickname 필수)",
                     required = true,
                     example = "ALL"
             ),
             @Parameter(name = "clubId", description = "조회하는 Club ID (scope가 CLUB일 때 필수)", required = false, example = "1"),
+            @Parameter(name = "targetMemberNickname", description = "조회할 회원의 닉네임 (scope가 TARGET일 때 필수)", required = false, example = "MODUGGAGI"),
             @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
     })
     @ApiResponses({
@@ -60,16 +63,21 @@ public class BookStoryController {
     })
     @GetMapping
     public ApiResponse<BookStorySharedDTO.BookStoryListResponse> getBookStories(
-            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
+            @CurrentId String memberId,
             @RequestParam(required = false, defaultValue = "ALL") BookStoryRequestDTO.BookStoryScope scope,
             @RequestParam(required = false) Long clubId,
+            @RequestParam(required = false) String targetMemberNickname,
             @RequestParam(required = false) Long cursorId
     ) {
         if (scope == BookStoryRequestDTO.BookStoryScope.CLUB && clubId == null) {
             throw new IllegalArgumentException("scope가 CLUB일 때는 clubId 파라미터가 필수입니다.");
         }
 
-        var bookStoriesByScope = bookStoryQueryFacade.getBookStoriesByScope(memberId, scope, clubId, cursorId);
+        if (scope == BookStoryRequestDTO.BookStoryScope.TARGET && targetMemberNickname == null) {
+            throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
+        }
+
+        var bookStoriesByScope = bookStoryQueryFacade.getBookStoriesByScope(memberId, scope, clubId, targetMemberNickname, cursorId);
         return ApiResponse.onSuccess(bookStoriesByScope);
     }
 
@@ -83,7 +91,7 @@ public class BookStoryController {
     })
     @GetMapping("/{bookStoryId}")
     public ApiResponse<BookStorySharedDTO.BookStoryResponse> getBookStory(
-            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
+            @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
         var bookStory = bookStoryQueryFacade.getBookStory(memberId, bookStoryId);
@@ -100,7 +108,7 @@ public class BookStoryController {
     })
     @PostMapping("/{bookStoryId}/like")
     public ApiResponse<Long> toggleLikeBookStory(
-            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
+            @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
         boolean isLiked = bookStoryCommandFacade.toggleLikeOnBookStory(memberId, bookStoryId);
@@ -123,7 +131,7 @@ public class BookStoryController {
     })
     @PatchMapping("/{bookStoryId}")
     public ApiResponse<Long> updateBookStory(
-            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
+            @CurrentId String memberId,
             @PathVariable Long bookStoryId,
             @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequestDTO request
     ) {
@@ -142,7 +150,7 @@ public class BookStoryController {
     })
     @DeleteMapping("/{bookStoryId}")
     public ApiResponse<String> deleteBookStory(
-            @RequestParam String memberId, // TODO: 스프링 시큐리티 구현 후 제거 예정
+            @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
         bookStoryCommandFacade.deleteBookStory(memberId, bookStoryId);
