@@ -49,7 +49,7 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
         String memberId = null;
         if (authentication.getPrincipal() instanceof PrincipalDetails) {
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-//            memberId = principalDetails.getUsername(); //‼️TODO: PrincipalDetails 완성하고 반드시 주석 해야함!!!!‼️
+            memberId = principalDetails.getUsername(); //‼️TODO: PrincipalDetails 완성하고 반드시 주석 해야함!!!!‼️
         }
 
         if (memberId == null) {
@@ -66,7 +66,7 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
         // @CurrentUser인 경우 User 객체 반환
         if (parameter.getParameterAnnotation(CurrentMember.class) != null) {
             Member currentUser = memberRepository.findById(memberId)
-                    .orElse(null);
+                                                 .orElse(null);
 
             if (currentUser != null) {
                 log.info("User 객체 주입: {}", currentUser.getId());
