@@ -3,6 +3,7 @@ package checkmo.domain.member.service.authenticate;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.member.service.security.auth.PrincipalDetails;
+import checkmo.domain.member.service.security.jwt.JwtCookieUtil;
 import checkmo.domain.member.service.security.jwt.JwtToken;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
 import checkmo.domain.member.service.security.jwt.TokenCacheService;
@@ -23,6 +24,7 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenCacheService tokenCacheService;
+    private final JwtCookieUtil jwtCookieUtil;
 
     @Override
     public void login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
@@ -41,8 +43,8 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             // JWT 토큰 생성
             JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
-            addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), 2 * 60 * 60); // 2시간 유효
-            addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), 14 * 24 * 60 * 60); // 14일 유효
+            jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), 2 * 60 * 60); // 2시간 유효
+            jwtCookieUtil.addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), 14 * 24 * 60 * 60); // 14일 유효
 
             // RefreshToken Redis에 저장
             String memberId = ((PrincipalDetails) authentication.getPrincipal()).getMember().getId();
@@ -62,15 +64,5 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     @Override
     public void reactivateMember() {
         // TODO: 계정 복구 로직 구현
-    }
-
-    private void addTokenToCookie(HttpServletResponse response, String cookieName, String token, int maxAge) {
-        Cookie cookie = new Cookie(cookieName, token);
-        cookie.setHttpOnly(true); // 클라이언트 스크립트에서 접근 불가
-        cookie.setAttribute("SameSite", "Strict"); // CSRF 공격 방지
-        cookie.setPath("/"); // 모든 경로에서 접근 가능
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
-        // TODO: 배포 시 cookie.setSecure(true); // HTTPS에서만 전송하도록 추가
     }
 }

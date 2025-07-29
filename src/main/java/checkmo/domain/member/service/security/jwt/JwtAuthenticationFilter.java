@@ -31,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenCacheService tokenCacheService;
+    private final JwtCookieUtil jwtCookieUtil;
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request,
@@ -103,7 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 이제 새로운 Access Token을 쿠키에 담기
         String newAccessToken = newJwtToken.getAccessToken();
-        addTokenToCookie(response, "accessToken", newAccessToken, 2 * 60 * 60); // 2시간 유효
+        jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken, 2 * 60 * 60); // 2시간 유효
 
         // SecurityContext에 새로운 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -122,14 +123,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null; // 쿠키에서 Access Token을 찾지 못한 경우
     }
 
-    // TODO: 공통 메서드 분리시키기
-    private void addTokenToCookie(HttpServletResponse response, String cookieName, String token,
-                                  int maxAge) {
-        Cookie cookie = new Cookie(cookieName, token);
-        cookie.setHttpOnly(true); // 클라이언트 스크립트에서 접근 불가
-        cookie.setAttribute("SameSite", "Strict"); // CSRF 공격 방지
-        cookie.setPath("/"); // 모든 경로에서 접근 가능
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
-    }
 }
