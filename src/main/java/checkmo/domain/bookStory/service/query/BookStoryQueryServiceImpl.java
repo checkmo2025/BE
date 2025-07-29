@@ -1,5 +1,7 @@
 package checkmo.domain.bookStory.service.query;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.bookStory.converter.BookStoryConverter;
 import checkmo.domain.bookStory.entity.BookStory;
@@ -81,7 +83,7 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     @Override
     public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 책 이야기입니다."));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 
         return BookStoryConverter.fromBookStoryToResponse(
                 bookStory,

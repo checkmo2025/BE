@@ -1,5 +1,7 @@
 package checkmo.domain.bookStory.service.command;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.entity.BookStoryLiked;
 import checkmo.domain.bookStory.repository.BookStoryLikedRepository;
@@ -26,7 +28,7 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
     public boolean toggleLikeOnBookStory(String memberId, Long bookStoryId) {
 
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new IllegalArgumentException(bookStoryId + "에 해당하는 책이야기를 찾을 수 없습니다"));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 
         Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
 

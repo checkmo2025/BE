@@ -1,5 +1,7 @@
 package checkmo.domain.bookStory.facade;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.bookStory.converter.BookStoryConverter;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.service.query.BookStoryQueryService;
@@ -75,7 +77,7 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
             myClubInfoDTO = myClubList.getClubList().stream()
                     .filter(club -> club.getClubId().equals(clubId))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 클럽이거나 가입하지 않은 클럽입니다."));
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_NOT_FOUND));
         }
 
         // 6. 스코프 정보 변환 (CLUB 스코프인 경우 선택된 클럽 정보 포함)
