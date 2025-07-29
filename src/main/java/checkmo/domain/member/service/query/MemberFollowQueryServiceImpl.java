@@ -1,9 +1,6 @@
 package checkmo.domain.member.service.query;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.member.repository.FollowRepository;
-import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,27 +9,26 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
 
-    private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
 
     @Override
     public MemberResponseDTO.FollowerListResponseDTO getFollowers(String memberId, Long cursorId) {
-        return null;
+        throw new UnsupportedOperationException("아직 개발 중~");
     }
 
     @Override
     public MemberResponseDTO.FollowingListResponseDTO getFollowing(String memberId, Long cursorId) {
-        return null;
+        throw new UnsupportedOperationException("아직 개발 중~");
     }
 
     @Override
     public MemberResponseDTO.FollowerListResponseDTO getFollowers(Long memberId, int size) {
-        return null;
+        throw new UnsupportedOperationException("아직 개발 중~");
     }
 
     @Override
     public MemberResponseDTO.FollowingListResponseDTO getFollowing(Long memberId, int size) {
-        return null;
+        throw new UnsupportedOperationException("아직 개발 중~");
     }
 
     @Override
