@@ -47,8 +47,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         long now = (new Date()).getTime();
 
         // 액세스 토큰과 리프레시 토큰 유효 시간 가져오기
-        long accessTokenValidity = jwtProperties.getTokenValidity().getAccessToken() * 1000;
-        long refreshTokenValidity = jwtProperties.getTokenValidity().getRefreshToken() * 1000;
+        long accessTokenValidity = jwtProperties.getTokenValidity().getAccessToken();
+        long refreshTokenValidity = jwtProperties.getTokenValidity().getRefreshToken();
 
         // 액세스 토큰 생성
         String accessToken = Jwts.builder()
@@ -65,7 +65,6 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                                   .compact();
 
         return JwtToken.builder()
-                       .grantType("Bearer")
                        .accessToken(accessToken)
                        .refreshToken(refreshToken)
                        .build();
@@ -89,16 +88,31 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .build()
                 .parseSignedClaims(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.warn("잘못된 JWT 서명입니다.", e);
         } catch (ExpiredJwtException e) {
-            log.warn("만료된 JWT 서명입니다", e);
+            throw e; // 토큰이 만료된 경우 재발급하도록 던지기
+        }
+        catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.warn("잘못된 JWT 서명입니다.", e);
         } catch (UnsupportedJwtException e) {
             log.warn("지원하지 않는 JWT 토큰입니다", e);
         } catch (IllegalArgumentException e) {
             log.warn("JWT 토큰이 잘못되었습니다", e);
         }
         return false;
+    }
+
+    @Override
+    public boolean isRefreshTokenValid(String refreshToken) {
+        try {
+            Jwts.parser()
+                .verifyWith((SecretKey) key)
+                .build()
+                .parseSignedClaims(refreshToken);
+            return true;
+        } catch (Exception e) {
+            log.warn("유효하지 않은 Refresh Token 입니다: {}", e.getMessage());
+            return false;
+        }
     }
 
     @Override
