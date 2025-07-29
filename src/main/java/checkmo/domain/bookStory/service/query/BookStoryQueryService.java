@@ -19,14 +19,15 @@ public interface BookStoryQueryService {
      * 조건에 맞는 책 이야기 엔티티 목록을 조회 (페이지네이션을 위해 +1개 더 조회)
      *
      * @param memberId 조회하는 회원의 ID
-     * @param scope 조회 범위 ("ALL", "NY", "FOLLOWING", "CLUB")
+     * @param scope 조회 범위 ("ALL", "MY", "FOLLOWING", "CLUB", "TARGET")
      * @param clubId 클럽 ID (scope가 "CLUB"일 때 필수)
+     * @param targetMemberId 대상 회원 ID (scope가 "TARGET"일 때 필수)
      * @param cursorId 페이지네이션을 위한 커서 ID (처음에는 null)
      * @param pageSize 페이지 크기
      *
      * @return 조회된 책 이야기 엔티티 목록
      */
-    List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId, int pageSize);
+    List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, String targetMemberId, Long cursorId, int pageSize);
 
     /**
      * 조회된 책 이야기 목록에 대한 '좋아요' 여부를 확인
@@ -75,14 +76,4 @@ public interface BookStoryQueryService {
      * @return 조회된 책 이야기의 DTO
      */
     BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId);
-
-    /**
-     * 특정 회원의 책 이야기 목록을 커서 기반으로 조회합니다.
-     *
-     * @param memberId 조회할 회원의 ID
-     * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
-     *
-     * @return 조회된 책 이야기 목록 DTO
-     */
-    BookStorySharedDTO.BookStoryListResponse getMyBookStoriesByNickname(String memberId, String targetMemberNickname, Long cursorId);
 }

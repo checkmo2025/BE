@@ -70,4 +70,14 @@ public class MemberConverter {
                 .build();
     }
 
+    /**
+     * BasicInfoDTO -> WithFollowStatusDTO 변환
+     */
+    public static MemberSharedDTO.WithFollowStatusDTO toWithFollowStatusDTO(MemberSharedDTO.BasicInfoDTO basicInfo, boolean isFollowing) {
+        return MemberSharedDTO.WithFollowStatusDTO.builder()
+                .nickname(basicInfo.getNickname())
+                .profileImageUrl(basicInfo.getProfileImageUrl())
+                .isFollowing(isFollowing)
+                .build();
+    }
 }

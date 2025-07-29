@@ -1,5 +1,7 @@
 package checkmo.domain.bookStory.service.query;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.bookStory.converter.BookStoryConverter;
 import checkmo.domain.bookStory.entity.BookStory;
@@ -34,9 +36,9 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     private final BookStoryLikedRepository bookStoryLikedRepository;
 
     @Override
-    public List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId, int pageSize) {
+    public List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, String targetMemberId, Long cursorId, int pageSize) {
         // TODO: 현재 내부에서 외부 도메인의 Q클래스를 호출해서 QueryDSL 사용하고 있는데, 이 부분도 리팩토링 필요
-        return bookStoryRepository.searchBookStories(memberId, scope, clubId, cursorId, pageSize + 1);
+        return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize + 1);
     }
 
     @Override
@@ -81,7 +83,7 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     @Override
     public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 책 이야기입니다."));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 
         return BookStoryConverter.fromBookStoryToResponse(
                 bookStory,
@@ -90,10 +92,5 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
                 memberQueryFacade.getMemberWithFollowStatusForShare(bookStory.getMemberId(), memberId),
                 bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStory.getId())
         );
-    }
-
-    @Override
-    public BookStorySharedDTO.BookStoryListResponse getMyBookStoriesByNickname(String memberId, String targetMemberNickname, Long cursorId) {
-        return null;
     }
 }

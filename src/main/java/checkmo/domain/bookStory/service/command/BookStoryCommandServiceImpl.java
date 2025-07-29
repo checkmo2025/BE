@@ -1,5 +1,7 @@
 package checkmo.domain.bookStory.service.command;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.facade.BookCommandFacade;
 import checkmo.domain.book.facade.BookQueryFacade;
@@ -44,10 +46,10 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     @Transactional
     public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 책이야기가 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 
         if (!bookStory.getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException("해당 책이야기를 수정할 권한이 없습니다.");
+            throw new GeneralException(ErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
         return bookStory.updateDescription(request.getDescription());
@@ -57,10 +59,10 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     @Transactional
     public void deleteBookStory(String memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 책이야기가 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 
         if (!bookStory.getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException("해당 책이야기를 삭제할 권한이 없습니다.");
+            throw new GeneralException(ErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
         bookStoryRepository.delete(bookStory);

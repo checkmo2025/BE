@@ -46,5 +46,5 @@ public interface MemberFollowQueryService {
     /**
      * 특정 회원의 팔로우 여부 확인
      */
-    boolean isFollowing(String memberId, String targetMemberNickname);
+    boolean isFollowing(String memberId, String targetMemberId);
 }
