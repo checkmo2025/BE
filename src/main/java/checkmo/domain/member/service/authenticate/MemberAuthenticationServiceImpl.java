@@ -1,7 +1,12 @@
 package checkmo.domain.member.service.authenticate;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.service.security.jwt.JwtToken;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
+import checkmo.domain.member.service.security.jwt.TokenCacheService;
+import checkmo.domain.member.web.dto.MemberRequestDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,27 +22,36 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenCacheService tokenCacheService;
 
     @Override
-    public void login(String email, String password, HttpServletResponse response) {
+    public void login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(email, password);
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
-        // 인증 요청
-        Authentication authentication =
-            authenticationManager.authenticate(authenticationToken);
+        try {
+            // 인증 요청
+            Authentication authentication =
+                authenticationManager.authenticate(authenticationToken);
 
-        /// 인증 성공 후 SecurityContext에 인증 정보 저장
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            /// 인증 성공 후 SecurityContext에 인증 정보 저장
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // JWT 토큰 생성
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+            // JWT 토큰 생성
+            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
-        addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), 2 * 60 * 60); // 2시간 유효
-        addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), 14 * 24 * 60 * 60); // 14일 유효
+            addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), 2 * 60 * 60); // 2시간 유효
+            addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), 14 * 24 * 60 * 60); // 14일 유효
 
-        // TODO: Redis에 리프레시 토큰 저장 로직 추가
+            // RefreshToken Redis에 저장
+            String memberId = ((PrincipalDetails) authentication.getPrincipal()).getMember().getId();
+            tokenCacheService.saveRefreshToken(memberId, jwtToken.getRefreshToken());
+
+        } catch (Exception e) {
+            // 인증 실패 시 예외 처리
+            throw new GeneralException(ErrorStatus.INVALID_CREDENTIALS, "이메일 또는 비밀번호가 일치하지 않습니다");
+        }
     }
 
     @Override
@@ -57,5 +71,6 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
         cookie.setPath("/"); // 모든 경로에서 접근 가능
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
+        // TODO: 배포 시 cookie.setSecure(true); // HTTPS에서만 전송하도록 추가
     }
 }
