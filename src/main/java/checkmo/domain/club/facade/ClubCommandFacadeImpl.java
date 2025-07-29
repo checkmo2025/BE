@@ -1,9 +1,11 @@
 package checkmo.domain.club.facade;
 
 import checkmo.domain.club.service.command.ClubBookRecommendCommandService;
+import checkmo.domain.club.service.command.ClubCommunicationCommandService;
 import checkmo.domain.club.service.command.ClubManagementCommandService;
 import checkmo.domain.club.service.command.ClubMeetingCommandService;
 import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
+import checkmo.domain.club.service.query.ClubCommunicationQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
@@ -22,6 +24,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     private final ClubManagementCommandService clubManagementCommandService;
     private final ClubBookRecommendCommandService clubBookRecommendCommandService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
+    private final ClubCommunicationCommandService clubCommunicationCommandService;
+    private final ClubCommunicationQueryService clubNoticeQueryService;
 
     /**
      * ClubManagementCommandService
@@ -46,9 +50,28 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     }
 
+    /**
+     * ClubCommunicationCommandService
+     * 모임에 공지사항을 작성합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 작성자(운영진) 회원 ID
+     * @param request  공지사항 작성 요청 DTO
+     * @return 작성된 공지사항의 상세 정보 DTO
+     */
     @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO createNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request) {
-        return null;
+    public ClubResponseDTO.ClubNoticeDetailDTO createNotice(
+            Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request
+    ) {
+        // 1. 공지 생성
+        Long noticeId = clubCommunicationCommandService.createNotice(clubId, memberId, request);
+
+        // 2. 생성된 공지를 다시 조회
+        ClubResponseDTO.ClubNoticeDetailDTO clubNoticeDetailDTO = clubNoticeQueryService.getNoticeOrVoteDetail(clubId, noticeId, "공지", memberId);
+
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .noticeItem(clubNoticeDetailDTO.getNoticeItem())
+                .build();
     }
 
     @Override

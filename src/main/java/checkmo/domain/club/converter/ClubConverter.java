@@ -4,11 +4,14 @@ import checkmo.domain.book.entity.Book;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
+import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
@@ -130,6 +133,34 @@ public class ClubConverter {
                 .hasNext(hasNext)
                 .nextCursor(lastCursorId)
                 .pageSize(dtoList.size())
+                .build();
+    }
+
+    /**
+     * Notice 엔티티 → PureNoticeDTO 변환
+     */
+    public static ClubResponseDTO.PureNoticeDTO toPureNoticeDTO(Notice notice) {
+        return ClubResponseDTO.PureNoticeDTO.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .content(notice.getContent())
+                .important(notice.isImportant())
+                .tag(notice.getTag())  // "공지"
+                .build();
+    }
+
+    /**
+     * CreateClubNoticeDTO -> Notice 엔티티 변환 (모임과 연결되지 않은 순수 공지사항)
+     */
+    public static Notice fromCreateNoticeDTOToNotice(
+            ClubRequestDTO.CreateClubNoticeDTO request,
+            Club club) {
+        return Notice.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .important(request.isImportant())
+                .tag("공지")
+                .club(club)
                 .build();
     }
 
