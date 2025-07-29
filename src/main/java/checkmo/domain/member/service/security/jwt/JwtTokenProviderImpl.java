@@ -1,6 +1,7 @@
 package checkmo.domain.member.service.security.jwt;
 
 import checkmo.config.properties.JwtProperties;
+import checkmo.config.properties.MailProperties.Auth;
 import checkmo.domain.member.service.security.auth.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -60,6 +62,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         // 리프레시 토큰 생성
         String refreshToken = Jwts.builder()
+                                  .subject(authentication.getName())
                                   .expiration(new Date(now + refreshTokenValidity))
                                   .signWith(key)
                                   .compact();
@@ -81,6 +84,12 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
     @Override
     public boolean validateToken(String token) {
+
+        if (!StringUtils.hasText(token)) {
+            log.warn("JWT 토큰이 null 입니다.");
+            return false;
+        }
+
         try {
             // TODO: 로그아웃 시 토큰 블랙리스트 검증 로직 추가
             Jwts.parser()
@@ -127,5 +136,14 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         } catch (ExpiredJwtException e) {
             return e.getClaims().getSubject();
         }
+    }
+
+    @Override
+    public Authentication getAuthenticationFromMemberId(String memberId) {
+        UserDetails userDetails = customUserDetailsService.loadUserById(memberId);
+
+        return new UsernamePasswordAuthenticationToken(
+            userDetails, null, userDetails.getAuthorities()
+        );
     }
 }

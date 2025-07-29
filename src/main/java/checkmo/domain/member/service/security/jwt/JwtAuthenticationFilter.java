@@ -42,58 +42,61 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String accessToken = resolveToken(request, "accessToken");
         log.info("[JWT 필터] 요청 URI: {}, Access Token 존재 여부 확인: {}", request.getRequestURI(), accessToken != null);
 
-        try {
-            if (StringUtils.hasText(accessToken) && jwtTokenProvider.validateToken(accessToken)) {
-                log.info("[JWT 필터] 유효한 Access Token 발견: {}", accessToken);
+        if (StringUtils.hasText(accessToken))  { // Access Token이 존재하는 경우
+            try {
+                if (jwtTokenProvider.validateToken(accessToken)) { // Access Token 유효성 검사
 
-                // 토큰이 유효한 경우 인증 정보 설정
-                Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                log.warn("[JWT 필터] 유효하지 않거나 만료된 Access Token");
+                    // Access Token이 유효한 경우, 인증 정보 설정
+                    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.info("[JWT 필터] Access Token 유효성 검사 통과");
+                }
+            } catch (ExpiredJwtException e) { // Access Token이 존재하지만 만료된 경우
+                log.warn("[JWT 필터] Access Token 만료됨: {}", e.getMessage());
+                reissueAccessToken(request, response); // Refresh Token을 사용해 Access Token 재발급 시도
             }
-        } catch (ExpiredJwtException e) { // Access Token 만료 되었으면 재발급
-            log.info("만료된 Access Token, Refresh Token으로 재발급 시도: {}", e.getMessage());
-            reissueAccessToken(request, response, accessToken, e);
+        } else { // Access Token이 존재하지 않는 경우
+            log.warn("[JWT 필터] Access Token이 존재하지 않음");
+            reissueAccessToken(request, response); // Refresh Token을 사용해 Access Token 재발급 시도
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(request, response); // 다음 필터로 요청 전달
     }
 
-    private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response,
-                                    String expiredAccessToken,
-                                    ExpiredJwtException e) {
-
-        // 사용자 식별 정보 추출
-        String memberId = e.getClaims().getSubject();
-        log.info("[재발급] memberId 추출: {}", memberId);
+    // Access Token이 만료된 경우, Refresh Token을 사용해 재발급
+    private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
 
         // 쿠키에서 Refresh Token 추출
         String refreshToken = resolveToken(request, "refreshToken");
         log.info("[재발급] Refresh Token 존재 여부 확인: {}", refreshToken != null);
 
         if (!StringUtils.hasText(refreshToken)) {
-            log.warn("재발급 실패: Refresh Token 쿠키 없음 (memberId={})", memberId);
+            log.warn("재발급 실패: Refresh Token 쿠키 없음");
+            return;
+        }
+
+        if (!jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
+            log.warn("재발급 실패: 유효하지 않은 Refresh Token");
+            return;
+        }
+
+        String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+        if(!StringUtils.hasText(memberId)) {
+            log.warn("재발급 실패: Refresh Token에서 memberId 추출 실패");
             return;
         }
 
         // Redis에 저장된 Refresh Token과 비교
         String storedRefreshToken = tokenCacheService.getRefreshToken(memberId);
-        log.info("[재발급] Redis에 저장된 Refresh Token: {}", storedRefreshToken);
+        log.info("[재발급] Redis에 저장된 Refresh Token과 비교");
 
         if (!refreshToken.equals(storedRefreshToken)) {
             log.warn("재발급 실패: 저장된 Refresh Token과 일치하지 않음 (memberId={})", memberId);
             return;
         }
 
-        // Refresh Token 유효성 검사 (만료 되었는지)
-        if (!jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
-            log.warn("재발급 실패: Refresh Token 만료됨 (memberId={})", memberId);
-            return;
-        }
-
-        // 만료된 Access Token으로 인증 객체 생성
-        Authentication authentication = jwtTokenProvider.getAuthentication(expiredAccessToken);
+        // Refresh Token이 유효한 경우, 해당 memberId로 인증 정보 가져오기
+        Authentication authentication = jwtTokenProvider.getAuthenticationFromMemberId(memberId);
 
         // 그리고 새로운 Access Token 생성
         JwtToken newJwtToken = jwtTokenProvider.generateToken(authentication);
