@@ -17,4 +17,6 @@ public interface JwtTokenProvider {
     String getUserIdFromToken(String token);
     boolean isRefreshTokenValid(String refreshToken);
     Authentication getAuthenticationFromMemberId(String memberId);
+    long getAccessTokenExpirationTime();
+    long getRefreshTokenExpirationTime();
 }

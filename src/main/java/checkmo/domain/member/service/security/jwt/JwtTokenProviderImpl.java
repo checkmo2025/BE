@@ -146,4 +146,14 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
             userDetails, null, userDetails.getAuthorities()
         );
     }
+
+    @Override
+    public long getAccessTokenExpirationTime() {
+        return jwtProperties.getTokenValidity().getAccessToken();
+    }
+
+    @Override
+    public long getRefreshTokenExpirationTime() {
+        return jwtProperties.getTokenValidity().getRefreshToken();
+    }
 }

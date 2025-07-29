@@ -104,7 +104,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 이제 새로운 Access Token을 쿠키에 담기
         String newAccessToken = newJwtToken.getAccessToken();
-        jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken, 2 * 60 * 60); // 2시간 유효
+
+        int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
+        jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken, accessTokenMaxAge); // 2시간 유효
 
         // SecurityContext에 새로운 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);

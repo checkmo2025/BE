@@ -8,7 +8,6 @@ import checkmo.domain.member.service.security.jwt.JwtToken;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
 import checkmo.domain.member.service.security.jwt.TokenCacheService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,8 +42,11 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             // JWT 토큰 생성
             JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
-            jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), 2 * 60 * 60); // 2시간 유효
-            jwtCookieUtil.addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), 14 * 24 * 60 * 60); // 14일 유효
+            int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L); // ms → sec
+            int refreshTokenMaxAge = (int) (jwtTokenProvider.getRefreshTokenExpirationTime() / 1000L);
+
+            jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), accessTokenMaxAge);
+            jwtCookieUtil.addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenMaxAge);
 
             // RefreshToken Redis에 저장
             String memberId = ((PrincipalDetails) authentication.getPrincipal()).getMember().getId();
