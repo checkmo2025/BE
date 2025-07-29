@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 public class BookStoryRequestDTO {
 
     public enum BookStoryScope {
-        ALL, MY, FOLLOWING, CLUB
+        ALL, MY, FOLLOWING, CLUB, TARGET
     }
 
     @Getter
