@@ -37,7 +37,7 @@ public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
 
     @Override
     public boolean isFollowing(String memberId, String targetMemberId) {
-        if (memberId == targetMemberId) {
+        if (memberId.equals(targetMemberId)) {
             return true; // 자기 자신을 팔로우하는 것은 항상 true
         }
 
