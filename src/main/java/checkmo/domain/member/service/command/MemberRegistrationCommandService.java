@@ -43,6 +43,7 @@ public interface MemberRegistrationCommandService {
      *  - 추가 정보 입력 안받으면 정식 회원 아님
      *
      * @param request id,pw DTO
+     * @param response HttpServletResponse 객체
      * @return 회원 가입 응답 DTO
      */
     MemberResponseDTO.SignUpResponseDTO signUp(
