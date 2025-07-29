@@ -36,10 +36,10 @@ public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
     }
 
     @Override
-    public boolean isFollowing(String memberId, String targetMemberNickname) {
-        // 대상 회원의 ID를 조회
-        String targetMemberId = memberRepository.findIdByNickName(targetMemberNickname)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+    public boolean isFollowing(String memberId, String targetMemberId) {
+        if (memberId == targetMemberId) {
+            return true; // 자기 자신을 팔로우하는 것은 항상 true
+        }
 
         // 팔로우 관계가 존재하는지 확인
         return followRepository.existsByFollowerIdAndFollowingId(memberId, targetMemberId);
