@@ -4,6 +4,7 @@ import checkmo.domain.bookStory.converter.BookStoryConverter;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.service.query.BookStoryQueryService;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.BookStorySharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
@@ -23,6 +24,7 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
     public static final int DEFAULT_PAGE_SIZE = 10;
 
     private final BookStoryQueryService bookStoryQueryService;
+    private final MemberQueryFacade memberQueryFacade;
 
     @Override
     public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
@@ -30,14 +32,15 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
     }
 
     @Override
-    public BookStorySharedDTO.BookStoryListResponse getBookStoriesByNickname(String memberId, String targetMemberNickname, Long cursorId) {
-        return null;
-    }
-
-    @Override
-    public BookStorySharedDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, Long cursorId) {
-        // 1. 책이야기 목록 조회
-        List<BookStory> bookStories = bookStoryQueryService.findBookStories(memberId, scope, clubId, cursorId, DEFAULT_PAGE_SIZE);
+    public BookStorySharedDTO.BookStoryListResponse getBookStoriesByScope(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, String targetMemberNickname, Long cursorId) {
+        // 1. TARGET 스코프인 경우 닉네임으로 targetMemberId 조회
+        String targetMemberId = null;
+        if (scope == BookStoryRequestDTO.BookStoryScope.TARGET) {
+            targetMemberId = memberQueryFacade.getMemberIdByNickname(targetMemberNickname);
+        }
+        
+        // 2. 책이야기 목록 조회 (페이지 사이즈 +1을 서비스에서 처리함)
+        List<BookStory> bookStories = bookStoryQueryService.findBookStories(memberId, scope, clubId, targetMemberId, cursorId, DEFAULT_PAGE_SIZE);
 
         // 2. Facade에서 페이지네이션 로직 처리
         boolean hasNext = bookStories.size() > DEFAULT_PAGE_SIZE;
