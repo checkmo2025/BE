@@ -15,7 +15,7 @@ public class TokenCacheService {
 
     @CachePut(value = "refreshToken", key = "#memberId")
     public String saveRefreshToken(String memberId, String refreshToken) {
-        log.info("리프레시 토큰 저장 - memberId={}, refreshToken={}", memberId, refreshToken);
+        log.info("리프레시 토큰 저장 - memberId={}", memberId);
         return refreshToken;
     }
 
