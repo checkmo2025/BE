@@ -41,4 +41,12 @@ public interface MemberQueryService {
      * @return 회원 ID
      */
     String getMemberIdByNickname(String nickname);
+
+    /**
+     * 회원ID로 회원 닉네임 조회
+     *
+     * @param memberId 회원 ID
+     * @return 회원 닉네임
+     */
+    String getMemberNicknameById(String memberId);
 }
