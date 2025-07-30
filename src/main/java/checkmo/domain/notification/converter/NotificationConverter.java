@@ -2,6 +2,7 @@ package checkmo.domain.notification.converter;
 
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.notification.entity.Notification;
+import checkmo.domain.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.dto.NotificationSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -82,6 +83,56 @@ public class NotificationConverter {
                 .notificationId(notification.getId())
                 .notificationType(notification.getNotificationType())
                 .senderNickname(senderNickname)
+                .isRead(notification.isRead())
+                .createdAt(notification.getCreatedAt())
+                .redirectPath(notification.getRedirectPath())
+                .build();
+    }
+
+    // =====================================================
+    // Notification → NotificationResponseDTO 변환 (커서 기반 페이징용)
+    // =====================================================
+
+    /**
+     * Notification -> NotificationListResponseDTO 변환
+     */
+    public static NotificationResponseDTO.NotificationListResponseDTO convertToNotificationListDTO(
+            List<Notification> notifications,
+            Map<String, String> senderNicknameMap,
+            Map<String, String> receiverNicknameMap,
+            boolean hasNext,
+            Long nextCursor,
+            int pageSize
+    ) {
+
+        List<NotificationResponseDTO.NotificationInfoResponseDTO> notificationList = notifications.stream()
+                .map(notification -> convertToNotificationInfoDTO(
+                        notification, 
+                        senderNicknameMap.get(notification.getSenderId()),
+                        receiverNicknameMap.get(notification.getReceiverId())
+                ))
+                .toList();
+
+        return NotificationResponseDTO.NotificationListResponseDTO.builder()
+                .notifications(notificationList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(pageSize)
+                .build();
+    }
+
+    /**
+     * Notification → NotificationInfoResponseDTO 변환
+     */
+    public static NotificationResponseDTO.NotificationInfoResponseDTO convertToNotificationInfoDTO(
+            Notification notification, 
+            String senderNickname, 
+            String receiverNickname) {
+        
+        return NotificationResponseDTO.NotificationInfoResponseDTO.builder()
+                .NotificationId(notification.getId())
+                .senderNickname(senderNickname)
+                .receiverNickname(receiverNickname)
                 .isRead(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .redirectPath(notification.getRedirectPath())
