@@ -96,7 +96,7 @@ public class NotificationConverter {
     /**
      * Notification -> NotificationListResponseDTO 변환
      */
-    public static NotificationResponseDTO.NotificationListResponseDTO convertToNotificationListDTO(
+    public static NotificationResponseDTO.NotificationListResponse convertToNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
             boolean hasNext,
@@ -104,35 +104,18 @@ public class NotificationConverter {
             int pageSize
     ) {
 
-        List<NotificationResponseDTO.NotificationInfoResponseDTO> notificationList = notifications.stream()
-                .map(notification -> convertToNotificationInfoDTO(
+        var notificationList = notifications.stream()
+                .map(notification -> convertToPreviewDTO(
                         notification, 
                         senderNicknameMap.get(notification.getSenderId())
                 ))
                 .toList();
 
-        return NotificationResponseDTO.NotificationListResponseDTO.builder()
+        return NotificationResponseDTO.NotificationListResponse.builder()
                 .notifications(notificationList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
                 .pageSize(pageSize)
-                .build();
-    }
-
-    /**
-     * Notification → NotificationInfoResponseDTO 변환
-     */
-    public static NotificationResponseDTO.NotificationInfoResponseDTO convertToNotificationInfoDTO(
-            Notification notification, 
-            String senderNickname
-    ) {
-        
-        return NotificationResponseDTO.NotificationInfoResponseDTO.builder()
-                .NotificationId(notification.getId())
-                .senderNickname(senderNickname)
-                .read(notification.isRead())
-                .createdAt(notification.getCreatedAt())
-                .redirectPath(notification.getRedirectPath())
                 .build();
     }
 }
