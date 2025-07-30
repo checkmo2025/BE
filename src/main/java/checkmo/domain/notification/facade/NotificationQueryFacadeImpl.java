@@ -41,26 +41,19 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
             nextCursor = notifications.getLast().getId();
         }
 
-        // 3. Service를 통해 나머지 정보들을 가져옴
+        // 3. 알림을 보낸 사람의 ID 목록 가져오기
         List<String> senderIds = notifications.stream()
                 .map(Notification::getSenderId)
                 .distinct()
                 .toList();
-                
-        List<String> receiverIds = notifications.stream()
-                .map(Notification::getReceiverId)
-                .distinct()
-                .toList();
 
-        // 4. 발신자/수신자 닉네임 배치 조회
+        // 4. 알림 보낸 사람 닉네임 배치 조회
         Map<String, String> senderNicknameMap = memberQueryFacade.getMemberNicknamesByMemberIds(senderIds);
-        Map<String, String> receiverNicknameMap = memberQueryFacade.getMemberNicknamesByMemberIds(receiverIds);
 
         // 5. DTO 변환
         return NotificationConverter.convertToNotificationListDTO(
                 notifications, 
-                senderNicknameMap, 
-                receiverNicknameMap, 
+                senderNicknameMap,
                 hasNext, 
                 nextCursor, 
                 DEFAULT_PAGE_SIZE

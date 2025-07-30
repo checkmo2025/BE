@@ -39,7 +39,7 @@ public class NotificationConverter {
      */
     public static String getRedirectPath(Notification.NotificationType notificationType, Long bookStoryId) {
         if (Notification.NotificationType.LIKE == notificationType) {
-            return "api/book-stories/" + bookStoryId;
+            return "/api/book-stories/" + bookStoryId;
         }
         return null; // 지금은 LIKE 타입일 경우 무조건 bookStoryId를 사용하지만, 다른 타입이 추가될 경우를 대비하여 null 반환
     }
@@ -83,7 +83,7 @@ public class NotificationConverter {
                 .notificationId(notification.getId())
                 .notificationType(notification.getNotificationType())
                 .senderNickname(senderNickname)
-                .isRead(notification.isRead())
+                .read(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .redirectPath(notification.getRedirectPath())
                 .build();
@@ -99,7 +99,6 @@ public class NotificationConverter {
     public static NotificationResponseDTO.NotificationListResponseDTO convertToNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
-            Map<String, String> receiverNicknameMap,
             boolean hasNext,
             Long nextCursor,
             int pageSize
@@ -108,8 +107,7 @@ public class NotificationConverter {
         List<NotificationResponseDTO.NotificationInfoResponseDTO> notificationList = notifications.stream()
                 .map(notification -> convertToNotificationInfoDTO(
                         notification, 
-                        senderNicknameMap.get(notification.getSenderId()),
-                        receiverNicknameMap.get(notification.getReceiverId())
+                        senderNicknameMap.get(notification.getSenderId())
                 ))
                 .toList();
 
@@ -126,14 +124,13 @@ public class NotificationConverter {
      */
     public static NotificationResponseDTO.NotificationInfoResponseDTO convertToNotificationInfoDTO(
             Notification notification, 
-            String senderNickname, 
-            String receiverNickname) {
+            String senderNickname
+    ) {
         
         return NotificationResponseDTO.NotificationInfoResponseDTO.builder()
                 .NotificationId(notification.getId())
                 .senderNickname(senderNickname)
-                .receiverNickname(receiverNickname)
-                .isRead(notification.isRead())
+                .read(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .redirectPath(notification.getRedirectPath())
                 .build();
