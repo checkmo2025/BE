@@ -1,6 +1,5 @@
 package checkmo.domain.notification.service.command;
 
-import checkmo.domain.notification.web.dto.NotificationRequestDTO;
 import checkmo.event.FollowEvent;
 import checkmo.event.LikeEvent;
 
