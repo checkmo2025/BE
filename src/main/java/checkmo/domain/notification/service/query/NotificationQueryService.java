@@ -1,6 +1,7 @@
 package checkmo.domain.notification.service.query;
 
 import checkmo.domain.notification.web.dto.NotificationResponseDTO;
+import checkmo.global.dto.NotificationSharedDTO;
 
 /**
  * 알림 조회 서비스
@@ -25,4 +26,13 @@ public interface NotificationQueryService {
      * @return 알림 목록 size개
      */
     NotificationResponseDTO.NotificationListResponseDTO getNotifications(Long memberId, int size);
+
+    /**
+     * 읽지 않은 알림 목록 조회
+     *
+     * @param receiverId 알림을 받을 회원 ID
+     * @param size 조회할 알림 개수
+     * @return 읽지 않은 알림 목록
+     */
+    NotificationSharedDTO.NotificationPreviewList getUnreadNotifications(String receiverId, int size);
 }
