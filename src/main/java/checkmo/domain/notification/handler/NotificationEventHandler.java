@@ -12,20 +12,19 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class NotificationEventHandler {
 
-    //TODO : 나중에 구현할 때 주석 해제하고 사용하기!!
-    //private final NotificationCommandService notificationCommandService;
-
-    @Async("notificationExecutor")
-    @TransactionalEventListener
-    public void handleNotificationEvent(FollowEvent event) {
-        // 이벤트 처리 로직
-
-    }
+    private final NotificationCommandService notificationCommandService;
 
     @Async("notificationExecutor")
     @TransactionalEventListener
     public void handleNotificationEvent(LikeEvent event) {
         // 이벤트 처리 로직
+        notificationCommandService.createNotification(event);
+    }
 
+    @Async("notificationExecutor")
+    @TransactionalEventListener
+    public void handleNotificationEvent(FollowEvent event) {
+        // 이벤트 처리 로직
+        notificationCommandService.createNotification(event);
     }
 }
