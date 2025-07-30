@@ -31,7 +31,7 @@ public class NotificationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
     })
     @GetMapping()
-    public ApiResponse<NotificationResponseDTO.NotificationListResponseDTO> getNotifications(
+    public ApiResponse<NotificationResponseDTO.NotificationListResponse> getNotifications(
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
