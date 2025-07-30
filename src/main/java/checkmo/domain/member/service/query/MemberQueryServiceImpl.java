@@ -41,6 +41,13 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public String getMemberIdByNickname(String nickname) {
-        return null;
+        return memberRepository.findIdByNickName(nickname)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    @Override
+    public String getMemberNicknameById(String memberId) {
+        return memberRepository.findNicknameById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
     }
 }
