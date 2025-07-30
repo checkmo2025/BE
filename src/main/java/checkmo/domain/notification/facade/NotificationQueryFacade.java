@@ -27,5 +27,5 @@ public interface NotificationQueryFacade {
      * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
      * @return 알림 목록 정보 DTO
      */
-    NotificationResponseDTO.NotificationListResponseDTO getNotifications(String memberId, Long cursorId);
+    NotificationResponseDTO.NotificationListResponse getNotifications(String memberId, Long cursorId);
 }
