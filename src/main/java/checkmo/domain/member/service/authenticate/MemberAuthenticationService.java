@@ -1,6 +1,7 @@
 package checkmo.domain.member.service.authenticate;
 
 import checkmo.domain.member.web.dto.MemberRequestDTO;
+import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -18,7 +19,7 @@ public interface MemberAuthenticationService {
      * @param request 로그인 요청 DTO
      * @param response HttpServletResponse 객체
      */
-    void login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
+    MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
 
     /**
      * 로그아웃 처리 - JWT 토큰을 무효화하고 쿠키 삭제

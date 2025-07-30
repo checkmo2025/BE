@@ -2,12 +2,15 @@ package checkmo.domain.member.service.authenticate;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.member.converter.MemberConverter;
+import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.service.security.jwt.JwtCookieUtil;
 import checkmo.domain.member.service.security.jwt.JwtToken;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
 import checkmo.domain.member.service.security.jwt.TokenCacheService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
+import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,15 +29,16 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final JwtCookieUtil jwtCookieUtil;
 
     @Override
-    public void login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
+    public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
+        Authentication authentication;
+
         try {
             // 인증 요청
-            Authentication authentication =
-                authenticationManager.authenticate(authenticationToken);
+            authentication = authenticationManager.authenticate(authenticationToken);
 
             /// 인증 성공 후 SecurityContext에 인증 정보 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,6 +60,10 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             // 인증 실패 시 예외 처리
             throw new GeneralException(ErrorStatus.INVALID_CREDENTIALS, "이메일 또는 비밀번호가 일치하지 않습니다");
         }
+
+        // 인증 성공 후 MemberResponseDTO 반환
+        Member member = ((PrincipalDetails) authentication.getPrincipal()).getMember();
+        return MemberConverter.fromMemberToLoginResponseDTO(member);
     }
 
     @Override

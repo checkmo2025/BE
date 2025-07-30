@@ -50,6 +50,15 @@ public class MemberConverter {
     }
 
     /**
+     * Member 엔티티 → MemberLoginResponseDTO 변환
+     */
+    public static MemberResponseDTO.LoginResponseDTO fromMemberToLoginResponseDTO(Member member) {
+        return MemberResponseDTO.LoginResponseDTO.builder()
+                .nickname(member.getNickName())
+                .build();
+    }
+
+    /**
      * Member 엔티티 → MemberProfileResponseDTO 변환
      */
     public static MemberResponseDTO.MemberProfileResponseDTO toMemberProfileResponseDTO(Member member) {

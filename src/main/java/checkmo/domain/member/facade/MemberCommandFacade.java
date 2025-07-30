@@ -50,7 +50,7 @@ public interface MemberCommandFacade {
      * @param request 로그인 요청 DTO
      * @param response HttpServletResponse 객체
      */
-    void login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
+    MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
 
     /**
      * 로그아웃 처리 (내부용)

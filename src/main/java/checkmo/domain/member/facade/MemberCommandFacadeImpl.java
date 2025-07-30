@@ -38,8 +38,8 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public void login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
-        memberAuthenticationService.login(request, response);
+    public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
+        return memberAuthenticationService.login(request, response);
     }
 
     @Override

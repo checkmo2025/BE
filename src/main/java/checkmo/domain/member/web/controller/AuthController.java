@@ -77,9 +77,8 @@ public class AuthController {
     // 이메일 로그인
     @Operation(summary = "이메일 로그인", description = "이메일과 비밀번호로 로그인합니다.")
     @PostMapping("/login")
-    public ApiResponse<Void> login(@Valid @RequestBody MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
-        memberCommandFacade.login(request, response);
-        return ApiResponse.onSuccess(null);
+    public ApiResponse<MemberResponseDTO.LoginResponseDTO> login(@Valid @RequestBody MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
+        return ApiResponse.onSuccess(memberCommandFacade.login(request, response));
     }
 
     // 소셜 로그인 관련
