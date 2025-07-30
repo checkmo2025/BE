@@ -29,7 +29,7 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
     }
 
     @Override
-    public NotificationResponseDTO.NotificationListResponseDTO getNotifications(String memberId, Long cursorId) {
+    public NotificationResponseDTO.NotificationListResponse getNotifications(String memberId, Long cursorId) {
         // 1. 알림 목록 조회
         List<Notification> notifications = notificationQueryService.findNotifications(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
 
