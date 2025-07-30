@@ -3,6 +3,7 @@ package checkmo.domain.notification.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.notification.facade.NotificationQueryFacade;
 import checkmo.domain.notification.service.command.NotificationCommandService;
+import checkmo.domain.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.auth.CurrentId;
 import checkmo.global.dto.NotificationSharedDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,11 +31,12 @@ public class NotificationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
     })
     @GetMapping()
-    public ApiResponse<String> getUnreadNotifications(
+    public ApiResponse<NotificationResponseDTO.NotificationListResponseDTO> getNotifications(
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        return ApiResponse.onSuccess("아직 구현X");
+        var notifications = notificationQueryFacade.getNotifications(memberId, cursorId);
+        return ApiResponse.onSuccess(notifications);
     }
 
     @Operation(summary = "읽지 않은 알림 5개 조회", description = "홈화면에서 보여줄 읽지 않은 알림을 조회합니다. Redis 캐시를 사용합니다.")
