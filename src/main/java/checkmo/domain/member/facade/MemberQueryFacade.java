@@ -119,4 +119,10 @@ public interface MemberQueryFacade {
      * @return Member 엔티티의 프록시 객체
      */
     Member findMemberReferenceById(String memberId);
+
+    /**
+     * 회원 ID로 회원의 닉네임을 조회합니다. (외부용)
+     * @return 회원의 닉네임
+     */
+    String getMemberNicknameById(String memberId);
 }

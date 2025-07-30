@@ -95,4 +95,9 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     public Member findMemberReferenceById(String memberId) {
         return memberRepository.getReferenceById(memberId);
     }
+
+    @Override
+    public String getMemberNicknameById(String memberId) {
+        return memberQueryService.getMemberNicknameById(memberId);
+    }
 }
