@@ -1,5 +1,6 @@
 package checkmo.domain.notification.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,8 +31,9 @@ public class NotificationResponseDTO {
     public static class NotificationInfoResponseDTO {
         private Long NotificationId;
         private String senderNickname;
-        private String receiverNickname;
-        private boolean isRead;
+        private boolean read;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
         private String redirectPath;
     }
