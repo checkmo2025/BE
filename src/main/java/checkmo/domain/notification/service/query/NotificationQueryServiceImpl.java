@@ -24,13 +24,15 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
     private final MemberQueryFacade memberQueryFacade;
 
     @Override
-    public NotificationResponseDTO.NotificationListResponseDTO getNotifications(Long memberId, Long cursorId) {
-        throw new UnsupportedOperationException("아직 구현 X - 커서 기반 페이징");
-    }
-
-    @Override
-    public NotificationResponseDTO.NotificationListResponseDTO getNotifications(Long memberId, int size) {
-        throw new UnsupportedOperationException("아직 구현 X");
+    public List<Notification> findNotifications(String memberId, Long cursorId, int pageSize) {
+        // 커서 기반으로 알림 목록 조회 (페이지 크기 + 1개 조회)
+        if (cursorId == null) {
+            // 첫 페이지: 가장 최근 알림부터 조회
+            return notificationRepository.findByReceiverIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));
+        } else {
+            // 다음 페이지: 커서보다 작은 ID의 알림 조회
+            return notificationRepository.findByReceiverIdAndIdLessThanOrderByIdDesc(memberId, cursorId, PageRequest.of(0, pageSize));
+        }
     }
 
     @Cacheable(value = "notifications", key = "#receiverId")
