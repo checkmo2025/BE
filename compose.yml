@@ -1,11 +1,53 @@
 services:
   app:
-    image: nginx #ecr 주소 추가 예정 (지금은 아무거나 넣어놓음)
-    container_name: checkmo
-    ports:
-      - "8080:8080"
+    image: 268456953414.dkr.ecr.ap-northeast-2.amazonaws.com/checkmo-server
+    container_name: checkmo-app
     env_file:
       - .env
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: aladin,jwt,mail,prod,redis
     restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - redis # redis가 먼저 시작되어야지 우리 서비스에 redis 의존성 주입 가능
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      # nginx 설정 파일 저장할 볼륨
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # GitHub Actions에서 전송할 nginx 설정 파일들
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - app # 우리 서비스가 먼저 시작되어야지 nginx가 우리 서비스에 대한 프록시 설정을 할 수 있음
+
+  redis:
+    image: 'redis:7.2-alpine'
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass checkmo123
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "checkmo123", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis_data:
