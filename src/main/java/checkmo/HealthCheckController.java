@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/")
 @Slf4j
-@Tag(name = "Home", description = "헬스체크용 테스트 API")
+@Tag(name = "헬스체크용", description = "헬스체크용 테스트용 사용 X")
 public class HealthCheckController {
 
     @GetMapping
     public String home() {
-        return "로드밸런서 사용 중인 홈 화면입니다. auto scaling 제대로 삭제되고 잘 되나 확인용.";
+        return "헬스체크 확인용 입니다.";
     }
 }
