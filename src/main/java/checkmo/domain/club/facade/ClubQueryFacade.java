@@ -194,7 +194,7 @@ public interface ClubQueryFacade {
      * @param cursorId 페이징 커서 ID
      * @return 발제 목록 DTO
      */
-    MeetingResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId);
+    BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
 
     /**
      * ClubMeetingQueryService

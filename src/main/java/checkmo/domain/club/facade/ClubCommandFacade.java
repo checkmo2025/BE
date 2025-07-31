@@ -160,9 +160,9 @@ public interface ClubCommandFacade {
      * @param memberId  작성자 회원 ID
      * @param meetingId 미팅 ID
      * @param request   발제 내용 DTO
-     * @return 생성된 발제 정보 DTO
+     * @return 생성된 발제 ID
      */
-    MeetingResponseDTO.TopicDTO createTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicDTO request);
+    Long createTopic(String memberId, Long meetingId, BookShelfRequestDTO.TopicDTO request);
 
     /**
      * ClubMeetingCommandService
@@ -172,9 +172,9 @@ public interface ClubCommandFacade {
      * @param meetingId 미팅 ID
      * @param topicId   수정할 발제 ID
      * @param request   수정할 발제 내용 DTO
-     * @return 수정된 발제 정보 DTO
+     * @return 수정된 발제 ID
      */
-    MeetingResponseDTO.TopicDTO updateTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request);
+    Long updateTopic(String memberId, Long meetingId, Long topicId, BookShelfRequestDTO.TopicDTO request);
 
     /**
      * ClubMeetingCommandService

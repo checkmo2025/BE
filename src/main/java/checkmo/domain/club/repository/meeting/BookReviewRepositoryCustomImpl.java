@@ -3,7 +3,6 @@ package checkmo.domain.club.repository.meeting;
 import checkmo.domain.club.entity.QClubMember;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.QBookReview;
-import checkmo.domain.member.entity.QMember;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ public class BookReviewRepositoryCustomImpl implements BookReviewRepositoryCusto
     private final JPAQueryFactory queryFactory;
     private final QBookReview bookReview = QBookReview.bookReview;
     private final QClubMember clubMember = QClubMember.clubMember;
-    private final QMember member = QMember.member;
 
 
     @Override

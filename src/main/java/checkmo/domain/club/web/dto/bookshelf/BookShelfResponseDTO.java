@@ -1,5 +1,6 @@
 package checkmo.domain.club.web.dto.bookshelf;
 
+import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AllArgsConstructor;
@@ -71,6 +72,27 @@ public class BookShelfResponseDTO {
         private String description; // 한줄평 내용
         private double rate; // 평점
         private MemberSharedDTO.BasicInfoDTO authorInfo; // 작성자 정보 (globalDTO 사용)
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TopicListDTO {
+        private List<TopicDTO> topics; // 토픽 목록
+        private boolean hasNext; // 다음 페이지 존재 여부
+        private Long nextCursor; // 다음 페이지 커서
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TopicDTO {
+        private Long topicId; // 토픽 ID
+        private String content; // 토픽 내용
+        private MemberSharedDTO.BasicInfoDTO authorInfo; // 작성자 정보
+        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 
 }
