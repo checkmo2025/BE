@@ -61,8 +61,8 @@ public class ClubRequestDTO {
         private String item3;
         private String item4;
         private String item5;
-        private boolean isAnonymity;
-        private boolean isDuplication;
+        private boolean anonymity;
+        private boolean duplication;
         private LocalDateTime startTime;
         private LocalDateTime deadline;
     }
