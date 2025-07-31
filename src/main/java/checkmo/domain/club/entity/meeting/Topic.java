@@ -40,4 +40,12 @@ public class Topic extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
     private List<TeamTopic> teamTopics = new ArrayList<>();
+
+    public boolean isOwnedBy(ClubMember clubMember) {
+        return this.clubMember != null && this.clubMember.equals(clubMember);
+    }
+
+    public void updateTopic(String description) {
+        this.description = description;
+    }
 }

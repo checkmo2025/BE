@@ -11,8 +11,10 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.repository.meeting.BookReviewRepository;
 import checkmo.domain.club.repository.meeting.MeetingRepository;
+import checkmo.domain.club.repository.meeting.TopicRepository;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
@@ -34,6 +36,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final ClubMeetingQueryService clubMeetingQueryService;
 
     private final MeetingRepository meetingRepository;
+    private final TopicRepository topicRepository;
     private final BookReviewRepository bookReviewRepository;
 
     @Override
@@ -92,7 +95,16 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     @Override
     public Long createTopic(String memberId, Long meetingId, BookShelfRequestDTO.TopicDTO request) {
-        return 0L;
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        Topic topic = ClubConverter.fromTopicDTOToTopic(request);
+
+        meeting.addTopic(topic);
+        clubMember.addTopic(topic);
+
+        topicRepository.save(topic);
+        return topic.getId();
     }
 
     @Override
@@ -102,7 +114,20 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     @Override
     public Long updateTopic(String memberId, Long meetingId, Long topicId, BookShelfRequestDTO.TopicDTO request) {
-        return 0L;
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
+        if(!topic.isOwnedBy(clubMember)){
+            throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
+        }
+
+        topic.updateTopic(
+                request.getDescription()
+        );
+
+        topicRepository.save(topic);
+        return topic.getId();
     }
 
     @Override

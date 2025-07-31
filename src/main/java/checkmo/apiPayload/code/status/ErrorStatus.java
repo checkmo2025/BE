@@ -54,6 +54,10 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_PROFILE_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_406", "이미 프로필이 완성된 회원입니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_407", "이미 존재하는 닉네임입니다."),
 
+    // 발제
+    TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "TOPIC_404", "발제를 찾을 수 없습니다."),
+    TOPIC_FORBIDDEN(HttpStatus.FORBIDDEN, "TOPIC_403", "해당 발제에 대한 권한이 없습니다."),
+
     // 한줄평
     BOOK_REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_REVIEW403", "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
     BOOK_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_REVIEW404", "한줄평을 찾을 수 없습니다."),

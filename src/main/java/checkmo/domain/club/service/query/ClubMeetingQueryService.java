@@ -3,6 +3,7 @@ package checkmo.domain.club.service.query;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 import java.util.List;
@@ -77,4 +78,13 @@ public interface ClubMeetingQueryService {
      * @throws GeneralException 미팅이 존재하지 않을 경우
      */
     Meeting validateMeeting(Long meetingId) throws GeneralException;
+
+    /**
+     * 독서모임의 발제가 존재하는지 확인합니다.
+     *
+     * @param topicId 발제 ID
+     * @param meetingId 미팅 ID
+     * @return Topic 존재하는 발제 객체
+     */
+    Topic validateTopic(Long topicId, Long meetingId) throws GeneralException;
 }

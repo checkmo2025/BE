@@ -4,8 +4,10 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.repository.meeting.BookReviewRepository;
 import checkmo.domain.club.repository.meeting.MeetingRepository;
+import checkmo.domain.club.repository.meeting.TopicRepository;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.List;
 public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     private final MeetingRepository meetingRepository;
     private final BookReviewRepository bookReviewRepository;
+    private final TopicRepository topicRepository;
 
     @Override
     public MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId) {
@@ -49,5 +52,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     public Meeting validateMeeting(Long meetingId) throws GeneralException {
         return meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEETING_NOT_FOUND));
+    }
+
+    @Override
+    public Topic validateTopic(Long topicId, Long meetingId) throws GeneralException {
+        return topicRepository.findByIdAndMeetingId(topicId, meetingId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.TOPIC_NOT_FOUND));
     }
 }

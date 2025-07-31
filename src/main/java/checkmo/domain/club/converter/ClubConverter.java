@@ -7,6 +7,7 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
@@ -155,6 +156,17 @@ public class ClubConverter {
                 .hasNext(hasNext)
                 .nextCursor(lastCursorId)
                 .pageSize(dtoList.size())
+                .build();
+    }
+
+    /**
+     * TopicDTO -> Topic 엔티티 변환
+     */
+    public static Topic fromTopicDTOToTopic(
+            BookShelfRequestDTO.TopicDTO topicDTO
+    ){
+        return Topic.builder()
+                .description(topicDTO.getDescription())
                 .build();
     }
 

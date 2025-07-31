@@ -123,4 +123,51 @@ public class ClubBookshelfController {
         clubCommandFacade.deleteBookReview(memberId, meetingId, reviewId);
         return ApiResponse.onSuccess(null);
     }
+
+    // 발제(Topic) 관리
+    // POST /api/meetings/{meetingId}/topics - Topic 등록
+    @Operation(summary = "발제 등록 API", description = "발제를 등록합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "발제를 등록할 정기 독서모임 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @PostMapping("/api/meetings/{meetingId}/topics")
+    public ApiResponse<Long> createTopic(
+            @PathVariable Long meetingId,
+            @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
+            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+    ) {
+        Long topicId = clubCommandFacade.createTopic(memberId, meetingId, request);
+        return ApiResponse.onSuccess(topicId);
+    }
+
+    // PATCH /api/meetings/{meetingId}/topics/{topicId} - Topic 수정
+    @Operation(summary = "발제 수정 API", description = "발제를 수정합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "발제를 수정할 정기 독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "topicId", description = "수정할 발제 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 발제에 대한 수정 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다."),
+    })
+    @PatchMapping("/api/meetings/{meetingId}/topics/{topicId}")
+    public ApiResponse<Long> updateTopic(
+            @PathVariable Long meetingId,
+            @PathVariable Long topicId,
+            @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
+            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+    ) {
+        Long updatedTopicId = clubCommandFacade.updateTopic(memberId, meetingId, topicId, request);
+        return ApiResponse.onSuccess(updatedTopicId);
+    }
+    // DELETE /api/meetings/{meetingId}/topics/{topicId} - Topic 삭제
+    // GET /api/meetings/{meetingId}/topics - Meeting에 대한 Topic 전체보기
 }
