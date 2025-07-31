@@ -59,3 +59,29 @@ public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCom
         return notice.getId();
     }
 
+
+    /**
+     * 독서 모임에 투표를 생성합니다.
+     *
+     * @param clubId 독서 모임 ID
+     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
+     * @param request 투표 생성 요청 DTO
+     * @return 생성된 투표 ID
+     */
+    @Override
+    public Long createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request) {
+
+        // 1. 검증
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. Vote 엔티티 생성 & 저장
+        Vote vote = ClubConverter.fromCreateVoteDTOToVote(request, club);
+        voteRepository.save(vote);
+
+        return vote.getId();
+    }
+

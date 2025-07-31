@@ -10,6 +10,8 @@ import checkmo.domain.club.repository.announcement.MemberVoteRepository;
 import checkmo.domain.club.repository.announcement.NoticeRepository;
 import checkmo.domain.club.repository.announcement.VoteRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,8 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
+
+    private final MemberQueryFacade memberQueryFacade;
 
     /**
      * 공지 or 투표 상세 조회
@@ -49,6 +53,67 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
                 yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
                         .noticeItem(ClubConverter.toPureNoticeDTO(notice))
+                        .build();
+            }
+
+            case "투표" -> {
+                Vote vote = voteRepository.findById(itemId)
+                        .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
+
+                List<String> voteItems = vote.getItems();
+                int itemCount = voteItems.size();
+
+                // 전체 투표 결과
+                List<MemberVote> memberVotes = memberVoteRepository.findAllByVoteId(vote.getId());
+
+                // 항목별 투표자 정보 리스트 초기화
+                List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem = new ArrayList<>();
+                for (int i = 0; i < itemCount; i++) {
+                    votedMembersByItem.add(new ArrayList<>());
+                }
+
+                // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
+                for (MemberVote mv : memberVotes) {
+                    String voterId = mv.getMemberId();
+                    MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(voterId);
+
+                    if (mv.isItem1()) votedMembersByItem.get(0).add(memberInfo);
+                    if (itemCount >= 2 && mv.isItem2()) votedMembersByItem.get(1).add(memberInfo);
+                    if (itemCount >= 3 && mv.isItem3()) votedMembersByItem.get(2).add(memberInfo);
+                    if (itemCount >= 4 && mv.isItem4()) votedMembersByItem.get(3).add(memberInfo);
+                    if (itemCount >= 5 && mv.isItem5()) votedMembersByItem.get(4).add(memberInfo);
+                }
+
+                // 본인 투표 정보
+                MemberVote myVote = memberVoteRepository.findByVoteIdAndMemberId(vote.getId(), memberId).orElse(null);
+
+                List<ClubResponseDTO.EachItemDTO> itemDTOs = new ArrayList<>();
+                for (int i = 0; i < itemCount; i++) {
+                    boolean isSelected = false;
+                    if (myVote != null) {
+                        isSelected = switch (i) {
+                            case 0 -> myVote.isItem1();
+                            case 1 -> myVote.isItem2();
+                            case 2 -> myVote.isItem3();
+                            case 3 -> myVote.isItem4();
+                            case 4 -> myVote.isItem5();
+                            default -> false;
+                        };
+                    }
+
+                    itemDTOs.add(
+                            ClubConverter.toEachItemDTO(
+                                    voteItems.get(i),
+                                    isSelected,
+                                    votedMembersByItem.get(i)
+                            )
+                    );
+                }
+
+                ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
+
+                yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                        .noticeItem(voteDTO)
                         .build();
             }
 

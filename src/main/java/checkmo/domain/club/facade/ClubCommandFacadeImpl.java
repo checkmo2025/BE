@@ -79,9 +79,23 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     }
 
+    /**
+     * ClubCommunicationCommandService
+     * 모임에 투표를 생성합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 작성자(운영진) 회원 ID
+     * @param request  투표 생성 요청 DTO
+     * @return 생성된 투표가 포함된 공지사항 상세 DTO
+     */
     @Override
     public ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request) {
-        return null;
+
+        // 1. 투표 생성
+        Long voteId = clubCommunicationCommandService.createVote(clubId, memberId, request);
+
+        // 2. 생성된 투표를 다시 조회
+        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId);
     }
 
     @Override

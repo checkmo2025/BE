@@ -58,4 +58,14 @@ public class Vote {
     @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL)
     private List<MemberVote> memberVotes = new ArrayList<>();
 
+    public List<String> getItems() {
+        List<String> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+        if (item3 != null) items.add(item3);
+        if (item4 != null) items.add(item4);
+        if (item5 != null) items.add(item5);
+        return items;
+    }
+
 }

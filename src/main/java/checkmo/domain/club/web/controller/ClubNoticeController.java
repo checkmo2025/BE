@@ -39,5 +39,22 @@ public class ClubNoticeController {
         return ApiResponse.onSuccess(clubCommandFacade.createNotice(clubId, memberId, request));
     }
 
+    @Operation(summary = "투표 생성", description = "특정 모임에 투표를 생성합니다. (운영진만 생성 가능)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 생성 가능"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
+    })
+    @PostMapping("/votes")
+    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> createVote(
+            @PathVariable Long clubId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId,
+            @RequestBody @Valid ClubRequestDTO.CreateClubVoteDTO request
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        return ApiResponse.onSuccess(clubCommandFacade.createVote(clubId, memberId, request));
+    }
+
 
 }

@@ -150,6 +150,31 @@ public class ClubConverter {
     }
 
     /**
+     * CreateClubVoteDTO + Club -> Vote 엔티티 변환
+     */
+    public static Vote fromCreateVoteDTOToVote(
+            ClubRequestDTO.CreateClubVoteDTO request,
+            Club club
+    ) {
+        return Vote.builder()
+                .title(request.getTitle())
+                .tag("투표")
+                .important(request.isImportant())
+                .item1(request.getItem1())
+                .item2(request.getItem2())
+                .item3(request.getItem3())
+                .item4(request.getItem4())
+                .item5(request.getItem5())
+                .isAnonymity(request.isAnonymity())
+                .isDuplication(request.isDuplication())
+                .startTime(request.getStartTime())
+                .deadline(request.getDeadline())
+                .clubId(club.getId())
+                .club(club)
+                .build();
+    }
+
+    /**
      * CreateClubNoticeDTO -> Notice 엔티티 변환 (모임과 연결되지 않은 순수 공지사항)
      */
     public static Notice fromCreateNoticeDTOToNotice(
@@ -161,6 +186,35 @@ public class ClubConverter {
                 .important(request.isImportant())
                 .tag("공지")
                 .club(club)
+                .build();
+    }
+
+    /**
+     * 투표 항목 → EachItemDTO 변환
+     */
+    public static ClubResponseDTO.EachItemDTO toEachItemDTO(
+            String item,
+            boolean isSelected,
+            List<MemberSharedDTO.BasicInfoDTO> votedMembers
+    ) {
+        return ClubResponseDTO.EachItemDTO.builder()
+                .item(item)
+                .isSelected(isSelected)
+                .voteCount(votedMembers.size())
+                .votedMembers(votedMembers)
+                .build();
+    }
+
+    /**
+     * Vote 엔티티 → VoteDTO 변환
+     */
+    public static ClubResponseDTO.VoteDTO toVoteDTO(Vote vote, List<ClubResponseDTO.EachItemDTO> itemDTOs) {
+        return ClubResponseDTO.VoteDTO.builder()
+                .id(vote.getId())
+                .title(vote.getTitle())
+                .important(vote.isImportant())
+                .tag("투표")
+                .items(itemDTOs)
                 .build();
     }
 
