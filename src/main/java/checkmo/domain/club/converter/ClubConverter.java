@@ -342,6 +342,22 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * List<ClubMember> -> ClubSharedDTO.MyClubList 변환
+     */
+    public static ClubSharedDTO.MyClubList fromClubMemberToMyClubList(
+            List<ClubMember> clubMembers
+    ) {
+        return ClubSharedDTO.MyClubList.builder()
+                .clubList(clubMembers.stream()
+                        .map(cm -> ClubSharedDTO.MyClubInfo.builder()
+                                .clubId(cm.getClubId())
+                                .clubName(cm.getClub().getName())
+                                .build())
+                        .toList())
+                .build();
+    }
+
     // =====================================================
     // Entity -> Entity 변환
     // =====================================================
@@ -374,14 +390,6 @@ public class ClubConverter {
                 .bookReviewList(bookReviewList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .build();
-    }
-
-    public static ClubSharedDTO.MyClubList fromClubInfoListToMyClubList(
-            List<ClubSharedDTO.MyClubInfo> clubInfoList
-    ) {
-        return ClubSharedDTO.MyClubList.builder()
-                .clubList(clubInfoList)
                 .build();
     }
 

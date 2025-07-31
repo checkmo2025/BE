@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,10 +27,8 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     @Override
     public ClubSharedDTO.MyClubList getMyClubList(String memberId) {
+        List<ClubMember> myClubMember = clubMemberRepository.findMyClubInfoByMemberId(memberId);
 
-        // 회원ID를 통해 JPQL로 바로 DTO로 변환해서 매핑
-        var myClubInfoByMemberId = clubMemberRepository.findMyClubInfoByMemberId(memberId);
-
-        return ClubConverter.fromClubInfoListToMyClubList(myClubInfoByMemberId);
+        return ClubConverter.fromClubMemberToMyClubList(myClubMember);
     }
 }
