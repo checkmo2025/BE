@@ -64,8 +64,6 @@ public class AuthController {
         return ApiResponse.onSuccess(null);
     }
 
-    // 회원가입 관련
-
     // 닉네임 중복 확인
     @Operation(summary = "닉네임 중복 확인", description = "회원가입 시 닉네임 중복을 확인합니다.")
     @PostMapping("/check-nickname")
@@ -76,8 +74,12 @@ public class AuthController {
         return ApiResponse.onSuccess(isDuplicated);
     }
 
-
-    // POST /api/auth/additional-info - 회원 추가 정보 입력
+    // 이메일 로그인
+    @Operation(summary = "이메일 로그인", description = "이메일과 비밀번호로 로그인합니다.")
+    @PostMapping("/login")
+    public ApiResponse<MemberResponseDTO.LoginResponseDTO> login(@Valid @RequestBody MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
+        return ApiResponse.onSuccess(memberCommandFacade.login(request, response));
+    }
 
     // 소셜 로그인 관련
     // GET /api/auth/oauth2/google - 소셜 로그인 (구글)

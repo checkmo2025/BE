@@ -33,8 +33,17 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_4005", "독서클럽 운영진만 접근할 수 있습니다."),
     CLUB_BOOK_RECOMMEND_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4014", "추천 책을 찾을 수 없습니다."),
     CLUB_BOOK_RECOMMEND_FORBIDDEN(HttpStatus.FORBIDDEN, "CLUB_4015", "해당 추천 책에 대한 권한이 없습니다."),
+    CLUB_INVALID_TAG_TYPE(HttpStatus.BAD_REQUEST, "CLUB_4011", "유효하지 않은 공지 유형입니다. (공지, 모임, 투표 중 하나)"),
 
-    // 회원
+    // 공지사항
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_4004", "공지사항을 찾을 수 없습니다."),
+
+    // 투표
+    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_4004", "투표를 찾을 수 없습니다."),
+    VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_4003", "투표 가능 시간이 아닙니다."),
+    MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_4001", "하나의 항목에만 투표 가능합니다."),
+
+    // 이메일
     EMAIL_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "EMAIL_401", "인증번호가 만료되었습니다."),
     EMAIL_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, "EMAIL_402", "잘못된 인증번호입니다."),
     EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL_403", "이미 인증된 이메일입니다."),
@@ -47,12 +56,15 @@ public enum ErrorStatus implements BaseErrorCode {
     // 카테고리
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_4004", "카테고리를 찾을 수 없습니다."),
 
+    // 회원
     MEMBER_INACTIVE(HttpStatus.FORBIDDEN, "MEMBER_401", "비활성화된 회원입니다."),
     MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 회원입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "해당 회원을 찾을 수 없습니다."),
     MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "MEMBER_403", "인증되지 않은 회원입니다."),
     MEMBER_PROFILE_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_406", "이미 프로필이 완성된 회원입니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_407", "이미 존재하는 닉네임입니다."),
+    MEMBER_PROFILE_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_408", "프로필이 완성되지 않은 회원입니다."),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER_409", "이메일 또는 비밀번호가 일치하지 않습니다."),
 
     // 발제
     TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "TOPIC_404", "발제를 찾을 수 없습니다."),

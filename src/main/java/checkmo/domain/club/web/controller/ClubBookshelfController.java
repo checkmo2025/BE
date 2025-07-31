@@ -168,6 +168,7 @@ public class ClubBookshelfController {
         Long updatedTopicId = clubCommandFacade.updateTopic(memberId, meetingId, topicId, request);
         return ApiResponse.onSuccess(updatedTopicId);
     }
+
     // DELETE /api/meetings/{meetingId}/topics/{topicId} - Topic 삭제
     // GET /api/meetings/{meetingId}/topics - Meeting에 대한 Topic 전체보기
 }

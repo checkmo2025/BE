@@ -9,6 +9,7 @@ import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
+import checkmo.domain.club.service.query.ClubCommunicationQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
@@ -30,6 +31,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
+    private final ClubCommunicationQueryService clubCommunicationQueryService;
+
     private final ClubRepository clubRepository; // 프록시용
 
     private final MemberQueryFacade memberQueryFacade;
@@ -95,9 +98,17 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return null;
     }
 
+    /**
+     * ClubQueryService
+     * 공지사항(투표 포함)의 상세 정보를 조회합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param noticeId 조회할 공지사항 ID
+     * @return 공지사항 상세 정보 DTO
+     */
     @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId) {
-        return null;
+    public ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId, String tag, String memberId) {
+        return clubCommunicationQueryService.getNoticeOrVoteDetail(clubId, noticeId, tag, memberId);
     }
 
     /**

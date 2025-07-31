@@ -4,7 +4,9 @@ import checkmo.domain.book.entity.Book;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
+import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.entity.meeting.Topic;
@@ -13,6 +15,7 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
@@ -106,6 +109,7 @@ public class ClubConverter {
                 .tag(request.getTag())
                 .clubMember(clubMember)
                 .book(proxyBook)
+                .bookId(proxyBook.getId())
                 .build();
     }
 
@@ -156,6 +160,110 @@ public class ClubConverter {
                 .hasNext(hasNext)
                 .nextCursor(lastCursorId)
                 .pageSize(dtoList.size())
+                .build();
+    }
+
+    /**
+     * Notice 엔티티 → PureNoticeDTO 변환
+     */
+    public static ClubResponseDTO.PureNoticeDTO toPureNoticeDTO(Notice notice) {
+        return ClubResponseDTO.PureNoticeDTO.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .content(notice.getContent())
+                .important(notice.isImportant())
+                .tag(notice.getTag())  // "공지"
+                .build();
+    }
+
+    /**
+     * CreateClubVoteDTO + Club -> Vote 엔티티 변환
+     */
+    public static Vote fromCreateVoteDTOToVote(
+            ClubRequestDTO.CreateClubVoteDTO request,
+            Club club
+    ) {
+        return Vote.builder()
+                .title(request.getTitle())
+                .tag("투표")
+                .important(request.isImportant())
+                .item1(request.getItem1())
+                .item2(request.getItem2())
+                .item3(request.getItem3())
+                .item4(request.getItem4())
+                .item5(request.getItem5())
+                .isAnonymity(request.isAnonymity())
+                .isDuplication(request.isDuplication())
+                .startTime(request.getStartTime())
+                .deadline(request.getDeadline())
+                .clubId(club.getId())
+                .club(club)
+                .build();
+    }
+
+    /**
+     * VoteResultDTO -> MemberVote 엔티티
+     */
+    public static MemberVote fromVoteRequestToMemberVote(
+            Vote vote,
+            String memberId,
+            Member memberProxy,
+            ClubRequestDTO.VoteResultDTO request
+    ) {
+        return MemberVote.builder()
+                .vote(vote)
+                .voteId(vote.getId())
+                .memberId(memberId)
+                .member(memberProxy)
+                .item1(request.isItem1())
+                .item2(request.isItem2())
+                .item3(request.isItem3())
+                .item4(request.isItem4())
+                .item5(request.isItem5())
+                .build();
+    }
+
+    /**
+     * CreateClubNoticeDTO -> Notice 엔티티 변환 (모임과 연결되지 않은 순수 공지사항)
+     */
+    public static Notice fromCreateNoticeDTOToNotice(
+            ClubRequestDTO.CreateClubNoticeDTO request,
+            Club club) {
+        return Notice.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .important(request.isImportant())
+                .tag("공지")
+                .club(club)
+                .build();
+    }
+
+    /**
+     * 투표 항목 → EachItemDTO 변환
+     */
+    public static ClubResponseDTO.EachItemDTO toEachItemDTO(
+            String item,
+            boolean isSelected,
+            List<MemberSharedDTO.BasicInfoDTO> votedMembers
+    ) {
+        return ClubResponseDTO.EachItemDTO.builder()
+                .item(item)
+                .isSelected(isSelected)
+                .voteCount(votedMembers.size())
+                .votedMembers(votedMembers)
+                .build();
+    }
+
+    /**
+     * Vote 엔티티 → VoteDTO 변환
+     */
+    public static ClubResponseDTO.VoteDTO toVoteDTO(Vote vote, List<ClubResponseDTO.EachItemDTO> itemDTOs) {
+        return ClubResponseDTO.VoteDTO.builder()
+                .id(vote.getId())
+                .title(vote.getTitle())
+                .important(vote.isImportant())
+                .tag("투표")
+                .items(itemDTOs)
                 .build();
     }
 

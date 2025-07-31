@@ -158,6 +158,8 @@ public class ClubResponseDTO {
     public static class EachItemDTO {
         private String item;
         private boolean isSelected;
+        private int voteCount; // 투표한 사람 수
+        private List<MemberSharedDTO.BasicInfoDTO> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
     }
 
     @Getter

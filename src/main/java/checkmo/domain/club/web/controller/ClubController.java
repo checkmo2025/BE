@@ -60,7 +60,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "입력 값이 유효하지 않습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "중복된 모임 이름입니다."),
     })
-    @PostMapping("/")
+    @PostMapping("")
     public ApiResponse<ClubResponseDTO.ClubDetailDTO> createClub(
             @RequestHeader("MemberId") String memberId,
             @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request

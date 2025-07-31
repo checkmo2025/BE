@@ -1,6 +1,7 @@
 package checkmo.domain.member.service.security.jwt;
 
 import checkmo.config.properties.JwtProperties;
+import checkmo.config.properties.MailProperties.Auth;
 import checkmo.domain.member.service.security.auth.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -47,8 +49,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         long now = (new Date()).getTime();
 
         // 액세스 토큰과 리프레시 토큰 유효 시간 가져오기
-        long accessTokenValidity = jwtProperties.getTokenValidity().getAccessToken() * 1000;
-        long refreshTokenValidity = jwtProperties.getTokenValidity().getRefreshToken() * 1000;
+        long accessTokenValidity = jwtProperties.getTokenValidity().getAccessToken();
+        long refreshTokenValidity = jwtProperties.getTokenValidity().getRefreshToken();
 
         // 액세스 토큰 생성
         String accessToken = Jwts.builder()
@@ -60,12 +62,12 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         // 리프레시 토큰 생성
         String refreshToken = Jwts.builder()
+                                  .subject(authentication.getName())
                                   .expiration(new Date(now + refreshTokenValidity))
                                   .signWith(key)
                                   .compact();
 
         return JwtToken.builder()
-                       .grantType("Bearer")
                        .accessToken(accessToken)
                        .refreshToken(refreshToken)
                        .build();
@@ -82,6 +84,12 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
     @Override
     public boolean validateToken(String token) {
+
+        if (!StringUtils.hasText(token)) {
+            log.warn("JWT 토큰이 null 입니다.");
+            return false;
+        }
+
         try {
             // TODO: 로그아웃 시 토큰 블랙리스트 검증 로직 추가
             Jwts.parser()
@@ -89,16 +97,31 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .build()
                 .parseSignedClaims(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.warn("잘못된 JWT 서명입니다.", e);
         } catch (ExpiredJwtException e) {
-            log.warn("만료된 JWT 서명입니다", e);
+            throw e; // 토큰이 만료된 경우 재발급하도록 던지기
+        }
+        catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.warn("잘못된 JWT 서명입니다.", e);
         } catch (UnsupportedJwtException e) {
             log.warn("지원하지 않는 JWT 토큰입니다", e);
         } catch (IllegalArgumentException e) {
             log.warn("JWT 토큰이 잘못되었습니다", e);
         }
         return false;
+    }
+
+    @Override
+    public boolean isRefreshTokenValid(String refreshToken) {
+        try {
+            Jwts.parser()
+                .verifyWith((SecretKey) key)
+                .build()
+                .parseSignedClaims(refreshToken);
+            return true;
+        } catch (Exception e) {
+            log.warn("유효하지 않은 Refresh Token 입니다: {}", e.getMessage());
+            return false;
+        }
     }
 
     @Override
@@ -113,5 +136,24 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         } catch (ExpiredJwtException e) {
             return e.getClaims().getSubject();
         }
+    }
+
+    @Override
+    public Authentication getAuthenticationFromMemberId(String memberId) {
+        UserDetails userDetails = customUserDetailsService.loadUserById(memberId);
+
+        return new UsernamePasswordAuthenticationToken(
+            userDetails, null, userDetails.getAuthorities()
+        );
+    }
+
+    @Override
+    public long getAccessTokenExpirationTime() {
+        return jwtProperties.getTokenValidity().getAccessToken();
+    }
+
+    @Override
+    public long getRefreshTokenExpirationTime() {
+        return jwtProperties.getTokenValidity().getRefreshToken();
     }
 }

@@ -1,5 +1,6 @@
 package checkmo.domain.club.entity.announcement;
 
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -31,5 +32,12 @@ public class Notice extends BaseEntity {
     @JoinColumn(name = "meeting_id")
     @Setter
     private Meeting meeting;
+
+    @Column(name = "club_id", insertable = false, updatable = false)
+    private Long clubId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id")
+    private Club club;
     
 }

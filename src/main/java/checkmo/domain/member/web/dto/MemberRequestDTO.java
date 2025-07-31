@@ -2,6 +2,7 @@ package checkmo.domain.member.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -75,5 +76,19 @@ public class MemberRequestDTO {
 
         @NotEmpty(message = "관심 카테고리는 최소 1개 이상 선택해야 합니다")
         private List<Long> categoryIds;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginRequestDTO {
+        @NotBlank(message = "이메일은 필수입니다")
+        @Email(message = "유효한 이메일 형식이 아닙니다")
+        private String email;
+
+        @NotBlank(message = "비밀번호는 필수입니다")
+        @Size(min = 6, max = 10, message = "비밀번호는 6-10자여야 합니다")
+        @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$", message = "비밀번호는 영어 및 특수문자를 포함해야 합니다")
+        private String password;
     }
 }
