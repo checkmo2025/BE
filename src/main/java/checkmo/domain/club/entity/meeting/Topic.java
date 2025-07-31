@@ -1,5 +1,6 @@
 package checkmo.domain.club.entity.meeting;
 
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,16 +26,26 @@ public class Topic extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
+    @Setter
     private Meeting meeting;
 
-    @Column(name = "member_team_id", insertable = false, updatable = false)
-    private Long memberTeamId;
+    @Column(name = "club_member_id", insertable = false, updatable = false)
+    private Long clubMemberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_team_id")
-    private MemberTeam memberTeam;
+    @JoinColumn(name = "club_member_id")
+    @Setter
+    private ClubMember clubMember;
 
     @Builder.Default
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
     private List<TeamTopic> teamTopics = new ArrayList<>();
+
+    public boolean isOwnedBy(ClubMember clubMember) {
+        return this.clubMember != null && this.clubMember.equals(clubMember);
+    }
+
+    public void updateTopic(String description) {
+        this.description = description;
+    }
 }

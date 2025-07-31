@@ -3,6 +3,7 @@ package checkmo.domain.club.service.query;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.converter.ClubConverter;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.announcement.Vote;
@@ -44,7 +45,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
         // 1. 검증
         clubQueryService.validateClub(clubId);
-        clubMemberQueryService.validateClubMember(clubId, memberId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         return switch (tag) {
             case "공지" -> {
@@ -52,6 +53,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                         .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
 
                 yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                        .isStaff(clubMember.isStaff())
                         .noticeItem(ClubConverter.toPureNoticeDTO(notice))
                         .build();
             }
@@ -123,6 +125,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                 ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
 
                 yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                        .isStaff(clubMember.isStaff())
                         .noticeItem(voteDTO)
                         .build();
             }

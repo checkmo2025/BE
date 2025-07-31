@@ -16,14 +16,14 @@ public class CategoryConverter {
     /**
      * CategoryListResponseDTO → CategoryInfoListDTO 변환
      */
-    public static CategorySharedDTO.CategoryInfoListDTO toCategoryInfoListDTO(
+    public static CategorySharedDTO.CategoryInfoList toCategoryInfoListDTO(
             CategoryResponseDTO.CategoryListResponseDTO response
     ) {
-        List<CategorySharedDTO.CategoryInfoDTO> categoryList = response.getCategoryList().stream()
+        List<CategorySharedDTO.CategoryInfo> categoryList = response.getCategoryList().stream()
                 .map(CategoryConverter::toCategoryInfoDTO)
                 .collect(Collectors.toList());
 
-        return CategorySharedDTO.CategoryInfoListDTO.builder()
+        return CategorySharedDTO.CategoryInfoList.builder()
                 .categoryList(categoryList)
                 .build();
     }
@@ -31,10 +31,10 @@ public class CategoryConverter {
     /**
      * CategoryInfoResponseDTO → CategoryInfoDTO 변환
      */
-    public static CategorySharedDTO.CategoryInfoDTO toCategoryInfoDTO(
+    public static CategorySharedDTO.CategoryInfo toCategoryInfoDTO(
             CategoryResponseDTO.CategoryInfoResponseDTO dto
     ) {
-        return CategorySharedDTO.CategoryInfoDTO.builder()
+        return CategorySharedDTO.CategoryInfo.builder()
                 .id(dto.getId())
                 .name(dto.getName())
                 .build();

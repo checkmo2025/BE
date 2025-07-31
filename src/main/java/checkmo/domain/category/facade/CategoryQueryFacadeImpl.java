@@ -17,12 +17,12 @@ public class CategoryQueryFacadeImpl implements CategoryQueryFacade {
     private final CategoryQueryService categoryQueryService;
 
     @Override
-    public CategorySharedDTO.CategoryInfoListDTO getAllCategoriesForShare() {
+    public CategorySharedDTO.CategoryInfoList getAllCategoriesForShare() {
         return null;
     }
 
     @Override
-    public CategorySharedDTO.CategoryInfoListDTO getCategoriesByMemberForShare(Long memberId) {
+    public CategorySharedDTO.CategoryInfoList getCategoriesByMemberForShare(Long memberId) {
         return null;
     }
 
@@ -34,7 +34,7 @@ public class CategoryQueryFacadeImpl implements CategoryQueryFacade {
      * @return 해당 모임의 카테고리 정보가 담긴 공유 DTO
      */
     @Override
-    public CategorySharedDTO.CategoryInfoListDTO getCategoriesByClubForShare(Long clubId) {
+    public CategorySharedDTO.CategoryInfoList getCategoriesByClubForShare(Long clubId) {
         CategoryResponseDTO.CategoryListResponseDTO responseDTO = categoryQueryService.findCategoriesByClub(clubId);
         return CategoryConverter.toCategoryInfoListDTO(responseDTO);
     }

@@ -10,7 +10,6 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
-import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,11 +66,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         Long noticeId = clubCommunicationCommandService.createNotice(clubId, memberId, request);
 
         // 2. 생성된 공지를 다시 조회
-        ClubResponseDTO.ClubNoticeDetailDTO clubNoticeDetailDTO = clubNoticeQueryService.getNoticeOrVoteDetail(clubId, noticeId, "공지", memberId);
-
-        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
-                .noticeItem(clubNoticeDetailDTO.getNoticeItem())
-                .build();
+        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, noticeId, "공지", memberId);
     }
 
     /**
@@ -194,18 +189,18 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public MeetingResponseDTO.TopicDTO createTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicDTO request) {
-        return null;
+    public Long createTopic(String memberId, Long meetingId, BookShelfRequestDTO.TopicDTO request) {
+        return clubMeetingCommandService.createTopic(memberId, meetingId, request);
     }
 
     @Override
-    public MeetingResponseDTO.TopicDTO updateTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request) {
-        return null;
+    public Long updateTopic(String memberId, Long meetingId, Long topicId, BookShelfRequestDTO.TopicDTO request) {
+        return clubMeetingCommandService.updateTopic(memberId, meetingId, topicId, request);
     }
 
     @Override
     public void deleteTopic(String memberId, Long meetingId, Long topicId) {
-
+        clubMeetingCommandService.deleteTopic(memberId, meetingId, topicId);
     }
 
     @Override

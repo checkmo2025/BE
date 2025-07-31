@@ -16,7 +16,7 @@ public interface CategoryQueryFacade {
      *
      * @return 모든 카테고리 정보가 담긴 공유 DTO
      */
-    CategorySharedDTO.CategoryInfoListDTO getAllCategoriesForShare();
+    CategorySharedDTO.CategoryInfoList getAllCategoriesForShare();
 
     /**
      * 특정 회원이 설정한 카테고리 목록을 조회합니다. (외부용)
@@ -25,7 +25,7 @@ public interface CategoryQueryFacade {
      * @param memberId 회원 ID
      * @return 해당 회원의 카테고리 정보가 담긴 공유 DTO
      */
-    CategorySharedDTO.CategoryInfoListDTO getCategoriesByMemberForShare(Long memberId);
+    CategorySharedDTO.CategoryInfoList getCategoriesByMemberForShare(Long memberId);
 
     /**
      * 특정 모임에 설정된 카테고리 목록을 조회합니다. (외부용)
@@ -34,7 +34,7 @@ public interface CategoryQueryFacade {
      * @param clubId 모임 ID
      * @return 해당 모임의 카테고리 정보가 담긴 공유 DTO
      */
-    CategorySharedDTO.CategoryInfoListDTO getCategoriesByClubForShare(Long clubId);
+    CategorySharedDTO.CategoryInfoList getCategoriesByClubForShare(Long clubId);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)

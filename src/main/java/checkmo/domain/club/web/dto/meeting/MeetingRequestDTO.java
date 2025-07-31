@@ -53,12 +53,6 @@ public class MeetingRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class TopicDTO {
-        private String description; // 토픽 내용
-    }
-
-    @Getter
-    @NoArgsConstructor
     public static class TeamManageDTO {
         private List<TeamMemberDTO> teamMemberDTOList;
     }

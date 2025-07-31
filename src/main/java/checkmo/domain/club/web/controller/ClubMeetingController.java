@@ -3,6 +3,7 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -34,7 +35,7 @@ public class ClubMeetingController {
     public ApiResponse<Long> createMeeting(
             @PathVariable Long clubId,
             @RequestBody @Valid MeetingRequestDTO.MeetingCreateRequestDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long meetingId = clubCommandFacade.createMeeting(clubId, memberId, request);
         return ApiResponse.onSuccess(meetingId);
@@ -54,7 +55,7 @@ public class ClubMeetingController {
     public ApiResponse<Long> updateMeeting(
             @PathVariable Long meetingId,
             @RequestBody @Valid MeetingRequestDTO.MeetingUpdateRequestDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long updateMeetingId = clubCommandFacade.updateMeeting(meetingId, memberId, request);
         return ApiResponse.onSuccess(updateMeetingId);
@@ -67,12 +68,6 @@ public class ClubMeetingController {
     // GET /api/meetings/{meetingId}/teams - Meeting 참여 인원 전체 조회
     // POST /api/meetings/{meetingId}/teams - 토론조 생성
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
-
-    // 발제(Topic) 관리
-    // POST /api/meetings/{meetingId}/topics - Topic 등록
-    // PATCH /api/meetings/{meetingId}/topics/{topicId} - Topic 수정
-    // DELETE /api/meetings/{meetingId}/topics/{topicId} - Topic 삭제
-    // GET /api/meetings/{meetingId}/topics - Meeting에 대한 Topic 전체보기
 
     // 팀-발제 연결 관리
     // POST /api/meetings/{meetingId}/teams/{teamId}/topics/{topicId}/select - Team에서 Topic 선택하기

@@ -67,6 +67,10 @@ public enum ErrorStatus implements BaseErrorCode {
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER_409", "이메일 또는 비밀번호가 일치하지 않습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER_500", "서버 내부 오류입니다. 관리자에게 문의 바랍니다."),
 
+    // 발제
+    TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "TOPIC_404", "발제를 찾을 수 없습니다."),
+    TOPIC_FORBIDDEN(HttpStatus.FORBIDDEN, "TOPIC_403", "해당 발제에 대한 권한이 없습니다."),
+
     // 한줄평
     BOOK_REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_REVIEW403", "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
     BOOK_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_REVIEW404", "한줄평을 찾을 수 없습니다."),

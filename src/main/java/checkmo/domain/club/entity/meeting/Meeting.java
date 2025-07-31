@@ -63,7 +63,7 @@ public class Meeting extends BaseEntity {
     private Notice notice;
 
     @Builder.Default
-    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "meeting")
     private List<Topic> topics = new ArrayList<>();
 
     @Builder.Default
@@ -116,5 +116,10 @@ public class Meeting extends BaseEntity {
         if (newNotice != null) {
             newNotice.setMeeting(this);
         }
+    }
+
+    public void addTopic(Topic topic) {
+        this.topics.add(topic);
+        topic.setMeeting(this); // 주인 쪽에도 세팅
     }
 }

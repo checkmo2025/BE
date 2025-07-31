@@ -20,4 +20,11 @@ public class BookShelfRequestDTO {
         @ValidRate
         private Double rate; // 책에 대한 평점
     }
+
+    @Getter
+    @NoArgsConstructor
+    public static class TopicDTO {
+        @NotBlank(message = "발제는 필수 입력입니다.")
+        private String description; // 토픽 내용
+    }
 }
