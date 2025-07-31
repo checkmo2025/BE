@@ -5,6 +5,7 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.BookRecommend;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.BookRecommendRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
@@ -70,7 +71,7 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
         clubQueryService.validateClub(clubId);
 
         // 2. 클럽 멤버 검증
-        clubMemberQueryService.validateClubMember(clubId, memberId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 3. 추천 책 엔티티 조회
         BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
@@ -85,7 +86,7 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
         var currentNickname = currentMemberInfo.getNickname();
 
         // 6. DTO 변환 후 반환
-        return ClubConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo, currentNickname);
+        return ClubConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo, currentNickname, clubMember.isStaff());
     }
 
 }

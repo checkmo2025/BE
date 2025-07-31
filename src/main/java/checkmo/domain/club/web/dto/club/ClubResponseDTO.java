@@ -60,6 +60,7 @@ public class ClubResponseDTO {
         private List<Club.ParticipantType> participantTypes;
         private String insta;
         private String kakao;
+        private boolean isStaff;
     }
 
     @Getter
@@ -167,6 +168,7 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class ClubNoticeDetailDTO {
+        private boolean isStaff;
         private NoticeItem noticeItem; // 공지사항 아이템 (PureNoticeDTO, MeetingNoticeDTO, VoteDTO 중 하나)
     }
 
@@ -193,5 +195,6 @@ public class ClubResponseDTO {
         private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
         private MemberSharedDTO.BasicInfoDTO authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
         private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+        private boolean isStaff; // 본인이 모임의 스탭인지 여부
     }
 }

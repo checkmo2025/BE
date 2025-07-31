@@ -3,6 +3,7 @@ package checkmo.domain.club.facade;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.entity.meeting.Topic;
@@ -119,23 +120,29 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     @Override
     public ClubResponseDTO.BookRecommendListDTO getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
 
-        // 1. 커서 초기화 (페이징 로직)
+        // 1. 클럽 검증
+        clubQueryService.validateClub(clubId);
+
+        // 2. 클럽 멤버 검증
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 3. 커서 초기화 (페이징 로직)
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
 
-        // 2. ServiceImpl에서 순수 엔티티 조회
+        // 4. ServiceImpl에서 순수 엔티티 조회
         var bookRecommends = clubBookRecommendQueryService.getRecommendedBooks(clubId, cursor, memberId);
 
-        // 3. 외부 도메인 정보 조합 (Facade에서 처리)
+        // 5. 외부 도메인 정보 조합 (Facade에서 처리)
         var currentMemberNickname = memberQueryFacade.getMemberBasicInfoForShare(memberId).getNickname();
 
         var dtoList = bookRecommends.stream()
                 .map(bookRecommend -> {
                     var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBookId());
                     var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
-                    return ClubConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo, currentMemberNickname);
+                    return ClubConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo, currentMemberNickname, clubMember.isStaff());
                 }).toList();
 
-        // 4. 페이징 처리 (Facade에서)
+        // 6. 페이징 처리 (Facade에서)
         Long lastId = bookRecommends.isEmpty() ? null : bookRecommends.get(bookRecommends.size() - 1).getId();
         boolean hasNext = clubBookRecommendQueryService.hasNextPage(clubId, lastId);
 
