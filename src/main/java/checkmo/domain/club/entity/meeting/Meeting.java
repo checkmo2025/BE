@@ -37,7 +37,11 @@ public class Meeting extends BaseEntity {
     private String tag;
 
     @Builder.Default
-    private double sumRate = 0; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
+    private double sumRate = 0;
+
+    @Version
+    @Builder.Default
+    private Long version = 0L; // sumRate 동시성 문제 해결을 위한 버전 관리(낙관적 락)
 
     @Column(name = "club_id", insertable = false, updatable = false)
     private Long clubId;
