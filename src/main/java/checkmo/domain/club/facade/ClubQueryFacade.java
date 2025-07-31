@@ -114,7 +114,7 @@ public interface ClubQueryFacade {
      * @param noticeId 조회할 공지사항 ID
      * @return 공지사항 상세 정보 DTO
      */
-    ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId);
+    ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId, String tag, String memberId);
 
     /**
      * ClubBookRecommendQueryService
