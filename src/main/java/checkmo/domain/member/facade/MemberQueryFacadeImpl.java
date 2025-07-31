@@ -3,12 +3,16 @@ package checkmo.domain.member.facade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
+import checkmo.domain.member.service.query.MemberFollowQueryService;
 import checkmo.domain.member.service.query.MemberQueryService;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +21,11 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     private final MemberRepository memberRepository; // 프록시용
     private final MemberQueryService memberQueryService;
+    private final MemberFollowQueryService memberFollowQueryService;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
-        return false;
+        return memberQueryService.isNicknameDuplicated(nickname);
     }
 
     @Override
@@ -74,13 +79,33 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
         return MemberConverter.toBasicInfoDTO(profile);
     }
 
+    /**
+     * 공유용 기본 회원 정보 + 팔로우 상태 조회 (외부용)
+     * @param targetMemberId 조회 대상 회원 ID
+     * @param currentMemberId 현재 로그인한 회원 ID
+     * @return MemberSharedDTO.WithFollowStatusDTO
+     */
     @Override
     public MemberSharedDTO.WithFollowStatusDTO getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId) {
-        return null;
+        // 팔로우 상태를 조회
+        boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
+
+        var basicInfoDTO = getMemberBasicInfoForShare(targetMemberId);
+        return MemberConverter.toWithFollowStatusDTO(basicInfoDTO, isFollowing);
     }
 
     @Override
     public Member findMemberReferenceById(String memberId) {
         return memberRepository.getReferenceById(memberId);
+    }
+
+    @Override
+    public String getMemberNicknameById(String memberId) {
+        return memberQueryService.getMemberNicknameById(memberId);
+    }
+
+    @Override
+    public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
+        return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
     }
 }

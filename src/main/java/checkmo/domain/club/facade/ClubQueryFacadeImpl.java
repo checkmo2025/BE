@@ -1,5 +1,9 @@
 package checkmo.domain.club.facade;
 
+import checkmo.domain.club.entity.meeting.BookReview;
+import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.service.query.ClubMeetingQueryService;
+import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
@@ -16,11 +20,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
+    private final ClubMeetingQueryService clubMeetingQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationQueryService clubCommunicationQueryService;
@@ -158,6 +166,29 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     @Override
     public BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId) {
         return null;
+    }
+
+    @Override
+    public BookShelfResponseDTO.BookReviewListDTO getBookReviewList(Long meetingId, Long lastReviewId, int size, String memberId) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size + 1);
+
+        boolean hasNext = bookReviews.size() > size;
+        if (hasNext) {
+            bookReviews = bookReviews.subList(0, size);
+        }
+        Long nextCursor = hasNext ? bookReviews.get(bookReviews.size() - 1).getId() : null;
+
+        List<BookShelfResponseDTO.BookReviewDTO> bookReviewDTOs = bookReviews.stream()
+                .map(review -> ClubConverter.fromBookReviewAndMemberSharedDTOToBookReviewDTO(
+                        review,
+                        memberQueryFacade.getMemberBasicInfoForShare(review.getClubMember().getMemberId())
+                ))
+                .toList();
+
+        return ClubConverter.fromBookReviewDTOListToBookReviewListDTO(bookReviewDTOs, hasNext, nextCursor);
     }
 
     @Override

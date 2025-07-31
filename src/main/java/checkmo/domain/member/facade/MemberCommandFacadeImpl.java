@@ -1,8 +1,10 @@
 package checkmo.domain.member.facade;
 
+import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.command.MemberRegistrationCommandService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
     private final MemberRegistrationCommandService memberRegistrationCommandService;
+    private final MemberAuthenticationService memberAuthenticationService;
 
     @Override
     public void sendEmailVerification(String email) {
@@ -25,17 +28,18 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
+        return memberRegistrationCommandService.signUp(request, response);
     }
 
     @Override
     public void addAdditionalInfo(MemberRequestDTO.AdditionalInfoDTO request) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+        memberRegistrationCommandService.addAdditionalInfo(request);
     }
 
     @Override
-    public void login(String email, String password) {
+    public void login(String email, String password, HttpServletResponse response) {
+        memberAuthenticationService.login(email, password, response);
     }
 
     @Override

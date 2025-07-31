@@ -1,5 +1,7 @@
 package checkmo.domain.member.service.security.jwt;
 
+import org.springframework.security.core.Authentication;
+
 /**
  * JWT 토큰 생성, 검증 서비스
  *
@@ -8,4 +10,9 @@ package checkmo.domain.member.service.security.jwt;
  * 쿠키 설정이나 SecurityContext 처리는 JwtAuthenticationFilter에서 담당
  */
 public interface JwtTokenProvider {
+
+    JwtToken generateToken(Authentication authentication);
+    Authentication getAuthentication(String accessToken);
+    boolean validateToken(String token);
+    String getUserIdFromToken(String token);
 }

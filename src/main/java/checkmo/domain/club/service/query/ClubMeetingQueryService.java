@@ -1,8 +1,11 @@
 package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
+
+import java.util.List;
 
 /**
  * 독서 모임의 토론 조회 서비스
@@ -53,6 +56,18 @@ public interface ClubMeetingQueryService {
      * @return 조회한 팀 정보 DTO
      */
     MeetingResponseDTO.TeamDTO findTeamsByMeeting(Long meetingId, Integer teamNumber);
+
+    /**
+     * 독서 모임의 책장(한줄평) 리스트를 조회합니다.
+     *
+     * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책] 클릭시
+     *
+     * @param meetingId 미팅 ID
+     * @param lastReviewId 마지막으로 조회한 한줄평 ID (무한 스크롤용, 처음에는 null 또는 0)
+     * @param size 조회할 한줄평 개수
+     * @return 조회한 한줄평 리스트
+     */
+    List<BookReview> findBookReviewsByMeeting(Long meetingId, Long lastReviewId, int size);
 
     /**
      * 독서모임이 존재하는지 확인합니다.

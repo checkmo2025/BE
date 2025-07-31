@@ -1,5 +1,7 @@
 package checkmo.global.dto;
 
+import checkmo.domain.notification.entity.Notification;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,8 +24,8 @@ public class NotificationSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NotificationPreviewListDTO {
-        private List<NotificationPreviewDTO> notifications;
+    public static class NotificationPreviewList {
+        private List<NotificationPreview> notifications;
     }
 
     /**
@@ -36,11 +38,13 @@ public class NotificationSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NotificationPreviewDTO {
+    public static class NotificationPreview {
         private Long notificationId;
+        private Notification.NotificationType notificationType; // 알림 타입
         private String senderNickname;
-        private String receiverNickname;
-        private boolean isRead;
+        private boolean read;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
         private String redirectPath; // 알림 클릭 시 이동할 URL
     }

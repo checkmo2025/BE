@@ -4,28 +4,35 @@ import checkmo.domain.notification.service.command.NotificationCommandService;
 import checkmo.event.FollowEvent;
 import checkmo.event.LikeEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationEventHandler {
 
-    //TODO : 나중에 구현할 때 주석 해제하고 사용하기!!
-    //private final NotificationCommandService notificationCommandService;
-
-    @Async("notificationExecutor")
-    @TransactionalEventListener
-    public void handleNotificationEvent(FollowEvent event) {
-        // 이벤트 처리 로직
-
-    }
+    private final NotificationCommandService notificationCommandService;
 
     @Async("notificationExecutor")
     @TransactionalEventListener
     public void handleNotificationEvent(LikeEvent event) {
-        // 이벤트 처리 로직
+        try {
+            notificationCommandService.createNotification(event);
+        } catch (Exception e) {
+            log.error("책이야기 좋아요 알림 생성 실패, LikeEvent: {}", event, e);
+        }
+    }
 
+    @Async("notificationExecutor")
+    @TransactionalEventListener
+    public void handleNotificationEvent(FollowEvent event) {
+        try {
+            notificationCommandService.createNotification(event);
+        } catch (Exception e) {
+            log.error("팔로우 알림 생성 실패, FollowEvent: {}", event, e);
+        }
     }
 }

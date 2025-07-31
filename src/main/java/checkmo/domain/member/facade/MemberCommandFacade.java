@@ -2,6 +2,7 @@ package checkmo.domain.member.facade;
 
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Member Domain Command Facade
@@ -32,7 +33,7 @@ public interface MemberCommandFacade {
      * @param request id,pw DTO
      * @return 회원 가입 응답 DTO
      */
-    MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request);
+    MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response);
 
     /**
      * 회원 추가 정보 입력 (내부용)
@@ -48,7 +49,7 @@ public interface MemberCommandFacade {
      * @param email 사용자의 이메일
      * @param password 사용자의 비밀번호
      */
-    void login(String email, String password);
+    void login(String email, String password, HttpServletResponse response);
 
     /**
      * 로그아웃 처리 (내부용)
