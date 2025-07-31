@@ -43,7 +43,10 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
                 .orElseGet(() -> {
                     // 좋아요가 없다면 새로 생성하고 true 반환
                     createAndSaveBookStoryLiked(bookStory, proxyMember);
-                    eventPublisher.publishEvent(new LikeEvent(memberId, bookStory.getMemberId(), bookStory.getId()));
+                    if (!memberId.equals(bookStory.getMemberId())) {
+                        // 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
+                        eventPublisher.publishEvent(new LikeEvent(memberId, bookStory.getMemberId(), bookStory.getId()));
+                    }
                     return true;
                 });
     }
