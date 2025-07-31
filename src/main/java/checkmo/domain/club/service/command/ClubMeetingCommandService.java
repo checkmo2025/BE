@@ -47,7 +47,7 @@ public interface ClubMeetingCommandService {
      * @param request 발제 내용 DTO
      * @return 생성한 발제 ID
      */
-    Long createTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicDTO request);
+    Long createTopic(String memberId, Long meetingId, BookShelfRequestDTO.TopicDTO request);
 
     /**
      * 독서모임의 특정 팀이 발제를 선택하고 해제합니다.
@@ -72,7 +72,7 @@ public interface ClubMeetingCommandService {
      * @param request 수정된 발제 내용 DTO
      * @return 수정한 발제 ID
      */
-    Long updateTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request);
+    Long updateTopic(String memberId, Long meetingId, Long topicId, BookShelfRequestDTO.TopicDTO request);
 
     /**
      * 독서모임의 특정 팀이 발제를 삭제합니다.

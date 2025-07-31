@@ -126,12 +126,12 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public MeetingResponseDTO.TopicDTO createTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicDTO request) {
+    public Long createTopic(String memberId, Long meetingId, BookShelfRequestDTO.TopicDTO request) {
         return null;
     }
 
     @Override
-    public MeetingResponseDTO.TopicDTO updateTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request) {
+    public Long updateTopic(String memberId, Long meetingId, Long topicId, BookShelfRequestDTO.TopicDTO request) {
         return null;
     }
 

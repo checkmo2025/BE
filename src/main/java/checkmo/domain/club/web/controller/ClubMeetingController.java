@@ -68,12 +68,6 @@ public class ClubMeetingController {
     // POST /api/meetings/{meetingId}/teams - 토론조 생성
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
 
-    // 발제(Topic) 관리
-    // POST /api/meetings/{meetingId}/topics - Topic 등록
-    // PATCH /api/meetings/{meetingId}/topics/{topicId} - Topic 수정
-    // DELETE /api/meetings/{meetingId}/topics/{topicId} - Topic 삭제
-    // GET /api/meetings/{meetingId}/topics - Meeting에 대한 Topic 전체보기
-
     // 팀-발제 연결 관리
     // POST /api/meetings/{meetingId}/teams/{teamId}/topics/{topicId}/select - Team에서 Topic 선택하기
     // GET /api/meetings/{meetingId}/teams/{teamId}/topics - Team별로 선택된 Topic 보기

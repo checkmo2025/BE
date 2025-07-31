@@ -91,7 +91,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long createTopic(Long memberId, Long meetingId, MeetingRequestDTO.TopicDTO request) {
+    public Long createTopic(String memberId, Long meetingId, BookShelfRequestDTO.TopicDTO request) {
         return 0L;
     }
 
@@ -101,7 +101,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long updateTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicDTO request) {
+    public Long updateTopic(String memberId, Long meetingId, Long topicId, BookShelfRequestDTO.TopicDTO request) {
         return 0L;
     }
 
