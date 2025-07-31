@@ -5,8 +5,8 @@ import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,12 +30,10 @@ public class ClubNoticeController {
     })
     @PostMapping("")
     public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> createNotice(
+            @CurrentId String memberId,
             @PathVariable Long clubId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId,
             @RequestBody @Valid ClubRequestDTO.CreateClubNoticeDTO request
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubCommandFacade.createNotice(clubId, memberId, request));
     }
 
@@ -47,12 +45,10 @@ public class ClubNoticeController {
     })
     @PostMapping("/votes")
     public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> createVote(
+            @CurrentId String memberId,
             @PathVariable Long clubId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId,
             @RequestBody @Valid ClubRequestDTO.CreateClubVoteDTO request
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubCommandFacade.createVote(clubId, memberId, request));
     }
 
@@ -65,10 +61,8 @@ public class ClubNoticeController {
     public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> getNoticeDetail(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubQueryFacade.getNoticeDetail(clubId, noticeId, "공지", memberId));
     }
 
@@ -81,10 +75,8 @@ public class ClubNoticeController {
     public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> getVoteDetail(
             @PathVariable Long clubId,
             @PathVariable Long voteId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubQueryFacade.getNoticeDetail(clubId, voteId, "투표", memberId));
     }
 
@@ -98,11 +90,9 @@ public class ClubNoticeController {
     public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> submitVote(
             @PathVariable Long clubId,
             @PathVariable Long voteId,
-            @Parameter(name = "MemberId", description = "회원 ID", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId,
+            @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.VoteResultDTO request
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubCommandFacade.participateInPoll(clubId, memberId, voteId, request));
     }
 
@@ -116,10 +106,8 @@ public class ClubNoticeController {
     public ApiResponse<String> deleteNotice(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         clubCommandFacade.deleteNotice(clubId, memberId, noticeId);
         return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
     }
@@ -134,10 +122,8 @@ public class ClubNoticeController {
     public ApiResponse<String> deleteVote(
             @PathVariable Long clubId,
             @PathVariable Long voteId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         clubCommandFacade.deleteVote(clubId, memberId, voteId);
         return ApiResponse.onSuccess("투표가 삭제되었습니다.");
     }

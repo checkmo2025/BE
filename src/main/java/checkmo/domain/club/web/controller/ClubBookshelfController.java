@@ -51,6 +51,23 @@ public class ClubBookshelfController {
     }
 
     // GET /api/meetings/{meetingId} - 책장(책장이 곧 Meeting) 상세 화면 (책 정보, 발제들, 한줄평)
+    @Operation(summary = "책장 상세 조회 API", description = "책장의 상세 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "책장(책장이 곧 Meeting)의 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/bookshelves/{meetingId}")
+    public ApiResponse<BookShelfResponseDTO.BookShelfDetailDTO> getBookShelfDetail(
+            @PathVariable Long meetingId,
+            @CurrentId String memberId
+    ) {
+        BookShelfResponseDTO.BookShelfDetailDTO bookShelfDetail = clubQueryFacade.getBookShelfDetail(meetingId, memberId);
+        return ApiResponse.onSuccess(bookShelfDetail);
+    }
 
     // 한줄평(BookReview) 관리
     // GET /api/meetings/{meetingId}/reviews - 책(Meeting)에 대한 BookReview 전체 조회

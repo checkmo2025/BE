@@ -63,7 +63,8 @@ public class ClubQueryServiceImpl implements ClubQueryService {
 
         // 2. 운영진 권한 확인
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        if (!clubMember.isStaff()) {
+        boolean isStaff = clubMember.isStaff();
+        if (!isStaff) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
@@ -75,7 +76,7 @@ public class ClubQueryServiceImpl implements ClubQueryService {
                 .collect(Collectors.toList());
 
         // 4. Club 엔티티 + 카테고리 ID 리스트 → DTO 변환
-        return ClubConverter.fromClubToClubDetailDTO(club, categoryIds);
+        return ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
 
     }
 

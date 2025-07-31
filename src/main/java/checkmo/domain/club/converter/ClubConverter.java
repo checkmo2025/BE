@@ -81,7 +81,7 @@ public class ClubConverter {
     /**
      * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
      */
-    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, List<Long> categoryIds) {
+    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, List<Long> categoryIds, boolean isStaff) {
         return ClubResponseDTO.ClubDetailDTO.builder()
                 .clubId(club.getId())
                 .name(club.getName())
@@ -93,6 +93,7 @@ public class ClubConverter {
                 .participantTypes(club.getParticipantTypes())
                 .insta(club.getInsta())
                 .kakao(club.getKakao())
+                .isStaff(isStaff)
                 .build();
     }
 
@@ -121,7 +122,8 @@ public class ClubConverter {
             BookRecommend bookRecommend,
             BookSharedDTO.BasicInfoDTO bookInfo,
             MemberSharedDTO.BasicInfoDTO authorInfo,
-            String currentMemberNickname
+            String currentMemberNickname,
+            boolean isStaff
     ) {
         return ClubResponseDTO.BookRecommendDetailDTO.builder()
                 .id(bookRecommend.getId())
@@ -131,6 +133,7 @@ public class ClubConverter {
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
                 .isAuthor(authorInfo.getNickname().equals(currentMemberNickname))
+                .isStaff(isStaff)
                 .build();
     }
 
@@ -194,8 +197,8 @@ public class ClubConverter {
                 .item3(request.getItem3())
                 .item4(request.getItem4())
                 .item5(request.getItem5())
-                .isAnonymity(request.isAnonymity())
-                .isDuplication(request.isDuplication())
+                .anonymity(request.isAnonymity())
+                .duplication(request.isDuplication())
                 .startTime(request.getStartTime())
                 .deadline(request.getDeadline())
                 .clubId(club.getId())

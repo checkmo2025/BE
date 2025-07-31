@@ -48,7 +48,8 @@ public class BookShelfResponseDTO {
     public static class BookShelfDetailDTO {
         private BookSharedDTO.DetailInfoDTO bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
         private MeetingInfoDTO meetingInfo; // Meeting 기본 정보
-        private List<BookReviewDTO> bookReviewList; // 한줄평+평점 리스트
+        private TopicListDTO topicList; // 발제 리스트(3개 미리보기)
+        private BookReviewListDTO bookReviewList; // 한줄평 리스트(무한스크롤 가능)
     }
 
     @Getter
