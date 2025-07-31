@@ -31,7 +31,7 @@ public class ClubBookshelfController {
             @Parameter(name = "clubId", description = "책장을 조회할 클럽 ID", required = true, example = "1"),
             @Parameter(name = "cursorId", description = "마지막으로 조회한 책장 ID (무한 스크롤용)", required = false, example = "10"),
             @Parameter(name = "size", description = "조회할 책장 개수", required = false, example = "9"),
-            @Parameter(name = "generation", description = "활동 기수", required = true, example = "1"),
+            @Parameter(name = "generation", description = "활동 기수", required = false, example = "1"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
