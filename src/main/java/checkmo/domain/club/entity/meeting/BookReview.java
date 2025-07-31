@@ -25,6 +25,7 @@ public class BookReview extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
+    @Setter
     private ClubMember clubMember;
 
     @Column(name = "meeting_id", insertable = false, updatable = false)
@@ -32,5 +33,11 @@ public class BookReview extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
+    @Setter
     private Meeting meeting;
+
+    public void updateBookReview(String description, double rate) {
+        this.description = description;
+        this.rate = rate;
+    }
 }

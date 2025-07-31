@@ -1,6 +1,10 @@
 package checkmo.domain.notification.service.query;
 
+import checkmo.domain.notification.entity.Notification;
 import checkmo.domain.notification.web.dto.NotificationResponseDTO;
+import checkmo.global.dto.NotificationSharedDTO;
+
+import java.util.List;
 
 /**
  * 알림 조회 서비스
@@ -10,19 +14,21 @@ import checkmo.domain.notification.web.dto.NotificationResponseDTO;
  */
 public interface NotificationQueryService {
     /**
-     * 알림 목록 조회
+     * 커서 기반으로 알림 엔티티 목록을 조회 (페이지네이션을 위해 +1개 더 조회)
      *
-     * @param memberId receiver ID
-     * @return 전체 알림 목록
+     * @param memberId 회원 ID
+     * @param cursorId 페이징을 위한 커서 ID (처음에는 null)
+     * @param pageSize 페이지 크기
+     * @return 조회된 알림 엔티티 목록
      */
-    NotificationResponseDTO.NotificationListResponseDTO getNotifications(Long memberId, Long cursorId);
+    List<Notification> findNotifications(String memberId, Long cursorId, int pageSize);
 
     /**
-     * size개의 알림 목록 조회
+     * 읽지 않은 알림 목록 조회
      *
-     * @param memberId receiver ID
-     * @param size 몇개를 조회할지
-     * @return 알림 목록 size개
+     * @param receiverId 알림을 받을 회원 ID
+     * @param size 조회할 알림 개수
+     * @return 읽지 않은 알림 목록
      */
-    NotificationResponseDTO.NotificationListResponseDTO getNotifications(Long memberId, int size);
+    NotificationSharedDTO.NotificationPreviewList getUnreadNotifications(String receiverId, int size);
 }

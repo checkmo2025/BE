@@ -9,7 +9,9 @@ import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
+import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.repository.meeting.BookReviewRepository;
 import checkmo.domain.club.repository.meeting.MeetingRepository;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
@@ -26,10 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService {
     private final BookCommandFacade bookCommandFacade;
     private final BookQueryFacade bookQueryFacade;
-    private final ClubMemberQueryService clubMemberQueryService;
+
     private final ClubQueryService clubQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
+
     private final MeetingRepository meetingRepository;
+    private final BookReviewRepository bookReviewRepository;
 
     @Override
     public Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request) {
@@ -112,16 +117,47 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     @Override
     public Long createBookReview(String memberId, Long meetingId, BookShelfRequestDTO.BookReviewDTO request) {
-        return 0L;
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        BookReview bookReview = ClubConverter.fromBookReviewDTOToBookReview(request);
+
+        clubMember.addBookReview(bookReview);
+        meeting.addBookReview(bookReview);
+
+        bookReviewRepository.save(bookReview);
+        return bookReview.getId();
     }
 
     @Override
     public Long updateBookReview(String memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request) {
-        return 0L;
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        BookReview bookReview = bookReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_REVIEW_NOT_FOUND));
+        if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
+            throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
+        }
+
+        bookReview.updateBookReview(
+                request.getDescription(),
+                request.getRate()
+        );
+
+        bookReviewRepository.save(bookReview);
+        return bookReview.getId();
     }
 
     @Override
     public void deleteBookReview(String memberId, Long meetingId, Long reviewId) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        BookReview bookReview = bookReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_REVIEW_NOT_FOUND));
+        if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
+            throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
+        }
 
+        bookReviewRepository.delete(bookReview);
     }
 }

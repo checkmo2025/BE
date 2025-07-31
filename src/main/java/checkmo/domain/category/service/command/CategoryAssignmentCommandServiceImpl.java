@@ -5,12 +5,17 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.domain.category.converter.CategoryConverter;
 import checkmo.domain.category.entity.Category;
 import checkmo.domain.category.entity.ClubCategory;
+import checkmo.domain.category.entity.MemberCategory;
 import checkmo.domain.category.repository.CategoryRepository;
 import checkmo.domain.category.repository.ClubCategoryRepository;
+import checkmo.domain.category.repository.MemberCategoryRepository;
 import checkmo.domain.category.web.dto.CategoryRequestDTO;
 import checkmo.domain.category.web.dto.CategoryResponseDTO;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.global.dto.CategorySharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,12 +28,61 @@ import java.util.List;
 public class CategoryAssignmentCommandServiceImpl implements CategoryAssignmentCommandService {
 
     private final ClubCategoryRepository clubCategoryRepository;
+    private final MemberCategoryRepository memberCategoryRepository;
     private final ClubQueryFacade clubQueryFacade;
     private final CategoryRepository categoryRepository;
+    private final MemberQueryFacade memberQueryFacade;
 
     @Override
-    public CategoryResponseDTO.CategoryListResponseDTO modifyMemberCategories(Long memberId, CategoryRequestDTO.CategoryListRequestDTO request) {
-        return null;
+    public CategoryResponseDTO.CategoryListResponseDTO modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request) {
+
+        // 1. 기존 카테고리 ID 리스트
+        List<MemberCategory> existingMemberCategories = memberCategoryRepository.findByMemberId(memberId);
+
+        // 2. 기존 카테고리 ID 리스트
+        List<Long> existingCategoryIds = existingMemberCategories.stream()
+                .map(mc -> mc.getCategory().getId())
+                .toList();
+
+        // 3. 요청 카테고리 ID 리스트
+        List<Long> requestedCategoryIds = request.getCategoryIdList();
+
+        // 4. 추가할 카테고리
+        List<Long> categoriesToAdd = requestedCategoryIds.stream()
+                .filter(id -> !existingCategoryIds.contains(id))
+                .toList();
+
+        // 5. 제거할 카테고리
+        List<Long> categoriesToRemove = existingCategoryIds.stream()
+                .filter(id -> !requestedCategoryIds.contains(id))
+                .toList();
+
+        // 6. 추가
+        for (Long categoryId : categoriesToAdd) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.CATEGORY_NOT_FOUND));
+
+            Member memberProxy = memberQueryFacade.findMemberReferenceById(memberId);
+
+            MemberCategory newMemberCategory = MemberCategory.builder()
+                    .member(memberProxy)
+                    .category(category)
+                    .build();
+
+            memberCategoryRepository.save(newMemberCategory);
+        }
+
+        // 7. 제거
+        categoriesToRemove.forEach(categoryId -> existingMemberCategories.stream()
+                                                                     .filter(mc -> mc.getCategory().getId().equals(categoryId))
+                                                                     .findFirst()
+                                                                     .ifPresent(memberCategoryRepository::delete));
+
+        // 8. 최종 카테고리 목록
+        List<MemberCategory> updatedMemberCategories = memberCategoryRepository.findByMemberId(memberId);
+
+        // 9. DTO 변환 후 반환
+        return CategoryConverter.toMemberCategoryListResponseDTO(updatedMemberCategories);
     }
 
     /**

@@ -1,17 +1,19 @@
 package checkmo.domain.bookStory.service.command;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.entity.BookStoryLiked;
 import checkmo.domain.bookStory.repository.BookStoryLikedRepository;
 import checkmo.domain.bookStory.repository.BookStoryRepository;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.event.LikeEvent;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -21,12 +23,14 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
     private final BookStoryLikedRepository bookStoryLikedRepository;
     private final MemberQueryFacade memberQueryFacade;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     @Override
     @Transactional
     public boolean toggleLikeOnBookStory(String memberId, Long bookStoryId) {
 
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new IllegalArgumentException(bookStoryId + "에 해당하는 책이야기를 찾을 수 없습니다"));
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 
         Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
 
@@ -39,6 +43,10 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
                 .orElseGet(() -> {
                     // 좋아요가 없다면 새로 생성하고 true 반환
                     createAndSaveBookStoryLiked(bookStory, proxyMember);
+                    if (!memberId.equals(bookStory.getMemberId())) {
+                        // 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
+                        eventPublisher.publishEvent(new LikeEvent(memberId, bookStory.getMemberId(), bookStory.getId()));
+                    }
                     return true;
                 });
     }

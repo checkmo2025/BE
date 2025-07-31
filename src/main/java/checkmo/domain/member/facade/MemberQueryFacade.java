@@ -4,6 +4,9 @@ import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.MemberSharedDTO;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Member Domain Query Facade
  * Member 도메인의 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade
@@ -119,4 +122,17 @@ public interface MemberQueryFacade {
      * @return Member 엔티티의 프록시 객체
      */
     Member findMemberReferenceById(String memberId);
+
+    /**
+     * 회원 ID로 회원의 닉네임을 조회합니다. (외부용)
+     * @return 회원의 닉네임
+     */
+    String getMemberNicknameById(String memberId);
+
+    /**
+     * 회원 ID 목록으로 회원의 닉네임을 조회합니다. (외부용)
+     * @param memberIds
+     * @return 회원 ID와 닉네임의 매핑 정보
+     */
+    Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds);
 }
