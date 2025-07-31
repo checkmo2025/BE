@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -94,5 +97,15 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     @Override
     public Member findMemberReferenceById(String memberId) {
         return memberRepository.getReferenceById(memberId);
+    }
+
+    @Override
+    public String getMemberNicknameById(String memberId) {
+        return memberQueryService.getMemberNicknameById(memberId);
+    }
+
+    @Override
+    public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
+        return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
     }
 }

@@ -91,7 +91,14 @@ public class BookConverter {
     public static BookResponseDTO.BookInfoDetailResponse fromAladinBookItem(
             AladinApiResponseDTO.AladinBookItem item
     ) {
-        String decodedDescription = HtmlUtils.htmlUnescape(item.getDescription());
+        // description이 null인 경우를 대비한 방어 코드
+        String description = (item.getDescription() != null) ? item.getDescription() : "";
+
+        // HTML 이스케이프 문자를 변환하고, 개행 문자를 공백으로 치환한 뒤, 양 끝 공백을 제거합니다.
+        String cleanedDescription = HtmlUtils.htmlUnescape(description)
+                .replace("\\n", " ") // 이스케이프된 개행 문자 처리
+                .replace("\n", " ")  // 실제 개행 문자 처리
+                .trim();
 
         return BookResponseDTO.BookInfoDetailResponse.builder()
                 .isbn(item.getIsbn13())
@@ -99,7 +106,7 @@ public class BookConverter {
                 .author(item.getAuthor())
                 .imgUrl(item.getCover())
                 .publisher(item.getPublisher())
-                .description(decodedDescription)
+                .description(cleanedDescription)
                 .build();
     }
 

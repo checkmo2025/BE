@@ -2,6 +2,9 @@ package checkmo.domain.member.service.query;
 
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 회원 기본 정보 조회 서비스
  *
@@ -41,4 +44,20 @@ public interface MemberQueryService {
      * @return 회원 ID
      */
     String getMemberIdByNickname(String nickname);
+
+    /**
+     * 회원ID로 회원 닉네임 조회
+     *
+     * @param memberId 회원 ID
+     * @return 회원 닉네임
+     */
+    String getMemberNicknameById(String memberId);
+
+    /**
+     * 회원 ID 목록으로 회원 닉네임 배치 조회
+     *
+     * @param memberIds 회원 ID 목록
+     * @return 회원 ID와 닉네임의 매핑 정보
+     */
+    Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds);
 }

@@ -4,8 +4,6 @@ import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import java.util.UUID;
-import checkmo.domain.member.entity.Member;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
