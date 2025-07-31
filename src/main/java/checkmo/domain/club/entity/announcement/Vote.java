@@ -38,10 +38,10 @@ public class Vote {
     private String item5;
 
     @Column(nullable = false)
-    private boolean anonymity;
+    private boolean isAnonymity;
 
     @Column(nullable = false)
-    private boolean duplication;
+    private boolean isDuplication;
 
     private LocalDateTime startTime;
 
