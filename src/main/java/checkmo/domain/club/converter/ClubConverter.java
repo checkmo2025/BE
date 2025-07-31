@@ -17,6 +17,7 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -346,6 +347,14 @@ public class ClubConverter {
                 .bookReviewList(bookReviewList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .build();
+    }
+
+    public static ClubSharedDTO.MyClubList fromClubInfoListToMyClubList(
+            List<ClubSharedDTO.MyClubInfo> clubInfoList
+    ) {
+        return ClubSharedDTO.MyClubList.builder()
+                .clubList(clubInfoList)
                 .build();
     }
 
