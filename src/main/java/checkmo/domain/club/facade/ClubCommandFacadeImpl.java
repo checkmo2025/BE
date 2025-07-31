@@ -74,9 +74,17 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
                 .build();
     }
 
+    /**
+     * ClubCommunicationCommandService
+     * 모임의 공지사항을 삭제합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 요청자(운영진) 회원 ID
+     * @param noticeId 삭제할 공지사항 ID
+     */
     @Override
     public void deleteNotice(Long clubId, String memberId, Long noticeId) {
-
+        clubCommunicationCommandService.deleteNotice(clubId, memberId, noticeId);
     }
 
     /**

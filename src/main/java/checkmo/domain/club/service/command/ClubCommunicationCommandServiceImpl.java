@@ -59,6 +59,30 @@ public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCom
         return notice.getId();
     }
 
+    /**
+     * 독서 모임의 공지사항을 삭제합니다.
+     *
+     * @param clubId   독서 모임 ID
+     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
+     * @param noticeId 삭제할 공지사항 ID
+     */
+    @Override
+    public void deleteNotice(Long clubId, String memberId, Long noticeId) {
+
+        // 1. 검증
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. 공지사항 존재 여부 확인
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+
+        // 3. 삭제
+        noticeRepository.delete(notice);
+    }
 
     /**
      * 독서 모임에 투표를 생성합니다.

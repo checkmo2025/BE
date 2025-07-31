@@ -106,4 +106,22 @@ public class ClubNoticeController {
         return ApiResponse.onSuccess(clubCommandFacade.participateInPoll(clubId, memberId, voteId, request));
     }
 
+    @Operation(summary = "공지사항 삭제", description = "특정 공지사항을 삭제합니다. (운영진만 삭제 가능)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 삭제 가능"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
+    })
+    @DeleteMapping("/{noticeId}")
+    public ApiResponse<String> deleteNotice(
+            @PathVariable Long clubId,
+            @PathVariable Long noticeId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        clubCommandFacade.deleteNotice(clubId, memberId, noticeId);
+        return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
+    }
+
 }
