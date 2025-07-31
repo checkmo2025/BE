@@ -23,6 +23,8 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     private final BookReviewRepository bookReviewRepository;
     private final TopicRepository topicRepository;
 
+    private final ClubMemberQueryService clubMemberQueryService;
+
     @Override
     public MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId) {
         return null;
@@ -34,8 +36,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public MeetingResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId) {
-        return null;
+    public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+        Meeting meeting = validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        return topicRepository.findTopicsByCursorAsc(meetingId, cursorId, size + 1);
     }
 
     @Override

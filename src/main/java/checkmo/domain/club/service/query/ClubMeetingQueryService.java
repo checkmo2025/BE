@@ -45,7 +45,7 @@ public interface ClubMeetingQueryService {
      * @param meetingId 미팅 ID
      * @return 조회한 토픽 정보 DTO
      */
-    MeetingResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId);
+    List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
 
     /**
      * 독서 모임의 미팅의 팀별 인원 조회 (해당 팀이 선택한 발제 리스트도 포함)
