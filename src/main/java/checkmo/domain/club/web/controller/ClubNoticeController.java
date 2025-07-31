@@ -56,5 +56,21 @@ public class ClubNoticeController {
         return ApiResponse.onSuccess(clubCommandFacade.createVote(clubId, memberId, request));
     }
 
+    @Operation(summary = "공지사항 상세 조회", description = "특정 공지사항 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
+    })
+    @GetMapping("/{noticeId}")
+    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> getNoticeDetail(
+            @PathVariable Long clubId,
+            @PathVariable Long noticeId,
+            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        return ApiResponse.onSuccess(clubQueryFacade.getNoticeDetail(clubId, noticeId, "공지", memberId));
+    }
+
 
 }
