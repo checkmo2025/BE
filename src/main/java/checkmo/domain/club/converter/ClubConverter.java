@@ -326,6 +326,21 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * Meeting 엔티티 + BookSharedDTO.DetailInfoDTO + BookShelfResponseDTO.TopicListDTO -> BookShelfResponseDTO.BookShelfDetailDTO 변환
+     */
+    public static BookShelfResponseDTO.BookShelfDetailDTO fromBookShelfDTOToBookShelfDetailDTO(
+            Meeting meeting,
+            BookSharedDTO.DetailInfoDTO bookSharedDTO,
+            BookShelfResponseDTO.TopicListDTO topicListDTO
+    ) {
+        return BookShelfResponseDTO.BookShelfDetailDTO.builder()
+                .meetingInfo(fromMeetingToMeetingInfoDTO(meeting))
+                .bookDetailInfo(bookSharedDTO)
+                .topicList(topicListDTO)
+                .build();
+    }
+
     // =====================================================
     // Entity -> Entity 변환
     // =====================================================

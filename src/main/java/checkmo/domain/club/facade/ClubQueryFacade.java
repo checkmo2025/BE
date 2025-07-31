@@ -156,7 +156,7 @@ public interface ClubQueryFacade {
      * @param meetingId 미팅 ID
      * @return 책장 상세 정보 DTO
      */
-    BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId);
+    BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId, String memberId);
 
     /**
      * ClubBookShelfQueryService

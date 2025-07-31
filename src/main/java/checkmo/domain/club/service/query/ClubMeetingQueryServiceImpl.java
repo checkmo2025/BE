@@ -8,7 +8,6 @@ import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.repository.meeting.BookReviewRepository;
 import checkmo.domain.club.repository.meeting.MeetingRepository;
 import checkmo.domain.club.repository.meeting.TopicRepository;
-import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,9 +38,6 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
-        Meeting meeting = validateMeeting(meetingId);
-        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-
         return topicRepository.findTopicsByCursorAsc(meetingId, cursorId, size + 1);
     }
 
@@ -61,11 +57,6 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
         return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
-    }
-
-    @Override
-    public BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId) {
-        return null;
     }
 
     @Override
