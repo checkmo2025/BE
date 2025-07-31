@@ -170,5 +170,26 @@ public class ClubBookshelfController {
     }
 
     // DELETE /api/meetings/{meetingId}/topics/{topicId} - Topic 삭제
+    @Operation(summary = "발제 삭제 API", description = "발제를 삭제합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "발제를 삭제할 정기 독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "topicId", description = "삭제할 발제 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 발제에 대한 삭제 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다."),
+    })
+    @DeleteMapping("/api/meetings/{meetingId}/topics/{topicId}")
+    public ApiResponse<Void> deleteTopic(
+            @PathVariable Long meetingId,
+            @PathVariable Long topicId,
+            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+    ) {
+        clubCommandFacade.deleteTopic(memberId, meetingId, topicId);
+        return ApiResponse.onSuccess(null);
+    }
     // GET /api/meetings/{meetingId}/topics - Meeting에 대한 Topic 전체보기
 }

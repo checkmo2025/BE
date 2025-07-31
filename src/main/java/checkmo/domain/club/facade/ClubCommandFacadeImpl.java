@@ -204,7 +204,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     @Override
     public void deleteTopic(String memberId, Long meetingId, Long topicId) {
-
+        clubMeetingCommandService.deleteTopic(memberId, meetingId, topicId);
     }
 
     @Override

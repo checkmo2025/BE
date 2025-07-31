@@ -132,7 +132,15 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     @Override
     public void deleteTopic(String memberId, Long meetingId, Long topicId) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
+        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
+        if (!topic.isOwnedBy(clubMember)) {
+            throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
+        }
+
+        topicRepository.delete(topic);
     }
 
     @Override
