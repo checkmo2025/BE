@@ -156,8 +156,24 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId) {
-        return null;
+    public BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size, Integer generation, String memberId) {
+        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1, memberId);
+        boolean hasNext = meetings.size() > size;
+        if (hasNext) {
+            meetings = meetings.subList(0, size);
+        }
+        Long nextCursor = hasNext ? meetings.getLast().getId() : null;
+
+        List<BookShelfResponseDTO.BookShelfInfoDTO> bookShelfInfoDTOS = meetings.stream()
+                .map(meeting ->
+                        ClubConverter.fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
+                                meeting,
+                                bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId())
+                        )
+                )
+                .toList();
+
+        return ClubConverter.fromBookShelfInfoDTOListToBookShelfListDTO(bookShelfInfoDTOS, hasNext, nextCursor);
     }
 
     @Override
@@ -216,7 +232,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 ))
                 .toList();
 
-        return ClubConverter.fromTopicListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
+        return ClubConverter.fromTopicDTOListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
     }
 
     @Override

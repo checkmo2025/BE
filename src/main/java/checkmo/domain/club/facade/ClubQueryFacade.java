@@ -142,9 +142,12 @@ public interface ClubQueryFacade {
      *
      * @param clubId 모임 ID
      * @param cursorId 페이징 커서 ID
+     * @param size 조회할 개수
+     * @param generation 미팅 기수 (1기, 2기 등)
+     * @param memberId 요청자 회원 ID
      * @return 책장 목록 DTO
      */
-    BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId);
+    BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size, Integer generation, String memberId);
 
     /**
      * ClubBookShelfQueryService

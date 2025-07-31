@@ -281,21 +281,6 @@ public class ClubConverter {
     }
 
     /**
-     * List<Topic> -> BookShelfResponseDTO.TopicListDTO 변환
-     */
-    public static BookShelfResponseDTO.TopicListDTO fromTopicListToTopicListDTO(
-            List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
-            boolean hasNext,
-            Long nextCursor
-    ) {
-        return BookShelfResponseDTO.TopicListDTO.builder()
-                .topics(topicListDTOs)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
-                .build();
-    }
-
-    /**
      * Topic 엔티티 -> BookShelfResponseDTO.TopicDTO 변환
      */
     public static BookShelfResponseDTO.TopicDTO fromTopicAndMemberSharedDTOToTopicDTO(
@@ -308,6 +293,33 @@ public class ClubConverter {
                 .content(topic.getDescription())
                 .authorInfo(authorSharedDTO)
                 .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
+                .build();
+    }
+
+    /**
+     * Meeting 엔티티 + BookSharedDTO.BasicInfoDTO -> BookShelfResponseDTO.BookShelfInfoDTO 변환
+     */
+    public static BookShelfResponseDTO.BookShelfInfoDTO fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
+            Meeting meeting,
+            BookSharedDTO.BasicInfoDTO bookSharedDTO
+    ) {
+        BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToMeetingInfoDTO(meeting);
+
+        return BookShelfResponseDTO.BookShelfInfoDTO.builder()
+                .meetingInfo(meetingInfoDTO)
+                .bookInfo(bookSharedDTO)
+                .build();
+    }
+
+    /**
+     * Meeting 엔티티 -> BookShelfResponseDTO.MeetingInfoDTO 변환
+     */
+    public static BookShelfResponseDTO.MeetingInfoDTO fromMeetingToMeetingInfoDTO(Meeting meeting) {
+        return BookShelfResponseDTO.MeetingInfoDTO.builder()
+                .meetingId(meeting.getId())
+                .generation(meeting.getGeneration())
+                .tag(meeting.getTag())
+                .averageRate(meeting.calculateAverageRate())
                 .build();
     }
 
@@ -341,6 +353,36 @@ public class ClubConverter {
     ) {
         return BookShelfResponseDTO.BookReviewListDTO.builder()
                 .bookReviewList(bookReviewList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * List<TopicDTO> -> BookShelfResponseDTO.TopicListDTO 변환
+     */
+    public static BookShelfResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTO(
+            List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return BookShelfResponseDTO.TopicListDTO.builder()
+                .topics(topicListDTOs)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * List<BookShelfInfoDTO> -> BookShelfListDTO 변환
+     */
+    public static BookShelfResponseDTO.BookShelfListDTO fromBookShelfInfoDTOListToBookShelfListDTO(
+            List<BookShelfResponseDTO.BookShelfInfoDTO> bookShelfInfoDTOs,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return BookShelfResponseDTO.BookShelfListDTO.builder()
+                .bookShelfInfoList(bookShelfInfoDTOs)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
                 .build();
