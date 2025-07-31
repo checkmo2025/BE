@@ -33,8 +33,8 @@ public class ClubBookshelfController {
     @Operation(summary = "한줄평 조회 API", description = "한줄평을 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "한줄평을 조회할 정기 독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "lastReviewId", description = "마지막으로 조회한 한줄평 ID (무한 스크롤용)", required = false, example = "10"),
-            @Parameter(name = "size", description = "조회할 한줄평 개수", required = true, example = "10"),
+            @Parameter(name = "cursorId", description = "마지막으로 조회한 한줄평 ID (무한 스크롤용)", required = false, example = "10"),
+            @Parameter(name = "size", description = "조회할 한줄평 개수", required = false, example = "15"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -44,11 +44,11 @@ public class ClubBookshelfController {
     @GetMapping("/api/meetings/{meetingId}/reviews")
     public ApiResponse<BookShelfResponseDTO.BookReviewListDTO> getAllReviews(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) Long lastReviewId,
-            @RequestParam Integer size,
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false, defaultValue = "15") Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, lastReviewId, size, memberId);
+        BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(bookReviewList);
     }
 
