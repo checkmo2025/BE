@@ -2,6 +2,7 @@ package checkmo.domain.member.service.authenticate;
 
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -26,9 +27,10 @@ public interface MemberAuthenticationService {
      * 계정 복구를 원치 않는 경우에도 다시 사용하기
      * -> NO를 누름 -> AccessToken, RefreshToken 모두 삭제하고 탈퇴 상태 유지(아무것도 안해줘도 됨)
      *
-     * @param token 로그아웃할 JWT 토큰 -> redis Blacklist에 저장하여 무효화
+     * @param request HttpServletRequest 객체
+     * @param response HttpServletResponse 객체
      */
-    void logout(String token);
+    void logout(HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 회원 계정 복구 (비활성화된 계정 재활성화)

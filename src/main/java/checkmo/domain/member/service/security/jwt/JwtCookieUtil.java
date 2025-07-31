@@ -1,6 +1,7 @@
 package checkmo.domain.member.service.security.jwt;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
@@ -15,5 +16,27 @@ public class JwtCookieUtil {
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
         // TODO: 배포 시 cookie.setSecure(true); // HTTPS에서만 전송하도록 추가
+    }
+
+    public String resolveToken(HttpServletRequest request, String cookieName) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null; // 쿠키에서 Access Token을 찾지 못한 경우
+    }
+
+    public void deleteTokenFromCookie(HttpServletResponse response, String cookieName) {
+        // 쿠키에서 토큰을 삭제
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "Strict");
+        response.addCookie(cookie);
     }
 }
