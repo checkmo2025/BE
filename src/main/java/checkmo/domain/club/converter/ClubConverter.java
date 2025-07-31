@@ -175,6 +175,28 @@ public class ClubConverter {
     }
 
     /**
+     * VoteResultDTO -> MemberVote 엔티티
+     */
+    public static MemberVote fromVoteRequestToMemberVote(
+            Vote vote,
+            String memberId,
+            Member memberProxy,
+            ClubRequestDTO.VoteResultDTO request
+    ) {
+        return MemberVote.builder()
+                .vote(vote)
+                .voteId(vote.getId())
+                .memberId(memberId)
+                .member(memberProxy)
+                .item1(request.isItem1())
+                .item2(request.isItem2())
+                .item3(request.isItem3())
+                .item4(request.isItem4())
+                .item5(request.isItem5())
+                .build();
+    }
+
+    /**
      * CreateClubNoticeDTO -> Notice 엔티티 변환 (모임과 연결되지 않은 순수 공지사항)
      */
     public static Notice fromCreateNoticeDTOToNotice(

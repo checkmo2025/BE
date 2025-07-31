@@ -85,3 +85,60 @@ public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCom
         return vote.getId();
     }
 
+
+    /**
+     * 독서 모임의 투표에 참여합니다.
+     *
+     * @param clubId 독서 모임 ID
+     * @param memberId 참여자 회원 ID -> 독서 클럽의 회원인지만 확인
+     * @param voteId 투표 ID
+     * @param request 투표 내역 DTO
+     * @return 참여한 투표 ID
+     */
+    @Override
+    public Long participateInPoll(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request) {
+
+        // 1. 클럽 및 회원 검증
+        clubQueryService.validateClub(clubId);
+        clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 투표 조회
+        Vote vote = voteRepository.findById(voteId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
+
+        // 3. 투표 시간 내인지 검증
+        LocalDateTime now = LocalDateTime.now();
+        if ((vote.getStartTime() != null && now.isBefore(vote.getStartTime())) ||
+                (vote.getDeadline() != null && now.isAfter(vote.getDeadline()))) {
+            throw new GeneralException(ErrorStatus.VOTE_TIME_EXPIRED);
+        }
+
+        // 4. 복수 선택 금지 처리
+        if (!vote.isDuplication()) {
+            int count = 0;
+            if (request.isItem1()) count++;
+            if (request.isItem2()) count++;
+            if (request.isItem3()) count++;
+            if (request.isItem4()) count++;
+            if (request.isItem5()) count++;
+
+            if (count > 1) {
+                throw new GeneralException(ErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
+            }
+        }
+
+        // 5. 기존 투표 내역 삭제
+        memberVoteRepository.deleteByVoteIdAndMemberId(voteId, memberId);
+
+        // 6. MemberVote 생성 및 저장
+        Member memberProxy = memberQueryFacade.findMemberReferenceById(memberId);
+        MemberVote memberVote = ClubConverter.fromVoteRequestToMemberVote(
+                vote, memberId, memberProxy, request
+        );
+
+        memberVoteRepository.save(memberVote);
+
+        return vote.getId();
+    }
+
+}

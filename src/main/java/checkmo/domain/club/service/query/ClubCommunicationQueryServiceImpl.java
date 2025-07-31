@@ -74,8 +74,18 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
                 // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
                 for (MemberVote mv : memberVotes) {
-                    String voterId = mv.getMemberId();
-                    MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(voterId);
+
+                    MemberSharedDTO.BasicInfoDTO memberInfo = null;
+
+                    // 익명 투표 여부 확인
+                    if (vote.isAnonymity()) {
+                        String voterName = "익명";
+                        String profileImageUrl = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
+                        memberInfo = new MemberSharedDTO.BasicInfoDTO(voterName, profileImageUrl);
+                    } else {
+                        String voterId = mv.getMemberId();
+                        memberInfo = memberQueryFacade.getMemberBasicInfoForShare(voterId);
+                    }
 
                     if (mv.isItem1()) votedMembersByItem.get(0).add(memberInfo);
                     if (itemCount >= 2 && mv.isItem2()) votedMembersByItem.get(1).add(memberInfo);

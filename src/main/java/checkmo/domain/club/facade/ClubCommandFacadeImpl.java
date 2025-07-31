@@ -103,9 +103,24 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     }
 
+    /**
+     * ClubCommunicationCommandService
+     * 모임의 투표에 참여합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 참여자 회원 ID
+     * @param voteId   투표 ID
+     * @param request  투표 선택 항목 DTO
+     * @return 참여 결과가 반영된 투표 상세 DTO
+     */
     @Override
     public ClubResponseDTO.ClubNoticeDetailDTO participateInPoll(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request) {
-        return null;
+
+        // 1. 투표 참여
+        voteId = clubCommunicationCommandService.participateInPoll(clubId, memberId, voteId, request);
+
+        // 2. 투표 결과를 다시 조회
+        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId);
     }
 
     /**

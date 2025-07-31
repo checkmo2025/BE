@@ -36,6 +36,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 투표
     VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_4004", "투표를 찾을 수 없습니다."),
+    VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_4003", "투표 가능 시간이 아닙니다."),
+    MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_4001", "하나의 항목에만 투표 가능합니다."),
 
     // 회원  
     EMAIL_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "EMAIL_401", "인증번호가 만료되었습니다."),

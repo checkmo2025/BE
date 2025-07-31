@@ -88,5 +88,22 @@ public class ClubNoticeController {
         return ApiResponse.onSuccess(clubQueryFacade.getNoticeDetail(clubId, voteId, "투표", memberId));
     }
 
+    @Operation(summary = "투표하기", description = "특정 투표에 참여합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "모임 멤버가 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "투표를 찾을 수 없음")
+    })
+    @PostMapping("/votes/{voteId}/submit")
+    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> submitVote(
+            @PathVariable Long clubId,
+            @PathVariable Long voteId,
+            @Parameter(name = "MemberId", description = "회원 ID", required = true, example = "mem_001")
+            @RequestHeader("MemberId") String memberId,
+            @RequestBody @Valid ClubRequestDTO.VoteResultDTO request
+    ) {
+        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
+        return ApiResponse.onSuccess(clubCommandFacade.participateInPoll(clubId, memberId, voteId, request));
+    }
 
 }
