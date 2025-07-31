@@ -28,8 +28,8 @@ public class Topic extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    @Column(name = "member_team_id", insertable = false, updatable = false)
-    private Long memberTeamId;
+    @Column(name = "club_member_id", insertable = false, updatable = false)
+    private Long clubMemberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
