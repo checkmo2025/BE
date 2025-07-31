@@ -117,4 +117,9 @@ public class Meeting extends BaseEntity {
             newNotice.setMeeting(this);
         }
     }
+
+    public void addTopic(Topic topic) {
+        this.topics.add(topic);
+        topic.setMeeting(this); // 주인 쪽에도 세팅
+    }
 }

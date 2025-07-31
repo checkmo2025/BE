@@ -68,6 +68,11 @@ public class ClubMember extends BaseEntity {
         bookReview.setClubMember(this);
     }
 
+    public void addTopic(Topic topic) {
+        this.topics.add(topic);
+        topic.setClubMember(this);
+    }
+
     public enum ClubMemberStatus {
         MEMBER, STAFF, PENDING, BLOCKED
     }

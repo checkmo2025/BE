@@ -26,6 +26,7 @@ public class Topic extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
+    @Setter
     private Meeting meeting;
 
     @Column(name = "club_member_id", insertable = false, updatable = false)
@@ -33,6 +34,7 @@ public class Topic extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
+    @Setter
     private ClubMember clubMember;
 
     @Builder.Default
