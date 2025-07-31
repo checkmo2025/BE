@@ -20,16 +20,7 @@ public interface ClubQueryFacade {
      * @param memberId 회원 ID
      * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
      */
-    ClubSharedDTO.MyClubListDTO getMyClubListForShare(String memberId);
-
-    /**
-     * 특정 회원이 가입한 모임 목록을 size 개수만큼 조회합니다. (외부용)
-     *
-     * @param memberId 회원 ID
-     * @param size 조회할 개수
-     * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
-     */
-    ClubSharedDTO.MyClubListDTO getMyClubListForShare(String memberId, int size);
+    ClubSharedDTO.MyClubList getMyClubListForShare(String memberId);
 
     /**
      * ClubQueryService

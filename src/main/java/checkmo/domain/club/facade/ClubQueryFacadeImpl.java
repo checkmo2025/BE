@@ -37,13 +37,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final BookQueryFacade bookQueryFacade;
 
     @Override
-    public ClubSharedDTO.MyClubListDTO getMyClubListForShare(String memberId) {
-        return null;
-    }
-
-    @Override
-    public ClubSharedDTO.MyClubListDTO getMyClubListForShare(String memberId, int size) {
-        return null;
+    public ClubSharedDTO.MyClubList getMyClubListForShare(String memberId) {
+        return clubMemberQueryService.getMyClubList(memberId);
     }
 
     @Override

@@ -70,18 +70,18 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
         // 5. 클럽 정보 조회 (책 이야기 페이지에서 맨 위에 보여줄 정보)
         var myClubList = bookStoryQueryService.findMyClubs(memberId);
 
-        ClubSharedDTO.MyClubInfoDTO myClubInfoDTO = null;
+        ClubSharedDTO.MyClubInfo myClubInfo = null;
 
         // 5.1 클럽 스코프인 경우 클럽 정보 조회
         if (scope == BookStoryRequestDTO.BookStoryScope.CLUB) {
-            myClubInfoDTO = myClubList.getClubList().stream()
+            myClubInfo = myClubList.getClubList().stream()
                     .filter(club -> club.getClubId().equals(clubId))
                     .findFirst()
                     .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_NOT_FOUND));
         }
 
         // 6. 스코프 정보 변환 (CLUB 스코프인 경우 선택된 클럽 정보 포함)
-        var scopeInfo = BookStoryConverter.fromScopeInfo(scope, myClubInfoDTO);
+        var scopeInfo = BookStoryConverter.fromScopeInfo(scope, myClubInfo);
 
         // 7. 최종 응답 DTO 변환
         return BookStoryConverter.fromBookStoryResponses(list, hasNext, nextCursor, DEFAULT_PAGE_SIZE, scopeInfo, myClubList);

@@ -25,8 +25,8 @@ public class ClubSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MyClubListDTO {
-        private List<MyClubInfoDTO> clubList;
+    public static class MyClubList {
+        private List<MyClubInfo> clubList;
     }
 
     /**
@@ -38,7 +38,7 @@ public class ClubSharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MyClubInfoDTO {
+    public static class MyClubInfo {
         private Long clubId;     // 모임 ID
         private String clubName; // 모임 이름
     }

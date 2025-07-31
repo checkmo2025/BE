@@ -2,6 +2,7 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.global.dto.ClubSharedDTO;
 
 /**
  * 독서클럽 회원에 대한 조회 서비스
@@ -20,4 +21,13 @@ public interface ClubMemberQueryService {
      */
     ClubMember validateClubMember(Long clubId, String memberId) throws GeneralException;
 
+    /**
+     * 특정 회원이 가입한 독서 클럽 목록을 조회합니다. (외부용)
+     *
+     * 다른 서비스 제공용
+     *
+     * @param memberId 회원 ID
+     * @return 회원이 가입한 독서 클럽의 간략한 정보 목록 DTO
+     */
+    ClubSharedDTO.MyClubList getMyClubList(String memberId);
 }
