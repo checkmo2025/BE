@@ -3,6 +3,7 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -34,7 +35,7 @@ public class ClubMeetingController {
     public ApiResponse<Long> createMeeting(
             @PathVariable Long clubId,
             @RequestBody @Valid MeetingRequestDTO.MeetingCreateRequestDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long meetingId = clubCommandFacade.createMeeting(clubId, memberId, request);
         return ApiResponse.onSuccess(meetingId);
@@ -54,7 +55,7 @@ public class ClubMeetingController {
     public ApiResponse<Long> updateMeeting(
             @PathVariable Long meetingId,
             @RequestBody @Valid MeetingRequestDTO.MeetingUpdateRequestDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long updateMeetingId = clubCommandFacade.updateMeeting(meetingId, memberId, request);
         return ApiResponse.onSuccess(updateMeetingId);

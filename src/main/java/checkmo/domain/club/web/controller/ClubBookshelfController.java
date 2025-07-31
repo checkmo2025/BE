@@ -5,6 +5,7 @@ import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
+import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -45,7 +46,7 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @RequestParam(required = false) Long lastReviewId,
             @RequestParam Integer size,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, lastReviewId, size, memberId);
         return ApiResponse.onSuccess(bookReviewList);
@@ -67,7 +68,7 @@ public class ClubBookshelfController {
     public ApiResponse<Long> createReview(
             @PathVariable Long meetingId,
             @RequestBody @Valid BookShelfRequestDTO.BookReviewDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long bookReviewId = clubCommandFacade.createBookReview(memberId, meetingId, request);
         return ApiResponse.onSuccess(bookReviewId);
@@ -95,7 +96,7 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @PathVariable Long reviewId,
             @RequestBody @Valid BookShelfRequestDTO.BookReviewDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long updatedReviewId = clubCommandFacade.updateBookReview(memberId, meetingId, reviewId, request);
         return ApiResponse.onSuccess(updatedReviewId);
@@ -118,7 +119,7 @@ public class ClubBookshelfController {
     public ApiResponse<Void> deleteReview(
             @PathVariable Long meetingId,
             @PathVariable Long reviewId,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         clubCommandFacade.deleteBookReview(memberId, meetingId, reviewId);
         return ApiResponse.onSuccess(null);
@@ -139,7 +140,7 @@ public class ClubBookshelfController {
     public ApiResponse<Long> createTopic(
             @PathVariable Long meetingId,
             @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long topicId = clubCommandFacade.createTopic(memberId, meetingId, request);
         return ApiResponse.onSuccess(topicId);
@@ -163,7 +164,7 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
             @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         Long updatedTopicId = clubCommandFacade.updateTopic(memberId, meetingId, topicId, request);
         return ApiResponse.onSuccess(updatedTopicId);
@@ -186,7 +187,7 @@ public class ClubBookshelfController {
     public ApiResponse<Void> deleteTopic(
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         clubCommandFacade.deleteTopic(memberId, meetingId, topicId);
         return ApiResponse.onSuccess(null);
@@ -209,7 +210,7 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false, defaultValue = "15") Integer size,
-            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+            @CurrentId String memberId
     ) {
         BookShelfResponseDTO.TopicListDTO topicList = clubQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(topicList);
