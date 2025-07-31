@@ -66,11 +66,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         Long noticeId = clubCommunicationCommandService.createNotice(clubId, memberId, request);
 
         // 2. 생성된 공지를 다시 조회
-        ClubResponseDTO.ClubNoticeDetailDTO clubNoticeDetailDTO = clubNoticeQueryService.getNoticeOrVoteDetail(clubId, noticeId, "공지", memberId);
-
-        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
-                .noticeItem(clubNoticeDetailDTO.getNoticeItem())
-                .build();
+        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, noticeId, "공지", memberId);
     }
 
     /**

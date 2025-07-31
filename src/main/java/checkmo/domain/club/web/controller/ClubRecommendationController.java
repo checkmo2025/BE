@@ -5,8 +5,8 @@ import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,11 +30,9 @@ public class ClubRecommendationController {
     @PostMapping
     public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> createRecommendation(
             @PathVariable Long clubId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId,
+            @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.CreateBookRecommendDTO request
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubCommandFacade.recommendBook(clubId, memberId, request));
     }
 
@@ -48,11 +46,9 @@ public class ClubRecommendationController {
     public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> updateRecommendation(
             @PathVariable Long clubId,
             @PathVariable Long recommendId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId,
+            @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.UpdateBookRecommendDTO request
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubCommandFacade.updateBookRecommend(clubId, memberId, recommendId, request));
     }
 
@@ -65,10 +61,8 @@ public class ClubRecommendationController {
     public ApiResponse<ClubResponseDTO.BookRecommendListDTO> getAllRecommendations(
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubQueryFacade.getRecommendedBooks(clubId, cursorId, memberId));
     }
 
@@ -81,10 +75,8 @@ public class ClubRecommendationController {
     public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> getRecommendationDetail(
             @PathVariable Long clubId,
             @PathVariable Long recommendId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         return ApiResponse.onSuccess(clubQueryFacade.getRecommendedBookDetail(clubId, recommendId, memberId));
     }
 
@@ -98,10 +90,8 @@ public class ClubRecommendationController {
     public ApiResponse<Void> deleteRecommendation(
             @PathVariable Long clubId,
             @PathVariable Long recommendId,
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-            @RequestHeader("MemberId") String memberId
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         clubCommandFacade.deleteRecommendedBook(clubId, memberId, recommendId);
         return ApiResponse.onSuccess(null);
     }

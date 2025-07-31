@@ -5,6 +5,7 @@ import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -52,9 +53,6 @@ public class ClubController {
      * @return 생성된 클럽 정보를 포함한 성공 응답
      */
     @Operation(summary = "독서 모임 생성 API", description = "새로운 독서 모임을 생성합니다.")
-    @Parameters({
-            @Parameter(name = "MemberId", description = "회원 ID (시큐리티 구현 후 삭제 예정)", required = true, example = "mem_001")
-    })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "입력 값이 유효하지 않습니다."),
@@ -62,10 +60,9 @@ public class ClubController {
     })
     @PostMapping("")
     public ApiResponse<ClubResponseDTO.ClubDetailDTO> createClub(
-            @RequestHeader("MemberId") String memberId,
-            @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request
+            @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request,
+            @CurrentId String memberId
     ) {
-        // TODO - 로그인 된 사용자가 맞는지 검사하는 어노테이션 필요
         Long clubId = clubCommandFacade.createClub(memberId, request);
         ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
         return ApiResponse.onSuccess(result);
