@@ -79,6 +79,11 @@ public class Meeting extends BaseEntity {
     }
 
     public void subtractSumRate(double rate) {
+        if (this.sumRate < rate) {
+            this.sumRate = this.bookReviews.stream()
+                    .mapToDouble(BookReview::getRate)
+                    .sum();
+        }
         this.sumRate -= rate;
     }
 
