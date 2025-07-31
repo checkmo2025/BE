@@ -1,0 +1,59 @@
+name: Deploy to EC2 with CodeDeploy
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  CheckmoDeploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 소스 코드 체크아웃
+      - name: Github Repository 파일 불러오기
+        uses: actions/checkout@v4
+
+      # 2. .env 파일 생성
+      - name: .env 파일 생성
+        run: echo "${{ secrets.ENV_FILE }}" > .env
+
+      # 3. AWS 자격 증명 설정
+      - name: AWS credentials 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      # 4. ECR 로그인
+      - name: ECR에 로그인
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 5. Docker 이미지 빌드 및 ECR에 푸시
+      - name: Docker 이미지 생성 및 ECR에 푸시
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: checkmo-server
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # 6. 배포할 파일들을 압축
+      - name: 배포 파일 압축
+        run: |
+          zip -r deployment.zip . -x ".git/*" ".github/*" ".gitignore"
+
+      # 7. S3에 배포 파일 업로드
+      - name: S3에 배포 파일 업로드
+        run: |
+          aws s3 cp deployment.zip s3://${{ secrets.S3_BUCKET_NAME }}/codedeploy/checkmo-server/${{ github.sha }}.zip
+
+      # 8. CodeDeploy 배포 생성
+      - name: CodeDeploy 배포 생성
+        run: |
+          aws deploy create-deployment \
+            --application-name ${{ secrets.CODEDEPLOY_APPLICATION_NAME }} \
+            --deployment-group-name ${{ secrets.CODEDEPLOY_DEPLOYMENT_GROUP_NAME }} \
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=codedeploy/checkmo-server/${{ github.sha }}.zip
