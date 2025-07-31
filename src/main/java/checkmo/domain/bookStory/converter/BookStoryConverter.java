@@ -45,7 +45,7 @@ public class BookStoryConverter {
             Long nextCursor,
             int pageSize,
             BookStorySharedDTO.ScopeInfo scopeInfo,
-            ClubSharedDTO.MyClubListDTO myClubList
+            ClubSharedDTO.MyClubList myClubList
     ) {
         return BookStorySharedDTO.BookStoryListResponse.builder()
                 .scopeInfo(scopeInfo)
@@ -62,7 +62,7 @@ public class BookStoryConverter {
      */
     public static BookStorySharedDTO.ScopeInfo fromScopeInfo(
             BookStoryRequestDTO.BookStoryScope scope,
-            ClubSharedDTO.MyClubInfoDTO selectedClub
+            ClubSharedDTO.MyClubInfo selectedClub
     ) {
         return BookStorySharedDTO.ScopeInfo.builder()
                 .scope(scope)

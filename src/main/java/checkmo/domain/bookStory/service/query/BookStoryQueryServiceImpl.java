@@ -52,7 +52,7 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     }
 
     @Override
-    public ClubSharedDTO.MyClubListDTO findMyClubs(String memberId) {
+    public ClubSharedDTO.MyClubList findMyClubs(String memberId) {
         return clubQueryFacade.getMyClubListForShare(memberId);
     }
 

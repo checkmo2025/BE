@@ -46,7 +46,7 @@ public interface BookStoryQueryService {
      *
      * @return 사용자가 가입한 클럽 목록 DTO
      */
-    ClubSharedDTO.MyClubListDTO findMyClubs(String memberId);
+    ClubSharedDTO.MyClubList findMyClubs(String memberId);
 
     /**
      * 책 이야기 목록에 포함된 책들의 기본 정보를 조회

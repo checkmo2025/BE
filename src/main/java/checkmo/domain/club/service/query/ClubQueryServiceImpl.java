@@ -69,10 +69,10 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         }
 
         // 3. 카테고리 DTO
-        CategorySharedDTO.CategoryInfoListDTO categoryInfoListDTO = categoryQueryFacade.getCategoriesByClubForShare(clubId);
+        CategorySharedDTO.CategoryInfoList categoryInfoList = categoryQueryFacade.getCategoriesByClubForShare(clubId);
 
-        List<Long> categoryIds = categoryInfoListDTO.getCategoryList().stream()
-                .map(CategorySharedDTO.CategoryInfoDTO::getId)
+        List<Long> categoryIds = categoryInfoList.getCategoryList().stream()
+                .map(CategorySharedDTO.CategoryInfo::getId)
                 .collect(Collectors.toList());
 
         // 4. Club 엔티티 + 카테고리 ID 리스트 → DTO 변환
