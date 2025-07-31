@@ -56,7 +56,8 @@ public interface MemberCommandFacade {
     /**
      * 로그아웃 처리 (내부용)
      *
-     * //@param token 로그아웃할 JWT 토큰
+     * @param request HttpServletRequest 객체
+     * @param response HttpServletResponse 객체
      */
     void logout(HttpServletRequest request, HttpServletResponse response);
 
