@@ -66,7 +66,7 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
         // @CurrentUser인 경우 User 객체 반환
         if (parameter.getParameterAnnotation(CurrentMember.class) != null) {
             Member currentUser = memberRepository.findById(memberId)
-                    .orElse(null);
+                                                 .orElse(null);
 
             if (currentUser != null) {
                 log.info("User 객체 주입: {}", currentUser.getId());

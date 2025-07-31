@@ -91,4 +91,12 @@ public class MemberResponseDTO {
         private LocalDateTime createdAt;
         private boolean isLiked; // 조회하는 사람의 좋아요 여부
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LoginResponseDTO {
+        private String nickname;
+    }
 }

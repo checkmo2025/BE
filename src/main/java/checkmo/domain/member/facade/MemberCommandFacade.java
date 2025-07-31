@@ -31,6 +31,7 @@ public interface MemberCommandFacade {
      * 회원 가입 (내부용)
      *
      * @param request id,pw DTO
+     * @param response HttpServletResponse 객체
      * @return 회원 가입 응답 DTO
      */
     MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response);
@@ -46,10 +47,10 @@ public interface MemberCommandFacade {
     /**
      * 로그인 처리 (내부용)
      *
-     * @param email 사용자의 이메일
-     * @param password 사용자의 비밀번호
+     * @param request 로그인 요청 DTO
+     * @param response HttpServletResponse 객체
      */
-    void login(String email, String password, HttpServletResponse response);
+    MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
 
     /**
      * 로그아웃 처리 (내부용)

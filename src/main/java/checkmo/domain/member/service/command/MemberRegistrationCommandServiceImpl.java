@@ -11,6 +11,7 @@ import checkmo.domain.member.service.common.EmailSender;
 import checkmo.domain.member.service.query.MemberQueryService;
 import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
+import checkmo.domain.member.web.dto.MemberRequestDTO.LoginRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
 import jakarta.servlet.http.HttpServletResponse;
@@ -128,7 +129,9 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         memberRepository.save(newMember);
         redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
 
-        memberAuthenticationService.login(request.getEmail(), request.getPassword(), response);
+        MemberRequestDTO.LoginRequestDTO loginRequest = new LoginRequestDTO(request.getEmail(), request.getPassword());
+
+        memberAuthenticationService.login(loginRequest, response);
 
         return MemberConverter.fromMember(newMember);
     }
@@ -145,8 +148,14 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         }
 
         // 사용자 정보 추출
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-        String memberId = principalDetails.getMember().getId();
+        Object principal = authentication.getPrincipal();
+
+        // PrincipalDetails 타입으로 캐스팅
+        if (!(principal instanceof PrincipalDetails)) {
+            throw new GeneralException(ErrorStatus.MEMBER_UNAUTHORIZED);
+        }
+
+        String memberId = ((PrincipalDetails) principal).getMember().getId();
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));

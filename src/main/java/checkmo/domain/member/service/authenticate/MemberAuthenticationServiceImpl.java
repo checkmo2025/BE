@@ -1,8 +1,16 @@
 package checkmo.domain.member.service.authenticate;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.member.converter.MemberConverter;
+import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.service.security.auth.PrincipalDetails;
+import checkmo.domain.member.service.security.jwt.JwtCookieUtil;
 import checkmo.domain.member.service.security.jwt.JwtToken;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
-import jakarta.servlet.http.Cookie;
+import checkmo.domain.member.service.security.jwt.TokenCacheService;
+import checkmo.domain.member.web.dto.MemberRequestDTO;
+import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,27 +25,45 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenCacheService tokenCacheService;
+    private final JwtCookieUtil jwtCookieUtil;
 
     @Override
-    public void login(String email, String password, HttpServletResponse response) {
+    public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(email, password);
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
-        // 인증 요청
-        Authentication authentication =
-            authenticationManager.authenticate(authenticationToken);
+        Authentication authentication;
 
-        /// 인증 성공 후 SecurityContext에 인증 정보 저장
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            // 인증 요청
+            authentication = authenticationManager.authenticate(authenticationToken);
 
-        // JWT 토큰 생성
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+            /// 인증 성공 후 SecurityContext에 인증 정보 저장
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), 2 * 60 * 60); // 2시간 유효
-        addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), 14 * 24 * 60 * 60); // 14일 유효
+            // JWT 토큰 생성
+            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
-        // TODO: Redis에 리프레시 토큰 저장 로직 추가
+            int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L); // ms → sec
+            int refreshTokenMaxAge = (int) (jwtTokenProvider.getRefreshTokenExpirationTime() / 1000L);
+
+            jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), accessTokenMaxAge);
+            jwtCookieUtil.addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenMaxAge);
+
+            // RefreshToken Redis에 저장
+            String memberId = ((PrincipalDetails) authentication.getPrincipal()).getMember().getId();
+            tokenCacheService.saveRefreshToken(memberId, jwtToken.getRefreshToken());
+
+        } catch (Exception e) {
+            // 인증 실패 시 예외 처리
+            throw new GeneralException(ErrorStatus.INVALID_CREDENTIALS, "이메일 또는 비밀번호가 일치하지 않습니다");
+        }
+
+        // 인증 성공 후 MemberResponseDTO 반환
+        Member member = ((PrincipalDetails) authentication.getPrincipal()).getMember();
+        return MemberConverter.fromMemberToLoginResponseDTO(member);
     }
 
     @Override
@@ -48,14 +74,5 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     @Override
     public void reactivateMember() {
         // TODO: 계정 복구 로직 구현
-    }
-
-    private void addTokenToCookie(HttpServletResponse response, String cookieName, String token, int maxAge) {
-        Cookie cookie = new Cookie(cookieName, token);
-        cookie.setHttpOnly(true); // 클라이언트 스크립트에서 접근 불가
-        cookie.setAttribute("SameSite", "Strict"); // CSRF 공격 방지
-        cookie.setPath("/"); // 모든 경로에서 접근 가능
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
     }
 }

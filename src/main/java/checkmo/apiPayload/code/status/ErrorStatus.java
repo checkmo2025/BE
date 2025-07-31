@@ -43,7 +43,7 @@ public enum ErrorStatus implements BaseErrorCode {
     VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_4003", "투표 가능 시간이 아닙니다."),
     MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_4001", "하나의 항목에만 투표 가능합니다."),
 
-    // 회원
+    // 이메일
     EMAIL_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "EMAIL_401", "인증번호가 만료되었습니다."),
     EMAIL_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, "EMAIL_402", "잘못된 인증번호입니다."),
     EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "EMAIL_403", "이미 인증된 이메일입니다."),
@@ -56,12 +56,15 @@ public enum ErrorStatus implements BaseErrorCode {
     // 카테고리
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_4004", "카테고리를 찾을 수 없습니다."),
 
+    // 회원
     MEMBER_INACTIVE(HttpStatus.FORBIDDEN, "MEMBER_401", "비활성화된 회원입니다."),
     MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 회원입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "해당 회원을 찾을 수 없습니다."),
     MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "MEMBER_403", "인증되지 않은 회원입니다."),
     MEMBER_PROFILE_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_406", "이미 프로필이 완성된 회원입니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_407", "이미 존재하는 닉네임입니다."),
+    MEMBER_PROFILE_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_408", "프로필이 완성되지 않은 회원입니다."),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER_409", "이메일 또는 비밀번호가 일치하지 않습니다."),
 
     // 한줄평
     BOOK_REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_REVIEW403", "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
