@@ -1,0 +1,46 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/deployment
+file_exists_behavior: OVERWRITE
+permissions:
+  - object: /home/ubuntu/deployment/scripts
+    pattern: "**"
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+hooks:
+  # ----------------------------------------------------------------
+  # 블루/그린 배포에서는 ApplicationStop, AfterInstall, ApplicationStart
+  # 이 3가지 훅이 새로 생성된 '그린' 인스턴스에서 순서대로 실행.
+  # ----------------------------------------------------------------
+
+  # 1. 이전 버전의 앱을 중지. (새 인스턴스에서는 실행 중인 게 없어서 알아서 넘어감)
+  ApplicationStop:
+    - location: scripts/codedeploy/stop.sh
+      timeout: 60
+      runas: ubuntu
+
+  # 2. 필요한 파일 권한을 설정하고 Docker 이미지를 미리 받아옵니다.
+  AfterInstall:
+    - location: scripts/codedeploy/after_install.sh
+      timeout: 300
+      runas: ubuntu
+
+  # 3. 새 버전의 애플리케이션을 실행합니다.
+  ApplicationStart:
+    - location: scripts/codedeploy/start.sh
+      timeout: 300
+      runas: ubuntu
+
+  # Blue/Green 배포 전용 훅 추가
+  BeforeAllowTraffic:
+    - location: scripts/codedeploy/before_allow_traffic.sh
+      timeout: 60
+      runas: ubuntu
+
+  AfterAllowTraffic:
+    - location: scripts/codedeploy/after_allow_traffic.sh
+      timeout: 60
+      runas: ubuntu
