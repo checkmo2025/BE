@@ -63,7 +63,7 @@ public class Meeting extends BaseEntity {
     private Notice notice;
 
     @Builder.Default
-    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "meeting")
     private List<Topic> topics = new ArrayList<>();
 
     @Builder.Default
