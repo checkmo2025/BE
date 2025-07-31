@@ -42,7 +42,7 @@ public class ClubResponseDTO {
     public static class ClubInfoDTO {
         private Long clubId;         // 모임 ID
         private String clubName;     // 모임 이름, joinClub의 반환값에서 사용될 때는 null
-        private Boolean isOpen;      // 모임 공개 여부 (true: 공개, false: 비공개), MyClubListDTO-ClubInfoDTO에서 사용될 때는 null
+        private Boolean open;      // 모임 공개 여부 (true: 공개, false: 비공개), MyClubListDTO-ClubInfoDTO에서 사용될 때는 null
     }
 
     @Getter
