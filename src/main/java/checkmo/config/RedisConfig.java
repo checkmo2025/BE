@@ -80,7 +80,7 @@ public class RedisConfig {
         Map<String, RedisCacheConfiguration> cacheConfigurations = Map.of(
                 "emailVerification", defaultConfig.entryTtl(Duration.ofMinutes(10)),
                 "refreshToken", defaultConfig.entryTtl(Duration.ofDays(14)),
-                "blacklist", defaultConfig.entryTtl(Duration.ofDays(7)), //TODO: 블랙리스트 TTL 설정기간은 Access Token과 동일하게 설정해주기!!
+                "blacklist", defaultConfig.entryTtl(Duration.ofHours(2)),
                 "notifications", defaultConfig.entryTtl(Duration.ofHours(6))  // 읽지 않은 알림 캐시
         );
 
