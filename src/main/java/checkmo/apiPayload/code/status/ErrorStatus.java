@@ -56,7 +56,12 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 한줄평
     BOOK_REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_REVIEW403", "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
-    BOOK_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_REVIEW404", "한줄평을 찾을 수 없습니다.");
+    BOOK_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_REVIEW404", "한줄평을 찾을 수 없습니다."),
+
+    //알림
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "알림을 찾을 수 없습니다."),
+    NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "NOTIFICATION4002", "이미 읽은 알림입니다."),
+    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION4003", "해당 알림에 접근할 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

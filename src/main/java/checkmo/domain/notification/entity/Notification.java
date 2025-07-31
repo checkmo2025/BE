@@ -43,4 +43,8 @@ public class Notification extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     private Member sender;
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }

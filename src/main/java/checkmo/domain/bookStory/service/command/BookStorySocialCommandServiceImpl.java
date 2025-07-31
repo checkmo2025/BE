@@ -8,12 +8,12 @@ import checkmo.domain.bookStory.repository.BookStoryLikedRepository;
 import checkmo.domain.bookStory.repository.BookStoryRepository;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.event.LikeEvent;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -22,6 +22,8 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
     private final BookStoryRepository bookStoryRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
     private final MemberQueryFacade memberQueryFacade;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -41,6 +43,10 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
                 .orElseGet(() -> {
                     // 좋아요가 없다면 새로 생성하고 true 반환
                     createAndSaveBookStoryLiked(bookStory, proxyMember);
+                    if (!memberId.equals(bookStory.getMemberId())) {
+                        // 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
+                        eventPublisher.publishEvent(new LikeEvent(memberId, bookStory.getMemberId(), bookStory.getId()));
+                    }
                     return true;
                 });
     }

@@ -9,6 +9,10 @@ import checkmo.domain.member.web.dto.MemberResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class MemberQueryServiceImpl implements MemberQueryService {
@@ -41,6 +45,23 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public String getMemberIdByNickname(String nickname) {
-        return null;
+        return memberRepository.findIdByNickName(nickname)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    @Override
+    public String getMemberNicknameById(String memberId) {
+        return memberRepository.findNicknameById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    @Override
+    public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
+        var results = memberRepository.findIdAndNicknameByIdIn(memberIds);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0], // memberId
+                        row -> (String) row[1]  // nickname
+                ));
     }
 }
