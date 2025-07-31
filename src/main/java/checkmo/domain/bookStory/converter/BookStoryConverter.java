@@ -17,7 +17,7 @@ import java.util.List;
 public class BookStoryConverter {
 
     // =====================================================
-    // BookStoryRequestDTO → BookStory 변환, 테스트용
+    // BookStoryRequestDTO → BookStory 변환
     // =====================================================
 
     /**
