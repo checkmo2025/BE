@@ -40,12 +40,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
 
         // 쿠키에서 Access Token 추출
-        String accessToken = resolveToken(request, "accessToken");
-        log.info("[JWT 필터] 요청 URI: {}, Access Token 존재 여부 확인: {}", request.getRequestURI(), accessToken != null);
+        String accessToken = jwtCookieUtil.resolveToken(request, "accessToken");
+        log.info("[JWT 필터] 요청 URI: {}, Access Token 존재 여부 확인: {}", request.getRequestURI(),
+            accessToken != null);
 
-        if (StringUtils.hasText(accessToken))  { // Access Token이 존재하는 경우
+        if (StringUtils.hasText(accessToken)) { // Access Token이 존재하는 경우
             try {
                 if (jwtTokenProvider.validateToken(accessToken)) { // Access Token 유효성 검사
+
+                    if (tokenCacheService.isAccessTokenBlacklisted(accessToken)) {
+                        log.warn("[JWT 필터] 블랙리스트에 등록된 Access Token 입니다. 요청 거부.");
+                        filterChain.doFilter(request, response); // 인증 없이 계속 진행
+                        return;
+                    }
 
                     // Access Token이 유효한 경우, 인증 정보 설정
                     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
@@ -68,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
 
         // 쿠키에서 Refresh Token 추출
-        String refreshToken = resolveToken(request, "refreshToken");
+        String refreshToken = jwtCookieUtil.resolveToken(request, "refreshToken");
         log.info("[재발급] Refresh Token 존재 여부 확인: {}", refreshToken != null);
 
         if (!StringUtils.hasText(refreshToken)) {
@@ -82,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        if(!StringUtils.hasText(memberId)) {
+        if (!StringUtils.hasText(memberId)) {
             log.warn("재발급 실패: Refresh Token에서 memberId 추출 실패");
             return;
         }
@@ -106,23 +113,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String newAccessToken = newJwtToken.getAccessToken();
 
         int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
-        jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken, accessTokenMaxAge); // 2시간 유효
+        jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken,
+            accessTokenMaxAge); // 2시간 유효
 
         // SecurityContext에 새로운 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("Access Token 재발급 성공: 새로운 Access Token 생성 (memberId={})", memberId);
     }
-
-    private String resolveToken(HttpServletRequest request, String cookieName) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null; // 쿠키에서 Access Token을 찾지 못한 경우
-    }
-
 }

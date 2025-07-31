@@ -4,6 +4,7 @@ import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.command.MemberRegistrationCommandService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +44,8 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public void logout(String token) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        memberAuthenticationService.logout(request, response);
     }
 
     @Override
