@@ -61,6 +61,7 @@ public class ClubConverter {
                 .rate(request.getRate())
                 .build();
     }
+
     /**
      * ClubRequestDTO.ClubDetailDTO -> Club 엔티티 변환
      */
@@ -147,6 +148,7 @@ public class ClubConverter {
                 .authorInfo(memberSharedDTO)
                 .build();
     }
+
     /**
      * BookRecommendDTO 리스트 → BookRecommendListDTO 변환
      */
@@ -272,9 +274,40 @@ public class ClubConverter {
      */
     public static Topic fromTopicDTOToTopic(
             BookShelfRequestDTO.TopicDTO topicDTO
-    ){
+    ) {
         return Topic.builder()
                 .description(topicDTO.getDescription())
+                .build();
+    }
+
+    /**
+     * List<Topic> -> BookShelfResponseDTO.TopicListDTO 변환
+     */
+    public static BookShelfResponseDTO.TopicListDTO fromTopicListToTopicListDTO(
+            List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return BookShelfResponseDTO.TopicListDTO.builder()
+                .topics(topicListDTOs)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * Topic 엔티티 -> BookShelfResponseDTO.TopicDTO 변환
+     */
+    public static BookShelfResponseDTO.TopicDTO fromTopicAndMemberSharedDTOToTopicDTO(
+            Topic topic,
+            MemberSharedDTO.BasicInfoDTO authorSharedDTO,
+            String memberId
+    ) {
+        return BookShelfResponseDTO.TopicDTO.builder()
+                .topicId(topic.getId())
+                .content(topic.getDescription())
+                .authorInfo(authorSharedDTO)
+                .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
                 .build();
     }
 

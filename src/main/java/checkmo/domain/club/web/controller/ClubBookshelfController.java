@@ -191,5 +191,27 @@ public class ClubBookshelfController {
         clubCommandFacade.deleteTopic(memberId, meetingId, topicId);
         return ApiResponse.onSuccess(null);
     }
+
     // GET /api/meetings/{meetingId}/topics - Meeting에 대한 Topic 전체보기
+    @Operation(summary = "미팅에 대한 발제 조회 API", description = "발제를 등록순으로 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "발제를 조회할 정기 독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "마지막으로 조회한 발제 ID (무한 스크롤용)", required = false, example = "10"),
+            @Parameter(name = "size", description = "조회할 발제 개수", required = false, example = "15"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/meetings/{meetingId}/topics")
+    public ApiResponse<BookShelfResponseDTO.TopicListDTO> getTopicList(
+            @PathVariable Long meetingId,
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false, defaultValue = "15") Integer size,
+            @RequestParam String memberId // TODO: @CurrentId로 추후 변경 예정
+    ) {
+        BookShelfResponseDTO.TopicListDTO topicList = clubQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+        return ApiResponse.onSuccess(topicList);
+    }
 }

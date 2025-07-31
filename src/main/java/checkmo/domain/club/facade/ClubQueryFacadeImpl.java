@@ -1,16 +1,13 @@
 package checkmo.domain.club.facade;
 
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.service.query.ClubMeetingQueryService;
-import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.meeting.BookReview;
+import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.repository.ClubRepository;
-import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
-import checkmo.domain.club.service.query.ClubCommunicationQueryService;
-import checkmo.domain.club.service.query.ClubQueryService;
+import checkmo.domain.club.service.query.*;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
@@ -57,7 +54,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * ClubQueryService
      * 독서 모임의 상세 정보를 조회합니다. (내부용)
      *
-     * @param clubId   조회할 모임 ID
+     * @param clubId 조회할 모임 ID
      * @param memberId 조회자 회원 ID
      * @return 모임 상세 정보 DTO
      */
@@ -102,7 +99,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * ClubQueryService
      * 공지사항(투표 포함)의 상세 정보를 조회합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param noticeId 조회할 공지사항 ID
      * @return 공지사항 상세 정보 DTO
      */
@@ -115,7 +112,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * ClubBookRecommendQueryService
      * 모임의 추천 책 목록을 조회합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param cursorId 페이징 커서 ID
      * @return 추천 책 목록 DTO
      */
@@ -149,7 +146,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * ClubBookRecommendQueryService
      * 추천 책의 상세 정보를 조회합니다. (내부용)
      *
-     * @param clubId          모임 ID
+     * @param clubId 모임 ID
      * @param bookRecommendId 추천 책 ID
      * @return 추천 책 상세 정보 DTO
      */
@@ -202,8 +199,24 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public MeetingResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId) {
-        return null;
+    public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+
+        boolean hasNext = topics.size() > size;
+        if (hasNext) {
+            topics = topics.subList(0, size);
+        }
+        Long nextCursor = hasNext ? topics.getLast().getId() : null;
+
+        List<BookShelfResponseDTO.TopicDTO> topicListDTOs = topics.stream()
+                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOToTopicDTO(
+                        topic,
+                        memberQueryFacade.getMemberBasicInfoForShare(topic.getClubMember().getMemberId()),
+                        memberId
+                ))
+                .toList();
+
+        return ClubConverter.fromTopicListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
     }
 
     @Override
