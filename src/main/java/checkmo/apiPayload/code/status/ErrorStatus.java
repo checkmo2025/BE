@@ -33,6 +33,15 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_4005", "독서클럽 운영진만 접근할 수 있습니다."),
     CLUB_BOOK_RECOMMEND_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4014", "추천 책을 찾을 수 없습니다."),
     CLUB_BOOK_RECOMMEND_FORBIDDEN(HttpStatus.FORBIDDEN, "CLUB_4015", "해당 추천 책에 대한 권한이 없습니다."),
+    CLUB_INVALID_TAG_TYPE(HttpStatus.BAD_REQUEST, "CLUB_4011", "유효하지 않은 공지 유형입니다. (공지, 모임, 투표 중 하나)"),
+
+    // 공지사항
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_4004", "공지사항을 찾을 수 없습니다."),
+
+    // 투표
+    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_4004", "투표를 찾을 수 없습니다."),
+    VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_4003", "투표 가능 시간이 아닙니다."),
+    MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_4001", "하나의 항목에만 투표 가능합니다."),
 
     // 회원
     EMAIL_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "EMAIL_401", "인증번호가 만료되었습니다."),
