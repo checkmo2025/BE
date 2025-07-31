@@ -2,6 +2,7 @@ package checkmo.domain.member.facade;
 
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -55,9 +56,9 @@ public interface MemberCommandFacade {
     /**
      * 로그아웃 처리 (내부용)
      *
-     * @param token 로그아웃할 JWT 토큰
+     * //@param token 로그아웃할 JWT 토큰
      */
-    void logout(String token);
+    void logout(HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 회원 계정 복구 (내부용)

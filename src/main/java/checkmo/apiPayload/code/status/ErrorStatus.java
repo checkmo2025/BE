@@ -65,6 +65,7 @@ public enum ErrorStatus implements BaseErrorCode {
     NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_407", "이미 존재하는 닉네임입니다."),
     MEMBER_PROFILE_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_408", "프로필이 완성되지 않은 회원입니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER_409", "이메일 또는 비밀번호가 일치하지 않습니다."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER_500", "서버 내부 오류입니다. 관리자에게 문의 바랍니다."),
 
     // 한줄평
     BOOK_REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_REVIEW403", "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
