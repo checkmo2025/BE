@@ -3,7 +3,7 @@ name: Deploy to EC2 with CodeDeploy
 on:
   push:
     branches:
-      - release
+      - develop
 
 jobs:
   CheckmoDeploy:
