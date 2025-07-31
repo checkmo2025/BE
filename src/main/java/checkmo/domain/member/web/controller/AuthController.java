@@ -8,6 +8,7 @@ import checkmo.domain.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -81,11 +82,15 @@ public class AuthController {
         return ApiResponse.onSuccess(memberCommandFacade.login(request, response));
     }
 
+    // 로그아웃
+    @Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        memberCommandFacade.logout(request, response);
+        return ApiResponse.onSuccess(null);
+    }
+
     // 소셜 로그인 관련
     // GET /api/auth/oauth2/google - 소셜 로그인 (구글)
     // GET /api/auth/oauth2/kakao - 소셜 로그인 (카카오)
-
-    // 일반 로그인/로그아웃 관련
-    // POST /api/auth/login - 이메일 로그인
-    // POST /api/auth/logout - 로그아웃
 }
