@@ -43,7 +43,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false, defaultValue = "9") Integer size,
-            @RequestParam(required = true) Integer generation, // 활동 기수 필터링이 필수가 아니라면 변경
+            @RequestParam(required = false) Integer generation,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookShelfListDTO bookShelfList = clubQueryFacade.getBookShelfList(clubId, cursorId, size, generation, memberId);
