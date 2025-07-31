@@ -106,9 +106,17 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId);
     }
 
+    /**
+     * ClubCommunicationCommandService
+     * 모임의 투표를 삭제합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 요청자(운영진) 회원 ID
+     * @param voteId   삭제할 투표 ID
+     */
     @Override
     public void deleteVote(Long clubId, String memberId, Long voteId) {
-
+        clubCommunicationCommandService.deleteVote(clubId, memberId, voteId);
     }
 
     /**

@@ -109,6 +109,30 @@ public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCom
         return vote.getId();
     }
 
+    /**
+     * 독서 모임에 투표를 삭제합니다.
+     *
+     * @param clubId 독서 모임 ID
+     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
+     * @param voteId 삭제할 투표 ID
+     */
+    @Override
+    public void deleteVote(Long clubId, String memberId, Long voteId) {
+
+        // 1. 검증
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. 투표 존재 여부 확인
+        Vote vote = voteRepository.findById(voteId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
+
+        // 3. 삭제
+        voteRepository.delete(vote);
+    }
 
     /**
      * 독서 모임의 투표에 참여합니다.
