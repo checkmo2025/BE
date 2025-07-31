@@ -74,19 +74,19 @@ public class Meeting extends BaseEntity {
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     private List<BookReview> bookReviews = new ArrayList<>();
 
-    public void calculateSumRate(double rate) {
-        if (this.sumRate == 0) {
-            this.sumRate = rate;
-        } else {
-            this.sumRate += rate;
-        }
+    public void addSumRate(double rate) {
+        this.sumRate += rate;
     }
 
-    public void calculateAverageRate() {
+    public void subtractSumRate(double rate) {
+        this.sumRate -= rate;
+    }
+
+    public double calculateAverageRate() {
         if (this.bookReviews.isEmpty()) {
-            this.sumRate = 0;
+            return 0;
         } else {
-            this.sumRate /= this.bookReviews.size();
+            return this.sumRate / this.bookReviews.size();
         }
     }
 

@@ -11,6 +11,9 @@ import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +33,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubManagementCommandService
      * 새로운 독서 모임을 생성합니다. (내부용)
      *
-     * @param memberId  생성자 회원 ID
-     * @param request   모임 생성 요청 정보 DTO
+     * @param memberId 생성자 회원 ID
+     * @param request 모임 생성 요청 정보 DTO
      * @return 생성된 독서 모임의 상세 정보 DTO
      */
     @Override
@@ -53,9 +56,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubCommunicationCommandService
      * 모임에 공지사항을 작성합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 작성자(운영진) 회원 ID
-     * @param request  공지사항 작성 요청 DTO
+     * @param request 공지사항 작성 요청 DTO
      * @return 작성된 공지사항의 상세 정보 DTO
      */
     @Override
@@ -77,7 +80,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubCommunicationCommandService
      * 모임의 공지사항을 삭제합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 요청자(운영진) 회원 ID
      * @param noticeId 삭제할 공지사항 ID
      */
@@ -90,9 +93,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubCommunicationCommandService
      * 모임에 투표를 생성합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 작성자(운영진) 회원 ID
-     * @param request  투표 생성 요청 DTO
+     * @param request 투표 생성 요청 DTO
      * @return 생성된 투표가 포함된 공지사항 상세 DTO
      */
     @Override
@@ -109,9 +112,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubCommunicationCommandService
      * 모임의 투표를 삭제합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 요청자(운영진) 회원 ID
-     * @param voteId   삭제할 투표 ID
+     * @param voteId 삭제할 투표 ID
      */
     @Override
     public void deleteVote(Long clubId, String memberId, Long voteId) {
@@ -122,10 +125,10 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubCommunicationCommandService
      * 모임의 투표에 참여합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 참여자 회원 ID
-     * @param voteId   투표 ID
-     * @param request  투표 선택 항목 DTO
+     * @param voteId 투표 ID
+     * @param request 투표 선택 항목 DTO
      * @return 참여 결과가 반영된 투표 상세 DTO
      */
     @Override
@@ -142,9 +145,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubBookRecommendCommandService
      * 모임에 책을 추천합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 추천자 회원 ID
-     * @param request  추천 책 정보 DTO
+     * @param request 추천 책 정보 DTO
      * @return 추천된 책의 상세 정보 DTO
      */
     @Override
@@ -157,10 +160,10 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubBookRecommendCommandService
      * 추천한 책 정보를 수정합니다. (내부용)
      *
-     * @param clubId          모임 ID
-     * @param memberId        요청자 회원 ID
+     * @param clubId 모임 ID
+     * @param memberId 요청자 회원 ID
      * @param bookRecommendId 수정할 추천 책 ID
-     * @param request         수정할 정보 DTO
+     * @param request 수정할 정보 DTO
      * @return 수정된 책의 상세 정보 DTO
      */
     @Override
@@ -173,8 +176,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubBookRecommendCommandService
      * 추천한 책을 삭제합니다. (내부용)
      *
-     * @param clubId          모임 ID
-     * @param memberId        요청자 회원 ID
+     * @param clubId 모임 ID
+     * @param memberId 요청자 회원 ID
      * @param bookRecommendId 삭제할 추천 책 ID
      */
     @Override
@@ -217,17 +220,34 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     }
 
+    // TODO: Aspect 로그
+    // TODO: Test DB 설정 후, 낙관적 락 동작 테스트
     @Override
+    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+            value = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+    )
     public Long createBookReview(String memberId, Long meetingId, BookShelfRequestDTO.BookReviewDTO request) {
         return clubMeetingCommandService.createBookReview(memberId, meetingId, request);
     }
 
     @Override
+    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+            value = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+    )
     public Long updateBookReview(String memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request) {
         return clubMeetingCommandService.updateBookReview(memberId, meetingId, reviewId, request);
     }
 
     @Override
+    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+            value = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+    )
     public void deleteBookReview(String memberId, Long meetingId, Long reviewId) {
         clubMeetingCommandService.deleteBookReview(memberId, meetingId, reviewId);
     }
