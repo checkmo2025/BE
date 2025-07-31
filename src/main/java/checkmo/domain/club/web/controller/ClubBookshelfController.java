@@ -25,7 +25,31 @@ public class ClubBookshelfController {
     private final ClubQueryFacade clubQueryFacade;
 
     // 책장 조회 (Meeting 기반)
-    // GET /api/clubs/{clubId}/meetings - 책장(책장이 곧 Meeting) 전체 조회 ← 필터 적용 가능
+    // GET /api/clubs/{clubId}/bookshelves - 책장(책장이 곧 Meeting) 전체 조회 ← 필터 적용 가능
+    @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 사이즈만큼 조회합니다.(최신순 정렬)")
+    @Parameters({
+            @Parameter(name = "clubId", description = "책장을 조회할 클럽 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "마지막으로 조회한 책장 ID (무한 스크롤용)", required = false, example = "10"),
+            @Parameter(name = "size", description = "조회할 책장 개수", required = false, example = "9"),
+            @Parameter(name = "generation", description = "활동 기수", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 클럽을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/clubs/{clubId}/bookshelves")
+    public ApiResponse<BookShelfResponseDTO.BookShelfListDTO> getBookShelfList(
+            @PathVariable Long clubId,
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false, defaultValue = "9") Integer size,
+            @RequestParam(required = true) Integer generation, // 활동 기수 필터링이 필수가 아니라면 변경
+            @CurrentId String memberId
+    ) {
+        BookShelfResponseDTO.BookShelfListDTO bookShelfList = clubQueryFacade.getBookShelfList(clubId, cursorId, size, generation, memberId);
+        return ApiResponse.onSuccess(bookShelfList);
+    }
+
     // GET /api/meetings/{meetingId} - 책장(책장이 곧 Meeting) 상세 화면 (책 정보, 발제들, 한줄평)
 
     // 한줄평(BookReview) 관리
