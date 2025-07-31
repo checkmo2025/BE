@@ -1,5 +1,6 @@
 package checkmo.domain.club.entity.meeting;
 
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,8 +32,8 @@ public class Topic extends BaseEntity {
     private Long memberTeamId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_team_id")
-    private MemberTeam memberTeam;
+    @JoinColumn(name = "club_member_id")
+    private ClubMember clubMember;
 
     @Builder.Default
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)

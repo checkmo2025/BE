@@ -2,6 +2,7 @@ package checkmo.domain.club.entity;
 
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.MemberTeam;
+import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -53,6 +54,10 @@ public class ClubMember extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
     private List<MemberTeam> memberTeams = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
+    private List<Topic> topics = new ArrayList<>();
 
     public boolean isStaff() {
         return this.clubMemberStatus == ClubMemberStatus.STAFF;

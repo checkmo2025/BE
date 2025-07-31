@@ -32,8 +32,4 @@ public class MemberTeam extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "memberTeam", cascade = CascadeType.ALL)
-    private List<Topic> topics = new ArrayList<>();
 }
