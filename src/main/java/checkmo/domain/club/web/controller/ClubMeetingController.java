@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
-@Tag(name = "모임 토론", description = "독서 모임 미팅, 발제, 토론조 관리 API")
+@Tag(name = "모임 토론", description = "독서 모임 미팅, 토론조 관리 API")
 public class ClubMeetingController {
 
     private final ClubCommandFacade clubCommandFacade;
