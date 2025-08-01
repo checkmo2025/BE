@@ -46,6 +46,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401); // 로그인 안한 사용자 → 리다이렉트 없이 401 응답
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"code\": \"UNAUTHORIZED\", \"message\": \"로그인이 필요합니다.\"}");
+                })
+            )
             .addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class) // JWT 인증 필터 추가
             .addFilterAfter(profileCompletionAuthorizationFilter,
