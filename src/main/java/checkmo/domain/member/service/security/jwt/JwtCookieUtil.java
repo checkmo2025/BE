@@ -14,8 +14,8 @@ public class JwtCookieUtil {
         cookie.setAttribute("SameSite", "Lax");
         cookie.setPath("/"); // 모든 경로에서 접근 가능
         cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
         cookie.setSecure(true); // HTTPS에서만 전송하도록 추가
+        response.addCookie(cookie);
     }
 
     public String resolveToken(HttpServletRequest request, String cookieName) {
