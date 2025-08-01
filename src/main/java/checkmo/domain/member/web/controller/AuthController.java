@@ -99,17 +99,16 @@ public class AuthController {
         return ApiResponse.onSuccess(null);
     }
 
-    @Operation(summary = "소셜 로그인 후 리다이렉트", description = """
-        소셜 로그인 성공 후, 프론트엔드가 리다이렉트 되는 중간 경로입니다.
+    // 소셜 로그인 관련
+    @Operation(summary = "소셜 로그인 성공 후 리다이렉트 (임시 컨트롤러)", description = """
+        소셜 로그인 성공 후, 리다이렉트 되는 중간 경로입니다.
 
         - 실제 로그인 진입 경로는 `/oauth2/authorization/{provider}` (예: /oauth2/authorization/google) 이며,
         이 엔드포인트는 로그인 성공 후 JWT 토큰이 발급된 상태에서 호출됩니다.
 
         - 최초 로그인(회원가입)의 경우: `isProfileCompleted: false` 가 응답되고, 프로필이 이미 완료된 유저의 경우: `nickname` 이 응답됩니다.
 
-        - 이 API는 프론트가 직접 호출하는 것이 아니라,
-        로그인 성공 후 자동으로 리다이렉트되는 경로입니다.
-        프론트는 이 응답을 보고 추가 정보 입력 화면으로 이동할지 여부를 판단하면 됩니다.
+        - 이 API는 프론트가 직접 호출하는 것이 아니라, 로그인 성공 후 자동으로 리다이렉트되는 경로입니다.
         """)
     @GetMapping(value = "/redirect/oauth2", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<Map<String, Object>> handleSocialLoginRedirect(
