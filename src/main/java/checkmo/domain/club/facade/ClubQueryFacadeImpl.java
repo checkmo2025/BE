@@ -168,6 +168,27 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
+    public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+
+        boolean hasNext = topics.size() > size;
+        if (hasNext) {
+            topics = topics.subList(0, size);
+        }
+        Long nextCursor = hasNext ? topics.getLast().getId() : null;
+
+        List<BookShelfResponseDTO.TopicDTO> topicListDTOs = topics.stream()
+                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOToTopicDTO(
+                        topic,
+                        memberQueryFacade.getMemberBasicInfoForShare(topic.getClubMember().getMemberId()),
+                        memberId
+                ))
+                .toList();
+
+        return ClubConverter.fromTopicListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
+    }
+
+    @Override
     public BookShelfResponseDTO.BookReviewListDTO getBookReviewList(Long meetingId, Long lastReviewId, int size, String memberId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
@@ -212,34 +233,28 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId) {
+    public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId, String memberId) {
         return null;
     }
 
     @Override
-    public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
-
-        boolean hasNext = topics.size() > size;
-        if (hasNext) {
-            topics = topics.subList(0, size);
-        }
-        Long nextCursor = hasNext ? topics.getLast().getId() : null;
-
-        List<BookShelfResponseDTO.TopicDTO> topicListDTOs = topics.stream()
-                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOToTopicDTO(
-                        topic,
-                        memberQueryFacade.getMemberBasicInfoForShare(topic.getClubMember().getMemberId()),
-                        memberId
-                ))
-                .toList();
-
-        return ClubConverter.fromTopicListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
+    public MeetingResponseDTO.TopicListDTO findMeetingTopicsWithTeam(Long meetingId, String memberId) {
+        return null;
     }
 
     @Override
-    public MeetingResponseDTO.TeamDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber) {
+    public MeetingResponseDTO.TeamTopicDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber, String memberId) {
         return null;
+    }
+
+    @Override
+    public List<MeetingResponseDTO.MeetingMemberDTO> findMeetingMembersByMeeting(Long meetingId, String memberId) {
+        return List.of();
+    }
+
+    @Override
+    public List<MeetingResponseDTO.MeetingMemberDTO> findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId) {
+        return List.of();
     }
 
     @Override
