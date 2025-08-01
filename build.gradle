@@ -69,6 +69,9 @@ dependencies {
 
     // ============= Java <-> XML =============
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
+    // ============ Meeting sumRate 낙관적 락 =============
+    implementation 'org.springframework.retry:spring-retry'
 }
 
 tasks.named('test') {
