@@ -26,7 +26,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     private final ClubMemberQueryService clubMemberQueryService;
 
     @Override
-    public MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId) {
+    public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId) {
         return null;
     }
 
@@ -44,7 +44,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public MeetingResponseDTO.TeamDTO findTeamsByMeeting(Long meetingId, Integer teamNumber) {
+    public MeetingResponseDTO.TeamTopicDTO findTeamsByMeeting(Long meetingId, Integer teamNumber) {
         return null;
     }
 

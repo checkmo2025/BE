@@ -24,7 +24,7 @@ public interface ClubMeetingQueryService {
      * @param meetingId 미팅 ID
      * @return 조회한 미팅 정보 DTO -> 전체 발제는 최대 4개, 각 조별 발제들 최대 4개 (전부 최신 내림차순 정렬)
      */
-    MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId);
+    MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId);
 
     /**
      * 독서 모임의 모든 미팅을 조회합니다. (책장 아님) - 이 페이지에서는 발제 작성 불가 및, 한줄평 조회 불가
@@ -57,7 +57,7 @@ public interface ClubMeetingQueryService {
      * @param teamNumber 팀 번호 (1, 2, 3, 4 팀 -> 실제로 프론트에서는 A, B, C, D로 표시)
      * @return 조회한 팀 정보 DTO
      */
-    MeetingResponseDTO.TeamDTO findTeamsByMeeting(Long meetingId, Integer teamNumber);
+    MeetingResponseDTO.TeamTopicDTO findTeamsByMeeting(Long meetingId, Integer teamNumber);
 
     /**
      * 독서 모임의 책장(한줄평) 리스트를 조회합니다.
