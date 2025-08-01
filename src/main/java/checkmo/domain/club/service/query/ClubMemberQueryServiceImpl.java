@@ -28,7 +28,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
         // 회원ID를 통해 JPQL로 클럽 ID와 이름을 조회하고 DTO로 변환
         var clubIdAndNameByMemberId = clubMemberRepository.findClubIdAndNameByMemberId(memberId);
-        
+
         // Object[] -> ClubSharedDTO.MyClubInfo 변환
         var myClubInfoList = clubIdAndNameByMemberId.stream()
                 .map(row -> new ClubSharedDTO.MyClubInfo((Long) row[0], (String) row[1]))
