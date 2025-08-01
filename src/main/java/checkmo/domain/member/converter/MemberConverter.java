@@ -33,7 +33,7 @@ public class MemberConverter {
 
         String uuid = UUID.randomUUID().toString().substring(0, 8);
         String newMemberId = "LOCAL_" + uuid;
-        String tempNickname = "TEMP_" + uuid; // 닉넴 임시로 일단 넣기
+        String tempNickname = "TEMP_" + newMemberId; // 닉넴 임시로 일단 넣기
 
         return Member.builder()
                      .id(newMemberId)
@@ -45,6 +45,25 @@ public class MemberConverter {
                      .deactivated(null)
                      .isProfileCompleted(false)
                      .build();
+    }
+
+    /**
+     * OAuth2 소셜 로그인 → Member 엔티티 변환
+     */
+    public static Member fromOAuth2User(String email, String registrationId, String providerId) {
+        String newMemberId = registrationId.toUpperCase() + "_" + providerId;
+        String tempNickname = "TEMP_" + newMemberId; // 닉넴 임시로 일단 넣기
+
+        return Member.builder()
+                        .id(newMemberId)
+                        .email(email)
+                        .password("") // OAuth2 사용자는 비밀번호가 없음
+                        .nickName(tempNickname)
+                        .description("")
+                        .role(Member.Role.USER) // 기본 역할 설정
+                        .deactivated(null)
+                        .isProfileCompleted(false) // 프로필 미완료 상태로 설정
+                        .build();
     }
 
     /**
