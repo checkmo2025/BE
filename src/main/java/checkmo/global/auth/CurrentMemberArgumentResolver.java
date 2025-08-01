@@ -49,7 +49,7 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
         String memberId = null;
         if (authentication.getPrincipal() instanceof PrincipalDetails) {
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-            memberId = principalDetails.getUsername(); //‼️TODO: PrincipalDetails 완성하고 반드시 주석 해야함!!!!‼️
+            memberId = principalDetails.getUsername();
         }
 
         if (memberId == null) {
