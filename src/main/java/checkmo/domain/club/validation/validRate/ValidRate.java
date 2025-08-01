@@ -1,4 +1,4 @@
-package checkmo.domain.club.validation;
+package checkmo.domain.club.validation.validRate;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

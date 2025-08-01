@@ -1,6 +1,6 @@
 package checkmo.domain.club.web.dto.bookshelf;
 
-import checkmo.domain.club.validation.ValidRate;
+import checkmo.domain.club.validation.validRate.ValidRate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
