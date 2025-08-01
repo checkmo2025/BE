@@ -90,6 +90,7 @@ public class ClubRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class UpdateBookRecommendDTO {
+        private String title; // 추천 제목
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그
