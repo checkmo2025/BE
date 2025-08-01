@@ -3,6 +3,8 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.domain.club.validation.validCursor.ValidCursor;
+import checkmo.domain.club.validation.validSize.ValidSize;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.global.auth.CurrentId;
@@ -13,12 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
 @Tag(name = "모임 책장", description = "독서 모임 책장, 한줄평 관리 API")
+@Validated
 public class ClubBookshelfController {
 
     private final ClubCommandFacade clubCommandFacade;
@@ -44,8 +48,8 @@ public class ClubBookshelfController {
     @GetMapping("/api/meetings/{meetingId}/reviews")
     public ApiResponse<BookShelfResponseDTO.BookReviewListDTO> getAllReviews(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) Long lastReviewId,
-            @RequestParam Integer size,
+            @RequestParam(required = false) @ValidCursor Long lastReviewId,
+            @RequestParam @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, lastReviewId, size, memberId);
@@ -208,8 +212,8 @@ public class ClubBookshelfController {
     @GetMapping("/api/meetings/{meetingId}/topics")
     public ApiResponse<BookShelfResponseDTO.TopicListDTO> getTopicList(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) Long cursorId,
-            @RequestParam(required = false, defaultValue = "15") Integer size,
+            @RequestParam(required = false) @ValidCursor Long cursorId,
+            @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.TopicListDTO topicList = clubQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);

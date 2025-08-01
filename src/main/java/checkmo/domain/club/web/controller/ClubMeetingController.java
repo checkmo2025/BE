@@ -3,6 +3,8 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.domain.club.validation.validCursor.ValidCursor;
+import checkmo.domain.club.validation.validSize.ValidSize;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.auth.CurrentId;
@@ -12,14 +14,15 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
 @Tag(name = "독서모임 미팅", description = "독서 모임 미팅, 발제, 토론조 관리 API")
+@Validated
 public class ClubMeetingController {
 
     private final ClubCommandFacade clubCommandFacade;
@@ -80,8 +83,8 @@ public class ClubMeetingController {
     @GetMapping("/api/clubs/{clubId}/meetings")
     public ApiResponse<MeetingResponseDTO.MeetingListDTO> getMeetings(
             @PathVariable Long clubId,
-            @RequestParam(required = false) @Positive Long cursorId,
-            @RequestParam(required = false, defaultValue = "5") @Positive Integer size,
+            @RequestParam(required = false) @ValidCursor Long cursorId,
+            @RequestParam(required = false, defaultValue = "5") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.MeetingListDTO meetings = clubQueryFacade.getMeetingsByClub(clubId, cursorId, size, memberId);
