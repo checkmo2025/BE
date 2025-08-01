@@ -83,7 +83,7 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         }
 
         // 4. 값 수정 (책 자체는 변경 불가)
-        bookRecommend.updateRecommendInfo(request.getContent(), request.getRate(), request.getTag());
+        bookRecommend.updateRecommendInfo(request.getTitle(), request.getContent(), request.getRate(), request.getTag());
 
         return bookRecommend.getId();
     }

@@ -107,6 +107,7 @@ public class ClubConverter {
             ClubMember clubMember
     ) {
         return BookRecommend.builder()
+                .title(request.getTitle())
                 .content(request.getContent())
                 .rate(request.getRate())
                 .tag(request.getTag())
@@ -128,6 +129,7 @@ public class ClubConverter {
     ) {
         return ClubResponseDTO.BookRecommendDetailDTO.builder()
                 .id(bookRecommend.getId())
+                .title(bookRecommend.getTitle())
                 .content(bookRecommend.getContent())
                 .rate(bookRecommend.getRate())
                 .tag(bookRecommend.getTag())

@@ -16,6 +16,8 @@ public class BookRecommend extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String title;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
@@ -37,7 +39,8 @@ public class BookRecommend extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    public void updateRecommendInfo(String content, double rate, String tag) {
+    public void updateRecommendInfo(String title, String content, double rate, String tag) {
+        this.title = title;
         this.content = content;
         this.rate = rate;
         this.tag = tag;
