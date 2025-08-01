@@ -2,6 +2,9 @@ package checkmo.config;
 
 import checkmo.domain.member.service.security.auth.ProfileCompletionAuthorizationFilter;
 import checkmo.domain.member.service.security.jwt.JwtAuthenticationFilter;
+import checkmo.domain.member.service.security.oauth2.CustomOAuth2UserService;
+import checkmo.domain.member.service.security.oauth2.OAuth2AuthenticationFailureHandler;
+import checkmo.domain.member.service.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +26,9 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ProfileCompletionAuthorizationFilter profileCompletionAuthorizationFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http)
@@ -34,16 +40,25 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**","/")// 루트 경로 추가
-                .permitAll() // Swagger UI 접근 허용
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/").permitAll() // Swagger UI 접근 허용
+                .requestMatchers("/login/oauth2").permitAll() // OAuth2 로그인 허용
                 .requestMatchers("/api/auth/additional-info").authenticated()
+                .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class) // JWT 인증 필터 추가
             .addFilterAfter(profileCompletionAuthorizationFilter,
                 JwtAuthenticationFilter.class); // 프로필 완료 필터 추가
+
+        // OAuth2 로그인 설정
+        http
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
+                )
+                .successHandler(oAuth2AuthenticationSuccessHandler) // 로그인 성공 핸들러 설정
+                .failureHandler(oAuth2AuthenticationFailureHandler) // 로그인 실패 핸들러 설정
+            );
 
         return http.build();
     }
