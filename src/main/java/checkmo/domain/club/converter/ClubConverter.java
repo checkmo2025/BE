@@ -15,6 +15,7 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
@@ -313,6 +314,35 @@ public class ClubConverter {
                 .authorInfo(authorSharedDTO)
                 .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
                 .build();
+    }
+
+    /**
+     * Meeting 엔티티 -> MeetingInfoDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingInfoDTO fromMeetingToMeetingInfoDTO(
+            Meeting meeting
+    ) {
+        return MeetingResponseDTO.MeetingInfoDTO.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .content(meeting.getContent())
+                .generation(meeting.getGeneration())
+                .tag(meeting.getTag())
+                // .bookInfo(null)
+                .build();
+    }
+
+    /**
+     * List<Meeting> -> List<MeetingResponseDTO.MeetingInfoDTO> 변환
+     */
+    public static List<MeetingResponseDTO.MeetingInfoDTO> fromMeetingListToMeetingInfoDTOList(
+            List<Meeting> meetings
+    ) {
+        return meetings.stream()
+                .map(ClubConverter::fromMeetingToMeetingInfoDTO)
+                .toList();
     }
 
     // =====================================================
