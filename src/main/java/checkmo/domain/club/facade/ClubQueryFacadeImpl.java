@@ -191,8 +191,24 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId, Long cursorId) {
-        return null;
+    public MeetingResponseDTO.MeetingListDTO getMeetingsByClub(Long clubId, Long cursorId, Integer size, String memberId) {
+        clubQueryService.validateClub(clubId);
+        clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        List<Meeting> meetings = clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size);
+        boolean hasNext = meetings.size() > size;
+        if (hasNext) {
+            meetings = meetings.subList(0, size);
+        }
+        Long nextCursor = hasNext ? meetings.getLast().getId() : null;
+
+        List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList = meetings.stream()
+                .map(meeting -> ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
+                        meeting,
+                        bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId())
+                ))
+                .toList();
+        return ClubConverter.fromMeetingInfoDTOListToMeetingListDTO(meetingInfoDTOList, hasNext, nextCursor);
     }
 
     @Override

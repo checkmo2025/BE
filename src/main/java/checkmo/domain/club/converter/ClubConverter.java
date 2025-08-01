@@ -15,6 +15,7 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
@@ -315,6 +316,36 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * Meeting 엔티티 + BooksharedDTO -> MeetingInfoDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingInfoDTO fromMeetingAndBookSharedDTOToMeetingInfoDTO(
+            Meeting meeting,
+            BookSharedDTO.BasicInfoDTO bookInfo
+    ) {
+        return MeetingResponseDTO.MeetingInfoDTO.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .content(meeting.getContent())
+                .generation(meeting.getGeneration())
+                .tag(meeting.getTag())
+                .bookInfo(bookInfo)
+                .build();
+    }
+
+    /**
+     * List<Meeting> -> List<MeetingResponseDTO.MeetingInfoDTO> 변환
+     */
+    public static List<MeetingResponseDTO.MeetingInfoDTO> fromMeetingListToMeetingInfoDTOList(
+            List<Meeting> meetings
+    ) {
+        return meetings.stream()
+                .map(meeting -> fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, null))
+                .toList();
+    }
+
     // =====================================================
     // Entity -> Entity 변환
     // =====================================================
@@ -355,6 +386,21 @@ public class ClubConverter {
     ) {
         return ClubSharedDTO.MyClubList.builder()
                 .clubList(clubInfoList)
+                .build();
+    }
+
+    /**
+     * List<MeetingResponseDTO.MeetingInfoDTO> -> MeetingListDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingListDTO fromMeetingInfoDTOListToMeetingListDTO(
+            List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return MeetingResponseDTO.MeetingListDTO.builder()
+                .meetingInfoList(meetingInfoDTOList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
                 .build();
     }
 

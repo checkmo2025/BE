@@ -31,8 +31,8 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId, Long cursorId) {
-        return null;
+    public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
+        return meetingRepository.findMeetingsByClubIdAndCursorDesc(clubId, cursorId, size + 1);
     }
 
     @Override

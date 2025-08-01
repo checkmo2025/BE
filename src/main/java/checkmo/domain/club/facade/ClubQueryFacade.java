@@ -164,9 +164,11 @@ public interface ClubQueryFacade {
      *
      * @param clubId 모임 ID
      * @param cursorId 페이징 커서 ID
+     * @param size 조회할 개수
+     * @param memberId 요청자 회원 ID
      * @return 미팅 목록 DTO
      */
-    MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId, Long cursorId);
+    MeetingResponseDTO.MeetingListDTO getMeetingsByClub(Long clubId, Long cursorId, Integer size, String memberId);
 
     /**
      * ClubMeetingQueryService
