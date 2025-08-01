@@ -310,7 +310,7 @@ public class ClubConverter {
             Meeting meeting,
             BookSharedDTO.BasicInfoDTO bookSharedDTO
     ) {
-        BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToMeetingInfoDTO(meeting);
+        BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToBookshelfMeetingInfoDTO(meeting);
 
         return BookShelfResponseDTO.BookShelfInfoDTO.builder()
                 .meetingInfo(meetingInfoDTO)
@@ -321,7 +321,7 @@ public class ClubConverter {
     /**
      * Meeting 엔티티 -> BookShelfResponseDTO.MeetingInfoDTO 변환
      */
-    public static BookShelfResponseDTO.MeetingInfoDTO fromMeetingToMeetingInfoDTO(Meeting meeting) {
+    public static BookShelfResponseDTO.MeetingInfoDTO fromMeetingToBookshelfMeetingInfoDTO(Meeting meeting) {
         return BookShelfResponseDTO.MeetingInfoDTO.builder()
                 .meetingId(meeting.getId())
                 .generation(meeting.getGeneration())
@@ -339,7 +339,7 @@ public class ClubConverter {
             BookShelfResponseDTO.TopicListDTO topicListDTO
     ) {
         return BookShelfResponseDTO.BookShelfDetailDTO.builder()
-                .meetingInfo(fromMeetingToMeetingInfoDTO(meeting))
+                .meetingInfo(fromMeetingToBookshelfMeetingInfoDTO(meeting))
                 .bookDetailInfo(bookSharedDTO)
                 .topicList(topicListDTO)
                 .build();
