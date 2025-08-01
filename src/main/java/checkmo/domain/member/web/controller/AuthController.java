@@ -1,10 +1,13 @@
 package checkmo.domain.member.web.controller;
 
 import checkmo.apiPayload.ApiResponse;
+import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberCommandFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import checkmo.global.auth.CurrentMember;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -111,16 +114,16 @@ public class AuthController {
         - 이 API는 프론트가 직접 호출하는 것이 아니라, 로그인 성공 후 자동으로 리다이렉트되는 경로입니다.
         """)
     @GetMapping(value = "/redirect/oauth2", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<Map<String, Object>> handleSocialLoginRedirect(
-        @RequestParam("isProfileCompleted") boolean isProfileCompleted,
-        @RequestParam(value = "nickname", required = false) String nickname
-    ) {
+    public ApiResponse<Map<String, Object>> handleSocialLoginRedirect(@CurrentMember Member member) {
+
+        boolean isProfileCompleted = member.isProfileCompleted();
         if (isProfileCompleted) {
             return ApiResponse.onSuccess(
-                Map.of("nickname", nickname));
+                Map.of("nickname", member.getNickName()));
         } else {
             return ApiResponse.onSuccess(
-                Map.of("isProfileCompleted", false)
+                Map.of("email", member.getEmail(), "isProfileCompleted",
+                    false)
             );
         }
     }

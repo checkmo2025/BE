@@ -29,18 +29,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
 
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-        boolean isProfileCompleted = principalDetails.getMember().isProfileCompleted();
-
-        // 기본 리다이렉트 URI
-        String redirectUri = "/api/auth/redirect/oauth2?isProfileCompleted=" + isProfileCompleted;
-
-        // 만약 프로필이 완료된 사용자라면 닉네임도 추가
-        if (isProfileCompleted) {
-            redirectUri += "&nickname=" + principalDetails.getMember().getNickName();
-        }
-
         // 성공 후 리다이렉트 URL 설정 (프로필 완료 여부에 따라 다르게)
-        getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        getRedirectStrategy().sendRedirect(request, response, "/api/auth/redirect/oauth2");
     }
 }
