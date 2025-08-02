@@ -6,6 +6,8 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.ClubSharedDTO;
 
+import java.util.List;
+
 /**
  * Club Domain Query Facade
  *
@@ -199,6 +201,18 @@ public interface ClubQueryFacade {
      * @return 해당 팀의 정보 DTO
      */
     MeetingResponseDTO.TeamDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber);
+
+    /**
+     * ClubMeetingQueryService
+     * 특정 클럽의 모임 캘린더를 조회합니다. (내부용)
+     *
+     * @param clubId 클럽 ID
+     * @param year 조회할 연도
+     * @param month 조회할 월
+     * @param memberId 요청자 회원 ID
+     * @return 미팅 리스트 DTO
+     */
+    List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingCalendar(Long clubId, int year, int month, String memberId);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)

@@ -29,10 +29,6 @@ public class MemberController {
     // 알림 설정 관련
     // PATCH /api/members/me/notification-settings - 알림 설정
 
-    // 캘린더/스케줄 관련 TODO: 어떻게 할지 확실하진 않음...!! ☠️
-    // GET /api/calendar?year=2025&month=1&clubId=1 - 달력 보기
-    // GET /api/schedule?year=2025&month=1 - 스케줄 조회
-
     // 다른 사람 프로필 관련
     // GET /api/members/{memberNickname} - 다른 사람 프로필 조회
 }

@@ -272,6 +272,11 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
+    public List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingCalendar(Long clubId, int year, int month, String memberId) {
+        return clubMeetingQueryService.getClubMeetingByYearAndMonth(clubId, year, month, memberId);
+    }
+
+    @Override
     public Club findClubReferenceById(Long clubId) {
         return clubRepository.getReferenceById(clubId);
     }
