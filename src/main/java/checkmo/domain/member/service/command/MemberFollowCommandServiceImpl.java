@@ -3,6 +3,7 @@ package checkmo.domain.member.service.command;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.member.converter.MemberConverter;
+import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.FollowRepository;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.event.FollowEvent;
@@ -29,14 +30,26 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
         // 닉네임으로 팔로잉 대상의 Id 조회
         String followingId = memberRepository.findIdByNickName(followingNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        // 자기 자신을 팔로우할 수 없음
+        if (memberId.equals(followingId)) {
+            throw new GeneralException(ErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
+        }
         
         // 이미 팔로잉 중인지 확인
         if (followRepository.existsByFollowerIdAndFollowingId(memberId, followingId)) {
             throw new GeneralException(ErrorStatus.MEMBER_ALREADY_FOLLOWING);
         }
 
+        // 회원 조회
+        Member follower = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        Member following = memberRepository.findById(followingId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
         // 팔로잉 관계 생성
-        followRepository.save(MemberConverter.toFollow(memberId, followingId));
+        followRepository.save(MemberConverter.toFollow(follower, following));
         
         // 팔로잉 이벤트 발행
         eventPublisher.publishEvent(new FollowEvent(memberId, followingId));
