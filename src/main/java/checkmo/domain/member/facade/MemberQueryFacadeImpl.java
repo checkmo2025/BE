@@ -97,13 +97,41 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     }
 
     @Override
-    public MemberResponseDTO.FollowList getFollowers(Long memberId, int size) {
-        return null;
+    public MemberResponseDTO.FollowPreviewList getFollowers(String memberId, int size) {
+        // 1. 팔로워 목록 size 개수만큼 조회
+        List<Follow> followerList = memberFollowQueryService.getFollowers(memberId, size);
+
+        // 2. 팔로워 목록의 닉네임, 프로필 이미지 배치 조회
+        List<String> followerIdList = followerList.stream()
+                .map(Follow::getFollowerId)
+                .distinct()
+                .toList();
+
+        var followerMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followerIdList);
+
+        List<MemberResponseDTO.FollowResponse> followerDTOList = new ArrayList<>(followerMap.values());
+
+        // 3. DTO 변환
+        return MemberConverter.toFollowPreviewList(followerDTOList);
     }
 
     @Override
-    public MemberResponseDTO.FollowList getFollowings(Long memberId, int size) {
-        return null;
+    public MemberResponseDTO.FollowPreviewList getFollowings(String memberId, int size) {
+        // 1. 팔로잉 목록 size 개수만큼 조회
+        List<Follow> followingList = memberFollowQueryService.getFollowings(memberId, size);
+
+        // 2. 팔로잉 목록의 닉네임, 프로필 이미지 배치 조회
+        List<String> followingIdList = followingList.stream()
+                .map(Follow::getFollowingId)
+                .distinct()
+                .toList();
+
+        var followingMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followingIdList);
+
+        List<MemberResponseDTO.FollowResponse> followingDTOList = new ArrayList<>(followingMap.values());
+
+        // 3. DTO 변환
+        return MemberConverter.toFollowPreviewList(followingDTOList);
     }
 
     @Override
