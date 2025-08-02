@@ -1,5 +1,6 @@
 package checkmo.domain.member.converter;
 
+import checkmo.domain.member.entity.Follow;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
@@ -85,6 +86,20 @@ public class MemberConverter {
                 .nickname(basicInfo.getNickname())
                 .profileImageUrl(basicInfo.getProfileImageUrl())
                 .isFollowing(isFollowing)
+                .build();
+    }
+
+    // =====================================================
+    // DTO ↔ Entity 변환
+    // =====================================================
+
+    /**
+     * followerId, FollowingId → Follow 엔티티 변환
+     */
+    public static Follow toFollow(String followerId, String followingId) {
+        return Follow.builder()
+                .followerId(followerId)
+                .followingId(followingId)
                 .build();
     }
 }
