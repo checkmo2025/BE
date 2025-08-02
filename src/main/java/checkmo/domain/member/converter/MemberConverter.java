@@ -110,17 +110,28 @@ public class MemberConverter {
     // =====================================================
 
     /**
-     * follower -> MemberResponseDTO.FollowerList 변환
+     * follow -> MemberResponseDTO.FollowList 변환
      */
     public static MemberResponseDTO.FollowList toFollowList(
-            List<MemberResponseDTO.FollowResponse> followerList,
+            List<MemberResponseDTO.FollowResponse> followList,
             boolean hasNext,
             Long nextCursor
     ) {
         return MemberResponseDTO.FollowList.builder()
-                .followList(followerList)
+                .followList(followList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * follow -> MemberResponseDTO.FollowPreviewList 변환
+     */
+    public static MemberResponseDTO.FollowPreviewList toFollowPreviewList(
+            List<MemberResponseDTO.FollowResponse> followList
+    ) {
+        return MemberResponseDTO.FollowPreviewList.builder()
+                .followList(followList)
                 .build();
     }
 }
