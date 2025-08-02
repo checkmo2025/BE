@@ -36,7 +36,7 @@ public interface MemberFollowQueryService {
      * @param memberId 조회할 회원의 ID
      * @return 팔로워 목록
      */
-    MemberResponseDTO.FollowList getFollowers(Long memberId, int size);
+    List<Follow> getFollowers(String memberId, int size);
 
     /**
      * 특정 회원의 팔로잉 목록 size 개수만큼 조회
@@ -44,7 +44,7 @@ public interface MemberFollowQueryService {
      * @param memberId 조회할 회원의 ID
      * @return 팔로잉 목록
      */
-    MemberResponseDTO.FollowList getFollowings(Long memberId, int size);
+    List<Follow> getFollowings(String memberId, int size);
 
     /**
      * 특정 회원의 팔로우 여부 확인
