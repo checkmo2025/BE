@@ -135,9 +135,12 @@ public interface ClubQueryFacade {
      *
      * @param clubId 모임 ID
      * @param cursorId 페이징 커서 ID
+     * @param size 조회할 개수
+     * @param generation 미팅 기수 (1기, 2기 등)
+     * @param memberId 요청자 회원 ID
      * @return 책장 목록 DTO
      */
-    BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId);
+    BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size, Integer generation, String memberId);
 
     /**
      * ClubMeetingQueryService
@@ -146,7 +149,7 @@ public interface ClubQueryFacade {
      * @param meetingId 미팅 ID
      * @return 책장 상세 정보 DTO
      */
-    BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId);
+    BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId, String memberId);
 
     /**
      * ClubMeetingQueryService
@@ -236,6 +239,18 @@ public interface ClubQueryFacade {
      * @return 해당 팀의 참여 인원 목록 DTO
      */
     List<MeetingResponseDTO.MeetingMemberDTO> findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId);
+
+    /**
+     * ClubMeetingQueryService
+     * 특정 클럽의 모임 캘린더를 조회합니다. (내부용)
+     *
+     * @param clubId 클럽 ID
+     * @param year 조회할 연도
+     * @param month 조회할 월
+     * @param memberId 요청자 회원 ID
+     * @return 미팅 리스트 DTO
+     */
+    List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingCalendar(Long clubId, int year, int month, String memberId);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)

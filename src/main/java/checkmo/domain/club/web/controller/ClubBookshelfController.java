@@ -3,8 +3,6 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
-import checkmo.domain.club.validation.validCursor.ValidCursor;
-import checkmo.domain.club.validation.validSize.ValidSize;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.global.auth.CurrentId;
@@ -14,31 +12,71 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
-@Tag(name = "모임 책장", description = "독서 모임 책장, 한줄평 관리 API")
-@Validated
+@Tag(name = "모임 책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
 public class ClubBookshelfController {
 
     private final ClubCommandFacade clubCommandFacade;
     private final ClubQueryFacade clubQueryFacade;
 
     // 책장 조회 (Meeting 기반)
-    // GET /api/clubs/{clubId}/meetings - 책장(책장이 곧 Meeting) 전체 조회 ← 필터 적용 가능
+    // GET /api/clubs/{clubId}/bookshelves - 책장(책장이 곧 Meeting) 전체 조회 ← 필터 적용 가능
+    @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 사이즈만큼 조회합니다.(최신순 정렬)")
+    @Parameters({
+            @Parameter(name = "clubId", description = "책장을 조회할 클럽 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "마지막으로 조회한 책장 ID (무한 스크롤용)", required = false, example = "10"),
+            @Parameter(name = "size", description = "조회할 책장 개수", required = false, example = "9"),
+            @Parameter(name = "generation", description = "활동 기수", required = false, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 클럽을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/clubs/{clubId}/bookshelves")
+    public ApiResponse<BookShelfResponseDTO.BookShelfListDTO> getBookShelfList(
+            @PathVariable Long clubId,
+            @RequestParam(required = false) @Positive Long cursorId,
+            @RequestParam(required = false, defaultValue = "9") @Positive Integer size,
+            @RequestParam(required = false) Integer generation,
+            @CurrentId String memberId
+    ) {
+        BookShelfResponseDTO.BookShelfListDTO bookShelfList = clubQueryFacade.getBookShelfList(clubId, cursorId, size, generation, memberId);
+        return ApiResponse.onSuccess(bookShelfList);
+    }
+
     // GET /api/meetings/{meetingId} - 책장(책장이 곧 Meeting) 상세 화면 (책 정보, 발제들, 한줄평)
+    @Operation(summary = "책장 상세 조회 API", description = "책장의 상세 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "책장(책장이 곧 Meeting)의 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/bookshelves/{meetingId}")
+    public ApiResponse<BookShelfResponseDTO.BookShelfDetailDTO> getBookShelfDetail(
+            @PathVariable Long meetingId,
+            @CurrentId String memberId
+    ) {
+        BookShelfResponseDTO.BookShelfDetailDTO bookShelfDetail = clubQueryFacade.getBookShelfDetail(meetingId, memberId);
+        return ApiResponse.onSuccess(bookShelfDetail);
+    }
 
     // 한줄평(BookReview) 관리
     // GET /api/meetings/{meetingId}/reviews - 책(Meeting)에 대한 BookReview 전체 조회
     @Operation(summary = "한줄평 조회 API", description = "한줄평을 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "한줄평을 조회할 정기 독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "lastReviewId", description = "마지막으로 조회한 한줄평 ID (무한 스크롤용)", required = false, example = "10"),
-            @Parameter(name = "size", description = "조회할 한줄평 개수", required = true, example = "10"),
+            @Parameter(name = "cursorId", description = "마지막으로 조회한 한줄평 ID (무한 스크롤용)", required = false, example = "10"),
+            @Parameter(name = "size", description = "조회할 한줄평 개수", required = false, example = "15"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -48,11 +86,11 @@ public class ClubBookshelfController {
     @GetMapping("/api/meetings/{meetingId}/reviews")
     public ApiResponse<BookShelfResponseDTO.BookReviewListDTO> getAllReviews(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) @ValidCursor Long lastReviewId,
-            @RequestParam @ValidSize Integer size,
+            @RequestParam(required = false) @Positive Long cursorId,
+            @RequestParam(required = false, defaultValue = "15") @Positive Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, lastReviewId, size, memberId);
+        BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(bookReviewList);
     }
 
@@ -212,8 +250,8 @@ public class ClubBookshelfController {
     @GetMapping("/api/meetings/{meetingId}/topics")
     public ApiResponse<BookShelfResponseDTO.TopicListDTO> getTopicList(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
+            @RequestParam(required = false) @Positive Long cursorId,
+            @RequestParam(required = false, defaultValue = "15") @Positive Integer size,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.TopicListDTO topicList = clubQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);
