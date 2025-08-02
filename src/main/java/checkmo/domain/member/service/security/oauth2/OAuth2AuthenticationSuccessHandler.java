@@ -29,7 +29,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
 
-        // 성공 후 리다이렉트 URL 설정 (프로필 완료 여부에 따라 다르게)
+        // 성공 후 리다이렉트 URL 설정
         getRedirectStrategy().sendRedirect(request, response, "/api/auth/redirect/oauth2");
     }
 }
