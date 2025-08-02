@@ -1,7 +1,6 @@
 package checkmo.domain.member.service.query;
 
 import checkmo.domain.member.entity.Follow;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 
 import java.util.List;
 
