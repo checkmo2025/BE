@@ -73,7 +73,7 @@ public class MemberController {
     @Operation(summary = "팔로잉 중 특정 회원 삭제 API",
             description = "나를 팔로잉하고 있는 특정 회원을 삭제합니다.\n"+
             "팔로워 삭제는 팔로워 목록에서만 가능합니다. 팔로잉 목록에서는 팔로워를 삭제할 수 없습니다.\n"+
-            "팔로워를 삭제하면 해당 회운의 팔로잉 목록에서도 제거됩니다.")
+            "팔로워를 삭제하면 해당 회원의 팔로잉 목록에서도 제거됩니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
