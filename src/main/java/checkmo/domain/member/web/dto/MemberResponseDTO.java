@@ -18,21 +18,8 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class FollowingListResponseDTO {
-        private List<FollowResponseDTO> followingList; // 팔로잉 목록
-        private boolean hasNext;        // 다음 페이지 존재 여부
-        private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
-    }
-
-    /**
-     * 팔로우 목록 조회 응답 DTO
-     */
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class FollowerListResponseDTO {
-        private List<FollowResponseDTO> followerList; // 팔로우 목록
+    public static class FollowList {
+        private List<FollowResponse> followList; // 팔로잉 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
     }
@@ -41,10 +28,10 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class FollowResponseDTO {
-        private Long followId;   // 팔로우 ID (Follow 엔티티의 ID)
+    public static class FollowResponse {
         private String nickname; // 회원 닉네임
         private String profileImageUrl; // 프로필 이미지 URL
+        private boolean following; // 조회하는 사람의 팔로우 여부
     }
 
 
