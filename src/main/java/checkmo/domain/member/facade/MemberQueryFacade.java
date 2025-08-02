@@ -49,7 +49,7 @@ public interface MemberQueryFacade {
      * @param cursorId 커서 ID
      * @return 팔로워 목록
      */
-    MemberResponseDTO.FollowerListResponseDTO getFollowers(String memberId, Long cursorId);
+    MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId);
 
     /**
      * 특정 회원의 팔로잉 목록 전체 조회 (내부용)
@@ -58,7 +58,7 @@ public interface MemberQueryFacade {
      * @param cursorId 커서 ID
      * @return 팔로잉 목록
      */
-    MemberResponseDTO.FollowingListResponseDTO getFollowing(String memberId, Long cursorId);
+    MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId);
 
     /**
      * 특정 회원의 팔로워 목록 size 개수만큼 조회 (내부용)
@@ -67,7 +67,7 @@ public interface MemberQueryFacade {
      * @param size     조회할 개수
      * @return 팔로워 목록
      */
-    MemberResponseDTO.FollowerListResponseDTO getFollowers(Long memberId, int size);
+    MemberResponseDTO.FollowList getFollowers(Long memberId, int size);
 
     /**
      * 특정 회원의 팔로잉 목록 size 개수만큼 조회 (내부용)
@@ -76,7 +76,7 @@ public interface MemberQueryFacade {
      * @param size     조회할 개수
      * @return 팔로잉 목록
      */
-    MemberResponseDTO.FollowingListResponseDTO getFollowing(Long memberId, int size);
+    MemberResponseDTO.FollowList getFollowings(Long memberId, int size);
 
     /**
      * 닉네임으로 회원 ID 조회 (외부용)
