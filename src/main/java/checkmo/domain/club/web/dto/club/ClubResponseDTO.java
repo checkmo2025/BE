@@ -189,6 +189,7 @@ public class ClubResponseDTO {
     @Builder
     public static class BookRecommendDetailDTO {
         private Long id; // 추천 책 ID
+        private String title; // 책 제목
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그

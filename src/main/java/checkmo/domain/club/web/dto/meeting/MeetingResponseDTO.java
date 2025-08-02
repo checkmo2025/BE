@@ -36,7 +36,8 @@ public class MeetingResponseDTO {
     }
 
     /**
-     * 모임 목록 페이지에서 사용할 리스트 DTO중 1개
+     * 모임 목록 페이지에서 사용할 DTO -> MeetingListDTO로 커서 기반 페이지네이션
+     * 캘린더 조회 페이지에서 사용할 DTO - BookSharedDTO.BasicInfoDTO, content 필드 제외
      */
     @Getter
     @NoArgsConstructor

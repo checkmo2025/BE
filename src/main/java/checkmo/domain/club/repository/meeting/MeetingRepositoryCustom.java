@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface MeetingRepositoryCustom {
     List<Meeting> findMeetingsByClubIdAndCursorDesc(Long clubId, Long cursorId, Integer size);
+    List<Meeting> findMeetingsByClubIdAndGenerationAndCursorDesc(Long clubId, Integer generation, Long cursorId, Integer size);
 }

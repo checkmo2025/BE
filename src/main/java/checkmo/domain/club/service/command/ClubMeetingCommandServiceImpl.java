@@ -118,7 +118,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
-        if(!topic.isOwnedBy(clubMember)){
+        if (!topic.isOwnedBy(clubMember)) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
@@ -159,6 +159,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         meeting.addBookReview(bookReview);
 
         bookReviewRepository.save(bookReview);
+
+        meeting.addSumRate(bookReview.getRate());
         return bookReview.getId();
     }
 
@@ -172,12 +174,21 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
+        double oldRate = bookReview.getRate();
+        double newRate = request.getRate();
+
         bookReview.updateBookReview(
                 request.getDescription(),
                 request.getRate()
         );
 
         bookReviewRepository.save(bookReview);
+
+        // 별점 업데이트
+        if (oldRate != newRate) {
+            meeting.subtractSumRate(oldRate);
+            meeting.addSumRate(newRate);
+        }
         return bookReview.getId();
     }
 
@@ -190,6 +201,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
+
+        meeting.subtractSumRate(bookReview.getRate());
 
         bookReviewRepository.delete(bookReview);
     }

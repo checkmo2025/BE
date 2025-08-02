@@ -37,7 +37,11 @@ public class Meeting extends BaseEntity {
     private String tag;
 
     @Builder.Default
-    private double sumRate = 0; //미팅에 대한 평점 총합이 아닌, 모임이 진행된 책에 대한 평점 총합
+    private double sumRate = 0;
+
+    @Version
+    @Builder.Default
+    private Long version = 0L; // sumRate 동시성 문제 해결을 위한 버전 관리(낙관적 락)
 
     @Column(name = "club_id", insertable = false, updatable = false)
     private Long clubId;
@@ -70,19 +74,24 @@ public class Meeting extends BaseEntity {
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     private List<BookReview> bookReviews = new ArrayList<>();
 
-    public void calculateSumRate(double rate) {
-        if (this.sumRate == 0) {
-            this.sumRate = rate;
-        } else {
-            this.sumRate += rate;
-        }
+    public void addSumRate(double rate) {
+        this.sumRate += rate;
     }
 
-    public void calculateAverageRate() {
+    public void subtractSumRate(double rate) {
+        if (this.sumRate < rate) {
+            this.sumRate = this.bookReviews.stream()
+                    .mapToDouble(BookReview::getRate)
+                    .sum();
+        }
+        this.sumRate -= rate;
+    }
+
+    public double calculateAverageRate() {
         if (this.bookReviews.isEmpty()) {
-            this.sumRate = 0;
+            return 0;
         } else {
-            this.sumRate /= this.bookReviews.size();
+            return this.sumRate / this.bookReviews.size();
         }
     }
 

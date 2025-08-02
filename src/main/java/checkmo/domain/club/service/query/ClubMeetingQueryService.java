@@ -72,6 +72,28 @@ public interface ClubMeetingQueryService {
     List<BookReview> findBookReviewsByMeeting(Long meetingId, Long lastReviewId, int size);
 
     /**
+     * 독서모임의 모임 캘린더를 조회합니다.
+     *
+     * @param clubId 독서클럽 ID
+     * @param year 조회하고자 하는 연도
+     * @param month 조회하고자 하는 달
+     * @param memberId 요청자 회원 ID
+     * @return 독서모임의 모임 정보 리스트
+     */
+    List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId);
+
+    /**
+     * 모임을 책장 리스트로 조회
+     *
+     * 피그마 참고 페이지 : #독서모임(사용자) - 책장 홈화면
+     *
+     * @param clubId 독서 클럽 ID
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @return Meeting 리스트
+     */
+    List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size, String memberId);
+
+    /**
      * 독서모임이 존재하는지 확인합니다.
      *
      * @param meetingId 미팅 ID
