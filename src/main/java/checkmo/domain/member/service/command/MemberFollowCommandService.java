@@ -28,7 +28,7 @@ public interface MemberFollowCommandService {
      * 내 팔로워 중 특정 회원 삭제
      *
      * @param memberId 제거할 회원 ID
-     * @param followingNickname 팔로워의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로워 삭제 처리
+     * @param followerNickname 팔로워의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로워 삭제 처리
      */
-    void deleteFollower(String memberId, String followingNickname);
+    void deleteFollower(String memberId, String followerNickname);
 }
