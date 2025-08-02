@@ -29,7 +29,19 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
 
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        boolean isProfileCompleted = principalDetails.getMember().isProfileCompleted();
+
+        // 기본 리다이렉트 URI
+        String redirectUri = "/api/auth/redirect/oauth2";
+
+        if (isProfileCompleted) {
+            redirectUri += "?nickname=" + principalDetails.getMember().getNickName();
+        } else {
+            redirectUri += "?isProfileCompleted=false&email=" + principalDetails.getMember().getEmail();
+        }
+
         // 성공 후 리다이렉트 URL 설정
-        getRedirectStrategy().sendRedirect(request, response, "/api/auth/redirect/oauth2");
+        getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 }
