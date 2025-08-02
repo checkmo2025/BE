@@ -72,10 +72,10 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
     }
 
     @Override
-    public void deleteFollower(String memberId, String followingNickname) {
+    public void deleteFollower(String memberId, String followerNickname) {
 
         // 닉네임으로 팔로워의 Id 조회
-        String followerId = memberRepository.findIdByNickName(followingNickname)
+        String followerId = memberRepository.findIdByNickName(followerNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로워가 존재하는지 확인
