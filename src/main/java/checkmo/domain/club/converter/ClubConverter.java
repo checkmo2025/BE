@@ -15,6 +15,7 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
@@ -309,7 +310,7 @@ public class ClubConverter {
             Meeting meeting,
             BookSharedDTO.BasicInfoDTO bookSharedDTO
     ) {
-        BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToMeetingInfoDTO(meeting);
+        BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToBookshelfMeetingInfoDTO(meeting);
 
         return BookShelfResponseDTO.BookShelfInfoDTO.builder()
                 .meetingInfo(meetingInfoDTO)
@@ -320,7 +321,7 @@ public class ClubConverter {
     /**
      * Meeting 엔티티 -> BookShelfResponseDTO.MeetingInfoDTO 변환
      */
-    public static BookShelfResponseDTO.MeetingInfoDTO fromMeetingToMeetingInfoDTO(Meeting meeting) {
+    public static BookShelfResponseDTO.MeetingInfoDTO fromMeetingToBookshelfMeetingInfoDTO(Meeting meeting) {
         return BookShelfResponseDTO.MeetingInfoDTO.builder()
                 .meetingId(meeting.getId())
                 .generation(meeting.getGeneration())
@@ -338,10 +339,39 @@ public class ClubConverter {
             BookShelfResponseDTO.TopicListDTO topicListDTO
     ) {
         return BookShelfResponseDTO.BookShelfDetailDTO.builder()
-                .meetingInfo(fromMeetingToMeetingInfoDTO(meeting))
+                .meetingInfo(fromMeetingToBookshelfMeetingInfoDTO(meeting))
                 .bookDetailInfo(bookSharedDTO)
                 .topicList(topicListDTO)
                 .build();
+    }
+
+    /**
+     * Meeting 엔티티 -> MeetingInfoDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingInfoDTO fromMeetingToMeetingInfoDTO(
+            Meeting meeting
+    ) {
+        return MeetingResponseDTO.MeetingInfoDTO.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .content(meeting.getContent())
+                .generation(meeting.getGeneration())
+                .tag(meeting.getTag())
+                // .bookInfo(null)
+                .build();
+    }
+
+    /**
+     * List<Meeting> -> List<MeetingResponseDTO.MeetingInfoDTO> 변환
+     */
+    public static List<MeetingResponseDTO.MeetingInfoDTO> fromMeetingListToMeetingInfoDTOList(
+            List<Meeting> meetings
+    ) {
+        return meetings.stream()
+                .map(ClubConverter::fromMeetingToMeetingInfoDTO)
+                .toList();
     }
 
     // =====================================================

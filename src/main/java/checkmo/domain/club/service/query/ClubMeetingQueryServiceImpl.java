@@ -2,6 +2,8 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.club.converter.ClubConverter;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.entity.meeting.Topic;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -57,6 +60,19 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
         return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
+    }
+
+    @Override
+    public List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
+        Club club = clubQueryService.validateClub(clubId);
+        clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
+        LocalDateTime endDateTime = startDateTime.plusMonths(1); //12월의 경우 다음 해 1월로 넘어감
+
+        List<Meeting> meetings = meetingRepository.findByClubIdAndMeetingTimeBetweenAsc(clubId, startDateTime, endDateTime);
+
+        return ClubConverter.fromMeetingListToMeetingInfoDTOList(meetings);
     }
 
     @Override
