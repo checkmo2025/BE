@@ -63,20 +63,24 @@ public interface MemberQueryFacade {
     /**
      * 특정 회원의 팔로워 목록 size 개수만큼 조회 (내부용)
      *
+     * ‼️ 마이페이지 구성할 때 사용하세요~~
+     *
      * @param memberId 조회할 회원의 ID
      * @param size     조회할 개수
      * @return 팔로워 목록
      */
-    MemberResponseDTO.FollowList getFollowers(Long memberId, int size);
+    MemberResponseDTO.FollowPreviewList getFollowers(String memberId, int size);
 
     /**
      * 특정 회원의 팔로잉 목록 size 개수만큼 조회 (내부용)
+     *
+     * ‼️ 마이페이지 구성할 때 사용하세요~~
      *
      * @param memberId 조회할 회원의 ID
      * @param size     조회할 개수
      * @return 팔로잉 목록
      */
-    MemberResponseDTO.FollowList getFollowings(Long memberId, int size);
+    MemberResponseDTO.FollowPreviewList getFollowings(String memberId, int size);
 
     /**
      * 닉네임으로 회원 ID 조회 (외부용)
