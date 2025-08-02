@@ -4,6 +4,7 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.repository.FollowRepository;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 public class MemberQueryServiceImpl implements MemberQueryService {
 
     private final MemberRepository memberRepository;
-    private final MemberFollowQueryService memberFollowQueryService;
+    private final FollowRepository followRepository;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -68,17 +70,23 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public Map<String, MemberResponseDTO.FollowResponse> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
+        // 1. 배치로 회원 기본 정보 조회 (1번의 쿼리)
         var results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
+        
+        // 2. 배치처리로 팔로잉 중인 회원의 id 목록 전부 조회 (2번의 쿼리)
+        Set<String> followingIds = followRepository.findFollowingIdsByFollowerId(memberId, memberIds);
+        
+        // 3. DTO 생성
         return results.stream()
                 .collect(Collectors.toMap(
                         row -> (String) row[0], // targetMemberId
                         row -> {
                             String targetMemberId = (String) row[0];
-                            boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMemberId);
+                            boolean isFollowing = followingIds.contains(targetMemberId); // 팔로잉 여부 확인
                             return MemberResponseDTO.FollowResponse.builder()
                                     .nickname((String) row[1])     // nickname
                                     .profileImageUrl((String) row[2]) // imgUrl
-                                    .following(isFollowing) // 실제 팔로우 여부 조회
+                                    .following(isFollowing)
                                     .build();
                         }
                 ));
