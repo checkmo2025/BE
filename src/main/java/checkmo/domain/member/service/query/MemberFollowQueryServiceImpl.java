@@ -2,7 +2,6 @@ package checkmo.domain.member.service.query;
 
 import checkmo.domain.member.entity.Follow;
 import checkmo.domain.member.repository.FollowRepository;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,13 +39,13 @@ public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
     }
 
     @Override
-    public MemberResponseDTO.FollowList getFollowers(Long memberId, int size) {
-        throw new UnsupportedOperationException("아직 개발 중~");
+    public List<Follow> getFollowers(String memberId, int size) {
+        return followRepository.findByFollowingIdOrderByIdDesc(memberId, PageRequest.of(0, size));
     }
 
     @Override
-    public MemberResponseDTO.FollowList getFollowings(Long memberId, int size) {
-        throw new UnsupportedOperationException("아직 개발 중~");
+    public List<Follow> getFollowings(String memberId, int size) {
+        return followRepository.findByFollowerIdOrderByIdDesc(memberId, PageRequest.of(0, size));
     }
 
     @Override
