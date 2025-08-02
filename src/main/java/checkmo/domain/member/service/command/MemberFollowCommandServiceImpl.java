@@ -27,17 +27,17 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
     @Override
     public void followingMember(String memberId, String followingNickname) {
 
-        // 닉네임으로 팔로잉 대상의 Id 조회
-        String followingId = memberRepository.findIdByNickName(followingNickname)
+        // 닉네임으로 팔로잉 대상 조회
+        Member following = memberRepository.findByNickName(followingNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         // 자기 자신을 팔로우할 수 없음
-        if (memberId.equals(followingId)) {
+        if (memberId.equals(following.getId())) {
             throw new GeneralException(ErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
         }
         
         // 이미 팔로잉 중인지 확인
-        if (followRepository.existsByFollowerIdAndFollowingId(memberId, followingId)) {
+        if (followRepository.existsByFollowerIdAndFollowingId(memberId, following.getId())) {
             throw new GeneralException(ErrorStatus.MEMBER_ALREADY_FOLLOWING);
         }
 
@@ -45,14 +45,11 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
         Member follower = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
-        Member following = memberRepository.findById(followingId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
-
         // 팔로잉 관계 생성
         followRepository.save(MemberConverter.toFollow(follower, following));
         
         // 팔로잉 이벤트 발행
-        eventPublisher.publishEvent(new FollowEvent(memberId, followingId));
+        eventPublisher.publishEvent(new FollowEvent(memberId, following.getId()));
     }
 
     @Override
