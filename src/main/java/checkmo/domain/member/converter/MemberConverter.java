@@ -4,6 +4,8 @@ import checkmo.domain.member.entity.Follow;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+
+import java.util.List;
 import java.util.UUID;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
@@ -94,12 +96,31 @@ public class MemberConverter {
     // =====================================================
 
     /**
-     * followerId, FollowingId → Follow 엔티티 변환
+     * follower, Following → Follow 엔티티 변환
      */
-    public static Follow toFollow(String followerId, String followingId) {
+    public static Follow toFollow(Member follower, Member following) {
         return Follow.builder()
-                .followerId(followerId)
-                .followingId(followingId)
+                .follower(follower)
+                .following(following)
+                .build();
+    }
+
+    // =====================================================
+    // DTO ↔ DTO 변환
+    // =====================================================
+
+    /**
+     * follower -> MemberResponseDTO.FollowerList 변환
+     */
+    public static MemberResponseDTO.FollowList toFollowList(
+            List<MemberResponseDTO.FollowResponse> followerList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return MemberResponseDTO.FollowList.builder()
+                .followList(followerList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
                 .build();
     }
 }
