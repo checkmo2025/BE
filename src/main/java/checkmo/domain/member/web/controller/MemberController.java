@@ -3,8 +3,10 @@ package checkmo.domain.member.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.member.facade.MemberCommandFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +30,13 @@ public class MemberController {
     // GET /api/members/me/clubs?status=all - 모임관리 페이지
     // DELETE /api/clubs/{clubId}/members/me - 모임 탈퇴
 
+    // 알림 설정 관련
+    // PATCH /api/members/me/notification-settings - 알림 설정
+
+    // 다른 사람 프로필 관련
+    // GET /api/members/{memberNickname} - 다른 사람 프로필 조회
+
     // 팔로우 관련
-    // GET /api/members/me/follow - 내 팔로우 조회
-    // GET /api/members/me/following - 내 팔로잉 조회
     @Operation(summary = "회원 팔로잉 API", description = "특정 회원을 팔로잉합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -82,9 +88,36 @@ public class MemberController {
         return ApiResponse.onSuccess(memberNickname + "님을 팔로워 목록에서 제거하였습니다.");
     }
 
-    // 알림 설정 관련
-    // PATCH /api/members/me/notification-settings - 알림 설정
+    @Operation(summary = "팔로잉 목록 조회 API", description = "특정 회원의 팔로잉 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/me/following")
+    public ApiResponse<MemberResponseDTO.FollowList> getFollowingList(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var followingList = memberQueryFacade.getFollowingList(memberId, cursorId);
+        return ApiResponse.onSuccess(followingList);
+    }
 
-    // 다른 사람 프로필 관련
-    // GET /api/members/{memberNickname} - 다른 사람 프로필 조회
+    @Operation(summary = "팔로워 목록 조회 API", description = "특정 회원의 팔로워 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/me/follower")
+    public ApiResponse<MemberResponseDTO.FollowList> getFollowerList(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var followerList = memberQueryFacade.getFollowerList(memberId, cursorId);
+        return ApiResponse.onSuccess(followerList);
+    }
+
 }
