@@ -66,6 +66,8 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_PROFILE_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_408", "프로필이 완성되지 않은 회원입니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER_409", "이메일 또는 비밀번호가 일치하지 않습니다."),
     MEMBER_ALREADY_FOLLOWING(HttpStatus.BAD_REQUEST, "MEMBER_410", "이미 팔로잉 중인 회원입니다."),
+    MEMBER_NOT_FOLLOWING(HttpStatus.BAD_REQUEST, "MEMBER_411", "팔로우 중이지 않은 회원입니다."),
+    MEMBER_NOT_FOLLOWER(HttpStatus.BAD_REQUEST, "MEMBER_412", "팔로워가 아닌 회원입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER_500", "서버 내부 오류입니다. 관리자에게 문의 바랍니다."),
 
     // 발제
