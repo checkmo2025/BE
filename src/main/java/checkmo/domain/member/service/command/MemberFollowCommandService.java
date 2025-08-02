@@ -12,23 +12,23 @@ public interface MemberFollowCommandService {
      * 특정 회원을 팔로우
      *
      * @param memberId 팔로우할 회원의 ID
-     * @param targetNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로우 처리
+     * @param followingNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로우 처리
      */
-    void followMember(String memberId, String targetNickname);
+    void followingMember(String memberId, String followingNickname);
 
     /**
      * 특정 회원의 팔로우를 취소 (언팔로우)
      *
      * @param memberId 언팔로우할 회원의 ID
-     * @param targetNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로우 처리
+     * @param followingNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로우 처리
      */
-    void unfollowMember(String memberId, String targetNickname);
+    void unfollowMember(String memberId, String followingNickname);
 
     /**
      * 특정 회원의 팔로잉를 취소 (언팔로잉)
      *
      * @param memberId 언팔로우할 회원의 ID
-     * @param targetNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로우 처리
+     * @param followingNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로우 처리
      */
-    void unfollowingMember(String memberId, String targetNickname);
+    void unfollowingMember(String memberId, String followingNickname);
 }
