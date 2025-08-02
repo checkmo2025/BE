@@ -1,6 +1,7 @@
 package checkmo.domain.member.converter;
 
 import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.service.security.oauth2.OAuth2Attributes;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import java.util.UUID;
@@ -50,13 +51,13 @@ public class MemberConverter {
     /**
      * OAuth2 소셜 로그인 → Member 엔티티 변환
      */
-    public static Member fromOAuth2User(String email, String registrationId, String providerId) {
-        String newMemberId = registrationId.toUpperCase() + "_" + providerId;
+    public static Member fromOAuth2Attributes(OAuth2Attributes attributes, String registrationId) {
+        String newMemberId = registrationId.toUpperCase() + "_" + attributes.getProviderId();
         String tempNickname = "TEMP_" + newMemberId; // 닉넴 임시로 일단 넣기
 
         return Member.builder()
                         .id(newMemberId)
-                        .email(email)
+                        .email(attributes.getEmail())
                         .password("") // OAuth2 사용자는 비밀번호가 없음
                         .nickName(tempNickname)
                         .description("")
