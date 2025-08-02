@@ -16,7 +16,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
     boolean existsByNickName(String nickName);
 
-    Optional<Member> findByNickName(String nickname);
+    Optional<Member> findByNickName(String nickName);
 
     @Query("select m.id from Member m where m.nickName = :nickName")
     Optional<String> findIdByNickName(@Param("nickName") String nickName);
