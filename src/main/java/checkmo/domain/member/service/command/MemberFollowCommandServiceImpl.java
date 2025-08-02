@@ -30,7 +30,7 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
         String followingId = memberRepository.findIdByNickName(followingNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
         
-        // 이미 팔로우 중인지 확인
+        // 이미 팔로잉 중인지 확인
         if (followRepository.existsByFollowerIdAndFollowingId(memberId, followingId)) {
             throw new GeneralException(ErrorStatus.MEMBER_ALREADY_FOLLOWING);
         }
@@ -38,17 +38,39 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
         // 팔로잉 관계 생성
         followRepository.save(MemberConverter.toFollow(memberId, followingId));
         
-        // 팔로우 이벤트 발행
+        // 팔로잉 이벤트 발행
         eventPublisher.publishEvent(new FollowEvent(memberId, followingId));
-    }
-
-    @Override
-    public void unfollowMember(String memberId, String followingNickname) {
-
     }
 
     @Override
     public void unfollowingMember(String memberId, String followingNickname) {
 
+        // 닉네임으로 팔로잉 대상의 Id 조회
+        String followingId = memberRepository.findIdByNickName(followingNickname)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        // 팔로잉 하고 있는지 여부 확인
+        if (!followRepository.existsByFollowerIdAndFollowingId(memberId, followingId)) {
+            throw new GeneralException(ErrorStatus.MEMBER_NOT_FOLLOWING);
+        }
+
+        // 팔로잉 관계 삭제
+        followRepository.deleteByFollowerIdAndFollowingId(memberId, followingId);
+    }
+
+    @Override
+    public void deleteFollower(String memberId, String followingNickname) {
+
+        // 닉네임으로 팔로워의 Id 조회
+        String followerId = memberRepository.findIdByNickName(followingNickname)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        // 팔로워가 존재하는지 확인
+        if (!followRepository.existsByFollowerIdAndFollowingId(followerId, memberId)) {
+            throw new GeneralException(ErrorStatus.MEMBER_NOT_FOLLOWER);
+        }
+
+        // 팔로워 관계 삭제
+        followRepository.deleteByFollowerIdAndFollowingId(followerId, memberId);
     }
 }

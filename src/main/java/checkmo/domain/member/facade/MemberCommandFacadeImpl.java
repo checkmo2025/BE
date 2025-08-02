@@ -76,17 +76,17 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public void followMember(String memberId, String targetNickname) {
-        memberFollowCommandService.followingMember(memberId, targetNickname);
+    public void followingMember(String memberId, String followingNickname) {
+        memberFollowCommandService.followingMember(memberId, followingNickname);
     }
 
     @Override
-    public void unfollowMember(String memberId, String targetNickname) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void unfollowingMember(String memberId, String followingNickname) {
+        memberFollowCommandService.unfollowingMember(memberId, followingNickname);
     }
 
     @Override
-    public void unfollowingMember(String memberId, String targetNickname) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void deleteFollower(String memberId, String followerNickname) {
+        memberFollowCommandService.deleteFollower(memberId, followerNickname);
     }
 }
