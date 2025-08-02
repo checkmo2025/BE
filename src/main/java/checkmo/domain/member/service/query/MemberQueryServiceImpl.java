@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class MemberQueryServiceImpl implements MemberQueryService {
 
     private final MemberRepository memberRepository;
+    private final MemberFollowQueryService memberFollowQueryService;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -62,6 +63,24 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                 .collect(Collectors.toMap(
                         row -> (String) row[0], // memberId
                         row -> (String) row[1]  // nickname
+                ));
+    }
+
+    @Override
+    public Map<String, MemberResponseDTO.FollowResponse> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
+        var results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0], // targetMemberId
+                        row -> {
+                            String targetMemberId = (String) row[0];
+                            boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMemberId);
+                            return MemberResponseDTO.FollowResponse.builder()
+                                    .nickname((String) row[1])     // nickname
+                                    .profileImageUrl((String) row[2]) // imgUrl
+                                    .following(isFollowing) // 실제 팔로우 여부 조회
+                                    .build();
+                        }
                 ));
     }
 }
