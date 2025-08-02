@@ -227,7 +227,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 ))
                 .toList();
 
-        return ClubConverter.fromTopicListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
+        return ClubConverter.fromTopicDTOListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
     }
 
     @Override
@@ -283,6 +283,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     public MeetingResponseDTO.TopicListDTO findMeetingTopicsWithTeam(Long meetingId, String memberId) {
         return null;
     }
+
     public MeetingResponseDTO.TeamTopicDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber, String memberId) {
         return null;
     }
