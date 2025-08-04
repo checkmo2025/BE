@@ -4,6 +4,8 @@ echo "$(date): BeforeAllowTraffic - 트래픽 전환 준비"
 cd /home/ubuntu/deployment
 HEALTH_CHECK_URL="http://localhost/health"
 
+sleep 5
+
 echo "최종 헬스체크 수행 ($HEALTH_CHECK_URL)"
 for i in {1..10}; do
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
