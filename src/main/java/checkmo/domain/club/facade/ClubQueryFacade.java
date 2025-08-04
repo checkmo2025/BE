@@ -203,9 +203,9 @@ public interface ClubQueryFacade {
      *
      * @param meetingId 미팅 ID
      * @param memberId 요청자 회원 ID
-     * @return 참여 인원 목록 DTO
+     * @return 미팅 발제 목록 DTO
      */
-    MeetingResponseDTO.TopicListDTO findMeetingTopicsWithTeam(Long meetingId, Long cursorId, Integer size, String memberId);
+    List<MeetingResponseDTO.TopicDTO> findMeetingTopicsWithTeam(Long meetingId, String memberId);
 
     /**
      * ClubMeetingQueryService

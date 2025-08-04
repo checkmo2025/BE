@@ -290,22 +290,15 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public MeetingResponseDTO.TopicListDTO findMeetingTopicsWithTeam(Long meetingId, Long cursorId, Integer size, String memberId) {
+    public List<MeetingResponseDTO.TopicDTO> findMeetingTopicsWithTeam(Long meetingId, String memberId) {
         // 1. 미팅과 클럽 멤버 검증
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 토픽 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, null, null, memberId);
 
-        // 3. 페이징 처리
-        boolean hasNext = topics.size() > size;
-        if (hasNext) {
-            topics = topics.subList(0, size);
-        }
-        Long nextCursor = hasNext ? topics.getLast().getId() : null;
-
-        // 4. 토픽 작성자 정보 배치 조회
+        // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = topics.stream()
                 .map(topic -> topic.getClubMember().getMemberId())
                 .distinct()
@@ -313,22 +306,20 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
                 memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
-        // 5. TeamTopic과 Team 배치 조회
+        // 4. TeamTopic과 Team 배치 조회
         List<Long> topicIds = topics.stream()
                 .map(Topic::getId)
                 .toList();
         Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
 
-        // 6. MeetingResponseDTO.TopicListDTO 변환
-        List<MeetingResponseDTO.TopicDTO> TopicDTOList = topics.stream()
+        // 5. MeetingResponseDTO.TopicListDTO 변환
+        return topics.stream()
                 .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
                                 topic,
                                 authorInfoMap.get(topic.getClubMember().getMemberId()),
                                 teamTopicsWithTeamByTopicIds.getOrDefault(topic.getId(), List.of())
                         )
                 ).toList();
-
-        return ClubConverter.fromTopicDTOListToTopicListDTOForMeeting(TopicDTOList, hasNext, nextCursor);
     }
 
     public MeetingResponseDTO.TeamTopicDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber, String memberId) {

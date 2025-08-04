@@ -126,11 +126,9 @@ public class ClubMeetingController {
 
     // 팀-발제 연결 관리
     // GET api/meetings/{meetingId}/team-topics?cursorId=[마지막 조회한 발제 id]&size=[조회할 개수]
-    @Operation(summary = "독서모임 발제 + 선택한 팀 정보 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 등록순으로 조회합니다.")
+    @Operation(summary = "독서모임 발제 + 선택한 팀 정보 전체 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 등록순으로 전체 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "cursorId", description = "마지막으로 조회한 발제 ID", required = false, example = "3"),
-            @Parameter(name = "size", description = "조회할 개수 (기본값: 15)", required = false, example = "15")
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -138,13 +136,11 @@ public class ClubMeetingController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
     })
     @GetMapping("/api/meetings/{meetingId}/team-topics")
-    public ApiResponse<MeetingResponseDTO.TopicListDTO> getTopics(
+    public ApiResponse<List<MeetingResponseDTO.TopicDTO>> getTopics(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TopicListDTO topics = clubQueryFacade.findMeetingTopicsWithTeam(meetingId, cursorId, size, memberId);
+        List<MeetingResponseDTO.TopicDTO> topics = clubQueryFacade.findMeetingTopicsWithTeam(meetingId, memberId);
         return ApiResponse.onSuccess(topics);
     }
 

@@ -40,11 +40,13 @@ public interface ClubMeetingQueryService {
     List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size);
 
     /**
-     * 특정 미팅의 전체 토픽을 조회합니다.
+     * 특정 미팅의 토픽을 커서 기반 조회합니다.
      *
      * 피그마 참고 페이지 : #독서모임(사용자) - 책장 [특정 책]에서 [발제] 클릭시
      *
      * @param meetingId 미팅 ID
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null)
+     * @param size 조회할 토픽 개수 (null이면 전체 조회)
      * @return 조회한 토픽 정보 DTO
      */
     List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
