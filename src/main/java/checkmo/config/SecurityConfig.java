@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**","/")// 루트 경로 추가
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**","/health")// 헬스체크 경로 추가
                 .permitAll() // Swagger UI 접근 허용
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/auth/additional-info").authenticated()
