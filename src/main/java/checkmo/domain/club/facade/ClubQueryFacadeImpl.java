@@ -14,11 +14,13 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -210,6 +212,35 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
+    public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+
+        boolean hasNext = topics.size() > size;
+        if (hasNext) {
+            topics = topics.subList(0, size);
+        }
+        Long nextCursor = hasNext ? topics.getLast().getId() : null;
+
+        List<String> authorIds = topics.stream()
+                .map(topic -> topic.getClubMember().getMemberId())
+                .distinct()
+                .toList();
+
+        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+                memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+
+        List<BookShelfResponseDTO.TopicDTO> topicListDTOs = topics.stream()
+                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOToTopicDTO(
+                        topic,
+                        authorInfoMap.get(topic.getClubMember().getMemberId()),
+                        memberId
+                ))
+                .toList();
+
+        return ClubConverter.fromTopicDTOListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
+    }
+
+    @Override
     public BookShelfResponseDTO.BookReviewListDTO getBookReviewList(Long meetingId, Long lastReviewId, int size, String memberId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
@@ -233,47 +264,53 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId, Long cursorId) {
-        return null;
-    }
+    public MeetingResponseDTO.MeetingListDTO getMeetingsByClub(Long clubId, Long cursorId, Integer size, String memberId) {
+        clubQueryService.validateClub(clubId);
+        clubMemberQueryService.validateClubMember(clubId, memberId);
 
-    @Override
-    public MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId) {
-        return null;
-    }
-
-    @Override
-    public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
-
-        boolean hasNext = topics.size() > size;
+        List<Meeting> meetings = clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size);
+        boolean hasNext = meetings.size() > size;
         if (hasNext) {
-            topics = topics.subList(0, size);
+            meetings = meetings.subList(0, size);
         }
-        Long nextCursor = hasNext ? topics.getLast().getId() : null;
+        Long nextCursor = hasNext ? meetings.getLast().getId() : null;
 
-        List<BookShelfResponseDTO.TopicDTO> topicListDTOs = topics.stream()
-                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOToTopicDTO(
-                        topic,
-                        memberQueryFacade.getMemberBasicInfoForShare(topic.getClubMember().getMemberId()),
-                        memberId
+        List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList = meetings.stream()
+                .map(meeting -> ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
+                        meeting,
+                        bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId())
                 ))
                 .toList();
-
-        return ClubConverter.fromTopicDTOListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
+        return ClubConverter.fromMeetingInfoDTOListToMeetingListDTO(meetingInfoDTOList, hasNext, nextCursor);
     }
 
     @Override
-    public MeetingResponseDTO.TeamDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber) {
+    public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId, String memberId) {
+        return null;
+    }
+
+    @Override
+    public MeetingResponseDTO.TopicListDTO findMeetingTopicsWithTeam(Long meetingId, String memberId) {
+        return null;
+    }
+
+    public MeetingResponseDTO.TeamTopicDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber, String memberId) {
         return null;
     }
 
     @Override
     public List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingCalendar(Long clubId, int year, int month, String memberId) {
         return clubMeetingQueryService.getClubMeetingByYearAndMonth(clubId, year, month, memberId);
+    }
+
+    @Override
+    public List<MeetingResponseDTO.MeetingMemberDTO> findMeetingMembersByMeeting(Long meetingId, String memberId) {
+        return List.of();
+    }
+
+    @Override
+    public List<MeetingResponseDTO.MeetingMemberDTO> findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId) {
+        return List.of();
     }
 
     @Override

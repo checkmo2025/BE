@@ -19,21 +19,10 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class InProgressMeetingDetailDTO {
+    public static class MeetingDetailDTO {
         private MeetingInfoDTO meetingInfo;
-        private List<TopicDTO> topics; // 모임의 토픽 목록 -> 최신순 최대 4개 담기
-        private List<TeamDTO> teams; // 모임의 팀 별 토픽 목록 -> 최신순 최대 4개 담기
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class CompletedMeetingDetailDTO {
-        private MeetingInfoDTO meetingInfo;
-        private List<TopicDTO> topics; // 모임의 토픽 목록
-        private List<MemberSharedDTO.BasicInfoDTO> participantInfoList; // 모임 참여자 목록 - 공용 DTO 사용
-        private List<TeamDTO> teams; // 모임의 팀 목록
+        private List<TopicDTO> topics; // 모임의 토픽 목록 -> 발제 등록순 4개 담기
+        private List<TeamTopicDTO> teams; // 모임의 팀 별 토픽 목록 -> 발제 등록순 4개 담기
     }
 
     @Getter
@@ -83,28 +72,27 @@ public class MeetingResponseDTO {
     public static class TopicDTO {
         private Long topicId; // 토픽 ID
         private String content; // 토픽 내용
-        private MemberTeamDTO authorInfo; // 작성자 정보
-        private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TopicListDTO-TopicDTO,TeamDTO-TopicDTO에서는 이 필드 NULL
-        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+        private MemberSharedDTO.BasicInfoDTO authorInfo; // 작성자 정보
+        private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TeamTopicDTO-TopicDTO에서는 이 필드 NULL
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MemberTeamDTO {
-        private Integer teamNumber;
-        private MemberSharedDTO.BasicInfoDTO memberInfo; // 기본 회원 정보 (닉네임, 프로필 이미지 URL) - 공용 DTO
-        // TODO: 만약 운영진만 보여주고 싶다면, 운영진 여부를 나타내는 필드 추가
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class TeamDTO {
+    public static class TeamTopicDTO {
         private Integer teamNumber; // 팀 번호
         private List<TopicDTO> topics; // 해당 팀이 선택한 토픽 목록
-        private List<MemberSharedDTO.BasicInfoDTO> participantInfoList; // 팀원 목록, InProgressMeetingDetailDTO-TeamDTO에서는 이 필드 NULL
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MeetingMemberDTO {
+        private String nickname; // 회원 닉네임
+        private String profileImageUrl; // 프로필 이미지 URL
+        private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
+        private Integer teamNumber; // 배정된 팀 번호
     }
 }

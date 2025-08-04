@@ -30,6 +30,7 @@ public class BookReviewRepositoryCustomImpl implements BookReviewRepositoryCusto
 
         return queryFactory
                 .selectFrom(bookReview)
+                .distinct()
                 .where(predicate)
                 .join(bookReview.clubMember, clubMember).fetchJoin() //review -> clubMember -> member 작성자 정보를 맵핑시키기 위해 fetchJoin
                 .orderBy(bookReview.id.desc())
