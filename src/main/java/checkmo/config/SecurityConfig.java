@@ -34,29 +34,29 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http)
         throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/health").permitAll() // Swagger UI 접근 허용
-                .requestMatchers("/login/oauth2").permitAll() // OAuth2 로그인 허용
-                .requestMatchers("/api/auth/additional-info").authenticated()
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(401); // 로그인 안한 사용자 → 리다이렉트 없이 401 응답
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"code\": \"UNAUTHORIZED\", \"message\": \"로그인이 필요합니다.\"}");
-                })
-            )
-            .addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class) // JWT 인증 필터 추가
-            .addFilterAfter(profileCompletionAuthorizationFilter,
-                JwtAuthenticationFilter.class); // 프로필 완료 필터 추가
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll() // Swagger UI 접근 허용
+                        .requestMatchers("/login/oauth2").permitAll() // OAuth2 로그인 허용
+                        .requestMatchers("/api/auth/additional-info").authenticated()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401); // 로그인 안한 사용자 → 리다이렉트 없이 401 응답
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"code\": \"UNAUTHORIZED\", \"message\": \"로그인이 필요합니다.\"}");
+                        })
+                )
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class) // JWT 인증 필터 추가
+                .addFilterAfter(profileCompletionAuthorizationFilter,
+                        JwtAuthenticationFilter.class); // 프로필 완료 필터 추가
 
         // OAuth2 로그인 설정
         http
