@@ -30,7 +30,8 @@ services:
     networks:
       - app-network
     depends_on:
-      - app # 우리 서비스가 먼저 시작되어야지 nginx가 우리 서비스에 대한 프록시 설정을 할 수 있음
+      app:
+        condition: service_healthy
 
 networks:
   app-network:
