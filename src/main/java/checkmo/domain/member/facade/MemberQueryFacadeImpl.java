@@ -1,6 +1,7 @@
 package checkmo.domain.member.facade;
 
 import checkmo.domain.member.converter.MemberConverter;
+import checkmo.domain.member.entity.Follow;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.service.query.MemberFollowQueryService;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberQueryFacadeImpl implements MemberQueryFacade {
+
+    public static final int DEFAULT_PAGE_SIZE = 20;
 
     private final MemberRepository memberRepository; // 프록시용
     private final MemberQueryService memberQueryService;
@@ -39,23 +43,95 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     }
 
     @Override
-    public MemberResponseDTO.FollowerListResponseDTO getFollowers(String memberId, Long cursorId) {
-        return null;
+    public MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId) {
+        // 1. 팔로워 목록 조회
+        List<Follow> followerList = memberFollowQueryService.getFollowerList(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
+
+        // 2. 커서 기반 페이징 처리
+        boolean hasNext = followerList.size() > DEFAULT_PAGE_SIZE;
+        Long nextCursor = null;
+        if (hasNext) {
+            followerList.removeLast();
+            nextCursor = followerList.getLast().getId();
+        }
+
+        // 3. 팔로워 목록의 닉네임, 프로필 이미지 배치 조회
+        List<String> followerIdList = followerList.stream()
+                .map(Follow::getFollowerId)
+                .distinct()
+                .toList();
+
+        var followerMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followerIdList);
+
+        List<MemberResponseDTO.FollowResponse> followerDTOList = new ArrayList<>(followerMap.values());
+
+        // 4. DTO 변환
+        return MemberConverter.toFollowList(followerDTOList, hasNext, nextCursor);
     }
 
     @Override
-    public MemberResponseDTO.FollowingListResponseDTO getFollowing(String memberId, Long cursorId) {
-        return null;
+    public MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId) {
+        // 1. 팔로잉 목록 조회
+        List<Follow> followingList = memberFollowQueryService.getFollowingList(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
+
+        // 2. 커서 기반 페이징 처리
+        boolean hasNext = followingList.size() > DEFAULT_PAGE_SIZE;
+        Long nextCursor = null;
+        if (hasNext) {
+            followingList.removeLast();
+            nextCursor = followingList.getLast().getId();
+        }
+
+        // 3. 팔로잉 목록의 닉네임, 프로필 이미지 배치 조회
+        List<String> followingIdList = followingList.stream()
+                .map(Follow::getFollowingId)
+                .distinct()
+                .toList();
+
+        var followingMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followingIdList);
+
+        List<MemberResponseDTO.FollowResponse> followingDTOList = new ArrayList<>(followingMap.values());
+
+        // 4. DTO 변환
+        return MemberConverter.toFollowList(followingDTOList, hasNext, nextCursor);
     }
 
     @Override
-    public MemberResponseDTO.FollowerListResponseDTO getFollowers(Long memberId, int size) {
-        return null;
+    public MemberResponseDTO.FollowPreviewList getFollowers(String memberId, int size) {
+        // 1. 팔로워 목록 size 개수만큼 조회
+        List<Follow> followerList = memberFollowQueryService.getFollowers(memberId, size);
+
+        // 2. 팔로워 목록의 닉네임, 프로필 이미지 배치 조회
+        List<String> followerIdList = followerList.stream()
+                .map(Follow::getFollowerId)
+                .distinct()
+                .toList();
+
+        var followerMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followerIdList);
+
+        List<MemberResponseDTO.FollowResponse> followerDTOList = new ArrayList<>(followerMap.values());
+
+        // 3. DTO 변환
+        return MemberConverter.toFollowPreviewList(followerDTOList);
     }
 
     @Override
-    public MemberResponseDTO.FollowingListResponseDTO getFollowing(Long memberId, int size) {
-        return null;
+    public MemberResponseDTO.FollowPreviewList getFollowings(String memberId, int size) {
+        // 1. 팔로잉 목록 size 개수만큼 조회
+        List<Follow> followingList = memberFollowQueryService.getFollowings(memberId, size);
+
+        // 2. 팔로잉 목록의 닉네임, 프로필 이미지 배치 조회
+        List<String> followingIdList = followingList.stream()
+                .map(Follow::getFollowingId)
+                .distinct()
+                .toList();
+
+        var followingMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followingIdList);
+
+        List<MemberResponseDTO.FollowResponse> followingDTOList = new ArrayList<>(followingMap.values());
+
+        // 3. DTO 변환
+        return MemberConverter.toFollowPreviewList(followingDTOList);
     }
 
     @Override

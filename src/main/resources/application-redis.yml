@@ -1,9 +1,8 @@
 spring:
   data:
     redis:
-      host: redis
+      host: ${REDIS_ENDPOINT}
       port: 6379
-      password: checkmo123
       database: 0
       timeout: 2000ms
       lettuce:
