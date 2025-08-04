@@ -60,4 +60,13 @@ public interface MemberQueryService {
      * @return 회원 ID와 닉네임의 매핑 정보
      */
     Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds);
+
+    /**
+     * 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회
+     *
+     * @param memberId 조회하는 회원 ID (팔로우 여부 확인용)
+     * @param memberIds 회원 ID 목록
+     * @return 회원 ID와 닉네임, 프로필 이미지 정보의 매핑
+     */
+    Map<String, MemberResponseDTO.FollowResponse> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds);
 }

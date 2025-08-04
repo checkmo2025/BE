@@ -1,6 +1,6 @@
 services:
   app:
-    image: 268456953414.dkr.ecr.ap-northeast-2.amazonaws.com/checkmo-server
+    image: 667183278509.dkr.ecr.ap-northeast-2.amazonaws.com/checkmo-ecr
     container_name: checkmo-app
     env_file:
       - .env
@@ -9,8 +9,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    depends_on:
-      - redis # redis가 먼저 시작되어야지 우리 서비스에 redis 의존성 주입 가능
 
   nginx:
     image: nginx:alpine
@@ -28,26 +26,6 @@ services:
     depends_on:
       - app # 우리 서비스가 먼저 시작되어야지 nginx가 우리 서비스에 대한 프록시 설정을 할 수 있음
 
-  redis:
-    image: 'redis:7.2-alpine'
-    container_name: redis-cache
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes --requirepass checkmo123
-    volumes:
-      - redis_data:/data
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "checkmo123", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  redis_data:

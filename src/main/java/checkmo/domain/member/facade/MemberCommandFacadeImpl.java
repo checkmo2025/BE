@@ -1,6 +1,7 @@
 package checkmo.domain.member.facade;
 
 import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
+import checkmo.domain.member.service.command.MemberFollowCommandService;
 import checkmo.domain.member.service.command.MemberRegistrationCommandService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
@@ -17,6 +18,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
     private final MemberRegistrationCommandService memberRegistrationCommandService;
     private final MemberAuthenticationService memberAuthenticationService;
+    private final MemberFollowCommandService memberFollowCommandService;
 
     @Override
     public void sendEmailVerification(String email) {
@@ -74,17 +76,17 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public void followMember(String memberId, String targetNickname) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void followingMember(String memberId, String followingNickname) {
+        memberFollowCommandService.followingMember(memberId, followingNickname);
     }
 
     @Override
-    public void unfollowMember(String memberId, String targetNickname) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void unfollowingMember(String memberId, String followingNickname) {
+        memberFollowCommandService.unfollowingMember(memberId, followingNickname);
     }
 
     @Override
-    public void unfollowingMember(String memberId, String targetNickname) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void deleteFollower(String memberId, String followerNickname) {
+        memberFollowCommandService.deleteFollower(memberId, followerNickname);
     }
 }

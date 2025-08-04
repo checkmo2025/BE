@@ -106,24 +106,24 @@ public interface MemberCommandFacade {
     /**
      * 특정 회원을 팔로우 (내부용/외부용) - Notification 도메인에서 사용
      *
-     * @param memberId 팔로우할 회원의 ID
-     * @param targetNickname 팔로우 대상 회원의 nickname
+     * @param memberId 회원의 ID
+     * @param followingNickname 팔로잉 대상 회원의 nickname
      */
-    void followMember(String memberId, String targetNickname);
+    void followingMember(String memberId, String followingNickname);
 
     /**
-     * 특정 회원의 팔로우를 취소 (언팔로우) (내부용)
+     * 특정 회원을 언팔로잉 (언팔로잉) (내부용)
      *
-     * @param memberId 언팔로우할 회원의 ID
-     * @param targetNickname 팔로우 대상 회원의 nickname
+     * @param memberId 회원의 ID
+     * @param followingNickname 언팔로잉 대상 회원의 nickname
      */
-    void unfollowMember(String memberId, String targetNickname);
+    void unfollowingMember(String memberId, String followingNickname);
 
     /**
-     * 특정 회원의 팔로잉를 취소 (언팔로잉) (내부용)
+     * 특정 회원의 팔로워를 삭제 (언팔로우) (내부용)
      *
-     * @param memberId 언팔로우할 회원의 ID
-     * @param targetNickname 팔로우 대상 회원의 nickname
+     * @param memberId 회원의 ID
+     * @param followerNickname 팔로워 중 삭제할 회원의 nickname
      */
-    void unfollowingMember(String memberId, String targetNickname);
+    void deleteFollower(String memberId, String followerNickname);
 }
