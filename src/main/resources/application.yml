@@ -6,7 +6,3 @@ spring:
       - aladin
       - mail
       - jwt
-
-  docker:
-    compose:
-      enabled: false
