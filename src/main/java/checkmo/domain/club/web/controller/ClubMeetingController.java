@@ -124,8 +124,6 @@ public class ClubMeetingController {
     // POST /api/meetings/{meetingId}/teams - 토론조 생성
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
 
-    // 팀-발제 연결 관리
-    // GET api/meetings/{meetingId}/team-topics?cursorId=[마지막 조회한 발제 id]&size=[조회할 개수]
     @Operation(summary = "독서모임 발제 + 선택한 팀 정보 전체 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 등록순으로 전체 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
@@ -145,5 +143,24 @@ public class ClubMeetingController {
     }
 
     // POST /api/meetings/{meetingId}/teams/{teamId}/topics/{topicId}/select - Team에서 Topic 선택하기
-    // GET /api/meetings/{meetingId}/teams/{teamId}/topics - Team별로 선택된 Topic 보기
+    @Operation(summary = "팀별 선택된 Topic 조회 API", description = "[모임] 팀별로 선택된 Topic을 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "teamNumber", description = "팀  번호(조회하려는 조 이름이 x조(x는 A부터 Z까지 알파벳 중 하나)이면 x - ‘A’ + 1 로 조회하려는 조 번호로 요청", required = true, example = "1")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다.")
+    })
+    @GetMapping("/api/meetings/{meetingId}/teams/{teamNumber}/topics")
+    public ApiResponse<MeetingResponseDTO.TeamTopicDTO> getSelectedTopics(
+            @PathVariable Long meetingId,
+            @PathVariable Integer teamNumber,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.TeamTopicDTO teamTopicDTO = clubQueryFacade.findMeetingTopicsByTeam(meetingId, teamNumber, memberId);
+        return ApiResponse.onSuccess(teamTopicDTO);
+    }
 }
