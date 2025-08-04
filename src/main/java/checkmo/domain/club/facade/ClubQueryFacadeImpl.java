@@ -14,11 +14,13 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -219,10 +221,18 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         }
         Long nextCursor = hasNext ? topics.getLast().getId() : null;
 
+        List<String> authorIds = topics.stream()
+                .map(topic -> topic.getClubMember().getMemberId())
+                .distinct()
+                .toList();
+
+        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+                memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = topics.stream()
                 .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOToTopicDTO(
                         topic,
-                        memberQueryFacade.getMemberBasicInfoForShare(topic.getClubMember().getMemberId()),
+                        authorInfoMap.get(memberId),
                         memberId
                 ))
                 .toList();
