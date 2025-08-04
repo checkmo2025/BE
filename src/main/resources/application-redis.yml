@@ -1,8 +1,10 @@
 spring:
   data:
     redis:
+      #host: localhost # 로컬 개발 환경에서 Redis를 사용하려면 주석을 해제하고 localhost로 설정
       host: ${REDIS_ENDPOINT}
       port: 6379
+      #password: checkmo123 # 로컬 개발 환경에서 Redis를 사용하려면 주석을 해제하고 비밀번호를 설정
       database: 0
       timeout: 2000ms
       lettuce:
