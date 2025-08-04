@@ -62,7 +62,6 @@ public class MeetingResponseDTO {
         private List<TopicDTO> topics; // 토픽 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서
-        private int pageSize; // 현재 페이지 크기
     }
 
     @Getter
