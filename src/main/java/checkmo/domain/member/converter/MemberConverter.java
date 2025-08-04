@@ -1,9 +1,12 @@
 package checkmo.domain.member.converter;
 
+import checkmo.domain.member.entity.Follow;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.service.security.oauth2.OAuth2Attributes;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+
+import java.util.List;
 import java.util.UUID;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
@@ -105,6 +108,50 @@ public class MemberConverter {
                 .nickname(basicInfo.getNickname())
                 .profileImageUrl(basicInfo.getProfileImageUrl())
                 .isFollowing(isFollowing)
+                .build();
+    }
+
+    // =====================================================
+    // DTO ↔ Entity 변환
+    // =====================================================
+
+    /**
+     * follower, Following → Follow 엔티티 변환
+     */
+    public static Follow toFollow(Member follower, Member following) {
+        return Follow.builder()
+                .follower(follower)
+                .following(following)
+                .build();
+    }
+
+    // =====================================================
+    // DTO ↔ DTO 변환
+    // =====================================================
+
+    /**
+     * follow -> MemberResponseDTO.FollowList 변환
+     */
+    public static MemberResponseDTO.FollowList toFollowList(
+            List<MemberResponseDTO.FollowResponse> followList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return MemberResponseDTO.FollowList.builder()
+                .followList(followList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * follow -> MemberResponseDTO.FollowPreviewList 변환
+     */
+    public static MemberResponseDTO.FollowPreviewList toFollowPreviewList(
+            List<MemberResponseDTO.FollowResponse> followList
+    ) {
+        return MemberResponseDTO.FollowPreviewList.builder()
+                .followList(followList)
                 .build();
     }
 }

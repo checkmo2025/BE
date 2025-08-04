@@ -40,11 +40,11 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
     @Override
     @Transactional
-    @CacheEvict(value = "notifications", key = "#event.getFollowedId()")
+    @CacheEvict(value = "notifications", key = "#event.getFollowingId()")
     public void createNotification(FollowEvent event) {
         // 팔로우 이벤트에서 팔로우 누른 사람과 팔로우 당하는 사람의 정보를 가져옴 (프록시로)
         Member proxyFollower = memberQueryFacade.findMemberReferenceById(event.getFollowerId()); // 팔로우 누른 사람
-        Member proxyFollowed = memberQueryFacade.findMemberReferenceById(event.getFollowedId()); // 팔로우 당하는 사람
+        Member proxyFollowing = memberQueryFacade.findMemberReferenceById(event.getFollowingId()); // 팔로우 당하는 사람
 
         // 팔로우 누른 사람의 닉네임을 가져옴
         String FollowerNickname = memberQueryFacade.getMemberNicknameById(event.getFollowerId());
@@ -53,7 +53,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.FOLLOW, FollowerNickname);
 
         // Notification 객체를 생성하고 저장
-        Notification notification = NotificationConverter.fromEvent(Notification.NotificationType.FOLLOW, redirectPath, proxyFollower, proxyFollowed);
+        Notification notification = NotificationConverter.fromEvent(Notification.NotificationType.FOLLOW, redirectPath, proxyFollower, proxyFollowing);
         notificationRepository.save(notification);
     }
 
