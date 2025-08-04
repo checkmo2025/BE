@@ -1,19 +1,19 @@
 services:
-  mysql:
-    image: 'mysql:8.0'
-    environment:
-      MYSQL_DATABASE: checkmo_db
-      MYSQL_ROOT_PASSWORD: checkmo123
-    ports:
-      - 3306:3306
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - checkmo-network
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping" ]
-      interval: 5s
-      retries: 10
+#  mysql:
+#    image: 'mysql:8.0'
+#    environment:
+#      MYSQL_DATABASE: checkmo_db
+#      MYSQL_ROOT_PASSWORD: checkmo123
+#    ports:
+#      - 3306:3306
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#    networks:
+#      - checkmo-network
+#    healthcheck:
+#      test: [ "CMD", "mysqladmin", "ping" ]
+#      interval: 5s
+#      retries: 10
 
   redis:
     image: 'redis:7.2-alpine'
@@ -35,5 +35,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
+#  mysql_data:
   redis_data:
