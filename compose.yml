@@ -7,6 +7,12 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: aladin,jwt,mail,prod,redis
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - app-network
 
