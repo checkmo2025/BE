@@ -59,7 +59,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         clubQueryService.validateClub(clubId);
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
+        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size + 1);
     }
 
     @Override
