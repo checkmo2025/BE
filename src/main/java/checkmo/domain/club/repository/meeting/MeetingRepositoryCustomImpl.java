@@ -25,6 +25,7 @@ public class MeetingRepositoryCustomImpl implements MeetingRepositoryCustom {
 
         return queryFactory
                 .selectFrom(meeting)
+                .distinct()
                 .where(predicate)
                 .orderBy(meeting.id.desc())
                 .limit(size)
@@ -56,6 +57,7 @@ public class MeetingRepositoryCustomImpl implements MeetingRepositoryCustom {
 
         return queryFactory
                 .selectFrom(meeting)
+                .distinct()
                 .where(predicate)
                 .orderBy(meeting.id.desc())
                 .limit(size)
