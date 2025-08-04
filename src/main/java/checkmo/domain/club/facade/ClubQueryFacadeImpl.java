@@ -4,9 +4,7 @@ import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Topic;
+import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.*;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
@@ -322,8 +320,38 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 ).toList();
     }
 
-    public MeetingResponseDTO.TeamTopicDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber, String memberId) {
-        return null;
+    public MeetingResponseDTO.TeamTopicDTO findMeetingTopicsByTeam(Long meetingId, Integer teamNumber, String memberId) {
+        // 1. 미팅과 클럽 멤버, 팀 검증
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
+
+        // 2. 팀 토픽 > 토픽 > 클럽 멤버 정보 조회
+        List<TeamTopic> teamTopics = clubMeetingQueryService.findTeamTopicsByTeam(team.getId());
+
+        // 3. 토픽 작성자 정보 배치 조회
+        List<String> authorIds = teamTopics.stream()
+                .map(
+                        teamTopic -> teamTopic.getTopic().getClubMember().getMemberId()
+                )
+                .distinct()
+                .toList();
+        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+                memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+
+        // 4. TeamTopicDTO 변환
+        List<MeetingResponseDTO.TopicDTO> topicDTOList = teamTopics.stream()
+                .map(teamTopic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+                        teamTopic.getTopic(),
+                        authorInfoMap.get(teamTopic.getTopic().getClubMember().getMemberId()),
+                        null
+                ))
+                .toList();
+
+        return MeetingResponseDTO.TeamTopicDTO.builder()
+                .teamNumber(teamNumber)
+                .topics(topicDTOList)
+                .build();
     }
 
     @Override
