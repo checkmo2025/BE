@@ -32,12 +32,6 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        // /health 경로는 Spring Security 필터 체인을 아예 거치지 않도록 설정
-        return (web) -> web.ignoring().requestMatchers("/health");
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http)
         throws Exception {
         http
@@ -47,7 +41,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll() // Swagger UI 접근 허용
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "health").permitAll() // Swagger UI 접근 허용
                         .requestMatchers("/login/oauth2").permitAll() // OAuth2 로그인 허용
                         .requestMatchers("/api/auth/additional-info").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
