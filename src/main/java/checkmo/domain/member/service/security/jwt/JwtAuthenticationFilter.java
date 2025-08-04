@@ -4,15 +4,16 @@ import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,6 +33,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    private final List<String> excludedPaths = List.of(
+        "/swagger-ui/**",
+        "/v3/api-docs/**"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
+        return excludedPaths.stream()
+                            .anyMatch(path -> pathMatcher.match(path, request.getRequestURI()));
+    }
 
     @Override
     protected void doFilterInternal(@Nonnull HttpServletRequest request,
