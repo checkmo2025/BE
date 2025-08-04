@@ -232,7 +232,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = topics.stream()
                 .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOToTopicDTO(
                         topic,
-                        authorInfoMap.get(memberId),
+                        authorInfoMap.get(topic.getClubMember().getMemberId()),
                         memberId
                 ))
                 .toList();
