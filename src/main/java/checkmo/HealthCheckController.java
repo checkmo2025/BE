@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/")
+@RequestMapping("/health")
 @Slf4j
 @Tag(name = "헬스체크용", description = "헬스체크용 테스트용 사용 X")
 public class HealthCheckController {
