@@ -7,5 +7,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FollowEvent {
     private final String followerId; // 팔로우를 한 회원의 ID
-    private final String followedId;  // 팔로우를 당한 회원의 ID
+    private final String followingId;  // 팔로우를 당한 회원의 ID
 }
