@@ -3,6 +3,8 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.domain.club.validation.validCursor.ValidCursor;
+import checkmo.domain.club.validation.validSize.ValidSize;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.auth.CurrentId;
@@ -15,6 +17,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +25,8 @@ import java.util.List;
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
-@Tag(name = "모임 토론", description = "독서 모임 미팅, 토론조 관리 API")
+@Tag(name = "독서모임 미팅", description = "독서 모임 미팅, 발제, 토론조 관리 API")
+@Validated
 public class ClubMeetingController {
 
     private final ClubCommandFacade clubCommandFacade;
@@ -69,6 +73,27 @@ public class ClubMeetingController {
     }
 
     // GET /api/clubs/{clubId}/meetings - Meeting 전체 보기
+    @Operation(summary = "정기 독서모임 간편 조회 API", description = "정기 독서모임을 커서 기반 최신순 정렬 간편 조회합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "정기 독서 모임을 조회할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "커서 ID", required = false, example = "3"),
+            @Parameter(name = "size", description = "조회할 개수 (기본값: 5)", required = false, example = "5")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/clubs/{clubId}/meetings")
+    public ApiResponse<MeetingResponseDTO.MeetingListDTO> getMeetings(
+            @PathVariable Long clubId,
+            @RequestParam(required = false) @ValidCursor Long cursorId,
+            @RequestParam(required = false, defaultValue = "5") @ValidSize Integer size,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.MeetingListDTO meetings = clubQueryFacade.getMeetingsByClub(clubId, cursorId, size, memberId);
+        return ApiResponse.onSuccess(meetings);
+    }
     // GET /api/meetings/{meetingId} - Meeting 상세 보기
 
     // 캘린더 관련

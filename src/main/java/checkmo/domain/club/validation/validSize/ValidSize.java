@@ -1,4 +1,4 @@
-package checkmo.domain.club.validation;
+package checkmo.domain.club.validation.validSize;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -6,11 +6,11 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = RateValidator.class)
-@Target({ElementType.FIELD})
+@Constraint(validatedBy = SizeValidator.class)
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidRate {
-    String message() default "평점은 1.0부터 5.0까지 0.5 단위로 입력해야 합니다.";
+public @interface ValidSize {
+    String message() default "SIZE_POSITIVE";
 
     Class<?>[] groups() default {};
 
