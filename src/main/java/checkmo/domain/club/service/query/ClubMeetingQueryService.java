@@ -7,6 +7,7 @@ import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 독서 모임의 토론 조회 서비스
@@ -47,6 +48,15 @@ public interface ClubMeetingQueryService {
      * @return 조회한 토픽 정보 DTO
      */
     List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
+
+    /**
+     * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후,
+     * 토픽 ID를 기준으로 해당 토픽을 선택한 팀 번호 리스트를 반환합니다.
+     *
+     * @param topicIds 조회할 토픽 ID 목록
+     * @return 토픽 id를 기준으로 선택한 팀 번호 리스트 Map
+     */
+    Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
 
     /**
      * 독서 모임의 미팅의 팀별 인원 조회 (해당 팀이 선택한 발제 리스트도 포함)
