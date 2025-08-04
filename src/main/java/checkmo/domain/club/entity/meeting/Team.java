@@ -12,6 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"meeting_id", "team_number"})
+})
 public class Team extends BaseEntity {
 
     @Id
@@ -19,7 +22,7 @@ public class Team extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Integer TeamNumber; // 팀 번호
+    private Integer teamNumber; // 팀 번호
 
     @Column(name = "meeting_id", insertable = false, updatable = false)
     private Long meetingId;
