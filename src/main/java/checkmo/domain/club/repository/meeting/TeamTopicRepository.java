@@ -11,4 +11,11 @@ public interface TeamTopicRepository extends JpaRepository<TeamTopic, Long> {
             "JOIN FETCH tt.team t " +
             "WHERE tt.topic.id IN :topicIds")
     List<TeamTopic> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
+
+    @Query("SELECT tt " +
+            "FROM TeamTopic tt " +
+            "JOIN FETCH tt.topic t " +
+            "JOIN FETCH t.clubMember cm " +
+            "WHERE tt.teamId = :teamId")
+    List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId);
 }

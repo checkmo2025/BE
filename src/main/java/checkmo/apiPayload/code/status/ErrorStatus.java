@@ -53,6 +53,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // 미팅
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_4004", "독서모임을 찾을 수 없습니다."),
 
+    // 팀
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM_4004", "팀을 찾을 수 없습니다."),
+
     // 카테고리
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_4004", "카테고리를 찾을 수 없습니다."),
 
@@ -85,8 +88,8 @@ public enum ErrorStatus implements BaseErrorCode {
     NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION4003", "해당 알림에 접근할 권한이 없습니다."),
 
     // 페이지네이션 파라미터
-    CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4001", "커서 값은 양수여야 합니다."),
-    SIZE_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4002", "조회할 개수는 양수여야 합니다."),
+    CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_401", "커서 값은 양수여야 합니다."),
+    SIZE_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_402", "조회할 개수는 양수여야 합니다."),
     ;
 
     private final HttpStatus httpStatus;

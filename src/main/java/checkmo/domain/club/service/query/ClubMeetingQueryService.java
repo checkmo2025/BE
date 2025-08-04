@@ -1,9 +1,7 @@
 package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Topic;
+import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 import java.util.List;
@@ -61,15 +59,14 @@ public interface ClubMeetingQueryService {
     Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
 
     /**
-     * 독서 모임의 미팅의 팀별 인원 조회 (해당 팀이 선택한 발제 리스트도 포함)
+     * 독서 모임 미팅의 팀별 발제 조회
      *
      * 피그마 참고 페이지 : #독서모임 - 운영진 화면 모임 - 특정 조 전체보기 클릭시
      *
-     * @param meetingId 미팅 ID
-     * @param teamNumber 팀 번호 (1, 2, 3, 4 팀 -> 실제로 프론트에서는 A, B, C, D로 표시)
-     * @return 조회한 팀 정보 DTO
+     * @param teamId 미팅 ID
+     * @return TeamTopic 리스트
      */
-    MeetingResponseDTO.TeamTopicDTO findTeamsByMeeting(Long meetingId, Integer teamNumber);
+    List<TeamTopic> findTeamTopicsByTeam(Long teamId);
 
     /**
      * 독서 모임의 책장(한줄평) 리스트를 조회합니다.
@@ -122,4 +119,13 @@ public interface ClubMeetingQueryService {
      * @return Topic 존재하는 발제 객체
      */
     Topic validateTopic(Long topicId, Long meetingId) throws GeneralException;
+
+    /**
+     * 독서모임의 팀이 존재하는지 확인합니다.
+     *
+     * @param meetingId 미팅 ID
+     * @param teamNumber 팀 번호 (1, 2, 3, 4... 팀)
+     * @return Team 존재하는 팀 객체
+     */
+    Team validateTeam(Long meetingId, Integer teamNumber);
 }

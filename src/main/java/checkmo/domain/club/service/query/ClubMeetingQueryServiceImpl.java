@@ -4,14 +4,8 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.TeamTopic;
-import checkmo.domain.club.entity.meeting.Topic;
-import checkmo.domain.club.repository.meeting.BookReviewRepository;
-import checkmo.domain.club.repository.meeting.MeetingRepository;
-import checkmo.domain.club.repository.meeting.TeamTopicRepository;
-import checkmo.domain.club.repository.meeting.TopicRepository;
+import checkmo.domain.club.entity.meeting.*;
+import checkmo.domain.club.repository.meeting.*;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +23,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     private final MeetingRepository meetingRepository;
     private final BookReviewRepository bookReviewRepository;
     private final TopicRepository topicRepository;
+    private final TeamRepository teamRepository;
     private final TeamTopicRepository teamTopicRepository;
 
     private final ClubMemberQueryService clubMemberQueryService;
@@ -63,8 +58,8 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public MeetingResponseDTO.TeamTopicDTO findTeamsByMeeting(Long meetingId, Integer teamNumber) {
-        return null;
+    public List<TeamTopic> findTeamTopicsByTeam(Long teamId) {
+        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamId(teamId);
     }
 
     @Override
@@ -103,5 +98,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     public Topic validateTopic(Long topicId, Long meetingId) throws GeneralException {
         return topicRepository.findByIdAndMeetingId(topicId, meetingId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.TOPIC_NOT_FOUND));
+    }
+
+    @Override
+    public Team validateTeam(Long meetingId, Integer teamNumber) {
+        return teamRepository.findByMeetingIdAndTeamNumber(meetingId, teamNumber)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.TEAM_NOT_FOUND));
     }
 }
