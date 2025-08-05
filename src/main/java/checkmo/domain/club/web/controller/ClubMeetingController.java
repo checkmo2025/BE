@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
-@Tag(name = "독서모임 미팅", description = "독서 모임 미팅, 발제, 토론조 관리 API")
+@Tag(name = "독서모임-모임(미팅)", description = "독서 모임 미팅, 팀 발제, 토론조 관리, 캘린더 API")
 @Validated
 public class ClubMeetingController {
 
