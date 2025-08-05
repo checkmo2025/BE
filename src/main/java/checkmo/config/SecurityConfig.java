@@ -41,7 +41,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/").permitAll() // 홈페이지 접근 허용
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "health").permitAll() // Swagger UI 접근 허용
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/health").permitAll() // Swagger UI 접근 허용
                         .requestMatchers("/login/oauth2/**").permitAll() // OAuth2 로그인 허용
                         .requestMatchers("/api/auth/additional-info").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
