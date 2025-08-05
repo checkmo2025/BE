@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TeamTopicRepository extends JpaRepository<TeamTopic, Long> {
     @Query("SELECT tt FROM TeamTopic tt " +
@@ -18,4 +19,6 @@ public interface TeamTopicRepository extends JpaRepository<TeamTopic, Long> {
             "JOIN FETCH t.clubMember cm " +
             "WHERE tt.teamId = :teamId")
     List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId);
+
+    Optional<TeamTopic> findByTeamIdAndTopicId(Long teamId, Long topicId);
 }

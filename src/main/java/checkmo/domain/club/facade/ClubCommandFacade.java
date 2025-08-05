@@ -190,11 +190,13 @@ public interface ClubCommandFacade {
      * ClubMeetingCommandService
      * 특정 팀이 발제를 선택/해제(토글)합니다. (내부용)
      *
-     * @param memberId  요청자 회원 ID
      * @param meetingId 미팅 ID
-     * @param request   발제 관리 요청 DTO
+     * @param topicId 발제 ID
+     * @param request 발제 선택/해제 요청 DTO
+     * @param memberId 요청자 회원 ID
+     * @return 발제 선택 결과 DTO
      */
-    void toggleTopic(String memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request);
+    MeetingResponseDTO.TopicSelectionDTO selectOrCacnelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId);
 
     /**
      * ClubMeetingCommandService

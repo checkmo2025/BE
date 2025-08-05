@@ -10,6 +10,7 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
+import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
@@ -207,8 +208,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public void toggleTopic(String memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request) {
-
+    public MeetingResponseDTO.TopicSelectionDTO selectOrCacnelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId) {
+        Boolean isSelected = clubMeetingCommandService.selectOrCancelTopic(memberId, meetingId, topicId, request);
+        return MeetingResponseDTO.TopicSelectionDTO.builder().topicId(topicId).teamNumbers(request.getTeamNumber()).isSelected(isSelected).build();
     }
 
     @Override

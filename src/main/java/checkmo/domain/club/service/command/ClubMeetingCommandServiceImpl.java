@@ -9,11 +9,10 @@ import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Topic;
+import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.meeting.BookReviewRepository;
 import checkmo.domain.club.repository.meeting.MeetingRepository;
+import checkmo.domain.club.repository.meeting.TeamTopicRepository;
 import checkmo.domain.club.repository.meeting.TopicRepository;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
@@ -23,6 +22,8 @@ import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     private final MeetingRepository meetingRepository;
     private final TopicRepository topicRepository;
+    private final TeamTopicRepository teamTopicRepository;
     private final BookReviewRepository bookReviewRepository;
 
     @Override
@@ -108,8 +110,31 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long toggleTopic(String memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request) {
-        return 0L;
+    public Boolean selectOrCancelTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request) {
+        // 1. 유효성 검증 (meeting, clubMember, topic, team)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Team team = clubMeetingQueryService.validateTeam(meetingId, request.getTeamNumber());
+        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 팀 발제가 존재하는지(선택된 상태인지) 확인
+        Optional<TeamTopic> existingTeamTopic = teamTopicRepository.findByTeamIdAndTopicId(team.getId(), topicId);
+        boolean isSelected = existingTeamTopic.isPresent();
+
+        // 3. 요청과 상태가 같으면 무시
+        if (request.getIsSelected() == isSelected) {
+            return isSelected;
+        }
+
+        // 4. 상태 변경
+        if (request.getIsSelected()) {
+            TeamTopic teamTopic = TeamTopic.builder().team(team).topic(topic).build();
+            teamTopicRepository.save(teamTopic);
+            return true;
+        } else {
+            teamTopicRepository.delete(existingTeamTopic.get());
+            return false;
+        }
     }
 
     @Override
