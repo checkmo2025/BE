@@ -25,6 +25,7 @@ public class ClubResponseDTO {
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
         private int pageSize; // 현재 페이지 크기
+        private boolean isStaff; // 본인이 모임의 스탭인지 여부
     }
 
     @Getter

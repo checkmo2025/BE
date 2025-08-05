@@ -26,6 +26,7 @@ public class ClubController {
 
     /**
      * 모임 이름 중복 검사 API
+     *
      * @param clubName 중복 여부 확인할 모임 이름
      * @return true: 이미 존재하는 이름, false: 사용 가능한 이름
      */
@@ -113,7 +114,7 @@ public class ClubController {
     public ApiResponse<ClubResponseDTO.ClubMemberListDTO> getClubMembers(
             @PathVariable Long clubId,
             @CurrentId String memberId,
-            @RequestParam(required = true, defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
+            @RequestParam(defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
             @RequestParam(required = false) Long cursorId // 페이징을 위한 커서 ID
     ) {
         return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId));
@@ -145,7 +146,7 @@ public class ClubController {
             @PathVariable Long clubId,
             @PathVariable Long memberId,
             @CurrentId String currentMemberId,
-            @RequestParam(required = true, defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+            @RequestParam(defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
     ) {
         return ApiResponse.onSuccess(clubCommandFacade.updateClubMemberStatus(clubId, memberId, currentMemberId, status));
     }

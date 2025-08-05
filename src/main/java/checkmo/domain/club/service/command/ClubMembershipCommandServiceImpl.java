@@ -71,14 +71,14 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
      * 독서 모임 회원의 등급(상태/역할)을 수정합니다.
      *
      * @param clubId          독서 모임 ID
-     * @param targetMemberId  수정 대상 회원 ID
+     * @param targetClubMemberId  수정 대상 회원 ID
      * @param currentMemberId 요청자(운영진) 회원 ID
      * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
      * @return 수정된 회원의 응답 DTO
      */
     @Override
     @Transactional
-    public ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status) {
+    public ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetClubMemberId, String currentMemberId, String status) {
 
         // 1. 클럽 유효성 검증
         clubQueryService.validateClub(clubId);
@@ -88,7 +88,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
         }
 
         // 2. 수정 대상 회원 존재 여부 확인
-        ClubMember targetMember = clubMemberRepository.findByClubIdAndId(clubId, targetMemberId)
+        ClubMember targetMember = clubMemberRepository.findByClubIdAndId(clubId, targetClubMemberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND));
 
         // 3. 상태 문자열 → Enum 변환
