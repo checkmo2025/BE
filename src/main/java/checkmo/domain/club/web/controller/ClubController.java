@@ -165,7 +165,7 @@ public class ClubController {
     @DeleteMapping("/{clubId}/leave")
     public ApiResponse<Void> leaveClub(
             @PathVariable Long clubId,
-            @RequestHeader String memberId // TODO : @CurrentId String memberId
+            @CurrentId String memberId
     ) {
         clubCommandFacade.leaveClub(clubId, memberId);
         return ApiResponse.onSuccess(null);
