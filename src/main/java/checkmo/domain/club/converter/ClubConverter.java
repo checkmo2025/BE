@@ -46,12 +46,9 @@ public class ClubConverter {
             String joinMessage
     ) {
         return ClubMember.builder()
-
                 .clubMemberStatus(status)
                 .joinMessage(joinMessage)
-                .clubId(club.getId())
                 .club(club)
-                .memberId(member.getId())
                 .member(member)
                 .build();
     }

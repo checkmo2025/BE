@@ -47,17 +47,15 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
                     throw new GeneralException(ErrorStatus.CLUB_MEMBER_ALREADY_EXISTS);
                 });
 
-        // 프록시로 멤버 참조
-        Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
-
         // 가입 상태 설정
         ClubMember.ClubMemberStatus status = club.isOpen()
                 ? ClubMember.ClubMemberStatus.MEMBER
                 : ClubMember.ClubMemberStatus.PENDING;
 
-        // ClubMember 엔티티 생성 및 저장
+        // ClubMember 생성 및 연관관계 설정
+        Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
         ClubMember clubMember = ClubConverter.toClubMemberEntity(club, proxyMember, status, request.getJoinMessage());
-        clubMemberRepository.save(clubMember);
+        club.addClubMember(clubMember);
 
         return new ClubInfoDTO(clubId, null, club.isOpen());
     }
