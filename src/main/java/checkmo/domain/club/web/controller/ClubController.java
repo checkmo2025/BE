@@ -150,9 +150,10 @@ public class ClubController {
         return ApiResponse.onSuccess(clubCommandFacade.updateClubMemberStatus(clubId, memberId, currentMemberId, status));
     }
 
-    // GET /api/clubs?keyword=독서&region=1&participants=1 - 독서 모임 조회 및 검색
-    // GET /api/clubs/{clubId}/dashboard - 참여중인 Club 메인 화면
+    /**
+     * 독서 모임 조회 및 검색
+     *
+     * @return 독서 모임 목록을 포함한 성공 응답
+     */
 
-    // 회원 관리
-    // DELETE /api/clubs/{clubId}/members/me - 독서클럽 탈퇴하기 (본인)
 }
