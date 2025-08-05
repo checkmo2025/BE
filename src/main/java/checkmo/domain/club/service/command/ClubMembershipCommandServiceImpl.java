@@ -7,10 +7,14 @@ import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
 import checkmo.domain.club.repository.ClubRepository;
+import checkmo.domain.club.service.query.ClubMemberQueryService;
+import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO.ClubInfoDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,8 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
 
+    private final ClubQueryService clubQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
     private final MemberQueryFacade memberQueryFacade;
 
     /**
@@ -60,9 +66,45 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
         return new ClubInfoDTO(clubId, null, club.isOpen());
     }
 
+    /**
+     * ClubMembershipCommandService
+     * 독서 모임 회원의 등급(상태/역할)을 수정합니다.
+     *
+     * @param clubId          독서 모임 ID
+     * @param targetMemberId  수정 대상 회원 ID
+     * @param currentMemberId 요청자(운영진) 회원 ID
+     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @return 수정된 회원의 응답 DTO
+     */
     @Override
     @Transactional
-    public void approveJoinRequest(Long clubId, String operatorId, Long clubMemberId) {
+    public ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, String targetMemberId, String currentMemberId, String status) {
+
+        // 1. 클럽 유효성 검증
+        clubQueryService.validateClub(clubId);
+        ClubMember requester = clubMemberQueryService.validateClubMember(clubId, currentMemberId);
+        if (!requester.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. 수정 대상 회원 존재 여부 확인
+        ClubMember targetMember = clubMemberRepository.findByClubIdAndMemberId(clubId, targetMemberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND));
+
+        // 3. 상태 문자열 → Enum 변환
+        ClubMember.ClubMemberStatus newStatus;
+        try {
+            newStatus = ClubMember.ClubMemberStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new GeneralException(ErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+
+        // 4. 상태 변경
+        targetMember.updateStatus(newStatus);
+
+        // 5. DTO 반환
+        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(targetMemberId);
+        return ClubConverter.toClubMemberDTO(targetMember, memberInfo);
     }
 
 }

@@ -54,9 +54,25 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         return clubMembershipCommandService.joinClub(clubId, memberId, request);
     }
 
+    /**
+     * ClubMembershipCommandService
+     * 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
+     *
+     * @param clubId          독서 모임 ID
+     * @param targetMemberId  수정 대상 회원 ID
+     * @param currentMemberId 요청자(운영진) 회원 ID
+     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @return 수정된 회원의 응답 DTO
+     */
     @Override
-    public void approveJoinRequest(Long clubId, String memberId, Long clubMemberId) {
+    public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, String targetMemberId, String currentMemberId, String status) {
+        ClubResponseDTO.ClubMemberDTO dto = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId, currentMemberId, status);
 
+        // 운영진 여부를 포함해서 반환
+        return ClubResponseDTO.ClubMemberUpdateResponseDTO.builder()
+                .updatedMember(dto)
+                .isRequesterStaff(true) // 이 api 는 운영진만 호출할 수 있으므로 true 로 설정
+                .build();
     }
 
     /**

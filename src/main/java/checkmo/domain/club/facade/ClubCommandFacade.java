@@ -36,13 +36,15 @@ public interface ClubCommandFacade {
 
     /**
      * ClubMembershipCommandService
-     * 독서 모임 가입 신청을 승인합니다. (내부용)
+     * 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
      *
-     * @param clubId       모임 ID
-     * @param memberId     요청자(운영진) 회원 ID
-     * @param clubMemberId 승인할 대상의 ClubMember ID
+     * @param clubId          독서 모임 ID
+     * @param targetMemberId  수정 대상 회원 ID
+     * @param currentMemberId 요청자(운영진) 회원 ID
+     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @return 수정된 회원의 응답 DTO
      */
-    void approveJoinRequest(Long clubId, String memberId, Long clubMemberId); //
+    ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, String targetMemberId, String currentMemberId, String status);
 
     /**
      * ClubCommunicationCommandService

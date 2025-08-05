@@ -79,6 +79,15 @@ public class ClubResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class ClubMemberUpdateResponseDTO {
+        private ClubResponseDTO.ClubMemberDTO updatedMember;
+        private boolean isRequesterStaff; // 현재 로그인한 요청자가 운영진인지 여부
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class ClubMemberDTO {
         private Long memberId; // 클럽 회원 ID
         private String nickname; // 회원의 닉네임

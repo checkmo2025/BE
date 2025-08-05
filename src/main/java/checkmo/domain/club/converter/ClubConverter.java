@@ -67,6 +67,19 @@ public class ClubConverter {
     }
 
     /**
+     * ClubMember 엔티티 + MemberSharedDTO.BasicInfoDTO -> ClubResponseDTO.ClubMemberDTO 변환
+     */
+    public static ClubResponseDTO.ClubMemberDTO toClubMemberDTO(ClubMember targetMember, MemberSharedDTO.BasicInfoDTO memberInfo) {
+        return ClubResponseDTO.ClubMemberDTO.builder()
+                .memberId(targetMember.getId())
+                .nickname(memberInfo.getNickname())
+                .profileImgUrl(memberInfo.getProfileImageUrl())
+                .joinMessage(targetMember.getJoinMessage())
+                .clubMemberStatus(targetMember.getClubMemberStatus().name())
+                .build();
+    }
+
+    /**
      * MeetingCreateRequestDTO -> Meeting 엔티티 변환
      */
     public static Meeting fromMeetingCreateRequestDTOToMeeting(

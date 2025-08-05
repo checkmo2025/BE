@@ -119,11 +119,40 @@ public class ClubController {
         return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId));
     }
 
+    /**
+     * 독서 클럽 회원 등급 수정 API
+     *
+     * @param clubId 독서 모임 ID
+     * @param memberId 수정할 회원 ID
+     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @return 수정된 회원 정보를 포함한 성공 응답
+     */
+    @Operation(summary = "독서 모임 회원 등급 수정 API", description = "독서 모임 회원의 등급을 수정합니다.")
+    @Parameters({
+            @Parameter(
+                    name = "status",
+                    description = "수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)",
+                    example = "STAFF"
+            )
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 사용할 수 있는 API입니다."),
+    })
+    @PatchMapping("/{clubId}/members/{memberId}/status")
+    public ApiResponse<ClubResponseDTO.ClubMemberUpdateResponseDTO> updateClubMemberStatus(
+            @PathVariable Long clubId,
+            @PathVariable String memberId,
+            @CurrentId String currentMemberId,
+            @RequestParam(required = true, defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+    ) {
+        return ApiResponse.onSuccess(clubCommandFacade.updateClubMemberStatus(clubId, memberId, currentMemberId, status));
+    }
+
     // GET /api/clubs?keyword=독서&region=1&participants=1 - 독서 모임 조회 및 검색
     // GET /api/clubs/{clubId}/dashboard - 참여중인 Club 메인 화면
 
     // 회원 관리
-    // PATCH /api/clubs/{clubId}/members/{memberId}/approve - 독서클럽 가입 승인하기 (운영진만)
-    // PATCH /api/clubs/{clubId}/members/{memberId}/status - 독서클럽 회원 등급/상태 수정하기 (운영진만)
     // DELETE /api/clubs/{clubId}/members/me - 독서클럽 탈퇴하기 (본인)
 }
