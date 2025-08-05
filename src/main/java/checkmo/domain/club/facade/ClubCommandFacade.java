@@ -47,6 +47,15 @@ public interface ClubCommandFacade {
     ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status);
 
     /**
+     * ClubMembershipCommandService
+     * 독서 모임에서 탈퇴합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 탈퇴할 회원 ID
+     */
+    void leaveClub(Long clubId, String memberId);
+
+    /**
      * ClubCommunicationCommandService
      * 모임에 공지사항을 작성합니다. (내부용)
      *

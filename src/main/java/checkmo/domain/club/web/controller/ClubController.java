@@ -151,9 +151,24 @@ public class ClubController {
     }
 
     /**
-     * 독서 모임 조회 및 검색
+     * 독서 모임 탈퇴하기 API
      *
-     * @return 독서 모임 목록을 포함한 성공 응답
+     * @param clubId 탈퇴할 독서 모임 ID
+     * @return 성공 응답
      */
+    @Operation(summary = "독서 모임 탈퇴 API", description = "본인이 가입한 독서 모임에서 탈퇴합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "탈퇴 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "본인만 탈퇴할 수 있습니다."),
+    })
+    @DeleteMapping("/{clubId}/leave")
+    public ApiResponse<Void> leaveClub(
+            @PathVariable Long clubId,
+            @RequestHeader String memberId // TODO : @CurrentId String memberId
+    ) {
+        clubCommandFacade.leaveClub(clubId, memberId);
+        return ApiResponse.onSuccess(null);
+    }
 
 }

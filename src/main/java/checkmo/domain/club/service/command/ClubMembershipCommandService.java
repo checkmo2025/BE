@@ -33,4 +33,12 @@ public interface ClubMembershipCommandService {
      */
     ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status);
 
+    /**
+     * 독서 모임에서 탈퇴합니다.
+     *
+     * @param clubId   독서 모임 ID
+     * @param memberId 탈퇴할 회원 ID (본인)
+     */
+    void leaveClub(Long clubId, String memberId);
+
 }

@@ -37,6 +37,7 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUB_MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "CLUB_4016", "이미 존재하는 클럽 회원입니다."),
     CLUB_MEMBER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "CLUB_4017", "유효하지 않은 상태입니다."),
     CLUB_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4018", "해당 클럽 회원을 찾을 수 없습니다."),
+    CLUB_STAFF_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "CLUB_4019", "운영진은 클럽을 탈퇴할 수 없습니다."),
 
     // 공지사항
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_4004", "공지사항을 찾을 수 없습니다."),

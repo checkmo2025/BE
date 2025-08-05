@@ -76,6 +76,18 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     /**
+     * ClubMembershipCommandService
+     * 독서 모임에서 탈퇴합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 탈퇴할 회원 ID
+     */
+    @Override
+    public void leaveClub(Long clubId, String memberId) {
+        clubMembershipCommandService.leaveClub(clubId, memberId);
+    }
+
+    /**
      * ClubCommunicationCommandService
      * 모임에 공지사항을 작성합니다. (내부용)
      *

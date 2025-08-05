@@ -107,4 +107,27 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
         return ClubConverter.toClubMemberDTO(targetMember, memberInfo);
     }
 
+    /**
+     * 독서 모임에서 탈퇴합니다.
+     *
+     * @param clubId   독서 모임 ID
+     * @param memberId 탈퇴할 회원 ID (본인)
+     */
+    @Override
+    @Transactional
+    public void leaveClub(Long clubId, String memberId) {
+
+        // 1. 클럽 유효성 검증
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 운영진(STAFF)은 탈퇴 불가
+        if (clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_CANNOT_LEAVE);
+        }
+
+        // 3. 탈퇴 처리
+        clubMemberRepository.delete(clubMember);
+    }
+
 }
