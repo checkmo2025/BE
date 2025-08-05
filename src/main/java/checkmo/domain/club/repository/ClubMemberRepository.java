@@ -13,4 +13,10 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     @Query("SELECT c.id, c.name FROM ClubMember cm JOIN cm.club c WHERE cm.memberId = :memberId")
     List<Object[]> findClubIdAndNameByMemberId(@Param("memberId") String memberId);
+
+    List<ClubMember> findTop10ByClub_IdAndClubMemberStatusAndIdLessThanOrderByIdDesc(Long clubId, ClubMember.ClubMemberStatus status, Long cursorId);
+    List<ClubMember> findTop10ByClub_IdAndIdLessThanOrderByIdDesc(Long clubId, Long cursorId);
+
+    boolean existsByClub_IdAndClubMemberStatusAndIdLessThan(Long clubId, ClubMember.ClubMemberStatus status, Long lastId);
+    boolean existsByClub_IdAndIdLessThan(Long clubId, Long lastId);
 }

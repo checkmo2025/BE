@@ -89,12 +89,40 @@ public class ClubController {
         return ApiResponse.onSuccess(clubCommandFacade.joinClub(clubId, memberId, request));
     }
 
+    /**
+     * 독서클럽 회원 조회하기 API (상태별 필터링 가능)
+     *
+     * @param clubId 독서 모임 ID
+     * @param status 조회할 회원 상태 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
+     * @param cursorId 페이징을 위한 커서 ID (선택 사항)
+     * @return 독서 모임의 회원 정보를 포함한 성공 응답
+     */
+    @Operation(summary = "독서 모임 회원 조회 API", description = "독서 모임의 회원 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(
+                    name = "status",
+                    description = "조회할 회원 상태 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)",
+                    example = "ALL"
+            )
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+    })
+    @GetMapping("/{clubId}/members")
+    public ApiResponse<ClubResponseDTO.ClubMemberListDTO> getClubMembers(
+            @PathVariable Long clubId,
+            @CurrentId String memberId,
+            @RequestParam(required = true, defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
+            @RequestParam(required = false) Long cursorId // 페이징을 위한 커서 ID
+    ) {
+        return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId));
+    }
+
     // GET /api/clubs?keyword=독서&region=1&participants=1 - 독서 모임 조회 및 검색
-    // POST /api/clubs/{clubId}/join - 독서 모임 가입 신청
     // GET /api/clubs/{clubId}/dashboard - 참여중인 Club 메인 화면
 
     // 회원 관리
-    // GET /api/clubs/{clubId}/members?status=pending - 독서클럽 회원 조회하기 (상태별 필터링 가능)
     // PATCH /api/clubs/{clubId}/members/{memberId}/approve - 독서클럽 가입 승인하기 (운영진만)
     // PATCH /api/clubs/{clubId}/members/{memberId}/status - 독서클럽 회원 등급/상태 수정하기 (운영진만)
     // DELETE /api/clubs/{clubId}/members/me - 독서클럽 탈퇴하기 (본인)

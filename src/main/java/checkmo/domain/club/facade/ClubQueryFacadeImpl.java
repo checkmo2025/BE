@@ -14,6 +14,7 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationQueryService clubCommunicationQueryService;
 
-    private final ClubRepository clubRepository; // 프록시용
+    private final ClubRepository clubRepository;
 
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
@@ -59,9 +60,44 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return clubQueryService.getClubInfo(clubId, memberId);
     }
 
+    /**
+     * ClubQueryService
+     * 특정 상태의 모임 회원 목록을 조회합니다. (내부용)
+     *
+     * @param clubId 모임 ID
+     * @param memberId 요청자(운영진) 회원 ID
+     * @param clubMemberStatus 조회할 회원 상태
+     * @param cursorId 페이징 커서 ID
+     * @return 해당 상태의 회원 목록 DTO
+     */
     @Override
     public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId) {
-        return null;
+
+        // 1. 커서 초기화
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 2. 클럽 멤버 리스트 조회
+        List<ClubMember> members = clubQueryService.getClubMemberListByStatus(clubId, memberId, clubMemberStatus, cursor);
+
+        // 3. DTO 변환
+        List<ClubResponseDTO.ClubMemberDTO> dtoList = members.stream()
+                .map(cm -> {
+                    MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(cm.getMemberId());
+                    return new ClubResponseDTO.ClubMemberDTO(
+                            cm.getId(),
+                            memberInfo.getNickname(),
+                            memberInfo.getProfileImageUrl(),
+                            cm.getJoinMessage(),
+                            cm.getClubMemberStatus().name()
+                    );
+                })
+                .toList();
+
+        // 4. 페이징 정보 조회
+        Long lastId = members.isEmpty() ? null : members.get(members.size() - 1).getId();
+        boolean hasNext = clubQueryService.hasNextPage(clubId, clubMemberStatus, lastId);
+
+        return ClubConverter.toClubMemberListDTO(dtoList, hasNext, lastId);
     }
 
     /**

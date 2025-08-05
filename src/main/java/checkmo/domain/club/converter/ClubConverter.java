@@ -54,6 +54,18 @@ public class ClubConverter {
     }
 
     /**
+     * ClubMemberDTO 리스트 → ClubResponseDTO.ClubMemberListDTO 변환
+     */
+    public static ClubResponseDTO.ClubMemberListDTO toClubMemberListDTO(List<ClubResponseDTO.ClubMemberDTO> dtoList, boolean hasNext, Long lastId) {
+        return ClubResponseDTO.ClubMemberListDTO.builder()
+                .clubMembers(dtoList)
+                .hasNext(hasNext)
+                .nextCursor(lastId)
+                .pageSize(dtoList.size())
+                .build();
+    }
+
+    /**
      * MeetingCreateRequestDTO -> Meeting 엔티티 변환
      */
     public static Meeting fromMeetingCreateRequestDTOToMeeting(

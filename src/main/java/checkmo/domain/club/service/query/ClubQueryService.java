@@ -2,7 +2,10 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+
+import java.util.List;
 
 /**
  * 독서 클럽 조회 서비스
@@ -46,17 +49,25 @@ public interface ClubQueryService {
     ClubResponseDTO.MyClubListDTO getMyClubList(String memberId, int size);
 
     /**
-     * 독서모임의 멤버 리스트를 조회합니다. (상태별로 조회 가능)
+     * 특정 상태의 모임 회원 목록을 조회합니다.
      *
-     * 피그마 참고 페이지 : #
-     *
-     * @param clubId 독서모임 ID
-     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
-     * @param clubMemberStatus 검색할 회원들의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
-     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
-     * @return 검색한 독서모임 멤버 목록 DTO (승인 안된 상태의 독서 모임 멤버도 포함될 수 있음)
+     * @param clubId 모임 ID
+     * @param memberId 요청자 회원 ID (권한 확인용)
+     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL" 중 하나)
+     * @param cursorId 페이징 커서 ID
+     * @return ClubMember 엔티티 리스트 (최대 10개)
      */
-    ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId);
+    List<ClubMember> getClubMemberListByStatus(Long clubId, String memberId, String status, Long cursorId);
+
+    /**
+     * 다음 페이지가 존재하는지 확인합니다.
+     *
+     * @param clubId 모임 ID
+     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL" 중 하나)
+     * @param lastId 현재 페이지의 마지막 ID
+     * @return true: 다음 페이지 있음, false: 마지막 페이지
+     */
+    boolean hasNextPage(Long clubId, String status, Long lastId);
 
     /**
      * 독서모임의 상세 정보를 조회합니다.
