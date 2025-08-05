@@ -72,7 +72,6 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(updateMeetingId);
     }
 
-    // GET /api/clubs/{clubId}/meetings - Meeting 전체 보기
     @Operation(summary = "정기 독서모임 간편 조회 API", description = "정기 독서모임을 커서 기반 최신순 정렬 간편 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "정기 독서 모임을 조회할 독서클럽 ID", required = true, example = "1"),
@@ -96,8 +95,6 @@ public class ClubMeetingController {
     }
     // GET /api/meetings/{meetingId} - Meeting 상세 보기
 
-    // 캘린더 관련
-    // GET /api/clubs/{clubId}/calendar?year=[조회하고자 하는 연도]&month=[조회하고자 하는 달] - 독서모임의 모임 캘린더 조회
     @Operation(summary = "독서모임 캘린더 조회 API", description = "독서모임의 모임 캘린더를 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
