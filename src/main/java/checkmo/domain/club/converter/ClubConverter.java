@@ -37,6 +37,26 @@ public class ClubConverter {
     // =====================================================
 
     /**
+    * Club 가입 정보 -> ClubMember 엔티티 변환
+    */
+    public static ClubMember toClubMemberEntity(
+            Club club,
+            Member member,
+            ClubMember.ClubMemberStatus status,
+            String joinMessage
+    ) {
+        return ClubMember.builder()
+
+                .clubMemberStatus(status)
+                .joinMessage(joinMessage)
+                .clubId(club.getId())
+                .club(club)
+                .memberId(member.getId())
+                .member(member)
+                .build();
+    }
+
+    /**
      * MeetingCreateRequestDTO -> Meeting 엔티티 변환
      */
     public static Meeting fromMeetingCreateRequestDTOToMeeting(

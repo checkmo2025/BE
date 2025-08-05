@@ -68,6 +68,26 @@ public class ClubController {
         return ApiResponse.onSuccess(result);
     }
 
+    /**
+     * 독서클럽 회원 가입 신청 API
+     *
+     * @param clubId 독서 모임 ID
+     * @return 가입 신청 결과를 포함한 성공 응답
+     */
+    @Operation(summary = "독서 모임 가입 신청 API", description = "독서 모임에 가입 신청을 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 가입 신청을 했거나, 가입이 승인된 상태입니다."),
+    })
+    @PostMapping("/{clubId}/join")
+    public ApiResponse<ClubResponseDTO.ClubInfoDTO> joinClub(
+            @PathVariable Long clubId,
+            @CurrentId String memberId,
+            @RequestBody @Valid ClubRequestDTO.ClubMemberJoinDTO request
+    ) {
+        return ApiResponse.onSuccess(clubCommandFacade.joinClub(clubId, memberId, request));
+    }
 
     // GET /api/clubs?keyword=독서&region=1&participants=1 - 독서 모임 조회 및 검색
     // POST /api/clubs/{clubId}/join - 독서 모임 가입 신청

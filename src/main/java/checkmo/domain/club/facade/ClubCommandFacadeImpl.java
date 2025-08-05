@@ -1,9 +1,6 @@
 package checkmo.domain.club.facade;
 
-import checkmo.domain.club.service.command.ClubBookRecommendCommandService;
-import checkmo.domain.club.service.command.ClubCommunicationCommandService;
-import checkmo.domain.club.service.command.ClubManagementCommandService;
-import checkmo.domain.club.service.command.ClubMeetingCommandService;
+import checkmo.domain.club.service.command.*;
 import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
 import checkmo.domain.club.service.query.ClubCommunicationQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
@@ -28,6 +25,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationCommandService clubCommunicationCommandService;
     private final ClubCommunicationQueryService clubNoticeQueryService;
+    private final ClubMembershipCommandService clubMembershipCommandService;
 
     /**
      * ClubManagementCommandService
@@ -42,9 +40,18 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         return clubManagementCommandService.createClub(memberId, request);
     }
 
+    /**
+     * ClubMembershipCommandService
+     * 독서 모임에 가입을 신청합니다. (내부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 신청자 회원 ID
+     * @param request  가입 신청 메시지 DTO
+     * @return 가입 신청 후의 모임 정보 DTO
+     */
     @Override
     public ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request) {
-        return null;
+        return clubMembershipCommandService.joinClub(clubId, memberId, request);
     }
 
     @Override
