@@ -142,7 +142,6 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(topics);
     }
 
-    // POST /api/meetings/{meetingId}/teams/{teamId}/topics/{topicId}/select - Team에서 Topic 선택하기
     @Operation(summary = "팀별 선택된 Topic 조회 API", description = "[모임] 팀별로 선택된 Topic을 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
@@ -162,5 +161,28 @@ public class ClubMeetingController {
     ) {
         MeetingResponseDTO.TeamTopicDTO teamTopicDTO = clubQueryFacade.findMeetingTopicsByTeam(meetingId, teamNumber, memberId);
         return ApiResponse.onSuccess(teamTopicDTO);
+    }
+
+    @Operation(summary = "팀에서 Topic 선택/해제 API", description = "[모임] 팀에서 Topic을 선택/해제합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "topicId", description = "선택/해제할 Topic ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다.")
+    })
+    @PostMapping("/api/meetings/{meetingId}/topics/{topicId}")
+    public ApiResponse<MeetingResponseDTO.TopicSelectionDTO> selectOrCacnelTopic(
+            @PathVariable Long meetingId,
+            @PathVariable Long topicId,
+            @RequestBody MeetingRequestDTO.TopicSelectionDTO request,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.TopicSelectionDTO result = clubCommandFacade.selectOrCacnelTopic(meetingId, topicId, request, memberId);
+        return ApiResponse.onSuccess(result);
     }
 }
