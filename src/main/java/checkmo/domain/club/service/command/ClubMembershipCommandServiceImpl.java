@@ -78,7 +78,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
      */
     @Override
     @Transactional
-    public ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, String targetMemberId, String currentMemberId, String status) {
+    public ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status) {
 
         // 1. 클럽 유효성 검증
         clubQueryService.validateClub(clubId);
@@ -88,7 +88,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
         }
 
         // 2. 수정 대상 회원 존재 여부 확인
-        ClubMember targetMember = clubMemberRepository.findByClubIdAndMemberId(clubId, targetMemberId)
+        ClubMember targetMember = clubMemberRepository.findByClubIdAndId(clubId, targetMemberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND));
 
         // 3. 상태 문자열 → Enum 변환
@@ -103,7 +103,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
         targetMember.updateStatus(newStatus);
 
         // 5. DTO 반환
-        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(targetMemberId);
+        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(targetMember.getMemberId());
         return ClubConverter.toClubMemberDTO(targetMember, memberInfo);
     }
 

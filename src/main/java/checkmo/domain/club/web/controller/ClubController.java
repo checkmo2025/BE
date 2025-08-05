@@ -143,7 +143,7 @@ public class ClubController {
     @PatchMapping("/{clubId}/members/{memberId}/status")
     public ApiResponse<ClubResponseDTO.ClubMemberUpdateResponseDTO> updateClubMemberStatus(
             @PathVariable Long clubId,
-            @PathVariable String memberId,
+            @PathVariable Long memberId,
             @CurrentId String currentMemberId,
             @RequestParam(required = true, defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
     ) {

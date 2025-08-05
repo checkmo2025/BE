@@ -65,7 +65,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * @return 수정된 회원의 응답 DTO
      */
     @Override
-    public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, String targetMemberId, String currentMemberId, String status) {
+    public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status) {
         ClubResponseDTO.ClubMemberDTO dto = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId, currentMemberId, status);
 
         // 운영진 여부를 포함해서 반환

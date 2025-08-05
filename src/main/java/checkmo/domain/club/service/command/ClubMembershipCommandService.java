@@ -31,6 +31,6 @@ public interface ClubMembershipCommandService {
      * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
      * @return 수정된 회원의 응답 DTO
      */
-    ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, String targetMemberId, String currentMemberId, String status);
+    ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status);
 
 }

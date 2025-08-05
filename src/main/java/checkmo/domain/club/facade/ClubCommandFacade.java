@@ -44,7 +44,7 @@ public interface ClubCommandFacade {
      * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
      * @return 수정된 회원의 응답 DTO
      */
-    ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, String targetMemberId, String currentMemberId, String status);
+    ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status);
 
     /**
      * ClubCommunicationCommandService
