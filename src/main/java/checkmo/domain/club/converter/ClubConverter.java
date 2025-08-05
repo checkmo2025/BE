@@ -62,6 +62,7 @@ public class ClubConverter {
                 .hasNext(hasNext)
                 .nextCursor(lastId)
                 .pageSize(dtoList.size())
+                .isStaff(true) // 항상 true
                 .build();
     }
 
