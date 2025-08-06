@@ -53,6 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @Nonnull FilterChain filterChain)
         throws ServletException, IOException {
 
+        if (request.getRequestURI().equals("/health")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 쿠키에서 Access Token 추출
         String accessToken = jwtCookieUtil.resolveToken(request, "accessToken");
         log.info("[JWT 필터] 요청 URI: {}, Access Token 존재 여부 확인: {}", request.getRequestURI(),
