@@ -58,7 +58,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     }
 
     @Override
-    public MemberResponseDTO.MemberProfileResponseDTO updateMemberProfile(String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request) {
+    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request) {
         return memberProfileCommandService.updateMemberProfile(memberId, request);
     }
 

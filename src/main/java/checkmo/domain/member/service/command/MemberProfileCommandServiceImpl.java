@@ -3,12 +3,14 @@ package checkmo.domain.member.service.command;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.category.facade.CategoryCommandFacade;
+import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +22,10 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     private final MemberRepository memberRepository;
     private final CategoryCommandFacade categoryCommandFacade;
+    private final CategoryQueryFacade categoryQueryFacade;
 
     @Override
-    public MemberResponseDTO.MemberProfileResponseDTO updateMemberProfile(
+    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(
         String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request
     ) {
         // 회원 조회
@@ -41,7 +44,9 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
                                                    .build());
         }
 
-        return MemberConverter.toMemberProfileResponseDTO(member);
+        List<CategorySharedDTO.CategoryInfo> categories = categoryQueryFacade.getCategoriesByMemberForShare(memberId).getCategoryList();
+
+        return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
     }
 
     @Override

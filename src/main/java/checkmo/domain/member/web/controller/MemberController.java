@@ -123,7 +123,7 @@ public class MemberController {
 
     @Operation(summary = "내 프로필 편집 API", description = "내 프로필을 편집합니다. 프로필 이미지, 소개, 관심 카테고리를 수정할 수 있습니다.")
     @PatchMapping("/me")
-    public ApiResponse<MemberResponseDTO.MemberProfileResponseDTO> updateMemberProfile(
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> updateMemberProfile(
             @CurrentId String memberId,
             @RequestBody MemberRequestDTO.MemberProfileUpdateRequestDTO request
     ) {

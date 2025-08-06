@@ -5,10 +5,10 @@ import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.service.security.oauth2.OAuth2Attributes;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
-
+import checkmo.global.dto.CategorySharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import java.util.List;
 import java.util.UUID;
-import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -90,6 +90,17 @@ public class MemberConverter {
                 .build();
     }
 
+    /**
+     * Member 엔티티 → MemberResponseDTO.FollowResponse 변환
+     */
+    public static MemberResponseDTO.MemberProfileWithCategoryResponseDTO toMemberProfileWithCategoryResponseDTO(Member member, List<CategorySharedDTO.CategoryInfo> categories) {
+        return MemberResponseDTO.MemberProfileWithCategoryResponseDTO.builder()
+                .nickname(member.getNickName())
+                .description(member.getDescription())
+                .profileImageUrl(member.getImgUrl())
+                .categories(categories)
+                .build();
+    }
     /**
      * MemberProfileResponseDTO → BasicInfoDTO 변환
      */

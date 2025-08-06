@@ -2,8 +2,11 @@ package checkmo.domain.category.service.query;
 
 import checkmo.domain.category.converter.CategoryConverter;
 import checkmo.domain.category.entity.ClubCategory;
+import checkmo.domain.category.entity.MemberCategory;
 import checkmo.domain.category.repository.ClubCategoryRepository;
+import checkmo.domain.category.repository.MemberCategoryRepository;
 import checkmo.domain.category.web.dto.CategoryResponseDTO;
+import checkmo.domain.member.web.dto.MemberResponseDTO.MemberProfileResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import java.util.List;
 public class CategoryQueryServiceImpl implements CategoryQueryService {
 
     private final ClubCategoryRepository clubCategoryRepository;
+    private final MemberCategoryRepository memberCategoryRepository;
 
     @Override
     public CategoryResponseDTO.CategoryListResponseDTO findAllCategories() {
@@ -21,8 +25,10 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
     }
 
     @Override
-    public CategoryResponseDTO.CategoryListResponseDTO findCategoriesByMember(Long memberId) {
-        return null;
+    public CategoryResponseDTO.CategoryListResponseDTO findCategoriesByMember(String memberId) {
+        List<MemberCategory> memberCategories = memberCategoryRepository.findByMemberId(memberId);
+
+        return CategoryConverter.toMemberCategoryListResponseDTO(memberCategories);
     }
 
     /**
