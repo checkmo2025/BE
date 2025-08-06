@@ -1,6 +1,7 @@
 package checkmo.domain.club.entity.announcement;
 
 import checkmo.domain.club.entity.Club;
+import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Vote {
+public class Vote extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -75,20 +75,11 @@ public interface ClubQueryFacade {
      * @param clubId 모임 ID
      * @param memberId 조회자 회원 ID
      * @param cursorId 페이징 커서 ID
+     * @param onlyImportant 중요 공지사항만 조회할지 여부
+     * @param pageSize 조회할 개수
      * @return 전체 공지사항 목록 DTO
      */
-    ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId);
-
-    /**
-     * ClubQueryService
-     * 모임의 중요 공지사항을 최신순으로 size 개수만큼 조회합니다. (내부용)
-     *
-     * @param clubId 모임 ID
-     * @param memberId 조회자 회원 ID
-     * @param size 조회할 개수
-     * @return 중요 공지사항 목록 DTO
-     */
-    ClubResponseDTO.ClubNoticeListDTO getImportantNotices(Long clubId, String memberId, int size);
+    ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId, boolean onlyImportant, int pageSize);
 
     /**
      * 특정 회원이 가입한 모든 클럽의 최신 소식을 조회합니다. (외부용)
