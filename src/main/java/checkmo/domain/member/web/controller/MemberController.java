@@ -3,6 +3,7 @@ package checkmo.domain.member.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.member.facade.MemberCommandFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
@@ -120,4 +121,12 @@ public class MemberController {
         return ApiResponse.onSuccess(followerList);
     }
 
+    @Operation(summary = "내 프로필 편집 API", description = "내 프로필을 편집합니다. 프로필 이미지, 소개, 관심 카테고리를 수정할 수 있습니다.")
+    @PatchMapping("/me")
+    public ApiResponse<MemberResponseDTO.MemberProfileResponseDTO> updateMemberProfile(
+            @CurrentId String memberId,
+            @RequestBody MemberRequestDTO.MemberProfileUpdateRequestDTO request
+    ) {
+        return ApiResponse.onSuccess(memberCommandFacade.updateMemberProfile(memberId, request));
+    }
 }
