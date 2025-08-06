@@ -2,7 +2,6 @@ package checkmo.domain.category.facade;
 
 import checkmo.domain.category.web.dto.CategoryRequestDTO;
 import checkmo.global.dto.CategorySharedDTO;
-import java.util.List;
 
 /**
  * Category Domain Command Facade
@@ -17,7 +16,6 @@ public interface CategoryCommandFacade {
      *
      * @param memberId 회원 ID
      * @param request  수정할 카테고리 ID 목록 DTO
-     * @return 수정된 카테고리 정보가 담긴 **공유 DTO**
      */
     void modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request);
 

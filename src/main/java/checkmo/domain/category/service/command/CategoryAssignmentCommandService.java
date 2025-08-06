@@ -13,7 +13,6 @@ public interface CategoryAssignmentCommandService {
      *
      * @param memberId     회원 ID
      * @param request  추가할 카테고리 ID 목록
-     * @return 추가된 카테고리 정보가 담긴 DTO
      */
     void modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request);
 

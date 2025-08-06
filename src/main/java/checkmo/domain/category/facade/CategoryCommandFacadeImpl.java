@@ -5,7 +5,6 @@ import checkmo.domain.category.service.command.CategoryAssignmentCommandService;
 import checkmo.domain.category.web.dto.CategoryRequestDTO;
 import checkmo.domain.category.web.dto.CategoryResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

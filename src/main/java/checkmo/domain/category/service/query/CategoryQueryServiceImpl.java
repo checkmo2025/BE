@@ -6,7 +6,6 @@ import checkmo.domain.category.entity.MemberCategory;
 import checkmo.domain.category.repository.ClubCategoryRepository;
 import checkmo.domain.category.repository.MemberCategoryRepository;
 import checkmo.domain.category.web.dto.CategoryResponseDTO;
-import checkmo.domain.member.web.dto.MemberResponseDTO.MemberProfileResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
