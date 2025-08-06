@@ -37,8 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private final List<String> excludedPaths = List.of(
-        "/swagger-ui/**",
-        "/v3/api-docs/**"
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/health"
     );
 
     @Override
@@ -52,11 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @Nonnull HttpServletResponse response,
                                     @Nonnull FilterChain filterChain)
         throws ServletException, IOException {
-
-        if (request.getRequestURI().equals("/health")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         // 쿠키에서 Access Token 추출
         String accessToken = jwtCookieUtil.resolveToken(request, "accessToken");
