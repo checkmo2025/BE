@@ -121,7 +121,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 1. 검증 -> 소식은 클럽에 속한 사람만 조회할 수 있음
         clubQueryService.validateClub(clubId);
-        clubMemberQueryService.validateClubMember(clubId, memberId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        boolean isStaff = clubMember.isStaff();
 
         // 2. 커서 초기화
         cursorId = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
@@ -133,7 +134,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         boolean hasNext = noticeItems.size() > pageSize;
         Long nextCursor = hasNext ? noticeItems.get(pageSize - 1).getId() : null;
 
-        return ClubConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor);
+        return ClubConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor, isStaff);
     }
 
     @Override

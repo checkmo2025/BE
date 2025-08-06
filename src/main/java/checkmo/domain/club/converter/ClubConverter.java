@@ -194,13 +194,15 @@ public class ClubConverter {
     public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
             List<ClubResponseDTO.NoticeItem> noticeItems,
             boolean hasNext,
-            Long nextCursor)
-    {
+            Long nextCursor,
+            boolean isStaff
+    ) {
         return ClubResponseDTO.ClubNoticeListDTO.builder()
                 .noticeList(noticeItems)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
                 .pageSize(noticeItems.size())
+                .isStaff(isStaff)
                 .build();
     }
 
