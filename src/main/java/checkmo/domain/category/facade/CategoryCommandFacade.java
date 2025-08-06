@@ -27,5 +27,5 @@ public interface CategoryCommandFacade {
      * @param request 수정할 카테고리 ID 목록 DTO
      * @return 수정된 카테고리 정보가 담긴 **공유 DTO**
      */
-    CategorySharedDTO.CategoryInfoList modifyClubCategories(Long clubId, CategoryRequestDTO.CategoryListRequestDTO request);
+    CategorySharedDTO.CategoryInfoList modifyClubCategories(Long clubId, CategorySharedDTO.CategoryIdListDTO request);
 }

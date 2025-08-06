@@ -30,7 +30,7 @@ public class CategoryCommandFacadeImpl implements CategoryCommandFacade {
      * @return 수정된 카테고리 정보가 담긴 **공유 DTO**
      */
     @Override
-    public CategorySharedDTO.CategoryInfoList modifyClubCategories(Long clubId, CategoryRequestDTO.CategoryListRequestDTO request) {
+    public CategorySharedDTO.CategoryInfoList modifyClubCategories(Long clubId, CategorySharedDTO.CategoryIdListDTO request) {
         CategoryResponseDTO.CategoryListResponseDTO response = categoryAssignmentCommandService.modifyClubCategories(clubId, request);
         return CategoryConverter.toCategoryInfoListDTO(response);
     }
