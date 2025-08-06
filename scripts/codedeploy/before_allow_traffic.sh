@@ -7,14 +7,14 @@ HEALTH_CHECK_URL="http://localhost/health"
 sleep 5
 
 echo "최종 헬스체크 수행 ($HEALTH_CHECK_URL)"
-for i in {1..10}; do
+for i in {1..20}; do
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_CHECK_URL)
 
     if [ "$HTTP_STATUS" -eq 200 ]; then
         echo "✅ 애플리케이션 헬스체크 성공! (상태 코드: $HTTP_STATUS) 트래픽 전환 준비 완료"
         exit 0
     else
-        echo "⏳ 헬스체크 시도 $i/10... 실패 (응답 코드: $HTTP_STATUS)"
+        echo "⏳ 헬스체크 시도 $i/20... 실패 (응답 코드: $HTTP_STATUS)"
     fi
     sleep 3
 done
