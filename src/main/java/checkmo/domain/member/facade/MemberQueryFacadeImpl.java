@@ -34,7 +34,12 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId) {
-        return null;
+        return memberQueryService.getMemberBasicInfo(memberId);
+    }
+
+    @Override
+    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
+        return memberQueryService.getMemberProfile(memberId);
     }
 
     @Override

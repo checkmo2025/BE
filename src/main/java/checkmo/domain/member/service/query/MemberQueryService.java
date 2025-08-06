@@ -30,6 +30,14 @@ public interface MemberQueryService {
     MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId);
 
     /**
+     * 회원 프로필 정보 (카테고리 포함) 조회
+     *
+     * @param memberId 회원 ID
+     * @return 회원 프로필 정보 DTO
+     */
+    MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId);
+
+    /**
      * 회원 ID 목록으로 회원 기본 정보 배치 조회
      *
      * @param memberIds 회원 ID 목록

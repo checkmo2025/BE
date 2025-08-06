@@ -129,4 +129,12 @@ public class MemberController {
     ) {
         return ApiResponse.onSuccess(memberCommandFacade.updateMemberProfile(memberId, request));
     }
+
+    @Operation(summary = "내 프로필 조회 API", description = "내 프로필 정보(관심 카테고리 정보 포함)를 조회합니다.")
+    @GetMapping("/profile")
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
+    }
 }
