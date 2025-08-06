@@ -4,6 +4,8 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 
+import java.util.List;
+
 /**
  * 독서 클럽 조회 서비스
  *
@@ -11,6 +13,7 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
  * ex) 독서 클럽 목록 조회, 검색 기능, 특정 독서 클럽 상세 정보 조회 등을 처리
  */
 public interface ClubQueryService {
+
     /**
      * 독서 클럽 목록을 조회합니다.
      *
@@ -22,7 +25,7 @@ public interface ClubQueryService {
      * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
      * @return 독서 클럽 목록 DTO
      */
-    ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId);
+    List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId);
 
     /**
      * 내가 가입한 독서 클럽 목록을 전체 조회합니다.

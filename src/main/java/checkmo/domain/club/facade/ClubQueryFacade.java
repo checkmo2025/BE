@@ -28,13 +28,14 @@ public interface ClubQueryFacade {
      * ClubQueryService
      * 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)
      *
-     * @param keyword 검색 키워드
+     * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
+     * @param keyword 검색 키워드 (모임명 등)
      * @param region 지역 필터링 여부
      * @param participants 대상 필터링 여부
      * @param cursorId 페이징 커서 ID
      * @return 검색된 모임 목록 DTO
      */
-    ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId);
+    ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId);
 
     /**
      * ClubQueryService

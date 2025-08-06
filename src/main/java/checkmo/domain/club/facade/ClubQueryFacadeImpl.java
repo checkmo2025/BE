@@ -43,9 +43,36 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return clubMemberQueryService.getMyClubList(memberId);
     }
 
+    /**
+     * ClubQueryService
+     * 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)
+     *
+     * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
+     * @param keyword 검색 키워드 (모임명 등)
+     * @param region 지역 필터링 여부
+     * @param participants 대상 필터링 여부
+     * @param cursorId 페이징 커서 ID
+     * @return 검색된 모임 목록 DTO
+     */
+    public static final int PAGE_SIZE = 10;
     @Override
-    public ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId) {
-        return null;
+    public ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId) {
+
+        // 1. 커서 초기화
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 2. 클럽 리스트 조회
+        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, region, participants, cursor);
+
+        // 3. 페이징 처리
+        boolean hasNext = clubList.size() > PAGE_SIZE;  // clubList의 크기가 PAGE_SIZE보다 크면 다음 페이지가 존재한다고 판단
+        if (hasNext) {
+            clubList = clubList.subList(0, PAGE_SIZE); // 다음 페이지를 위해 마지막은 제거
+        }
+        Long nextCursor = hasNext ? clubList.get(clubList.size() - 1).getClub().getClubId() : null; // 다음 커서 설정
+
+        // 4. 최종 DTO 변환
+        return ClubConverter.toClubListDTO(clubList, hasNext, nextCursor);
     }
 
     /**

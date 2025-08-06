@@ -36,4 +36,19 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
         return ClubConverter.fromClubInfoListToMyClubList(myClubInfoList);
     }
+
+    /**
+     * 특정 회원이 해당 클럽에서 어떤 상태(등급)인지 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @param clubId   클럽 ID
+     * @return ClubMemberStatus (MEMBER, STAFF 등) 또는 null (회원 아님)
+     */
+    @Override
+    public ClubMember.ClubMemberStatus getMemberStatusInClub(String memberId, Long clubId) {
+        return clubMemberRepository.findByMemberIdAndClubId(memberId, clubId)
+                .map(ClubMember::getClubMemberStatus)
+                .orElse(null); // 존재하지 않으면 null 반환
+    }
+
 }

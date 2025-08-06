@@ -21,10 +21,19 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class ClubListDTO {
-        private List<ClubDetailDTO> clubList; // 모임 목록
+        private List<ClubWithMyStatusDTO> clubList; // 모임 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
         private int pageSize; // 현재 페이지 크기
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubWithMyStatusDTO {
+        private ClubResponseDTO.ClubDetailDTO club;
+        private boolean isMember;
     }
 
     @Getter

@@ -25,9 +25,52 @@ public class ClubQueryServiceImpl implements ClubQueryService {
     private final ClubMemberQueryService clubMemberQueryService;
     private final CategoryQueryFacade categoryQueryFacade;
 
+    /**
+     * 독서 클럽 목록을 조회합니다.
+     *
+     * 피그마 참고 페이지 : #독서모임 - 모임 검색하기
+     *
+     * @param keyword 검색 키워드 (모임명 등)
+     * @param region 지역 필터 (0: 지역 필터 선택 안함 / 1: 지역 필터 선택해서 검색 키워드로 지역명도 검색 가능)
+     * @param participants 지역 필터 (0: 동아리 대상별 검색 필터 선택 안함 / 1: 동아리 대상별 검색 필터 선택해서 검색 키워드로 동아리 대상도 검색 가능)
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @return 독서 클럽 목록 DTO
+     */
     @Override
-    public ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId) {
-        return null;
+    public List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId) {
+
+        // 1. 검색 조건에 맞는 클럽 리스트 조회
+        List<Club> clubs = clubRepository.searchClubs(keyword, region, participants, cursorId);
+
+        // 2. 각 클럽에 대해 회원 상태 및 카테고리 정보 조회 후 DTO 변환
+        return clubs.stream()
+                .map(club -> {
+
+                    // 2-1. 현재 사용자의 해당 클럽 내 멤버 상태 조회
+                    ClubMember.ClubMemberStatus status = clubMemberQueryService.getMemberStatusInClub(memberId, club.getId());
+
+                    // 2-2. STAFF 여부 및 멤버 여부 판단
+                    boolean isStaff = status == ClubMember.ClubMemberStatus.STAFF;
+                    boolean isMember = status != null;
+
+                    // 2-3. 해당 클럽의 카테고리 목록 조회
+                    CategorySharedDTO.CategoryInfoList categoryInfoList = categoryQueryFacade.getCategoriesByClubForShare(club.getId());
+
+                    // 2-4. 카테고리 ID 리스트 추출
+                    List<Long> categoryIds = categoryInfoList.getCategoryList().stream()
+                            .map(CategorySharedDTO.CategoryInfo::getId)
+                            .toList();
+
+                    // 2-5. Club 엔티티와 카테고리, STAFF 여부를 포함한 DTO 변환
+                    ClubResponseDTO.ClubDetailDTO clubDetailDTO = ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
+
+                    // 2-6. 최종 반환 DTO 생성 (멤버 여부 포함)
+                    return ClubResponseDTO.ClubWithMyStatusDTO.builder()
+                            .club(clubDetailDTO)
+                            .isMember(isMember)
+                            .build();
+                })
+                .toList();
     }
 
     @Override
