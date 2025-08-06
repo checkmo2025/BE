@@ -2,7 +2,6 @@ package checkmo.domain.category.facade;
 
 import checkmo.domain.category.entity.Category;
 import checkmo.global.dto.CategorySharedDTO;
-import java.util.List;
 
 /**
  * Category Domain Query Facade
