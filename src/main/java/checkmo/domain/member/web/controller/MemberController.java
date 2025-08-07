@@ -131,7 +131,7 @@ public class MemberController {
     }
 
     @Operation(summary = "내 프로필 조회 API", description = "내 프로필 정보(관심 카테고리 정보 포함)를 조회합니다.")
-    @GetMapping("/profile")
+    @GetMapping("/me")
     public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
             @CurrentId String memberId
     ) {
