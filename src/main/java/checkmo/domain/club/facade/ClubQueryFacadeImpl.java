@@ -91,7 +91,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
 
         // 2. 클럽 리스트 조회
-        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, region, participants, cursor);
+        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, region, participants, cursor, PAGE_SIZE + 1);
 
         // 3. 페이징 처리
         boolean hasNext = clubList.size() > PAGE_SIZE;  // clubList의 크기가 PAGE_SIZE보다 크면 다음 페이지가 존재한다고 판단

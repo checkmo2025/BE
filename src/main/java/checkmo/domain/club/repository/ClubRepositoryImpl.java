@@ -10,8 +10,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-import static checkmo.domain.club.facade.ClubQueryFacadeImpl.PAGE_SIZE;
-
 @Repository
 public class ClubRepositoryImpl implements ClubRepositoryCustom {
 
@@ -23,7 +21,7 @@ public class ClubRepositoryImpl implements ClubRepositoryCustom {
 
     // 검색을 위한 메서드
     @Override
-    public List<Club> searchClubs(String keyword, int region, int participants, Long cursorId) {
+    public List<Club> searchClubs(String keyword, int region, int participants, Long cursorId, Integer PAGE_SIZE) {
 
         // Q클럽 객체 생성
         QClub club = QClub.club;
