@@ -81,15 +81,23 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         // 2. 클럽 멤버 리스트 조회
         List<ClubMember> members = clubQueryService.getClubMemberListByStatus(clubId, memberId, clubMemberStatus, cursor, pageable);
 
-        // 3. DTO 변환
+        // 3. memberId 추출
+        List<String> memberIds = members.stream()
+                .map(ClubMember::getMemberId)
+                .toList();
+
+        // 4. 기본 정보 배치 조회
+        Map<String, MemberSharedDTO.BasicInfoDTO> memberInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
+
+        // 5. DTO 변환
         List<ClubResponseDTO.ClubMemberDTO> dtoList = members.stream()
                 .map(cm -> {
-                    MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(cm.getMemberId());
+                    MemberSharedDTO.BasicInfoDTO memberInfo = memberInfoMap.get(cm.getMemberId());
                     return ClubConverter.toClubMemberDTO(cm, memberInfo);
                 })
                 .toList();
 
-        // 4. 페이징 정보 조회
+        // 6. 페이징 정보
         Long lastId = members.isEmpty() ? null : members.get(members.size() - 1).getId();
         boolean hasNext = clubQueryService.hasNextPage(clubId, clubMemberStatus, lastId);
 
