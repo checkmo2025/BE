@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,29 +43,31 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         // 1. 검색 조건에 맞는 클럽 리스트 조회
         List<Club> clubs = clubRepository.searchClubs(keyword, region, participants, cursorId, PAGE_SIZE);
 
-        // 2. 각 클럽에 대해 회원 상태 및 카테고리 정보 조회 후 DTO 변환
+        // 2. 클럽 ID 리스트 추출
+        List<Long> clubIds = clubs.stream()
+                .map(Club::getId)
+                .toList();
+
+        // 3. 클럽별 멤버 상태 배치 조회
+        Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
+
+        // 4. 클럽별 카테고리 배치 조회
+        Map<Long, List<CategorySharedDTO.CategoryInfo>> categoriesMap = categoryQueryFacade.getCategoriesByClubs(clubIds);
+
+        // 5. DTO 변환 (배치 조회 결과 활용)
         return clubs.stream()
                 .map(club -> {
-
-                    // 2-1. 현재 사용자의 해당 클럽 내 멤버 상태 조회
-                    ClubMember.ClubMemberStatus status = clubMemberQueryService.getMemberStatusInClub(memberId, club.getId());
-
-                    // 2-2. STAFF 여부 및 멤버 여부 판단
+                    ClubMember.ClubMemberStatus status = statusMap.get(club.getId());
                     boolean isStaff = status == ClubMember.ClubMemberStatus.STAFF;
                     boolean isMember = status != null;
 
-                    // 2-3. 해당 클럽의 카테고리 목록 조회
-                    CategorySharedDTO.CategoryInfoList categoryInfoList = categoryQueryFacade.getCategoriesByClubForShare(club.getId());
-
-                    // 2-4. 카테고리 ID 리스트 추출
-                    List<Long> categoryIds = categoryInfoList.getCategoryList().stream()
+                    List<Long> categoryIds = categoriesMap.getOrDefault(club.getId(), List.of())
+                            .stream()
                             .map(CategorySharedDTO.CategoryInfo::getId)
                             .toList();
 
-                    // 2-5. Club 엔티티와 카테고리, STAFF 여부를 포함한 DTO 변환
                     ClubResponseDTO.ClubDetailDTO clubDetailDTO = ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
 
-                    // 2-6. 최종 반환 DTO 생성 (멤버 여부 포함)
                     return ClubResponseDTO.ClubWithMyStatusDTO.builder()
                             .club(clubDetailDTO)
                             .isMember(isMember)

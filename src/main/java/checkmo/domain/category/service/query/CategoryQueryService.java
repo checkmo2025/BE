@@ -2,6 +2,9 @@ package checkmo.domain.category.service.query;
 
 import checkmo.domain.category.web.dto.CategoryResponseDTO;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 카테고리 조회 서비스
  */
@@ -29,4 +32,13 @@ public interface CategoryQueryService {
      * @return 모임의 카테고리 정보가 담긴 List
      */
     CategoryResponseDTO.CategoryListResponseDTO findCategoriesByClub(Long clubId);
+
+    /**
+     * 여러 클럽의 카테고리 목록을 한꺼번에 조회합니다.
+     *
+     * @param clubIds 모임 ID 리스트
+     * @return 클럽 ID별 카테고리 정보 매핑
+     */
+    Map<Long, CategoryResponseDTO.CategoryListResponseDTO> findCategoriesByClubs(List<Long> clubIds);
+
 }

@@ -3,6 +3,9 @@ package checkmo.domain.category.facade;
 import checkmo.domain.category.entity.Category;
 import checkmo.global.dto.CategorySharedDTO;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Category Domain Query Facade
  * Category 도메인의 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade 입니다.
@@ -37,6 +40,14 @@ public interface CategoryQueryFacade {
     CategorySharedDTO.CategoryInfoList getCategoriesByClubForShare(Long clubId);
 
     /**
+     * 여러 클럽에 설정된 카테고리 목록을 한꺼번에 조회합니다. (외부용)
+     *
+     * @param clubIds 클럽 ID 리스트
+     * @return 클럽 ID별 카테고리 정보 리스트 매핑
+     */
+    Map<Long, List<CategorySharedDTO.CategoryInfo>> getCategoriesByClubs(List<Long> clubIds);
+
+    /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)
      * ‼️ 이 메소드는 실제 DB 조회를 발생시키지 않는 메소드!!!
      * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
@@ -48,4 +59,5 @@ public interface CategoryQueryFacade {
      * @return Category 엔티티의 프록시 객체
      */
     Category findCategoryReferenceById(Long categoryId);
+
 }
