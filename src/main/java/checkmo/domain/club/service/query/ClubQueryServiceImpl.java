@@ -67,9 +67,9 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         ClubMember.ClubMemberStatus clubMemberStatus = parseStatus(status);
 
         if (clubMemberStatus == null) {
-            return clubMemberRepository.findByClub_IdAndIdLessThanOrderByIdDesc(clubId, cursorId, pageable);
+            return clubMemberRepository.findByClubIdAndIdLessThanOrderByIdDesc(clubId, cursorId, pageable);
         } else {
-            return clubMemberRepository.findByClub_IdAndClubMemberStatusAndIdLessThanOrderByIdDesc(clubId, clubMemberStatus, cursorId, pageable);
+            return clubMemberRepository.findByClubIdAndClubMemberStatusAndIdLessThanOrderByIdDesc(clubId, clubMemberStatus, cursorId, pageable);
         }
 
     }
