@@ -93,4 +93,21 @@ public class ClubController {
         return ApiResponse.onSuccess(clubQueryFacade.getClubList(memberId, keyword, region, participants, cursorId));
     }
 
+    /**
+     * 사이드바 - 내가 가입한 클럽 목록 조회 API
+     *
+     * @return 가입한 클럽 목록과 성공 응답
+     */
+    @Operation(summary = "사이드바 - 내가 가입한 클럽 목록 API", description = "내가 가입한 클럽 목록을 반환합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+    })
+    @GetMapping("/myClubs")
+    public ApiResponse<ClubResponseDTO.MyClubListDTO> getMyClubs(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(clubQueryFacade.getMyClubList(memberId));
+    }
+
 }

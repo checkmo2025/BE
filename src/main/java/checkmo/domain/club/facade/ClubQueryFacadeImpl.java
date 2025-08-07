@@ -38,6 +38,35 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
 
+    /**
+     * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
+     *
+     * 피그마 참고 페이지 : #독서모임 - 내 모임 바로가기
+     *
+     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
+     * @return 내가 가입한 독서 클럽 목록 DTO
+     */
+    @Override
+    public ClubResponseDTO.MyClubListDTO getMyClubList(String memberId) {
+
+        // 1. 회원이 가입한 모임 목록 조회
+        List<ClubSharedDTO.MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId).getClubList();
+
+        // 2. 모임 정보 DTO로 변환
+        List<ClubResponseDTO.ClubInfoDTO> clubInfoDTOList = myClubs.stream()
+                .map(myClub -> ClubResponseDTO.ClubInfoDTO.builder()
+                        .clubId(myClub.getClubId())
+                        .clubName(myClub.getClubName())
+                        .open(null)
+                        .build())
+                .toList();
+
+        // 3. 최종 DTO 반환
+        return ClubResponseDTO.MyClubListDTO.builder()
+                .clubList(clubInfoDTOList)
+                .build();
+    }
+
     @Override
     public ClubSharedDTO.MyClubList getMyClubListForShare(String memberId) {
         return clubMemberQueryService.getMyClubList(memberId);
