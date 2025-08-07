@@ -1,12 +1,15 @@
 package checkmo.domain.member.service.query;
 
-import checkmo.apiPayload.exception.GeneralException;
 import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.FollowRepository;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import checkmo.global.dto.CategorySharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
+    private final CategoryQueryFacade categoryQueryFacade;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -39,6 +43,34 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         return MemberConverter.toMemberProfileResponseDTO(member);
+    }
+
+    @Override
+    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        List<CategorySharedDTO.CategoryInfo> categories = categoryQueryFacade.getCategoriesByMemberForShare(memberId).getCategoryList();
+
+        return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
+    }
+
+    @Override
+    public Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds) {
+        // 1. Repository를 통해 IN 쿼리로 모든 회원 정보 조회
+        // [0] memberId, [1] nickname, [2] profileImageUrl
+        List<Object[]> results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
+
+        // 2. 조회된 엔티티 리스트를 Map으로 변환
+        // memberId를 key로, BasicInfoDTO를 value로 사용
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0], // memberId
+                        row -> MemberSharedDTO.BasicInfoDTO.builder()
+                                .nickname((String) row[1]) // nickname
+                                .profileImageUrl((String) row[2]) // profileImageUrl
+                                .build()
+                ));
     }
 
     @Override
@@ -72,10 +104,10 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     public Map<String, MemberResponseDTO.FollowResponse> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
         // 1. 배치로 회원 기본 정보 조회 (1번의 쿼리)
         var results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
-        
+
         // 2. 배치처리로 팔로잉 중인 회원의 id 목록 전부 조회 (2번의 쿼리)
         Set<String> followingIds = followRepository.findFollowingIdsByFollowerId(memberId, memberIds);
-        
+
         // 3. DTO 생성
         return results.stream()
                 .collect(Collectors.toMap(

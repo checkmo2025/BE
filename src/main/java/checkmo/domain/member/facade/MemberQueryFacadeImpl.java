@@ -34,7 +34,12 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId) {
-        return null;
+        return memberQueryService.getMemberBasicInfo(memberId);
+    }
+
+    @Override
+    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
+        return memberQueryService.getMemberProfile(memberId);
     }
 
     @Override
@@ -146,6 +151,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     /**
      * 공유용 기본 회원 정보 조회 (외부용)
+     *
      * @param memberId 조회할 회원 ID
      * @return MemberSharedDTO.BasicInfo
      */
@@ -155,8 +161,14 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
         return MemberConverter.toBasicInfoDTO(profile);
     }
 
+    @Override
+    public Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds) {
+        return memberQueryService.getMemberBasicInfoMapForShare(memberIds);
+    }
+
     /**
      * 공유용 기본 회원 정보 + 팔로우 상태 조회 (외부용)
+     *
      * @param targetMemberId 조회 대상 회원 ID
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return MemberSharedDTO.WithFollowStatusDTO

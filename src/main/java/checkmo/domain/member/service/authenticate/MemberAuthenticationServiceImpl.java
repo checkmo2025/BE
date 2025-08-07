@@ -6,6 +6,7 @@ import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.service.security.jwt.JwtCookieUtil;
+import checkmo.domain.member.service.security.jwt.JwtLoginProcessor;
 import checkmo.domain.member.service.security.jwt.JwtToken;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
 import checkmo.domain.member.service.security.jwt.TokenCacheService;
@@ -32,6 +33,7 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
+    private final JwtLoginProcessor jwtLoginProcessor;
 
     @Override
     public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
@@ -48,18 +50,8 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             /// 인증 성공 후 SecurityContext에 인증 정보 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // JWT 토큰 생성
-            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
-
-            int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L); // ms → sec
-            int refreshTokenMaxAge = (int) (jwtTokenProvider.getRefreshTokenExpirationTime() / 1000L);
-
-            jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), accessTokenMaxAge);
-            jwtCookieUtil.addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenMaxAge);
-
-            // RefreshToken Redis에 저장
-            String memberId = ((PrincipalDetails) authentication.getPrincipal()).getMember().getId();
-            tokenCacheService.saveRefreshToken(memberId, jwtToken.getRefreshToken());
+            // JWT 토큰 생성 및 쿠키 설정
+            jwtLoginProcessor.processLogin(response, authentication);
 
         } catch (AuthenticationException authEx) {
             // 인증 실패 시 예외 처리

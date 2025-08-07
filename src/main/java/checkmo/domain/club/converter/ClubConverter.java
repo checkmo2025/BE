@@ -389,10 +389,11 @@ public class ClubConverter {
     }
 
     /**
-     * Meeting 엔티티 -> MeetingInfoDTO 변환
+     * Meeting 엔티티 + BooksharedDTO -> MeetingInfoDTO 변환
      */
-    public static MeetingResponseDTO.MeetingInfoDTO fromMeetingToMeetingInfoDTO(
-            Meeting meeting
+    public static MeetingResponseDTO.MeetingInfoDTO fromMeetingAndBookSharedDTOToMeetingInfoDTO(
+            Meeting meeting,
+            BookSharedDTO.BasicInfoDTO bookInfo
     ) {
         return MeetingResponseDTO.MeetingInfoDTO.builder()
                 .meetingId(meeting.getId())
@@ -402,7 +403,7 @@ public class ClubConverter {
                 .content(meeting.getContent())
                 .generation(meeting.getGeneration())
                 .tag(meeting.getTag())
-                // .bookInfo(null)
+                .bookInfo(bookInfo)
                 .build();
     }
 
@@ -413,7 +414,7 @@ public class ClubConverter {
             List<Meeting> meetings
     ) {
         return meetings.stream()
-                .map(ClubConverter::fromMeetingToMeetingInfoDTO)
+                .map(meeting -> fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, null))
                 .toList();
     }
 
@@ -490,6 +491,21 @@ public class ClubConverter {
     ) {
         return ClubSharedDTO.MyClubList.builder()
                 .clubList(clubInfoList)
+                .build();
+    }
+
+    /**
+     * List<MeetingResponseDTO.MeetingInfoDTO> -> MeetingListDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingListDTO fromMeetingInfoDTOListToMeetingListDTO(
+            List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return MeetingResponseDTO.MeetingListDTO.builder()
+                .meetingInfoList(meetingInfoDTOList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package checkmo.domain.member.service.query;
 
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import checkmo.global.dto.MemberSharedDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,22 @@ public interface MemberQueryService {
      * @return 회원 기본 정보 DTO
      */
     MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId);
+
+    /**
+     * 회원 프로필 정보 (카테고리 포함) 조회
+     *
+     * @param memberId 회원 ID
+     * @return 회원 프로필 정보 DTO
+     */
+    MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId);
+
+    /**
+     * 회원 ID 목록으로 회원 기본 정보 배치 조회
+     *
+     * @param memberIds 회원 ID 목록
+     * @return 회원 ID와 기본 정보 DTO의 매핑
+     */
+    Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds);
 
     /**
      * 다른 사람 프로필 조회

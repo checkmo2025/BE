@@ -31,10 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                                             "해당 이메일을 가진 사용자를 찾을 수 없습니다: " + email));
 
         // 비활성화된 계정, 탈퇴한 계정 등의 상태 검증
-        if (member.getDeactivated() != null) {
-            throw new GeneralException(ErrorStatus.MEMBER_INACTIVE);
-        }
-
+        validateMemberStatus(member);
         return new PrincipalDetails(member);
     }
 

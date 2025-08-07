@@ -101,4 +101,10 @@ public class Member extends BaseEntity {
     public void completeProfile() {
         this.isProfileCompleted = true;
     }
+
+    // 프로필 수정
+    public void updateProfile(String description, String imgUrl) {
+        this.description = description != null ? description : "";
+        this.imgUrl = imgUrl != null ? imgUrl : "";
+    }
 }

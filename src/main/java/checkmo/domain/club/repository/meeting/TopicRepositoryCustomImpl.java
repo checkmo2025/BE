@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class TopicRepositoryCustomImpl implements  TopicRepositoryCustom {
+public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QTopic topic = QTopic.topic;
 
@@ -25,6 +25,7 @@ public class TopicRepositoryCustomImpl implements  TopicRepositoryCustom {
         }
         return queryFactory
                 .selectFrom(topic)
+                .distinct()
                 .where(predicate)
                 .join(topic.clubMember).fetchJoin()
                 .orderBy(topic.id.asc())

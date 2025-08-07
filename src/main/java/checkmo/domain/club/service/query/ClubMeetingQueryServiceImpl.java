@@ -30,13 +30,13 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     private final ClubQueryService clubQueryService;
 
     @Override
-    public MeetingResponseDTO.InProgressMeetingDetailDTO findMeetingById(Long meetingId) {
+    public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId) {
         return null;
     }
 
     @Override
-    public MeetingResponseDTO.MeetingListDTO findAllMeetingsByClub(Long clubId, Long cursorId) {
-        return null;
+    public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
+        return meetingRepository.findMeetingsByClubIdAndCursorDesc(clubId, cursorId, size + 1);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public MeetingResponseDTO.TeamDTO findTeamsByMeeting(Long meetingId, Integer teamNumber) {
+    public MeetingResponseDTO.TeamTopicDTO findTeamsByMeeting(Long meetingId, Integer teamNumber) {
         return null;
     }
 

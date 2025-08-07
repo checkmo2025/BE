@@ -86,7 +86,12 @@ public enum ErrorStatus implements BaseErrorCode {
     //알림
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION4001", "알림을 찾을 수 없습니다."),
     NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "NOTIFICATION4002", "이미 읽은 알림입니다."),
-    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION4003", "해당 알림에 접근할 권한이 없습니다.");
+    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION4003", "해당 알림에 접근할 권한이 없습니다."),
+
+    // 페이지네이션 파라미터
+    CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4001", "커서 값은 양수여야 합니다."),
+    SIZE_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4002", "조회할 개수는 양수여야 합니다."),
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

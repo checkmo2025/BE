@@ -12,8 +12,25 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class MeetingRepositoryCustomImpl implements MeetingRepositoryCustom {
-    private final JPAQueryFactory jpaQueryFactory;
+    private final JPAQueryFactory queryFactory;
     private final QMeeting meeting = QMeeting.meeting;
+
+    @Override
+    public List<Meeting> findMeetingsByClubIdAndCursorDesc(Long clubId, Long cursorId, Integer size) {
+        BooleanBuilder predicate = new BooleanBuilder();
+        predicate.and(meeting.club.id.eq(clubId));
+        if (cursorId != null) {
+            predicate.and(meeting.id.lt(cursorId));
+        }
+
+        return queryFactory
+                .selectFrom(meeting)
+                .distinct()
+                .where(predicate)
+                .orderBy(meeting.id.desc())
+                .limit(size)
+                .fetch();
+    }
 
     @Override
     public List<Meeting> findMeetingsByClubIdAndGenerationAndCursorDesc(Long clubId, Integer generation, Long cursorId, Integer size) {
@@ -38,8 +55,9 @@ public class MeetingRepositoryCustomImpl implements MeetingRepositoryCustom {
             predicate.and(meeting.id.lt(cursorId));
         }
 
-        return jpaQueryFactory
+        return queryFactory
                 .selectFrom(meeting)
+                .distinct()
                 .where(predicate)
                 .orderBy(meeting.id.desc())
                 .limit(size)

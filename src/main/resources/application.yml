@@ -6,3 +6,4 @@ spring:
       - aladin
       - mail
       - jwt
+      - oauth2

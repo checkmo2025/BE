@@ -32,10 +32,18 @@ public interface MemberQueryFacade {
     MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId);
 
     /**
+     * 회원 프로필 정보 (카테고리 포함) 조회 (내부용)
+     *
+     * @param memberId 회원 ID
+     * @return 회원 프로필 정보 DTO
+     */
+    MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId);
+
+    /**
      * 다른 사람 프로필 조회 (내부용)
      *
      * @param targetMemberNickname 조회 대상 회원 닉네임
-     * @param memberId             조회하는 회원 ID (팔로우 여부 확인용)
+     * @param memberId 조회하는 회원 ID (팔로우 여부 확인용)
      * @return targetMember의 프로필 정보 DTO
      */
     MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId);
@@ -66,7 +74,7 @@ public interface MemberQueryFacade {
      * ‼️ 마이페이지 구성할 때 사용하세요~~
      *
      * @param memberId 조회할 회원의 ID
-     * @param size     조회할 개수
+     * @param size 조회할 개수
      * @return 팔로워 목록
      */
     MemberResponseDTO.FollowPreviewList getFollowers(String memberId, int size);
@@ -77,7 +85,7 @@ public interface MemberQueryFacade {
      * ‼️ 마이페이지 구성할 때 사용하세요~~
      *
      * @param memberId 조회할 회원의 ID
-     * @param size     조회할 개수
+     * @param size 조회할 개수
      * @return 팔로잉 목록
      */
     MemberResponseDTO.FollowPreviewList getFollowings(String memberId, int size);
@@ -93,7 +101,7 @@ public interface MemberQueryFacade {
     /**
      * 특정 회원의 팔로우 여부 확인 (외부용)
      *
-     * @param memberId             조회하는 회원 ID
+     * @param memberId 조회하는 회원 ID
      * @param targetMemberNickname 조회 대상 회원 닉네임
      * @return 팔로우 여부
      */
@@ -101,13 +109,23 @@ public interface MemberQueryFacade {
 
     /**
      * 공유용 기본 회원 정보 조회 (외부용)
+     *
      * @param memberId 조회할 회원 ID
      * @return MemberSharedDTO.BasicInfo
      */
     MemberSharedDTO.BasicInfoDTO getMemberBasicInfoForShare(String memberId);
 
     /**
+     * 회원 ID 목록으로 공유용 기본 회원 정보 조회 (외부용)
+     *
+     * @param memberIds 조회할 회원 ID 목록
+     * @return 회원 ID와 기본 정보 매핑 리스트
+     */
+    Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds);
+
+    /**
      * 팔로우 상태를 포함한 공유용 회원 정보 조회 (외부용)
+     *
      * @param targetMemberId 조회 대상 회원 ID
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return MemberSharedDTO.WithFollowStatus
@@ -129,13 +147,14 @@ public interface MemberQueryFacade {
 
     /**
      * 회원 ID로 회원의 닉네임을 조회합니다. (외부용)
+     *
      * @return 회원의 닉네임
      */
     String getMemberNicknameById(String memberId);
 
     /**
      * 회원 ID 목록으로 회원의 닉네임을 조회합니다. (외부용)
-     * @param memberIds
+     *
      * @return 회원 ID와 닉네임의 매핑 정보
      */
     Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds);

@@ -3,6 +3,8 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.domain.club.validation.validCursor.ValidCursor;
+import checkmo.domain.club.validation.validSize.ValidSize;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.global.auth.CurrentId;
@@ -86,8 +88,8 @@ public class ClubBookshelfController {
     @GetMapping("/api/meetings/{meetingId}/reviews")
     public ApiResponse<BookShelfResponseDTO.BookReviewListDTO> getAllReviews(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) @Positive Long cursorId,
-            @RequestParam(required = false, defaultValue = "15") @Positive Integer size,
+            @RequestParam(required = false) @ValidCursor Long cursorId,
+            @RequestParam @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, cursorId, size, memberId);
@@ -250,8 +252,8 @@ public class ClubBookshelfController {
     @GetMapping("/api/meetings/{meetingId}/topics")
     public ApiResponse<BookShelfResponseDTO.TopicListDTO> getTopicList(
             @PathVariable Long meetingId,
-            @RequestParam(required = false) @Positive Long cursorId,
-            @RequestParam(required = false, defaultValue = "15") @Positive Integer size,
+            @RequestParam(required = false) @ValidCursor Long cursorId,
+            @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.TopicListDTO topicList = clubQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);

@@ -91,7 +91,6 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         }
 
         try {
-            // TODO: 로그아웃 시 토큰 블랙리스트 검증 로직 추가
             Jwts.parser()
                 .verifyWith((SecretKey) key)
                 .build()
