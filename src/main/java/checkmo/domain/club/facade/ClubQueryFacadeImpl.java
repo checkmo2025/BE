@@ -16,6 +16,7 @@ import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,25 +72,19 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * @return 해당 상태의 회원 목록 DTO
      */
     @Override
-    public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId) {
+    public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Pageable pageable) {
 
         // 1. 커서 초기화
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
 
         // 2. 클럽 멤버 리스트 조회
-        List<ClubMember> members = clubQueryService.getClubMemberListByStatus(clubId, memberId, clubMemberStatus, cursor);
+        List<ClubMember> members = clubQueryService.getClubMemberListByStatus(clubId, memberId, clubMemberStatus, cursor, pageable);
 
         // 3. DTO 변환
         List<ClubResponseDTO.ClubMemberDTO> dtoList = members.stream()
                 .map(cm -> {
                     MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(cm.getMemberId());
-                    return new ClubResponseDTO.ClubMemberDTO(
-                            cm.getId(),
-                            memberInfo.getNickname(),
-                            memberInfo.getProfileImageUrl(),
-                            cm.getJoinMessage(),
-                            cm.getClubMemberStatus().name()
-                    );
+                    return ClubConverter.toClubMemberDTO(cm, memberInfo);
                 })
                 .toList();
 

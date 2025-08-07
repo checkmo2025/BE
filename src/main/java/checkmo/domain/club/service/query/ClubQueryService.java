@@ -4,6 +4,7 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public interface ClubQueryService {
      * @param cursorId 페이징 커서 ID
      * @return ClubMember 엔티티 리스트 (최대 10개)
      */
-    List<ClubMember> getClubMemberListByStatus(Long clubId, String memberId, String status, Long cursorId);
+    List<ClubMember> getClubMemberListByStatus(Long clubId, String memberId, String status, Long cursorId, Pageable pageable);
 
     /**
      * 다음 페이지가 존재하는지 확인합니다.

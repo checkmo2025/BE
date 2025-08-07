@@ -11,6 +11,7 @@ import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,7 @@ public class ClubQueryServiceImpl implements ClubQueryService {
      * @return ClubMember 엔티티 리스트 (최대 10개)
      */
     @Override
-    public List<ClubMember> getClubMemberListByStatus(Long clubId, String memberId, String status, Long cursorId) {
+    public List<ClubMember> getClubMemberListByStatus(Long clubId, String memberId, String status, Long cursorId, Pageable pageable) {
 
         // 1. 클럽 유효성 검증
         validateClub(clubId);
@@ -65,11 +66,12 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         // 2. 조회 상태 변환
         ClubMember.ClubMemberStatus clubMemberStatus = parseStatus(status);
 
-        if (clubMemberStatus == null) { // ALL 상태
-            return clubMemberRepository.findTop10ByClub_IdAndIdLessThanOrderByIdDesc(clubId, cursorId);
+        if (clubMemberStatus == null) {
+            return clubMemberRepository.findByClub_IdAndIdLessThanOrderByIdDesc(clubId, cursorId, pageable);
         } else {
-            return clubMemberRepository.findTop10ByClub_IdAndClubMemberStatusAndIdLessThanOrderByIdDesc(clubId, clubMemberStatus, cursorId);
+            return clubMemberRepository.findByClub_IdAndClubMemberStatusAndIdLessThanOrderByIdDesc(clubId, clubMemberStatus, cursorId, pageable);
         }
+
     }
 
     /**

@@ -5,6 +5,7 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.ClubSharedDTO;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public interface ClubQueryFacade {
      * @param cursorId 페이징 커서 ID
      * @return 해당 상태의 회원 목록 DTO
      */
-    ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId);
+    ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Pageable pageable);
 
     /**
      * ClubQueryService
