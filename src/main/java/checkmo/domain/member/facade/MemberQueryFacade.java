@@ -32,6 +32,14 @@ public interface MemberQueryFacade {
     MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId);
 
     /**
+     * 회원 프로필 정보 (카테고리 포함) 조회 (내부용)
+     *
+     * @param memberId 회원 ID
+     * @return 회원 프로필 정보 DTO
+     */
+    MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId);
+
+    /**
      * 다른 사람 프로필 조회 (내부용)
      *
      * @param targetMemberNickname 조회 대상 회원 닉네임

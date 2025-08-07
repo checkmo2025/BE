@@ -2,11 +2,13 @@ package checkmo.domain.member.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.FollowRepository;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
+    private final CategoryQueryFacade categoryQueryFacade;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -40,6 +43,16 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         return MemberConverter.toMemberProfileResponseDTO(member);
+    }
+
+    @Override
+    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        List<CategorySharedDTO.CategoryInfo> categories = categoryQueryFacade.getCategoriesByMemberForShare(memberId).getCategoryList();
+
+        return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
     }
 
     @Override

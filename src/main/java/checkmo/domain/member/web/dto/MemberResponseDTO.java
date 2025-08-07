@@ -1,13 +1,13 @@
 package checkmo.domain.member.web.dto;
 
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.CategorySharedDTO;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 public class MemberResponseDTO {
 
@@ -51,6 +51,17 @@ public class MemberResponseDTO {
         private String nickname;
         private String description;
         private String profileImageUrl;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberProfileWithCategoryResponseDTO {
+        private String nickname;
+        private String description;
+        private String profileImageUrl;
+        private List<CategorySharedDTO.CategoryInfo> categories; // 카테고리 정보 리스트
     }
 
     @Getter

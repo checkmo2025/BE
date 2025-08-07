@@ -13,9 +13,8 @@ public interface CategoryAssignmentCommandService {
      *
      * @param memberId     회원 ID
      * @param request  추가할 카테고리 ID 목록
-     * @return 추가된 카테고리 정보가 담긴 DTO
      */
-    CategoryResponseDTO.CategoryListResponseDTO modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request);
+    void modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request);
 
     /**
      * Club의 관심 카테고리 수정 - 이미 추가되어있는 관심 카테고리는 서비스 로직 구현 시 제외하고 새로운 카테고리만 추가 or 제거
