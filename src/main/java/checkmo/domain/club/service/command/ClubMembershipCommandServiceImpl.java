@@ -63,7 +63,11 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
         ClubMember clubMember = ClubConverter.toClubMemberEntity(club, proxyMember, status, request.getJoinMessage());
         club.addClubMember(clubMember);
 
-        return new ClubInfoDTO(clubId, null, club.isOpen());
+        return ClubInfoDTO.builder()
+                .clubId(clubId)
+                .clubName(club.getName())
+                .open(club.isOpen())
+                .build();
     }
 
     /**
