@@ -46,7 +46,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
      */
     @Override
     public ClubMember.ClubMemberStatus getMemberStatusInClub(String memberId, Long clubId) {
-        return clubMemberRepository.findByMemberIdAndClubId(memberId, clubId)
+        return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
                 .map(ClubMember::getClubMemberStatus)
                 .orElse(null); // 존재하지 않으면 null 반환
     }
