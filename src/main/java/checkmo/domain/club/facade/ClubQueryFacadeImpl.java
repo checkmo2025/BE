@@ -98,7 +98,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         if (hasNext) {
             clubList = clubList.subList(0, PAGE_SIZE); // 다음 페이지를 위해 마지막은 제거
         }
-        Long nextCursor = hasNext ? clubList.get(clubList.size() - 1).getClub().getClubId() : null; // 다음 커서 설정
+        Long nextCursor = hasNext && !clubList.isEmpty() ?
+                clubList.get(clubList.size() - 1).getClub().getClubId() : null; // 다음 커서 설정
 
         // 4. 최종 DTO 변환
         return ClubConverter.toClubListDTO(clubList, hasNext, nextCursor);
@@ -161,7 +162,12 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 4. 페이징
         boolean hasNext = noticeItems.size() > pageSize;
-        Long nextCursor = hasNext ? noticeItems.get(pageSize - 1).getId() : null;
+        if (hasNext) {
+            noticeItems = noticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
+        }
+        Long nextCursor = hasNext && noticeItems.size() >= pageSize
+                ? noticeItems.get(pageSize - 1).getId()
+                : null;
 
         return ClubConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor, isStaff);
     }

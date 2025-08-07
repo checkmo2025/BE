@@ -31,17 +31,11 @@ public class ClubNoticeController {
     public ApiResponse<ClubResponseDTO.ClubNoticeListDTO> getNoticeList(
             @CurrentId String memberId,
             @PathVariable Long clubId,
-            @RequestParam(required = false, defaultValue = "") Long cursorId,
+            @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false, defaultValue = "false") boolean onlyImportant
     ) {
         int pageSize = 10; // 페이지 크기 설정
-        if (onlyImportant) {
-            // 중요 공지만 조회
-            return ApiResponse.onSuccess(clubQueryFacade.getLatestNotices(clubId, memberId, cursorId, true, pageSize));
-        } else {
-            // 전체 공지사항 조회
-            return ApiResponse.onSuccess(clubQueryFacade.getLatestNotices(clubId, memberId, cursorId, false, pageSize));
-        }
+        return ApiResponse.onSuccess(clubQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant, pageSize));
     }
 
     @Operation(summary = "공지사항 작성", description = "특정 모임에 공지사항을 작성합니다. (운영진만 작성 가능)")
