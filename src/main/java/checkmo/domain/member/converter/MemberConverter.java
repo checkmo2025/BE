@@ -122,6 +122,19 @@ public class MemberConverter {
                 .build();
     }
 
+    /**
+     * Object[] -> FollowResponse 변환
+     * 배치 처리를 위한 조회 결과를 Object[]에 담아서 전달
+     * 여기서 Object[]의 구성은 row[0]=memberId, row[1]=nickname, row[2]=profileImageUrl
+     */
+    public static MemberResponseDTO.FollowResponse toFollowResponse(Object[] row, boolean isFollowing) {
+        return MemberResponseDTO.FollowResponse.builder()
+                .nickname((String) row[1])
+                .profileImageUrl((String) row[2])
+                .following(isFollowing)
+                .build();
+    }
+
     // =====================================================
     // DTO ↔ Entity 변환
     // =====================================================
