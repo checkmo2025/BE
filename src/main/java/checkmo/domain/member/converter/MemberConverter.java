@@ -118,17 +118,17 @@ public class MemberConverter {
         return MemberSharedDTO.WithFollowStatusDTO.builder()
                 .nickname(basicInfo.getNickname())
                 .profileImageUrl(basicInfo.getProfileImageUrl())
-                .isFollowing(isFollowing)
+                .following(isFollowing)
                 .build();
     }
 
     /**
-     * Object[] -> FollowResponse 변환
+     * Object[] -> WithFollowStatusDTO 변환 (공유용)
      * 배치 처리를 위한 조회 결과를 Object[]에 담아서 전달
      * 여기서 Object[]의 구성은 row[0]=memberId, row[1]=nickname, row[2]=profileImageUrl
      */
-    public static MemberResponseDTO.FollowResponse toFollowResponse(Object[] row, boolean isFollowing) {
-        return MemberResponseDTO.FollowResponse.builder()
+    public static MemberSharedDTO.WithFollowStatusDTO toWithFollowStatusDTO(Object[] row, boolean isFollowing) {
+        return MemberSharedDTO.WithFollowStatusDTO.builder()
                 .nickname((String) row[1])
                 .profileImageUrl((String) row[2])
                 .following(isFollowing)
@@ -157,7 +157,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowList 변환
      */
     public static MemberResponseDTO.FollowList toFollowList(
-            List<MemberResponseDTO.FollowResponse> followList,
+            List<MemberSharedDTO.WithFollowStatusDTO> followList,
             boolean hasNext,
             Long nextCursor
     ) {
@@ -172,7 +172,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowPreviewList 변환
      */
     public static MemberResponseDTO.FollowPreviewList toFollowPreviewList(
-            List<MemberResponseDTO.FollowResponse> followList
+            List<MemberSharedDTO.WithFollowStatusDTO> followList
     ) {
         return MemberResponseDTO.FollowPreviewList.builder()
                 .followList(followList)
