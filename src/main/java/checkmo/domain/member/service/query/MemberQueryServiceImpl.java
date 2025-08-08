@@ -115,11 +115,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                         row -> {
                             String targetMemberId = (String) row[0];
                             boolean isFollowing = followingIds.contains(targetMemberId); // 팔로잉 여부 확인
-                            return MemberResponseDTO.FollowResponse.builder()
-                                    .nickname((String) row[1])     // nickname
-                                    .profileImageUrl((String) row[2]) // imgUrl
-                                    .following(isFollowing)
-                                    .build();
+                            return MemberConverter.toFollowResponse(row, isFollowing);
                         }
                 ));
     }
