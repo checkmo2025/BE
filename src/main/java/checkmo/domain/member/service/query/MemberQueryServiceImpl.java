@@ -101,7 +101,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Map<String, MemberResponseDTO.FollowResponse> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
+    public Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
         // 1. 배치로 회원 기본 정보 조회 (1번의 쿼리)
         var results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
 
@@ -115,7 +115,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                         row -> {
                             String targetMemberId = (String) row[0];
                             boolean isFollowing = followingIds.contains(targetMemberId); // 팔로잉 여부 확인
-                            return MemberConverter.toFollowResponse(row, isFollowing);
+                            return MemberConverter.toWithFollowStatusDTO(row, isFollowing);
                         }
                 ));
     }
