@@ -20,7 +20,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
     // 검색을 위한 메서드
     @Override
-    public List<Club> searchClubs(String keyword, int region, int participants, Long cursorId, Integer PAGE_SIZE) {
+    public List<Club> searchClubs(String keyword, int region, int participants, Long cursorId, Integer size) {
 
         // 검색 조건 빌더 생성
         BooleanBuilder builder = buildSearchCondition(keyword, region, participants);
@@ -35,7 +35,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
                 .selectFrom(club)
                 .where(builder)
                 .orderBy(club.id.desc())
-                .limit(PAGE_SIZE + 1)
+                .limit(size + 1)
                 .fetch();
     }
 
