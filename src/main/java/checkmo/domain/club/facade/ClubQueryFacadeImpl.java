@@ -38,6 +38,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
 
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
      *
