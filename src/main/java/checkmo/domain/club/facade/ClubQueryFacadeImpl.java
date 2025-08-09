@@ -16,6 +16,7 @@ import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,9 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
+
+    // 페이징 기본 크기 상수
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     @Override
     public ClubSharedDTO.MyClubList getMyClubListForShare(String memberId) {
@@ -72,24 +76,29 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * @param cursorId 페이징 커서 ID
      * @return 해당 상태의 회원 목록 DTO
      */
+
     @Override
-    public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Pageable pageable) {
+    public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Integer size) {
 
         // 1. 커서 초기화
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
 
-        // 2. 클럽 멤버 리스트 조회
+        // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
+        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+        Pageable pageable = PageRequest.of(0, pageSize);
+
+        // 3. 클럽 멤버 리스트 조회
         List<ClubMember> members = clubQueryService.getClubMemberListByStatus(clubId, memberId, clubMemberStatus, cursor, pageable);
 
-        // 3. memberId 추출
+        // 4. memberId 추출
         List<String> memberIds = members.stream()
                 .map(ClubMember::getMemberId)
                 .toList();
 
-        // 4. 기본 정보 배치 조회
+        // 5. 기본 정보 배치 조회
         Map<String, MemberSharedDTO.BasicInfoDTO> memberInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
 
-        // 5. DTO 변환
+        // 6. DTO 변환
         List<ClubResponseDTO.ClubMemberDTO> dtoList = members.stream()
                 .map(cm -> {
                     MemberSharedDTO.BasicInfoDTO memberInfo = memberInfoMap.get(cm.getMemberId());
@@ -97,7 +106,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 })
                 .toList();
 
-        // 6. 페이징 정보
+        // 7. 페이징 정보
         Long lastId = members.isEmpty() ? null : members.get(members.size() - 1).getId();
         boolean hasNext = clubQueryService.hasNextPage(clubId, clubMemberStatus, lastId);
 

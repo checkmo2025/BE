@@ -57,7 +57,7 @@ public interface ClubQueryFacade {
      * @param cursorId 페이징 커서 ID
      * @return 해당 상태의 회원 목록 DTO
      */
-    ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Pageable pageable);
+    ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Integer size);
 
     /**
      * ClubQueryService

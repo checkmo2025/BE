@@ -117,10 +117,10 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestParam(defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
-            @RequestParam(required = false) Long cursorId // 페이징을 위한 커서 ID
+            @RequestParam(required = false) Long cursorId, // 페이징을 위한 커서 ID
+            @RequestParam(required = false) Integer size // 페이지 사이즈
     ) {
-        Pageable pageable = PageRequest.of(0, 10);  // 페이지 0, 크기 10 고정
-        return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId, pageable));
+        return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId, size));
     }
 
     /**
