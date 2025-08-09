@@ -90,8 +90,7 @@ public class ClubResponseDTO {
     @Builder
     public static class ClubMemberDTO {
         private Long clubMemberId; // 클럽 회원 ID
-        private String nickname; // 회원의 닉네임
-        private String profileImgUrl; // 회원의 프로필 이미지 URL
+        private MemberSharedDTO.BasicInfoDTO basicInfo; // 닉네임과 프로필 url
         private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
         private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
     }

@@ -72,8 +72,7 @@ public class ClubConverter {
     public static ClubResponseDTO.ClubMemberDTO toClubMemberDTO(ClubMember targetMember, MemberSharedDTO.BasicInfoDTO memberInfo) {
         return ClubResponseDTO.ClubMemberDTO.builder()
                 .clubMemberId(targetMember.getId())
-                .nickname(memberInfo.getNickname())
-                .profileImgUrl(memberInfo.getProfileImageUrl())
+                .basicInfo(memberInfo)
                 .joinMessage(targetMember.getJoinMessage())
                 .clubMemberStatus(targetMember.getClubMemberStatus().name())
                 .build();
