@@ -114,7 +114,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                         row -> (String) row[0], // targetMemberId
                         row -> {
                             String targetMemberId = (String) row[0];
-                            boolean isFollowing = followingIds.contains(targetMemberId); // 팔로잉 여부 확인
+                            boolean isFollowing = targetMemberId.equals(memberId) || followingIds.contains(targetMemberId); // 본인인 경우 true, 그 외에는 팔로잉 여부 확인
                             return MemberConverter.toWithFollowStatusDTO(row, isFollowing);
                         }
                 ));
