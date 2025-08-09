@@ -11,11 +11,11 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 @Repository
-public class ClubRepositoryImpl implements ClubRepositoryCustom {
+public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public ClubRepositoryImpl(EntityManager em) {
+    public ClubRepositoryCustomImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
