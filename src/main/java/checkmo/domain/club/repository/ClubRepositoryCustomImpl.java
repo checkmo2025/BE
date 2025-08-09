@@ -5,26 +5,22 @@ import checkmo.domain.club.entity.QClub;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    public ClubRepositoryCustomImpl(EntityManager em) {
-        this.queryFactory = new JPAQueryFactory(em);
-    }
+    private final QClub club = QClub.club;
 
     // 검색을 위한 메서드
     @Override
     public List<Club> searchClubs(String keyword, int region, int participants, Long cursorId, Integer PAGE_SIZE) {
-
-        // Q클럽 객체 생성
-        QClub club = QClub.club;
 
         // 검색 조건 빌더 생성
         BooleanBuilder builder = buildSearchCondition(keyword, region, participants);
@@ -46,7 +42,6 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
     // 검색 조건 빌더
     private BooleanBuilder buildSearchCondition(String keyword, int region, int participants) {
 
-        QClub club = QClub.club;
         BooleanBuilder builder = new BooleanBuilder();
 
         // 키워드가 비어있지 않은 경우에만 검색 조건 추가
