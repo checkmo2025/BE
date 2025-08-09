@@ -55,6 +55,17 @@ public class ClubConverter {
     }
 
     /**
+     * Club -> ClubResponseDTO.ClubInfoDTO
+     */
+    public static ClubResponseDTO.ClubInfoDTO toClubInfoDTO(Club club) {
+        return ClubResponseDTO.ClubInfoDTO.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .open(club.isOpen())
+                .build();
+    }
+
+    /**
      * ClubMemberDTO 리스트 → ClubResponseDTO.ClubMemberListDTO 변환
      */
     public static ClubResponseDTO.ClubMemberListDTO toClubMemberListDTO(List<ClubResponseDTO.ClubMemberDTO> dtoList, boolean hasNext, Long lastId) {
