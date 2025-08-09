@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,5 +27,22 @@ public class BookQueryServiceImpl implements BookQueryService {
         );
 
         return BookConverter.fromBook(book);
+    }
+
+    @Override
+    public Map<String, BookResponseDTO.BookInfoDetailResponse> findBooksMap(List<String> bookIds) {
+        if (bookIds == null || bookIds.isEmpty()) {
+            return Map.of();
+        }
+
+        // 배치로 책 엔티티 조회
+        List<Book> books = bookRepository.findAllById(bookIds);
+
+        // Book 엔티티를 DTO로 변환하여 매핑
+        return books.stream()
+                .collect(Collectors.toMap(
+                        Book::getId,
+                        BookConverter::fromBook
+                ));
     }
 }
