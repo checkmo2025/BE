@@ -30,12 +30,6 @@ public class ClubRequestDTO {
         private List<Club.ParticipantType> participantTypes;
         private String insta;
         private String kakao;
-
-        public CategorySharedDTO.CategoryIdListDTO toCategoryListRequestDTO() {
-            return CategorySharedDTO.CategoryIdListDTO.builder()
-                    .categoryIdList(this.category)
-                    .build();
-        }
     }
 
     @Getter

@@ -59,7 +59,7 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         clubRepository.save(club);
 
         // 5. 카테고리 연관관계 설정
-        categoryCommandFacade.modifyClubCategories(club.getId(), request.toCategoryListRequestDTO());
+        categoryCommandFacade.modifyClubCategories(club.getId(), ClubConverter.toCategoryListRequestDTO(request));
 
         // 6. 생성된 클럽의 ID 반환
         return club.getId();

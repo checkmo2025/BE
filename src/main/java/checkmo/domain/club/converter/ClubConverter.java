@@ -18,6 +18,7 @@ import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
@@ -119,6 +120,15 @@ public class ClubConverter {
                 .insta(dto.getInsta())
                 .kakao(dto.getKakao())
                 .participantTypes(dto.getParticipantTypes())
+                .build();
+    }
+
+    /**
+     * ClubRequestDTO.ClubDetailDTO -> CategoryIdListDTO
+     */
+    public static CategorySharedDTO.CategoryIdListDTO toCategoryListRequestDTO(ClubRequestDTO.ClubDetailDTO dto) {
+        return CategorySharedDTO.CategoryIdListDTO.builder()
+                .categoryIdList(dto.getCategory())
                 .build();
     }
 
