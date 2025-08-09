@@ -87,9 +87,9 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         ClubMember.ClubMemberStatus clubMemberStatus = parseStatus(status);
 
         if (clubMemberStatus == null) { // ALL 상태
-            return clubMemberRepository.existsByClub_IdAndIdLessThan(clubId, lastId);
+            return clubMemberRepository.existsByClubIdAndIdLessThan(clubId, lastId);
         } else {
-            return clubMemberRepository.existsByClub_IdAndClubMemberStatusAndIdLessThan(clubId, clubMemberStatus, lastId);
+            return clubMemberRepository.existsByClubIdAndClubMemberStatusAndIdLessThan(clubId, clubMemberStatus, lastId);
         }
     }
 
