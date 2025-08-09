@@ -38,10 +38,10 @@ public class ClubQueryServiceImpl implements ClubQueryService {
      * @return 독서 클럽 목록 DTO
      */
     @Override
-    public List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer PAGE_SIZE) {
+    public List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer size) {
 
         // 1. 검색 조건에 맞는 클럽 리스트 조회
-        List<Club> clubs = clubRepository.searchClubs(keyword, region, participants, cursorId, PAGE_SIZE);
+        List<Club> clubs = clubRepository.searchClubs(keyword, region, participants, cursorId, size);
 
         // 2. 클럽 ID 리스트 추출
         List<Long> clubIds = clubs.stream()
