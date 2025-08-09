@@ -7,6 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,5 +59,23 @@ public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
 
         // 팔로우 관계가 존재하는지 확인
         return followRepository.existsByFollowerIdAndFollowingId(memberId, targetMemberId);
+    }
+
+    @Override
+    public Map<String, Boolean> getFollowStatusMapForMembers(String currentMemberId, List<String> targetMemberIds) {
+        if (targetMemberIds == null || targetMemberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        // 실제로 팔로우하고 있는 대상들을 배치로 조회
+        Set<String> followingIds = followRepository.findFollowingIdsByFollowerId(currentMemberId, targetMemberIds);
+        
+        // 모든 대상에 대해 팔로우 상태를 설정 (자기 자신은 항상 true)
+        return targetMemberIds.stream()
+                .distinct()
+                .collect(Collectors.toMap(
+                        targetId -> targetId,
+                        targetId -> currentMemberId.equals(targetId) || followingIds.contains(targetId)
+                ));
     }
 }

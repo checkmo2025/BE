@@ -2,6 +2,7 @@ package checkmo.domain.member.web.dto;
 
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.CategorySharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowList {
-        private List<FollowResponse> followList; // 팔로워/팔로잉 목록
+        private List<MemberSharedDTO.WithFollowStatusDTO> followList; // 팔로워/팔로잉 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
     }
@@ -29,17 +30,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowPreviewList {
-        private List<FollowResponse> followList; // 팔로워/팔로잉 목록
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class FollowResponse {
-        private String nickname; // 회원 닉네임
-        private String profileImageUrl; // 프로필 이미지 URL
-        private boolean following; // 조회하는 사람의 팔로잉 여부
+        private List<MemberSharedDTO.WithFollowStatusDTO> followList; // 팔로워/팔로잉 목록
     }
 
 

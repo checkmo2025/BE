@@ -4,6 +4,9 @@ import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.web.dto.BookResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Book Domain Query Facade
  * Book 도메인의 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade
@@ -42,6 +45,14 @@ public interface BookQueryFacade {
      * @return 공유용 상세 책 정보 DTO
      */
     BookSharedDTO.DetailInfoDTO getBookDetailInfoForShare(String bookId);
+
+    /**
+     * 책 ID 목록으로 공유용 기본 책 정보를 조회합니다. (외부용)
+     *
+     * @param bookIds 조회할 책 ID 목록
+     * @return 책 ID와 기본 정보 매핑 정보
+     */
+    Map<String, BookSharedDTO.BasicInfoDTO> getBookBasicInfoMapForShare(List<String> bookIds);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)
