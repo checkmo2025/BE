@@ -43,7 +43,7 @@ public class Topic extends BaseEntity {
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
     public boolean isOwnedBy(ClubMember clubMember) {
-        return this.clubMember != null && this.clubMember.equals(clubMember);
+        return this.clubMember != null && this.clubMemberId.equals(clubMember.getId());
     }
 
     public void updateTopic(String description) {
