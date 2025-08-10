@@ -141,7 +141,7 @@ public class MemberConverter {
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
                 .categories(categories)
-                .isFollowing(isFollowing)
+                .following(isFollowing)
                 .build();
     }
 

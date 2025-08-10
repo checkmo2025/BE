@@ -72,7 +72,7 @@ public class MemberResponseDTO {
         private String nickname;
         private String description;
         private String profileImageUrl;
-        private boolean isFollowing;
+        private boolean following;
         private List<CategorySharedDTO.CategoryInfo> categories;
     }
 
