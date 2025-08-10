@@ -207,7 +207,7 @@ public interface ClubCommandFacade {
      * @param memberId 요청자 회원 ID
      * @return 발제 선택 결과 DTO
      */
-    MeetingResponseDTO.TopicSelectionDTO selectOrCacnelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId);
+    MeetingResponseDTO.TopicSelectionDTO selectOrCanelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId);
 
     /**
      * ClubMeetingCommandService

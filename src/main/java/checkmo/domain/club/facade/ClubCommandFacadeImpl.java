@@ -45,9 +45,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubMembershipCommandService
      * 독서 모임에 가입을 신청합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 신청자 회원 ID
-     * @param request  가입 신청 메시지 DTO
+     * @param request 가입 신청 메시지 DTO
      * @return 가입 신청 후의 모임 정보 DTO
      */
     @Override
@@ -59,8 +59,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubMembershipCommandService
      * 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
      *
-     * @param clubId          독서 모임 ID
-     * @param targetMemberId  수정 대상 회원 ID
+     * @param clubId 독서 모임 ID
+     * @param targetMemberId 수정 대상 회원 ID
      * @param currentMemberId 요청자(운영진) 회원 ID
      * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
      * @return 수정된 회원의 응답 DTO
@@ -80,7 +80,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      * ClubMembershipCommandService
      * 독서 모임에서 탈퇴합니다. (내부용)
      *
-     * @param clubId   모임 ID
+     * @param clubId 모임 ID
      * @param memberId 탈퇴할 회원 ID
      */
     @Override
@@ -243,7 +243,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public MeetingResponseDTO.TopicSelectionDTO selectOrCacnelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId) {
+    public MeetingResponseDTO.TopicSelectionDTO selectOrCanelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId) {
         Boolean isSelected = clubMeetingCommandService.selectOrCancelTopic(memberId, meetingId, topicId, request);
         return MeetingResponseDTO.TopicSelectionDTO.builder().topicId(topicId).teamNumbers(request.getTeamNumber()).isSelected(isSelected).build();
     }

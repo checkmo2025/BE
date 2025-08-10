@@ -173,13 +173,13 @@ public class ClubMeetingController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다.")
     })
     @PostMapping("/api/meetings/{meetingId}/topics/{topicId}")
-    public ApiResponse<MeetingResponseDTO.TopicSelectionDTO> selectOrCacnelTopic(
+    public ApiResponse<MeetingResponseDTO.TopicSelectionDTO> selectOrCancelTopic(
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
             @RequestBody MeetingRequestDTO.TopicSelectionDTO request,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TopicSelectionDTO result = clubCommandFacade.selectOrCacnelTopic(meetingId, topicId, request, memberId);
+        MeetingResponseDTO.TopicSelectionDTO result = clubCommandFacade.selectOrCanelTopic(meetingId, topicId, request, memberId);
         return ApiResponse.onSuccess(result);
     }
 }
