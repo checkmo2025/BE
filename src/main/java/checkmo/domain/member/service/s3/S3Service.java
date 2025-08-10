@@ -29,6 +29,9 @@ public class S3Service {
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
     );
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+            ".jpg", ".jpeg", ".png", ".webp", ".gif"
+    );
 
     // 파일 업로드를 위한 presigned URL 생성
     public MemberResponseDTO.PresignedUrlDTO generatePresignedUploadUrl(String fileName, String contentType) {
@@ -145,7 +148,15 @@ public class S3Service {
             return "";
         }
 
+        // 파일 확장자 추출
+        String extension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+
+        // 허용된 확장자만 통과
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+        }
+
         // 파일의 확장자 반환
-        return fileName.substring(fileName.lastIndexOf("."));
+        return extension;
     }
 }
