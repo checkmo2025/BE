@@ -7,3 +7,4 @@ spring:
       - mail
       - jwt
       - oauth2
+      - s3

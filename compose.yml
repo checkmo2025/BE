@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_PROFILES_ACTIVE: aladin,jwt,mail,prod,redis, oauth2
+      SPRING_PROFILES_ACTIVE: aladin, jwt, mail, prod, redis, oauth2, s3
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
