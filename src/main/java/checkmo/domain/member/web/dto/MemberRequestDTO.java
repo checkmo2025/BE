@@ -91,4 +91,16 @@ public class MemberRequestDTO {
         @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$", message = "비밀번호는 영어 및 특수문자를 포함해야 합니다")
         private String password;
     }
+
+    @Getter
+    @NoArgsConstructor
+    public static class ImageUploadRequest {
+        @NotBlank(message = "파일명은 필수입니다")
+        @Schema(description = "업로드할 파일명", example = "profile.jpg")
+        private String fileName;
+
+        @NotBlank(message = "콘텐츠 타입은 필수입니다")
+        @Schema(description = "파일의 콘텐츠 타입", example = "image/jpeg")
+        private String contentType;
+    }
 }
