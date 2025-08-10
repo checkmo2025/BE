@@ -1,5 +1,6 @@
 package checkmo;
 
+import io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
@@ -8,7 +9,8 @@ import org.springframework.retry.annotation.EnableRetry;
 
 @SpringBootApplication(
         exclude = {
-                RedisRepositoriesAutoConfiguration.class
+                RedisRepositoriesAutoConfiguration.class,
+                S3AutoConfiguration.class
         }
 )
 @EnableJpaAuditing
