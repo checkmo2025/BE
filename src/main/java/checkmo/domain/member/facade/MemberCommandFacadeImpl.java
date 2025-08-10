@@ -96,6 +96,6 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
     @Override
     public MemberResponseDTO.PresignedUrlDTO generateProfileImageUploadUrl(MemberRequestDTO.ImageUploadRequest request) {
-        return s3Service.generatePresignedUploadUrl(request.getFileName(), request.getContentType());
+        return s3Service.generatePresignedUploadUrl(request.getOriginalFileName(), request.getContentType());
     }
 }
