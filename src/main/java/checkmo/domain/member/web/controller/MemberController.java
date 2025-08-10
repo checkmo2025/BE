@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -146,7 +147,7 @@ public class MemberController {
     })
     @PostMapping("/me/profile-image/upload-url")
     public ApiResponse<MemberResponseDTO.PresignedUrlDTO> getProfileImageUploadUrl(
-            @RequestBody MemberRequestDTO.ImageUploadRequest request
+            @Valid @RequestBody MemberRequestDTO.ImageUploadRequest request
     ) {
         return ApiResponse.onSuccess(memberCommandFacade.generateProfileImageUploadUrl(request));
     }
