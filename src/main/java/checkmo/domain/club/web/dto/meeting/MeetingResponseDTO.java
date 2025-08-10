@@ -62,7 +62,6 @@ public class MeetingResponseDTO {
         private List<TopicDTO> topics; // 토픽 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서
-        private int pageSize; // 현재 페이지 크기
     }
 
     @Getter
@@ -94,5 +93,15 @@ public class MeetingResponseDTO {
         private String profileImageUrl; // 프로필 이미지 URL
         private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
         private Integer teamNumber; // 배정된 팀 번호
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TopicSelectionDTO {
+        private Long topicId; // 토픽 ID
+        private Integer teamNumber; // 요청을 보낸 팀 번호
+        private Boolean isSelected; // 발제 선택 여부
     }
 }

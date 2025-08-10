@@ -438,6 +438,19 @@ public class ClubConverter {
                 .toList();
     }
 
+    public static MeetingResponseDTO.TopicDTO fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+            Topic topic,
+            MemberSharedDTO.BasicInfoDTO authorSharedDTO,
+            List<Integer> teamNumbers
+    ) {
+        return MeetingResponseDTO.TopicDTO.builder()
+                .topicId(topic.getId())
+                .content(topic.getDescription())
+                .authorInfo(authorSharedDTO)
+                .teamNumbers(teamNumbers)
+                .build();
+    }
+
     // =====================================================
     // Entity -> Entity 변환
     // =====================================================
@@ -476,7 +489,7 @@ public class ClubConverter {
     /**
      * List<TopicDTO> -> BookShelfResponseDTO.TopicListDTO 변환
      */
-    public static BookShelfResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTO(
+    public static BookShelfResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTOForBookshelf(
             List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
             boolean hasNext,
             Long nextCursor
@@ -524,6 +537,21 @@ public class ClubConverter {
     ) {
         return MeetingResponseDTO.MeetingListDTO.builder()
                 .meetingInfoList(meetingInfoDTOList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TopicListDTO 변환
+     */
+    public static MeetingResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTOForMeeting(
+            List<MeetingResponseDTO.TopicDTO> topicList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return MeetingResponseDTO.TopicListDTO.builder()
+                .topics(topicList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
                 .build();
