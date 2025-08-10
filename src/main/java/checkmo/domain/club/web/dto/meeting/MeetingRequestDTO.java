@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,6 +28,7 @@ public class MeetingRequestDTO {
         @Min(value = 1, message = "기수는 1 이상의 정수여야 합니다.")
         private int generation;  // 기수
         @NotBlank(message = "독서모임 태그는 필수 입력입니다.")
+        @Size(max = 6, message = "태그는 최대 6글자까지 입력 가능합니다.")
         private String tag; // 태그
         @Valid
         @NotNull(message = "책 정보는 null이 될 수 없습니다.")
@@ -47,6 +49,7 @@ public class MeetingRequestDTO {
         @Min(value = 1, message = "기수는 1 이상의 정수여야 합니다.")
         private int generation;  // 기수
         @NotBlank(message = "독서모임 태그는 필수 입력입니다.")
+        @Size(max = 6, message = "태그는 최대 6글자까지 입력 가능합니다.")
         private String tag; // 태그
     }
 
