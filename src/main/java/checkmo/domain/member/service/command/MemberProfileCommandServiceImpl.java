@@ -7,6 +7,7 @@ import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
+import checkmo.domain.member.service.s3.S3Service;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
@@ -23,6 +24,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
     private final MemberRepository memberRepository;
     private final CategoryCommandFacade categoryCommandFacade;
     private final CategoryQueryFacade categoryQueryFacade;
+    private final S3Service s3Service;
 
     @Override
     public MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(
@@ -33,8 +35,21 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
                                         .orElseThrow(() -> new GeneralException(
                                             ErrorStatus.MEMBER_NOT_FOUND));
 
+        // 기존에 저장된 이미지 url 가져오기
+        String existingImageUrl = member.getImgUrl();
+
+        // 새로 입력받은 request의 이미지 url 가져오기
+        String newImageUrl = request.getImgUrl();
+
+        // 기존 이미지와 새로운 이미지가 다를 경우 S3에서 기존 이미지 삭제
+        // 새로운 이미지 url이 null이면 기존 이미지 삭제
+        if (existingImageUrl != null && !existingImageUrl.equals(newImageUrl)) {
+            String imageKey = s3Service.extractKeyFromUrl(existingImageUrl);
+            s3Service.deleteImage(imageKey);
+        }
+
         // 프로필 정보 업데이트 (소개, 이미지)
-        member.updateProfile(request.getDescription(), request.getImgUrl());
+        member.updateProfile(request.getDescription(), newImageUrl);
 
         // 관심 카테고리 수정
         if (request.getCategoryIds() != null) {
