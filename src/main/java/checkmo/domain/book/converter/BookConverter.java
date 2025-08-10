@@ -100,11 +100,13 @@ public class BookConverter {
                 .replace("\n", " ")  // 실제 개행 문자 처리
                 .trim();
 
+        String replaceImgUrl = item.getCover().replace("coversum", "cover500");
+
         return BookResponseDTO.BookInfoDetailResponse.builder()
                 .isbn(item.getIsbn13())
                 .title(item.getTitle())
                 .author(item.getAuthor())
-                .imgUrl(item.getCover())
+                .imgUrl(replaceImgUrl)
                 .publisher(item.getPublisher())
                 .description(cleanedDescription)
                 .build();

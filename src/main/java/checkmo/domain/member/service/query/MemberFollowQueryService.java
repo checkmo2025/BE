@@ -3,6 +3,7 @@ package checkmo.domain.member.service.query;
 import checkmo.domain.member.entity.Follow;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 팔로우/팔로잉 조회 서비스
@@ -49,4 +50,13 @@ public interface MemberFollowQueryService {
      * 특정 회원의 팔로우 여부 확인
      */
     boolean isFollowing(String memberId, String targetMemberId);
+
+    /**
+     * 특정 회원이 여러 회원들을 팔로우하는지 배치로 확인 (배치 처리용)
+     *
+     * @param currentMemberId 현재 회원 ID
+     * @param targetMemberIds 확인할 대상 회원 ID 목록
+     * @return 대상 회원 ID별 팔로우 여부 매핑
+     */
+    Map<String, Boolean> getFollowStatusMapForMembers(String currentMemberId, List<String> targetMemberIds);
 }

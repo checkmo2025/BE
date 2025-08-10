@@ -37,8 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private final List<String> excludedPaths = List.of(
-        "/swagger-ui/**",
-        "/v3/api-docs/**"
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/health"
     );
 
     @Override

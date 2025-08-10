@@ -4,7 +4,6 @@ import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberCommandFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
-import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.auth.CurrentMember;
@@ -127,8 +126,4 @@ public class AuthController {
             );
         }
     }
-
-    // 소셜 로그인 관련
-    // GET /api/auth/oauth2/google - 소셜 로그인 (구글)
-    // GET /api/auth/oauth2/kakao - 소셜 로그인 (카카오)
 }

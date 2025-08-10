@@ -32,6 +32,14 @@ public interface MemberQueryFacade {
     MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId);
 
     /**
+     * 회원 프로필 정보 (카테고리 포함) 조회 (내부용)
+     *
+     * @param memberId 회원 ID
+     * @return 회원 프로필 정보 DTO
+     */
+    MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId);
+
+    /**
      * 다른 사람 프로필 조회 (내부용)
      *
      * @param targetMemberNickname 조회 대상 회원 닉네임
@@ -123,6 +131,15 @@ public interface MemberQueryFacade {
      * @return MemberSharedDTO.WithFollowStatus
      */
     MemberSharedDTO.WithFollowStatusDTO getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId);
+
+    /**
+     * 회원 ID 목록으로 팔로우 상태를 포함한 공유용 회원 정보를 조회합니다. (외부용)
+     *
+     * @param targetMemberIds 조회 대상 회원 ID 목록
+     * @param currentMemberId 현재 로그인한 회원 ID
+     * @return 회원 ID와 팔로우 상태 포함 정보 매핑
+     */
+    Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)

@@ -16,9 +16,8 @@ public interface CategoryCommandFacade {
      *
      * @param memberId 회원 ID
      * @param request  수정할 카테고리 ID 목록 DTO
-     * @return 수정된 카테고리 정보가 담긴 **공유 DTO**
      */
-    CategorySharedDTO.CategoryInfoList modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request);
+    void modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request);
 
     /**
      * 특정 모임의 카테고리 목록을 수정합니다.
@@ -27,5 +26,5 @@ public interface CategoryCommandFacade {
      * @param request 수정할 카테고리 ID 목록 DTO
      * @return 수정된 카테고리 정보가 담긴 **공유 DTO**
      */
-    CategorySharedDTO.CategoryInfoList modifyClubCategories(Long clubId, CategoryRequestDTO.CategoryListRequestDTO request);
+    CategorySharedDTO.CategoryInfoList modifyClubCategories(Long clubId, CategorySharedDTO.CategoryIdListDTO request);
 }

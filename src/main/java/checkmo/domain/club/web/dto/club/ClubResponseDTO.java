@@ -72,6 +72,16 @@ public class ClubResponseDTO {
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
         private int pageSize; // 현재 페이지 크기
+        private boolean isStaff; // 본인이 모임의 스탭인지 여부
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubMemberUpdateResponseDTO {
+        private ClubResponseDTO.ClubMemberDTO updatedMember;
+        private boolean isRequesterStaff; // 현재 로그인한 요청자가 운영진인지 여부
     }
 
     @Getter
@@ -79,8 +89,8 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class ClubMemberDTO {
-        private String nickname; // 회원의 닉네임
-        private String profileImgUrl; // 회원의 프로필 이미지 URL
+        private Long clubMemberId; // 클럽 회원 ID
+        private MemberSharedDTO.BasicInfoDTO basicInfo; // 닉네임과 프로필 url
         private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
         private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
     }

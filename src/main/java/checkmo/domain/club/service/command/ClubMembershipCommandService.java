@@ -22,13 +22,23 @@ public interface ClubMembershipCommandService {
     ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request);
 
     /**
-     * 독서모임의 가입 신청을 승인합니다.
+     * ClubMembershipCommandService
+     * 독서 모임 회원의 등급(상태/역할)을 수정합니다.
      *
-     * 피그마 참고 페이지 : 피그마 페이지 아직 없음
-     *
-     * @param clubId 독서모임 ID
-     * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
-     * @param ClubMemberId 가입 승인 해줄 멤버의 id DTO (그 멤버 자체의 id 아님!! , ClubMember의 id임)
+     * @param clubId          독서 모임 ID
+     * @param targetMemberId  수정 대상 회원 ID
+     * @param currentMemberId 요청자(운영진) 회원 ID
+     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @return 수정된 회원의 응답 DTO
      */
-    void approveJoinRequest(Long clubId, String memberId, Long ClubMemberId);
+    ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status);
+
+    /**
+     * 독서 모임에서 탈퇴합니다.
+     *
+     * @param clubId   독서 모임 ID
+     * @param memberId 탈퇴할 회원 ID (본인)
+     */
+    void leaveClub(Long clubId, String memberId);
+
 }
