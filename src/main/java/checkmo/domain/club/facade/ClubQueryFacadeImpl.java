@@ -211,6 +211,9 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        
         List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
 
         boolean hasNext = topics.size() > size;
