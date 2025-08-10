@@ -38,7 +38,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         Member member = principalDetails.getMember();
 
-        String path = member.isProfileCompleted() ? "/home" : "/profile";
+        String path = member.isProfileCompleted() ? "home" : "profile";
 
         // 기본 리다이렉트 URI
         String targetUrl = UriComponentsBuilder.fromUriString(baseUri)
