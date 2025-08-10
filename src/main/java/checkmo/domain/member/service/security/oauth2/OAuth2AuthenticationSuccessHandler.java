@@ -42,10 +42,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 기본 리다이렉트 URI
         String targetUrl = UriComponentsBuilder.fromUriString(baseUri)
-                                               .path(path)
+                                               .pathSegment(path)
                                                .build().toUriString();
 
         // 성공 후 리다이렉트 URL 설정
+        clearAuthenticationAttributes(request);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
