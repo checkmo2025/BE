@@ -178,4 +178,17 @@ public class MemberConverter {
                 .followList(followList)
                 .build();
     }
+
+    /**
+     * String들 -> MemberResponseDTO.PresignedUrlDTO 변환
+     */
+    public static MemberResponseDTO.PresignedUrlDTO toPresignedUrlDTO(
+            String presignedUrl,
+            String imageUrl
+    ) {
+        return MemberResponseDTO.PresignedUrlDTO.builder()
+                .presignedUrl(presignedUrl)
+                .imageUrl(imageUrl)
+                .build();
+    }
 }
