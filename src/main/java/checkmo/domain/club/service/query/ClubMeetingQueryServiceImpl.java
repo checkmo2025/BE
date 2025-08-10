@@ -40,7 +40,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+    public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size) {
         if (size == null) { // size가 null인 경우 전체 토픽 조회
             return topicRepository.findTopicsByMeetingIdOrderByIdAsc(meetingId);
         }

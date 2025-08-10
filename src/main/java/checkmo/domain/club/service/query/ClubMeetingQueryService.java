@@ -47,7 +47,7 @@ public interface ClubMeetingQueryService {
      * @param size 조회할 토픽 개수 (null이면 전체 조회)
      * @return 조회한 토픽 정보 DTO
      */
-    List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
+    List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size);
 
     /**
      * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후,
