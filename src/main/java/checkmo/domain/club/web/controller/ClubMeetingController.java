@@ -176,7 +176,7 @@ public class ClubMeetingController {
     public ApiResponse<MeetingResponseDTO.TopicSelectionDTO> selectOrCancelTopic(
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
-            @RequestBody MeetingRequestDTO.TopicSelectionDTO request,
+            @RequestBody @Valid MeetingRequestDTO.TopicSelectionDTO request,
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TopicSelectionDTO result = clubCommandFacade.selectOrCanelTopic(meetingId, topicId, request, memberId);

@@ -57,6 +57,7 @@ public class MeetingRequestDTO {
     @NoArgsConstructor
     public static class TopicSelectionDTO {
         @NotNull(message = "팀 번호는 필수 입력입니다.")
+        @Min(value = 1, message = "팀 번호는 1 이상의 정수여야 합니다.")
         private Integer teamNumber; // 팀 번호
         @NotNull(message = "발제 선택 여부는 필수 입력입니다.")
         private Boolean isSelected; // 발제 선택 여부

@@ -101,7 +101,7 @@ public class MeetingResponseDTO {
     @Builder
     public static class TopicSelectionDTO {
         private Long topicId; // 토픽 ID
-        private Integer teamNumbers; // 요청을 보낸 팀 번호
+        private Integer teamNumber; // 요청을 보낸 팀 번호
         private Boolean isSelected; // 발제 선택 여부
     }
 }
