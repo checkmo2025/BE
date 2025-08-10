@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -25,9 +26,18 @@ public class S3Service {
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
     private final S3Properties s3Properties;
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
+    );
 
     // 파일 업로드를 위한 presigned URL 생성
     public MemberResponseDTO.PresignedUrlDTO generatePresignedUploadUrl(String fileName, String contentType) {
+
+        // Content-Type 검증
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+        }
+
         // S3에 저장될 파일의 고유 경로(key) 생성
         String key = generateUniqueKey(fileName);
 
