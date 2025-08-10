@@ -245,7 +245,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     @Override
     public MeetingResponseDTO.TopicSelectionDTO selectOrCanelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId) {
         Boolean isSelected = clubMeetingCommandService.selectOrCancelTopic(memberId, meetingId, topicId, request);
-        return MeetingResponseDTO.TopicSelectionDTO.builder().topicId(topicId).teamNumbers(request.getTeamNumber()).isSelected(isSelected).build();
+        return MeetingResponseDTO.TopicSelectionDTO.builder().topicId(topicId).teamNumber(request.getTeamNumber()).isSelected(isSelected).build();
     }
 
     @Override
