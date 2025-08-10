@@ -123,7 +123,7 @@ public class S3Service {
             // presigned URL을 문자열로 변환
             String presignedUrl = presignedRequest.url().toString();
 
-            log.info("새로운 key로 presigned url 생성: {}", presignedUrl);
+            log.info("새로운 key로 presigned url 생성: {}", key);
             return presignedUrl;
         } catch (Exception e) {
             log.error("key를 통한 presigned url 생성 실패: {}", key, e);
