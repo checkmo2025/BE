@@ -67,7 +67,7 @@ public class Meeting extends BaseEntity {
     private Notice notice;
 
     @Builder.Default
-    @OneToMany(mappedBy = "meeting")
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Topic> topics = new ArrayList<>();
 
     @Builder.Default
@@ -130,5 +130,10 @@ public class Meeting extends BaseEntity {
     public void addTopic(Topic topic) {
         this.topics.add(topic);
         topic.setMeeting(this); // 주인 쪽에도 세팅
+    }
+
+    public void removeTopic(Topic topic) {
+        this.topics.remove(topic);
+        topic.setMeeting(null); // 주인 쪽에서 연결 끊기
     }
 }

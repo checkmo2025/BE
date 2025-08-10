@@ -56,7 +56,7 @@ public class ClubMember extends BaseEntity {
     private List<MemberTeam> memberTeams = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.REMOVE)
     private List<Topic> topics = new ArrayList<>();
 
     public boolean isStaff() {
@@ -71,6 +71,11 @@ public class ClubMember extends BaseEntity {
     public void addTopic(Topic topic) {
         this.topics.add(topic);
         topic.setClubMember(this);
+    }
+
+    public void removeTopic(Topic topic) {
+        this.topics.remove(topic);
+        topic.setClubMember(null);
     }
 
     public enum ClubMemberStatus {

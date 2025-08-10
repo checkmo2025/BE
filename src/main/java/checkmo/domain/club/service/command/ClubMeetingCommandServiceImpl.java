@@ -173,7 +173,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        topicRepository.delete(topic);
+        meeting.removeTopic(topic);
+        clubMember.removeTopic(topic);
     }
 
     @Override
