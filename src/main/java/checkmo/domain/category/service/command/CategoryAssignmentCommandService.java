@@ -23,5 +23,5 @@ public interface CategoryAssignmentCommandService {
      * @param request  추가할 카테고리 ID 목록
      * @return 추가된 카테고리 정보가 담긴 DTO
      */
-    CategoryResponseDTO.CategoryListResponseDTO modifyClubCategories(Long clubId, CategoryRequestDTO.CategoryListRequestDTO request);
+    CategoryResponseDTO.CategoryListResponseDTO modifyClubCategories(Long clubId, CategorySharedDTO.CategoryIdListDTO request);
 }

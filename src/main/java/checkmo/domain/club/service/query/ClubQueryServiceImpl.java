@@ -6,10 +6,12 @@ import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.repository.ClubMemberRepository;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class ClubQueryServiceImpl implements ClubQueryService {
 
     private final ClubRepository clubRepository;
+    private final ClubMemberRepository clubMemberRepository;
+
     private final ClubMemberQueryService clubMemberQueryService;
     private final CategoryQueryFacade categoryQueryFacade;
 
@@ -40,9 +44,73 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         return null;
     }
 
+    /**
+     * 특정 상태의 모임 회원 목록을 조회합니다.
+     *
+     * @param clubId 모임 ID
+     * @param memberId 요청자 회원 ID (권한 확인용)
+     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL" 중 하나)
+     * @param cursorId 페이징 커서 ID
+     * @return ClubMember 엔티티 리스트 (최대 10개)
+     */
     @Override
-    public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId) {
-        return null;
+    public List<ClubMember> getClubMemberListByStatus(Long clubId, String memberId, String status, Long cursorId, Pageable pageable) {
+
+        // 1. 클럽 유효성 검증
+        validateClub(clubId);
+        ClubMember requester = clubMemberQueryService.validateClubMember(clubId, memberId);
+        if (!requester.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. 조회 상태 변환
+        ClubMember.ClubMemberStatus clubMemberStatus = parseStatus(status);
+
+        if (clubMemberStatus == null) {
+            if (cursorId == null) {
+                return clubMemberRepository.findByClubIdOrderByIdDesc(clubId, pageable);
+            } else {
+                return clubMemberRepository.findByClubIdAndIdLessThanOrderByIdDesc(clubId, cursorId, pageable);
+            }
+        } else {
+            if (cursorId == null) {
+                return clubMemberRepository.findByClubIdAndClubMemberStatusOrderByIdDesc(clubId, clubMemberStatus, pageable);
+            } else {
+                return clubMemberRepository.findByClubIdAndClubMemberStatusAndIdLessThanOrderByIdDesc(clubId, clubMemberStatus, cursorId, pageable);
+            }
+        }
+
+    }
+
+    /**
+     * 다음 페이지가 존재하는지 확인합니다.
+     *
+     * @param clubId 모임 ID
+     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL" 중 하나)
+     * @param lastId 현재 페이지의 마지막 ID
+     * @return true: 다음 페이지 있음, false: 마지막 페이지
+     */
+    @Override
+    public boolean hasNextPage(Long clubId, String status, Long lastId) {
+        ClubMember.ClubMemberStatus clubMemberStatus = parseStatus(status);
+
+        if (clubMemberStatus == null) { // ALL 상태
+            return clubMemberRepository.existsByClubIdAndIdLessThan(clubId, lastId);
+        } else {
+            return clubMemberRepository.existsByClubIdAndClubMemberStatusAndIdLessThan(clubId, clubMemberStatus, lastId);
+        }
+    }
+
+    // 상태 변환 메소드
+    private ClubMember.ClubMemberStatus parseStatus(String clubMemberStatus) {
+        if ("ALL".equalsIgnoreCase(clubMemberStatus)) {
+            return null; // ALL
+        }
+        try {
+            return ClubMember.ClubMemberStatus.valueOf(clubMemberStatus.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new GeneralException(ErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
     }
 
     /**

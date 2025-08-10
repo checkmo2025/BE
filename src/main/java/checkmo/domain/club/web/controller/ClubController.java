@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,6 +28,7 @@ public class ClubController {
 
     /**
      * 모임 이름 중복 검사 API
+     *
      * @param clubName 중복 여부 확인할 모임 이름
      * @return true: 이미 존재하는 이름, false: 사용 가능한 이름
      */
@@ -68,14 +71,108 @@ public class ClubController {
         return ApiResponse.onSuccess(result);
     }
 
+    /**
+     * 독서클럽 회원 가입 신청 API
+     *
+     * @param clubId 독서 모임 ID
+     * @return 가입 신청 결과를 포함한 성공 응답
+     */
+    @Operation(summary = "독서 모임 가입 신청 API", description = "독서 모임에 가입 신청을 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 가입 신청을 했거나, 가입이 승인된 상태입니다."),
+    })
+    @PostMapping("/{clubId}/join")
+    public ApiResponse<ClubResponseDTO.ClubInfoDTO> joinClub(
+            @PathVariable Long clubId,
+            @CurrentId String memberId,
+            @RequestBody @Valid ClubRequestDTO.ClubMemberJoinDTO request
+    ) {
+        return ApiResponse.onSuccess(clubCommandFacade.joinClub(clubId, memberId, request));
+    }
 
-    // GET /api/clubs?keyword=독서&region=1&participants=1 - 독서 모임 조회 및 검색
-    // POST /api/clubs/{clubId}/join - 독서 모임 가입 신청
-    // GET /api/clubs/{clubId}/dashboard - 참여중인 Club 메인 화면
+    /**
+     * 독서클럽 회원 조회하기 API (상태별 필터링 가능)
+     *
+     * @param clubId 독서 모임 ID
+     * @param status 조회할 회원 상태 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
+     * @param cursorId 페이징을 위한 커서 ID (선택 사항)
+     * @return 독서 모임의 회원 정보를 포함한 성공 응답
+     */
+    @Operation(summary = "독서 모임 회원 조회 API", description = "독서 모임의 회원 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(
+                    name = "status",
+                    description = "조회할 회원 상태 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)",
+                    example = "ALL"
+            )
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+    })
+    @GetMapping("/{clubId}/members")
+    public ApiResponse<ClubResponseDTO.ClubMemberListDTO> getClubMembers(
+            @PathVariable Long clubId,
+            @CurrentId String memberId,
+            @RequestParam(defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
+            @RequestParam(required = false) Long cursorId, // 페이징을 위한 커서 ID
+            @RequestParam(required = false) Integer size // 페이지 사이즈
+    ) {
+        return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId, size));
+    }
 
-    // 회원 관리
-    // GET /api/clubs/{clubId}/members?status=pending - 독서클럽 회원 조회하기 (상태별 필터링 가능)
-    // PATCH /api/clubs/{clubId}/members/{memberId}/approve - 독서클럽 가입 승인하기 (운영진만)
-    // PATCH /api/clubs/{clubId}/members/{memberId}/status - 독서클럽 회원 등급/상태 수정하기 (운영진만)
-    // DELETE /api/clubs/{clubId}/members/me - 독서클럽 탈퇴하기 (본인)
+    /**
+     * 독서 클럽 회원 등급 수정 API
+     *
+     * @param clubId 독서 모임 ID
+     * @param memberId 수정할 회원 ID
+     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @return 수정된 회원 정보를 포함한 성공 응답
+     */
+    @Operation(summary = "독서 모임 회원 등급 수정 API", description = "독서 모임 회원의 등급을 수정합니다.")
+    @Parameters({
+            @Parameter(
+                    name = "status",
+                    description = "수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)",
+                    example = "STAFF"
+            )
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 사용할 수 있는 API입니다."),
+    })
+    @PatchMapping("/{clubId}/members/{memberId}/status")
+    public ApiResponse<ClubResponseDTO.ClubMemberUpdateResponseDTO> updateClubMemberStatus(
+            @PathVariable Long clubId,
+            @PathVariable Long memberId,
+            @CurrentId String currentMemberId,
+            @RequestParam(defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+    ) {
+        return ApiResponse.onSuccess(clubCommandFacade.updateClubMemberStatus(clubId, memberId, currentMemberId, status));
+    }
+
+    /**
+     * 독서 모임 탈퇴하기 API
+     *
+     * @param clubId 탈퇴할 독서 모임 ID
+     * @return 성공 응답
+     */
+    @Operation(summary = "독서 모임 탈퇴 API", description = "본인이 가입한 독서 모임에서 탈퇴합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "탈퇴 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "본인만 탈퇴할 수 있습니다."),
+    })
+    @DeleteMapping("/{clubId}/leave")
+    public ApiResponse<Void> leaveClub(
+            @PathVariable Long clubId,
+            @CurrentId String memberId
+    ) {
+        clubCommandFacade.leaveClub(clubId, memberId);
+        return ApiResponse.onSuccess(null);
+    }
+
 }
