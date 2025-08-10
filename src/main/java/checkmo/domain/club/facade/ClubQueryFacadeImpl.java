@@ -14,6 +14,8 @@ import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +33,13 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationQueryService clubCommunicationQueryService;
 
-    private final ClubRepository clubRepository; // 프록시용
+    private final ClubRepository clubRepository;
 
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
+
+    // 페이징 기본 크기 상수
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     @Override
     public ClubSharedDTO.MyClubList getMyClubListForShare(String memberId) {
@@ -59,9 +64,51 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return clubQueryService.getClubInfo(clubId, memberId);
     }
 
+    /**
+     * ClubQueryService
+     * 특정 상태의 모임 회원 목록을 조회합니다. (내부용)
+     *
+     * @param clubId 모임 ID
+     * @param memberId 요청자(운영진) 회원 ID
+     * @param clubMemberStatus 조회할 회원 상태
+     * @param cursorId 페이징 커서 ID
+     * @return 해당 상태의 회원 목록 DTO
+     */
+
     @Override
-    public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId) {
-        return null;
+    public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Integer size) {
+
+        // 1. 커서 초기화
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
+        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+        Pageable pageable = PageRequest.of(0, pageSize);
+
+        // 3. 클럽 멤버 리스트 조회
+        List<ClubMember> members = clubQueryService.getClubMemberListByStatus(clubId, memberId, clubMemberStatus, cursor, pageable);
+
+        // 4. memberId 추출
+        List<String> memberIds = members.stream()
+                .map(ClubMember::getMemberId)
+                .toList();
+
+        // 5. 기본 정보 배치 조회
+        Map<String, MemberSharedDTO.BasicInfoDTO> memberInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
+
+        // 6. DTO 변환
+        List<ClubResponseDTO.ClubMemberDTO> dtoList = members.stream()
+                .map(cm -> {
+                    MemberSharedDTO.BasicInfoDTO memberInfo = memberInfoMap.get(cm.getMemberId());
+                    return ClubConverter.toClubMemberDTO(cm, memberInfo);
+                })
+                .toList();
+
+        // 7. 페이징 정보
+        Long lastId = members.isEmpty() ? null : members.get(members.size() - 1).getId();
+        boolean hasNext = clubQueryService.hasNextPage(clubId, clubMemberStatus, lastId);
+
+        return ClubConverter.toClubMemberListDTO(dtoList, hasNext, lastId);
     }
 
     /**

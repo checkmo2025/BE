@@ -86,4 +86,9 @@ public class ClubMember extends BaseEntity {
     public enum ClubMemberStatus {
         MEMBER, STAFF, PENDING, BLOCKED
     }
+
+    public void updateStatus(ClubMemberStatus newStatus) {
+        this.clubMemberStatus = newStatus;
+    }
+
 }

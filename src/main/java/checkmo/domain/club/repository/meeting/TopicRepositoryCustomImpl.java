@@ -25,6 +25,7 @@ public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
         }
         return queryFactory
                 .selectFrom(topic)
+                .distinct()
                 .where(predicate)
                 .join(topic.clubMember).fetchJoin()
                 .orderBy(topic.id.asc())

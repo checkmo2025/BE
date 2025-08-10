@@ -14,9 +14,18 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 public class PrincipalDetails implements UserDetails, OAuth2User {
 
     private final Member member;
+    private final Map<String, Object> attributes;
 
+    // 이건 이메일 로그인 시 사용하는 생성자
     public PrincipalDetails(Member member) {
         this.member = member;
+        this.attributes = null;
+    }
+
+    // 이건 OAuth2 로그인 시 사용하는 생성자
+    public PrincipalDetails(Member member, Map<String, Object> attributes) {
+        this.member = member;
+        this.attributes = attributes;
     }
 
     @Override
@@ -55,10 +64,9 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     }
 
     // OAuth2User methods
-    // TODO: Oauth2User 관련 메소드 구현 필요
     @Override
     public Map<String, Object> getAttributes() {
-        return null;
+        return attributes;
     }
 
     @Override

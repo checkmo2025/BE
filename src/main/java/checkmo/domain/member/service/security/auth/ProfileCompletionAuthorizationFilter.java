@@ -25,7 +25,10 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
 
     private final List<String> excludedPaths = List.of(
         "/api/auth/logout",
-        "/api/auth/additional-info"
+        "/api/auth/additional-info",
+        "/api/auth/redirect/oauth2",
+        "/swagger-ui/**",
+        "/v3/api-docs/**"
     );
 
     @Override

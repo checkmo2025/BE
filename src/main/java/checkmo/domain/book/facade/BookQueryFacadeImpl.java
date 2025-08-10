@@ -11,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -42,6 +46,25 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
         var book = bookQueryService.findBook(bookId);
 
         return BookConverter.fromBookDTOToDetailInfoDTO(book);
+    }
+
+    @Override
+    public Map<String, BookSharedDTO.BasicInfoDTO> getBookBasicInfoMapForShare(List<String> bookIds) {
+        if (bookIds == null || bookIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<String> distinctBookIds = bookIds.stream().distinct().toList();
+        
+        // 배치로 책 정보 조회
+        Map<String, BookResponseDTO.BookInfoDetailResponse> booksMap = bookQueryService.findBooksMap(distinctBookIds);
+        
+        // DTO 변환
+        return booksMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> BookConverter.fromBookDTOToBasicInfoDTO(entry.getValue())
+                ));
     }
 
     @Override

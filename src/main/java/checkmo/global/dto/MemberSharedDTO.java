@@ -37,6 +37,6 @@ public class MemberSharedDTO {
     public static class WithFollowStatusDTO {
         private String nickname;
         private String profileImageUrl;
-        private boolean isFollowing;    // 조회하는 사람 기준으로 팔로우 여부
+        private boolean following;    // 조회하는 사람 기준으로 팔로우 여부
     }
 }

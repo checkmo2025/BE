@@ -20,7 +20,7 @@ public interface CategoryQueryService {
      * @param memberId 회원 ID
      * @return 회원의 카테고리 정보가 담긴 List
      */
-    CategoryResponseDTO.CategoryListResponseDTO findCategoriesByMember(Long memberId);
+    CategoryResponseDTO.CategoryListResponseDTO findCategoriesByMember(String memberId);
 
     /**
      * 모임의 모든 카테고리 조회
