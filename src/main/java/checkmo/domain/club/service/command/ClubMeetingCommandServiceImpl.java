@@ -136,9 +136,11 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             team.addTeamTopic(teamTopic);
             topic.addTeamTopic(teamTopic);
             try {
-                teamTopicRepository.save(teamTopic);
+                teamTopicRepository.saveAndFlush(teamTopic);
             } catch (DataIntegrityViolationException e) {
                 // 다른 쓰레드가 먼저 팀 발제를 선택한 경우, 선택 성공으로 간주
+                team.removeTeamTopic(teamTopic);
+                topic.removeTeamTopic(teamTopic);
                 return true;
             }
             return true;
@@ -149,6 +151,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 // 연관관계 해제 및 orphanRemoval로 삭제 처리
                 team.removeTeamTopic(teamTopic);
                 topic.removeTeamTopic(teamTopic);
+                teamTopicRepository.flush();
                 return false;
             } catch (OptimisticLockingFailureException e) {
                 // 다른 트랜잭션이 이미 삭제했거나 수정한 경우, 선택 해제 성공으로 간주
