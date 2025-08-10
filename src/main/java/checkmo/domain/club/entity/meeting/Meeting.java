@@ -71,7 +71,7 @@ public class Meeting extends BaseEntity {
     private List<Topic> topics = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<BookReview> bookReviews = new ArrayList<>();
 
     public void addSumRate(double rate) {
@@ -135,5 +135,10 @@ public class Meeting extends BaseEntity {
     public void removeTopic(Topic topic) {
         this.topics.remove(topic);
         topic.setMeeting(null); // 주인 쪽에서 연결 끊기
+    }
+
+    public void removeBookReview(BookReview bookReview) {
+        this.bookReviews.remove(bookReview);
+        bookReview.setMeeting(null);
     }
 }

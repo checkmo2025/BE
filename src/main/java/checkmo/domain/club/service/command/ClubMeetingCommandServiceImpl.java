@@ -238,6 +238,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
         meeting.subtractSumRate(bookReview.getRate());
 
-        bookReviewRepository.delete(bookReview);
+        clubMember.removeBookReview(bookReview);
+        meeting.removeBookReview(bookReview);
     }
 }
