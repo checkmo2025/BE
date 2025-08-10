@@ -10,6 +10,7 @@ import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.*;
+import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.repository.meeting.BookReviewRepository;
 import checkmo.domain.club.repository.meeting.MeetingRepository;
 import checkmo.domain.club.repository.meeting.TeamTopicRepository;
@@ -36,6 +37,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
 
+    private final ClubRepository clubRepository;
     private final MeetingRepository meetingRepository;
     private final TopicRepository topicRepository;
     private final TeamTopicRepository teamTopicRepository;
@@ -61,13 +63,11 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         Notice notice = ClubConverter.fromMeetingToNotice(meeting);
 
         // 5. 연관관계 설정
-        club.addMeeting(meeting);
+        club.addMeeting(meeting); //영속성 컨텍스트 내 객체 상태 동기화
         meeting.addNotice(notice);
 
-        // 6. 명시적 저장
-        meetingRepository.save(meeting);
-
-        return meeting.getId();
+        // 6. 미팅 명시적 저장 -> 공지사항도 함께 저장됨
+        return meetingRepository.save(meeting).getId();
     }
 
     @Override
