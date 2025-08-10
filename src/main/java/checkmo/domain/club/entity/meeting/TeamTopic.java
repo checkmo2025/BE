@@ -10,6 +10,9 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @EqualsAndHashCode(of = "id", callSuper = false)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"topic_id", "team_id"})
+})
 public class TeamTopic extends BaseEntity {
 
     @Id
@@ -31,4 +34,8 @@ public class TeamTopic extends BaseEntity {
     @JoinColumn(name = "team_id")
     @Setter
     private Team team;
+
+    @Version
+    @Builder.Default
+    private Long version = 0L; // 팀 발제 선택 취소에 대한 동시성 제어를 위한 버전 관리
 }

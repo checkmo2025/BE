@@ -21,6 +21,8 @@ import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -133,15 +135,25 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             // 연관관계 설정
             team.addTeamTopic(teamTopic);
             topic.addTeamTopic(teamTopic);
-            teamTopicRepository.save(teamTopic);
+            try {
+                teamTopicRepository.save(teamTopic);
+            } catch (DataIntegrityViolationException e) {
+                // 다른 쓰레드가 먼저 팀 발제를 선택한 경우, 선택 성공으로 간주
+                return true;
+            }
             return true;
         } else {
             // 4-2. 팀 발제 선택 취소
-            TeamTopic teamTopic = existingTeamTopic.get();
-            // 연관관계 해제 및 orphanRemoval로 삭제 처리
-            team.removeTeamTopic(teamTopic);
-            topic.removeTeamTopic(teamTopic);
-            return false;
+            try {
+                TeamTopic teamTopic = existingTeamTopic.get();
+                // 연관관계 해제 및 orphanRemoval로 삭제 처리
+                team.removeTeamTopic(teamTopic);
+                topic.removeTeamTopic(teamTopic);
+                return false;
+            } catch (OptimisticLockingFailureException e) {
+                // 다른 트랜잭션이 이미 삭제했거나 수정한 경우, 선택 해제 성공으로 간주
+                return false;
+            }
         }
     }
 
