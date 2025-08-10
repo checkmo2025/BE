@@ -126,4 +126,12 @@ public interface MemberCommandFacade {
      * @param followerNickname 팔로워 중 삭제할 회원의 nickname
      */
     void deleteFollower(String memberId, String followerNickname);
+
+    /**
+     * 프로필 이미지 업로드용 presigned URL 발급
+     *
+     * @param request 프로필 이미지 업로드 요청 DTO
+     * @return presigned URL
+     */
+    MemberResponseDTO.PresignedUrlDTO generateProfileImageUploadUrl(MemberRequestDTO.ImageUploadRequest request);
 }
