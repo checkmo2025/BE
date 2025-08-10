@@ -137,4 +137,17 @@ public class MemberController {
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
     }
+
+    @Operation(summary = "프로필 이미지용 presigned URL 발급 API", description = "프로필 이미지 업로드를 위한 S3 presigned URL을 발급합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @PostMapping("/me/profile-image/upload-url")
+    public ApiResponse<MemberResponseDTO.PresignedUrlDTO> getProfileImageUploadUrl(
+            @RequestBody MemberRequestDTO.ImageUploadRequest request
+    ) {
+        return ApiResponse.onSuccess(memberCommandFacade.generateProfileImageUploadUrl(request));
+    }
 }
