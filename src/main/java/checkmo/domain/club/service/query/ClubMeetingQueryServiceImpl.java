@@ -49,6 +49,10 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds) {
+        if (topicIds == null || topicIds.isEmpty()) {
+            return Map.of();
+        }
+
         List<TeamTopic> teamTopics = teamTopicRepository.findTeamTopicsWithTeamByTopicIds(topicIds);
         return teamTopics.stream()
                 .collect(Collectors.groupingBy(

@@ -10,7 +10,8 @@ import java.util.Optional;
 public interface TeamTopicRepository extends JpaRepository<TeamTopic, Long> {
     @Query("SELECT tt FROM TeamTopic tt " +
             "JOIN FETCH tt.team t " +
-            "WHERE tt.topic.id IN :topicIds")
+            "WHERE tt.topic.id IN :topicIds " +
+            "ORDER BY t.teamNumber ASC")
     List<TeamTopic> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
 
     @Query("SELECT tt " +
