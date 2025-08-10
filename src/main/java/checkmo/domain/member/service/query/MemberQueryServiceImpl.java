@@ -25,6 +25,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
     private final CategoryQueryFacade categoryQueryFacade;
+    private final MemberFollowQueryService memberFollowQueryService;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -75,7 +76,16 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
-        return null;
+
+        Member targetMember = memberRepository.findByNickName(targetMemberNickname)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
+
+        List<CategorySharedDTO.CategoryInfo> categories = categoryQueryFacade.getCategoriesByMemberForShare(targetMember.getId()).getCategoryList();
+
+        return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing, categories);
+
     }
 
     @Override

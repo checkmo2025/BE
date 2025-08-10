@@ -137,4 +137,15 @@ public class MemberController {
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
     }
+
+    @Operation(summary = "다른 사람 프로필 조회 API", description = "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태를 포함합니다.\n" +
+        "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
+    @GetMapping("/{memberNickname}")
+    public ApiResponse<MemberResponseDTO.otherProfileResponseDTO> getOtherProfile(
+            @CurrentId String memberId,
+            @PathVariable String memberNickname
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.getOtherProfile(memberNickname, memberId));
+    }
+
 }
