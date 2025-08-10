@@ -128,11 +128,19 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
         // 4. 상태 변경
         if (request.getIsSelected()) {
+            // 4-1. 팀 발제 선택
             TeamTopic teamTopic = TeamTopic.builder().team(team).topic(topic).build();
+            // 연관관계 설정
+            team.addTeamTopic(teamTopic);
+            topic.addTeamTopic(teamTopic);
             teamTopicRepository.save(teamTopic);
             return true;
         } else {
-            teamTopicRepository.delete(existingTeamTopic.get());
+            // 4-2. 팀 발제 선택 취소
+            TeamTopic teamTopic = existingTeamTopic.get();
+            // 연관관계 해제 및 orphanRemoval로 삭제 처리
+            team.removeTeamTopic(teamTopic);
+            topic.removeTeamTopic(teamTopic);
             return false;
         }
     }

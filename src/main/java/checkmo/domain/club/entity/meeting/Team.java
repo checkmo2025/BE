@@ -31,11 +31,21 @@ public class Team extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     @Builder.Default
     private List<MemberTeam> memberTeams = new ArrayList<>();
+
+    public void addTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.add(teamTopic);
+        teamTopic.setTeam(this);
+    }
+
+    public void removeTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.remove(teamTopic);
+        teamTopic.setTeam(null);
+    }
 }

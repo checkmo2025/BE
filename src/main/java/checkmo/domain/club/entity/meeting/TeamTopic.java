@@ -20,6 +20,7 @@ public class TeamTopic extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
+    @Setter
     private Topic topic;
 
     @Column(name = "team_id", insertable = false, updatable = false)
@@ -27,5 +28,6 @@ public class TeamTopic extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
+    @Setter
     private Team team;
 }

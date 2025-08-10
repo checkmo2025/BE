@@ -38,7 +38,7 @@ public class Topic extends BaseEntity {
     private ClubMember clubMember;
 
     @Builder.Default
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
     public boolean isOwnedBy(ClubMember clubMember) {
@@ -47,5 +47,15 @@ public class Topic extends BaseEntity {
 
     public void updateTopic(String description) {
         this.description = description;
+    }
+
+    public void addTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.add(teamTopic);
+        teamTopic.setTopic(this);
+    }
+
+    public void removeTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.remove(teamTopic);
+        teamTopic.setTopic(null);
     }
 }
