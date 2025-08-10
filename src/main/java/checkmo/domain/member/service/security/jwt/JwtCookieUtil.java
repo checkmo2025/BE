@@ -11,7 +11,7 @@ public class JwtCookieUtil {
     public void addTokenToCookie(HttpServletResponse response, String cookieName, String token, int maxAge) {
         Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true); // 클라이언트 스크립트에서 접근 불가
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", "None");
         cookie.setPath("/"); // 모든 경로에서 접근 가능
         cookie.setMaxAge(maxAge);
         cookie.setSecure(true); // HTTPS에서만 전송하도록 추가
@@ -36,7 +36,7 @@ public class JwtCookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 }
