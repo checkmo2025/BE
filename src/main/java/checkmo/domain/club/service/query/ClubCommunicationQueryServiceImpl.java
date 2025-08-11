@@ -166,7 +166,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
         // 공지사항과 투표를 생성일시 기준으로 병합하여 pageSize 만큼 결과 채움
         int i = 0, j = 0;
-        while (resultList.size() < pageSize && (i < n || j < m)) {
+        while (resultList.size() < pageSize + 1 && (i < n || j < m)) {
 
             LocalDateTime noticeTime = i < n ? notices.get(i).getCreatedAt() : LocalDateTime.MIN;
             LocalDateTime voteTime = j < m ? votes.get(j).getCreatedAt() : LocalDateTime.MIN;
