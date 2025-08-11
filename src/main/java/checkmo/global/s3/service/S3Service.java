@@ -1,10 +1,10 @@
-package checkmo.domain.member.service.s3;
+package checkmo.global.s3.service;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.config.properties.S3Properties;
-import checkmo.domain.member.converter.MemberConverter;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
+import checkmo.global.s3.converter.S3Converter;
+import checkmo.global.s3.web.dto.S3ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class S3Service {
     );
 
     // 파일 업로드를 위한 presigned URL 생성
-    public MemberResponseDTO.PresignedUrlDTO generatePresignedUploadUrl(String fileName, String contentType) {
+    public S3ResponseDTO.PresignedUrlResponse generatePresignedUploadUrl(String fileName, String contentType) {
 
         // Content-Type 검증
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
@@ -53,7 +53,7 @@ public class S3Service {
                 s3Properties.getRegion().getName(),
                 key);
 
-        return MemberConverter.toPresignedUrlDTO(presignedUrl, imageUrl);
+        return S3Converter.toPresignedUrlDTO(presignedUrl, imageUrl);
     }
 
     // 파일 삭제 - 이건 우리가 직접 수행
@@ -139,7 +139,7 @@ public class S3Service {
         String uniqueId = UUID.randomUUID().toString();
 
         // S3 버킷에 저장될 경로와 파일명을 생성 -> 이게 Key가 됨
-        return String.format("profile-images/%s%s", uniqueId, extension);
+        return String.format("images/%s%s", uniqueId, extension);
     }
 
     private String getFileExtension(String fileName) {
