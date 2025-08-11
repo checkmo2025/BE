@@ -10,6 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryQueryFacadeImpl implements CategoryQueryFacade {
@@ -39,6 +43,26 @@ public class CategoryQueryFacadeImpl implements CategoryQueryFacade {
     public CategorySharedDTO.CategoryInfoList getCategoriesByClubForShare(Long clubId) {
         CategoryResponseDTO.CategoryListResponseDTO responseDTO = categoryQueryService.findCategoriesByClub(clubId);
         return CategoryConverter.toCategoryInfoListDTO(responseDTO);
+    }
+
+    /**
+     * 여러 클럽에 설정된 카테고리 목록을 한꺼번에 조회합니다. (외부용)
+     *
+     * @param clubIds 클럽 ID 리스트
+     * @return 클럽 ID별 카테고리 정보 리스트 매핑
+     */
+    @Override
+    public Map<Long, List<CategorySharedDTO.CategoryInfo>> getCategoriesByClubs(List<Long> clubIds) {
+
+        // 1. 여러 클럽의 카테고리 정보를 한꺼번에 조회
+        Map<Long, CategoryResponseDTO.CategoryListResponseDTO> responseMap = categoryQueryService.findCategoriesByClubs(clubIds);
+
+        // 2. DTO 변환 및 Map<Long, List<CategoryInfo>> 형태로 변환
+        return responseMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> CategoryConverter.toCategoryInfoListDTO(entry.getValue()).getCategoryList()
+                ));
     }
 
     @Override

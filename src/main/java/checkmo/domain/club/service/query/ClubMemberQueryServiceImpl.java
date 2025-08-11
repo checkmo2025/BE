@@ -10,6 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,4 +40,37 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
         return ClubConverter.fromClubInfoListToMyClubList(myClubInfoList);
     }
+
+    /**
+     * 특정 회원이 해당 클럽에서 어떤 상태(등급)인지 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @param clubId   클럽 ID
+     * @return ClubMemberStatus (MEMBER, STAFF 등) 또는 null (회원 아님)
+     */
+    @Override
+    public ClubMember.ClubMemberStatus getMemberStatusInClub(String memberId, Long clubId) {
+        return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
+                .map(ClubMember::getClubMemberStatus)
+                .orElse(null); // 존재하지 않으면 null 반환
+    }
+
+    /**
+     * 특정 회원이 여러 클럽에서의 상태를 한꺼번에 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @param clubIds 클럽 ID 리스트
+     * @return 클럽 ID별 회원 상태 맵
+     */
+    @Override
+    public Map<Long, ClubMember.ClubMemberStatus> getMemberStatuses(String memberId, List<Long> clubIds) {
+
+        // clubMemberRepository에서 clubId IN :clubIds AND memberId = :memberId 조건으로 여러 상태를 한 번에 조회
+        List<ClubMember> members = clubMemberRepository.findAllByMemberIdAndClubIdIn(memberId, clubIds);
+
+        // Map<clubId, ClubMemberStatus> 형태로 변환 후 반환
+        return members.stream()
+                .collect(Collectors.toMap(ClubMember::getClubId, ClubMember::getClubMemberStatus));
+    }
+
 }

@@ -38,14 +38,72 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
 
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
+    /**
+     * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
+     *
+     * 피그마 참고 페이지 : #독서모임 - 내 모임 바로가기
+     *
+     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
+     * @return 내가 가입한 독서 클럽 목록 DTO
+     */
+    @Override
+    public ClubResponseDTO.MyClubListDTO getMyClubList(String memberId) {
+
+        // 1. 회원이 가입한 모임 목록 조회
+        List<ClubSharedDTO.MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId).getClubList();
+
+        // 2. 모임 정보 DTO로 변환
+        List<ClubResponseDTO.ClubInfoDTO> clubInfoDTOList = myClubs.stream()
+                .map(ClubConverter::toClubInfoDTOFromMyClubInfo)
+                .toList();
+
+        // 3. 최종 DTO 반환
+        return ClubResponseDTO.MyClubListDTO.builder()
+                .clubList(clubInfoDTOList)
+                .build();
+    }
+
     @Override
     public ClubSharedDTO.MyClubList getMyClubListForShare(String memberId) {
         return clubMemberQueryService.getMyClubList(memberId);
     }
 
+    /**
+     * ClubQueryService
+     * 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)
+     *
+     * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
+     * @param keyword 검색 키워드 (모임명 등)
+     * @param region 지역 필터링 여부
+     * @param participants 대상 필터링 여부
+     * @param cursorId 페이징 커서 ID
+     * @return 검색된 모임 목록 DTO
+     */
     @Override
-    public ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId) {
-        return null;
+    public ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer size) {
+
+        // 1. 커서 초기화
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
+        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+        Pageable pageable = PageRequest.of(0, pageSize);
+
+        // 2. 클럽 리스트 조회
+        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, region, participants, cursor, pageable);
+
+        // 3. 페이징 처리
+        boolean hasNext = clubList.size() > pageSize;  // clubList의 크기가 PAGE_SIZE보다 크면 다음 페이지가 존재한다고 판단
+        if (hasNext) {
+            clubList = clubList.subList(0, pageSize); // 다음 페이지를 위해 마지막은 제거
+        }
+        Long nextCursor = hasNext && !clubList.isEmpty() ?
+                clubList.get(clubList.size() - 1).getClub().getClubId() : null; // 다음 커서 설정
+
+        // 4. 최종 DTO 변환
+        return ClubConverter.toClubListDTO(clubList, hasNext, nextCursor);
     }
 
     /**
@@ -120,14 +178,45 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return clubQueryService.isDuplicateClubName(clubName);
     }
 
+    /**
+     * ClubQueryService
+     * 모임의 전체 공지사항 목록을 최신순으로 조회합니다. (내부용)
+     *
+     * @param clubId 모임 ID
+     * @param memberId 조회자 회원 ID
+     * @param cursorId 페이징 커서 ID
+     * @param onlyImportant 중요 공지사항만 조회할지 여부
+     * @param size 조회할 개수
+     * @return 전체 공지사항 목록 DTO
+     */
     @Override
-    public ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId) {
-        return null;
-    }
+    public ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId, boolean onlyImportant, Integer size) {
 
-    @Override
-    public ClubResponseDTO.ClubNoticeListDTO getImportantNotices(Long clubId, String memberId, int size) {
-        return null;
+        // 1. 검증 -> 소식은 클럽에 속한 사람만 조회할 수 있음
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        boolean isStaff = clubMember.isStaff();
+
+        // 2. 커서 초기화
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 3. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
+        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+        Pageable pageable = PageRequest.of(0, pageSize+1);
+
+        // 3. 공지(일반, 모임) + 투표 조회 및 변환
+        List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
+
+        // 4. 페이징
+        boolean hasNext = noticeItems.size() > pageSize;
+        if (hasNext) {
+            noticeItems = noticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
+        }
+        Long nextCursor = hasNext && noticeItems.size() >= pageSize
+                ? noticeItems.get(pageSize - 1).getId()
+                : null;
+
+        return ClubConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor, isStaff);
     }
 
     @Override
