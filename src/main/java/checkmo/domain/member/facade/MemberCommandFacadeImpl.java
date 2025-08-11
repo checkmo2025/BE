@@ -4,7 +4,6 @@ import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.command.MemberFollowCommandService;
 import checkmo.domain.member.service.command.MemberProfileCommandService;
 import checkmo.domain.member.service.command.MemberRegistrationCommandService;
-import checkmo.domain.member.service.s3.S3Service;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +21,6 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     private final MemberAuthenticationService memberAuthenticationService;
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberProfileCommandService memberProfileCommandService;
-    private final S3Service s3Service;
 
     @Override
     public void sendEmailVerification(String email) {
@@ -92,10 +90,5 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     @Override
     public void deleteFollower(String memberId, String followerNickname) {
         memberFollowCommandService.deleteFollower(memberId, followerNickname);
-    }
-
-    @Override
-    public MemberResponseDTO.PresignedUrlDTO generateProfileImageUploadUrl(MemberRequestDTO.ImageUploadRequest request) {
-        return s3Service.generatePresignedUploadUrl(request.getOriginalFileName(), request.getContentType());
     }
 }
