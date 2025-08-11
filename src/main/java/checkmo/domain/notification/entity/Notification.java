@@ -13,7 +13,7 @@ import lombok.*;
 public class Notification extends BaseEntity {
 
     public enum NotificationType {
-        LIKE, FOLLOW
+        LIKE, FOLLOW, JOIN_CLUB
     }
 
     @Id
@@ -30,6 +30,9 @@ public class Notification extends BaseEntity {
 
     @Column(nullable = false)
     private String redirectPath; // 알림 클릭 시 이동할 페이지의 경로
+
+    @Column
+    private String targetName; // 대상 엔티티의 이름 (클럽명, 사용자명 등)
 
     @Column(name = "receiver_id", insertable = false, updatable = false)
     private String receiverId;
