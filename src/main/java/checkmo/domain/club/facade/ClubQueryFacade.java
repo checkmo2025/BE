@@ -17,6 +17,16 @@ import java.util.List;
 public interface ClubQueryFacade {
 
     /**
+     * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
+     *
+     * 피그마 참고 페이지 : #독서모임 - 내 모임 바로가기
+     *
+     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
+     * @return 내가 가입한 독서 클럽 목록 DTO
+     */
+    ClubResponseDTO.MyClubListDTO getMyClubList(String memberId);
+
+    /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (외부용)
      * 마이페이지 등 다른 서비스에서 사용됩니다.
      *
@@ -29,13 +39,14 @@ public interface ClubQueryFacade {
      * ClubQueryService
      * 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)
      *
-     * @param keyword 검색 키워드
+     * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
+     * @param keyword 검색 키워드 (모임명 등)
      * @param region 지역 필터링 여부
      * @param participants 대상 필터링 여부
      * @param cursorId 페이징 커서 ID
      * @return 검색된 모임 목록 DTO
      */
-    ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId);
+    ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer size);
 
     /**
      * ClubQueryService
@@ -75,20 +86,11 @@ public interface ClubQueryFacade {
      * @param clubId 모임 ID
      * @param memberId 조회자 회원 ID
      * @param cursorId 페이징 커서 ID
+     * @param onlyImportant 중요 공지사항만 조회할지 여부
+     * @param size 조회할 개수
      * @return 전체 공지사항 목록 DTO
      */
-    ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId);
-
-    /**
-     * ClubQueryService
-     * 모임의 중요 공지사항을 최신순으로 size 개수만큼 조회합니다. (내부용)
-     *
-     * @param clubId 모임 ID
-     * @param memberId 조회자 회원 ID
-     * @param size 조회할 개수
-     * @return 중요 공지사항 목록 DTO
-     */
-    ClubResponseDTO.ClubNoticeListDTO getImportantNotices(Long clubId, String memberId, int size);
+    ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId, boolean onlyImportant, Integer size);
 
     /**
      * 특정 회원이 가입한 모든 클럽의 최신 소식을 조회합니다. (외부용)
