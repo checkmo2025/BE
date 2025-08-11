@@ -21,14 +21,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
-@Tag(name = "모임 책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
+@Tag(name = "독서모임-책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
 public class ClubBookshelfController {
 
     private final ClubCommandFacade clubCommandFacade;
     private final ClubQueryFacade clubQueryFacade;
 
-    // 책장 조회 (Meeting 기반)
-    // GET /api/clubs/{clubId}/bookshelves - 책장(책장이 곧 Meeting) 전체 조회 ← 필터 적용 가능
     @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 사이즈만큼 조회합니다.(최신순 정렬)")
     @Parameters({
             @Parameter(name = "clubId", description = "책장을 조회할 클럽 ID", required = true, example = "1"),
@@ -53,7 +51,6 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(bookShelfList);
     }
 
-    // GET /api/meetings/{meetingId} - 책장(책장이 곧 Meeting) 상세 화면 (책 정보, 발제들, 한줄평)
     @Operation(summary = "책장 상세 조회 API", description = "책장의 상세 정보를 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "책장(책장이 곧 Meeting)의 ID", required = true, example = "1"),
@@ -72,8 +69,6 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(bookShelfDetail);
     }
 
-    // 한줄평(BookReview) 관리
-    // GET /api/meetings/{meetingId}/reviews - 책(Meeting)에 대한 BookReview 전체 조회
     @Operation(summary = "한줄평 조회 API", description = "한줄평을 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "한줄평을 조회할 정기 독서모임 ID", required = true, example = "1"),
@@ -118,8 +113,6 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(bookReviewId);
     }
 
-
-    // PATCH /api/meetings/{meetingId}/reviews/{reviewId} - 한줄평(Book Review) 수정
     @Operation(summary = "한줄평 수정 API", description = "한줄평을 수정합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "한줄평을 수정할 정기 독서모임 ID", required = true, example = "1"),
@@ -146,7 +139,6 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(updatedReviewId);
     }
 
-    // DELETE /api/meetings/{meetingId}/reviews/{reviewId} - 한줄평(Book Review) 삭제
     @Operation(summary = "한줄평 삭제 API", description = "한줄평을 삭제합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "한줄평을 삭제할 정기 독서모임 ID", required = true, example = "1"),
@@ -169,8 +161,6 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(null);
     }
 
-    // 발제(Topic) 관리
-    // POST /api/meetings/{meetingId}/topics - Topic 등록
     @Operation(summary = "발제 등록 API", description = "발제를 등록합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "발제를 등록할 정기 독서모임 ID", required = true, example = "1"),
@@ -190,7 +180,6 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(topicId);
     }
 
-    // PATCH /api/meetings/{meetingId}/topics/{topicId} - Topic 수정
     @Operation(summary = "발제 수정 API", description = "발제를 수정합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "발제를 수정할 정기 독서모임 ID", required = true, example = "1"),
@@ -214,7 +203,6 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(updatedTopicId);
     }
 
-    // DELETE /api/meetings/{meetingId}/topics/{topicId} - Topic 삭제
     @Operation(summary = "발제 삭제 API", description = "발제를 삭제합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "발제를 삭제할 정기 독서모임 ID", required = true, example = "1"),
@@ -237,8 +225,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(null);
     }
 
-    // GET /api/meetings/{meetingId}/topics - Meeting에 대한 Topic 전체보기
-    @Operation(summary = "미팅에 대한 발제 조회 API", description = "발제를 등록순으로 조회합니다.")
+    @Operation(summary = "미팅에 대한 발제 조회 API", description = "[책장] 페이지 - 발제를 등록순으로 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "발제를 조회할 정기 독서모임 ID", required = true, example = "1"),
             @Parameter(name = "cursorId", description = "마지막으로 조회한 발제 ID (무한 스크롤용)", required = false, example = "10"),

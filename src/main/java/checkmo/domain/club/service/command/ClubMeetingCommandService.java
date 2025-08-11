@@ -56,10 +56,10 @@ public interface ClubMeetingCommandService {
      *
      * @param memberId 발제 작성자의 ID -> 클럽 회원인지 확인하는 로직
      * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
-     * @param request 발제 관리 요청 DTO
-     * @return 관리한 발제 ID
+     * @param topicId 발제 ID
+     * @param request 발제 선택 여부 (true: 선택, false: 해제)
      */
-    Long toggleTopic(String memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request);
+    Boolean selectOrCancelTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request);
 
     /**
      * 독서모임의 특정 팀이 발제를 수정합니다.

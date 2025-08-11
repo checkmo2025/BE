@@ -71,7 +71,7 @@ public class Club extends BaseEntity {
     private List<ClubCategory> clubCategories = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "club", cascade = CascadeType.REMOVE)
     private List<Meeting> meetings = new ArrayList<>();
 
     @Builder.Default

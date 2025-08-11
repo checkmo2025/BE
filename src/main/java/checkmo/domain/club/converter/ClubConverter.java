@@ -519,6 +519,19 @@ public class ClubConverter {
                 .toList();
     }
 
+    public static MeetingResponseDTO.TopicDTO fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+            Topic topic,
+            MemberSharedDTO.BasicInfoDTO authorSharedDTO,
+            List<Integer> teamNumbers
+    ) {
+        return MeetingResponseDTO.TopicDTO.builder()
+                .topicId(topic.getId())
+                .content(topic.getDescription())
+                .authorInfo(authorSharedDTO)
+                .teamNumbers(teamNumbers)
+                .build();
+    }
+
     // =====================================================
     // Entity -> Entity 변환
     // =====================================================
@@ -557,7 +570,7 @@ public class ClubConverter {
     /**
      * List<TopicDTO> -> BookShelfResponseDTO.TopicListDTO 변환
      */
-    public static BookShelfResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTO(
+    public static BookShelfResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTOForBookshelf(
             List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
             boolean hasNext,
             Long nextCursor
@@ -607,6 +620,46 @@ public class ClubConverter {
                 .meetingInfoList(meetingInfoDTOList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TopicListDTO 변환
+     */
+    public static MeetingResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTOForMeeting(
+            List<MeetingResponseDTO.TopicDTO> topicList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return MeetingResponseDTO.TopicListDTO.builder()
+                .topics(topicList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TeamTopicDTO 변환
+     */
+    public static MeetingResponseDTO.TeamTopicDTO fromTopicDTOListToTeamTopicDTO(Integer teamNumber, List<MeetingResponseDTO.TopicDTO> topicList) {
+        return MeetingResponseDTO.TeamTopicDTO.builder()
+                .teamNumber(teamNumber)
+                .topics(topicList)
+                .build();
+    }
+
+    // =====================================================
+    // Parameter ->  DTO 변환
+    // =====================================================
+
+    /**
+     * 파라미터 -> MeetingResponseDTO.TopicSelectionDTO 변환
+     */
+    public static MeetingResponseDTO.TopicSelectionDTO fromParametersToTopicSelectionDTO(Long topicId, Integer teamNumber, Boolean isSelected) {
+        return MeetingResponseDTO.TopicSelectionDTO.builder()
+                .topicId(topicId)
+                .teamNumber(teamNumber)
+                .isSelected(isSelected)
                 .build();
     }
 

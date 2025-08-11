@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
-@Tag(name = "독서모임 미팅", description = "독서 모임 미팅, 발제, 토론조 관리 API")
+@Tag(name = "독서모임-모임(미팅)", description = "독서 모임 미팅, 팀 발제, 토론조 관리, 캘린더 API")
 @Validated
 public class ClubMeetingController {
 
@@ -72,7 +72,6 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(updateMeetingId);
     }
 
-    // GET /api/clubs/{clubId}/meetings - Meeting 전체 보기
     @Operation(summary = "정기 독서모임 간편 조회 API", description = "정기 독서모임을 커서 기반 최신순 정렬 간편 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "정기 독서 모임을 조회할 독서클럽 ID", required = true, example = "1"),
@@ -96,8 +95,6 @@ public class ClubMeetingController {
     }
     // GET /api/meetings/{meetingId} - Meeting 상세 보기
 
-    // 캘린더 관련
-    // GET /api/clubs/{clubId}/calendar?year=[조회하고자 하는 연도]&month=[조회하고자 하는 달] - 독서모임의 모임 캘린더 조회
     @Operation(summary = "독서모임 캘린더 조회 API", description = "독서모임의 모임 캘린더를 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
@@ -124,7 +121,65 @@ public class ClubMeetingController {
     // POST /api/meetings/{meetingId}/teams - 토론조 생성
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
 
-    // 팀-발제 연결 관리
-    // POST /api/meetings/{meetingId}/teams/{teamId}/topics/{topicId}/select - Team에서 Topic 선택하기
-    // GET /api/meetings/{meetingId}/teams/{teamId}/topics - Team별로 선택된 Topic 보기
+    @Operation(summary = "독서모임 발제 + 선택한 팀 정보 전체 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 등록순으로 전체 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/meetings/{meetingId}/team-topics")
+    public ApiResponse<List<MeetingResponseDTO.TopicDTO>> getTopics(
+            @PathVariable Long meetingId,
+            @CurrentId String memberId
+    ) {
+        List<MeetingResponseDTO.TopicDTO> topics = clubQueryFacade.findMeetingTopicsWithTeam(meetingId, memberId);
+        return ApiResponse.onSuccess(topics);
+    }
+
+    @Operation(summary = "팀별 선택된 Topic 조회 API", description = "[모임] 팀별로 선택된 Topic을 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "teamNumber", description = "팀  번호(조회하려는 조 이름이 x조(x는 A부터 Z까지 알파벳 중 하나)이면 x - ‘A’ + 1 로 조회하려는 조 번호로 요청", required = true, example = "1")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다.")
+    })
+    @GetMapping("/api/meetings/{meetingId}/teams/{teamNumber}/topics")
+    public ApiResponse<MeetingResponseDTO.TeamTopicDTO> getSelectedTopics(
+            @PathVariable Long meetingId,
+            @PathVariable Integer teamNumber,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.TeamTopicDTO teamTopicDTO = clubQueryFacade.findMeetingTopicsByTeam(meetingId, teamNumber, memberId);
+        return ApiResponse.onSuccess(teamTopicDTO);
+    }
+
+    @Operation(summary = "팀에서 Topic 선택/해제 API", description = "[모임] 팀에서 Topic을 선택/해제합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "topicId", description = "선택/해제할 Topic ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다.")
+    })
+    @PostMapping("/api/meetings/{meetingId}/topics/{topicId}")
+    public ApiResponse<MeetingResponseDTO.TopicSelectionDTO> selectOrCancelTopic(
+            @PathVariable Long meetingId,
+            @PathVariable Long topicId,
+            @RequestBody @Valid MeetingRequestDTO.TopicSelectionDTO request,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.TopicSelectionDTO result = clubCommandFacade.selectOrCancelTopic(meetingId, topicId, request, memberId);
+        return ApiResponse.onSuccess(result);
+    }
 }

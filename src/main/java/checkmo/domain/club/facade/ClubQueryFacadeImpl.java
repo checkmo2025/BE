@@ -4,9 +4,7 @@ import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Topic;
+import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.*;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
@@ -29,18 +27,16 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
+    // 페이징 기본 크기 상수
+    private static final int DEFAULT_PAGE_SIZE = 10;
     private final ClubMeetingQueryService clubMeetingQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationQueryService clubCommunicationQueryService;
-
     private final ClubRepository clubRepository;
-
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
-
-    private static final int DEFAULT_PAGE_SIZE = 10;
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
@@ -204,7 +200,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 3. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
         int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize+1);
+        Pageable pageable = PageRequest.of(0, pageSize + 1);
 
         // 3. 공지(일반, 모임) + 투표 조회 및 변환
         List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
@@ -294,7 +290,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size, Integer generation, String memberId) {
-        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1, memberId);
+        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size, memberId);
         boolean hasNext = meetings.size() > size;
         if (hasNext) {
             meetings = meetings.subList(0, size);
@@ -321,7 +317,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, null, TOPIC_SIZE, memberId);
+        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, null, TOPIC_SIZE);
 
         boolean hasNext = topics.size() > TOPIC_SIZE;
         if (hasNext) {
@@ -340,13 +336,16 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         return ClubConverter.fromBookShelfDTOToBookShelfDetailDTO(
                 meeting,
                 bookQueryFacade.getBookDetailInfoForShare(meeting.getBookId()),
-                ClubConverter.fromTopicDTOListToTopicListDTO(topicListDTOs, hasNext, nextCursor)
+                ClubConverter.fromTopicDTOListToTopicListDTOForBookshelf(topicListDTOs, hasNext, nextCursor)
         );
     }
 
     @Override
     public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size);
 
         boolean hasNext = topics.size() > size;
         if (hasNext) {
@@ -370,7 +369,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 ))
                 .toList();
 
-        return ClubConverter.fromTopicDTOListToTopicListDTO(topicListDTOs, hasNext, nextCursor);
+        return ClubConverter.fromTopicDTOListToTopicListDTOForBookshelf(topicListDTOs, hasNext, nextCursor);
     }
 
     @Override
@@ -378,7 +377,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size + 1);
+        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size);
 
         boolean hasNext = bookReviews.size() > size;
         if (hasNext) {
@@ -423,12 +422,67 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public MeetingResponseDTO.TopicListDTO findMeetingTopicsWithTeam(Long meetingId, String memberId) {
-        return null;
+    public List<MeetingResponseDTO.TopicDTO> findMeetingTopicsWithTeam(Long meetingId, String memberId) {
+        // 1. 미팅과 클럽 멤버 검증
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 토픽 리스트 조회
+        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, null, null);
+
+        // 3. 토픽 작성자 정보 배치 조회
+        List<String> authorIds = topics.stream()
+                .map(topic -> topic.getClubMember().getMemberId())
+                .distinct()
+                .toList();
+        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+                memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+
+        // 4. TeamTopic과 Team 배치 조회
+        List<Long> topicIds = topics.stream()
+                .map(Topic::getId)
+                .toList();
+        Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
+
+        // 5. MeetingResponseDTO.TopicListDTO 변환
+        return topics.stream()
+                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+                                topic,
+                                authorInfoMap.get(topic.getClubMember().getMemberId()),
+                                teamTopicsWithTeamByTopicIds.getOrDefault(topic.getId(), List.of())
+                        )
+                ).toList();
     }
 
-    public MeetingResponseDTO.TeamTopicDTO findTeamDetailsByMeeting(Long meetingId, Integer teamNumber, String memberId) {
-        return null;
+    public MeetingResponseDTO.TeamTopicDTO findMeetingTopicsByTeam(Long meetingId, Integer teamNumber, String memberId) {
+        // 1. 미팅과 클럽 멤버, 팀 검증
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
+
+        // 2. 팀 토픽 > 토픽 > 클럽 멤버 정보 조회
+        List<TeamTopic> teamTopics = clubMeetingQueryService.findTeamTopicsByTeam(team.getId());
+
+        // 3. 토픽 작성자 정보 배치 조회
+        List<String> authorIds = teamTopics.stream()
+                .map(
+                        teamTopic -> teamTopic.getTopic().getClubMember().getMemberId()
+                )
+                .distinct()
+                .toList();
+        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+                memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+
+        // 4. TeamTopicDTO 변환
+        List<MeetingResponseDTO.TopicDTO> topicDTOList = teamTopics.stream()
+                .map(teamTopic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+                        teamTopic.getTopic(),
+                        authorInfoMap.get(teamTopic.getTopic().getClubMember().getMemberId()),
+                        null
+                ))
+                .toList();
+
+        return ClubConverter.fromTopicDTOListToTeamTopicDTO(teamNumber, topicDTOList);
     }
 
     @Override

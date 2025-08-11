@@ -12,6 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"meeting_id", "team_number"})
+})
 public class Team extends BaseEntity {
 
     @Id
@@ -19,7 +22,7 @@ public class Team extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Integer TeamNumber; // 팀 번호
+    private Integer teamNumber; // 팀 번호
 
     @Column(name = "meeting_id", insertable = false, updatable = false)
     private Long meetingId;
@@ -28,11 +31,21 @@ public class Team extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     @Builder.Default
     private List<MemberTeam> memberTeams = new ArrayList<>();
+
+    public void addTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.add(teamTopic);
+        teamTopic.setTeam(this);
+    }
+
+    public void removeTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.remove(teamTopic);
+        teamTopic.setTeam(null);
+    }
 }
