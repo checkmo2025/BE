@@ -2,6 +2,7 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.MemberVote;
@@ -12,12 +13,15 @@ import checkmo.domain.club.repository.announcement.NoticeRepository;
 import checkmo.domain.club.repository.announcement.VoteRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
     private final ClubMemberQueryService clubMemberQueryService;
 
     private final MemberQueryFacade memberQueryFacade;
+    private final BookQueryFacade bookQueryFacade;
 
     /**
      * 공지 or 투표 상세 조회
@@ -134,4 +139,63 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         };
 
     }
+
+    /**
+     * 클럽의 모든 공지와 투표를 조회합니다.
+     *
+     * @param clubId 클럽 ID
+     * @param onlyImportant 중요 공지/투표만 조회할지 여부
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @return 공지와 투표 목록 DTO
+     */
+    @Override
+    public List<ClubResponseDTO.NoticeItem> getAllNoticesAndVotes(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable) {
+
+        int pageSize = pageable.getPageSize();
+
+        // 1. 공지사항 리스트 조회
+        List<Notice> notices = noticeRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
+
+        // 2. 투표 리스트 조회
+        List<Vote> votes = voteRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
+
+        List<ClubResponseDTO.NoticeItem> resultList = new ArrayList<>();
+        int n = notices.size();  // 공지사항 개수
+        int m = votes.size();    // 투표 개수
+
+        // 공지사항과 투표를 생성일시 기준으로 병합하여 pageSize 만큼 결과 채움
+        int i = 0, j = 0;
+        while (resultList.size() < pageSize + 1 && (i < n || j < m)) {
+
+            LocalDateTime noticeTime = i < n ? notices.get(i).getCreatedAt() : LocalDateTime.MIN;
+            LocalDateTime voteTime = j < m ? votes.get(j).getCreatedAt() : LocalDateTime.MIN;
+
+            // 공지사항 우선순위가 높거나 투표가 없을 경우 공지사항 처리
+            if (i < n && (j >= m || noticeTime.isAfter(voteTime))) {
+
+                Notice notice = notices.get(i++);
+                ClubResponseDTO.NoticeItem dto;
+
+                // 공지사항이 미팅 관련이면 책 정보도 조회하여 DTO 변환
+                if (notice.getMeeting() != null) {
+                    BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+                    dto = ClubConverter.toMeetingNoticeDTO(notice, bookInfo);
+                } else {
+                    // 순수 공지사항 DTO 변환
+                    dto = ClubConverter.toPureNoticeDTO(notice);
+                }
+
+                resultList.add(dto);
+
+            } else if (j < m) {  // 투표 조회
+                Vote vote = votes.get(j++);
+                List<ClubResponseDTO.EachItemDTO> itemDTOs = ClubConverter.toEachItemDTOListFromItems(vote.getItems());
+                ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
+                resultList.add(voteDTO);
+            }
+        }
+
+        return resultList;
+    }
+
 }

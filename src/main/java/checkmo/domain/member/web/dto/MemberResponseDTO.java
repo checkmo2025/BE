@@ -33,7 +33,6 @@ public class MemberResponseDTO {
         private List<MemberSharedDTO.WithFollowStatusDTO> followList; // 팔로워/팔로잉 목록
     }
 
-
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -72,8 +71,8 @@ public class MemberResponseDTO {
         private String nickname;
         private String description;
         private String profileImageUrl;
-        private boolean isFollowed;
-        private List<BookStoryPreviewDTO> bookStories;
+        private boolean following;
+        private List<CategorySharedDTO.CategoryInfo> categories;
     }
 
     @Getter

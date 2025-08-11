@@ -38,8 +38,27 @@ public class ClubConverter {
     // =====================================================
 
     /**
-    * Club 가입 정보 -> ClubMember 엔티티 변환
-    */
+     * Club 리스트 → ClubResponseDTO.ClubListDTO 변환
+     */
+    public static ClubResponseDTO.ClubListDTO toClubListDTO(
+            List<ClubResponseDTO.ClubWithMyStatusDTO> clubList,
+            boolean hasNext,
+            Long nextCursor) {
+
+        List<ClubResponseDTO.ClubWithMyStatusDTO> safeList =
+                (clubList == null) ? List.of() : List.copyOf(clubList);
+
+        return ClubResponseDTO.ClubListDTO.builder()
+                .clubList(safeList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(safeList.size())
+                .build();
+    }
+
+    /**
+     * Club 가입 정보 -> ClubMember 엔티티 변환
+     */
     public static ClubMember toClubMemberEntity(
             Club club,
             Member member,
@@ -62,6 +81,17 @@ public class ClubConverter {
                 .clubId(club.getId())
                 .clubName(club.getName())
                 .open(club.isOpen())
+                .build();
+    }
+
+    /**
+     * ClubSharedDTO.MyClubInfo -> ClubResponseDTO.ClubInfoDTO
+     */
+    public static ClubResponseDTO.ClubInfoDTO toClubInfoDTOFromMyClubInfo(ClubSharedDTO.MyClubInfo myClubInfo) {
+        return ClubResponseDTO.ClubInfoDTO.builder()
+                .clubId(myClubInfo.getClubId())
+                .clubName(myClubInfo.getClubName())
+                .open(null)
                 .build();
     }
 
@@ -160,6 +190,28 @@ public class ClubConverter {
                 .kakao(club.getKakao())
                 .isStaff(isStaff)
                 .build();
+    }
+
+    /**
+     * ClubResponseDTO.ClubNoticeListDTO 변환
+     */
+    public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
+            List<ClubResponseDTO.NoticeItem> noticeItems,
+            boolean hasNext,
+            Long nextCursor,
+            boolean isStaff
+    ) {
+        List<ClubResponseDTO.NoticeItem> safeList =
+                (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
+
+        return ClubResponseDTO.ClubNoticeListDTO.builder()
+                .noticeList(safeList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(safeList.size())
+                .isStaff(isStaff)
+                .build();
+
     }
 
     /**
@@ -274,6 +326,21 @@ public class ClubConverter {
     }
 
     /**
+     * 투표 항목 리스트 → EachItemDTO 리스트 변환
+     * 기본값: isSelected = false, voteCount = 0, votedMembers = 빈 리스트
+     */
+    public static List<ClubResponseDTO.EachItemDTO> toEachItemDTOListFromItems(List<String> items) {
+        return items.stream()
+                .map(item -> ClubResponseDTO.EachItemDTO.builder()
+                        .item(item)
+                        .isSelected(false)       // 기본값
+                        .voteCount(0)            // 기본값
+                        .votedMembers(List.of()) // 빈 리스트
+                        .build())
+                .toList();
+    }
+
+    /**
      * VoteResultDTO -> MemberVote 엔티티
      */
     public static MemberVote fromVoteRequestToMemberVote(
@@ -363,6 +430,20 @@ public class ClubConverter {
                 .content(topic.getDescription())
                 .authorInfo(authorSharedDTO)
                 .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
+                .build();
+    }
+
+    /**
+     * Notice 엔티티 + BookSharedDTO.BasicInfoDTO -> ClubResponseDTO.MeetingNoticeDTO 변환
+     */
+    public static ClubResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(Notice notice, BookSharedDTO.BasicInfoDTO bookInfo) {
+        return ClubResponseDTO.MeetingNoticeDTO.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .content(notice.getContent())
+                .important(notice.isImportant())
+                .tag(notice.getTag())
+                .meetingInfoDTO(fromMeetingAndBookSharedDTOToMeetingInfoDTO(notice.getMeeting(), bookInfo))
                 .build();
     }
 
@@ -554,6 +635,31 @@ public class ClubConverter {
                 .topics(topicList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
+     * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TeamTopicDTO 변환
+     */
+    public static MeetingResponseDTO.TeamTopicDTO fromTopicDTOListToTeamTopicDTO(Integer teamNumber, List<MeetingResponseDTO.TopicDTO> topicList) {
+        return MeetingResponseDTO.TeamTopicDTO.builder()
+                .teamNumber(teamNumber)
+                .topics(topicList)
+                .build();
+    }
+
+    // =====================================================
+    // Parameter ->  DTO 변환
+    // =====================================================
+
+    /**
+     * 파라미터 -> MeetingResponseDTO.TopicSelectionDTO 변환
+     */
+    public static MeetingResponseDTO.TopicSelectionDTO fromParametersToTopicSelectionDTO(Long topicId, Integer teamNumber, Boolean isSelected) {
+        return MeetingResponseDTO.TopicSelectionDTO.builder()
+                .topicId(topicId)
+                .teamNumber(teamNumber)
+                .isSelected(isSelected)
                 .build();
     }
 

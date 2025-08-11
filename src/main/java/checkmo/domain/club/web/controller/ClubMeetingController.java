@@ -179,7 +179,7 @@ public class ClubMeetingController {
             @RequestBody @Valid MeetingRequestDTO.TopicSelectionDTO request,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TopicSelectionDTO result = clubCommandFacade.selectOrCanelTopic(meetingId, topicId, request, memberId);
+        MeetingResponseDTO.TopicSelectionDTO result = clubCommandFacade.selectOrCancelTopic(meetingId, topicId, request, memberId);
         return ApiResponse.onSuccess(result);
     }
 }

@@ -92,8 +92,13 @@ public enum ErrorStatus implements BaseErrorCode {
     NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "NOTIFICATION4003", "해당 알림에 접근할 권한이 없습니다."),
 
     // 페이지네이션 파라미터
-    CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_401", "커서 값은 양수여야 합니다."),
-    SIZE_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_402", "조회할 개수는 양수여야 합니다."),
+    CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4001", "커서 값은 양수여야 합니다."),
+    SIZE_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4002", "조회할 개수는 양수여야 합니다."),
+
+    // S3
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "S3_400", "지원하지 않는 파일 형식입니다. (이미지 파일만 허용됩니다.)"),
+    S3_FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3_500", "S3 파일 삭제에 실패했습니다."),
+    S3_PRESIGNED_URL_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3_501", "Presigned URL 생성에 실패했습니다."),
     ;
 
     private final HttpStatus httpStatus;

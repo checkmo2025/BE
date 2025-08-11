@@ -72,6 +72,10 @@ dependencies {
 
     // ============ Meeting sumRate 낙관적 락 =============
     implementation 'org.springframework.retry:spring-retry'
+
+    // ============ AWS 클라우드 서비스 =============
+    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
+    implementation "io.awspring.cloud:spring-cloud-aws-starter-s3"
 }
 
 tasks.named('test') {
