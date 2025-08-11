@@ -15,6 +15,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +46,17 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
         // 기존 이미지와 새로운 이미지가 다를 경우 S3에서 기존 이미지 삭제
         // 새로운 이미지 url이 null이면 기존 이미지 삭제
         if (existingImageUrl != null && !existingImageUrl.equals(newImageUrl)) {
-            String imageKey = s3Service.extractKeyFromUrl(existingImageUrl);
-            s3Service.deleteImage(imageKey);
+            // 기존에 저장된 url에서 이미지 키 추출
+            final String imageKey = s3Service.extractKeyFromUrl(existingImageUrl);
+            if (imageKey != null) {
+                // 이 메소드의 트랜잭션이 커밋 되면 기존 이미지 삭제
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        s3Service.deleteImage(imageKey);
+                    }
+                });
+            }
         }
 
         // 프로필 정보 업데이트 (소개, 이미지)
