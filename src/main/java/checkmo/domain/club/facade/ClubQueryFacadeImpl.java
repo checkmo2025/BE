@@ -189,11 +189,11 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * @param memberId 조회자 회원 ID
      * @param cursorId 페이징 커서 ID
      * @param onlyImportant 중요 공지사항만 조회할지 여부
-     * @param pageSize 조회할 개수
+     * @param size 조회할 개수
      * @return 전체 공지사항 목록 DTO
      */
     @Override
-    public ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId, boolean onlyImportant, int pageSize) {
+    public ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId, boolean onlyImportant, Integer size) {
 
         // 1. 검증 -> 소식은 클럽에 속한 사람만 조회할 수 있음
         clubQueryService.validateClub(clubId);
@@ -201,10 +201,14 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         boolean isStaff = clubMember.isStaff();
 
         // 2. 커서 초기화
-        cursorId = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 3. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
+        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+        Pageable pageable = PageRequest.of(0, pageSize);
 
         // 3. 공지(일반, 모임) + 투표 조회 및 변환
-        List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursorId, pageSize);
+        List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
 
         // 4. 페이징
         boolean hasNext = noticeItems.size() > pageSize;

@@ -150,7 +150,9 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
      * @return 공지와 투표 목록 DTO
      */
     @Override
-    public List<ClubResponseDTO.NoticeItem> getAllNoticesAndVotes(Long clubId, boolean onlyImportant, Long cursorId, int pageSize) {
+    public List<ClubResponseDTO.NoticeItem> getAllNoticesAndVotes(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable) {
+
+        int pageSize = pageable.getPageSize();
 
         // 1. 공지사항 리스트 조회
         List<Notice> notices = noticeRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));

@@ -32,10 +32,10 @@ public class ClubNoticeController {
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId,
-            @RequestParam(required = false, defaultValue = "false") boolean onlyImportant
+            @RequestParam(required = false, defaultValue = "false") boolean onlyImportant,
+            @RequestParam(required = false) Integer size // 페이지 사이즈
     ) {
-        int pageSize = 10; // 페이지 크기 설정
-        return ApiResponse.onSuccess(clubQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant, pageSize));
+        return ApiResponse.onSuccess(clubQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant, size));
     }
 
     @Operation(summary = "공지사항 작성", description = "특정 모임에 공지사항을 작성합니다. (운영진만 작성 가능)")
