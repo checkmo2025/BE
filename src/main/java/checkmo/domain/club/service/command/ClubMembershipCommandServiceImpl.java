@@ -64,7 +64,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
 
         // 공개 클럽이면 즉시 가입 완료 이벤트 발행
         if (club.isOpen()) {
-            JoinClubEvent joinClubEvent = new JoinClubEvent(memberId, String.valueOf(clubId), club.getName());
+            JoinClubEvent joinClubEvent = new JoinClubEvent(memberId, clubId, club.getName());
             eventPublisher.publishEvent(joinClubEvent);
         }
 
@@ -115,7 +115,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
 
         // PENDING → MEMBER로 변경되면 가입 완료 이벤트 발행
         if (oldStatus == ClubMember.ClubMemberStatus.PENDING && newStatus == ClubMember.ClubMemberStatus.MEMBER) {
-            JoinClubEvent joinClubEvent = new JoinClubEvent(targetMember.getMemberId(), String.valueOf(clubId), club.getName());
+            JoinClubEvent joinClubEvent = new JoinClubEvent(targetMember.getMemberId(), clubId, club.getName());
             eventPublisher.publishEvent(joinClubEvent);
         }
 
