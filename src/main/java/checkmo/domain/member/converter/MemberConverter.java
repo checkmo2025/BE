@@ -135,6 +135,16 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDTO.otherProfileResponseDTO toOtherProfileResponseDTO(Member member, boolean isFollowing, List<CategorySharedDTO.CategoryInfo> categories) {
+        return MemberResponseDTO.otherProfileResponseDTO.builder()
+                .nickname(member.getNickName())
+                .description(member.getDescription())
+                .profileImageUrl(member.getImgUrl())
+                .categories(categories)
+                .following(isFollowing)
+                .build();
+    }
+
     // =====================================================
     // DTO ↔ Entity 변환
     // =====================================================

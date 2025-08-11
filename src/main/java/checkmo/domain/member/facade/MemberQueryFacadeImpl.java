@@ -44,7 +44,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
-        return null;
+        return memberQueryService.getOtherProfile(targetMemberNickname, memberId);
     }
 
     @Override
@@ -141,12 +141,13 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public String getMemberIdByNickname(String nickname) {
-        return "";
+        return memberQueryService.getMemberIdByNickname(nickname);
     }
 
     @Override
     public boolean isFollowing(String memberId, String targetMemberNickname) {
-        return false;
+        String targetMemberId = memberQueryService.getMemberIdByNickname(targetMemberNickname);
+        return memberFollowQueryService.isFollowing(memberId, targetMemberId);
     }
 
     /**
