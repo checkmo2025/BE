@@ -8,3 +8,6 @@ spring:
       - jwt
       - oauth2
       - s3
+
+server:
+  forward-headers-strategy: NATIVE
