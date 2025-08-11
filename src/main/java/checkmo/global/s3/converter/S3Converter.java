@@ -12,7 +12,7 @@ public class S3Converter {
     // =====================================================
 
     /**
-     * String들 -> MemberResponseDTO.PresignedUrlDTO 변환
+     * String들 -> S3ResponseDTO.PresignedUrlResponse 변환
      */
     public static S3ResponseDTO.PresignedUrlResponse toPresignedUrlDTO(
             String presignedUrl,
