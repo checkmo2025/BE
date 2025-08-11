@@ -225,7 +225,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(null);
     }
 
-    @Operation(summary = "미팅에 대한 발제 조회 API", description = "[책장] 페이지 - 발제를 등록순으로 조회합니다.")
+    @Operation(summary = "미팅에 대한 발제 조회 API", description = "[책장] 페이지 - 발제를 최신순으로 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "발제를 조회할 정기 독서모임 ID", required = true, example = "1"),
             @Parameter(name = "cursorId", description = "마지막으로 조회한 발제 ID (무한 스크롤용)", required = false, example = "10"),
