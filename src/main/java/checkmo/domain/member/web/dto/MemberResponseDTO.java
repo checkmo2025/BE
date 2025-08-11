@@ -72,8 +72,8 @@ public class MemberResponseDTO {
         private String nickname;
         private String description;
         private String profileImageUrl;
-        private boolean isFollowed;
-        private List<BookStoryPreviewDTO> bookStories;
+        private boolean following;
+        private List<CategorySharedDTO.CategoryInfo> categories;
     }
 
     @Getter
