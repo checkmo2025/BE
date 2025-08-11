@@ -45,11 +45,14 @@ public class ClubConverter {
             boolean hasNext,
             Long nextCursor) {
 
+        List<ClubResponseDTO.ClubWithMyStatusDTO> safeList =
+                (clubList == null) ? List.of() : List.copyOf(clubList);
+
         return ClubResponseDTO.ClubListDTO.builder()
-                .clubList(clubList)
+                .clubList(safeList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .pageSize(clubList.size())
+                .pageSize(safeList.size())
                 .build();
     }
 
@@ -198,13 +201,17 @@ public class ClubConverter {
             Long nextCursor,
             boolean isStaff
     ) {
+        List<ClubResponseDTO.NoticeItem> safeList =
+                (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
+
         return ClubResponseDTO.ClubNoticeListDTO.builder()
-                .noticeList(noticeItems)
+                .noticeList(safeList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .pageSize(noticeItems.size())
+                .pageSize(safeList.size())
                 .isStaff(isStaff)
                 .build();
+
     }
 
     /**
