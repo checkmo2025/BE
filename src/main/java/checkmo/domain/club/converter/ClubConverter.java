@@ -37,22 +37,6 @@ public class ClubConverter {
     // =====================================================
 
     /**
-     * Club 리스트 → ClubResponseDTO.ClubListDTO 변환
-     */
-    public static ClubResponseDTO.ClubListDTO toClubListDTO(
-            List<ClubResponseDTO.ClubWithMyStatusDTO> clubList,
-            boolean hasNext,
-            Long nextCursor) {
-
-        return ClubResponseDTO.ClubListDTO.builder()
-                .clubList(clubList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
-                .pageSize(clubList.size())
-                .build();
-    }
-
-    /**
      * MeetingCreateRequestDTO -> Meeting 엔티티 변환
      */
     public static Meeting fromMeetingCreateRequestDTOToMeeting(
@@ -189,24 +173,6 @@ public class ClubConverter {
     }
 
     /**
-     * ClubResponseDTO.ClubNoticeListDTO 변환
-     */
-    public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
-            List<ClubResponseDTO.NoticeItem> noticeItems,
-            boolean hasNext,
-            Long nextCursor,
-            boolean isStaff
-    ) {
-        return ClubResponseDTO.ClubNoticeListDTO.builder()
-                .noticeList(noticeItems)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
-                .pageSize(noticeItems.size())
-                .isStaff(isStaff)
-                .build();
-    }
-
-    /**
      * Notice 엔티티 → PureNoticeDTO 변환
      */
     public static ClubResponseDTO.PureNoticeDTO toPureNoticeDTO(Notice notice) {
@@ -295,21 +261,6 @@ public class ClubConverter {
                 .voteCount(votedMembers.size())
                 .votedMembers(votedMembers)
                 .build();
-    }
-
-    /**
-     * 투표 항목 리스트 → EachItemDTO 리스트 변환
-     * 기본값: isSelected = false, voteCount = 0, votedMembers = 빈 리스트
-     */
-    public static List<ClubResponseDTO.EachItemDTO> toEachItemDTOListFromItems(List<String> items) {
-        return items.stream()
-                .map(item -> ClubResponseDTO.EachItemDTO.builder()
-                        .item(item)
-                        .isSelected(false)       // 기본값
-                        .voteCount(0)            // 기본값
-                        .votedMembers(List.of()) // 빈 리스트
-                        .build())
-                .toList();
     }
 
     /**
@@ -422,20 +373,6 @@ public class ClubConverter {
         return meetings.stream()
                 .map(meeting -> fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, null))
                 .toList();
-    }
-
-    /**
-     * Notice 엔티티 + BookSharedDTO.BasicInfoDTO -> ClubResponseDTO.MeetingNoticeDTO 변환
-     */
-    public static ClubResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(Notice notice, BookSharedDTO.BasicInfoDTO bookInfo) {
-        return ClubResponseDTO.MeetingNoticeDTO.builder()
-                .id(notice.getId())
-                .title(notice.getTitle())
-                .content(notice.getContent())
-                .important(notice.isImportant())
-                .tag(notice.getTag())
-                .meetingInfoDTO(fromMeetingAndBookSharedDTOToMeetingInfoDTO(notice.getMeeting(), bookInfo))
-                .build();
     }
 
     // =====================================================

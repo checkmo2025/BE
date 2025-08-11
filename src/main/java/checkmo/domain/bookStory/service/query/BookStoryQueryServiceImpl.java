@@ -19,8 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,11 +45,24 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
 
     @Override
     public Map<Long, Boolean> checkLikesForBookStories(String memberId, List<BookStory> bookStories) {
-        // TODO: 나중에 리팩토링으로 N+1 문제 해결
-        return bookStories.stream()
+        if (bookStories == null || bookStories.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Long> bookStoryIds = bookStories.stream()
+                .map(BookStory::getId)
+                .distinct()
+                .toList();
+
+        // 배치로 좋아요한 BookStory ID 목록 조회
+        List<Long> likedBookStoryIds = bookStoryLikedRepository.findLikedBookStoryIdsByMemberIdAndBookStoryIds(memberId, bookStoryIds);
+        Set<Long> likedIdSet = new HashSet<>(likedBookStoryIds);
+
+        // 모든 BookStory에 대해 좋아요 여부 매핑
+        return bookStoryIds.stream()
                 .collect(Collectors.toMap(
-                        BookStory::getId,
-                        story -> bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, story.getId())
+                        bookStoryId -> bookStoryId,
+                        likedIdSet::contains
                 ));
     }
 
@@ -58,26 +73,32 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
 
     @Override
     public Map<String, BookSharedDTO.BasicInfoDTO> findBookInfos(List<BookStory> bookStories) {
-        // TODO: 나중에 리팩토링으로 N+1 문제 해결, 외부 도메인이라 QueryDSL에서 fetchJoin 사용 하지않고 하려니 장난 아니게 어려움..
-        return bookStories.stream()
+        if (bookStories == null || bookStories.isEmpty()) {
+            return Map.of();
+        }
+
+        List<String> bookIds = bookStories.stream()
                 .map(BookStory::getBookId)
                 .distinct()
-                .collect(Collectors.toMap(
-                        bookId -> bookId,
-                        bookQueryFacade::getBookBasicInfoForShare
-                ));
+                .toList();
+
+        // 배치로 책 정보 조회
+        return bookQueryFacade.getBookBasicInfoMapForShare(bookIds);
     }
 
     @Override
     public Map<String, MemberSharedDTO.WithFollowStatusDTO> findAuthorInfos(String currentMemberId, List<BookStory> bookStories) {
-        // TODO: 나중에 리팩토링으로 N+1 문제 해결, 외부 도메인이라 QueryDSL에서 fetchJoin 사용 하지않고 하려니 장난 아니게 어려움..
-        return bookStories.stream()
+        if (bookStories == null || bookStories.isEmpty()) {
+            return Map.of();
+        }
+
+        List<String> memberIds = bookStories.stream()
                 .map(BookStory::getMemberId)
                 .distinct()
-                .collect(Collectors.toMap(
-                        authorId -> authorId,
-                        authorId -> memberQueryFacade.getMemberWithFollowStatusForShare(authorId, currentMemberId)
-                ));
+                .toList();
+
+        // 배치로 회원 정보와 팔로우 상태 조회
+        return memberQueryFacade.getMemberWithFollowStatusMapForShare(memberIds, currentMemberId);
     }
 
     @Override

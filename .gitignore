@@ -40,3 +40,5 @@ out/
 .gradle/
 .env
 /src/main/generated/
+
+.claude

@@ -34,7 +34,7 @@ public class CategoryAssignmentCommandServiceImpl implements CategoryAssignmentC
     private final MemberQueryFacade memberQueryFacade;
 
     @Override
-    public CategoryResponseDTO.CategoryListResponseDTO modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request) {
+    public void modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request) {
 
         // 1. 기존 카테고리 ID 리스트
         List<MemberCategory> existingMemberCategories = memberCategoryRepository.findByMemberId(memberId);
@@ -80,9 +80,6 @@ public class CategoryAssignmentCommandServiceImpl implements CategoryAssignmentC
 
         // 8. 최종 카테고리 목록
         List<MemberCategory> updatedMemberCategories = memberCategoryRepository.findByMemberId(memberId);
-
-        // 9. DTO 변환 후 반환
-        return CategoryConverter.toMemberCategoryListResponseDTO(updatedMemberCategories);
     }
 
     /**
@@ -93,7 +90,7 @@ public class CategoryAssignmentCommandServiceImpl implements CategoryAssignmentC
      * @return 추가된 카테고리 정보가 담긴 DTO
      */
     @Override
-    public CategoryResponseDTO.CategoryListResponseDTO modifyClubCategories(Long clubId, CategoryRequestDTO.CategoryListRequestDTO request) {
+    public CategoryResponseDTO.CategoryListResponseDTO modifyClubCategories(Long clubId, CategorySharedDTO.CategoryIdListDTO request) {
 
         // 1. 기존 ClubCategory 목록 조회
         List<ClubCategory> existingClubCategories = clubCategoryRepository.findByClubId(clubId);

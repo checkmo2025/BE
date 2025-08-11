@@ -3,6 +3,7 @@ package checkmo.domain.member.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.member.facade.MemberCommandFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
@@ -118,6 +119,33 @@ public class MemberController {
     ) {
         var followerList = memberQueryFacade.getFollowerList(memberId, cursorId);
         return ApiResponse.onSuccess(followerList);
+    }
+
+    @Operation(summary = "내 프로필 편집 API", description = "내 프로필을 편집합니다. 프로필 이미지, 소개, 관심 카테고리를 수정할 수 있습니다.")
+    @PatchMapping("/me")
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> updateMemberProfile(
+            @CurrentId String memberId,
+            @RequestBody MemberRequestDTO.MemberProfileUpdateRequestDTO request
+    ) {
+        return ApiResponse.onSuccess(memberCommandFacade.updateMemberProfile(memberId, request));
+    }
+
+    @Operation(summary = "내 프로필 조회 API", description = "내 프로필 정보(관심 카테고리 정보 포함)를 조회합니다.")
+    @GetMapping("/me")
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
+    }
+
+    @Operation(summary = "다른 사람 프로필 조회 API", description = "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태를 포함합니다.\n" +
+        "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
+    @GetMapping("/{memberNickname}")
+    public ApiResponse<MemberResponseDTO.otherProfileResponseDTO> getOtherProfile(
+            @CurrentId String memberId,
+            @PathVariable String memberNickname
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.getOtherProfile(memberNickname, memberId));
     }
 
 }

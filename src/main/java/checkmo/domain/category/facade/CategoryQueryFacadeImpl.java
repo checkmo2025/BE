@@ -8,6 +8,7 @@ import checkmo.domain.category.web.dto.CategoryResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 import java.util.stream.Collectors;
 import java.util.List;
@@ -26,8 +27,9 @@ public class CategoryQueryFacadeImpl implements CategoryQueryFacade {
     }
 
     @Override
-    public CategorySharedDTO.CategoryInfoList getCategoriesByMemberForShare(Long memberId) {
-        return null;
+    public CategorySharedDTO.CategoryInfoList getCategoriesByMemberForShare(String memberId) {
+        CategoryResponseDTO.CategoryListResponseDTO responseDTO = categoryQueryService.findCategoriesByMember(memberId);
+        return CategoryConverter.toCategoryInfoListDTO(responseDTO);
     }
 
     /**

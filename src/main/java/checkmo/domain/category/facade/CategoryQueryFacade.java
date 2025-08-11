@@ -28,7 +28,7 @@ public interface CategoryQueryFacade {
      * @param memberId 회원 ID
      * @return 해당 회원의 카테고리 정보가 담긴 공유 DTO
      */
-    CategorySharedDTO.CategoryInfoList getCategoriesByMemberForShare(Long memberId);
+    CategorySharedDTO.CategoryInfoList getCategoriesByMemberForShare(String memberId);
 
     /**
      * 특정 모임에 설정된 카테고리 목록을 조회합니다. (외부용)

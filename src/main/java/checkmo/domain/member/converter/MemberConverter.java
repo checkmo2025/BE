@@ -5,10 +5,10 @@ import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.service.security.oauth2.OAuth2Attributes;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
-
+import checkmo.global.dto.CategorySharedDTO;
+import checkmo.global.dto.MemberSharedDTO;
 import java.util.List;
 import java.util.UUID;
-import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -91,6 +91,17 @@ public class MemberConverter {
     }
 
     /**
+     * Member 엔티티 → MemberResponseDTO.FollowResponse 변환
+     */
+    public static MemberResponseDTO.MemberProfileWithCategoryResponseDTO toMemberProfileWithCategoryResponseDTO(Member member, List<CategorySharedDTO.CategoryInfo> categories) {
+        return MemberResponseDTO.MemberProfileWithCategoryResponseDTO.builder()
+                .nickname(member.getNickName())
+                .description(member.getDescription())
+                .profileImageUrl(member.getImgUrl())
+                .categories(categories)
+                .build();
+    }
+    /**
      * MemberProfileResponseDTO → BasicInfoDTO 변환
      */
     public static MemberSharedDTO.BasicInfoDTO toBasicInfoDTO(MemberResponseDTO.MemberProfileResponseDTO profile) {
@@ -107,7 +118,30 @@ public class MemberConverter {
         return MemberSharedDTO.WithFollowStatusDTO.builder()
                 .nickname(basicInfo.getNickname())
                 .profileImageUrl(basicInfo.getProfileImageUrl())
-                .isFollowing(isFollowing)
+                .following(isFollowing)
+                .build();
+    }
+
+    /**
+     * Object[] -> WithFollowStatusDTO 변환 (공유용)
+     * 배치 처리를 위한 조회 결과를 Object[]에 담아서 전달
+     * 여기서 Object[]의 구성은 row[0]=memberId, row[1]=nickname, row[2]=profileImageUrl
+     */
+    public static MemberSharedDTO.WithFollowStatusDTO toWithFollowStatusDTO(Object[] row, boolean isFollowing) {
+        return MemberSharedDTO.WithFollowStatusDTO.builder()
+                .nickname((String) row[1])
+                .profileImageUrl((String) row[2])
+                .following(isFollowing)
+                .build();
+    }
+
+    public static MemberResponseDTO.otherProfileResponseDTO toOtherProfileResponseDTO(Member member, boolean isFollowing, List<CategorySharedDTO.CategoryInfo> categories) {
+        return MemberResponseDTO.otherProfileResponseDTO.builder()
+                .nickname(member.getNickName())
+                .description(member.getDescription())
+                .profileImageUrl(member.getImgUrl())
+                .categories(categories)
+                .following(isFollowing)
                 .build();
     }
 
@@ -133,7 +167,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowList 변환
      */
     public static MemberResponseDTO.FollowList toFollowList(
-            List<MemberResponseDTO.FollowResponse> followList,
+            List<MemberSharedDTO.WithFollowStatusDTO> followList,
             boolean hasNext,
             Long nextCursor
     ) {
@@ -148,7 +182,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowPreviewList 변환
      */
     public static MemberResponseDTO.FollowPreviewList toFollowPreviewList(
-            List<MemberResponseDTO.FollowResponse> followList
+            List<MemberSharedDTO.WithFollowStatusDTO> followList
     ) {
         return MemberResponseDTO.FollowPreviewList.builder()
                 .followList(followList)

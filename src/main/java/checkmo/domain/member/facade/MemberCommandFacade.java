@@ -76,7 +76,7 @@ public interface MemberCommandFacade {
      * @param request 수정할 프로필 정보 DTO
      * @return 수정된 회원 프로필 정보 DTO
      */
-    MemberResponseDTO.MemberProfileResponseDTO updateMemberProfile(String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request);
+    MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request);
 
     /**
      * 회원 비밀번호 변경 (내부용)

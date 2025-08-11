@@ -34,12 +34,17 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId) {
-        return null;
+        return memberQueryService.getMemberBasicInfo(memberId);
+    }
+
+    @Override
+    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
+        return memberQueryService.getMemberProfile(memberId);
     }
 
     @Override
     public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
-        return null;
+        return memberQueryService.getOtherProfile(targetMemberNickname, memberId);
     }
 
     @Override
@@ -63,7 +68,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
         var followerMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followerIdList);
 
-        List<MemberResponseDTO.FollowResponse> followerDTOList = new ArrayList<>(followerMap.values());
+        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = new ArrayList<>(followerMap.values());
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followerDTOList, hasNext, nextCursor);
@@ -90,7 +95,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
         var followingMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followingIdList);
 
-        List<MemberResponseDTO.FollowResponse> followingDTOList = new ArrayList<>(followingMap.values());
+        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = new ArrayList<>(followingMap.values());
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followingDTOList, hasNext, nextCursor);
@@ -109,7 +114,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
         var followerMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followerIdList);
 
-        List<MemberResponseDTO.FollowResponse> followerDTOList = new ArrayList<>(followerMap.values());
+        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = new ArrayList<>(followerMap.values());
 
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followerDTOList);
@@ -128,7 +133,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
         var followingMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followingIdList);
 
-        List<MemberResponseDTO.FollowResponse> followingDTOList = new ArrayList<>(followingMap.values());
+        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = new ArrayList<>(followingMap.values());
 
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followingDTOList);
@@ -136,12 +141,13 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public String getMemberIdByNickname(String nickname) {
-        return "";
+        return memberQueryService.getMemberIdByNickname(nickname);
     }
 
     @Override
     public boolean isFollowing(String memberId, String targetMemberNickname) {
-        return false;
+        String targetMemberId = memberQueryService.getMemberIdByNickname(targetMemberNickname);
+        return memberFollowQueryService.isFollowing(memberId, targetMemberId);
     }
 
     /**
@@ -158,6 +164,10 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+
         return memberQueryService.getMemberBasicInfoMapForShare(memberIds);
     }
 
@@ -178,6 +188,16 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     }
 
     @Override
+    public Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId) {
+        if (targetMemberIds == null || targetMemberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        // 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회하기
+        return memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(currentMemberId, targetMemberIds);
+    }
+
+    @Override
     public Member findMemberReferenceById(String memberId) {
         return memberRepository.getReferenceById(memberId);
     }
@@ -189,6 +209,10 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+
         return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
     }
 }

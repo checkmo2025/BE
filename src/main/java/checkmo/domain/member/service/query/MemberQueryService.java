@@ -30,6 +30,14 @@ public interface MemberQueryService {
     MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId);
 
     /**
+     * 회원 프로필 정보 (카테고리 포함) 조회
+     *
+     * @param memberId 회원 ID
+     * @return 회원 프로필 정보 DTO
+     */
+    MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId);
+
+    /**
      * 회원 ID 목록으로 회원 기본 정보 배치 조회
      *
      * @param memberIds 회원 ID 목록
@@ -75,7 +83,7 @@ public interface MemberQueryService {
      *
      * @param memberId 조회하는 회원 ID (팔로우 여부 확인용)
      * @param memberIds 회원 ID 목록
-     * @return 회원 ID와 닉네임, 프로필 이미지 정보의 매핑
+     * @return 회원 ID와 닉네임, 프로필 이미지, 팔로우 상태 정보의 매핑
      */
-    Map<String, MemberResponseDTO.FollowResponse> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds);
+    Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds);
 }
