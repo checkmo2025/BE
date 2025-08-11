@@ -95,13 +95,4 @@ public class MemberResponseDTO {
     public static class LoginResponseDTO {
         private String nickname;
     }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class PresignedUrlDTO {
-        private String presignedUrl; //프론트가 사용할 URL
-        private String imageUrl; //우리 백엔드에 저장할 URL
-    }
 }
