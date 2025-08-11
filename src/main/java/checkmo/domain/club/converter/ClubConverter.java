@@ -18,6 +18,7 @@ import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
@@ -35,6 +36,75 @@ public class ClubConverter {
     // =====================================================
     // Entity ↔ DTO 변환
     // =====================================================
+
+    /**
+     * Club 리스트 → ClubResponseDTO.ClubListDTO 변환
+     */
+    public static ClubResponseDTO.ClubListDTO toClubListDTO(
+            List<ClubResponseDTO.ClubWithMyStatusDTO> clubList,
+            boolean hasNext,
+            Long nextCursor) {
+
+        return ClubResponseDTO.ClubListDTO.builder()
+                .clubList(clubList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(clubList.size())
+                .build();
+    }
+
+    /**
+     * Club 가입 정보 -> ClubMember 엔티티 변환
+     */
+    public static ClubMember toClubMemberEntity(
+            Club club,
+            Member member,
+            ClubMember.ClubMemberStatus status,
+            String joinMessage
+    ) {
+        return ClubMember.builder()
+                .clubMemberStatus(status)
+                .joinMessage(joinMessage)
+                .club(club)
+                .member(member)
+                .build();
+    }
+
+    /**
+     * Club -> ClubResponseDTO.ClubInfoDTO
+     */
+    public static ClubResponseDTO.ClubInfoDTO toClubInfoDTO(Club club) {
+        return ClubResponseDTO.ClubInfoDTO.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .open(club.isOpen())
+                .build();
+    }
+
+    /**
+     * ClubMemberDTO 리스트 → ClubResponseDTO.ClubMemberListDTO 변환
+     */
+    public static ClubResponseDTO.ClubMemberListDTO toClubMemberListDTO(List<ClubResponseDTO.ClubMemberDTO> dtoList, boolean hasNext, Long lastId) {
+        return ClubResponseDTO.ClubMemberListDTO.builder()
+                .clubMembers(dtoList)
+                .hasNext(hasNext)
+                .nextCursor(lastId)
+                .pageSize(dtoList.size())
+                .isStaff(true) // 항상 true
+                .build();
+    }
+
+    /**
+     * ClubMember 엔티티 + MemberSharedDTO.BasicInfoDTO -> ClubResponseDTO.ClubMemberDTO 변환
+     */
+    public static ClubResponseDTO.ClubMemberDTO toClubMemberDTO(ClubMember targetMember, MemberSharedDTO.BasicInfoDTO memberInfo) {
+        return ClubResponseDTO.ClubMemberDTO.builder()
+                .clubMemberId(targetMember.getId())
+                .basicInfo(memberInfo)
+                .joinMessage(targetMember.getJoinMessage())
+                .clubMemberStatus(targetMember.getClubMemberStatus().name())
+                .build();
+    }
 
     /**
      * MeetingCreateRequestDTO -> Meeting 엔티티 변환
@@ -81,6 +151,15 @@ public class ClubConverter {
     }
 
     /**
+     * ClubRequestDTO.ClubDetailDTO -> CategoryIdListDTO
+     */
+    public static CategorySharedDTO.CategoryIdListDTO toCategoryListRequestDTO(ClubRequestDTO.ClubDetailDTO dto) {
+        return CategorySharedDTO.CategoryIdListDTO.builder()
+                .categoryIdList(dto.getCategory())
+                .build();
+    }
+
+    /**
      * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
      */
     public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, List<Long> categoryIds, boolean isStaff) {
@@ -95,6 +174,24 @@ public class ClubConverter {
                 .participantTypes(club.getParticipantTypes())
                 .insta(club.getInsta())
                 .kakao(club.getKakao())
+                .isStaff(isStaff)
+                .build();
+    }
+
+    /**
+     * ClubResponseDTO.ClubNoticeListDTO 변환
+     */
+    public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
+            List<ClubResponseDTO.NoticeItem> noticeItems,
+            boolean hasNext,
+            Long nextCursor,
+            boolean isStaff
+    ) {
+        return ClubResponseDTO.ClubNoticeListDTO.builder()
+                .noticeList(noticeItems)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(noticeItems.size())
                 .isStaff(isStaff)
                 .build();
     }
