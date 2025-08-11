@@ -33,7 +33,6 @@ public class MemberResponseDTO {
         private List<MemberSharedDTO.WithFollowStatusDTO> followList; // 팔로워/팔로잉 목록
     }
 
-
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
