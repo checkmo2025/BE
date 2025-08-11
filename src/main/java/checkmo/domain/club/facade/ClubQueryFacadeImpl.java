@@ -58,11 +58,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 2. 모임 정보 DTO로 변환
         List<ClubResponseDTO.ClubInfoDTO> clubInfoDTOList = myClubs.stream()
-                .map(myClub -> ClubResponseDTO.ClubInfoDTO.builder()
-                        .clubId(myClub.getClubId())
-                        .clubName(myClub.getClubName())
-                        .open(null)
-                        .build())
+                .map(ClubConverter::toClubInfoDTOFromMyClubInfo)
                 .toList();
 
         // 3. 최종 DTO 반환
