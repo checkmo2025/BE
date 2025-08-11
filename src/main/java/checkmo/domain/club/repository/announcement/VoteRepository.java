@@ -23,4 +23,19 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
             @Param("cursorId") Long cursorId,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT v FROM Vote v 
+        WHERE v.club.id IN :clubIds
+          AND (:onlyImportant = false OR v.important = true)
+          AND (:cursorId IS NULL OR v.id < :cursorId)
+        ORDER BY v.createdAt DESC
+        """)
+    List<Vote> findByClubIdsAndCursorPaging(
+            @Param("clubIds") List<Long> clubIds,
+            @Param("onlyImportant") boolean onlyImportant,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
 }
