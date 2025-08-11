@@ -121,7 +121,7 @@ public class ClubMeetingController {
     // POST /api/meetings/{meetingId}/teams - 토론조 생성
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
 
-    @Operation(summary = "독서모임 발제 + 선택한 팀 정보 전체 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 등록순으로 전체 조회합니다.")
+    @Operation(summary = "독서모임 발제 + 선택한 팀 정보 전체 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 최신순으로 전체 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
     })

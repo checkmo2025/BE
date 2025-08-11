@@ -18,8 +18,9 @@ public interface TeamTopicRepository extends JpaRepository<TeamTopic, Long> {
             "FROM TeamTopic tt " +
             "JOIN FETCH tt.topic t " +
             "JOIN FETCH t.clubMember cm " +
-            "WHERE tt.teamId = :teamId")
-    List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId);
+            "WHERE tt.teamId = :teamId " +
+            "ORDER BY t.id DESC ")
+    List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(Long teamId);
 
     Optional<TeamTopic> findByTeamIdAndTopicId(Long teamId, Long topicId);
 }
