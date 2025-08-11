@@ -201,7 +201,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 3. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
         int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize);
+        Pageable pageable = PageRequest.of(0, pageSize+1);
 
         // 3. 공지(일반, 모임) + 투표 조회 및 변환
         List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
