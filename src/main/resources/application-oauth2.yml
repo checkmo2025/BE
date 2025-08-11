@@ -1,3 +1,8 @@
+app:
+  oauth2:
+    redirect:
+      base-uri: ${FRONTEND_BASE_URI}
+
 spring:
   security:
     oauth2:
