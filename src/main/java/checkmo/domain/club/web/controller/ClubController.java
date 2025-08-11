@@ -91,9 +91,10 @@ public class ClubController {
             @RequestParam(required = false, defaultValue = "") String keyword, // 검색 키워드 (모임명 등)
             @RequestParam(required = false, defaultValue = "0") int region, // 지역 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
             @RequestParam(required = false, defaultValue = "0") int participants, // 대상 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
-            @RequestParam(required = false) Long cursorId // 페이징 커서 ID
+            @RequestParam(required = false) Long cursorId, // 페이징 커서 ID
+            @RequestParam(required = false) Integer size // 페이지 사이즈
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getClubList(memberId, keyword, region, participants, cursorId));
+        return ApiResponse.onSuccess(clubQueryFacade.getClubList(memberId, keyword, region, participants, cursorId, size));
     }
 
     /**

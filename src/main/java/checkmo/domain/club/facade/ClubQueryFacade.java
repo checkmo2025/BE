@@ -46,7 +46,7 @@ public interface ClubQueryFacade {
      * @param cursorId 페이징 커서 ID
      * @return 검색된 모임 목록 DTO
      */
-    ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId);
+    ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer size);
 
     /**
      * ClubQueryService

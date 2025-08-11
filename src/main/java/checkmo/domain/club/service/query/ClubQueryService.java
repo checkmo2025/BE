@@ -29,7 +29,7 @@ public interface ClubQueryService {
      * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
      * @return 독서 클럽 목록 DTO
      */
-    List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer size);
+    List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Pageable pageable);
 
     /**
      * 내가 가입한 독서 클럽 목록을 전체 조회합니다.
