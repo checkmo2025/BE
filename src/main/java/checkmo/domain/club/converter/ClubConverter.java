@@ -638,6 +638,31 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TeamTopicDTO 변환
+     */
+    public static MeetingResponseDTO.TeamTopicDTO fromTopicDTOListToTeamTopicDTO(Integer teamNumber, List<MeetingResponseDTO.TopicDTO> topicList) {
+        return MeetingResponseDTO.TeamTopicDTO.builder()
+                .teamNumber(teamNumber)
+                .topics(topicList)
+                .build();
+    }
+
+    // =====================================================
+    // Parameter ->  DTO 변환
+    // =====================================================
+
+    /**
+     * 파라미터 -> MeetingResponseDTO.TopicSelectionDTO 변환
+     */
+    public static MeetingResponseDTO.TopicSelectionDTO fromParametersToTopicSelectionDTO(Long topicId, Integer teamNumber, Boolean isSelected) {
+        return MeetingResponseDTO.TopicSelectionDTO.builder()
+                .topicId(topicId)
+                .teamNumber(teamNumber)
+                .isSelected(isSelected)
+                .build();
+    }
+
     // =====================================================
     // Private Methods
     // =====================================================

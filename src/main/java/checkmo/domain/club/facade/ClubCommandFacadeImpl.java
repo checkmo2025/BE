@@ -1,5 +1,6 @@
 package checkmo.domain.club.facade;
 
+import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.service.command.*;
 import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
 import checkmo.domain.club.service.query.ClubCommunicationQueryService;
@@ -245,7 +246,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     @Override
     public MeetingResponseDTO.TopicSelectionDTO selectOrCancelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId) {
         Boolean isSelected = clubMeetingCommandService.selectOrCancelTopic(memberId, meetingId, topicId, request);
-        return MeetingResponseDTO.TopicSelectionDTO.builder().topicId(topicId).teamNumber(request.getTeamNumber()).isSelected(isSelected).build();
+        return ClubConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), isSelected);
     }
 
     @Override

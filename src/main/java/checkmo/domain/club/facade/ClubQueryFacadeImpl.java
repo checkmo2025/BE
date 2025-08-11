@@ -482,10 +482,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 ))
                 .toList();
 
-        return MeetingResponseDTO.TeamTopicDTO.builder()
-                .teamNumber(teamNumber)
-                .topics(topicDTOList)
-                .build();
+        return ClubConverter.fromTopicDTOListToTeamTopicDTO(teamNumber, topicDTOList);
     }
 
     @Override
