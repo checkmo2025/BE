@@ -11,6 +11,7 @@ import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.s3.service.S3Service;
 import checkmo.global.dto.CategorySharedDTO;
+import checkmo.global.s3.service.S3Service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
