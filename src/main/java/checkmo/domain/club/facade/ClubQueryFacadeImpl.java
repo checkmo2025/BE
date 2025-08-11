@@ -38,8 +38,6 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final MemberQueryFacade memberQueryFacade;
     private final BookQueryFacade bookQueryFacade;
 
-    private static final int DEFAULT_PAGE_SIZE = 10;
-
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
      *
@@ -202,7 +200,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 3. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
         int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize+1);
+        Pageable pageable = PageRequest.of(0, pageSize + 1);
 
         // 3. 공지(일반, 모임) + 투표 조회 및 변환
         List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
