@@ -42,9 +42,9 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     @Override
     public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size) {
         if (size == null) { // size가 null인 경우 전체 토픽 조회
-            return topicRepository.findTopicsByMeetingIdOrderByIdAsc(meetingId);
+            return topicRepository.findTopicsByMeetingIdOrderByIdDesc(meetingId);
         }
-        return topicRepository.findTopicsByCursorOrderByIdAsc(meetingId, cursorId, size + 1);
+        return topicRepository.findTopicsByCursorOrderByIdDesc(meetingId, cursorId, size + 1);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public List<TeamTopic> findTeamTopicsByTeam(Long teamId) {
-        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamId(teamId);
+        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(teamId);
     }
 
     @Override

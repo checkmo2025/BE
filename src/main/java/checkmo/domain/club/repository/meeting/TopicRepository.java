@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface TopicRepository extends JpaRepository<Topic, Long>, TopicRepositoryCustom {
     Optional<Topic> findByIdAndMeetingId(Long topicId, Long meetingId);
 
-    List<Topic> findTopicsByMeetingIdOrderByIdAsc(Long meetingId);
+    List<Topic> findTopicsByMeetingIdOrderByIdDesc(Long meetingId);
 }
