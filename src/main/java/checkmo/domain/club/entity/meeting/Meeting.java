@@ -60,7 +60,7 @@ public class Meeting extends BaseEntity {
     private Book book; // null 허용
 
     @Builder.Default
-    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Team> teams = new ArrayList<>();
 
     @OneToOne(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -130,5 +130,17 @@ public class Meeting extends BaseEntity {
     public void addTopic(Topic topic) {
         this.topics.add(topic);
         topic.setMeeting(this); // 주인 쪽에도 세팅
+    }
+
+    public void addTeam(Team team) {
+        if (team == null) return;
+        this.teams.add(team);
+        team.setMeeting(this);
+    }
+
+    public void removeTeam(Team team) {
+        if (team == null) return;
+        this.teams.remove(team);
+        team.setMeeting(null);
     }
 }
