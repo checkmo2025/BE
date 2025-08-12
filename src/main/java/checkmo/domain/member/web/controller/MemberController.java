@@ -128,6 +128,7 @@ public class MemberController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> updateMemberProfile(
@@ -142,6 +143,7 @@ public class MemberController {
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
