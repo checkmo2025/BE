@@ -5,5 +5,5 @@ import checkmo.domain.club.entity.meeting.Topic;
 import java.util.List;
 
 public interface TopicRepositoryCustom {
-    List<Topic> findTopicsByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size);
+    List<Topic> findTopicsWithClubMemberByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size);
 }
