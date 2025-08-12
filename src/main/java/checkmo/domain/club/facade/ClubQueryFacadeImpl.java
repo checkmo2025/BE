@@ -21,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -437,8 +440,52 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId, String memberId) {
-        return null;
+    public MeetingResponseDTO.MeetingDetailDTO findMeetingDetailById(Long meetingId, String memberId) {
+        // 1. 미팅과 클럽 멤버 검증
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. [발제 전체보기 - 미리보기] 발제 최신순 상위 4개 토픽 리스트 조회
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, 4);
+
+        // 3. [발제 전체보기 - 미리보기] TeamTopic과 Team 배치 조회
+        List<Long> topicIds = topics.stream()
+                .map(Topic::getId)
+                .toList();
+        Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
+
+        // 4. [토론 x조 - 미리보기] 해당하는 미팅의 존재하는 모든 팀 조회
+        List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId);
+
+        // 5. [토론 x조 - 미리보기] 모든 팀의 발제 등록순 상위 4개 토픽 조회
+        Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber = teams.stream()
+                .collect(Collectors.toMap(
+                        Team::getTeamNumber, // key: 팀 번호
+                        team -> clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(), 4) //value : 해당 팀의 발제 최신순 상위 4개 팀 토픽 리스트
+                ));
+
+        // 6. 조회한 모든 발제(topics와 teamTopics)의 작성자 id를 중복 없이 리스트 조회
+        List<String> authorIds = Stream.concat(
+                        topics.stream().map(t -> t.getClubMember().getMemberId()),
+                        teamTopicsGroupingByTeamNumber.values().stream()
+                                .flatMap(List::stream)
+                                .map(tt -> tt.getTopic().getClubMember().getMemberId())
+                )
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 7. 발제의 작성자 정보 배치 조회
+        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+                memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+
+        // 7. DTO 변환
+        return ClubConverter.fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
+                meeting, bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId()), // -> MeetingInfoDTO
+                topics, teamTopicsWithTeamByTopicIds, // -> List<TopicDTO>
+                teams, teamTopicsGroupingByTeamNumber, // -> List<TeamTopicDTO>
+                authorInfoMap // -> List<TopicDTO>, List<TeamTopicDTO> 작성자 정보
+        );
     }
 
     @Override
