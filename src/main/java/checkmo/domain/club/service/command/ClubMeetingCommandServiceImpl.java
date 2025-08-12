@@ -10,7 +10,6 @@ import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.*;
-import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.repository.meeting.*;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
@@ -37,7 +36,6 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
 
-    private final ClubRepository clubRepository;
     private final MeetingRepository meetingRepository;
     private final TopicRepository topicRepository;
     private final TeamTopicRepository teamTopicRepository;
