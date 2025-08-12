@@ -5,9 +5,6 @@ import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Builder
 @AllArgsConstructor
@@ -24,6 +21,7 @@ public class MemberTeam extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
+    @Setter
     private ClubMember clubMember;
 
     @Column(name = "team_id", insertable = false, updatable = false)
@@ -31,5 +29,7 @@ public class MemberTeam extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
+    @Setter
     private Team team;
+
 }
