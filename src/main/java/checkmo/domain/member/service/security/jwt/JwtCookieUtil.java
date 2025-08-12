@@ -11,10 +11,12 @@ public class JwtCookieUtil {
     public void addTokenToCookie(HttpServletResponse response, String cookieName, String token, int maxAge) {
         Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true); // 클라이언트 스크립트에서 접근 불가
-        cookie.setAttribute("SameSite", "None");
+        //cookie.setAttribute("SameSite", "None"); // 프론트 배포 성공 시 사용, TODO : 프론트 배포 성공 시 주석해제
+        cookie.setAttribute("SameSite", "Lax"); // 프론트가 개발중일 때 사용, TODO : 프론트 배포 성공 시 삭제
         cookie.setPath("/"); // 모든 경로에서 접근 가능
         cookie.setMaxAge(maxAge);
-        cookie.setSecure(true); // HTTPS에서만 전송하도록 추가
+        //cookie.setSecure(true); // HTTPS에서만 전송하도록 추가
+        cookie.setSecure(false); // 프론트가 개발중일 때 사용, TODO : 프론트 배포 성공 시 삭제
         response.addCookie(cookie);
     }
 
@@ -36,7 +38,9 @@ public class JwtCookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setAttribute("SameSite", "None");
+        //cookie.setAttribute("SameSite", "None"); // 프론트 배포 성공 시 사용, TODO : 프론트 배포 성공 시 주석해제
+        cookie.setAttribute("SameSite", "Lax"); // 프론트가 개발중일 때 사용 , TODO : 프론트 배포 성공 시 삭제
+        cookie.setSecure(false); // 프론트가 개발중일 때 사용, TODO : 프론트 배포 성공 시 true로 변경
         response.addCookie(cookie);
     }
 }
