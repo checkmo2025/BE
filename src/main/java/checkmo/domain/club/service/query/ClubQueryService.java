@@ -2,11 +2,8 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.Club;
-import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 import java.util.List;
 
@@ -51,27 +48,6 @@ public interface ClubQueryService {
      * @return 내가 가입한 독서 클럽 목록 DTO
      */
     ClubResponseDTO.MyClubListDTO getMyClubList(String memberId, int size);
-
-    /**
-     * 특정 상태의 모임 회원 목록을 조회합니다.
-     *
-     * @param clubId 모임 ID
-     * @param memberId 요청자 회원 ID (권한 확인용)
-     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL" 중 하나)
-     * @param cursorId 페이징 커서 ID
-     * @return ClubMember 엔티티 리스트 (최대 10개)
-     */
-    List<ClubMember> getClubMemberListByStatus(Long clubId, String memberId, String status, Long cursorId, Pageable pageable);
-
-    /**
-     * 다음 페이지가 존재하는지 확인합니다.
-     *
-     * @param clubId 모임 ID
-     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL" 중 하나)
-     * @param lastId 현재 페이지의 마지막 ID
-     * @return true: 다음 페이지 있음, false: 마지막 페이지
-     */
-    boolean hasNextPage(Long clubId, String status, Long lastId);
 
     /**
      * 독서모임의 상세 정보를 조회합니다.

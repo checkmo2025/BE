@@ -45,7 +45,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
      * 특정 회원이 해당 클럽에서 어떤 상태(등급)인지 조회합니다.
      *
      * @param memberId 회원 ID
-     * @param clubId   클럽 ID
+     * @param clubId 클럽 ID
      * @return ClubMemberStatus (MEMBER, STAFF 등) 또는 null (회원 아님)
      */
     @Override
@@ -73,4 +73,36 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .collect(Collectors.toMap(ClubMember::getClubId, ClubMember::getClubMemberStatus));
     }
 
+
+    /**
+     * 특정 상태의 모임 회원 목록을 조회합니다.
+     *
+     * @param clubId 모임 ID
+     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL", *"ACTIVE"* 중 하나)
+     * @param cursorId 페이징 커서 ID (null이면 처음부터 조회)
+     * @param size 조회할 개수 (null이면 전체 조회)
+     * @return ClubMember 엔티티 리스트
+     */
+    @Override
+    public List<ClubMember> getClubMemberListByStatus(Long clubId, String status, Long cursorId, Integer size) {
+        List<ClubMember.ClubMemberStatus> clubMemberStatus;
+        if ("ALL".equalsIgnoreCase(status)) {
+            clubMemberStatus = null; // ALL
+        } else if ("ACTIVE".equalsIgnoreCase(status)) { // ACTIVE는 내부적으로 사용할 예정
+            clubMemberStatus = List.of(ClubMember.ClubMemberStatus.MEMBER, ClubMember.ClubMemberStatus.STAFF);
+        } else {
+            try {
+                clubMemberStatus = List.of(ClubMember.ClubMemberStatus.valueOf(status.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new GeneralException(ErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+            }
+        }
+
+        return clubMemberRepository.findClubMembersByClubIdInClubMemberStatusOrderByIdDesc(
+                clubId,
+                clubMemberStatus,
+                cursorId,
+                size
+        );
+    }
 }

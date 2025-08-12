@@ -129,19 +129,25 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * @param cursorId 페이징 커서 ID
      * @return 해당 상태의 회원 목록 DTO
      */
-
     @Override
     public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId, String clubMemberStatus, Long cursorId, Integer size) {
+        // 1. 클럽 멤버 리스트 조회
+        clubQueryService.validateClub(clubId);
+        ClubMember requester = clubMemberQueryService.validateClubMember(clubId, memberId);
+        if (!requester.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
 
-        // 1. 커서 초기화
-        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+        // 2. 만약 size가 null이면 기본값 사용 후 size+1만큼 조회
+        if (size == null) size = DEFAULT_PAGE_SIZE;
+        List<ClubMember> members = clubMemberQueryService.getClubMemberListByStatus(clubId, clubMemberStatus, cursorId, size + 1);
 
-        // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
-        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize);
-
-        // 3. 클럽 멤버 리스트 조회
-        List<ClubMember> members = clubQueryService.getClubMemberListByStatus(clubId, memberId, clubMemberStatus, cursor, pageable);
+        // 3. 페이징 처리
+        boolean hasNext = members.size() > size;
+        if (hasNext) {
+            members = members.subList(0, size);
+        }
+        Long nextCursor = hasNext ? members.getLast().getId() : null;
 
         // 4. memberId 추출
         List<String> memberIds = members.stream()
@@ -159,11 +165,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 })
                 .toList();
 
-        // 7. 페이징 정보
-        Long lastId = members.isEmpty() ? null : members.get(members.size() - 1).getId();
-        boolean hasNext = clubQueryService.hasNextPage(clubId, clubMemberStatus, lastId);
-
-        return ClubConverter.toClubMemberListDTO(dtoList, hasNext, lastId);
+        return ClubConverter.toClubMemberListDTO(dtoList, hasNext, nextCursor);
     }
 
     /**
