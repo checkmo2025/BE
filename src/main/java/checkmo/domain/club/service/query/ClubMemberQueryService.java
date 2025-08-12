@@ -4,6 +4,9 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.global.dto.ClubSharedDTO;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * 독서클럽 회원에 대한 조회 서비스
  * <p>
@@ -14,7 +17,7 @@ public interface ClubMemberQueryService {
     /**
      * 독서클럽 회원인지 확인합니다.
      *
-     * @param clubId   독서동아리 id
+     * @param clubId 독서동아리 id
      * @param memberId 회원 id
      * @return ClubMember 객체
      * @throws GeneralException 클럽 회원이 존재하지 않을 경우
@@ -30,4 +33,14 @@ public interface ClubMemberQueryService {
      * @return 회원이 가입한 독서 클럽의 간략한 정보 목록 DTO
      */
     ClubSharedDTO.MyClubList getMyClubList(String memberId);
+
+    /**
+     * 멤버의 닉네임으로 clubMember를 매핑합니다.
+     *
+     * @param clubId 독서 모임 ID
+     * @param nicknames 멤버 닉네임 리스트
+     * @return 닉네임과 ClubMember 객체를 매핑한 Map
+     * @throws GeneralException 닉네임에 해당하는 ClubMember가 존재하지 않을 경우, CLUB_MEMBER_NOT_FOUND 예외 발생
+     */
+    Map<String, ClubMember> getNicknameToClubMember(Long clubId, Collection<String> nicknames) throws GeneralException;
 }
