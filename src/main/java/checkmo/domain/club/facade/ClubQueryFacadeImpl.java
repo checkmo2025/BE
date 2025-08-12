@@ -218,8 +218,28 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public ClubSharedDTO.ClubUpdatePreviewListDTO getNoticeForHome(String memberId, int size) {
-        return null;
+    public ClubResponseDTO.ClubNoticeListDTO getNoticeForHome(String memberId, Long cursorId, boolean onlyImportant, Integer size) {
+
+        // 1. 커서 초기화
+        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+
+        // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
+        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
+        Pageable pageable = PageRequest.of(0, pageSize + 1);
+
+        // 3. 공지(일반, 모임) + 투표 조회 및 변환
+        List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getMemberNoticesAndVotes(memberId, onlyImportant, cursor, pageable);
+
+        // 4. 페이징
+        boolean hasNext = noticeItems.size() > pageSize;
+        if (hasNext) {
+            noticeItems = noticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
+        }
+        Long nextCursor = hasNext && noticeItems.size() >= pageSize
+                ? noticeItems.get(pageSize - 1).getId()
+                : null;
+
+        return ClubConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor);
     }
 
     /**

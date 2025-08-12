@@ -93,14 +93,14 @@ public interface ClubQueryFacade {
     ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId, boolean onlyImportant, Integer size);
 
     /**
-     * 특정 회원이 가입한 모든 클럽의 최신 소식을 조회합니다. (외부용)
+     * 특정 회원이 가입한 모든 클럽의 최신 소식을 조회합니다.
      * 홈 화면 피드를 구성할 때 사용됩니다.
      *
      * @param memberId 조회할 회원의 ID
      * @param size 조회할 개수
      * @return 모든 클럽의 최신 소식이 통합된 미리보기 DTO
      */
-    ClubSharedDTO.ClubUpdatePreviewListDTO getNoticeForHome(String memberId, int size);
+    ClubResponseDTO.ClubNoticeListDTO getNoticeForHome(String memberId, Long cursorId, boolean onlyImportant, Integer size);
 
     /**
      * ClubQueryService

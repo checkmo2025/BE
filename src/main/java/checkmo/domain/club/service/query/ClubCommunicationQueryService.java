@@ -27,4 +27,13 @@ public interface ClubCommunicationQueryService {
      */
     List<ClubResponseDTO.NoticeItem> getAllNoticesAndVotes(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable);
 
+    /**
+     * 회원이 가입한 클럽의 모든 공지와 투표를 조회합니다.
+     *
+     * @param onlyImportant 중요 공지/투표만 조회할지 여부
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @return 공지와 투표 목록 DTO
+     */
+    List<ClubResponseDTO.NoticeItem> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable);
+
 }

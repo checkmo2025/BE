@@ -14,12 +14,14 @@ import checkmo.domain.club.repository.announcement.VoteRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.BookSharedDTO;
+import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -159,9 +161,54 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         // 2. 투표 리스트 조회
         List<Vote> votes = voteRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
 
+        // 3. 생성 시간 순서대로 합치기
+        return mergeNoticesAndVotes(notices, votes, pageSize);
+    }
+
+    /**
+     * 회원이 가입한 클럽의 모든 공지와 투표를 조회합니다.
+     *
+     * @param onlyImportant 중요 공지/투표만 조회할지 여부
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @return 공지와 투표 목록 DTO
+     */
+    @Override
+    public List<ClubResponseDTO.NoticeItem> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable) {
+
+        int pageSize = pageable.getPageSize();
+
+        // 1. 회원이 가입한 클럽 목록 조회 (MyClubInfo → clubId만 추출)
+        List<Long> clubIds = clubMemberQueryService.getMyClubList(memberId)
+                .getClubList()
+                .stream()
+                .map(ClubSharedDTO.MyClubInfo::getClubId)
+                .toList();
+
+        if (clubIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2. 모든 클럽 공지/투표 조회
+        List<Notice> notices = noticeRepository.findByClubIdsAndCursorPaging(
+                clubIds, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1)
+        );
+
+        List<Vote> votes = voteRepository.findByClubIdsAndCursorPaging(
+                clubIds, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1)
+        );
+
+        // 3. 생성 시간 순서대로 합치기
+        return mergeNoticesAndVotes(notices, votes, pageSize);
+    }
+
+    // 3가지 공지를 생성 시간 순서대로 합치는 로직
+    private List<ClubResponseDTO.NoticeItem> mergeNoticesAndVotes(
+            List<Notice> notices, List<Vote> votes, int pageSize
+    ) {
+
         List<ClubResponseDTO.NoticeItem> resultList = new ArrayList<>();
-        int n = notices.size();  // 공지사항 개수
-        int m = votes.size();    // 투표 개수
+        int n = notices.size();
+        int m = votes.size();
 
         // 공지사항과 투표를 생성일시 기준으로 병합하여 pageSize 만큼 결과 채움
         int i = 0, j = 0;

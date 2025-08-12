@@ -215,6 +215,26 @@ public class ClubConverter {
     }
 
     /**
+     * ClubResponseDTO.ClubNoticeListDTO 변환
+     */
+    public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
+            List<ClubResponseDTO.NoticeItem> noticeItems,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        List<ClubResponseDTO.NoticeItem> safeList =
+                (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
+
+        return ClubResponseDTO.ClubNoticeListDTO.builder()
+                .noticeList(safeList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(safeList.size())
+                .build();
+
+    }
+
+    /**
      * CreateBookRecommendDTO -> BookRecommend 엔티티
      */
     public static BookRecommend fromCreateBookRecommendDTOToEntity(
