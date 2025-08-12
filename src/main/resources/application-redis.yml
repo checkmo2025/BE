@@ -9,10 +9,11 @@ spring:
       timeout: 2000ms
       lettuce:
         pool:
-          max-active: 8
+          max-active: 16
           max-idle: 8
           min-idle: 2
-          max-wait: -1ms
+          max-wait: 3000ms
+          time-between-eviction-runs: 60000ms
 
   cache:
     type: redis
