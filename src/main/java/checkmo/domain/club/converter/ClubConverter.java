@@ -585,10 +585,7 @@ public class ClubConverter {
                             ))
                             .toList();
 
-                    return MeetingResponseDTO.TeamTopicDTO.builder()
-                            .teamNumber(team.getTeamNumber())
-                            .topics(teamTopicDTOs)
-                            .build();
+                    return fromTopicDTOListToTeamTopicDTO(team.getTeamNumber(), teamTopicDTOs);
                 })
                 .toList();
         return fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
