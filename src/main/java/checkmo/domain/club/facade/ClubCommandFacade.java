@@ -4,7 +4,6 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
-import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 /**
  * Club Domain Command Facade
@@ -215,7 +214,7 @@ public interface ClubCommandFacade {
      * @param meetingId 미팅 ID
      * @param request   팀 구성 요청 DTO
      */
-    void manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request);
+    void manageTeams(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request);
 
     /**
      * ClubMeetingCommandService
