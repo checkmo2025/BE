@@ -62,11 +62,6 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public List<TeamTopic> findTeamTopicsByTeam(Long teamId) {
-        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(teamId);
-    }
-
-    @Override
     public List<BookReview> findBookReviewsByMeeting(Long meetingId, Long lastReviewId, int size) {
         return bookReviewRepository.findBookReviewsByCusor(meetingId, lastReviewId, size + 1);
     }
@@ -90,6 +85,12 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         List<Meeting> meetings = meetingRepository.findByClubIdAndMeetingTimeBetweenAsc(clubId, startDateTime, endDateTime);
 
         return ClubConverter.fromMeetingListToMeetingInfoDTOList(meetings);
+    }
+
+    @Override
+    public List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size) {
+        Pageable pageable = (size == null) ? Pageable.unpaged() : PageRequest.of(0, size);
+        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(teamId, pageable);
     }
 
     @Override

@@ -480,8 +480,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
         Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
 
-        // 2. 팀 토픽 > 토픽 > 클럽 멤버 정보 조회
-        List<TeamTopic> teamTopics = clubMeetingQueryService.findTeamTopicsByTeam(team.getId());
+        // 2. 팀 토픽 > 토픽 > 클럽 멤버 정보 전체 조회
+        List<TeamTopic> teamTopics = clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(), null);
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = teamTopics.stream()
