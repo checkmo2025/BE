@@ -552,6 +552,19 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * MemberSharedDTO.BasicInfoDTO + teamNumber -> MeetingResponseDTO.MeetingMemberDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingMemberDTO fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(
+            MemberSharedDTO.BasicInfoDTO memberSharedDTO,
+            Integer teamNumber
+    ) {
+        return MeetingResponseDTO.MeetingMemberDTO.builder()
+                .memberInfo(memberSharedDTO)
+                .teamNumber(teamNumber)
+                .build();
+    }
+
     // =====================================================
     // Entity -> Entity 변환
     // =====================================================

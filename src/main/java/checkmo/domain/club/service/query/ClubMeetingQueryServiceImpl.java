@@ -81,6 +81,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
+    public List<Team> findTeamsByMeeting(Long meetingId) {
+        return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
+    }
+
+    @Override
     public List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
         Club club = clubQueryService.validateClub(clubId);
         clubMemberQueryService.validateClubMember(clubId, memberId);
@@ -95,7 +100,17 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public List<MemberTeam> getMemberTeamsByTeam(Long teamId) {
-        return memberTeamRepository.findAllWithClubMemberByTeamId(teamId);
+        return memberTeamRepository.findAllWithClubMemberByTeamIds(List.of(teamId));
+    }
+
+    @Override
+    public Map<String, Long> getMemberIdToTeamNumberMap(List<Long> teamIds) {
+        List<MemberTeam> memberTeams = memberTeamRepository.findAllWithClubMemberByTeamIds(teamIds);
+        return memberTeams.stream()
+                .collect(Collectors.toMap(
+                        mt -> mt.getClubMember().getMemberId(), // key: 멤버 ID
+                        MemberTeam::getTeamId // value: 팀 id
+                ));
     }
 
     @Override

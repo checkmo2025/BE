@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -516,7 +517,43 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public List<MeetingResponseDTO.MeetingMemberDTO> findMeetingMembersByMeeting(Long meetingId, String memberId) {
-        return List.of();
+        // 1. 미팅, 클럽 멤버 검증
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. 클럽의 모든 회원 조회 (이때 PENDING이나 BLOCKED 상태는 제외하고 STAFF나 MEMBER만 조회)
+        List<ClubMember> clubMembers = clubMemberQueryService.getClubMemberListByStatus(meeting.getClubId(), "ACTIVE", null, null);
+
+        // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberSharedDTO.BasicInfoDTO 조회)
+        List<String> memberIds = clubMembers.stream()
+                .map(ClubMember::getMemberId)
+                .distinct()
+                .toList();
+        Map<String, MemberSharedDTO.BasicInfoDTO> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
+
+        // 4. 미팅에 존재하는 모든 팀 조회
+        List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId); // TODO: 독서모임 상세조회 PR에 존재하는데 충돌날지도?!
+        Map<Long, Integer> teamIdToTeamNumberMap = teams.stream()
+                .collect(Collectors.toMap(
+                        Team::getId, // key: 팀 ID
+                        Team::getTeamNumber // value: 팀 번호
+                ));
+
+        // 5. Map<memberId, teamId> 형태로 모든 팀의 팀원 조회
+        Map<String, Long> memberIdToTeamNumberMap = clubMeetingQueryService.getMemberIdToTeamNumberMap(teamIdToTeamNumberMap.keySet().stream().toList());
+
+        // 6. 응답 DTO로 변환 만약 4번에 clubMemberId가 존재한다면 teamNumber 채워넣고, 없으면 null로 채워넣기
+        return clubMembers.stream()
+                .map(cm -> {
+                    Long teamId = memberIdToTeamNumberMap.get(cm.getMemberId()); // 해당 회원이 팀에 속해 있다면 팀 ID, 그렇지 않다면 null
+                    Integer teamNumber = teamId != null ? teamIdToTeamNumberMap.get(teamId) : null;
+                    MemberSharedDTO.BasicInfoDTO memberBasicInfo = memberBasicInfoMap.get(cm.getMemberId());
+                    return ClubConverter.fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(memberBasicInfo, teamNumber);
+                })
+                .toList();
     }
 
     @Override
