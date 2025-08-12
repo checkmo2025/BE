@@ -19,12 +19,15 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     List<ClubMember> findAllByMemberIdAndClubIdIn(String memberId, List<Long> clubIds);
 
-    List<ClubMember> findByClubIdAndClubMemberStatusAndIdLessThanOrderByIdDesc(Long clubId, ClubMember.ClubMemberStatus status, Long cursorId, Pageable pageable);
-    List<ClubMember> findByClubIdAndIdLessThanOrderByIdDesc(Long clubId, Long cursorId, Pageable pageable);
+    List<ClubMember> findAllByClubIdAndClubMemberStatusAndIdLessThanOrderByIdDesc(Long clubId, ClubMember.ClubMemberStatus status, Long cursorId, Pageable pageable);
 
-    List<ClubMember> findByClubIdAndClubMemberStatusOrderByIdDesc(Long clubId, ClubMember.ClubMemberStatus status, Pageable pageable);
-    List<ClubMember> findByClubIdOrderByIdDesc(Long clubId, Pageable pageable);
+    List<ClubMember> findAllByClubIdAndIdLessThanOrderByIdDesc(Long clubId, Long cursorId, Pageable pageable);
+
+    List<ClubMember> findAllByClubIdAndClubMemberStatusOrderByIdDesc(Long clubId, ClubMember.ClubMemberStatus status, Pageable pageable);
+
+    List<ClubMember> findAllByClubIdOrderByIdDesc(Long clubId, Pageable pageable);
 
     boolean existsByClubIdAndClubMemberStatusAndIdLessThan(Long clubId, ClubMember.ClubMemberStatus status, Long lastId);
+
     boolean existsByClubIdAndIdLessThan(Long clubId, Long lastId);
 }

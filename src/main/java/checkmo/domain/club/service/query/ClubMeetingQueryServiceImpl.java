@@ -38,12 +38,12 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
-        return meetingRepository.findMeetingsByClubIdAndCursorDesc(clubId, cursorId, size);
+        return meetingRepository.findAllByClubIdAndCursorDesc(clubId, cursorId, size);
     }
 
     @Override
     public List<Topic> findTopicsWithClubMemberByMeeting(Long meetingId, Long cursorId, Integer size) {
-        return topicRepository.findTopicsWithClubMemberByCursorOrderByIdDesc(meetingId, cursorId, size);
+        return topicRepository.findAllWithClubMemberByCursorOrderByIdDesc(meetingId, cursorId, size);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
             return Map.of();
         }
 
-        List<TeamTopic> teamTopics = teamTopicRepository.findTeamTopicsWithTeamByTopicIds(topicIds);
+        List<TeamTopic> teamTopics = teamTopicRepository.findAllWithTeamByTopicIds(topicIds);
         return teamTopics.stream()
                 .collect(Collectors.groupingBy(
                         TeamTopic::getTopicId, //key: 토픽 ID(토픽 ID로 그룹화)
@@ -70,7 +70,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         clubQueryService.validateClub(clubId);
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
+        return meetingRepository.findAllByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
     }
 
     @Override
@@ -81,20 +81,20 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1); //12월의 경우 다음 해 1월로 넘어감
 
-        List<Meeting> meetings = meetingRepository.findByClubIdAndMeetingTimeBetweenAsc(clubId, startDateTime, endDateTime);
+        List<Meeting> meetings = meetingRepository.findAllByClubIdBetweenMeetingTimeAsc(clubId, startDateTime, endDateTime);
 
         return ClubConverter.fromMeetingListToMeetingInfoDTOList(meetings);
     }
 
     @Override
     public List<Team> findTeamsByMeeting(Long meetingId) {
-        return teamRepository.findTeamsByMeetingIdOrderByTeamNumberAsc(meetingId);
+        return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
     }
 
     @Override
     public List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size) {
         Pageable pageable = (size == null) ? Pageable.unpaged() : PageRequest.of(0, size);
-        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(teamId, pageable);
+        return teamTopicRepository.findAllWithTopicAndClubMemberByTeamIdOrderByDesc(teamId, pageable);
     }
 
     @Override

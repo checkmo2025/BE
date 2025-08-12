@@ -20,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +44,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
      *
      * @param clubId 클럽 ID
      * @param itemId 공지 또는 투표 ID
-     * @param tag    "공지", "모임", "투표" 중 하나
+     * @param tag "공지", "모임", "투표" 중 하나
      * @return 공통된 NoticeItem DTO
      */
     @Override
@@ -156,7 +156,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         int pageSize = pageable.getPageSize();
 
         // 1. 공지사항 리스트 조회
-        List<Notice> notices = noticeRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
+        List<Notice> notices = noticeRepository.findAllByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
 
         // 2. 투표 리스트 조회
         List<Vote> votes = voteRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
@@ -189,7 +189,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         }
 
         // 2. 모든 클럽 공지/투표 조회
-        List<Notice> notices = noticeRepository.findByClubIdsAndCursorPaging(
+        List<Notice> notices = noticeRepository.findAllByClubIdsAndCursorPaging(
                 clubIds, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1)
         );
 

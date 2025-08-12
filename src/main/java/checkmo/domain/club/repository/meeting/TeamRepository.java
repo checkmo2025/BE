@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByMeetingIdAndTeamNumber(Long meetingId, Integer teamNumber);
 
-    List<Team> findTeamsByMeetingIdOrderByTeamNumberAsc(Long meetingId);
+    List<Team> findAllByMeetingIdOrderByTeamNumberAsc(Long meetingId);
 }

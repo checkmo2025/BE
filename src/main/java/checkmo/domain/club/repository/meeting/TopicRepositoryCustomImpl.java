@@ -17,7 +17,7 @@ public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
     private final QTopic topic = QTopic.topic;
 
     @Override
-    public List<Topic> findTopicsWithClubMemberByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
+    public List<Topic> findAllWithClubMemberByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(topic.meetingId.eq(meetingId));
 

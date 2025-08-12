@@ -115,15 +115,15 @@ public class ClubQueryServiceImpl implements ClubQueryService {
 
         if (clubMemberStatus == null) {
             if (cursorId == null) {
-                return clubMemberRepository.findByClubIdOrderByIdDesc(clubId, pageable);
+                return clubMemberRepository.findAllByClubIdOrderByIdDesc(clubId, pageable);
             } else {
-                return clubMemberRepository.findByClubIdAndIdLessThanOrderByIdDesc(clubId, cursorId, pageable);
+                return clubMemberRepository.findAllByClubIdAndIdLessThanOrderByIdDesc(clubId, cursorId, pageable);
             }
         } else {
             if (cursorId == null) {
-                return clubMemberRepository.findByClubIdAndClubMemberStatusOrderByIdDesc(clubId, clubMemberStatus, pageable);
+                return clubMemberRepository.findAllByClubIdAndClubMemberStatusOrderByIdDesc(clubId, clubMemberStatus, pageable);
             } else {
-                return clubMemberRepository.findByClubIdAndClubMemberStatusAndIdLessThanOrderByIdDesc(clubId, clubMemberStatus, cursorId, pageable);
+                return clubMemberRepository.findAllByClubIdAndClubMemberStatusAndIdLessThanOrderByIdDesc(clubId, clubMemberStatus, cursorId, pageable);
             }
         }
 
