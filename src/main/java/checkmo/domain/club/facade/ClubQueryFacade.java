@@ -5,7 +5,6 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.ClubSharedDTO;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -224,7 +223,7 @@ public interface ClubQueryFacade {
     /**
      * ClubMeetingQueryService
      *
-     * [모임] 특정 미팅의 참여 인원 목록을 조회합니다.(내부용) //TODO: 무한스크롤인지 궁금
+     * [모임] 특정 미팅의 참여 인원 목록을 조회합니다.(내부용)
      *
      * @param meetingId 미팅 ID
      * @param memberId 요청자 회원 ID
@@ -241,7 +240,7 @@ public interface ClubQueryFacade {
      * @param memberId 요청자 회원 ID
      * @return 해당 팀의 참여 인원 목록 DTO
      */
-    List<MeetingResponseDTO.MeetingMemberDTO> findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId);
+    MeetingResponseDTO.TeamMemberDTO findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId);
 
     /**
      * ClubMeetingQueryService

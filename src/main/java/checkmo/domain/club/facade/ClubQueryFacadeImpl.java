@@ -518,6 +518,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     @Override
     public List<MeetingResponseDTO.MeetingMemberDTO> findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId) {
         return List.of();
+    public MeetingResponseDTO.TeamMemberDTO findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId) {
     }
 
     @Override

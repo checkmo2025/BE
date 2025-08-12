@@ -89,10 +89,17 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMemberDTO {
-        private String nickname; // 회원 닉네임
-        private String profileImageUrl; // 프로필 이미지 URL
-        private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
+        private MemberSharedDTO.BasicInfoDTO memberInfo; // 참여자 정보
         private Integer teamNumber; // 배정된 팀 번호
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TeamMemberDTO {
+        private Integer teamNumber; // 팀 번호
+        private List<MemberSharedDTO.BasicInfoDTO> members; // 해당 팀의 참여자 목록
     }
 
     @Getter
