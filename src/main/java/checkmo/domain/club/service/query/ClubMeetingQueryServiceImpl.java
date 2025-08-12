@@ -85,6 +85,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
+    public List<Team> findTeamsByMeeting(Long meetingId) {
+        return teamRepository.findTeamsByMeetingIdOrderByTeamNumberAsc(meetingId);
+    }
+
+    @Override
     public List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size) {
         Pageable pageable = (size == null) ? Pageable.unpaged() : PageRequest.of(0, size);
         return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(teamId, pageable);
