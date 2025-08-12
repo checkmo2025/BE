@@ -173,7 +173,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
      * @return 공지와 투표 목록 DTO
      */
     @Override
-    public List<ClubResponseDTO.NoticeItem> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable) {
+    public List<ClubResponseDTO.ClubNoticeWithClubDTO> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable) {
 
         int pageSize = pageable.getPageSize();
 
@@ -198,7 +198,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         );
 
         // 3. 생성 시간 순서대로 합치기
-        return mergeNoticesAndVotes(notices, votes, pageSize);
+        return mergeNoticesAndVotesWithClub(notices, votes, pageSize);
     }
 
     // 3가지 공지를 생성 시간 순서대로 합치는 로직

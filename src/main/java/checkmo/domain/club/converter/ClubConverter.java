@@ -215,17 +215,17 @@ public class ClubConverter {
     }
 
     /**
-     * ClubResponseDTO.ClubNoticeListDTO 변환
+     * ClubResponseDTO.MemberNoticeListDTO 변환
      */
-    public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
-            List<ClubResponseDTO.NoticeItem> noticeItems,
+    public static ClubResponseDTO.MemberNoticeListDTO toMemberNoticeListDTO(
+            List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems,
             boolean hasNext,
             Long nextCursor
     ) {
-        List<ClubResponseDTO.NoticeItem> safeList =
-                (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> safeList =
+                (memberNoticeItems == null) ? List.of() : List.copyOf(memberNoticeItems);
 
-        return ClubResponseDTO.ClubNoticeListDTO.builder()
+        return ClubResponseDTO.MemberNoticeListDTO.builder()
                 .noticeList(safeList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
