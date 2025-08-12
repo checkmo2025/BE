@@ -249,7 +249,9 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         // 6. 기존 MemberTeam orphanRemoval = true 삭제
         if (!existingTeams.isEmpty()) {
             existingTeams.forEach(Team::clearMemberTeams);
-            // 이때 삭제되는 memberTeam의 clubMember도 양방향 연관관계 설정이 다시 필요하지 않나?
+            // 기존 멤버 삭제 시 소유자만 끊고 orphanRemoval=true로 고아 삭제를 걸면 DB 행은 사라지고,
+            // clubMember.memberTeams는 LAZY 초기화를 해서 굳이 연관관계를 설정하지 않는다.
+            // 이때 이 하나의 트랜잭션에서 clubMember.memberTeams를 사용하지 않습니다!!!
         }
 
         // 7. 닉네임 → memberId → ClubMember 일괄 매핑
