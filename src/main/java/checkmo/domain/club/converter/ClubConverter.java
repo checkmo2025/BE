@@ -215,6 +215,28 @@ public class ClubConverter {
     }
 
     /**
+     * ClubResponseDTO.NoticeItem -> ClubResponseDTO.ClubNoticeWithClubDTO
+     */
+    public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Notice notice, ClubResponseDTO.NoticeItem noticeItemDTO) {
+        return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                .clubId(notice.getClub().getId())
+                .clubName(notice.getClub().getName())
+                .notice(noticeItemDTO)
+                .build();
+    }
+
+    /**
+     * ClubResponseDTO.VoteDTO -> ClubResponseDTO.ClubNoticeWithClubDTO
+     */
+    public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Vote vote, ClubResponseDTO.VoteDTO voteDTO) {
+        return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                .clubId(vote.getClub().getId())
+                .clubName(vote.getClub().getName())
+                .notice(voteDTO)
+                .build();
+    }
+
+    /**
      * ClubResponseDTO.MemberNoticeListDTO 변환
      */
     public static ClubResponseDTO.MemberNoticeListDTO toMemberNoticeListDTO(
