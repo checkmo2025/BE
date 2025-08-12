@@ -569,13 +569,7 @@ public class ClubConverter {
     ) {
         MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, bookSharedDTO);
 
-        List<MeetingResponseDTO.TopicDTO> topicDTOList = topics.stream()
-                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
-                        topic,
-                        authorInfoMap.get(topic.getClubMember().getMemberId()),
-                        teamTopicsWithTeamByTopicIds.getOrDefault(topic.getId(), List.of())
-                ))
-                .toList();
+        List<MeetingResponseDTO.TopicDTO> topicDTOList = fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(topics, authorInfoMap, teamTopicsWithTeamByTopicIds);
 
         List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList = teams.stream()
                 .sorted(Comparator.comparing(Team::getTeamNumber)) // 팀 번호 기준 정렬
@@ -602,6 +596,24 @@ public class ClubConverter {
                 topicDTOList,
                 teamTopicDTOList
         );
+    }
+
+    /**
+     * Topic 리스트 + Topic별 팀 선택 정보 + 작성자 정보 맵 -> List<MeetingResponseDTO.TopicDTO> 변환
+     */
+    public static List<MeetingResponseDTO.TopicDTO> fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
+            List<Topic> topics,
+            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
+            Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds
+    ) {
+        List<MeetingResponseDTO.TopicDTO> topicDTOList = topics.stream()
+                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+                        topic,
+                        authorInfoMap.get(topic.getClubMember().getMemberId()),
+                        teamTopicsWithTeamByTopicIds.getOrDefault(topic.getId(), List.of())
+                ))
+                .toList();
+        return topicDTOList;
     }
 
     // =====================================================

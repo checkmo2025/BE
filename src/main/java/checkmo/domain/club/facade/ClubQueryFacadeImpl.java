@@ -512,13 +512,11 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
 
         // 5. MeetingResponseDTO.TopicListDTO 변환
-        return topics.stream()
-                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
-                                topic,
-                                authorInfoMap.get(topic.getClubMember().getMemberId()),
-                                teamTopicsWithTeamByTopicIds.getOrDefault(topic.getId(), List.of())
-                        )
-                ).toList();
+        return ClubConverter.fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
+                topics,
+                authorInfoMap,
+                teamTopicsWithTeamByTopicIds
+        );
     }
 
     public MeetingResponseDTO.TeamTopicDTO findMeetingTopicsByTeam(Long meetingId, Integer teamNumber, String memberId) {
