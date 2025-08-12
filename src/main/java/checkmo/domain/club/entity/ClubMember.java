@@ -52,7 +52,7 @@ public class ClubMember extends BaseEntity {
     private List<BookRecommend> bookRecommends = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.REMOVE)
     private List<MemberTeam> memberTeams = new ArrayList<>();
 
     @Builder.Default
@@ -73,12 +73,17 @@ public class ClubMember extends BaseEntity {
         topic.setClubMember(this);
     }
 
-    public enum ClubMemberStatus {
-        MEMBER, STAFF, PENDING, BLOCKED
-    }
-
     public void updateStatus(ClubMemberStatus newStatus) {
         this.clubMemberStatus = newStatus;
+    }
+
+    public void addMemberTeam(MemberTeam memberTeam) {
+        this.memberTeams.add(memberTeam);
+        memberTeam.setClubMember(this);
+    }
+
+    public enum ClubMemberStatus {
+        MEMBER, STAFF, PENDING, BLOCKED
     }
 
 }
