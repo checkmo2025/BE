@@ -218,9 +218,21 @@ public class ClubConverter {
      * ClubResponseDTO.NoticeItem -> ClubResponseDTO.ClubNoticeWithClubDTO
      */
     public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Notice notice, ClubResponseDTO.NoticeItem noticeItemDTO) {
+        var club = notice.getClub();
+        if (club == null && notice.getMeeting() != null) {
+            club = notice.getMeeting().getClub();
+        }
+        if (club == null) {
+            // 클럽 정보가 아예 없을 경우 null 처리
+            return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                    .clubId(null)
+                    .clubName(null)
+                    .notice(noticeItemDTO)
+                    .build();
+        }
         return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
-                .clubId(notice.getClub().getId())
-                .clubName(notice.getClub().getName())
+                .clubId(club.getId())
+                .clubName(club.getName())
                 .notice(noticeItemDTO)
                 .build();
     }
