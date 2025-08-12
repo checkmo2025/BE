@@ -125,7 +125,6 @@ public class ClubResponseDTO {
         private boolean hasNext;
         private Long nextCursor;
         private int pageSize;
-        private boolean isStaff;
     }
 
     @Getter
