@@ -8,4 +8,7 @@ import java.util.List;
 public interface ClubCategoryRepository extends JpaRepository<ClubCategory, Long> {
     // 클럽 ID로 ClubCategory 리스트 조회
     List<ClubCategory> findByClubId(Long clubId);
+
+    List<ClubCategory> findByClubIdIn(List<Long> clubIds);
+
 }

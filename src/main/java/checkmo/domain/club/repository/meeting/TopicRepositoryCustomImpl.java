@@ -16,19 +16,19 @@ public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
     private final QTopic topic = QTopic.topic;
 
     @Override
-    public List<Topic> findTopicsByCursorAsc(Long meetingId, Long cursorId, Integer size) {
+    public List<Topic> findTopicsByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(topic.meeting.id.eq(meetingId));
 
         if (cursorId != null) {
-            predicate.and(topic.id.gt(cursorId));
+            predicate.and(topic.id.lt(cursorId));
         }
         return queryFactory
                 .selectFrom(topic)
                 .distinct()
                 .where(predicate)
                 .join(topic.clubMember).fetchJoin()
-                .orderBy(topic.id.asc())
+                .orderBy(topic.id.desc())
                 .limit(size)
                 .fetch();
     }

@@ -1,12 +1,11 @@
 package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Topic;
+import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 독서 모임의 토론 조회 서비스
@@ -39,25 +38,35 @@ public interface ClubMeetingQueryService {
     List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size);
 
     /**
-     * 특정 미팅의 전체 토픽을 조회합니다.
+     * 특정 미팅의 토픽을 커서 기반 조회합니다.
      *
      * 피그마 참고 페이지 : #독서모임(사용자) - 책장 [특정 책]에서 [발제] 클릭시
      *
      * @param meetingId 미팅 ID
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null)
+     * @param size 조회할 토픽 개수 (null이면 전체 조회)
      * @return 조회한 토픽 정보 DTO
      */
-    List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
+    List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size);
 
     /**
-     * 독서 모임의 미팅의 팀별 인원 조회 (해당 팀이 선택한 발제 리스트도 포함)
+     * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후,
+     * 토픽 ID를 기준으로 해당 토픽을 선택한 팀 번호 리스트를 반환합니다.
+     *
+     * @param topicIds 조회할 토픽 ID 목록
+     * @return 토픽 id를 기준으로 선택한 팀 번호 리스트 Map
+     */
+    Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
+
+    /**
+     * 독서 모임 미팅의 팀별 발제 조회
      *
      * 피그마 참고 페이지 : #독서모임 - 운영진 화면 모임 - 특정 조 전체보기 클릭시
      *
-     * @param meetingId 미팅 ID
-     * @param teamNumber 팀 번호 (1, 2, 3, 4 팀 -> 실제로 프론트에서는 A, B, C, D로 표시)
-     * @return 조회한 팀 정보 DTO
+     * @param teamId 미팅 ID
+     * @return TeamTopic 리스트
      */
-    MeetingResponseDTO.TeamTopicDTO findTeamsByMeeting(Long meetingId, Integer teamNumber);
+    List<TeamTopic> findTeamTopicsByTeam(Long teamId);
 
     /**
      * 독서 모임의 책장(한줄평) 리스트를 조회합니다.
@@ -110,4 +119,13 @@ public interface ClubMeetingQueryService {
      * @return Topic 존재하는 발제 객체
      */
     Topic validateTopic(Long topicId, Long meetingId) throws GeneralException;
+
+    /**
+     * 독서모임의 팀이 존재하는지 확인합니다.
+     *
+     * @param meetingId 미팅 ID
+     * @param teamNumber 팀 번호 (1, 2, 3, 4... 팀)
+     * @return Team 존재하는 팀 객체
+     */
+    Team validateTeam(Long meetingId, Integer teamNumber);
 }
