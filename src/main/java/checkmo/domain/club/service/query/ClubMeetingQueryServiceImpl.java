@@ -4,12 +4,8 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Topic;
-import checkmo.domain.club.repository.meeting.BookReviewRepository;
-import checkmo.domain.club.repository.meeting.MeetingRepository;
-import checkmo.domain.club.repository.meeting.TopicRepository;
+import checkmo.domain.club.entity.meeting.*;
+import checkmo.domain.club.repository.meeting.*;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +23,8 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     private final MeetingRepository meetingRepository;
     private final BookReviewRepository bookReviewRepository;
     private final TopicRepository topicRepository;
+    private final TeamRepository teamRepository;
+    private final TeamTopicRepository teamTopicRepository;
 
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
@@ -40,13 +40,30 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
-        return topicRepository.findTopicsByCursorAsc(meetingId, cursorId, size + 1);
+    public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size) {
+        if (size == null) { // size가 null인 경우 전체 토픽 조회
+            return topicRepository.findTopicsByMeetingIdOrderByIdDesc(meetingId);
+        }
+        return topicRepository.findTopicsByCursorOrderByIdDesc(meetingId, cursorId, size + 1);
     }
 
     @Override
-    public MeetingResponseDTO.TeamTopicDTO findTeamsByMeeting(Long meetingId, Integer teamNumber) {
-        return null;
+    public Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds) {
+        if (topicIds == null || topicIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<TeamTopic> teamTopics = teamTopicRepository.findTeamTopicsWithTeamByTopicIds(topicIds);
+        return teamTopics.stream()
+                .collect(Collectors.groupingBy(
+                        TeamTopic::getTopicId, //key: 토픽 ID(토픽 ID로 그룹화)
+                        Collectors.mapping(tt -> tt.getTeam().getTeamNumber(), Collectors.toList()) //value: 해당 토픽을 선택한 팀 번호 리스트(같은 그룹에 속하는 TeamTopic의 팀 번호 List 생성)
+                ));
+    }
+
+    @Override
+    public List<TeamTopic> findTeamTopicsByTeam(Long teamId) {
+        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(teamId);
     }
 
     @Override
@@ -59,7 +76,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         clubQueryService.validateClub(clubId);
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
+        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size + 1);
     }
 
     @Override
@@ -85,5 +102,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     public Topic validateTopic(Long topicId, Long meetingId) throws GeneralException {
         return topicRepository.findByIdAndMeetingId(topicId, meetingId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.TOPIC_NOT_FOUND));
+    }
+
+    @Override
+    public Team validateTeam(Long meetingId, Integer teamNumber) {
+        return teamRepository.findByMeetingIdAndTeamNumber(meetingId, teamNumber)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.TEAM_NOT_FOUND));
     }
 }

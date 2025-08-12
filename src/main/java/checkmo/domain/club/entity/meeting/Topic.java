@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@EqualsAndHashCode(of = "id", callSuper = false)
 public class Topic extends BaseEntity {
 
     @Id
@@ -38,14 +39,24 @@ public class Topic extends BaseEntity {
     private ClubMember clubMember;
 
     @Builder.Default
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
     public boolean isOwnedBy(ClubMember clubMember) {
-        return this.clubMember != null && this.clubMember.equals(clubMember);
+        return this.clubMember != null && this.clubMemberId.equals(clubMember.getId());
     }
 
     public void updateTopic(String description) {
         this.description = description;
+    }
+
+    public void addTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.add(teamTopic);
+        teamTopic.setTopic(this);
+    }
+
+    public void removeTeamTopic(TeamTopic teamTopic) {
+        this.teamTopics.remove(teamTopic);
+        teamTopic.setTopic(null);
     }
 }

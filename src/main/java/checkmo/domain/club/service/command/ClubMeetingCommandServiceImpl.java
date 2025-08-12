@@ -10,16 +10,16 @@ import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.*;
-import checkmo.domain.club.repository.meeting.BookReviewRepository;
-import checkmo.domain.club.repository.meeting.MeetingRepository;
-import checkmo.domain.club.repository.meeting.TeamRepository;
-import checkmo.domain.club.repository.meeting.TopicRepository;
+import checkmo.domain.club.repository.ClubRepository;
+import checkmo.domain.club.repository.meeting.*;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +37,10 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
 
+    private final ClubRepository clubRepository;
     private final MeetingRepository meetingRepository;
     private final TopicRepository topicRepository;
+    private final TeamTopicRepository teamTopicRepository;
     private final BookReviewRepository bookReviewRepository;
     private final TeamRepository teamRepository;
 
@@ -62,13 +64,11 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         Notice notice = ClubConverter.fromMeetingToNotice(meeting);
 
         // 5. 연관관계 설정
-        club.addMeeting(meeting);
+        club.addMeeting(meeting); //영속성 컨텍스트 내 객체 상태 동기화
         meeting.addNotice(notice);
 
-        // 6. 명시적 저장
-        meetingRepository.save(meeting);
-
-        return meeting.getId();
+        // 6. 미팅 명시적 저장 -> 공지사항도 함께 저장됨
+        return meetingRepository.save(meeting).getId();
     }
 
     @Override
@@ -111,8 +111,52 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long toggleTopic(String memberId, Long meetingId, MeetingRequestDTO.TopicManageDTO request) {
-        return 0L;
+    public Boolean selectOrCancelTopic(String memberId, Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request) {
+        // 1. 유효성 검증 (meeting, clubMember, topic, team)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Team team = clubMeetingQueryService.validateTeam(meetingId, request.getTeamNumber());
+        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
+        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 팀 발제가 존재하는지(선택된 상태인지) 확인
+        Optional<TeamTopic> existingTeamTopic = teamTopicRepository.findByTeamIdAndTopicId(team.getId(), topicId);
+        boolean isSelected = existingTeamTopic.isPresent();
+
+        // 3. 요청과 상태가 같으면 무시
+        if (request.getIsSelected() == isSelected) {
+            return isSelected;
+        }
+
+        // 4. 상태 변경
+        if (request.getIsSelected()) {
+            // 4-1. 팀 발제 선택
+            TeamTopic teamTopic = TeamTopic.builder().team(team).topic(topic).build();
+            // 연관관계 설정
+            team.addTeamTopic(teamTopic);
+            topic.addTeamTopic(teamTopic);
+            try {
+                teamTopicRepository.saveAndFlush(teamTopic);
+            } catch (DataIntegrityViolationException e) {
+                // 다른 쓰레드가 먼저 팀 발제를 선택한 경우, 선택 성공으로 간주
+                team.removeTeamTopic(teamTopic);
+                topic.removeTeamTopic(teamTopic);
+                return true;
+            }
+            return true;
+        } else {
+            // 4-2. 팀 발제 선택 취소
+            try {
+                TeamTopic teamTopic = existingTeamTopic.get();
+                // 연관관계 해제 및 orphanRemoval로 삭제 처리
+                team.removeTeamTopic(teamTopic);
+                topic.removeTeamTopic(teamTopic);
+                teamTopicRepository.flush();
+                return false;
+            } catch (OptimisticLockingFailureException e) {
+                // 다른 트랜잭션이 이미 삭제했거나 수정한 경우, 선택 해제 성공으로 간주
+                return false;
+            }
+        }
     }
 
     @Override
@@ -143,7 +187,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        topicRepository.delete(topic);
+        meeting.removeTopic(topic);
+        clubMember.removeTopic(topic);
     }
 
     @Override
@@ -181,7 +226,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         for (Integer teamNumber : requestTeamNumbers) {
             if (!existingTeamNumberToTeam.containsKey(teamNumber)) {
                 Team team = Team.builder()
-                        .TeamNumber(teamNumber)
+                        .teamNumber(teamNumber)
                         .build();
                 meeting.addTeam(team);
                 existingTeams.add(team);
@@ -285,6 +330,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
         meeting.subtractSumRate(bookReview.getRate());
 
-        bookReviewRepository.delete(bookReview);
+        clubMember.removeBookReview(bookReview);
+        meeting.removeBookReview(bookReview);
     }
 }

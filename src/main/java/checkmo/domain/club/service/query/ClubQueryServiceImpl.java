@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,9 +30,55 @@ public class ClubQueryServiceImpl implements ClubQueryService {
     private final ClubMemberQueryService clubMemberQueryService;
     private final CategoryQueryFacade categoryQueryFacade;
 
+    /**
+     * 독서 클럽 목록을 조회합니다.
+     *
+     * 피그마 참고 페이지 : #독서모임 - 모임 검색하기
+     *
+     * @param keyword 검색 키워드 (모임명 등)
+     * @param region 지역 필터 (0: 지역 필터 선택 안함 / 1: 지역 필터 선택해서 검색 키워드로 지역명도 검색 가능)
+     * @param participants 지역 필터 (0: 동아리 대상별 검색 필터 선택 안함 / 1: 동아리 대상별 검색 필터 선택해서 검색 키워드로 동아리 대상도 검색 가능)
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @return 독서 클럽 목록 DTO
+     */
     @Override
-    public ClubResponseDTO.ClubListDTO getClubList(String keyword, int region, int participants, Long cursorId) {
-        return null;
+    public List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Pageable pageable) {
+
+        // 1. 검색 조건에 맞는 클럽 리스트 조회
+        int pageSize = pageable.getPageSize();
+        List<Club> clubs = clubRepository.searchClubs(keyword, region, participants, cursorId, pageSize);
+
+        // 2. 클럽 ID 리스트 추출
+        List<Long> clubIds = clubs.stream()
+                .map(Club::getId)
+                .toList();
+
+        // 3. 클럽별 멤버 상태 배치 조회
+        Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
+
+        // 4. 클럽별 카테고리 배치 조회
+        Map<Long, List<CategorySharedDTO.CategoryInfo>> categoriesMap = categoryQueryFacade.getCategoriesByClubs(clubIds);
+
+        // 5. DTO 변환 (배치 조회 결과 활용)
+        return clubs.stream()
+                .map(club -> {
+                    ClubMember.ClubMemberStatus status = statusMap.get(club.getId());
+                    boolean isStaff = status == ClubMember.ClubMemberStatus.STAFF;
+                    boolean isMember = status != null;
+
+                    List<Long> categoryIds = categoriesMap.getOrDefault(club.getId(), List.of())
+                            .stream()
+                            .map(CategorySharedDTO.CategoryInfo::getId)
+                            .toList();
+
+                    ClubResponseDTO.ClubDetailDTO clubDetailDTO = ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
+
+                    return ClubResponseDTO.ClubWithMyStatusDTO.builder()
+                            .club(clubDetailDTO)
+                            .isMember(isMember)
+                            .build();
+                })
+                .toList();
     }
 
     @Override

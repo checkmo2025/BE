@@ -58,6 +58,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_4004", "독서모임을 찾을 수 없습니다."),
 
     // 팀
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM_4004", "팀을 찾을 수 없습니다."),
     TEAM_NUMBER_DUPLICATED_REQUEST(HttpStatus.BAD_REQUEST, "TEAM_4001", "중복된 팀 번호가 요청되었습니다."),
 
     // 카테고리
@@ -94,6 +95,11 @@ public enum ErrorStatus implements BaseErrorCode {
     // 페이지네이션 파라미터
     CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4001", "커서 값은 양수여야 합니다."),
     SIZE_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_4002", "조회할 개수는 양수여야 합니다."),
+
+    // S3
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "S3_400", "지원하지 않는 파일 형식입니다. (이미지 파일만 허용됩니다.)"),
+    S3_FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3_500", "S3 파일 삭제에 실패했습니다."),
+    S3_PRESIGNED_URL_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3_501", "Presigned URL 생성에 실패했습니다."),
     ;
 
     private final HttpStatus httpStatus;

@@ -9,7 +9,10 @@ import checkmo.domain.category.web.dto.CategoryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +46,31 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
 
         // DTO로 변환 후 반환
         return CategoryConverter.toCategoryListResponseDTO(clubCategories);
+    }
+
+    /**
+     * 여러 클럽의 카테고리 목록을 한꺼번에 조회합니다.
+     *
+     * @param clubIds 모임 ID 리스트
+     * @return 클럽 ID별 카테고리 정보 매핑
+     */
+    @Override
+    public Map<Long, CategoryResponseDTO.CategoryListResponseDTO> findCategoriesByClubs(List<Long> clubIds) {
+
+        // clubIds에 해당하는 ClubCategory를 한 번에 조회
+        List<ClubCategory> clubCategories = clubCategoryRepository.findByClubIdIn(clubIds);
+
+        // clubId별로 그룹핑
+        Map<Long, List<ClubCategory>> grouped = clubCategories.stream()
+                .collect(Collectors.groupingBy(ClubCategory::getClubId));
+
+        // Map<Long, CategoryListResponseDTO> 변환
+        Map<Long, CategoryResponseDTO.CategoryListResponseDTO> result = new HashMap<>();
+        for (Map.Entry<Long, List<ClubCategory>> entry : grouped.entrySet()) {
+            result.put(entry.getKey(), CategoryConverter.toCategoryListResponseDTO(entry.getValue()));
+        }
+
+        return result;
     }
 
 }
