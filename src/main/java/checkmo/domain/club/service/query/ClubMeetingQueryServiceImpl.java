@@ -8,6 +8,8 @@ import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.meeting.*;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +38,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
-        return meetingRepository.findMeetingsByClubIdAndCursorDesc(clubId, cursorId, size + 1);
+        return meetingRepository.findMeetingsByClubIdAndCursorDesc(clubId, cursorId, size);
     }
 
     @Override
@@ -68,7 +70,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         clubQueryService.validateClub(clubId);
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size + 1);
+        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
     }
 
     @Override

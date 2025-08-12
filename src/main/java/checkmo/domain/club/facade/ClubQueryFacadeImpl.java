@@ -310,7 +310,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size, Integer generation, String memberId) {
-        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size, memberId);
+        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1, memberId);
         boolean hasNext = meetings.size() > size;
         if (hasNext) {
             meetings = meetings.subList(0, size);
@@ -337,7 +337,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, null, TOPIC_SIZE);
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, TOPIC_SIZE + 1);
 
         boolean hasNext = topics.size() > TOPIC_SIZE;
         if (hasNext) {
@@ -365,7 +365,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, cursorId, size);
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, cursorId, size + 1);
 
         boolean hasNext = topics.size() > size;
         if (hasNext) {
@@ -420,7 +420,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         clubQueryService.validateClub(clubId);
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        List<Meeting> meetings = clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size);
+        List<Meeting> meetings = clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size + 1);
         boolean hasNext = meetings.size() > size;
         if (hasNext) {
             meetings = meetings.subList(0, size);
@@ -448,7 +448,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 토픽 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsByMeeting(meetingId, null, null);
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, null);
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = topics.stream()
