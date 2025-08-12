@@ -28,6 +28,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
+    private final MemberTeamRepository memberTeamRepository;
 
     @Override
     public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId) {
@@ -90,6 +91,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         List<Meeting> meetings = meetingRepository.findByClubIdAndMeetingTimeBetweenAsc(clubId, startDateTime, endDateTime);
 
         return ClubConverter.fromMeetingListToMeetingInfoDTOList(meetings);
+    }
+
+    @Override
+    public List<MemberTeam> getMemberTeamsByTeam(Long teamId) {
+        return memberTeamRepository.findAllWithClubMemberByTeamId(teamId);
     }
 
     @Override

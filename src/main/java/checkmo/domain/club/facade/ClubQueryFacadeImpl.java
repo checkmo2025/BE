@@ -1,5 +1,7 @@
 package checkmo.domain.club.facade;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
@@ -516,9 +518,28 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public List<MeetingResponseDTO.MeetingMemberDTO> findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId) {
-        return List.of();
     public MeetingResponseDTO.TeamMemberDTO findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId) {
+        // 1. 검증
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+        Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
+
+        // 2. 팀 멤버 조회
+        List<MemberTeam> memberTeams = clubMeetingQueryService.getMemberTeamsByTeam(team.getId());
+
+        // 3. 클럽 멤버의 기본 정보 배치 조회
+        List<String> memberIds = memberTeams.stream()
+                .map(MemberTeam::getClubMember)
+                .map(ClubMember::getMemberId)
+                .distinct()
+                .toList();
+        Map<String, MemberSharedDTO.BasicInfoDTO> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
+
+        // 4. TeamMemberDTO 변환
+        return ClubConverter.fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(teamNumber, memberBasicInfoMap.values().stream().toList());
     }
 
     @Override

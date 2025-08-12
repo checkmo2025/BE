@@ -668,6 +668,19 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * 팀 번호 + List<MemberSharedDTO> -> MeetingResponseDTO.TeamMemberDTO 변환
+     */
+    public static MeetingResponseDTO.TeamMemberDTO fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
+            Integer teamNumber,
+            List<MemberSharedDTO.BasicInfoDTO> memberSharedDTOs
+    ) {
+        return MeetingResponseDTO.TeamMemberDTO.builder()
+                .teamNumber(teamNumber)
+                .members(memberSharedDTOs)
+                .build();
+    }
+
     // =====================================================
     // Parameter ->  DTO 변환
     // =====================================================

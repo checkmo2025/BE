@@ -103,6 +103,14 @@ public interface ClubMeetingQueryService {
     List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size, String memberId);
 
     /**
+     * 독서모임의 팀 멤버 정보를 조회합니다.
+     *
+     * @param teamId 팀 ID
+     * @return MemberTeam 리스트
+     */
+    List<MemberTeam> getMemberTeamsByTeam(Long teamId);
+
+    /**
      * 독서모임이 존재하는지 확인합니다.
      *
      * @param meetingId 미팅 ID

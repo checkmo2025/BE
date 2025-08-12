@@ -119,7 +119,26 @@ public class ClubMeetingController {
     // 토론조 관리
     // GET /api/meetings/{meetingId}/teams - Meeting 참여 인원 전체 조회
     // POST /api/meetings/{meetingId}/teams - 토론조 생성
-    // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
+    @Operation(summary = "미팅 팀별 참여 인원 전체 조회 API", description = "[모임] 페이지 - 독서모임의 팀별 참여 인원을 전체 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "teamNumber", description = "팀 번호(조회하려는 조 이름이 x조(x는 A부터 Z까지 알파벳 중 하나)이면 x - ‘A’ + 1 로 조회하려는 조 번호로 요청", required = true, example = "1")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다.")
+    })
+    @GetMapping("/api/meetings/{meetingId}/teams/{teamNumber}/members")
+    public ApiResponse<MeetingResponseDTO.TeamMemberDTO> getTeamMembers(
+            @PathVariable Long meetingId,
+            @PathVariable Integer teamNumber,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.TeamMemberDTO teamMembers = clubQueryFacade.findTeamMembersByMeeting(meetingId, teamNumber, memberId);
+        return ApiResponse.onSuccess(teamMembers);
+    }
 
     @Operation(summary = "독서모임 발제 + 선택한 팀 정보 전체 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 최신순으로 전체 조회합니다.")
     @Parameters({
