@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -142,6 +143,14 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     @Override
     public String getMemberIdByNickname(String nickname) {
         return memberQueryService.getMemberIdByNickname(nickname);
+    }
+
+    @Override
+    public Map<String, String> getMemberIdsByNicknames(Collection<String> nicknames) {
+        if (nicknames == null || nicknames.isEmpty()) {
+            return Map.of();
+        }
+        return memberQueryService.getMemberIdsByNicknames(nicknames);
     }
 
     @Override
