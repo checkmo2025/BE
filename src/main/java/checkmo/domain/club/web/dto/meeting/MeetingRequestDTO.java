@@ -1,11 +1,11 @@
 package checkmo.domain.club.web.dto.meeting;
 
-import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.global.dto.BookSharedDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -54,14 +54,24 @@ public class MeetingRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class TeamManageDTO {
+        @Valid
+        @NotNull(message = "팀 멤버 정보는 null이 될 수 없습니다.")
         private List<TeamMemberDTO> teamMemberDTOList;
     }
 
     @Getter
     @NoArgsConstructor
     public static class TeamMemberDTO {
+        @Min(value = 1, message = "팀 번호는 1 이상의 정수여야 합니다.")
+        @NotNull(message = "팀 번호는 null이 될 수 없습니다.")
         private Integer teamNumber; // 팀 번호
-        private List<String> nicknameList; // 팀원들의 닉네임 리스트
+        @NotNull(message = "닉네임 리스트는 null이 될 수 없습니다.")
+        private List<
+                @NotBlank(message = "닉네임은 필수입니다")
+                @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
+                        message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")
+                        // @Size(max = 6, message = "닉네임은 6자 이하여야 합니다.")
+                        String> nicknameList; // 팀원들의 닉네임 리스트, 닉네임에 대한 검증은 AdditionalInfoDTO에서 가져왔습니다
     }
 
     @Getter

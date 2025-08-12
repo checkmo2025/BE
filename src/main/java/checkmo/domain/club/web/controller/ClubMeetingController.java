@@ -121,7 +121,25 @@ public class ClubMeetingController {
 
     // 토론조 관리
     // GET /api/meetings/{meetingId}/teams - Meeting 참여 인원 전체 조회
-    // POST /api/meetings/{meetingId}/teams - 토론조 생성
+    @Operation(summary = "토론조 관리(생성/수정/삭제) API", description = "Response Body에 따라 정기 독서모임의 토론조를 생성/수정/삭제합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "팀을 관리할 정기 독서 모임 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @PutMapping("/api/meetings/{meetingId}/teams")
+    public ApiResponse<Void> manageTeams(
+            @PathVariable Long meetingId,
+            @RequestBody @Valid MeetingRequestDTO.TeamManageDTO request,
+            @CurrentId String memberId
+    ) {
+        clubCommandFacade.manageTeams(memberId, meetingId, request);
+        return ApiResponse.onSuccess(null);
+    }
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
 
     // 팀-발제 연결 관리
