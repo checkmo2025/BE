@@ -57,6 +57,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // 미팅
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_4004", "독서모임을 찾을 수 없습니다."),
 
+    // 팀
+    TEAM_NUMBER_DUPLICATED_REQUEST(HttpStatus.BAD_REQUEST, "TEAM_4001", "중복된 팀 번호가 요청되었습니다."),
+
     // 카테고리
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_4004", "카테고리를 찾을 수 없습니다."),
 
