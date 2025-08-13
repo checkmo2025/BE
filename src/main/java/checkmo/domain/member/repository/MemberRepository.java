@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +25,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     Optional<String> findNicknameById(@Param("memberId") String memberId);
 
     @Query("select m.nickName, m.id from Member m where m.nickName in :nicknames")
-    List<Object[]> findNicknameAndIdByNicknameIn(Collection<String> nicknames);
+    List<Object[]> findNicknameAndIdByNicknameIn(List<String> nicknames);
 
     @Query("select m.id, m.nickName from Member m where m.id in :memberIds")
     List<Object[]> findIdAndNicknameByIdIn(@Param("memberIds") List<String> memberIds);
