@@ -215,17 +215,51 @@ public class ClubConverter {
     }
 
     /**
-     * ClubResponseDTO.ClubNoticeListDTO 변환
+     * ClubResponseDTO.NoticeItem -> ClubResponseDTO.ClubNoticeWithClubDTO
      */
-    public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
-            List<ClubResponseDTO.NoticeItem> noticeItems,
+    public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Notice notice, ClubResponseDTO.NoticeItem noticeItemDTO) {
+        var club = notice.getClub();
+        if (club == null && notice.getMeeting() != null) {
+            club = notice.getMeeting().getClub();
+        }
+        if (club == null) {
+            // 클럽 정보가 아예 없을 경우 null 처리
+            return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                    .clubId(null)
+                    .clubName(null)
+                    .notice(noticeItemDTO)
+                    .build();
+        }
+        return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .notice(noticeItemDTO)
+                .build();
+    }
+
+    /**
+     * ClubResponseDTO.VoteDTO -> ClubResponseDTO.ClubNoticeWithClubDTO
+     */
+    public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Vote vote, ClubResponseDTO.VoteDTO voteDTO) {
+        return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                .clubId(vote.getClub().getId())
+                .clubName(vote.getClub().getName())
+                .notice(voteDTO)
+                .build();
+    }
+
+    /**
+     * ClubResponseDTO.MemberNoticeListDTO 변환
+     */
+    public static ClubResponseDTO.MemberNoticeListDTO toMemberNoticeListDTO(
+            List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems,
             boolean hasNext,
             Long nextCursor
     ) {
-        List<ClubResponseDTO.NoticeItem> safeList =
-                (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> safeList =
+                (memberNoticeItems == null) ? List.of() : List.copyOf(memberNoticeItems);
 
-        return ClubResponseDTO.ClubNoticeListDTO.builder()
+        return ClubResponseDTO.MemberNoticeListDTO.builder()
                 .noticeList(safeList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)

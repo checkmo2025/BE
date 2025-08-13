@@ -221,7 +221,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
-    public ClubResponseDTO.ClubNoticeListDTO getNoticeForHome(String memberId, Long cursorId, boolean onlyImportant, Integer size) {
+    public ClubResponseDTO.MemberNoticeListDTO getNoticeForHome(String memberId, Long cursorId, boolean onlyImportant, Integer size) {
 
         // 1. 커서 초기화
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
@@ -231,18 +231,18 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
         // 3. 공지(일반, 모임) + 투표 조회 및 변환
-        List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getMemberNoticesAndVotes(memberId, onlyImportant, cursor, pageable);
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems = clubCommunicationQueryService.getMemberNoticesAndVotes(memberId, onlyImportant, cursor, pageable);
 
         // 4. 페이징
-        boolean hasNext = noticeItems.size() > pageSize;
+        boolean hasNext = memberNoticeItems.size() > pageSize;
         if (hasNext) {
-            noticeItems = noticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
+            memberNoticeItems = memberNoticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
         }
-        Long nextCursor = hasNext && noticeItems.size() >= pageSize
-                ? noticeItems.get(pageSize - 1).getId()
+        Long nextCursor = hasNext && memberNoticeItems.size() >= pageSize
+                ? memberNoticeItems.get(pageSize - 1).getNotice().getId()
                 : null;
 
-        return ClubConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor);
+        return ClubConverter.toMemberNoticeListDTO(memberNoticeItems, hasNext, nextCursor);
     }
 
     /**
