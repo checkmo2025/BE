@@ -22,6 +22,8 @@ public class Vote extends BaseEntity {
 
     private String title;
 
+    private String content;
+
     private String tag = "투표";
 
     private boolean important;

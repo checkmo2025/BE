@@ -44,6 +44,7 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class CreateClubVoteDTO {
         private String title;
+        private String content;
         private boolean important;
 
         @NotNull

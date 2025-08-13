@@ -382,6 +382,7 @@ public class ClubConverter {
     ) {
         return Vote.builder()
                 .title(request.getTitle())
+                .content(request.getContent())
                 .tag("투표")
                 .important(request.isImportant())
                 .item1(request.getItem1())
@@ -473,7 +474,10 @@ public class ClubConverter {
         return ClubResponseDTO.VoteDTO.builder()
                 .id(vote.getId())
                 .title(vote.getTitle())
+                .content(vote.getContent())
                 .important(vote.isImportant())
+                .anonymity(vote.isAnonymity())
+                .duplication(vote.isDuplication())
                 .tag("투표")
                 .items(itemDTOs)
                 .build();

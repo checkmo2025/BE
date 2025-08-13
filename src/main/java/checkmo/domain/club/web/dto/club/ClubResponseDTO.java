@@ -214,7 +214,11 @@ public class ClubResponseDTO {
     public static final class VoteDTO implements NoticeItem {
         private Long id; // 투표 ID
         private String title; // 공지사항 제목
+        private String content; // 내용
         private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+        private boolean anonymity; // 익명 여부
+        private boolean duplication; // 중복 여부
+
         private String tag = "투표";
         private List<EachItemDTO> items; // 투표 항목 목록
     }
