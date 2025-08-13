@@ -48,6 +48,32 @@ public class ClubResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class MyPageClubListDTO {
+        private List<ClubDetailResponseDTO> clubList; // 모임 목록
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubDetailResponseDTO {
+        private Long clubId;
+        private String name;
+        private String description;
+        private String profileImageUrl;
+        private boolean open;
+        private List<String> category; // String으로 주기 -> 마이페이지용
+        private String region;
+        private List<Club.ParticipantType> participantTypes;
+        private String insta;
+        private String kakao;
+        private boolean isStaff;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class ClubInfoDTO {
         private Long clubId;         // 모임 ID
         private String clubName;     // 모임 이름, joinClub의 반환값에서 사용될 때는 null

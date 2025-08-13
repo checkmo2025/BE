@@ -192,6 +192,28 @@ public class ClubConverter {
                 .build();
     }
 
+    public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTO(
+            Club club, List<CategorySharedDTO.CategoryInfo> categories, boolean isStaff) {
+
+        List<String> categoryNames = categories.stream()
+                .map(CategorySharedDTO.CategoryInfo::getName)
+                .toList();
+
+        return ClubResponseDTO.ClubDetailResponseDTO.builder()
+                .clubId(club.getId())
+                .name(club.getName())
+                .description(club.getDescription())
+                .profileImageUrl(club.getProfileImgUrl())
+                .open(club.isOpen())
+                .category(categoryNames)
+                .region(club.getRegion())
+                .participantTypes(club.getParticipantTypes())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
+                .isStaff(isStaff)
+                .build();
+    }
+
     /**
      * ClubResponseDTO.ClubNoticeListDTO 변환
      */

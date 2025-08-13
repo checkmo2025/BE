@@ -2,10 +2,14 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ import java.util.stream.Collectors;
 public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     private final ClubMemberRepository clubMemberRepository;
+    private final CategoryQueryFacade categoryQueryFacade;
     private final MemberQueryFacade memberQueryFacade;
 
     @Override
@@ -43,6 +48,34 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .toList();
 
         return ClubConverter.fromClubInfoListToMyClubList(myClubInfoList);
+    }
+
+    /**
+     * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
+     *
+     * 피그마 참고 페이지 : #마이페이지
+     *
+     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
+     * @return 내가 가입한 독서 클럽 목록 DTO
+     */
+    @Override
+    public ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId) {
+
+        // 1. ClubMember와 Club 엔티티 fetch join으로 조회
+        List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdWithClub(memberId);
+
+        // 2. ClubDetailResponseDTO 리스트로 변환
+        List<ClubResponseDTO.ClubDetailResponseDTO> responseList = clubMembers.stream()
+                .map(cm -> {
+                    Club c = cm.getClub();
+                    CategorySharedDTO.CategoryInfoList categoryInfoList = categoryQueryFacade.getCategoriesByClubForShare(c.getId());
+                    return ClubConverter.fromClubToResponseDTO(c, categoryInfoList.getCategoryList(), cm.isStaff());
+                })
+                .toList();
+
+        return ClubResponseDTO.MyPageClubListDTO.builder()
+                .clubList(responseList)
+                .build();
     }
 
     /**
