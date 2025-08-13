@@ -651,13 +651,13 @@ public class ClubConverter {
     /**
      * Meeting 엔티티 -> Notice 엔티티 변환 (자동 생성)
      */
-    public static Notice fromMeetingToNotice(Meeting meeting) {
+    public static Notice fromMeetingToNotice(Meeting meeting, Club club) {
         return Notice.builder()
                 .title(meeting.getTitle())
                 .content(meeting.getContent())
                 .important(true)
                 .tag("모임")
-                .club(meeting.getClub())
+                .club(club)
                 .build();
     }
 

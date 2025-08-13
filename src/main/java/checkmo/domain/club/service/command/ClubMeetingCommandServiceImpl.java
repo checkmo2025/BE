@@ -62,7 +62,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         club.addMeeting(meeting); //영속성 컨텍스트 내 객체 상태 동기화
 
         // 6. 공지 생성
-        Notice notice = ClubConverter.fromMeetingToNotice(meeting);
+        Notice notice = ClubConverter.fromMeetingToNotice(meeting, club);
         meeting.addNotice(notice);
 
         // 6. 미팅 명시적 저장 -> 공지사항도 함께 저장됨
