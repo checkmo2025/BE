@@ -228,7 +228,7 @@ public interface ClubQueryFacade {
      * @param meetingId 미팅 ID
      * @param memberId 요청자 회원 ID
      */
-    List<MeetingResponseDTO.MeetingMemberDTO> findMeetingMembersByMeeting(Long meetingId, String memberId);
+    MeetingResponseDTO.MeetingMemberListDTO findMeetingMembersByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
 
     /**
      * ClubMeetingQueryService

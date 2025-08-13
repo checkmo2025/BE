@@ -88,6 +88,16 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class MeetingMemberListDTO {
+        private List<MeetingMemberDTO> members; // 모임 참여자 목록
+        private boolean hasNext; // 다음 페이지 존재 여부
+        private Long nextCursor; // 다음 페이지 커서
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MeetingMemberDTO {
         private MemberSharedDTO.BasicInfoDTO memberInfo; // 참여자 정보
         private Integer teamNumber; // 배정된 팀 번호

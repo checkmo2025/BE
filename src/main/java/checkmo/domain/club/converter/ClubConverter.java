@@ -694,6 +694,17 @@ public class ClubConverter {
                 .build();
     }
 
+    /**
+     * List<MeetingResponseDTO.MeetingMemberDTO> -> MeetingResponseDTO.MeetingMemberListDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingMemberListDTO fromMeetingMemberDTOListToMeetingMemberListDTO(List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList, boolean hasNext, Long nextCursor) {
+        return MeetingResponseDTO.MeetingMemberListDTO.builder()
+                .members(meetingMemberDTOList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+    
     // =====================================================
     // Parameter ->  DTO 변환
     // =====================================================
