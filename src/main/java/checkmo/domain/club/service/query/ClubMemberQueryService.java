@@ -52,6 +52,7 @@ public interface ClubMemberQueryService {
      */
     Map<Long, ClubMember.ClubMemberStatus> getMemberStatuses(String memberId, List<Long> clubIds);
 
+
     /**
      * 특정 상태의 모임 회원 목록을 조회합니다.
      *
@@ -62,5 +63,15 @@ public interface ClubMemberQueryService {
      * @return ClubMember 엔티티 리스트
      */
     List<ClubMember> getClubMemberListByStatus(Long clubId, String status, Long cursorId, Integer size);
+
+    /**
+     * 멤버의 닉네임으로 clubMember를 매핑합니다.
+     *
+     * @param clubId 독서 모임 ID
+     * @param nicknames 멤버 닉네임 리스트
+     * @return 닉네임과 ClubMember 객체를 매핑한 Map
+     * @throws GeneralException 닉네임에 해당하는 ClubMember가 존재하지 않을 경우, CLUB_MEMBER_NOT_FOUND 예외 발생
+     */
+    Map<String, ClubMember> getNicknameToClubMember(Long clubId, List<String> nicknames) throws GeneralException;
 
 }

@@ -47,7 +47,7 @@ public interface ClubMeetingQueryService {
      * @param size 조회할 토픽 개수 (null이면 전체 조회)
      * @return 조회한 토픽 정보 DTO
      */
-    List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size);
+    List<Topic> findTopicsWithClubMemberByMeeting(Long meetingId, Long cursorId, Integer size);
 
     /**
      * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후,
@@ -57,16 +57,6 @@ public interface ClubMeetingQueryService {
      * @return 토픽 id를 기준으로 선택한 팀 번호 리스트 Map
      */
     Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
-
-    /**
-     * 독서 모임 미팅의 팀별 발제 조회
-     *
-     * 피그마 참고 페이지 : #독서모임 - 운영진 화면 모임 - 특정 조 전체보기 클릭시
-     *
-     * @param teamId 미팅 ID
-     * @return TeamTopic 리스트
-     */
-    List<TeamTopic> findTeamTopicsByTeam(Long teamId);
 
     /**
      * 독서 모임의 책장(한줄평) 리스트를 조회합니다.
@@ -109,6 +99,15 @@ public interface ClubMeetingQueryService {
      * @Param meetingId 미팅 ID
      */
     List<Team> findTeamsByMeeting(Long meetingId);
+
+    /**
+     * 독서 모임 미팅의 팀별 발제 조회
+     *
+     * @param teamId 미팅 ID
+     * @param size 조회할 팀 토픽 개수 (null이면 전체 조회)
+     * @return TeamTopic 리스트
+     */
+    List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size);
 
     /**
      * 독서모임의 팀 멤버 정보를 조회합니다.

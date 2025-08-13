@@ -116,6 +116,27 @@ public class ClubResponseDTO {
         private boolean isStaff; // 본인이 모임의 스탭인지 여부 (true: 스탭, false: 일반 회원)
     }
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberNoticeListDTO {
+        List<ClubNoticeWithClubDTO> noticeList;
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubNoticeWithClubDTO {
+        private Long clubId;
+        private String clubName;
+        private NoticeItem notice; // 기존 NoticeItem 유지
+    }
+
     @JsonTypeInfo(
             use = JsonTypeInfo.Id.NAME,
             include = JsonTypeInfo.As.EXISTING_PROPERTY,

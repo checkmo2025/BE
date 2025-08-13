@@ -16,7 +16,7 @@ public class MeetingRepositoryCustomImpl implements MeetingRepositoryCustom {
     private final QMeeting meeting = QMeeting.meeting;
 
     @Override
-    public List<Meeting> findMeetingsByClubIdAndCursorDesc(Long clubId, Long cursorId, Integer size) {
+    public List<Meeting> findAllByClubIdAndCursorDesc(Long clubId, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(meeting.club.id.eq(clubId));
         if (cursorId != null) {
@@ -33,7 +33,7 @@ public class MeetingRepositoryCustomImpl implements MeetingRepositoryCustom {
     }
 
     @Override
-    public List<Meeting> findMeetingsByClubIdAndGenerationAndCursorDesc(Long clubId, Integer generation, Long cursorId, Integer size) {
+    public List<Meeting> findAllByClubIdAndGenerationAndCursorDesc(Long clubId, Integer generation, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(meeting.club.id.eq(clubId));
 

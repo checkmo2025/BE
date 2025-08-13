@@ -145,6 +145,14 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     }
 
     @Override
+    public Map<String, String> getMemberIdsByNicknames(List<String> nicknames) {
+        if (nicknames == null || nicknames.isEmpty()) {
+            return Map.of();
+        }
+        return memberQueryService.getMemberIdsByNicknames(nicknames);
+    }
+
+    @Override
     public boolean isFollowing(String memberId, String targetMemberNickname) {
         String targetMemberId = memberQueryService.getMemberIdByNickname(targetMemberNickname);
         return memberFollowQueryService.isFollowing(memberId, targetMemberId);

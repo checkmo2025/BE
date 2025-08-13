@@ -93,9 +93,8 @@ public interface ClubMeetingCommandService {
      * @param memberId 팀 구성자의 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
      * @param meetingId 미팅 ID -> 미팅 ID만 알아도 어느 Club인지 알 수 있기 때문에 ClubId는 필요 없음
      * @param request 팀 구성 요청 DTO
-     * @return 해당 미팅의 ID
      */
-    Long manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request);
+    void manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request);
 
     /**
      * 독서모임의 한줄평을 작성합니다.

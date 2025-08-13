@@ -20,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +44,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
      *
      * @param clubId 클럽 ID
      * @param itemId 공지 또는 투표 ID
-     * @param tag    "공지", "모임", "투표" 중 하나
+     * @param tag "공지", "모임", "투표" 중 하나
      * @return 공통된 NoticeItem DTO
      */
     @Override
@@ -156,7 +156,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         int pageSize = pageable.getPageSize();
 
         // 1. 공지사항 리스트 조회
-        List<Notice> notices = noticeRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
+        List<Notice> notices = noticeRepository.findAllByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
 
         // 2. 투표 리스트 조회
         List<Vote> votes = voteRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1));
@@ -173,7 +173,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
      * @return 공지와 투표 목록 DTO
      */
     @Override
-    public List<ClubResponseDTO.NoticeItem> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable) {
+    public List<ClubResponseDTO.ClubNoticeWithClubDTO> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable) {
 
         int pageSize = pageable.getPageSize();
 
@@ -189,7 +189,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         }
 
         // 2. 모든 클럽 공지/투표 조회
-        List<Notice> notices = noticeRepository.findByClubIdsAndCursorPaging(
+        List<Notice> notices = noticeRepository.findAllByClubIdsAndCursorPaging(
                 clubIds, onlyImportant, cursorId, Pageable.ofSize(pageSize + 1)
         );
 
@@ -198,7 +198,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         );
 
         // 3. 생성 시간 순서대로 합치기
-        return mergeNoticesAndVotes(notices, votes, pageSize);
+        return mergeNoticesAndVotesWithClub(notices, votes, pageSize);
     }
 
     // 3가지 공지를 생성 시간 순서대로 합치는 로직
@@ -245,4 +245,41 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         return resultList;
     }
 
+    // 클럽 id, 클럽 name 추가 버전
+    // 3가지 공지를 생성 시간 순서대로 합치는 로직
+    private List<ClubResponseDTO.ClubNoticeWithClubDTO> mergeNoticesAndVotesWithClub(
+            List<Notice> notices, List<Vote> votes, int pageSize
+    ) {
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> resultList = new ArrayList<>();
+
+        // 공지사항과 투표를 생성일시 기준으로 병합하여 pageSize 만큼 결과 채움
+        int i = 0, j = 0;
+        while (resultList.size() < pageSize + 1 && (i < notices.size() || j < votes.size())) {
+            LocalDateTime noticeTime = i < notices.size() ? notices.get(i).getCreatedAt() : LocalDateTime.MIN;
+            LocalDateTime voteTime = j < votes.size() ? votes.get(j).getCreatedAt() : LocalDateTime.MIN;
+
+            // 공지사항 우선순위가 높거나 투표가 없을 경우 공지사항 처리
+            if (i < notices.size() && (j >= votes.size() || noticeTime.isAfter(voteTime))) {
+                Notice notice = notices.get(i++);
+                ClubResponseDTO.NoticeItem dto;
+
+                // 공지사항이 미팅 관련이면 책 정보도 조회하여 DTO 변환
+                if (notice.getMeeting() != null) {
+                    BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+                    dto = ClubConverter.toMeetingNoticeDTO(notice, bookInfo);
+                } else {
+                    // 순수 공지사항 DTO 변환
+                    dto = ClubConverter.toPureNoticeDTO(notice);
+                }
+                resultList.add(ClubConverter.toClubNoticeWithClubDTO(notice, dto));
+
+            } else if (j < votes.size()) { // 투표 조회
+                Vote vote = votes.get(j++);
+                List<ClubResponseDTO.EachItemDTO> itemDTOs = ClubConverter.toEachItemDTOListFromItems(vote.getItems());
+                ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
+                resultList.add(ClubConverter.toClubNoticeWithClubDTO(vote, voteDTO));
+            }
+        }
+        return resultList;
+    }
 }

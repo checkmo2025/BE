@@ -99,7 +99,7 @@ public interface ClubQueryFacade {
      * @param size 조회할 개수
      * @return 모든 클럽의 최신 소식이 통합된 미리보기 DTO
      */
-    ClubResponseDTO.ClubNoticeListDTO getNoticeForHome(String memberId, Long cursorId, boolean onlyImportant, Integer size);
+    ClubResponseDTO.MemberNoticeListDTO getNoticeForHome(String memberId, Long cursorId, boolean onlyImportant, Integer size);
 
     /**
      * ClubQueryService
@@ -197,7 +197,7 @@ public interface ClubQueryFacade {
      * @param memberId 요청자 회원 ID
      * @return 미팅 상세 정보 DTO
      */
-    MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId, String memberId);
+    MeetingResponseDTO.MeetingDetailDTO findMeetingDetailById(Long meetingId, String memberId);
 
     /**
      * ClubMeetingQueryService

@@ -35,7 +35,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
     })
     @GetMapping("/notices")
-    public ApiResponse<ClubResponseDTO.ClubNoticeListDTO> getMemberNoticeList(
+    public ApiResponse<ClubResponseDTO.MemberNoticeListDTO> getMemberNoticeList(
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false, defaultValue = "false") boolean onlyImportant,

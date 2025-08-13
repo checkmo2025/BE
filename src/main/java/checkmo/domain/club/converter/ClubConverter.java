@@ -7,9 +7,7 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.announcement.Vote;
-import checkmo.domain.club.entity.meeting.BookReview;
-import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Topic;
+import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
@@ -24,7 +22,9 @@ import checkmo.global.dto.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -215,17 +215,51 @@ public class ClubConverter {
     }
 
     /**
-     * ClubResponseDTO.ClubNoticeListDTO 변환
+     * ClubResponseDTO.NoticeItem -> ClubResponseDTO.ClubNoticeWithClubDTO
      */
-    public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
-            List<ClubResponseDTO.NoticeItem> noticeItems,
+    public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Notice notice, ClubResponseDTO.NoticeItem noticeItemDTO) {
+        var club = notice.getClub();
+        if (club == null && notice.getMeeting() != null) {
+            club = notice.getMeeting().getClub();
+        }
+        if (club == null) {
+            // 클럽 정보가 아예 없을 경우 null 처리
+            return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                    .clubId(null)
+                    .clubName(null)
+                    .notice(noticeItemDTO)
+                    .build();
+        }
+        return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .notice(noticeItemDTO)
+                .build();
+    }
+
+    /**
+     * ClubResponseDTO.VoteDTO -> ClubResponseDTO.ClubNoticeWithClubDTO
+     */
+    public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Vote vote, ClubResponseDTO.VoteDTO voteDTO) {
+        return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
+                .clubId(vote.getClub().getId())
+                .clubName(vote.getClub().getName())
+                .notice(voteDTO)
+                .build();
+    }
+
+    /**
+     * ClubResponseDTO.MemberNoticeListDTO 변환
+     */
+    public static ClubResponseDTO.MemberNoticeListDTO toMemberNoticeListDTO(
+            List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems,
             boolean hasNext,
             Long nextCursor
     ) {
-        List<ClubResponseDTO.NoticeItem> safeList =
-                (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> safeList =
+                (memberNoticeItems == null) ? List.of() : List.copyOf(memberNoticeItems);
 
-        return ClubResponseDTO.ClubNoticeListDTO.builder()
+        return ClubResponseDTO.MemberNoticeListDTO.builder()
                 .noticeList(safeList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
@@ -539,6 +573,9 @@ public class ClubConverter {
                 .toList();
     }
 
+    /**
+     * Topic 엔티티 + MemberSharedDTO.BasicInfoDTO + 팀 번호 리스트 -> MeetingResponseDTO.TopicDTO 변환
+     */
     public static MeetingResponseDTO.TopicDTO fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
             Topic topic,
             MemberSharedDTO.BasicInfoDTO authorSharedDTO,
@@ -563,6 +600,64 @@ public class ClubConverter {
                 .memberInfo(memberSharedDTO)
                 .teamNumber(teamNumber)
                 .build();
+    }
+
+    /**
+     * Meeting 엔티티 + BookSharedDTO.BasicInfoDTO + Topic 리스트 + 팀별 Topic 리스트 -> MeetingResponseDTO.MeetingDetailDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingDetailDTO fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
+            Meeting meeting,
+            BookSharedDTO.BasicInfoDTO bookSharedDTO,
+            List<Topic> topics,
+            Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds,
+            List<Team> teams,
+            Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber,
+            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap
+    ) {
+        MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, bookSharedDTO);
+
+        List<MeetingResponseDTO.TopicDTO> topicDTOList = fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(topics, authorInfoMap, teamTopicsWithTeamByTopicIds);
+
+        List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList = teams.stream()
+                .sorted(Comparator.comparing(Team::getTeamNumber)) // 팀 번호 기준 정렬
+                .map(team -> {
+                    List<TeamTopic> teamTopics =
+                            teamTopicsGroupingByTeamNumber.get(team.getTeamNumber());
+
+                    List<MeetingResponseDTO.TopicDTO> teamTopicDTOs = teamTopics.stream()
+                            .map(tt -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+                                    tt.getTopic(),
+                                    authorInfoMap.get(tt.getTopic().getClubMember().getMemberId()),
+                                    null // TeamTopicDTO-TopicDTO에서는 teamNumbers 필드가 NULL이어야 함
+                            ))
+                            .toList();
+
+                    return fromTopicDTOListToTeamTopicDTO(team.getTeamNumber(), teamTopicDTOs);
+                })
+                .toList();
+        return fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
+                meetingInfoDTO,
+                topicDTOList,
+                teamTopicDTOList
+        );
+    }
+
+    /**
+     * Topic 리스트 + Topic별 팀 선택 정보 + 작성자 정보 맵 -> List<MeetingResponseDTO.TopicDTO> 변환
+     */
+    public static List<MeetingResponseDTO.TopicDTO> fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
+            List<Topic> topics,
+            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
+            Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds
+    ) {
+        List<MeetingResponseDTO.TopicDTO> topicDTOList = topics.stream()
+                .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+                        topic,
+                        authorInfoMap.get(topic.getClubMember().getMemberId()),
+                        teamTopicsWithTeamByTopicIds.getOrDefault(topic.getId(), List.of())
+                ))
+                .toList();
+        return topicDTOList;
     }
 
     // =====================================================
@@ -682,6 +777,21 @@ public class ClubConverter {
     }
 
     /**
+     * MeetingResponseDTO.MeetingInfoDTO + List<TopicDTO> + List<TeamTopicDTO> -> MeetingResponseDTO.MeetingDetailDTO 변환
+     */
+    public static MeetingResponseDTO.MeetingDetailDTO fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
+            MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO,
+            List<MeetingResponseDTO.TopicDTO> topicDTOList,
+            List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList
+    ) {
+        return MeetingResponseDTO.MeetingDetailDTO.builder()
+                .meetingInfo(meetingInfoDTO)
+                .topics(topicDTOList)
+                .teams(teamTopicDTOList)
+                .build();
+    }
+
+    /**
      * 팀 번호 + List<MemberSharedDTO> -> MeetingResponseDTO.TeamMemberDTO 변환
      */
     public static MeetingResponseDTO.TeamMemberDTO fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
@@ -704,7 +814,7 @@ public class ClubConverter {
                 .nextCursor(nextCursor)
                 .build();
     }
-    
+
     // =====================================================
     // Parameter ->  DTO 변환
     // =====================================================
