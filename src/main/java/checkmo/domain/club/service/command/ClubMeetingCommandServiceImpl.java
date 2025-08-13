@@ -72,6 +72,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     @Override
     public Long updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Club club = clubQueryService.validateClub(meeting.getClubId());
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
@@ -86,7 +87,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 request.getTag()
         );
 
-        Notice newNotice = ClubConverter.fromMeetingToNotice(meeting);
+        Notice newNotice = ClubConverter.fromMeetingToNotice(meeting, club);
         meeting.replaceNotice(newNotice);
 
         meetingRepository.save(meeting);
