@@ -10,11 +10,7 @@ import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.meeting.*;
-import checkmo.domain.club.repository.ClubRepository;
-import checkmo.domain.club.repository.meeting.BookReviewRepository;
-import checkmo.domain.club.repository.meeting.MeetingRepository;
-import checkmo.domain.club.repository.meeting.TeamTopicRepository;
-import checkmo.domain.club.repository.meeting.TopicRepository;
+import checkmo.domain.club.repository.meeting.*;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
@@ -26,7 +22,8 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +36,11 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
 
-    private final ClubRepository clubRepository;
     private final MeetingRepository meetingRepository;
     private final TopicRepository topicRepository;
     private final TeamTopicRepository teamTopicRepository;
     private final BookReviewRepository bookReviewRepository;
+    private final TeamRepository teamRepository;
 
     @Override
     public Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request) {
@@ -193,8 +190,88 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request) {
-        return 0L;
+    public void manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request) {
+        // 1. 미팅과 클럽 멤버 검증
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. 요청 teamNumber와 nicknameList 검증 및 정리
+        Map<Integer, List<String>> requestTeamNumberToNicknameList = new HashMap<>();
+        Set<Integer> requestTeamNumbers = new HashSet<>();
+        Set<String> requestNicknames = new LinkedHashSet<>();
+
+        for (MeetingRequestDTO.TeamMemberDTO dto : request.getTeamMemberDTOList()) {
+            Integer num = dto.getTeamNumber();
+
+            if (!requestTeamNumbers.add(num)) { // 요청 teamNumber 중 teamNumber가 이미 존재하면 예외 발생
+                throw new GeneralException(ErrorStatus.TEAM_NUMBER_DUPLICATED_REQUEST, num.toString()); //TODO: 팀 넘버 포함 예외 메시지
+            }
+
+            List<String> names = new ArrayList<>(new LinkedHashSet<>(dto.getNicknameList())); // 닉네임 리스트의 중복 제거
+            requestTeamNumberToNicknameList.put(num, names);
+            requestNicknames.addAll(names);
+        }
+
+        // 3. 해당 미팅의 기존 팀들 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
+        List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
+        Map<Integer, Team> existingTeamNumberToTeam = existingTeams.stream()
+                .collect(Collectors.toMap(Team::getTeamNumber, t -> t));
+
+        // 4. 요청에 있는데 아직 없는 teamNumber는 Team 생성
+        for (Integer teamNumber : requestTeamNumbers) {
+            if (!existingTeamNumberToTeam.containsKey(teamNumber)) {
+                Team team = Team.builder()
+                        .teamNumber(teamNumber)
+                        .build();
+                meeting.addTeam(team);
+                existingTeams.add(team);
+                existingTeamNumberToTeam.put(teamNumber, team);
+            }
+        }
+
+        // 5. 요청에는 없는데 존재하는 teamNumber는 Team 삭제
+        List<Team> toDeleteTeams = existingTeams.stream()
+                .filter(t -> !requestTeamNumbers.contains(t.getTeamNumber()))
+                .toList();
+
+        // 미팅과의 양방향 연관 끊기 -> orphanRemoval이 true이므로 미팅이 flush될 때 Team도 삭제됨
+        toDeleteTeams.forEach(meeting::removeTeam);
+
+        // 기존 팀, 기존 teamNumber -> Team Map 메모리 컬렉션/맵 동기화
+        existingTeams.removeAll(toDeleteTeams);
+        existingTeamNumberToTeam.keySet().removeAll(toDeleteTeams.stream()
+                .map(Team::getTeamNumber)
+                .collect(Collectors.toSet()));
+
+        // 6. 기존 MemberTeam orphanRemoval = true 삭제
+        if (!existingTeams.isEmpty()) {
+            existingTeams.forEach(Team::clearMemberTeams);
+            // 기존 멤버 삭제 시 소유자만 끊고 orphanRemoval=true로 고아 삭제를 걸면 DB 행은 사라지고,
+            // clubMember.memberTeams는 LAZY 초기화를 해서 굳이 연관관계를 설정하지 않는다.
+            // 이때 이 하나의 트랜잭션에서 clubMember.memberTeams를 사용하지 않습니다!!!
+        }
+
+        // 7. 닉네임 → memberId → ClubMember 일괄 매핑
+        Map<String, ClubMember> nicknameToClubMember = clubMemberQueryService.getNicknameToClubMember(meeting.getClubId(), requestNicknames.stream().toList());
+
+        // 8. 요청대로 MemberTeam 배치 재생성
+        for (Map.Entry<Integer, List<String>> e : requestTeamNumberToNicknameList.entrySet()) {
+            Team team = existingTeamNumberToTeam.get(e.getKey());
+            for (String nick : e.getValue()) {
+                ClubMember cm = nicknameToClubMember.get(nick);
+                MemberTeam mt = MemberTeam.builder().build();
+
+                team.addMemberTeam(mt);
+                cm.addMemberTeam(mt);
+            }
+        }
+
+        // 9. 기존 팀과 새로 생성된 Team을 명시적으로 저장 (내부적으로 MemberTeam도 저장됨)
+        meetingRepository.save(meeting);
+        teamRepository.saveAll(existingTeams);
     }
 
     @Override

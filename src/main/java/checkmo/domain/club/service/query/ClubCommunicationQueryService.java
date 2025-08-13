@@ -34,6 +34,6 @@ public interface ClubCommunicationQueryService {
      * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
      * @return 공지와 투표 목록 DTO
      */
-    List<ClubResponseDTO.NoticeItem> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable);
+    List<ClubResponseDTO.ClubNoticeWithClubDTO> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable);
 
 }

@@ -29,13 +29,14 @@ public class Team extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
+    @Setter
     private Meeting meeting;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<MemberTeam> memberTeams = new ArrayList<>();
 
@@ -47,5 +48,14 @@ public class Team extends BaseEntity {
     public void removeTeamTopic(TeamTopic teamTopic) {
         this.teamTopics.remove(teamTopic);
         teamTopic.setTeam(null);
+    }
+
+    public void addMemberTeam(MemberTeam memberTeam) {
+        this.memberTeams.add(memberTeam);
+        memberTeam.setTeam(this);
+    }
+
+    public void clearMemberTeams() {
+        this.memberTeams.clear();
     }
 }

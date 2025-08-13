@@ -95,6 +95,16 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
+    public Map<String, String> getMemberIdsByNicknames(List<String> nicknames) {
+        List<Object[]> results = memberRepository.findNicknameAndIdByNicknameIn(nicknames);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0], // key: nickname
+                        row -> (String) row[1]  // value: memberId
+                ));
+    }
+
+    @Override
     public String getMemberNicknameById(String memberId) {
         return memberRepository.findNicknameById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
