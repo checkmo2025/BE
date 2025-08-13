@@ -3,7 +3,9 @@ package checkmo.domain.club.web.dto.club;
 import checkmo.domain.club.entity.Club;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.CategorySharedDTO;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -43,8 +45,12 @@ public class ClubRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class CreateClubVoteDTO {
+        @NotBlank                 // title은 필수
         private String title;
+
+        @Size(max = 255)           
         private String content;
+
         private boolean important;
 
         @NotNull
