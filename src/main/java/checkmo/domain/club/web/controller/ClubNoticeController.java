@@ -7,6 +7,8 @@ import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.global.auth.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -81,6 +83,26 @@ public class ClubNoticeController {
     ) {
         clubCommandFacade.deleteNotice(clubId, memberId, noticeId);
         return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
+    }
+
+    @Operation(summary = "모임 공지사항 상세 조회", description = "특정 모임 공지사항 상세 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "클럽 ID", required = true, example = "1"),
+            @Parameter(name = "noticeId", description = "모임 공지사항 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "모임 멤버가 아님"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음"),
+    })
+    @GetMapping("/meeting/{noticeId}")
+    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> getMeetingDetail(
+            @PathVariable Long clubId,
+            @PathVariable Long noticeId,
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(clubQueryFacade.getNoticeDetail(clubId, noticeId, "모임", memberId));
     }
 
     @Operation(summary = "투표 생성", description = "특정 모임에 투표를 생성합니다. (운영진만 생성 가능)")

@@ -67,7 +67,20 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                         .noticeItem(ClubConverter.toPureNoticeDTO(notice))
                         .build();
             }
+            case "모임" -> {
+                Notice notice = noticeRepository.findById(itemId)
+                        .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+                if (notice.getTag().equals("공지")) {
+                    throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+                }
 
+                BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+
+                yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                        .isStaff(clubMember.isStaff())
+                        .noticeItem(ClubConverter.toMeetingNoticeDTO(notice, bookInfo))
+                        .build();
+            }
             case "투표" -> {
                 Vote vote = voteRepository.findById(itemId)
                         .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
