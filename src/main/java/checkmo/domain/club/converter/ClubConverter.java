@@ -310,20 +310,6 @@ public class ClubConverter {
                 .build();
     }
 
-    /**
-     * BookReview 엔티티 + MemberSharedDTO -> BookReviewDTO 변환
-     */
-    public static BookShelfResponseDTO.BookReviewDTO fromBookReviewAndMemberSharedDTOToBookReviewDTO(
-            BookReview bookReview,
-            MemberSharedDTO.BasicInfoDTO memberSharedDTO
-    ) {
-        return BookShelfResponseDTO.BookReviewDTO.builder()
-                .bookReviewId(bookReview.getId())
-                .description(bookReview.getDescription())
-                .rate(bookReview.getRate())
-                .authorInfo(memberSharedDTO)
-                .build();
-    }
 
     /**
      * BookRecommendDTO 리스트 → BookRecommendListDTO 변환
@@ -472,19 +458,20 @@ public class ClubConverter {
     }
 
     /**
-     * Topic 엔티티 -> BookShelfResponseDTO.TopicDTO 변환
+     * Topic 리스트 + 작성자 정보 맵 + 회원 ID -> List<BookShelfResponseDTO.TopicDTO> 변환
      */
-    public static BookShelfResponseDTO.TopicDTO fromTopicAndMemberSharedDTOToTopicDTO(
-            Topic topic,
-            MemberSharedDTO.BasicInfoDTO authorSharedDTO,
+    public static List<BookShelfResponseDTO.TopicDTO> fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
+            List<Topic> topics,
+            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
             String memberId
     ) {
-        return BookShelfResponseDTO.TopicDTO.builder()
-                .topicId(topic.getId())
-                .content(topic.getDescription())
-                .authorInfo(authorSharedDTO)
-                .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
-                .build();
+        return topics.stream()
+                .map(topic -> fromTopicAndMemberSharedDTOToTopicDTO(
+                        topic,
+                        authorInfoMap.get(topic.getClubMember().getMemberId()),
+                        memberId
+                ))
+                .toList();
     }
 
     /**
@@ -609,14 +596,14 @@ public class ClubConverter {
             Meeting meeting,
             BookSharedDTO.BasicInfoDTO bookSharedDTO,
             List<Topic> topics,
-            Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds,
+            Map<Long, List<Integer>> topicIdToSelectTeamNumbers,
             List<Team> teams,
             Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber,
             Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap
     ) {
         MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, bookSharedDTO);
 
-        List<MeetingResponseDTO.TopicDTO> topicDTOList = fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(topics, authorInfoMap, teamTopicsWithTeamByTopicIds);
+        List<MeetingResponseDTO.TopicDTO> topicDTOList = fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(topics, authorInfoMap, topicIdToSelectTeamNumbers);
 
         List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList = teams.stream()
                 .sorted(Comparator.comparing(Team::getTeamNumber)) // 팀 번호 기준 정렬
@@ -648,16 +635,15 @@ public class ClubConverter {
     public static List<MeetingResponseDTO.TopicDTO> fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
             List<Topic> topics,
             Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
-            Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds
+            Map<Long, List<Integer>> topicIdToSelectTeamNumbers
     ) {
-        List<MeetingResponseDTO.TopicDTO> topicDTOList = topics.stream()
+        return topics.stream()
                 .map(topic -> ClubConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
                         topic,
                         authorInfoMap.get(topic.getClubMember().getMemberId()),
-                        teamTopicsWithTeamByTopicIds.getOrDefault(topic.getId(), List.of())
+                        topicIdToSelectTeamNumbers.getOrDefault(topic.getId(), List.of())
                 ))
                 .toList();
-        return topicDTOList;
     }
 
     // =====================================================
@@ -679,6 +665,21 @@ public class ClubConverter {
     // =====================================================
     // DTO -> DTO 변환
     // =====================================================
+
+    /**
+     * BookReview 엔티티 + MemberSharedDTO -> BookReviewDTO 변환
+     */
+    public static BookShelfResponseDTO.BookReviewDTO fromBookReviewAndMemberSharedDTOToBookReviewDTO(
+            BookReview bookReview,
+            MemberSharedDTO.BasicInfoDTO memberSharedDTO
+    ) {
+        return BookShelfResponseDTO.BookReviewDTO.builder()
+                .bookReviewId(bookReview.getId())
+                .description(bookReview.getDescription())
+                .rate(bookReview.getRate())
+                .authorInfo(memberSharedDTO)
+                .build();
+    }
 
     /**
      * BookReviewDTO 리스트 -> BookReviewListDTO 변환
@@ -834,4 +835,19 @@ public class ClubConverter {
     // Private Methods
     // =====================================================
 
+    /**
+     * Topic 엔티티 -> BookShelfResponseDTO.TopicDTO 변환
+     */
+    private static BookShelfResponseDTO.TopicDTO fromTopicAndMemberSharedDTOToTopicDTO(
+            Topic topic,
+            MemberSharedDTO.BasicInfoDTO authorSharedDTO,
+            String memberId
+    ) {
+        return BookShelfResponseDTO.TopicDTO.builder()
+                .topicId(topic.getId())
+                .content(topic.getDescription())
+                .authorInfo(authorSharedDTO)
+                .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
+                .build();
+    }
 }

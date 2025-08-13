@@ -33,11 +33,6 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     private final MemberTeamRepository memberTeamRepository;
 
     @Override
-    public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId) {
-        return null;
-    }
-
-    @Override
     public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
         return meetingRepository.findAllByClubIdAndCursorDesc(clubId, cursorId, size);
     }
@@ -104,7 +99,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public Map<String, Long> getMemberIdToTeamNumberMap(List<Long> teamIds) {
+    public Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds) {
         List<MemberTeam> memberTeams = memberTeamRepository.findAllWithClubMemberByTeamIds(teamIds);
         return memberTeams.stream()
                 .collect(Collectors.toMap(
