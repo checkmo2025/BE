@@ -15,10 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,15 +61,25 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
         // 1. ClubMember와 Club 엔티티 fetch join으로 조회
         List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdWithClub(memberId);
 
-        // 2. ClubDetailResponseDTO 리스트로 변환
+        // 2. 모든 클럽 ID 수집
+        List<Long> clubIds = clubMembers.stream()
+                .map(cm -> cm.getClub().getId())
+                .toList();
+
+        // 3. 모든 클럽의 카테고리를 한 번에 조회
+        Map<Long, List<CategorySharedDTO.CategoryInfo>> clubCategoriesMap =
+                categoryQueryFacade.getCategoriesByClubs(clubIds);
+
+        // 4. DTO 변환
         List<ClubResponseDTO.ClubDetailResponseDTO> responseList = clubMembers.stream()
                 .map(cm -> {
                     Club c = cm.getClub();
-                    CategorySharedDTO.CategoryInfoList categoryInfoList = categoryQueryFacade.getCategoriesByClubForShare(c.getId());
-                    return ClubConverter.fromClubToResponseDTO(c, categoryInfoList.getCategoryList(), cm.isStaff());
+                    List<CategorySharedDTO.CategoryInfo> categories = clubCategoriesMap.getOrDefault(c.getId(), Collections.emptyList());
+                    return ClubConverter.fromClubToResponseDTO(c, categories, cm.isStaff());
                 })
                 .toList();
 
+        // 5. MyPageClubListDTO로 감싸서 반환
         return ClubResponseDTO.MyPageClubListDTO.builder()
                 .clubList(responseList)
                 .build();
