@@ -680,6 +680,7 @@ public class ClubConverter {
                 .important(true)
                 .tag("모임")
                 .club(club)
+                .clubId(club.getId())
                 .build();
     }
 
