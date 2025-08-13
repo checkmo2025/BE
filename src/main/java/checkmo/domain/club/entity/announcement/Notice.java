@@ -23,6 +23,7 @@ public class Notice extends BaseEntity {
 
     private boolean important;
 
+    @Column(nullable = false)
     private String tag; //TODO: "공지", "모임" 2개 값만 가능
 
     @Column(name = "meeting_id", insertable = false, updatable = false)
@@ -39,5 +40,5 @@ public class Notice extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
     private Club club;
-    
+
 }
