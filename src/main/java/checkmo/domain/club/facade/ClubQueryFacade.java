@@ -26,6 +26,16 @@ public interface ClubQueryFacade {
     ClubResponseDTO.MyClubListDTO getMyClubList(String memberId);
 
     /**
+     * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
+     *
+     * 피그마 참고 페이지 : #마이페이지
+     *
+     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
+     * @return 내가 가입한 독서 클럽 목록 DTO
+     */
+    ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId);
+
+    /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (외부용)
      * 마이페이지 등 다른 서비스에서 사용됩니다.
      *

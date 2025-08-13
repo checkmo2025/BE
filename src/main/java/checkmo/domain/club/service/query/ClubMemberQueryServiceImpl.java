@@ -2,19 +2,20 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     private final ClubMemberRepository clubMemberRepository;
+    private final CategoryQueryFacade categoryQueryFacade;
     private final MemberQueryFacade memberQueryFacade;
 
     @Override
@@ -43,6 +45,44 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .toList();
 
         return ClubConverter.fromClubInfoListToMyClubList(myClubInfoList);
+    }
+
+    /**
+     * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
+     *
+     * 피그마 참고 페이지 : #마이페이지
+     *
+     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
+     * @return 내가 가입한 독서 클럽 목록 DTO
+     */
+    @Override
+    public ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId) {
+
+        // 1. ClubMember와 Club 엔티티 fetch join으로 조회
+        List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdWithClub(memberId);
+
+        // 2. 모든 클럽 ID 수집
+        List<Long> clubIds = clubMembers.stream()
+                .map(cm -> cm.getClub().getId())
+                .toList();
+
+        // 3. 모든 클럽의 카테고리를 한 번에 조회
+        Map<Long, List<CategorySharedDTO.CategoryInfo>> clubCategoriesMap =
+                categoryQueryFacade.getCategoriesByClubs(clubIds);
+
+        // 4. DTO 변환
+        List<ClubResponseDTO.ClubDetailResponseDTO> responseList = clubMembers.stream()
+                .map(cm -> {
+                    Club c = cm.getClub();
+                    List<CategorySharedDTO.CategoryInfo> categories = clubCategoriesMap.getOrDefault(c.getId(), Collections.emptyList());
+                    return ClubConverter.fromClubToResponseDTO(c, categories, cm.isStaff());
+                })
+                .toList();
+
+        // 5. MyPageClubListDTO로 감싸서 반환
+        return ClubResponseDTO.MyPageClubListDTO.builder()
+                .clubList(responseList)
+                .build();
     }
 
     /**
