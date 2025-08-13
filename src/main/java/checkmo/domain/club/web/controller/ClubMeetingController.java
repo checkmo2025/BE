@@ -156,7 +156,7 @@ public class ClubMeetingController {
     @GetMapping("/api/meetings/{meetingId}/teams/{teamNumber}/members")
     public ApiResponse<MeetingResponseDTO.TeamMemberDTO> getTeamMembers(
             @PathVariable Long meetingId,
-            @PathVariable Integer teamNumber,
+            @PathVariable @Min(value = 1) Integer teamNumber,
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TeamMemberDTO teamMembers = clubQueryFacade.findTeamMembersByMeeting(meetingId, teamNumber, memberId);
@@ -195,7 +195,7 @@ public class ClubMeetingController {
     @GetMapping("/api/meetings/{meetingId}/teams/{teamNumber}/topics")
     public ApiResponse<MeetingResponseDTO.TeamTopicDTO> getSelectedTopics(
             @PathVariable Long meetingId,
-            @PathVariable Integer teamNumber,
+            @PathVariable @Min(value = 1) Integer teamNumber,
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TeamTopicDTO teamTopicDTO = clubQueryFacade.findMeetingTopicsByTeam(meetingId, teamNumber, memberId);
