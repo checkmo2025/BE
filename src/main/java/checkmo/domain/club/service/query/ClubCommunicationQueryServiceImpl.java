@@ -20,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +44,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
      *
      * @param clubId 클럽 ID
      * @param itemId 공지 또는 투표 ID
-     * @param tag    "공지", "모임", "투표" 중 하나
+     * @param tag "공지", "모임", "투표" 중 하나
      * @return 공통된 NoticeItem DTO
      */
     @Override
@@ -58,6 +58,9 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
             case "공지" -> {
                 Notice notice = noticeRepository.findById(itemId)
                         .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+                if (notice.getTag().equals("모임")) {
+                    throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+                }
 
                 yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
                         .isStaff(clubMember.isStaff())

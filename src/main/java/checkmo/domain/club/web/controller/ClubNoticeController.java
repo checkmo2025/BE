@@ -38,7 +38,7 @@ public class ClubNoticeController {
         return ApiResponse.onSuccess(clubQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant, size));
     }
 
-    @Operation(summary = "공지사항 작성", description = "특정 모임에 공지사항을 작성합니다. (운영진만 작성 가능)")
+    @Operation(summary = "순수 공지사항 작성", description = "특정 모임에 순수 공지사항을 작성합니다. (운영진만 작성 가능)")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 작성 가능"),
@@ -51,6 +51,36 @@ public class ClubNoticeController {
             @RequestBody @Valid ClubRequestDTO.CreateClubNoticeDTO request
     ) {
         return ApiResponse.onSuccess(clubCommandFacade.createNotice(clubId, memberId, request));
+    }
+
+    @Operation(summary = "순수 공지사항 상세 조회", description = "특정 순수 공지사항 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
+    })
+    @GetMapping("/{noticeId}")
+    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> getNoticeDetail(
+            @PathVariable Long clubId,
+            @PathVariable Long noticeId,
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(clubQueryFacade.getNoticeDetail(clubId, noticeId, "공지", memberId));
+    }
+
+    @Operation(summary = "순수 공지사항 삭제", description = "순수 공지사항을 삭제합니다. (운영진만 삭제 가능)")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 삭제 가능"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
+    })
+    @DeleteMapping("/{noticeId}")
+    public ApiResponse<String> deleteNotice(
+            @PathVariable Long clubId,
+            @PathVariable Long noticeId,
+            @CurrentId String memberId
+    ) {
+        clubCommandFacade.deleteNotice(clubId, memberId, noticeId);
+        return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
     }
 
     @Operation(summary = "투표 생성", description = "특정 모임에 투표를 생성합니다. (운영진만 생성 가능)")
@@ -66,20 +96,6 @@ public class ClubNoticeController {
             @RequestBody @Valid ClubRequestDTO.CreateClubVoteDTO request
     ) {
         return ApiResponse.onSuccess(clubCommandFacade.createVote(clubId, memberId, request));
-    }
-
-    @Operation(summary = "공지사항 상세 조회", description = "특정 공지사항 상세 정보를 조회합니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
-    })
-    @GetMapping("/{noticeId}")
-    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> getNoticeDetail(
-            @PathVariable Long clubId,
-            @PathVariable Long noticeId,
-            @CurrentId String memberId
-    ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getNoticeDetail(clubId, noticeId, "공지", memberId));
     }
 
     @Operation(summary = "투표 상세 조회", description = "특정 투표의 상세 정보를 조회합니다.")
@@ -110,22 +126,6 @@ public class ClubNoticeController {
             @RequestBody @Valid ClubRequestDTO.VoteResultDTO request
     ) {
         return ApiResponse.onSuccess(clubCommandFacade.participateInPoll(clubId, memberId, voteId, request));
-    }
-
-    @Operation(summary = "공지사항 삭제", description = "특정 공지사항을 삭제합니다. (운영진만 삭제 가능)")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 삭제 가능"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
-    })
-    @DeleteMapping("/{noticeId}")
-    public ApiResponse<String> deleteNotice(
-            @PathVariable Long clubId,
-            @PathVariable Long noticeId,
-            @CurrentId String memberId
-    ) {
-        clubCommandFacade.deleteNotice(clubId, memberId, noticeId);
-        return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
     }
 
     @Operation(summary = "투표 삭제", description = "특정 투표를 삭제합니다. (운영진만 삭제 가능)")
