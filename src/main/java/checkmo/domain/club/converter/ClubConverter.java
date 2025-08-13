@@ -192,6 +192,28 @@ public class ClubConverter {
                 .build();
     }
 
+    public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTO(
+            Club club, List<CategorySharedDTO.CategoryInfo> categories, boolean isStaff) {
+
+        List<String> categoryNames = categories.stream()
+                .map(CategorySharedDTO.CategoryInfo::getName)
+                .toList();
+
+        return ClubResponseDTO.ClubDetailResponseDTO.builder()
+                .clubId(club.getId())
+                .name(club.getName())
+                .description(club.getDescription())
+                .profileImageUrl(club.getProfileImgUrl())
+                .open(club.isOpen())
+                .category(categoryNames)
+                .region(club.getRegion())
+                .participantTypes(club.getParticipantTypes())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
+                .isStaff(isStaff)
+                .build();
+    }
+
     /**
      * ClubResponseDTO.ClubNoticeListDTO 변환
      */
@@ -219,9 +241,6 @@ public class ClubConverter {
      */
     public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Notice notice, ClubResponseDTO.NoticeItem noticeItemDTO) {
         var club = notice.getClub();
-        if (club == null && notice.getMeeting() != null) {
-            club = notice.getMeeting().getClub();
-        }
         if (club == null) {
             // 클럽 정보가 아예 없을 경우 null 처리
             return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
@@ -653,12 +672,14 @@ public class ClubConverter {
     /**
      * Meeting 엔티티 -> Notice 엔티티 변환 (자동 생성)
      */
-    public static Notice fromMeetingToNotice(Meeting meeting) {
+    public static Notice fromMeetingToNotice(Meeting meeting, Club club) {
         return Notice.builder()
                 .title(meeting.getTitle())
                 .content(meeting.getContent())
                 .important(true)
                 .tag("모임")
+                .club(club)
+                .clubId(club.getId())
                 .build();
     }
 

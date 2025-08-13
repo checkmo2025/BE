@@ -2,6 +2,7 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.global.dto.ClubSharedDTO;
 
 import java.util.List;
@@ -33,6 +34,16 @@ public interface ClubMemberQueryService {
      * @return 회원이 가입한 독서 클럽의 간략한 정보 목록 DTO
      */
     ClubSharedDTO.MyClubList getMyClubList(String memberId);
+
+    /**
+     * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
+     *
+     * 피그마 참고 페이지 : #마이페이지
+     *
+     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
+     * @return 내가 가입한 독서 클럽 목록 DTO
+     */
+    ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId);
 
     /**
      * 특정 회원이 해당 클럽에서 어떤 상태(등급)인지 조회합니다.

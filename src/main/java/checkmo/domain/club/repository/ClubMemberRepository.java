@@ -1,5 +1,6 @@
 package checkmo.domain.club.repository;
 
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,9 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long>, C
 
     @Query("SELECT c.id, c.name FROM ClubMember cm JOIN cm.club c WHERE cm.memberId = :memberId")
     List<Object[]> findClubIdAndNameByMemberId(@Param("memberId") String memberId);
+
+    @Query("SELECT cm FROM ClubMember cm JOIN FETCH cm.club WHERE cm.memberId = :memberId")
+    List<ClubMember> findByMemberIdWithClub(@Param("memberId") String memberId);
 
     List<ClubMember> findAllByMemberIdAndClubIdIn(String memberId, List<Long> clubIds);
 
