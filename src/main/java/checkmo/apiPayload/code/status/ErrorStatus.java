@@ -65,12 +65,12 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 회원
     MEMBER_INACTIVE(HttpStatus.FORBIDDEN, "MEMBER_401", "비활성화된 회원입니다."),
-    MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 회원입니다."),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "해당 회원을 찾을 수 없습니다."),
+    MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_402", "이미 존재하는 회원입니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_404", "해당 회원을 찾을 수 없습니다."),
     MEMBER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "MEMBER_403", "인증되지 않은 회원입니다."),
     MEMBER_PROFILE_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_406", "이미 프로필이 완성된 회원입니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_407", "이미 존재하는 닉네임입니다."),
-    MEMBER_PROFILE_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "MEMBER_408", "프로필이 완성되지 않은 회원입니다."),
+    MEMBER_PROFILE_NOT_COMPLETED(HttpStatus.FORBIDDEN, "MEMBER_408", "프로필이 완성되지 않은 회원입니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "MEMBER_409", "이메일 또는 비밀번호가 일치하지 않습니다."),
     MEMBER_CANNOT_FOLLOW_SELF(HttpStatus.BAD_REQUEST, "MEMBER_410", "자기 자신을 팔로잉할 수 없습니다."),
     MEMBER_ALREADY_FOLLOWING(HttpStatus.BAD_REQUEST, "MEMBER_411", "이미 팔로잉 중인 회원입니다."),
