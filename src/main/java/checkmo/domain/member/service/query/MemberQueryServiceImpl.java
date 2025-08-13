@@ -13,7 +13,6 @@ import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,7 +95,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Map<String, String> getMemberIdsByNicknames(Collection<String> nicknames) {
+    public Map<String, String> getMemberIdsByNicknames(List<String> nicknames) {
         List<Object[]> results = memberRepository.findNicknameAndIdByNicknameIn(nicknames);
         return results.stream()
                 .collect(Collectors.toMap(

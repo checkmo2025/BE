@@ -8,6 +8,7 @@ import checkmo.domain.notification.converter.NotificationConverter;
 import checkmo.domain.notification.entity.Notification;
 import checkmo.domain.notification.repository.NotificationRepository;
 import checkmo.event.FollowEvent;
+import checkmo.event.JoinClubEvent;
 import checkmo.event.LikeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -33,8 +34,14 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         // 리다이렉트 경로를 생성
         String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.LIKE, event.getBookStoryId());
 
-        // Notification 객체를 생성하고 저장
-        Notification notification = NotificationConverter.fromEvent(Notification.NotificationType.LIKE, redirectPath, proxySender, proxyReceiver);
+        // Notification 객체를 생성하고 저장 (targetName = null)
+        Notification notification = NotificationConverter.fromEvent(
+                Notification.NotificationType.LIKE, 
+                redirectPath, 
+                null, 
+                proxySender, 
+                proxyReceiver
+        );
         notificationRepository.save(notification);
     }
 
@@ -52,8 +59,35 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         // 리다이렉트 경로를 생성
         String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.FOLLOW, FollowerNickname);
 
-        // Notification 객체를 생성하고 저장
-        Notification notification = NotificationConverter.fromEvent(Notification.NotificationType.FOLLOW, redirectPath, proxyFollower, proxyFollowing);
+        // Notification 객체를 생성하고 저장 (targetName = followerNickname)
+        Notification notification = NotificationConverter.fromEvent(
+                Notification.NotificationType.FOLLOW, 
+                redirectPath, 
+                FollowerNickname, 
+                proxyFollower, 
+                proxyFollowing
+        );
+        notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "notifications", key = "#event.getMemberId()")
+    public void createNotification(JoinClubEvent event) {
+        // 독서 클럽 가입 승인 이벤트에서 멤버 정보를 가져옴 (프록시로)
+        Member proxyJoinedMember = memberQueryFacade.findMemberReferenceById(event.getMemberId()); // 클럽에 새로 가입된 사람
+
+        // 리다이렉트 경로를 생성
+        String redirectPath = NotificationConverter.getRedirectPathForClub(Notification.NotificationType.JOIN_CLUB, event.getClubId());
+
+        // Notification 객체를 생성하고 저장 (sender 없이, targetName 포함)
+        Notification notification = NotificationConverter.fromEvent(
+                Notification.NotificationType.JOIN_CLUB, 
+                redirectPath, 
+                event.getClubName(),
+                null, // 시스템 알림이므로 sender는 null
+                proxyJoinedMember
+        );
         notificationRepository.save(notification);
     }
 

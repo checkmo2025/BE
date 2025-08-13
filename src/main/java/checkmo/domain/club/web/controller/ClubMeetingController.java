@@ -93,7 +93,24 @@ public class ClubMeetingController {
         MeetingResponseDTO.MeetingListDTO meetings = clubQueryFacade.getMeetingsByClub(clubId, cursorId, size, memberId);
         return ApiResponse.onSuccess(meetings);
     }
-    // GET /api/meetings/{meetingId} - Meeting 상세 보기
+
+    @Operation(summary = "정기 독서모임 상세 조회 API", description = "정기 독서모임의 상세 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "정기 독서 모임 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/meetings/{meetingId}")
+    public ApiResponse<MeetingResponseDTO.MeetingDetailDTO> getMeetingDetail(
+            @PathVariable Long meetingId,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.MeetingDetailDTO meetingDetail = clubQueryFacade.findMeetingDetailById(meetingId, memberId);
+        return ApiResponse.onSuccess(meetingDetail);
+    }
 
     @Operation(summary = "독서모임 캘린더 조회 API", description = "독서모임의 모임 캘린더를 조회합니다.")
     @Parameters({

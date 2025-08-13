@@ -216,7 +216,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         }
 
         // 3. 해당 미팅의 기존 팀들 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
-        List<Team> existingTeams = teamRepository.findTeamsByMeetingId(meetingId);
+        List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
         Map<Integer, Team> existingTeamNumberToTeam = existingTeams.stream()
                 .collect(Collectors.toMap(Team::getTeamNumber, t -> t));
 
@@ -255,7 +255,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         }
 
         // 7. 닉네임 → memberId → ClubMember 일괄 매핑
-        Map<String, ClubMember> nicknameToClubMember = clubMemberQueryService.getNicknameToClubMember(meeting.getClubId(), requestNicknames);
+        Map<String, ClubMember> nicknameToClubMember = clubMemberQueryService.getNicknameToClubMember(meeting.getClubId(), requestNicknames.stream().toList());
 
         // 8. 요청대로 MemberTeam 배치 재생성
         for (Map.Entry<Integer, List<String>> e : requestTeamNumberToNicknameList.entrySet()) {

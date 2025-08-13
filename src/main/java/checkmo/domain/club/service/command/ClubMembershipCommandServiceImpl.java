@@ -14,8 +14,10 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO.ClubInfoDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.event.JoinClubEvent;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,8 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final MemberQueryFacade memberQueryFacade;
+    
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 독서모임에 가입 신청을 합니다.
@@ -58,6 +62,12 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
                 ? ClubMember.ClubMemberStatus.MEMBER
                 : ClubMember.ClubMemberStatus.PENDING;
 
+        // 공개 클럽이면 즉시 가입 완료 이벤트 발행
+        if (club.isOpen()) {
+            JoinClubEvent joinClubEvent = new JoinClubEvent(memberId, clubId, club.getName());
+            eventPublisher.publishEvent(joinClubEvent);
+        }
+
         // ClubMember 생성 및 연관관계 설정
         Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
         ClubMember clubMember = ClubConverter.toClubMemberEntity(club, proxyMember, status, request.getJoinMessage());
@@ -81,7 +91,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
     public ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetClubMemberId, String currentMemberId, String status) {
 
         // 1. 클럽 유효성 검증
-        clubQueryService.validateClub(clubId);
+        Club club = clubQueryService.validateClub(clubId);
         ClubMember requester = clubMemberQueryService.validateClubMember(clubId, currentMemberId);
         if (!requester.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
@@ -99,8 +109,15 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
 
-        // 4. 상태 변경
+        // 4. 상태 변경 및 이벤트 발행
+        ClubMember.ClubMemberStatus oldStatus = targetMember.getClubMemberStatus();
         targetMember.updateStatus(newStatus);
+
+        // PENDING → MEMBER로 변경되면 가입 완료 이벤트 발행
+        if (oldStatus == ClubMember.ClubMemberStatus.PENDING && newStatus == ClubMember.ClubMemberStatus.MEMBER) {
+            JoinClubEvent joinClubEvent = new JoinClubEvent(targetMember.getMemberId(), clubId, club.getName());
+            eventPublisher.publishEvent(joinClubEvent);
+        }
 
         // 5. DTO 반환
         MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(targetMember.getMemberId());

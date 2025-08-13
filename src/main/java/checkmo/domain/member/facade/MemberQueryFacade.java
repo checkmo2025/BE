@@ -4,7 +4,6 @@ import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.MemberSharedDTO;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -105,7 +104,7 @@ public interface MemberQueryFacade {
      * @param nicknames 닉네임 목록
      * @return 닉네임과 회원 ID 매핑 정보
      */
-    Map<String, String> getMemberIdsByNicknames(Collection<String> nicknames);
+    Map<String, String> getMemberIdsByNicknames(List<String> nicknames);
 
     /**
      * 특정 회원의 팔로우 여부 확인 (외부용)

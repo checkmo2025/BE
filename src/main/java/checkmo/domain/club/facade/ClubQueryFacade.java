@@ -5,7 +5,6 @@ import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.ClubSharedDTO;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -198,7 +197,7 @@ public interface ClubQueryFacade {
      * @param memberId 요청자 회원 ID
      * @return 미팅 상세 정보 DTO
      */
-    MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId, String memberId);
+    MeetingResponseDTO.MeetingDetailDTO findMeetingDetailById(Long meetingId, String memberId);
 
     /**
      * ClubMeetingQueryService

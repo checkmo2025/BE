@@ -3,7 +3,6 @@ package checkmo.domain.member.service.query;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.MemberSharedDTO;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +68,7 @@ public interface MemberQueryService {
      * @param nicknames 닉네임 목록
      * @return 닉네임과 회원 ID의 매핑 정보
      */
-    Map<String, String> getMemberIdsByNicknames(Collection<String> nicknames);
+    Map<String, String> getMemberIdsByNicknames(List<String> nicknames);
 
     /**
      * 회원ID로 회원 닉네임 조회
