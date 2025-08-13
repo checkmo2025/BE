@@ -80,9 +80,13 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     @Override
     public Map<String, ClubMember> getNicknameToClubMember(Long clubId, List<String> nicknames) throws GeneralException {
+        if (nicknames == null || nicknames.isEmpty()) {
+            return Map.of();
+        }
+
         Map<String, String> nicknameToMemberId = memberQueryFacade.getMemberIdsByNicknames(nicknames);
         Map<String, ClubMember> memberIdToClubMember = getMemberIdToClubMember(clubId, nicknameToMemberId.values().stream().toList());
-        Map<String, ClubMember> nicknameToClubMember = new HashMap<>();
+        Map<String, ClubMember> nicknameToClubMember = new HashMap<>(nicknameToMemberId.size());
         List<String> missing = new ArrayList<>();
         for (String nickname : nicknames) {
             String memberId = nicknameToMemberId.get(nickname);
