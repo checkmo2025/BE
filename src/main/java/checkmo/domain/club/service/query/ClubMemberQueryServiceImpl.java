@@ -11,11 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +49,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
      * 특정 회원이 해당 클럽에서 어떤 상태(등급)인지 조회합니다.
      *
      * @param memberId 회원 ID
-     * @param clubId   클럽 ID
+     * @param clubId 클럽 ID
      * @return ClubMemberStatus (MEMBER, STAFF 등) 또는 null (회원 아님)
      */
     @Override
@@ -79,9 +79,9 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
 
     @Override
-    public Map<String, ClubMember> getNicknameToClubMember(Long clubId, Collection<String> nicknames) throws GeneralException {
+    public Map<String, ClubMember> getNicknameToClubMember(Long clubId, List<String> nicknames) throws GeneralException {
         Map<String, String> nicknameToMemberId = memberQueryFacade.getMemberIdsByNicknames(nicknames);
-        Map<String, ClubMember> memberIdToClubMember = getMemberIdToClubMember(clubId, nicknameToMemberId.values());
+        Map<String, ClubMember> memberIdToClubMember = getMemberIdToClubMember(clubId, nicknameToMemberId.values().stream().toList());
         Map<String, ClubMember> nicknameToClubMember = new HashMap<>();
         List<String> missing = new ArrayList<>();
         for (String nickname : nicknames) {
@@ -96,7 +96,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
         return nicknameToClubMember;
     }
 
-    private Map<String, ClubMember> getMemberIdToClubMember(Long clubId, Collection<String> memberIds) {
+    private Map<String, ClubMember> getMemberIdToClubMember(Long clubId, List<String> memberIds) {
         if (memberIds == null || memberIds.isEmpty()) {
             return Map.of();
         }
