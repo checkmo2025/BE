@@ -42,6 +42,7 @@ public class NotificationSharedDTO {
         private Long notificationId;
         private Notification.NotificationType notificationType; // 알림 타입
         private String senderNickname;
+        private String targetName; // 대상 이름 (클럽명, 사용자명 등)
         private boolean read;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")

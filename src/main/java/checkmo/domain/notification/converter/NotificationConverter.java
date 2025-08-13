@@ -23,12 +23,14 @@ public class NotificationConverter {
     public static Notification fromEvent(
             Notification.NotificationType notificationType,
             String redirectPath,
+            String targetName,
             Member proxySender,
             Member proxyReceiver
     ) {
         return Notification.builder()
                 .notificationType(notificationType)
                 .redirectPath(redirectPath)
+                .targetName(targetName)
                 .sender(proxySender)
                 .receiver(proxyReceiver)
                 .build();
@@ -51,6 +53,13 @@ public class NotificationConverter {
         return null; // 지금은 FOLLOW 타입일 경우 무조건 Nickname을 사용하지만, 다른 타입이 추가될 경우를 대비하여 null 반환
     }
 
+    public static String getRedirectPathForClub(Notification.NotificationType notificationType, Long clubId) {
+        if (Notification.NotificationType.JOIN_CLUB == notificationType) {
+            return "/bookclub/" + clubId + "/home"; // 프론트엔드 경로
+        }
+        return null;
+    }
+
     // =====================================================
     // Notification → NotificationSharedDTO 변환
     // =====================================================
@@ -66,7 +75,7 @@ public class NotificationConverter {
         List<NotificationSharedDTO.NotificationPreview> previewList = notifications.stream()
                 .map(notification -> convertToPreviewDTO(
                         notification,
-                        senderNicknameMap.get(notification.getSenderId())
+                        notification.getSenderId() != null ? senderNicknameMap.get(notification.getSenderId()) : null
                 ))
                 .toList();
 
@@ -83,6 +92,7 @@ public class NotificationConverter {
                 .notificationId(notification.getId())
                 .notificationType(notification.getNotificationType())
                 .senderNickname(senderNickname)
+                .targetName(notification.getTargetName())
                 .read(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .redirectPath(notification.getRedirectPath())
@@ -107,7 +117,7 @@ public class NotificationConverter {
         var notificationList = notifications.stream()
                 .map(notification -> convertToPreviewDTO(
                         notification, 
-                        senderNicknameMap.get(notification.getSenderId())
+                        notification.getSenderId() != null ? senderNicknameMap.get(notification.getSenderId()) : null
                 ))
                 .toList();
 

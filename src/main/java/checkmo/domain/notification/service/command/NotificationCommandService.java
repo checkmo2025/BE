@@ -1,6 +1,7 @@
 package checkmo.domain.notification.service.command;
 
 import checkmo.event.FollowEvent;
+import checkmo.event.JoinClubEvent;
 import checkmo.event.LikeEvent;
 
 /**
@@ -25,6 +26,13 @@ public interface NotificationCommandService {
      * @param event 팔로우 알림 정보 DTO
      */
      void createNotification(FollowEvent event);
+
+    /**
+     * 독서 클럽 가입 승인 알림 생성
+     *
+     * @param event 독서 클럽 가입 승인 알림 정보 DTO
+     */
+    void createNotification(JoinClubEvent event);
 
     /**
      * 알림 읽음 처리
