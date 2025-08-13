@@ -16,7 +16,22 @@
 * **[🏛️ 객체 생성 시 Entity 관계 설계](./docs/03_entity_relations.md)**
 
 ---
+## 🖥️ Server Architecture
+<div align="center">
+    <a href="./docs/images/Checkmo_Server_Architecture.png">
+    <img src="./docs/images/Checkmo_Server_Architecture.png" alt="서버 아키텍처" width="800"/>
+  </a>
+</div>
 
+---
+## 🚀 Deployment Architecture
+<div align="center">
+    <a href="./docs/images/Checkmo_AWS_Deploy_Architecture.png">
+    <img src="./docs/images/Checkmo_AWS_Deploy_Architecture.png" alt="서버 아키텍처" width="800"/>
+  </a>
+</div>
+
+---
 ## 🛠️ Tech Stacks
 
 <div align="center">
@@ -30,11 +45,17 @@
 **Database**<br>
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
 <img src="https://img.shields.io/badge/redis-DC382D?style=for-the-badge&logo=redis&logoColor=white">
+<img src="https://img.shields.io/badge/amazon elasticache-2E73B8?style=for-the-badge&logo=amazonaws&logoColor=white">
 <br>
 
 **Infra & DevOps**<br>
-<img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white">
+<img src="https://img.shields.io/badge/amazon aws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white">
 <img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+<img src="https://img.shields.io/badge/amazon ecr-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white">
+
+<img src="https://img.shields.io/badge/nginx-009639?style=for-the-badge&logo=nginx&logoColor=white">
+<img src="https://img.shields.io/badge/aws codedeploy-759C3E?style=for-the-badge&logo=amazonaws&logoColor=white">
+<img src="https://img.shields.io/badge/amazon s3-E05243?style=for-the-badge&logo=amazons3&logoColor=white">
 <br>
 
 **Tools**<br>
