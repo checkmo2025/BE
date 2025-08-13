@@ -219,9 +219,6 @@ public class ClubConverter {
      */
     public static ClubResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Notice notice, ClubResponseDTO.NoticeItem noticeItemDTO) {
         var club = notice.getClub();
-        if (club == null && notice.getMeeting() != null) {
-            club = notice.getMeeting().getClub();
-        }
         if (club == null) {
             // 클럽 정보가 아예 없을 경우 null 처리
             return ClubResponseDTO.ClubNoticeWithClubDTO.builder()
@@ -660,6 +657,7 @@ public class ClubConverter {
                 .content(meeting.getContent())
                 .important(true)
                 .tag("모임")
+                .club(meeting.getClub())
                 .build();
     }
 

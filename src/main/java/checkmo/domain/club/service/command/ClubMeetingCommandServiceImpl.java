@@ -58,11 +58,11 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         // 3. 미팅 생성 후 proxyBook 연결
         Meeting meeting = ClubConverter.fromMeetingCreateRequestDTOToMeeting(request, proxyBook);
 
-        // 4. 공지 생성
-        Notice notice = ClubConverter.fromMeetingToNotice(meeting);
-
         // 5. 연관관계 설정
         club.addMeeting(meeting); //영속성 컨텍스트 내 객체 상태 동기화
+
+        // 6. 공지 생성
+        Notice notice = ClubConverter.fromMeetingToNotice(meeting);
         meeting.addNotice(notice);
 
         // 6. 미팅 명시적 저장 -> 공지사항도 함께 저장됨
