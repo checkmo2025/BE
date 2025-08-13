@@ -131,6 +131,21 @@ public class ClubController {
     }
 
     /**
+     * 마이 페이지 - 내가 가입한 클럽 조회 API
+     */
+    @Operation(summary = "마이 페이지 - 내가 가입한 클럽 조회 API", description = "내가 가입한 클럽 목록을 반환합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+    })
+    @GetMapping("/myPage")
+    public ApiResponse<ClubResponseDTO.MyPageClubListDTO> getMyPageClubs(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(clubQueryFacade.getMyPageClubList(memberId));
+    }
+
+    /**
      * 독서클럽 회원 가입 신청 API
      *
      * @param clubId 독서 모임 ID
