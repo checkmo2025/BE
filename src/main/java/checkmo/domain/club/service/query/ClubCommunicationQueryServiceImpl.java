@@ -56,9 +56,9 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
         return switch (tag) {
             case "공지" -> {
-                Notice notice = noticeRepository.findById(itemId)
+                Notice notice = noticeRepository.findByIdAndClubId(itemId, clubId)
                         .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
-                if (notice.getTag().equals("모임")) {
+                if ("모임".equals(notice.getTag())) {
                     throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
                 }
 
@@ -68,9 +68,9 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                         .build();
             }
             case "모임" -> {
-                Notice notice = noticeRepository.findById(itemId)
+                Notice notice = noticeRepository.findWithMeetingByIdAndClubId(itemId, clubId)
                         .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
-                if (notice.getTag().equals("공지")) {
+                if ("공지".equals(notice.getTag())) {
                     throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
                 }
 
@@ -82,7 +82,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                         .build();
             }
             case "투표" -> {
-                Vote vote = voteRepository.findById(itemId)
+                Vote vote = voteRepository.findByIdAndClubId(itemId, clubId)
                         .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
 
                 List<String> voteItems = vote.getItems();
