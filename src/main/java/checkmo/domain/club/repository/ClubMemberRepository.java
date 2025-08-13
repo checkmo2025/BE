@@ -30,4 +30,7 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
     boolean existsByClubIdAndClubMemberStatusAndIdLessThan(Long clubId, ClubMember.ClubMemberStatus status, Long lastId);
 
     boolean existsByClubIdAndIdLessThan(Long clubId, Long lastId);
+
+    @Query("SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.memberId IN :memberIds")
+    List<ClubMember> findClubMembersByClubIdAndMemberIdIn(Long clubId, List<String> memberIds);
 }

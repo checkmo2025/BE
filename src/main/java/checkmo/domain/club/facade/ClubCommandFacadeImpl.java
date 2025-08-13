@@ -250,8 +250,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public void manageTeam(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request) {
-
+    public void manageTeams(String memberId, Long meetingId, MeetingRequestDTO.TeamManageDTO request) {
+        clubMeetingCommandService.manageTeam(memberId, meetingId, request);
     }
 
     // TODO: Aspect 로그

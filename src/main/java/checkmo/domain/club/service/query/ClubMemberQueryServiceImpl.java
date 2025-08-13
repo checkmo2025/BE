@@ -5,11 +5,14 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
+import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     private final ClubMemberRepository clubMemberRepository;
+    private final MemberQueryFacade memberQueryFacade;
 
     @Override
     public ClubMember validateClubMember(Long clubId, String memberId) throws GeneralException {
@@ -45,7 +49,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
      * 특정 회원이 해당 클럽에서 어떤 상태(등급)인지 조회합니다.
      *
      * @param memberId 회원 ID
-     * @param clubId   클럽 ID
+     * @param clubId 클럽 ID
      * @return ClubMemberStatus (MEMBER, STAFF 등) 또는 null (회원 아님)
      */
     @Override
@@ -73,4 +77,38 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .collect(Collectors.toMap(ClubMember::getClubId, ClubMember::getClubMemberStatus));
     }
 
+
+    @Override
+    public Map<String, ClubMember> getNicknameToClubMember(Long clubId, List<String> nicknames) throws GeneralException {
+        if (nicknames == null || nicknames.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, String> nicknameToMemberId = memberQueryFacade.getMemberIdsByNicknames(nicknames);
+        Map<String, ClubMember> memberIdToClubMember = getMemberIdToClubMember(clubId, nicknameToMemberId.values().stream().toList());
+        Map<String, ClubMember> nicknameToClubMember = new HashMap<>(nicknameToMemberId.size());
+        List<String> missing = new ArrayList<>();
+        for (String nickname : nicknames) {
+            String memberId = nicknameToMemberId.get(nickname);
+            ClubMember clubMember = (memberId == null) ? null : memberIdToClubMember.get(memberId);
+            if (clubMember == null) missing.add(nickname);
+            else nicknameToClubMember.put(nickname, clubMember);
+        }
+        if (!missing.isEmpty()) {
+            throw new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND, missing.toString()); // TODO: 잘못에러 메시지 확인
+        }
+        return nicknameToClubMember;
+    }
+
+    private Map<String, ClubMember> getMemberIdToClubMember(Long clubId, List<String> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+        List<ClubMember> results = clubMemberRepository.findClubMembersByClubIdAndMemberIdIn(clubId, memberIds);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        ClubMember::getMemberId,
+                        cm -> cm)
+                );
+    }
 }
