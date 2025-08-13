@@ -14,5 +14,5 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long>, Meeting
             "AND m.meetingTime < :endDate " +
             "ORDER BY m.meetingTime ASC")
         // DATE_FORMAT이나 TO_CHAR은 모든 ROW에 대해 해당 함수를 적용하기 때문에 성능 상 범위 탐색으로 찾기
-    List<Meeting> findByClubIdAndMeetingTimeBetweenAsc(Long clubId, LocalDateTime startDate, LocalDateTime endDate);
+    List<Meeting> findAllByClubIdBetweenMeetingTimeAsc(Long clubId, LocalDateTime startDate, LocalDateTime endDate);
 }

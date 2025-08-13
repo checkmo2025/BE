@@ -8,6 +8,8 @@ import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.meeting.*;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,15 +38,12 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
-        return meetingRepository.findMeetingsByClubIdAndCursorDesc(clubId, cursorId, size + 1);
+        return meetingRepository.findAllByClubIdAndCursorDesc(clubId, cursorId, size);
     }
 
     @Override
-    public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size) {
-        if (size == null) { // size가 null인 경우 전체 토픽 조회
-            return topicRepository.findTopicsByMeetingIdOrderByIdDesc(meetingId);
-        }
-        return topicRepository.findTopicsByCursorOrderByIdDesc(meetingId, cursorId, size + 1);
+    public List<Topic> findTopicsWithClubMemberByMeeting(Long meetingId, Long cursorId, Integer size) {
+        return topicRepository.findAllWithClubMemberByCursorOrderByIdDesc(meetingId, cursorId, size);
     }
 
     @Override
@@ -53,17 +52,12 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
             return Map.of();
         }
 
-        List<TeamTopic> teamTopics = teamTopicRepository.findTeamTopicsWithTeamByTopicIds(topicIds);
+        List<TeamTopic> teamTopics = teamTopicRepository.findAllWithTeamByTopicIds(topicIds);
         return teamTopics.stream()
                 .collect(Collectors.groupingBy(
                         TeamTopic::getTopicId, //key: 토픽 ID(토픽 ID로 그룹화)
                         Collectors.mapping(tt -> tt.getTeam().getTeamNumber(), Collectors.toList()) //value: 해당 토픽을 선택한 팀 번호 리스트(같은 그룹에 속하는 TeamTopic의 팀 번호 List 생성)
                 ));
-    }
-
-    @Override
-    public List<TeamTopic> findTeamTopicsByTeam(Long teamId) {
-        return teamTopicRepository.findTeamTopicsWithTopicAndClubMemberByTeamIdOrderByDesc(teamId);
     }
 
     @Override
@@ -76,7 +70,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         clubQueryService.validateClub(clubId);
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        return meetingRepository.findMeetingsByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size + 1);
+        return meetingRepository.findAllByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
     }
 
     @Override
@@ -87,9 +81,20 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1); //12월의 경우 다음 해 1월로 넘어감
 
-        List<Meeting> meetings = meetingRepository.findByClubIdAndMeetingTimeBetweenAsc(clubId, startDateTime, endDateTime);
+        List<Meeting> meetings = meetingRepository.findAllByClubIdBetweenMeetingTimeAsc(clubId, startDateTime, endDateTime);
 
         return ClubConverter.fromMeetingListToMeetingInfoDTOList(meetings);
+    }
+
+    @Override
+    public List<Team> findTeamsByMeeting(Long meetingId) {
+        return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
+    }
+
+    @Override
+    public List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size) {
+        Pageable pageable = (size == null) ? Pageable.unpaged() : PageRequest.of(0, size);
+        return teamTopicRepository.findAllWithTopicAndClubMemberByTeamIdOrderByDesc(teamId, pageable);
     }
 
     @Override
