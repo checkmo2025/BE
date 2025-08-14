@@ -22,6 +22,7 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
         if (teamMemberDTOList == null) return true; // @NotNull로 따로 처리
 
         boolean success = true;
+        context.disableDefaultConstraintViolation();
 
         Set<Integer> seenTeamNumbers = new HashSet<>(); // 팀 번호 중복 체크용
         Set<String> seenNicknames = new HashSet<>();
@@ -37,6 +38,14 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
                 addViolation(context,
                         String.format("요청 teamNumber'%d'가 중복되었습니다.", teamNum),
                         "teamMemberDTOList[" + i + "].teamNumber");
+                /*
+                // TODO: ConstraintViolationException의 PropertyPath를 포함해서 에러를 응답하도록 Handler 수정 필요
+                context.buildConstraintViolationWithTemplate(
+                            String.format("팀 번호 '%d'가 중복되었습니다.", teamNum))
+                    .addPropertyNode("teamMemberDTOList").inIterable().atIndex(i)
+                    .addPropertyNode("teamNumber")
+                    .addConstraintViolation();
+                */
             }
 
             List<String> nicknameList = dto.getNicknameList();
@@ -50,6 +59,13 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
                                 String.format("닉네임 '%s'이 여러 개 포함되었습니다.", nick),
                                 "teamMemberDTOList[" + i + "].nicknameList[" + j + "]"
                         );
+                        /*
+                        context.buildConstraintViolationWithTemplate(
+                                        String.format("닉네임 '%s'이 여러 개 포함되었습니다.", nick))
+                                .addPropertyNode("teamMemberDTOList").inIterable().atIndex(i)
+                                .addPropertyNode("nicknameList").inIterable().atIndex(j)
+                                .addConstraintViolation();
+                         */
                     }
                 }
             }
