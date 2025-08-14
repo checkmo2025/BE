@@ -43,6 +43,19 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     /**
+     * ClubManagementCommandService
+     * 기존 독서 모임 정보를 수정합니다. (내부용)
+     *
+     * @param clubId   수정할 모임 ID
+     * @param memberId 수정 요청한 회원 ID
+     * @param request  모임 수정 요청 정보 DTO
+     */
+    @Override
+    public void updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request) {
+        clubManagementCommandService.updateClub(clubId, memberId, request);
+    }
+
+    /**
      * ClubMembershipCommandService
      * 독서 모임에 가입을 신청합니다. (내부용)
      *

@@ -90,6 +90,74 @@ public class ClubController {
     }
 
     /**
+     * 독서 모임 상세 조회 API
+     *
+     * @param clubId   조회할 클럽 ID
+     * @param memberId 현재 로그인한 회원 ID
+     * @return 클럽 상세 정보
+     */
+    @Operation(summary = "독서 모임 상세 조회", description = "지정한 클럽의 상세 정보를 반환합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "클럽을 찾을 수 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "조회 권한 없음")
+    })
+    @GetMapping("/{clubId}")
+    public ApiResponse<ClubResponseDTO.ClubDetailDTO> getClubDetail(
+            @PathVariable Long clubId,
+            @CurrentId String memberId
+    ) {
+        ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    /**
+     * 독서 모임 업데이트 API
+     *
+     * @param clubId   수정할 클럽 ID
+     * @param memberId 현재 로그인한 회원 ID
+     * @param request  수정할 클럽 정보(name, description, profileImageUrl, isOpen, category 등)
+     * @return 수정된 클럽 상세 정보
+     */
+    @Operation(
+            summary = "독서 모임 정보 수정",
+            description = """
+            지정한 클럽의 정보를 수정합니다.
+            
+            수정 가능 필드:
+              - name (모임 이름)
+              - description (모임 설명)
+              - profileImageUrl (프로필 이미지 URL)
+              - participantTypes (참여자 유형 목록)
+              - region (지역)
+              - insta (인스타그램 주소)
+              - kakao (카카오 오픈채팅 주소)
+            
+            수정 불가 필드:
+              - open (공개 여부)
+                - 요청 DTO에는 포함되지만, 서버에서는 해당 값을 무시하며 DB에 반영하지 않습니다.
+                - open 값 변경은 모임 생성 시에만 가능합니다.
+                - 피그마에 적힌 요구 사항을 참고한 것으로, 수정이 필요하면 말씀해주세요!
+            """
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "입력 값이 유효하지 않습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "수정 권한 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "클럽을 찾을 수 없음")
+    })
+    @PutMapping("/{clubId}")
+    public ApiResponse<ClubResponseDTO.ClubDetailDTO> updateClub(
+            @PathVariable Long clubId,
+            @CurrentId String memberId,
+            @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request
+    ) {
+        clubCommandFacade.updateClub(clubId, memberId, request);
+        ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    /**
      * 독서 모임 검색 API
      *
      * @param keyword 검색할 키워드

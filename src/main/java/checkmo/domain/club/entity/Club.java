@@ -3,6 +3,7 @@ package checkmo.domain.club.entity;
 import checkmo.domain.category.entity.ClubCategory;
 import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.Meeting;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -86,6 +87,34 @@ public class Club extends BaseEntity {
     public void addClubMember(ClubMember clubMember) {
         this.clubMembers.add(clubMember);
         clubMember.setClub(this);
+    }
+
+    public void updateFromDetailDTO(ClubRequestDTO.ClubDetailDTO dto) {
+        if (dto.getName() != null) {
+            this.name = dto.getName();
+        }
+        if (dto.getDescription() != null) {
+            this.description = dto.getDescription();
+        }
+        if (dto.getProfileImageUrl() != null) {
+            this.profileImgUrl = dto.getProfileImageUrl();
+        }
+
+        // open 필드는 수정 불가 → 반영하지 않음
+
+        if (dto.getParticipantTypes() != null) {
+            this.participantTypes.clear();
+            this.participantTypes.addAll(dto.getParticipantTypes());
+        }
+        if (dto.getRegion() != null) {
+            this.region = dto.getRegion();
+        }
+        if (dto.getInsta() != null) {
+            this.insta = dto.getInsta();
+        }
+        if (dto.getKakao() != null) {
+            this.kakao = dto.getKakao();
+        }
     }
 
 }

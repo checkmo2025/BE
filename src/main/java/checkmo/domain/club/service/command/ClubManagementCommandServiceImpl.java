@@ -7,6 +7,7 @@ import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubRepository;
+import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.member.entity.Member;
@@ -21,6 +22,7 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
 
     private final ClubRepository clubRepository;
     private final ClubQueryService clubQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
     private final MemberQueryFacade memberQueryFacade;
     private final CategoryCommandFacade categoryCommandFacade;
 
@@ -63,6 +65,43 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
 
         // 6. 생성된 클럽의 ID 반환
         return club.getId();
+    }
+
+    /**
+     * 독서모임 정보를 수정합니다.
+     *
+     * 피그마 참고 페이지 : #독서모임 - 모임 수정 화면
+     *
+     * @param clubId   수정할 독서모임 ID
+     * @param memberId 수정 요청 회원 ID
+     * @param request  수정할 모임 정보 DTO
+     */
+    @Override
+    @Transactional
+    public void updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request) {
+
+        // 1. 클럽 유효성 검증
+        Club club = clubQueryService.validateClub(clubId);
+
+        // 2. 운영진 권한 확인
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        boolean isStaff = clubMember.isStaff();
+        if (!isStaff) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 3. 클럽 이름 중복 검사 (단, 기존 이름과 다를 때만)
+        if (!club.getName().equals(request.getName()) &&
+                clubQueryService.isDuplicateClubName(request.getName())) {
+            throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
+        }
+
+        // 4. 엔티티 필드 수정
+        club.updateFromDetailDTO(request);
+
+        // 5. 카테고리 연관관계 수정
+        categoryCommandFacade.modifyClubCategories(clubId, ClubConverter.toCategoryListRequestDTO(request));
+
     }
 
 }
