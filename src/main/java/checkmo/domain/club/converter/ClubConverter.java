@@ -476,6 +476,8 @@ public class ClubConverter {
                 .important(vote.isImportant())
                 .anonymity(vote.isAnonymity())
                 .duplication(vote.isDuplication())
+                .startTime(vote.getStartTime())
+                .deadline(vote.getDeadline())
                 .tag("투표")
                 .items(itemDTOs)
                 .build();

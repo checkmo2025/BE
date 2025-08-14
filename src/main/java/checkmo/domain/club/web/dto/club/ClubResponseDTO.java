@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ClubResponseDTO {
@@ -218,6 +219,9 @@ public class ClubResponseDTO {
         private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
         private boolean anonymity; // 익명 여부
         private boolean duplication; // 중복 여부
+
+        private LocalDateTime startTime; // 시작 시간
+        private LocalDateTime deadline; // 종료 시간
 
         private String tag = "투표";
         private List<EachItemDTO> items; // 투표 항목 목록
