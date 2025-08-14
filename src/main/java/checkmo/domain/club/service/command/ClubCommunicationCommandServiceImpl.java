@@ -62,7 +62,7 @@ public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCom
     /**
      * 독서 모임의 공지사항을 삭제합니다.
      *
-     * @param clubId   독서 모임 ID
+     * @param clubId 독서 모임 ID
      * @param memberId 운영진 ID -> 운영진인지 확인하는 로직 필요 ClubMember에서 Role 확인 -> 어노테이션으로 처리 고려
      * @param noticeId 삭제할 공지사항 ID
      */
@@ -80,7 +80,12 @@ public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCom
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
 
-        // 3. 삭제
+        // 3. 공지사항의 태그가 "모임"인 경우 예외 처리(모임 공지사항은 삭제할 수 없음)
+        if ("모임".equals(notice.getTag())) {
+            throw new GeneralException(ErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
+        }
+
+        // 4. 삭제
         noticeRepository.delete(notice);
     }
 

@@ -43,7 +43,20 @@ jobs:
       # 6. 배포할 파일들을 압축
       - name: 배포 파일 압축
         run: |
-          zip -r deployment.zip . -x ".git/*" ".github/*" ".gitignore"
+          zip -r deployment.zip . -x \
+            ".git/*" \
+            ".github/*" \
+            ".gitignore" \
+            "docs/*" \
+            "README.md" \
+            "src/*" \
+            "Dockerfile" \
+            "build.gradle" \
+            "settings.gradle" \
+            "gradle/*" \
+            "gradlew" \
+            "gradlew.bat" \
+            "compose-dev.yml"
 
       # 7. S3에 배포 파일 업로드
       - name: S3에 배포 파일 업로드

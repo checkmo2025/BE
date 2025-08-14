@@ -8,6 +8,7 @@ import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.*;
+import checkmo.domain.club.web.dto.MembershipResponseDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
@@ -36,6 +37,17 @@ public class ClubConverter {
     // =====================================================
     // Entity ↔ DTO 변환
     // =====================================================
+
+    /**
+     * ClubMember 엔티티 -> MembershipResponseDTO.MembershipDTO 변환
+     */
+    public static MembershipResponseDTO.MembershipDTO fromClubMembertoMembershipDTO(ClubMember clubMember) {
+        return MembershipResponseDTO.MembershipDTO.builder()
+                .clubMemberId(clubMember.getId())
+                .clubMemberStatus(clubMember.getClubMemberStatus().name())
+                .updatedAt(clubMember.getUpdatedAt())
+                .build();
+    }
 
     /**
      * Club 리스트 → ClubResponseDTO.ClubListDTO 변환
@@ -368,6 +380,7 @@ public class ClubConverter {
     ) {
         return Vote.builder()
                 .title(request.getTitle())
+                .content(request.getContent())
                 .tag("투표")
                 .important(request.isImportant())
                 .item1(request.getItem1())
@@ -459,7 +472,10 @@ public class ClubConverter {
         return ClubResponseDTO.VoteDTO.builder()
                 .id(vote.getId())
                 .title(vote.getTitle())
+                .content(vote.getContent())
                 .important(vote.isImportant())
+                .anonymity(vote.isAnonymity())
+                .duplication(vote.isDuplication())
                 .tag("투표")
                 .items(itemDTOs)
                 .build();
@@ -540,12 +556,14 @@ public class ClubConverter {
     public static BookShelfResponseDTO.BookShelfDetailDTO fromBookShelfDTOToBookShelfDetailDTO(
             Meeting meeting,
             BookSharedDTO.DetailInfoDTO bookSharedDTO,
-            BookShelfResponseDTO.TopicListDTO topicListDTO
+            BookShelfResponseDTO.TopicListDTO topicListDTO,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.BookShelfDetailDTO.builder()
                 .meetingInfo(fromMeetingToBookshelfMeetingInfoDTO(meeting))
                 .bookDetailInfo(bookSharedDTO)
                 .topicList(topicListDTO)
+                .membership(membershipDTO)
                 .build();
     }
 
@@ -571,12 +589,16 @@ public class ClubConverter {
     /**
      * List<Meeting> -> List<MeetingResponseDTO.MeetingInfoDTO> 변환
      */
-    public static List<MeetingResponseDTO.MeetingInfoDTO> fromMeetingListToMeetingInfoDTOList(
-            List<Meeting> meetings
+    public static MeetingResponseDTO.CalendarMeetingDTO fromMeetingListToMCalendarMeetingDTO(
+            List<Meeting> meetings,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
-        return meetings.stream()
-                .map(meeting -> fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, null))
-                .toList();
+        return MeetingResponseDTO.CalendarMeetingDTO.builder()
+                .meetingInfoList(meetings.stream()
+                        .map(meeting -> fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, null))
+                        .toList())
+                .membership(membershipDTO)
+                .build();
     }
 
     /**
@@ -618,7 +640,8 @@ public class ClubConverter {
             Map<Long, List<Integer>> topicIdToSelectTeamNumbers,
             List<Team> teams,
             Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber,
-            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap
+            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, bookSharedDTO);
 
@@ -638,13 +661,14 @@ public class ClubConverter {
                             ))
                             .toList();
 
-                    return fromTopicDTOListToTeamTopicDTO(team.getTeamNumber(), teamTopicDTOs);
+                    return fromTopicDTOListToTeamTopicDTO(team.getTeamNumber(), teamTopicDTOs, null);
                 })
                 .toList();
         return fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
                 meetingInfoDTO,
                 topicDTOList,
-                teamTopicDTOList
+                teamTopicDTOList,
+                membershipDTO
         );
     }
 
@@ -708,12 +732,14 @@ public class ClubConverter {
     public static BookShelfResponseDTO.BookReviewListDTO fromBookReviewDTOListToBookReviewListDTO(
             List<BookShelfResponseDTO.BookReviewDTO> bookReviewList,
             boolean hasNext,
-            Long nextCursor
+            Long nextCursor,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.BookReviewListDTO.builder()
                 .bookReviewList(bookReviewList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .membership(membershipDTO)
                 .build();
     }
 
@@ -723,12 +749,14 @@ public class ClubConverter {
     public static BookShelfResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTOForBookshelf(
             List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
             boolean hasNext,
-            Long nextCursor
+            Long nextCursor,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.TopicListDTO.builder()
                 .topics(topicListDTOs)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .membership(membershipDTO)
                 .build();
     }
 
@@ -738,12 +766,14 @@ public class ClubConverter {
     public static BookShelfResponseDTO.BookShelfListDTO fromBookShelfInfoDTOListToBookShelfListDTO(
             List<BookShelfResponseDTO.BookShelfInfoDTO> bookShelfInfoDTOs,
             boolean hasNext,
-            Long nextCursor
+            Long nextCursor,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.BookShelfListDTO.builder()
                 .bookShelfInfoList(bookShelfInfoDTOs)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .membership(membershipDTO)
                 .build();
     }
 
@@ -764,12 +794,14 @@ public class ClubConverter {
     public static MeetingResponseDTO.MeetingListDTO fromMeetingInfoDTOListToMeetingListDTO(
             List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList,
             boolean hasNext,
-            Long nextCursor
+            Long nextCursor,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.MeetingListDTO.builder()
                 .meetingInfoList(meetingInfoDTOList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .membership(membershipDTO)
                 .build();
     }
 
@@ -791,10 +823,15 @@ public class ClubConverter {
     /**
      * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TeamTopicDTO 변환
      */
-    public static MeetingResponseDTO.TeamTopicDTO fromTopicDTOListToTeamTopicDTO(Integer teamNumber, List<MeetingResponseDTO.TopicDTO> topicList) {
+    public static MeetingResponseDTO.TeamTopicDTO fromTopicDTOListToTeamTopicDTO(
+            Integer teamNumber,
+            List<MeetingResponseDTO.TopicDTO> topicList,
+            MembershipResponseDTO.MembershipDTO membershipDTO
+    ) {
         return MeetingResponseDTO.TeamTopicDTO.builder()
                 .teamNumber(teamNumber)
                 .topics(topicList)
+                .membership(membershipDTO)
                 .build();
     }
 
@@ -804,12 +841,24 @@ public class ClubConverter {
     public static MeetingResponseDTO.MeetingDetailDTO fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
             MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO,
             List<MeetingResponseDTO.TopicDTO> topicDTOList,
-            List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList
+            List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.MeetingDetailDTO.builder()
                 .meetingInfo(meetingInfoDTO)
                 .topics(topicDTOList)
                 .teams(teamTopicDTOList)
+                .membership(membershipDTO)
+                .build();
+    }
+
+    public static MeetingResponseDTO.TopicDTOList fromTopicDTOListAndMembershipDTOToTopicListDTO(
+            List<MeetingResponseDTO.TopicDTO> topicDTOs,
+            MembershipResponseDTO.MembershipDTO membershipDTO
+    ) {
+        return MeetingResponseDTO.TopicDTOList.builder()
+                .topics(topicDTOs)
+                .membership(membershipDTO)
                 .build();
     }
 

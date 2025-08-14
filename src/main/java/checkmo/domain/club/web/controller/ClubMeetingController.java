@@ -20,8 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping()
 @RequiredArgsConstructor
@@ -124,7 +122,7 @@ public class ClubMeetingController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
     })
     @GetMapping("/api/clubs/{clubId}/calendar")
-    public ApiResponse<List<MeetingResponseDTO.MeetingInfoDTO>> getClubCalendar(
+    public ApiResponse<MeetingResponseDTO.CalendarMeetingDTO> getClubCalendar(
             @PathVariable Long clubId,
             @RequestParam @Min(2000) @Max(2050) int year,
             @RequestParam @Min(1) @Max(12) int month,
@@ -211,11 +209,11 @@ public class ClubMeetingController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
     })
     @GetMapping("/api/meetings/{meetingId}/team-topics")
-    public ApiResponse<List<MeetingResponseDTO.TopicDTO>> getTopics(
+    public ApiResponse<MeetingResponseDTO.TopicDTOList> getTopics(
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        List<MeetingResponseDTO.TopicDTO> topics = clubQueryFacade.findMeetingTopicsWithTeam(meetingId, memberId);
+        MeetingResponseDTO.TopicDTOList topics = clubQueryFacade.findMeetingTopicsWithTeam(meetingId, memberId);
         return ApiResponse.onSuccess(topics);
     }
 

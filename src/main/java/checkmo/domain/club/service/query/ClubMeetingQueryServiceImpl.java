@@ -4,8 +4,10 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.meeting.*;
+import checkmo.domain.club.web.dto.MembershipResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -63,9 +65,6 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size, String memberId) {
-        clubQueryService.validateClub(clubId);
-        clubMemberQueryService.validateClubMember(clubId, memberId);
-
         return meetingRepository.findAllByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
     }
 
@@ -75,16 +74,18 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
+    public MeetingResponseDTO.CalendarMeetingDTO getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
         Club club = clubQueryService.validateClub(clubId);
-        clubMemberQueryService.validateClubMember(clubId, memberId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1); //12월의 경우 다음 해 1월로 넘어감
 
         List<Meeting> meetings = meetingRepository.findAllByClubIdBetweenMeetingTimeAsc(clubId, startDateTime, endDateTime);
 
-        return ClubConverter.fromMeetingListToMeetingInfoDTOList(meetings);
+        MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
+
+        return ClubConverter.fromMeetingListToMCalendarMeetingDTO(meetings, membershipDTO);
     }
 
     @Override
