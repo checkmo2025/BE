@@ -18,4 +18,13 @@ public interface ClubManagementCommandService {
      */
     Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request);
 
+    /**
+     * ClubManagementCommandService
+     * 기존 독서 모임 정보를 수정합니다.
+     *
+     * @param clubId   수정할 모임 ID
+     * @param memberId 수정 요청한 회원 ID
+     * @param request  모임 수정 요청 정보 DTO
+     */
+    void updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request);
 }
