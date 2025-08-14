@@ -251,4 +251,28 @@ public class ClubController {
         return ApiResponse.onSuccess(null);
     }
 
+    /**
+     * 독서 모임의 스태프인지 여부 확인하는 API
+     *
+     * @param clubId 독서 모임 ID
+     * @param memberId 현재 로그인한 회원 ID
+     * @return 스태프 여부 (true: 스태프, false: 일반 회원)
+     */
+    @Operation(summary = "클럽 스태프 여부 확인 API", description = "로그인한 회원이 해당 클럽의 스태프인지 확인합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
+    })
+    @GetMapping("/{clubId}/staff")
+    public ApiResponse<Boolean> checkStaffStatus(
+            @PathVariable Long clubId,
+            @CurrentId String memberId
+    ) {
+        Boolean isStaff = clubQueryFacade.checkStaffStatus(clubId, memberId);
+        return ApiResponse.onSuccess(isStaff);
+    }
 }
