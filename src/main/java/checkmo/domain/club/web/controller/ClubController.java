@@ -90,6 +90,28 @@ public class ClubController {
     }
 
     /**
+     * 독서 모임 상세 조회 API
+     *
+     * @param clubId   조회할 클럽 ID
+     * @param memberId 현재 로그인한 회원 ID
+     * @return 클럽 상세 정보
+     */
+    @Operation(summary = "독서 모임 상세 조회", description = "지정한 클럽의 상세 정보를 반환합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "클럽을 찾을 수 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "조회 권한 없음")
+    })
+    @GetMapping("/{clubId}")
+    public ApiResponse<ClubResponseDTO.ClubDetailDTO> getClubDetail(
+            @PathVariable Long clubId,
+            @CurrentId String memberId
+    ) {
+        ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    /**
      * 독서 모임 검색 API
      *
      * @param keyword 검색할 키워드
