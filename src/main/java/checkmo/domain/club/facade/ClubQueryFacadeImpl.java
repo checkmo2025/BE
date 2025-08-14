@@ -628,10 +628,11 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 6. 응답 DTO로 변환
         Map<String, Integer> memberIdToTeamNumberMap = mapMemberIdToTeamNumberMap(memberIdToTeamIdMap, teamIdToTeamNumberMap);
+        MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList = clubMembers.stream()
                 .map(cm -> toMeetingMemberDTO(cm, memberBasicInfoMap, memberIdToTeamNumberMap))
                 .toList();
-        return ClubConverter.fromMeetingMemberDTOListToMeetingMemberListDTO(meetingMemberDTOList, hasNext, nextCursor);
+        return ClubConverter.fromMeetingMemberDTOListToMeetingMemberListDTO(meetingMemberDTOList, hasNext, nextCursor, membershipDTO);
     }
 
     private MeetingResponseDTO.MeetingMemberDTO toMeetingMemberDTO(
@@ -688,7 +689,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Map<String, MemberSharedDTO.BasicInfoDTO> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
 
         // 4. TeamMemberDTO 변환
-        return ClubConverter.fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(teamNumber, memberBasicInfoMap.values().stream().toList());
+        MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
+        return ClubConverter.fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(teamNumber, memberBasicInfoMap.values().stream().toList(), membershipDTO);
     }
 
     private List<String> extractMemberIds(List<ClubMember> members) {

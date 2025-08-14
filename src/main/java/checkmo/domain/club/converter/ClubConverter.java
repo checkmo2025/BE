@@ -867,22 +867,29 @@ public class ClubConverter {
      */
     public static MeetingResponseDTO.TeamMemberDTO fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
             Integer teamNumber,
-            List<MemberSharedDTO.BasicInfoDTO> memberSharedDTOs
+            List<MemberSharedDTO.BasicInfoDTO> memberSharedDTOs,
+            MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.TeamMemberDTO.builder()
                 .teamNumber(teamNumber)
                 .members(memberSharedDTOs)
+                .membership(membershipDTO)
                 .build();
     }
 
     /**
      * List<MeetingResponseDTO.MeetingMemberDTO> -> MeetingResponseDTO.MeetingMemberListDTO 변환
      */
-    public static MeetingResponseDTO.MeetingMemberListDTO fromMeetingMemberDTOListToMeetingMemberListDTO(List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList, boolean hasNext, Long nextCursor) {
+    public static MeetingResponseDTO.MeetingMemberListDTO fromMeetingMemberDTOListToMeetingMemberListDTO(
+            List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList,
+            boolean hasNext, Long nextCursor,
+            MembershipResponseDTO.MembershipDTO membershipDTO
+    ) {
         return MeetingResponseDTO.MeetingMemberListDTO.builder()
                 .members(meetingMemberDTOList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
+                .membership(membershipDTO)
                 .build();
     }
 

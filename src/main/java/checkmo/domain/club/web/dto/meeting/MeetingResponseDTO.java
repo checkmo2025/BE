@@ -116,6 +116,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMemberListDTO {
+        private MembershipResponseDTO.MembershipDTO membership;
         private List<MeetingMemberDTO> members; // 모임 참여자 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서
@@ -135,6 +136,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TeamMemberDTO {
+        private MembershipResponseDTO.MembershipDTO membership;
         private Integer teamNumber; // 팀 번호
         private List<MemberSharedDTO.BasicInfoDTO> members; // 해당 팀의 참여자 목록
     }
