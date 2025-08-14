@@ -200,21 +200,16 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         }
 
         // 2. 요청 teamNumber와 nicknameList 검증 및 정리
-        Map<Integer, List<String>> requestTeamNumberToNicknameList = new HashMap<>();
-        Set<Integer> requestTeamNumbers = new HashSet<>();
-        Set<String> requestNicknames = new LinkedHashSet<>();
-
-        for (MeetingRequestDTO.TeamMemberDTO dto : request.getTeamMemberDTOList()) {
-            Integer num = dto.getTeamNumber();
-
-            if (!requestTeamNumbers.add(num)) { // 요청 teamNumber 중 teamNumber가 이미 존재하면 예외 발생
-                throw new GeneralException(ErrorStatus.TEAM_NUMBER_DUPLICATED_REQUEST, num.toString()); //TODO: 팀 넘버 포함 예외 메시지
-            }
-
-            List<String> names = new ArrayList<>(new LinkedHashSet<>(dto.getNicknameList())); // 닉네임 리스트의 중복 제거
-            requestTeamNumberToNicknameList.put(num, names);
-            requestNicknames.addAll(names);
-        }
+        Map<Integer, List<String>> requestTeamNumberToNicknameList =
+                request.getTeamMemberDTOList().stream()
+                        .collect(Collectors.toMap(
+                                MeetingRequestDTO.TeamMemberDTO::getTeamNumber,
+                                dto -> dto.getNicknameList().stream().distinct().toList()
+                        ));
+        Set<Integer> requestTeamNumbers = requestTeamNumberToNicknameList.keySet();
+        Set<String> requestNicknames = requestTeamNumberToNicknameList.values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         // 3. 해당 미팅의 기존 팀들 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
         List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
@@ -222,25 +217,23 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 .collect(Collectors.toMap(Team::getTeamNumber, t -> t));
 
         // 4. 요청에 있는데 아직 없는 teamNumber는 Team 생성
-        for (Integer teamNumber : requestTeamNumbers) {
-            if (!existingTeamNumberToTeam.containsKey(teamNumber)) {
-                Team team = Team.builder()
-                        .teamNumber(teamNumber)
-                        .build();
-                meeting.addTeam(team);
-                existingTeams.add(team);
-                existingTeamNumberToTeam.put(teamNumber, team);
-            }
-        }
+        requestTeamNumbers.stream()
+                .filter(teamNumber -> !existingTeamNumberToTeam.containsKey(teamNumber))
+                .forEach(teamNumber -> {
+                    Team team = Team.builder()
+                            .teamNumber(teamNumber)
+                            .build();
+                    meeting.addTeam(team);
+                    existingTeams.add(team);
+                    existingTeamNumberToTeam.put(teamNumber, team);
+                });
 
         // 5. 요청에는 없는데 존재하는 teamNumber는 Team 삭제
         List<Team> toDeleteTeams = existingTeams.stream()
                 .filter(t -> !requestTeamNumbers.contains(t.getTeamNumber()))
                 .toList();
-
         // 미팅과의 양방향 연관 끊기 -> orphanRemoval이 true이므로 미팅이 flush될 때 Team도 삭제됨
         toDeleteTeams.forEach(meeting::removeTeam);
-
         // 기존 팀, 기존 teamNumber -> Team Map 메모리 컬렉션/맵 동기화
         existingTeams.removeAll(toDeleteTeams);
         existingTeamNumberToTeam.keySet().removeAll(toDeleteTeams.stream()

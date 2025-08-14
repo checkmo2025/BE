@@ -1,11 +1,10 @@
 package checkmo.domain.club.web.dto.meeting;
 
+import checkmo.domain.club.validation.validTeamManage.ValidTeamManage;
 import checkmo.global.dto.BookSharedDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -64,6 +63,7 @@ public class MeetingRequestDTO {
 
     @Getter
     @NoArgsConstructor
+    @ValidTeamManage
     public static class TeamManageDTO {
         @Valid
         @NotNull(message = "팀 멤버 정보는 null이 될 수 없습니다.")

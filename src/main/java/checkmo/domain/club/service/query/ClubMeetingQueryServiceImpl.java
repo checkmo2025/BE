@@ -109,6 +109,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
                 .collect(Collectors.toMap(
                         mt -> mt.getClubMember().getMemberId(), // key: 멤버 ID
                         MemberTeam::getTeamId // value: 팀 id
+                        // 하나의 멤버는 하나의 미팅의 여러 팀에 속할 수 없으므로 병합 조건 존재하지 않아도 됨
                 ));
     }
 
