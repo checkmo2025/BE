@@ -79,7 +79,7 @@ public interface ClubMeetingQueryService {
      * @param memberId 요청자 회원 ID
      * @return 독서모임의 모임 정보 리스트
      */
-    List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId);
+    MeetingResponseDTO.CalendarMeetingDTO getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId);
 
     /**
      * 모임을 책장 리스트로 조회

@@ -217,7 +217,7 @@ public interface ClubQueryFacade {
      * @param memberId 요청자 회원 ID
      * @return 미팅 발제 목록 DTO
      */
-    List<MeetingResponseDTO.TopicDTO> findMeetingTopicsWithTeam(Long meetingId, String memberId);
+    MeetingResponseDTO.TopicDTOList findMeetingTopicsWithTeam(Long meetingId, String memberId);
 
     /**
      * ClubMeetingQueryService
@@ -262,7 +262,7 @@ public interface ClubQueryFacade {
      * @param memberId 요청자 회원 ID
      * @return 미팅 리스트 DTO
      */
-    List<MeetingResponseDTO.MeetingInfoDTO> getClubMeetingCalendar(Long clubId, int year, int month, String memberId);
+    MeetingResponseDTO.CalendarMeetingDTO getClubMeetingCalendar(Long clubId, int year, int month, String memberId);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)

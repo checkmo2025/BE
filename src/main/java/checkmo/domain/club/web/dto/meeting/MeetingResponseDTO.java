@@ -1,7 +1,9 @@
 package checkmo.domain.club.web.dto.meeting;
 
+import checkmo.domain.club.web.dto.MembershipResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +22,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingDetailDTO {
+        MembershipResponseDTO.MembershipDTO membership;
         private MeetingInfoDTO meetingInfo;
         private List<TopicDTO> topics; // 모임의 토픽 목록 -> 발제 등록순 4개 담기
         private List<TeamTopicDTO> teams; // 모임의 팀 별 토픽 목록 -> 발제 등록순 4개 담기
@@ -30,6 +33,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingListDTO {
+        MembershipResponseDTO.MembershipDTO membership;
         private List<MeetingInfoDTO> meetingInfoList; // 모임 정보 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서
@@ -50,8 +54,19 @@ public class MeetingResponseDTO {
         private String location; // 모임 장소
         private int generation; // 기수
         private String tag;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private String content; // 모임 내용, ClubNoticeDetailDTO-MeetingNoticeDTO-MeetingInfoDTO 에서만 이 필드에 값 넣고 나머지에선 다 NULL
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CalendarMeetingDTO {
+        List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoList;
+        MembershipResponseDTO.MembershipDTO membership;
     }
 
     @Getter
@@ -72,6 +87,7 @@ public class MeetingResponseDTO {
         private Long topicId; // 토픽 ID
         private String content; // 토픽 내용
         private MemberSharedDTO.BasicInfoDTO authorInfo; // 작성자 정보
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TeamTopicDTO-TopicDTO에서는 이 필드 NULL
     }
 
@@ -79,7 +95,18 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class TopicDTOList {
+        List<MeetingResponseDTO.TopicDTO> topics;
+        MembershipResponseDTO.MembershipDTO membership;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class TeamTopicDTO {
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        MembershipResponseDTO.MembershipDTO membership;
         private Integer teamNumber; // 팀 번호
         private List<TopicDTO> topics; // 해당 팀이 선택한 토픽 목록
     }
