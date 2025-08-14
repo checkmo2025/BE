@@ -805,6 +805,13 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     }
 
     @Override
+    public Boolean checkStaffStatus(Long clubId, String memberId) {
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        return clubMember.isStaff();
+    }
+
+    @Override
     public Club findClubReferenceById(Long clubId) {
         return clubRepository.getReferenceById(clubId);
     }

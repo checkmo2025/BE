@@ -265,6 +265,15 @@ public interface ClubQueryFacade {
     MeetingResponseDTO.CalendarMeetingDTO getClubMeetingCalendar(Long clubId, int year, int month, String memberId);
 
     /**
+     * 특정 회원이 특정 클럽의 스태프인지 확인합니다. (내부용)
+     *
+     * @param clubId 클럽 ID
+     * @param memberId 회원 ID
+     * @return 스태프 여부 (true: 스태프, false: 일반 회원)
+     */
+    Boolean checkStaffStatus(Long clubId, String memberId);
+
+    /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)
      * ‼️ 이 메소드는 실제 DB 조회를 발생시키지 않는 메소드!!!
      * ‼️ 그리고 반드시 외래 키를 설정하는 용도로만 사용되어야 함!
