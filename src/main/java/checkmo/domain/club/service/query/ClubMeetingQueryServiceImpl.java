@@ -100,6 +100,9 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     @Override
     public Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds) {
+        if (teamIds == null || teamIds.isEmpty()) {
+            return Map.of();
+        }
         List<MemberTeam> memberTeams = memberTeamRepository.findAllWithClubMemberByTeamIds(teamIds);
         return memberTeams.stream()
                 .collect(Collectors.toMap(
