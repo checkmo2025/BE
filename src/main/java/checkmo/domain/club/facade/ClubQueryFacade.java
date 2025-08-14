@@ -233,12 +233,12 @@ public interface ClubQueryFacade {
     /**
      * ClubMeetingQueryService
      *
-     * [모임] 특정 미팅의 참여 인원 목록을 조회합니다.(내부용) //TODO: 무한스크롤인지 궁금
+     * [모임] 특정 미팅의 참여 인원 목록을 조회합니다.(내부용)
      *
      * @param meetingId 미팅 ID
      * @param memberId 요청자 회원 ID
      */
-    List<MeetingResponseDTO.MeetingMemberDTO> findMeetingMembersByMeeting(Long meetingId, String memberId);
+    MeetingResponseDTO.MeetingMemberListDTO findMeetingMembersByMeeting(Long meetingId, Long cursorId, Integer size, String memberId);
 
     /**
      * ClubMeetingQueryService
@@ -250,7 +250,7 @@ public interface ClubQueryFacade {
      * @param memberId 요청자 회원 ID
      * @return 해당 팀의 참여 인원 목록 DTO
      */
-    List<MeetingResponseDTO.MeetingMemberDTO> findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId);
+    MeetingResponseDTO.TeamMemberDTO findTeamMembersByMeeting(Long meetingId, Integer teamNumber, String memberId);
 
     /**
      * ClubMeetingQueryService

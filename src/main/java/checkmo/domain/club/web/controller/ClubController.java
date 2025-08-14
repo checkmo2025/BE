@@ -3,6 +3,8 @@ package checkmo.domain.club.web.controller;
 import checkmo.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.domain.club.validation.validCursor.ValidCursor;
+import checkmo.domain.club.validation.validSize.ValidSize;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.global.auth.CurrentId;
@@ -13,10 +15,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RestController
 @RequestMapping("/api/clubs")
 @RequiredArgsConstructor
@@ -191,8 +193,8 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestParam(defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
-            @RequestParam(required = false) Long cursorId, // 페이징을 위한 커서 ID
-            @RequestParam(required = false) Integer size // 페이지 사이즈
+            @RequestParam(required = false) @ValidCursor Long cursorId, // 페이징을 위한 커서 ID
+            @RequestParam(required = false) @ValidSize Integer size // 페이지 사이즈
     ) {
         return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId, size));
     }

@@ -65,6 +65,17 @@ public interface ClubMemberQueryService {
 
 
     /**
+     * 특정 상태의 모임 회원 목록을 조회합니다.
+     *
+     * @param clubId 모임 ID
+     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL", *"ACTIVE"* 중 하나)
+     * @param cursorId 페이징 커서 ID (null이면 처음부터 조회)
+     * @param size 조회할 개수 (null이면 전체 조회)
+     * @return ClubMember 엔티티 리스트
+     */
+    List<ClubMember> getClubMemberListByStatus(Long clubId, String status, Long cursorId, Integer size);
+
+    /**
      * 멤버의 닉네임으로 clubMember를 매핑합니다.
      *
      * @param clubId 독서 모임 ID
@@ -73,4 +84,5 @@ public interface ClubMemberQueryService {
      * @throws GeneralException 닉네임에 해당하는 ClubMember가 존재하지 않을 경우, CLUB_MEMBER_NOT_FOUND 예외 발생
      */
     Map<String, ClubMember> getNicknameToClubMember(Long clubId, List<String> nicknames) throws GeneralException;
+
 }

@@ -16,16 +16,6 @@ import java.util.Map;
 public interface ClubMeetingQueryService {
 
     /**
-     * 독서 모임의 특정 미팅을 조회합니다. -
-     *
-     * 피그마 참고 페이지 : #독서모임 - 운영진 화면 - 등록 완료시 나오는 화면 - 등록된 모임 상세보기
-     *
-     * @param meetingId 미팅 ID
-     * @return 조회한 미팅 정보 DTO -> 전체 발제는 최대 4개, 각 조별 발제들 최대 4개 (전부 최신 내림차순 정렬)
-     */
-    MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId);
-
-    /**
      * 독서 모임의 모든 미팅을 조회합니다. (책장 아님) - 이 페이지에서는 발제 작성 불가 및, 한줄평 조회 불가
      *
      * 피그마 참고 페이지 : #독서모임 - 모임 생성 후, 모임 리스트
@@ -108,6 +98,21 @@ public interface ClubMeetingQueryService {
      * @return TeamTopic 리스트
      */
     List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size);
+
+    /**
+     * 독서모임의 팀 멤버 정보를 조회합니다.
+     *
+     * @param teamId 팀 ID
+     * @return MemberTeam 리스트
+     */
+    List<MemberTeam> getMemberTeamsByTeam(Long teamId);
+
+    /**
+     * 독서모임의 멤버 id에 따라 해당 클럽 멤버가 소속하는 팀 id를 매핑한 맵을 조회합니다.
+     *
+     * @param teamIds 팀 ID 목록
+     */
+    Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds);
 
     /**
      * 독서모임이 존재하는지 확인합니다.

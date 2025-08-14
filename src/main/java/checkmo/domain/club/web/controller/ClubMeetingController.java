@@ -132,7 +132,30 @@ public class ClubMeetingController {
     }
 
     // 토론조 관리
-    // GET /api/meetings/{meetingId}/teams - Meeting 참여 인원 전체 조회
+    @Operation(summary = "독서 동아리 회원 중 참여 인원 페이지네이션 조회 API",
+            description = "[모임] 페이지 - 독서클럽의 모든 회원 정보(STAFF, MEMBER)와 함께, 해당 미팅에 배정된 팀 번호까지 페이지네이션 조회합니다. " +
+                    "만약 팀 번호가 null이면 아직 아무 팀에도 배정되지 않은 것입니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "커서 ID (null이면 처음부터 조회)", required = false, example = "5"),
+            @Parameter(name = "size", description = "조회할 개수 (기본값: 15)", required = false, example = "15")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+    })
+    @GetMapping("/api/meetings/{meetingId}/members")
+    public ApiResponse<MeetingResponseDTO.MeetingMemberListDTO> getMeetingMembers(
+            @PathVariable Long meetingId,
+            @RequestParam(required = false) @ValidCursor Long cursorId,
+            @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.MeetingMemberListDTO members = clubQueryFacade.findMeetingMembersByMeeting(meetingId, cursorId, size, memberId);
+        return ApiResponse.onSuccess(members);
+    }
+
     @Operation(summary = "토론조 관리(생성/수정/삭제) API", description = "Response Body에 따라 정기 독서모임의 토론조를 생성/수정/삭제합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "팀을 관리할 정기 독서 모임 ID", required = true, example = "1"),
@@ -153,6 +176,28 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(null);
     }
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
+
+    // POST /api/meetings/{meetingId}/teams - 토론조 생성
+    @Operation(summary = "미팅 팀별 참여 인원 전체 조회 API", description = "[모임] 페이지 - 독서모임의 팀별 참여 인원을 전체 조회합니다.")
+    @Parameters({
+            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "teamNumber", description = "팀 번호(조회하려는 조 이름이 x조(x는 A부터 Z까지 알파벳 중 하나)이면 x - ‘A’ + 1 로 조회하려는 조 번호로 요청", required = true, example = "1")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다.")
+    })
+    @GetMapping("/api/meetings/{meetingId}/teams/{teamNumber}/members")
+    public ApiResponse<MeetingResponseDTO.TeamMemberDTO> getTeamMembers(
+            @PathVariable Long meetingId,
+            @PathVariable @Min(value = 1) Integer teamNumber,
+            @CurrentId String memberId
+    ) {
+        MeetingResponseDTO.TeamMemberDTO teamMembers = clubQueryFacade.findTeamMembersByMeeting(meetingId, teamNumber, memberId);
+        return ApiResponse.onSuccess(teamMembers);
+    }
 
     @Operation(summary = "독서모임 발제 + 선택한 팀 정보 전체 조회 API", description = "[모임] 페이지 - 독서모임의 발제와 선택한 팀 정보를 최신순으로 전체 조회합니다.")
     @Parameters({
@@ -186,7 +231,7 @@ public class ClubMeetingController {
     @GetMapping("/api/meetings/{meetingId}/teams/{teamNumber}/topics")
     public ApiResponse<MeetingResponseDTO.TeamTopicDTO> getSelectedTopics(
             @PathVariable Long meetingId,
-            @PathVariable Integer teamNumber,
+            @PathVariable @Min(value = 1) Integer teamNumber,
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TeamTopicDTO teamTopicDTO = clubQueryFacade.findMeetingTopicsByTeam(meetingId, teamNumber, memberId);

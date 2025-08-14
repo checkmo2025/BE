@@ -32,11 +32,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
 
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
-
-    @Override
-    public MeetingResponseDTO.MeetingDetailDTO findMeetingById(Long meetingId) {
-        return null;
-    }
+    private final MemberTeamRepository memberTeamRepository;
 
     @Override
     public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
@@ -73,6 +69,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
+    public List<Team> findTeamsByMeeting(Long meetingId) {
+        return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
+    }
+
+    @Override
     public MeetingResponseDTO.CalendarMeetingDTO getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
         Club club = clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
@@ -88,14 +89,27 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public List<Team> findTeamsByMeeting(Long meetingId) {
-        return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
-    }
-
-    @Override
     public List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size) {
         Pageable pageable = (size == null) ? Pageable.unpaged() : PageRequest.of(0, size);
         return teamTopicRepository.findAllWithTopicAndClubMemberByTeamIdOrderByDesc(teamId, pageable);
+    }
+
+    @Override
+    public List<MemberTeam> getMemberTeamsByTeam(Long teamId) {
+        return memberTeamRepository.findAllWithClubMemberByTeamIds(List.of(teamId));
+    }
+
+    @Override
+    public Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds) {
+        if (teamIds == null || teamIds.isEmpty()) {
+            return Map.of();
+        }
+        List<MemberTeam> memberTeams = memberTeamRepository.findAllWithClubMemberByTeamIds(teamIds);
+        return memberTeams.stream()
+                .collect(Collectors.toMap(
+                        mt -> mt.getClubMember().getMemberId(), // key: 멤버 ID
+                        MemberTeam::getTeamId // value: 팀 id
+                ));
     }
 
     @Override

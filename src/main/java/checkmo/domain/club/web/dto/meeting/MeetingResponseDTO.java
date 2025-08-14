@@ -115,11 +115,30 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class MeetingMemberListDTO {
+        private MembershipResponseDTO.MembershipDTO membership;
+        private List<MeetingMemberDTO> members; // 모임 참여자 목록
+        private boolean hasNext; // 다음 페이지 존재 여부
+        private Long nextCursor; // 다음 페이지 커서
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MeetingMemberDTO {
-        private String nickname; // 회원 닉네임
-        private String profileImageUrl; // 프로필 이미지 URL
-        private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
+        private MemberSharedDTO.BasicInfoDTO memberInfo; // 참여자 정보
         private Integer teamNumber; // 배정된 팀 번호
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TeamMemberDTO {
+        private MembershipResponseDTO.MembershipDTO membership;
+        private Integer teamNumber; // 팀 번호
+        private List<MemberSharedDTO.BasicInfoDTO> members; // 해당 팀의 참여자 목록
     }
 
     @Getter
