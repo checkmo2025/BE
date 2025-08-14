@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -619,7 +620,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Map<String, MemberSharedDTO.BasicInfoDTO> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
 
         // 4. 미팅에 존재하는 모든 팀 조회
-        List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId); // TODO: 독서모임 상세조회 PR에 존재하는데 충돌날지도?!
+        List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId);
         List<Long> teamIds = extractTeamIds(teams);
         Map<Long, Integer> teamIdToTeamNumberMap = mapTeamIdToTeamNumberMap(teams);
 
@@ -650,14 +651,15 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         if (memberIdToTeamIdMap == null || memberIdToTeamIdMap.isEmpty()) {
             return Map.of();
         }
-        return memberIdToTeamIdMap.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,                                        // key: memberId
-                        e -> {
-                            Long teamId = e.getValue();                           // value: 팀ID (nullable)
-                            return (teamId == null) ? null : teamIdToTeamNumberMap.get(teamId);
-                        }
-                ));
+        if (teamIdToTeamNumberMap == null || teamIdToTeamNumberMap.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, Integer> memberIdToTeamNumber = new HashMap<>();
+        memberIdToTeamIdMap.forEach((memberId, teamId) -> {
+            Integer teamNumber = (teamId == null) ? null : teamIdToTeamNumberMap.get(teamId);
+            memberIdToTeamNumber.put(memberId, teamNumber);
+        });
+        return memberIdToTeamNumber;
     }
 
     private Map<Long, Integer> mapTeamIdToTeamNumberMap(List<Team> teams) {
