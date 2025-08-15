@@ -102,13 +102,14 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      *
      * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
      * @param keyword 검색 키워드 (모임명 등)
+     * @param name 클럽명 필터링 여부
      * @param region 지역 필터링 여부
      * @param participants 대상 필터링 여부
      * @param cursorId 페이징 커서 ID
      * @return 검색된 모임 목록 DTO
      */
     @Override
-    public ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer size) {
+    public ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int name, int region, int participants, Long cursorId, Integer size) {
 
         // 1. 커서 초기화
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
@@ -118,7 +119,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Pageable pageable = PageRequest.of(0, pageSize);
 
         // 2. 클럽 리스트 조회
-        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, region, participants, cursor, pageable);
+        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, name, region, participants, cursor, pageable);
 
         // 3. 페이징 처리
         boolean hasNext = clubList.size() > pageSize;  // clubList의 크기가 PAGE_SIZE보다 크면 다음 페이지가 존재한다고 판단

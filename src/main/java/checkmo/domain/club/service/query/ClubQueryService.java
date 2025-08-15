@@ -21,12 +21,13 @@ public interface ClubQueryService {
      * 피그마 참고 페이지 : #독서모임 - 모임 검색하기
      *
      * @param keyword 검색 키워드 (모임명 등)
+     * @param name 클럽명 필터 (0: 클럽명 필터 선택 안함 / 1: 클럽명 필터 선택해서 검색 키워드로 클럽명도 검색 가능)
      * @param region 지역 필터 (0: 지역 필터 선택 안함 / 1: 지역 필터 선택해서 검색 키워드로 지역명도 검색 가능)
      * @param participants 지역 필터 (0: 동아리 대상별 검색 필터 선택 안함 / 1: 동아리 대상별 검색 필터 선택해서 검색 키워드로 동아리 대상도 검색 가능)
      * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
      * @return 독서 클럽 목록 DTO
      */
-    List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Pageable pageable);
+    List<ClubResponseDTO.ClubWithMyStatusDTO> getClubList(String memberId, String keyword, int name, int region, int participants, Long cursorId, Pageable pageable);
 
     /**
      * 내가 가입한 독서 클럽 목록을 전체 조회합니다.
