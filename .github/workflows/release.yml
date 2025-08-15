@@ -30,15 +30,25 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 5. Docker 이미지 빌드 및 ECR에 푸시
+      # 5-1. Docker Buildx 설정
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
+      # 5-2. Docker 이미지 빌드 및 ECR에 푸시
       - name: Docker 이미지 생성 및 ECR에 푸시
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: checkmo-ecr
           IMAGE_TAG: latest
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # 6. 배포할 파일들을 압축
       - name: 배포 파일 압축
