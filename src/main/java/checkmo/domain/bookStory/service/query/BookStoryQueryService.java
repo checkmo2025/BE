@@ -2,10 +2,6 @@ package checkmo.domain.bookStory.service.query;
 
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.global.dto.BookSharedDTO;
-import checkmo.global.dto.BookStorySharedDTO;
-import checkmo.global.dto.ClubSharedDTO;
-import checkmo.global.dto.MemberSharedDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -39,41 +35,13 @@ public interface BookStoryQueryService {
      */
     Map<Long, Boolean> checkLikesForBookStories(String memberId, List<BookStory> bookStories);
 
-    /**
-     * 사용자가 가입한 클럽 목록을 조회
-     *
-     * @param memberId 조회하는 회원의 ID
-     *
-     * @return 사용자가 가입한 클럽 목록 DTO
-     */
-    ClubSharedDTO.MyClubList findMyClubs(String memberId);
 
     /**
-     * 책 이야기 목록에 포함된 책들의 기본 정보를 조회
+     * 책 이야기 엔티티 조회
      *
-     * @param bookStories 조회된 책 이야기 목록
-     *
-     * @return 책 ID와 책 기본 정보를 매핑한 Map
-     */
-    Map<String, BookSharedDTO.BasicInfoDTO> findBookInfos(List<BookStory> bookStories);
-
-    /**
-     * 책 이야기 목록에 포함된 작성자들의 정보를 '팔로우' 상태와 함께 조회
-     *
-     * @param currentMemberId 현재 회원의 ID (팔로우 상태 확인용)
-     * @param bookStories 조회된 책 이야기 목록
-     *
-     * @return 작성자 ID와 작성자 정보(팔로우 상태 포함)를 매핑한 Map
-     */
-    Map<String, MemberSharedDTO.WithFollowStatusDTO> findAuthorInfos(String currentMemberId, List<BookStory> bookStories);
-
-    /**
-     * 책 이야기 조회
-     *
-     * @param memberId 조회하는 회원의 ID
      * @param bookStoryId 조회할 책 이야기의 ID
      *
-     * @return 조회된 책 이야기의 DTO
+     * @return 조회된 책 이야기 엔티티
      */
-    BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId);
+    BookStory findBookStoryById(Long bookStoryId);
 }
