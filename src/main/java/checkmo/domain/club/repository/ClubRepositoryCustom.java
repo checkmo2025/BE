@@ -5,5 +5,5 @@ import checkmo.domain.club.entity.Club;
 import java.util.List;
 
 public interface ClubRepositoryCustom {
-    List<Club> searchClubs(String keyword, int region, int participants, Long cursorId, Integer size);
+    List<Club> searchClubs(String keyword, int name, int region, int participants, Long cursorId, Integer size);
 }

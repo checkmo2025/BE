@@ -20,10 +20,10 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
     // 검색을 위한 메서드
     @Override
-    public List<Club> searchClubs(String keyword, int region, int participants, Long cursorId, Integer size) {
+    public List<Club> searchClubs(String keyword, int name, int region, int participants, Long cursorId, Integer size) {
 
         // 검색 조건 빌더 생성
-        BooleanBuilder builder = buildSearchCondition(keyword, region, participants);
+        BooleanBuilder builder = buildSearchCondition(keyword, name, region, participants);
 
         // 커서 ID가 null이 아니고 0이 아닐 경우, 커서 ID보다 작은 ID를 가진 클럽만 조회
         if (cursorId != null && cursorId != 0L) {
@@ -40,7 +40,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
     }
 
     // 검색 조건 빌더
-    private BooleanBuilder buildSearchCondition(String keyword, int region, int participants) {
+    private BooleanBuilder buildSearchCondition(String keyword, int name, int region, int participants) {
 
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -48,18 +48,19 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
         if (StringUtils.hasText(keyword)) {
             BooleanBuilder keywordBuilder = new BooleanBuilder();
 
-            // region 필터가 켜졌을 경우
+            // 조합에 따른 조건 처리
+            if (name == 1) {
+                keywordBuilder.or(club.name.containsIgnoreCase(keyword));
+            }
             if (region == 1) {
                 keywordBuilder.or(club.region.containsIgnoreCase(keyword));
             }
-
-            // participants 필터가 켜졌을 경우
             if (participants == 1) {
                 keywordBuilder.or(club.participantTypes.any().stringValue().containsIgnoreCase(keyword));
             }
 
-            // 둘 다 꺼졌을 경우 (region == 0 & participants == 0)
-            if (region == 0 && participants == 0) {
+            // 세 플래그가 전부 0인 경우 → 전체 필드 검색
+            if (name == 0 && region == 0 && participants == 0) {
                 keywordBuilder.or(club.name.containsIgnoreCase(keyword))
                         .or(club.region.containsIgnoreCase(keyword))
                         .or(club.participantTypes.any().stringValue().containsIgnoreCase(keyword));

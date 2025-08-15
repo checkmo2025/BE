@@ -50,12 +50,13 @@ public interface ClubQueryFacade {
      *
      * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
      * @param keyword 검색 키워드 (모임명 등)
+     * @param name 클럽명 필터링 여부
      * @param region 지역 필터링 여부
      * @param participants 대상 필터링 여부
      * @param cursorId 페이징 커서 ID
      * @return 검색된 모임 목록 DTO
      */
-    ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int region, int participants, Long cursorId, Integer size);
+    ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int name, int region, int participants, Long cursorId, Integer size);
 
     /**
      * ClubQueryService
