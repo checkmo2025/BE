@@ -6,13 +6,13 @@ spring:
       port: 6379
       #password: checkmo123 # 로컬 개발 환경에서 Redis를 사용하려면 주석을 해제하고 비밀번호를 설정
       database: 0
-      timeout: 2000ms
+      timeout: 5000ms
       lettuce:
         pool:
           max-active: 16
-          max-idle: 8
-          min-idle: 2
-          max-wait: 3000ms
+          max-idle: 16
+          min-idle: 8
+          max-wait: 2000ms
           time-between-eviction-runs: 60000ms
 
   cache:
