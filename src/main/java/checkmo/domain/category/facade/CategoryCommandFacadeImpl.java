@@ -1,10 +1,11 @@
 package checkmo.domain.category.facade;
 
 import checkmo.domain.category.converter.CategoryConverter;
+import checkmo.domain.category.entity.ClubCategory;
 import checkmo.domain.category.service.command.CategoryAssignmentCommandService;
-import checkmo.domain.category.web.dto.CategoryRequestDTO;
-import checkmo.domain.category.web.dto.CategoryResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
+
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,8 @@ public class CategoryCommandFacadeImpl implements CategoryCommandFacade {
 
     @Override
     public void modifyMemberCategories(String memberId, CategorySharedDTO.CategoryIdListDTO request) {
-        categoryAssignmentCommandService.modifyMemberCategories(memberId, request);
+        // DTO에서 데이터 추출하여 Service에 전달
+        categoryAssignmentCommandService.modifyMemberCategories(memberId, request.getCategoryIdList());
     }
 
     /**
@@ -30,7 +32,10 @@ public class CategoryCommandFacadeImpl implements CategoryCommandFacade {
      */
     @Override
     public CategorySharedDTO.CategoryInfoList modifyClubCategories(Long clubId, CategorySharedDTO.CategoryIdListDTO request) {
-        CategoryResponseDTO.CategoryListResponseDTO response = categoryAssignmentCommandService.modifyClubCategories(clubId, request);
-        return CategoryConverter.toCategoryInfoListDTO(response);
+        // DTO에서 데이터 추출하여 Service에 전달
+        List<ClubCategory> clubCategories =
+                categoryAssignmentCommandService.modifyClubCategories(clubId, request.getCategoryIdList());
+
+        return CategoryConverter.fromClubCategoriesToCategoryInfoList(clubCategories);
     }
 }
