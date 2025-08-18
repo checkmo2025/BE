@@ -1,6 +1,6 @@
 package checkmo.domain.book.service.query;
 
-import checkmo.domain.book.web.dto.BookResponseDTO;
+import checkmo.domain.book.entity.Book;
 
 import java.util.List;
 import java.util.Map;
@@ -10,18 +10,18 @@ import java.util.Map;
  */
 public interface BookQueryService {
     /**
-     * 책 단건 조회
+     * 책 단건 조회 (순수 엔티티)
      *
      * @param bookId 책 ID
-     * @return 책 정보 DTO
+     * @return 책 엔티티
      */
-    BookResponseDTO.BookInfoDetailResponse findBook(String bookId);
+    Book findBook(String bookId);
 
     /**
      * 책 ID 목록으로 배치 조회 (배치 처리용)
      *
      * @param bookIds 조회할 책 ID 목록
-     * @return 책 ID와 책 정보 매핑
+     * @return 책 ID와 책 엔티티 매핑
      */
-    Map<String, BookResponseDTO.BookInfoDetailResponse> findBooksMap(List<String> bookIds);
+    Map<String, Book> findBooksMap(List<String> bookIds);
 }
