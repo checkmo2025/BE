@@ -9,22 +9,22 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookConverter {
 
     // =====================================================
-    // BookResponseDTO → BookSharedDTO 변환
+    // Book Entity → BookSharedDTO 변환
     // =====================================================
 
     /**
-     * BookResponseDTO → BasicInfoDTO 변환 (기본 정보만)
+     * Book → BasicInfoDTO
      */
-    public static BookSharedDTO.BasicInfoDTO fromBookDTOToBasicInfoDTO(
-            BookResponseDTO.BookInfoDetailResponse book
-    ) {
+    public static BookSharedDTO.BasicInfoDTO fromBookToBasicInfoDTO(Book book) {
         return BookSharedDTO.BasicInfoDTO.builder()
-                .bookId(book.getIsbn())
+                .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .imgUrl(book.getImgUrl())
@@ -32,38 +32,33 @@ public class BookConverter {
     }
 
     /**
-     * BookResponseDTO → DetailInfoDTO 변환 (상세 정보 포함)
+     * Book → DetailInfoDTO
      */
-    public static BookSharedDTO.DetailInfoDTO fromBookDTOToDetailInfoDTO(
-            BookResponseDTO.BookInfoDetailResponse book
-    ) {
+    public static BookSharedDTO.DetailInfoDTO fromBookToDetailInfoDTO(Book book) {
         return BookSharedDTO.DetailInfoDTO.builder()
-                .bookId(book.getIsbn())
+                .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .imgUrl(book.getImgUrl())
                 .publisher(book.getPublisher())
                 .description(book.getDescription())
                 .build();
+    }
+
+    /**
+     * Book Map → BasicInfoDTO Map
+     */
+    public static Map<String, BookSharedDTO.BasicInfoDTO> fromBooksMapToBasicInfoDTOMap(Map<String, Book> booksMap) {
+        return booksMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> fromBookToBasicInfoDTO(entry.getValue())
+                ));
     }
 
     // =====================================================
     // Entity ↔ DTO 변환
     // =====================================================
-
-    /**
-     * Book 엔티티 → BookResponseDTO 변환
-     */
-    public static BookResponseDTO.BookInfoDetailResponse fromBook(Book book) {
-        return BookResponseDTO.BookInfoDetailResponse.builder()
-                .isbn(book.getId())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .imgUrl(book.getImgUrl())
-                .publisher(book.getPublisher())
-                .description(book.getDescription())
-                .build();
-    }
 
     /**
      * BookCreateRequestDTO → Book 엔티티 변환
