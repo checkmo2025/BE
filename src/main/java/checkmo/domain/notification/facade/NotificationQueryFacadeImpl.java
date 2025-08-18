@@ -7,6 +7,7 @@ import checkmo.domain.notification.service.query.NotificationQueryService;
 import checkmo.domain.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.dto.NotificationSharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,22 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
     private final MemberQueryFacade memberQueryFacade;
 
     @Override
+    @Cacheable(value = "notifications", key = "#memberId")
     public NotificationSharedDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size) {
-        return notificationQueryService.getUnreadNotifications(memberId, size);
+        // 1. Service에서 순수 엔티티 조회
+        List<Notification> notifications = notificationQueryService.findUnreadNotifications(memberId, size);
+
+        // 2. 발신자 ID 목록 추출 (중복 제거)
+        List<String> senderIds = notifications.stream()
+                .map(Notification::getSenderId)
+                .distinct()
+                .toList();
+
+        // 3. 발신자 닉네임 배치 조회로 처리
+        Map<String, String> senderNicknameMap = memberQueryFacade.getMemberNicknamesByMemberIds(senderIds);
+
+        // 4. DTO 변환
+        return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap);
     }
 
     @Override
