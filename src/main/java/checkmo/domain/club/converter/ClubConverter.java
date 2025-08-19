@@ -3,6 +3,7 @@ package checkmo.domain.club.converter;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
@@ -26,6 +27,7 @@ import lombok.NoArgsConstructor;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -928,5 +930,41 @@ public class ClubConverter {
                 .authorInfo(authorSharedDTO)
                 .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
                 .build();
+    }
+
+    // =====================================================
+    // ClubCategory 관련 변환
+    // =====================================================
+
+    /**
+     * List<ClubCategory> → CategoryInfoList 변환
+     */
+    public static CategorySharedDTO.CategoryInfoList fromClubCategoriesToCategoryInfoList(
+            List<ClubCategory> clubCategories
+    ) {
+        List<CategorySharedDTO.CategoryInfo> categoryList = clubCategories.stream()
+                .map(cc -> CategorySharedDTO.CategoryInfo.builder()
+                        .id(cc.getCategory().getId())
+                        .name(cc.getCategory().getName())
+                        .build())
+                .collect(Collectors.toList());
+
+        return CategorySharedDTO.CategoryInfoList.builder()
+                .categoryList(categoryList)
+                .build();
+    }
+
+    public static Map<Long, List<CategorySharedDTO.CategoryInfo>> fromClubCategoriesToCategoryInfoListMap(
+            List<ClubCategory> allClubCategories
+    ) {
+        return allClubCategories.stream()
+                .collect(Collectors.groupingBy(
+                        ClubCategory::getClubId,
+                        Collectors.mapping(cc -> CategorySharedDTO.CategoryInfo.builder()
+                                        .id(cc.getCategory().getId())
+                                        .name(cc.getCategory().getName())
+                                        .build(),
+                                Collectors.toList())
+                ));
     }
 }
