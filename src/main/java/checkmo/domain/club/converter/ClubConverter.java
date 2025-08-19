@@ -229,6 +229,27 @@ public class ClubConverter {
     }
 
     /**
+     * Club 엔티티 + 카테고리 이름 리스트 → ClubDetailResponseDTO 변환 (효율적 버전)
+     */
+    public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTOWithCategoryNames(
+            Club club, List<String> categoryNames, boolean isStaff) {
+
+        return ClubResponseDTO.ClubDetailResponseDTO.builder()
+                .clubId(club.getId())
+                .name(club.getName())
+                .description(club.getDescription())
+                .profileImageUrl(club.getProfileImgUrl())
+                .open(club.isOpen())
+                .category(categoryNames)
+                .region(club.getRegion())
+                .participantTypes(club.getParticipantTypes())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
+                .isStaff(isStaff)
+                .build();
+    }
+
+    /**
      * ClubResponseDTO.ClubNoticeListDTO 변환
      */
     public static ClubResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
@@ -939,21 +960,6 @@ public class ClubConverter {
     /**
      * List<ClubCategory> → CategoryInfoList 변환
      */
-    public static CategorySharedDTO.CategoryInfoList fromClubCategoriesToCategoryInfoList(
-            List<ClubCategory> clubCategories
-    ) {
-        List<CategorySharedDTO.CategoryInfo> categoryList = clubCategories.stream()
-                .map(cc -> CategorySharedDTO.CategoryInfo.builder()
-                        .id(cc.getCategory().getId())
-                        .name(cc.getCategory().getName())
-                        .build())
-                .collect(Collectors.toList());
-
-        return CategorySharedDTO.CategoryInfoList.builder()
-                .categoryList(categoryList)
-                .build();
-    }
-
     public static Map<Long, List<CategorySharedDTO.CategoryInfo>> fromClubCategoriesToCategoryInfoListMap(
             List<ClubCategory> allClubCategories
     ) {
@@ -965,6 +971,32 @@ public class ClubConverter {
                                         .name(cc.getCategory().getName())
                                         .build(),
                                 Collectors.toList())
+                ));
+    }
+
+    /**
+     * List<ClubCategory> → 클럽별 카테고리 이름 Map 변환
+     */
+    public static Map<Long, List<String>> fromClubCategoriesToCategoryNamesMap(
+            List<ClubCategory> allClubCategories
+    ) {
+        return allClubCategories.stream()
+                .collect(Collectors.groupingBy(
+                        ClubCategory::getClubId,
+                        Collectors.mapping(cc -> cc.getCategory().getName(), Collectors.toList())
+                ));
+    }
+
+    /**
+     * List<ClubCategory> → 클럽별 카테고리 ID Map 변환
+     */
+    public static Map<Long, List<Long>> fromClubCategoriesToCategoryIdMap(
+            List<ClubCategory> allClubCategories
+    ) {
+        return allClubCategories.stream()
+                .collect(Collectors.groupingBy(
+                        ClubCategory::getClubId,
+                        Collectors.mapping(ClubCategory::getCategoryId, Collectors.toList())
                 ));
     }
 }
