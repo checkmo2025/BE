@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * 카테고리 조회 서비스
- * Level 1 Domain (Category) - 카테고리 자체에 대한 조회만 담당
+ * 카테고리 자체에 대한 조회만 담당
  */
 public interface CategoryQueryService {
 

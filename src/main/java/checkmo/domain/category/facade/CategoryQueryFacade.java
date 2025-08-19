@@ -3,9 +3,8 @@ package checkmo.domain.category.facade;
 import checkmo.global.dto.CategorySharedDTO;
 
 /**
- * Category Domain Query Facade
- * Level 1 Domain (Category) - 카테고리 자체 정보 제공만 담당
- * 이 도메인의 모든 조회 기능은 다른 도메인에 카테고리 정보를 제공하기 위한 것입니다.
+ * 카테고리 자체 정보 제공만 담당
+ * 그런데 이게 필요한가....??
  */
 public interface CategoryQueryFacade {
 
