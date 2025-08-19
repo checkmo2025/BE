@@ -9,7 +9,6 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
-import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -72,17 +71,21 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .map(cm -> cm.getClub().getId())
                 .toList();
 
-        // 3. 모든 클럽의 카테고리를 한 번에 조회
+        // 3. 모든 클럽의 카테고리 이름을 한 번에 조회
         List<ClubCategory> allClubCategories = clubCategoryQueryService.findCategoriesByClubIds(clubIds);
-
-        var clubCategoriesMap = ClubConverter.fromClubCategoriesToCategoryInfoListMap(allClubCategories);
+        Map<Long, List<String>> clubCategoryNamesMap = ClubConverter.fromClubCategoriesToCategoryNamesMap(allClubCategories);
 
         // 4. DTO 변환
         List<ClubResponseDTO.ClubDetailResponseDTO> responseList = clubMembers.stream()
                 .map(cm -> {
                     Club c = cm.getClub();
+                    List<String> categoryNames = clubCategoryNamesMap.getOrDefault(c.getId(), Collections.emptyList());
+                    return ClubConverter.fromClubToResponseDTOWithCategoryNames(c, categoryNames, cm.isStaff());
+/*
+                    // 기존 방식: 카테고리 정보를 CategorySharedDTO로 변환, TODO : 팀원들과 상의 후 제거
                     List<CategorySharedDTO.CategoryInfo> categories = clubCategoriesMap.getOrDefault(c.getId(), Collections.emptyList());
                     return ClubConverter.fromClubToResponseDTO(c, categories, cm.isStaff());
+*/
                 })
                 .toList();
 
