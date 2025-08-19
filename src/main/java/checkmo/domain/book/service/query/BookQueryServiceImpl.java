@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class BookQueryServiceImpl implements BookQueryService {
 
+    // 자신의 Repository
     private final BookRepository bookRepository;
 
     @Override

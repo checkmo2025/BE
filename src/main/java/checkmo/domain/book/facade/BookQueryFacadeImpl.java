@@ -19,8 +19,13 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class BookQueryFacadeImpl implements BookQueryFacade {
 
+    // 외부 API 서비스
     private final AladinApiService aladinApiService;
+
+    // 자신의 QueryService
     private final BookQueryService bookQueryService;
+
+    // 자신의 Repository
     private final BookRepository bookRepository;
 
     @Override
