@@ -2,11 +2,10 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.entity.ClubMember;
-import checkmo.domain.club.repository.ClubMemberRepository;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
@@ -25,10 +24,9 @@ import java.util.stream.Collectors;
 public class ClubQueryServiceImpl implements ClubQueryService {
 
     private final ClubRepository clubRepository;
-    private final ClubMemberRepository clubMemberRepository;
 
     private final ClubMemberQueryService clubMemberQueryService;
-    private final CategoryQueryFacade categoryQueryFacade;
+    private final ClubCategoryQueryService clubCategoryQueryService;
 
     /**
      * 독서 클럽 목록을 조회합니다.
@@ -57,7 +55,9 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
 
         // 4. 클럽별 카테고리 배치 조회
-        Map<Long, List<CategorySharedDTO.CategoryInfo>> categoriesMap = categoryQueryFacade.getCategoriesByClubs(clubIds);
+        List<ClubCategory> allClubCategories = clubCategoryQueryService.findCategoriesByClubIds(clubIds);
+
+        var categoriesMap = ClubConverter.fromClubCategoriesToCategoryInfoListMap(allClubCategories);
 
         // 5. DTO 변환 (배치 조회 결과 활용)
         return clubs.stream()
@@ -115,7 +115,9 @@ public class ClubQueryServiceImpl implements ClubQueryService {
         }
 
         // 3. 카테고리 DTO
-        CategorySharedDTO.CategoryInfoList categoryInfoList = categoryQueryFacade.getCategoriesByClubForShare(clubId);
+        List<ClubCategory> clubCategories = clubCategoryQueryService.findCategoriesByClub(clubId);
+
+        var categoryInfoList = ClubConverter.fromClubCategoriesToCategoryInfoList(clubCategories);
 
         List<Long> categoryIds = categoryInfoList.getCategoryList().stream()
                 .map(CategorySharedDTO.CategoryInfo::getId)
