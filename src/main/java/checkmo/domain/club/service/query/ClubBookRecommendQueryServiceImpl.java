@@ -18,12 +18,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQueryService {
 
+    // Domain level 2
+    private final MemberQueryFacade memberQueryFacade;
+    // Domain level 1
+    private final BookQueryFacade bookQueryFacade;
+
+    // 자신의 QueryService
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
+
+    // 자신의 Repository
     private final BookRecommendRepository bookRecommendRepository;
 
-    private final MemberQueryFacade memberQueryFacade;
-    private final BookQueryFacade bookQueryFacade;
 
     /**
      * 순수하게 BookRecommend 엔티티들만 조회 (페이징 없음)

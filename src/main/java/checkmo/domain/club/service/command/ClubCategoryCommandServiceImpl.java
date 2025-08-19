@@ -19,9 +19,12 @@ import java.util.List;
 @Transactional
 public class ClubCategoryCommandServiceImpl implements ClubCategoryCommandService {
 
+    // Domain level 1의 Repository
+    private final CategoryRepository categoryRepository;
+
+    // 자신의 Repository
     private final ClubRepository clubRepository;
     private final ClubCategoryRepository clubCategoryRepository;
-    private final CategoryRepository categoryRepository;
 
     @Override
     public void modifyClubCategories(Long clubId, List<Long> categoryIds) {

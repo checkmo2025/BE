@@ -20,10 +20,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCommandService {
 
-    private final ClubQueryService clubQueryService;
-    private final ClubMemberQueryService clubMemberQueryService;
+    // Domain level 1
     private final BookQueryFacade bookQueryFacade;
     private final BookCommandFacade bookCommandFacade;
+
+    // 자신의 QueryService
+    private final ClubQueryService clubQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
+
+    // 자신의 Repository
     private final BookRecommendRepository bookRecommendRepository;
 
     /**

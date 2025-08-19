@@ -23,9 +23,15 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
-    private final ClubMemberRepository clubMemberRepository;
-    private final ClubCategoryQueryService clubCategoryQueryService;
+    // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
+
+    // 자신의 QueryService
+    private final ClubCategoryQueryService clubCategoryQueryService;
+
+
+    // 자신의 Repository
+    private final ClubMemberRepository clubMemberRepository;
 
     @Override
     public ClubMember validateClubMember(Long clubId, String memberId) throws GeneralException {

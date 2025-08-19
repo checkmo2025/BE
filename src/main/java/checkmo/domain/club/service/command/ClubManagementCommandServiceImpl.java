@@ -19,11 +19,18 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ClubManagementCommandServiceImpl implements ClubManagementCommandService {
 
-    private final ClubRepository clubRepository;
+    // Domain level 2
+    private final MemberQueryFacade memberQueryFacade;
+
+    // 자신의 CommandService
+    private final ClubCategoryCommandService clubCategoryCommandService;
+
+    // 자신의 QueryService
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
-    private final MemberQueryFacade memberQueryFacade;
-    private final ClubCategoryCommandService clubCategoryCommandService;
+
+    // 자신의 Repository
+    private final ClubRepository clubRepository;
 
     /**
      * 독서모임을 생성합니다.

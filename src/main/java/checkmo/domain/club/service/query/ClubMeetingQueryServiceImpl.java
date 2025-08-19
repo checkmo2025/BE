@@ -24,15 +24,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
+
+    // 자신의 QueryService
+    private final ClubMemberQueryService clubMemberQueryService;
+    private final ClubQueryService clubQueryService;
+
+    // 자신의 Repository
     private final MeetingRepository meetingRepository;
-    private final BookReviewRepository bookReviewRepository;
     private final TopicRepository topicRepository;
     private final TeamRepository teamRepository;
     private final TeamTopicRepository teamTopicRepository;
-
-    private final ClubMemberQueryService clubMemberQueryService;
-    private final ClubQueryService clubQueryService;
     private final MemberTeamRepository memberTeamRepository;
+    private final BookReviewRepository bookReviewRepository;
 
     @Override
     public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {

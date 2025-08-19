@@ -13,6 +13,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ClubCategoryQueryServiceImpl implements ClubCategoryQueryService {
 
+    // 자신의 Repository
     private final ClubCategoryRepository clubCategoryRepository;
 
     @Override

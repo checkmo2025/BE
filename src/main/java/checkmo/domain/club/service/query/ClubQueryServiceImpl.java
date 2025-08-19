@@ -23,10 +23,12 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ClubQueryServiceImpl implements ClubQueryService {
 
-    private final ClubRepository clubRepository;
-
+    // 자신의 QueryService
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubCategoryQueryService clubCategoryQueryService;
+
+    // 자신의 Repository
+    private final ClubRepository clubRepository;
 
     /**
      * 독서 클럽 목록을 조회합니다.
