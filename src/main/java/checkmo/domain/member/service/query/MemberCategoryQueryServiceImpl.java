@@ -11,6 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberCategoryQueryServiceImpl implements MemberCategoryQueryService {
 
+    // 자신의 Repository
     private final MemberCategoryRepository memberCategoryRepository;
 
     @Override

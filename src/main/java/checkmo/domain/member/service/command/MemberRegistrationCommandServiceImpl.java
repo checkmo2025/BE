@@ -31,17 +31,29 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberRegistrationCommandServiceImpl implements MemberRegistrationCommandService {
 
+    // 자신의 CommandService
+    private final MemberCategoryCommandService memberCategoryCommandService;
+    
+    // 자신의 QueryService
+    private final MemberQueryService memberQueryService;
+    
+    // 자신의 Repository
     private final MemberRepository memberRepository;
+    
+    // 인증 관련 서비스
+    private final MemberAuthenticationService memberAuthenticationService;
+    private final PasswordEncoder passwordEncoder;
+    
+    // 외부 서비스
     private final RedisTemplate<String, Object> redisTemplate;
     private final EmailSender emailSender;
-    private final MemberAuthenticationService memberAuthenticationService;
-    private final MemberQueryService memberQueryService;
-    private final MemberCategoryCommandService memberCategoryCommandService;
 
+    // 이메일 인증 관련 상수
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
+    
+    // 랜덤 인증번호 생성용 정적 필드
     private static final SecureRandom secureRandom = new SecureRandom();
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void sendEmailVerification(String email) {

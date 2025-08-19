@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class BookStoryQueryServiceImpl implements BookStoryQueryService {
 
+    // 자신의 Repository
     private final BookStoryRepository bookStoryRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
 

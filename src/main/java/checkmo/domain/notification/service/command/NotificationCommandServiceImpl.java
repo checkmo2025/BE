@@ -20,7 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NotificationCommandServiceImpl implements NotificationCommandService {
 
+    // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
+
+    // 자신의 Repository
     private final NotificationRepository notificationRepository;
 
     @Override

@@ -22,10 +22,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MemberQueryServiceImpl implements MemberQueryService {
 
-    private final MemberRepository memberRepository;
-    private final FollowRepository followRepository;
+    // 자신의 QueryService
     private final MemberCategoryQueryService memberCategoryQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
+
+    // 자신의 Repository
+    private final MemberRepository memberRepository;
+    private final FollowRepository followRepository;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {

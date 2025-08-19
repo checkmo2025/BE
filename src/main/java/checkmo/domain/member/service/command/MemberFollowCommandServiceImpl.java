@@ -19,10 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberFollowCommandServiceImpl implements MemberFollowCommandService {
 
-    private final ApplicationEventPublisher eventPublisher;
-
+    // 자신의 Repository
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
+
+    // 이벤트 발행을 위한 ApplicationEventPublisher
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void followingMember(String memberId, String followingNickname) {

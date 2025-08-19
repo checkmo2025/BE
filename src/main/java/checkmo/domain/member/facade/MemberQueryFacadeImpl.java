@@ -21,11 +21,15 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
+    // 페이징 기본 크기 상수
     public static final int DEFAULT_PAGE_SIZE = 20;
 
-    private final MemberRepository memberRepository; // 프록시용
+    // 자신의 QueryService
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
+
+    // 자신의 Repository (프록시용, TODO: 해결 불가한가?)
+    private final MemberRepository memberRepository;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {

@@ -14,6 +14,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class NotificationQueryServiceImpl implements NotificationQueryService {
 
+    // 자신의 Repository
     private final NotificationRepository notificationRepository;
 
     @Override

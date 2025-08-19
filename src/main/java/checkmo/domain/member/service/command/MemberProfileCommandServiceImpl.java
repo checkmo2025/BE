@@ -22,9 +22,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Transactional
 public class MemberProfileCommandServiceImpl implements MemberProfileCommandService {
 
-    private final MemberRepository memberRepository;
+    // 자신의 CommandService
     private final MemberCategoryCommandService memberCategoryCommandService;
+
+    // 자신의 QueryService
     private final MemberCategoryQueryService memberCategoryQueryService;
+
+    // 자신의 Repository
+    private final MemberRepository memberRepository;
+
+    // 이미지 삭제를 위한 S3 서비스
     private final S3Service s3Service;
 
     @Override

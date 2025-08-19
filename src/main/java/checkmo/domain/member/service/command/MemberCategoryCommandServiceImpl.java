@@ -19,7 +19,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberCategoryCommandServiceImpl implements MemberCategoryCommandService {
 
+    // Domain level 1의 Repository
     private final CategoryRepository categoryRepository;
+
+    // 자신의 Repository
     private final MemberCategoryRepository memberCategoryRepository;
     private final MemberRepository memberRepository;
 

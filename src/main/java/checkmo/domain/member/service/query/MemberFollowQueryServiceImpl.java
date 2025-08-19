@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
 
+    // 자신의 Repository
     private final FollowRepository followRepository;
 
     @Override

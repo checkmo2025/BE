@@ -19,10 +19,14 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
 
+    // 페이징 기본 크기 상수
     public static final int DEFAULT_PAGE_SIZE = 20;
 
-    private final NotificationQueryService notificationQueryService;
+    // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
+
+    // 자신의 QueryService
+    private final NotificationQueryService notificationQueryService;
 
     @Override
     @Cacheable(value = "notifications", key = "#memberId")
