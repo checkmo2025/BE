@@ -13,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryQueryFacadeImpl implements CategoryQueryFacade {
 
+    // 자신의 QueryService
     private final CategoryQueryService categoryQueryService;
 
     @Override

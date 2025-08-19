@@ -21,13 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
+    // 자신의 CommandService
     private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubManagementCommandService clubManagementCommandService;
     private final ClubBookRecommendCommandService clubBookRecommendCommandService;
-    private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationCommandService clubCommunicationCommandService;
-    private final ClubCommunicationQueryService clubNoticeQueryService;
     private final ClubMembershipCommandService clubMembershipCommandService;
+
+    // 자신의 QueryService
+    private final ClubBookRecommendQueryService clubBookRecommendQueryService;
+    private final ClubCommunicationQueryService clubNoticeQueryService;
 
     /**
      * ClubManagementCommandService

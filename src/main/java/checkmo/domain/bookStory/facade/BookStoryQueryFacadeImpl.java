@@ -25,12 +25,18 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
 
+    // 페이징 기본 크기 상수
     public static final int DEFAULT_PAGE_SIZE = 10;
 
-    private final BookStoryQueryService bookStoryQueryService;
-    private final BookQueryFacade bookQueryFacade;
+    // Domain level 3
     private final ClubQueryFacade clubQueryFacade;
+    // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
+    // Domain level 1
+    private final BookQueryFacade bookQueryFacade;
+
+    // 자신의 QueryService
+    private final BookStoryQueryService bookStoryQueryService;
 
     @Override
     public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
@@ -140,7 +146,7 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
             String memberId, 
             List<BookStory> bookStories, 
             Map<Long, Boolean> isLikedMap, 
-            Map<String, BookSharedDTO.BasicInfoDTO> bookInfoMap, 
+            Map<String, BookSharedDTO.BasicInfoDTO> bookInfoMap,
             Map<String, MemberSharedDTO.WithFollowStatusDTO> authorInfoMap) {
         
         return bookStories.stream()

@@ -11,6 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryQueryServiceImpl implements CategoryQueryService {
 
+    // 자신의 Repository
     private final CategoryRepository categoryRepository;
 
     @Override

@@ -36,14 +36,21 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     // 페이징 기본 크기 상수
     private static final int DEFAULT_PAGE_SIZE = 10;
+
+    // Domain level 2
+    private final MemberQueryFacade memberQueryFacade;
+    // Domain level 1
+    private final BookQueryFacade bookQueryFacade;
+
+    // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationQueryService clubCommunicationQueryService;
+
+    // 자신의 Repository
     private final ClubRepository clubRepository;
-    private final MemberQueryFacade memberQueryFacade;
-    private final BookQueryFacade bookQueryFacade;
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
