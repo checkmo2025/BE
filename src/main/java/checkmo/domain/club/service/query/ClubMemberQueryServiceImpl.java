@@ -2,9 +2,9 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     private final ClubMemberRepository clubMemberRepository;
-    private final CategoryQueryFacade categoryQueryFacade;
+    private final ClubCategoryQueryService clubCategoryQueryService;
     private final MemberQueryFacade memberQueryFacade;
 
     @Override
@@ -67,8 +67,9 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .toList();
 
         // 3. 모든 클럽의 카테고리를 한 번에 조회
-        Map<Long, List<CategorySharedDTO.CategoryInfo>> clubCategoriesMap =
-                categoryQueryFacade.getCategoriesByClubs(clubIds);
+        List<ClubCategory> allClubCategories = clubCategoryQueryService.findCategoriesByClubIds(clubIds);
+
+        var clubCategoriesMap = ClubConverter.fromClubCategoriesToCategoryInfoListMap(allClubCategories);
 
         // 4. DTO 변환
         List<ClubResponseDTO.ClubDetailResponseDTO> responseList = clubMembers.stream()
