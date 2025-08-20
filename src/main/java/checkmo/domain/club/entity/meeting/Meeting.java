@@ -29,6 +29,7 @@ public class Meeting extends BaseEntity {
 
     private String location;
 
+    @Column(length = 1000)
     private String content;
 
     @Column(nullable = false)

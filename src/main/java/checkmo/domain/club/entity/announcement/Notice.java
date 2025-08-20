@@ -19,6 +19,7 @@ public class Notice extends BaseEntity {
 
     private String title;
 
+    @Column(length = 1000)
     private String content;
 
     private boolean important;
