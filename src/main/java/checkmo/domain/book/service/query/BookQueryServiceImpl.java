@@ -1,9 +1,7 @@
 package checkmo.domain.book.service.query;
 
-import checkmo.domain.book.converter.BookConverter;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.repository.BookRepository;
-import checkmo.domain.book.web.dto.BookResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,32 +15,29 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class BookQueryServiceImpl implements BookQueryService {
 
+    // 자신의 Repository
     private final BookRepository bookRepository;
 
     @Override
-    public BookResponseDTO.BookInfoDetailResponse findBook(String bookId) {
-
-        Book book = bookRepository.findById(bookId).orElseThrow(
+    public Book findBook(String bookId) {
+        return bookRepository.findById(bookId).orElseThrow(
                 () -> new IllegalArgumentException("책을 찾을 수 없습니다. bookId: " + bookId)
         );
-
-        return BookConverter.fromBook(book);
     }
 
     @Override
-    public Map<String, BookResponseDTO.BookInfoDetailResponse> findBooksMap(List<String> bookIds) {
+    public Map<String, Book> findBooksMap(List<String> bookIds) {
         if (bookIds == null || bookIds.isEmpty()) {
             return Map.of();
         }
 
-        // 배치로 책 엔티티 조회
+        // 배치로 책 엔티티 조회하여 Map으로 변환
         List<Book> books = bookRepository.findAllById(bookIds);
-
-        // Book 엔티티를 DTO로 변환하여 매핑
+        
         return books.stream()
                 .collect(Collectors.toMap(
                         Book::getId,
-                        BookConverter::fromBook
+                        book -> book
                 ));
     }
 }

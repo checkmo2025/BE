@@ -2,7 +2,6 @@ package checkmo.domain.member.service.command;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.category.facade.CategoryCommandFacade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
@@ -13,7 +12,6 @@ import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberRequestDTO.LoginRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
-import checkmo.global.dto.CategorySharedDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -33,17 +31,29 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberRegistrationCommandServiceImpl implements MemberRegistrationCommandService {
 
+    // 자신의 CommandService
+    private final MemberCategoryCommandService memberCategoryCommandService;
+    
+    // 자신의 QueryService
+    private final MemberQueryService memberQueryService;
+    
+    // 자신의 Repository
     private final MemberRepository memberRepository;
+    
+    // 인증 관련 서비스
+    private final MemberAuthenticationService memberAuthenticationService;
+    private final PasswordEncoder passwordEncoder;
+    
+    // 외부 서비스
     private final RedisTemplate<String, Object> redisTemplate;
     private final EmailSender emailSender;
-    private final MemberAuthenticationService memberAuthenticationService;
-    private final MemberQueryService memberQueryService;
-    private final CategoryCommandFacade categoryCommandFacade;
 
+    // 이메일 인증 관련 상수
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
+    
+    // 랜덤 인증번호 생성용 정적 필드
     private static final SecureRandom secureRandom = new SecureRandom();
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void sendEmailVerification(String email) {
@@ -180,9 +190,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         );
 
         // 관심 카테고리 저장
-        categoryCommandFacade.modifyMemberCategories(memberId, CategorySharedDTO.CategoryIdListDTO.builder()
-                                                     .categoryIdList(request.getCategoryIds())
-                                                     .build());
+        memberCategoryCommandService.modifyMemberCategories(memberId, request.getCategoryIds());
 
         // 프로필 완료 상태로 변경
         member.completeProfile();

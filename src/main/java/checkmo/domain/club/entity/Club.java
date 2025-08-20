@@ -1,6 +1,5 @@
 package checkmo.domain.club.entity;
 
-import checkmo.domain.category.entity.ClubCategory;
 import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;

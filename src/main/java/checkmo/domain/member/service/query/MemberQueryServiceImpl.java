@@ -2,9 +2,9 @@ package checkmo.domain.member.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.category.facade.CategoryQueryFacade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.entity.MemberCategory;
 import checkmo.domain.member.repository.FollowRepository;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
@@ -22,10 +22,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MemberQueryServiceImpl implements MemberQueryService {
 
+    // 자신의 QueryService
+    private final MemberCategoryQueryService memberCategoryQueryService;
+    private final MemberFollowQueryService memberFollowQueryService;
+
+    // 자신의 Repository
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
-    private final CategoryQueryFacade categoryQueryFacade;
-    private final MemberFollowQueryService memberFollowQueryService;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -48,11 +51,15 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
+        // 1. 회원 정보 조회
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
-        List<CategorySharedDTO.CategoryInfo> categories = categoryQueryFacade.getCategoriesByMemberForShare(memberId).getCategoryList();
+        // 2. 회원의 카테고리 정보 조회 후 DTO 변환
+        List<MemberCategory> memberCategories = memberCategoryQueryService.findCategoriesByMember(memberId);
+        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(memberCategories);
 
+        // 3. 회원 프로필 정보와 카테고리 정보를 포함한 DTO 반환
         return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
     }
 
@@ -77,14 +84,19 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
 
+        // 1. 조회하려는 대상의 회원 정보 조회
         Member targetMember = memberRepository.findByNickName(targetMemberNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
+        // 2. 조회하려는 대상에 대한 본인의 팔로잉 여부 확인
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
 
-        List<CategorySharedDTO.CategoryInfo> categories = categoryQueryFacade.getCategoriesByMemberForShare(targetMember.getId()).getCategoryList();
+        // 3. 대상 회원의 카테고리 정보 조회 후 DTO 변환
+        List<MemberCategory> targetMemberCategories = memberCategoryQueryService.findCategoriesByMember(targetMember.getId());
+        List<CategorySharedDTO.CategoryInfo> targetMemberCategoriesDTO = MemberConverter.fromMemberCategoriesToCategoryInfoList(targetMemberCategories);
 
-        return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing, categories);
+        // 4. 대상 회원의 프로필 정보와 카테고리 정보를 포함한 DTO 반환
+        return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing, targetMemberCategoriesDTO);
 
     }
 

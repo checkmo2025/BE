@@ -3,6 +3,7 @@ package checkmo.domain.club.converter;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
@@ -26,6 +27,7 @@ import lombok.NoArgsConstructor;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubConverter {
@@ -210,6 +212,27 @@ public class ClubConverter {
         List<String> categoryNames = categories.stream()
                 .map(CategorySharedDTO.CategoryInfo::getName)
                 .toList();
+
+        return ClubResponseDTO.ClubDetailResponseDTO.builder()
+                .clubId(club.getId())
+                .name(club.getName())
+                .description(club.getDescription())
+                .profileImageUrl(club.getProfileImgUrl())
+                .open(club.isOpen())
+                .category(categoryNames)
+                .region(club.getRegion())
+                .participantTypes(club.getParticipantTypes())
+                .insta(club.getInsta())
+                .kakao(club.getKakao())
+                .isStaff(isStaff)
+                .build();
+    }
+
+    /**
+     * Club 엔티티 + 카테고리 이름 리스트 → ClubDetailResponseDTO 변환 (효율적 버전)
+     */
+    public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTOWithCategoryNames(
+            Club club, List<String> categoryNames, boolean isStaff) {
 
         return ClubResponseDTO.ClubDetailResponseDTO.builder()
                 .clubId(club.getId())
@@ -928,5 +951,52 @@ public class ClubConverter {
                 .authorInfo(authorSharedDTO)
                 .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
                 .build();
+    }
+
+    // =====================================================
+    // ClubCategory 관련 변환
+    // =====================================================
+
+    /**
+     * List<ClubCategory> → CategoryInfoList 변환
+     */
+    public static Map<Long, List<CategorySharedDTO.CategoryInfo>> fromClubCategoriesToCategoryInfoListMap(
+            List<ClubCategory> allClubCategories
+    ) {
+        return allClubCategories.stream()
+                .collect(Collectors.groupingBy(
+                        ClubCategory::getClubId,
+                        Collectors.mapping(cc -> CategorySharedDTO.CategoryInfo.builder()
+                                        .id(cc.getCategory().getId())
+                                        .name(cc.getCategory().getName())
+                                        .build(),
+                                Collectors.toList())
+                ));
+    }
+
+    /**
+     * List<ClubCategory> → 클럽별 카테고리 이름 Map 변환
+     */
+    public static Map<Long, List<String>> fromClubCategoriesToCategoryNamesMap(
+            List<ClubCategory> allClubCategories
+    ) {
+        return allClubCategories.stream()
+                .collect(Collectors.groupingBy(
+                        ClubCategory::getClubId,
+                        Collectors.mapping(cc -> cc.getCategory().getName(), Collectors.toList())
+                ));
+    }
+
+    /**
+     * List<ClubCategory> → 클럽별 카테고리 ID Map 변환
+     */
+    public static Map<Long, List<Long>> fromClubCategoriesToCategoryIdMap(
+            List<ClubCategory> allClubCategories
+    ) {
+        return allClubCategories.stream()
+                .collect(Collectors.groupingBy(
+                        ClubCategory::getClubId,
+                        Collectors.mapping(ClubCategory::getCategoryId, Collectors.toList())
+                ));
     }
 }

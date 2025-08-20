@@ -2,6 +2,7 @@ package checkmo.domain.member.converter;
 
 import checkmo.domain.member.entity.Follow;
 import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.entity.MemberCategory;
 import checkmo.domain.member.service.security.oauth2.OAuth2Attributes;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
@@ -187,5 +188,21 @@ public class MemberConverter {
         return MemberResponseDTO.FollowPreviewList.builder()
                 .followList(followList)
                 .build();
+    }
+
+    // =====================================================
+    // MemberCategory <-> DTO 변환
+    // =====================================================
+
+    /**
+     * List<MemberCategory> → CategoryInfoList 변환
+     */
+    public static List<CategorySharedDTO.CategoryInfo> fromMemberCategoriesToCategoryInfoList(List<MemberCategory> memberCategories) {
+        return memberCategories.stream()
+                .map(mc -> CategorySharedDTO.CategoryInfo.builder()
+                        .id(mc.getCategory().getId())
+                        .name(mc.getCategory().getName())
+                        .build())
+                .toList();
     }
 }

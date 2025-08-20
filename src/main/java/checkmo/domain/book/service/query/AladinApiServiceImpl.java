@@ -19,7 +19,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Transactional(readOnly = true)
 public class AladinApiServiceImpl implements AladinApiService {
 
+    // 알라딘 API 호출을 위한 RestTemplate
     private final RestTemplate restTemplate;
+
+    // 알라딘의 환경 설정 정보를 담은 Properties
     private final AladinProperties aladinProperties;
 
     @Override

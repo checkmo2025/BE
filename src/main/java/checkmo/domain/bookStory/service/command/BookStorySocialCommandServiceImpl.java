@@ -19,10 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookStorySocialCommandServiceImpl implements BookStorySocialCommandService {
 
-    private final BookStoryRepository bookStoryRepository;
-    private final BookStoryLikedRepository bookStoryLikedRepository;
+    // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
 
+    // 자신의 Repository
+    private final BookStoryRepository bookStoryRepository;
+    private final BookStoryLikedRepository bookStoryLikedRepository;
+
+    // 이벤트 발행을 위한 ApplicationEventPublisher
     private final ApplicationEventPublisher eventPublisher;
 
     @Override

@@ -29,13 +29,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService {
+
+    // Domain level 1
     private final BookCommandFacade bookCommandFacade;
     private final BookQueryFacade bookQueryFacade;
 
+    // 자신의 QueryService
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
 
+    // 자신의 Repository
     private final MeetingRepository meetingRepository;
     private final TopicRepository topicRepository;
     private final TeamTopicRepository teamTopicRepository;

@@ -27,12 +27,17 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCommandService {
 
+    // Domain level 2
+    private final MemberQueryFacade memberQueryFacade;
+
+    // 자신의 QueryService
+    private final ClubMemberQueryService clubMemberQueryService;
+    private final ClubQueryService clubQueryService;
+
+    // 자신의 Repository
     private final VoteRepository voteRepository;
     private final NoticeRepository noticeRepository;
     private final MemberVoteRepository memberVoteRepository;
-    private final ClubQueryService clubQueryService;
-    private final ClubMemberQueryService clubMemberQueryService;
-    private final MemberQueryFacade memberQueryFacade;
 
     /**
      * 독서 모임에 공지사항을 작성합니다. (모임이랑 연결되지 않은 순수 공지사항)

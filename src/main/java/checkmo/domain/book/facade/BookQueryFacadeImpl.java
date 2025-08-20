@@ -13,15 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookQueryFacadeImpl implements BookQueryFacade {
 
+    // 외부 API 서비스
     private final AladinApiService aladinApiService;
+
+    // 자신의 QueryService
     private final BookQueryService bookQueryService;
+
+    // 자신의 Repository
     private final BookRepository bookRepository;
 
     @Override
@@ -36,16 +40,18 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
 
     @Override
     public BookSharedDTO.BasicInfoDTO getBookBasicInfoForShare(String bookId) {
-        var book = bookQueryService.findBook(bookId);
-
-        return BookConverter.fromBookDTOToBasicInfoDTO(book);
+        // Service에서 엔티티 받아서 직접 변환
+        Book book = bookQueryService.findBook(bookId);
+        
+        return BookConverter.fromBookToBasicInfoDTO(book);
     }
 
     @Override
     public BookSharedDTO.DetailInfoDTO getBookDetailInfoForShare(String bookId) {
-        var book = bookQueryService.findBook(bookId);
-
-        return BookConverter.fromBookDTOToDetailInfoDTO(book);
+        // Service에서 엔티티 받아서 직접 변환
+        Book book = bookQueryService.findBook(bookId);
+        
+        return BookConverter.fromBookToDetailInfoDTO(book);
     }
 
     @Override
@@ -56,15 +62,11 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
 
         List<String> distinctBookIds = bookIds.stream().distinct().toList();
         
-        // 배치로 책 정보 조회
-        Map<String, BookResponseDTO.BookInfoDetailResponse> booksMap = bookQueryService.findBooksMap(distinctBookIds);
+        // 배치로 책 엔티티 조회
+        Map<String, Book> booksMap = bookQueryService.findBooksMap(distinctBookIds);
         
-        // DTO 변환
-        return booksMap.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> BookConverter.fromBookDTOToBasicInfoDTO(entry.getValue())
-                ));
+        // 엔티티 → SharedDTO 직접 변환
+        return BookConverter.fromBooksMapToBasicInfoDTOMap(booksMap);
     }
 
     @Override

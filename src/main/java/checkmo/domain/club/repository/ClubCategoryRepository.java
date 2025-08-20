@@ -1,6 +1,6 @@
-package checkmo.domain.category.repository;
+package checkmo.domain.club.repository;
 
-import checkmo.domain.category.entity.ClubCategory;
+import checkmo.domain.club.entity.ClubCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

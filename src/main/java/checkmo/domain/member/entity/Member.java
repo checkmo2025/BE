@@ -3,7 +3,6 @@ package checkmo.domain.member.entity;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.entity.BookStoryLiked;
 import checkmo.domain.bookStory.entity.Comment;
-import checkmo.domain.category.entity.MemberCategory;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.notification.entity.Notification;
 import checkmo.domain.club.entity.announcement.MemberVote;

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookStoryCommandFacadeImpl implements BookStoryCommandFacade {
 
+    // 자신의 CommandService
     private final BookStoryCommandService bookStoryCommandService;
     private final BookStorySocialCommandService bookStorySocialCommandService;
 

@@ -2,7 +2,6 @@ package checkmo.domain.club.service.command;
 
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.domain.category.facade.CategoryCommandFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
@@ -20,11 +19,18 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ClubManagementCommandServiceImpl implements ClubManagementCommandService {
 
-    private final ClubRepository clubRepository;
+    // Domain level 2
+    private final MemberQueryFacade memberQueryFacade;
+
+    // 자신의 CommandService
+    private final ClubCategoryCommandService clubCategoryCommandService;
+
+    // 자신의 QueryService
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
-    private final MemberQueryFacade memberQueryFacade;
-    private final CategoryCommandFacade categoryCommandFacade;
+
+    // 자신의 Repository
+    private final ClubRepository clubRepository;
 
     /**
      * 독서모임을 생성합니다.
@@ -61,7 +67,9 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         clubRepository.save(club);
 
         // 5. 카테고리 연관관계 설정
-        categoryCommandFacade.modifyClubCategories(club.getId(), ClubConverter.toCategoryListRequestDTO(request));
+        if (request.getCategory() != null && !request.getCategory().isEmpty()) {
+            clubCategoryCommandService.modifyClubCategories(club.getId(), request.getCategory());
+        }
 
         // 6. 생성된 클럽의 ID 반환
         return club.getId();
@@ -100,8 +108,8 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         club.updateFromDetailDTO(request);
 
         // 5. 카테고리 연관관계 수정
-        categoryCommandFacade.modifyClubCategories(clubId, ClubConverter.toCategoryListRequestDTO(request));
-
+        if (request.getCategory() != null && !request.getCategory().isEmpty()) {
+            clubCategoryCommandService.modifyClubCategories(clubId, request.getCategory());
+        }
     }
-
 }

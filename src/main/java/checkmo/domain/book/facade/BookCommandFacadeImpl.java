@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookCommandFacadeImpl implements BookCommandFacade {
 
+    // 자신의 CommandService
     private final BookCommandService bookCommandService;
 
     @Override

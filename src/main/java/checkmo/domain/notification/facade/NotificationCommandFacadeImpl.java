@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class NotificationCommandFacadeImpl implements NotificationCommandFacade {
 
+    // 자신의 CommandService
     private final NotificationCommandService notificationCommandService;
 
     @Override

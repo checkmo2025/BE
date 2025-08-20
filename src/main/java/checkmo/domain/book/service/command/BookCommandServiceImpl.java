@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookCommandServiceImpl implements BookCommandService {
 
+    // 자신의 Repository
     private final BookRepository bookRepository;
 
     @Override

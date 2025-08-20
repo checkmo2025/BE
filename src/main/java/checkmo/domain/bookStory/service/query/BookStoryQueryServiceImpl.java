@@ -2,18 +2,10 @@ package checkmo.domain.bookStory.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.book.facade.BookQueryFacade;
-import checkmo.domain.bookStory.converter.BookStoryConverter;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.repository.BookStoryLikedRepository;
 import checkmo.domain.bookStory.repository.BookStoryRepository;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.global.dto.BookSharedDTO;
-import checkmo.global.dto.BookStorySharedDTO;
-import checkmo.domain.club.facade.ClubQueryFacade;
-import checkmo.domain.member.facade.MemberQueryFacade;
-import checkmo.global.dto.ClubSharedDTO;
-import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,9 +23,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class BookStoryQueryServiceImpl implements BookStoryQueryService {
 
-    private final MemberQueryFacade memberQueryFacade;
-    private final BookQueryFacade bookQueryFacade;
-    private final ClubQueryFacade clubQueryFacade;
+    // 자신의 Repository
     private final BookStoryRepository bookStoryRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
 
@@ -66,52 +56,10 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
                 ));
     }
 
-    @Override
-    public ClubSharedDTO.MyClubList findMyClubs(String memberId) {
-        return clubQueryFacade.getMyClubListForShare(memberId);
-    }
 
     @Override
-    public Map<String, BookSharedDTO.BasicInfoDTO> findBookInfos(List<BookStory> bookStories) {
-        if (bookStories == null || bookStories.isEmpty()) {
-            return Map.of();
-        }
-
-        List<String> bookIds = bookStories.stream()
-                .map(BookStory::getBookId)
-                .distinct()
-                .toList();
-
-        // 배치로 책 정보 조회
-        return bookQueryFacade.getBookBasicInfoMapForShare(bookIds);
-    }
-
-    @Override
-    public Map<String, MemberSharedDTO.WithFollowStatusDTO> findAuthorInfos(String currentMemberId, List<BookStory> bookStories) {
-        if (bookStories == null || bookStories.isEmpty()) {
-            return Map.of();
-        }
-
-        List<String> memberIds = bookStories.stream()
-                .map(BookStory::getMemberId)
-                .distinct()
-                .toList();
-
-        // 배치로 회원 정보와 팔로우 상태 조회
-        return memberQueryFacade.getMemberWithFollowStatusMapForShare(memberIds, currentMemberId);
-    }
-
-    @Override
-    public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
-        BookStory bookStory = bookStoryRepository.findById(bookStoryId)
+    public BookStory findBookStoryById(Long bookStoryId) {
+        return bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
-
-        return BookStoryConverter.fromBookStoryToResponse(
-                bookStory,
-                memberId,
-                bookQueryFacade.getBookBasicInfoForShare(bookStory.getBookId()),
-                memberQueryFacade.getMemberWithFollowStatusForShare(bookStory.getMemberId(), memberId),
-                bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStory.getId())
-        );
     }
 }

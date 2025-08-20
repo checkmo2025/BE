@@ -17,8 +17,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
-    private final MemberRegistrationCommandService memberRegistrationCommandService;
+    // 자신의 인증 관련 Service
     private final MemberAuthenticationService memberAuthenticationService;
+
+    // 자신의 CommandService
+    private final MemberRegistrationCommandService memberRegistrationCommandService;
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberProfileCommandService memberProfileCommandService;
 

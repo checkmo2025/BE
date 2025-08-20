@@ -2,15 +2,14 @@ package checkmo.domain.member.service.command;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.category.facade.CategoryCommandFacade;
-import checkmo.domain.category.facade.CategoryQueryFacade;
+import checkmo.domain.member.entity.MemberCategory;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
+import checkmo.domain.member.service.query.MemberCategoryQueryService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.s3.service.S3Service;
-import checkmo.global.dto.CategorySharedDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,9 +22,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Transactional
 public class MemberProfileCommandServiceImpl implements MemberProfileCommandService {
 
+    // 자신의 CommandService
+    private final MemberCategoryCommandService memberCategoryCommandService;
+
+    // 자신의 QueryService
+    private final MemberCategoryQueryService memberCategoryQueryService;
+
+    // 자신의 Repository
     private final MemberRepository memberRepository;
-    private final CategoryCommandFacade categoryCommandFacade;
-    private final CategoryQueryFacade categoryQueryFacade;
+
+    // 이미지 삭제를 위한 S3 서비스
     private final S3Service s3Service;
 
     @Override
@@ -64,14 +70,16 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
         // 관심 카테고리 수정
         if (request.getCategoryIds() != null) {
-            categoryCommandFacade.modifyMemberCategories(memberId,
-                CategorySharedDTO.CategoryIdListDTO.builder()
-                                                   .categoryIdList(request.getCategoryIds())
-                                                   .build());
+            memberCategoryCommandService.modifyMemberCategories(memberId, request.getCategoryIds());
         }
 
-        List<CategorySharedDTO.CategoryInfo> categories = categoryQueryFacade.getCategoriesByMemberForShare(memberId).getCategoryList();
+        // 수정된 회원의 카테고리 정보 조회
+        List<MemberCategory> categoryList = memberCategoryQueryService.findCategoriesByMember(memberId);
 
+        // 카테고리 정보를 DTO로 변환
+        var categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(categoryList);
+
+        // 회원 프로필과 카테고리 정보를 포함한 DTO 반환
         return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
     }
 

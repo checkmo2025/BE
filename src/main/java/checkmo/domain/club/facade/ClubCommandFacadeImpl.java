@@ -1,14 +1,17 @@
 package checkmo.domain.club.facade;
 
 import checkmo.domain.club.converter.ClubConverter;
+import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.service.command.*;
-import checkmo.domain.club.service.query.ClubBookRecommendQueryService;
 import checkmo.domain.club.service.query.ClubCommunicationQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
+import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
@@ -21,13 +24,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
+    // Domain level 2
+    private final MemberQueryFacade memberQueryFacade;
+
+    // 자신의 QueryFacade
+    private final ClubQueryFacade clubQueryFacade;
+
+    // 자신의 CommandService
     private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubManagementCommandService clubManagementCommandService;
     private final ClubBookRecommendCommandService clubBookRecommendCommandService;
-    private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationCommandService clubCommunicationCommandService;
-    private final ClubCommunicationQueryService clubNoticeQueryService;
     private final ClubMembershipCommandService clubMembershipCommandService;
+
+    // 자신의 QueryService
+    private final ClubCommunicationQueryService clubNoticeQueryService;
 
     /**
      * ClubManagementCommandService
@@ -66,7 +77,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      */
     @Override
     public ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request) {
-        return clubMembershipCommandService.joinClub(clubId, memberId, request);
+        Club club = clubMembershipCommandService.joinClub(clubId, memberId, request);
+        return ClubConverter.toClubInfoDTO(club);
     }
 
     /**
@@ -81,11 +93,15 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
      */
     @Override
     public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status) {
-        ClubResponseDTO.ClubMemberDTO dto = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId, currentMemberId, status);
+        ClubMember updatedClubMember = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId, currentMemberId, status);
+        
+        // 외부 도메인 정보 조회 및 DTO 변환
+        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(updatedClubMember.getMemberId());
+        ClubResponseDTO.ClubMemberDTO updatedClubMemberDTO = ClubConverter.toClubMemberDTO(updatedClubMember, memberInfo);
 
         // 운영진 여부를 포함해서 반환
         return ClubResponseDTO.ClubMemberUpdateResponseDTO.builder()
-                .updatedMember(dto)
+                .updatedMember(updatedClubMemberDTO)
                 .isRequesterStaff(true) // 이 api 는 운영진만 호출할 수 있으므로 true 로 설정
                 .build();
     }
@@ -199,7 +215,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     @Override
     public ClubResponseDTO.BookRecommendDetailDTO recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommendDTO request) {
         Long bookRecommendId = clubBookRecommendCommandService.recommendBook(clubId, memberId, request);
-        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, bookRecommendId);
+        return clubQueryFacade.getRecommendedBookDetail(clubId, bookRecommendId, memberId);
     }
 
     /**
@@ -215,7 +231,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     @Override
     public ClubResponseDTO.BookRecommendDetailDTO updateBookRecommend(Long clubId, String memberId, Long bookRecommendId, ClubRequestDTO.UpdateBookRecommendDTO request) {
         Long updateBookRecommendId = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId, bookRecommendId, request);
-        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, updateBookRecommendId);
+        return clubQueryFacade.getRecommendedBookDetail(clubId, updateBookRecommendId, memberId);
     }
 
     /**

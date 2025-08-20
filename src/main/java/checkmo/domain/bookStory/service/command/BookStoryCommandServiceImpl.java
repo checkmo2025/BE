@@ -22,10 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
-    private final BookStoryRepository bookStoryRepository;
+    // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
+    // Domain level 1
     private final BookCommandFacade bookCommandFacade;
     private final BookQueryFacade bookQueryFacade;
+
+    // 자신의 Repository
+    private final BookStoryRepository bookStoryRepository;
 
     @Override
     @Transactional

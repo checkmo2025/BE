@@ -29,15 +29,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQueryService {
 
+    // Domain level 2
+    private final MemberQueryFacade memberQueryFacade;
+    // Domain level 1
+    private final BookQueryFacade bookQueryFacade;
+
+    // 자신의 QueryService
+    private final ClubQueryService clubQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
+
+    // 자신의 Repository
     private final NoticeRepository noticeRepository;
     private final VoteRepository voteRepository;
     private final MemberVoteRepository memberVoteRepository;
 
-    private final ClubQueryService clubQueryService;
-    private final ClubMemberQueryService clubMemberQueryService;
 
-    private final MemberQueryFacade memberQueryFacade;
-    private final BookQueryFacade bookQueryFacade;
 
     /**
      * 공지 or 투표 상세 조회
