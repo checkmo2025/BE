@@ -10,12 +10,9 @@ import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
-import checkmo.domain.club.web.dto.club.ClubResponseDTO;
-import checkmo.domain.club.web.dto.club.ClubResponseDTO.ClubInfoDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.event.JoinClubEvent;
-import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -51,7 +48,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
      */
     @Override
     @Transactional
-    public ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request) {
+    public Club joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request) {
 
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_NOT_FOUND));
@@ -78,7 +75,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
         ClubMember clubMember = ClubConverter.toClubMemberEntity(club, proxyMember, status, request.getJoinMessage());
         club.addClubMember(clubMember);
 
-        return ClubConverter.toClubInfoDTO(club);
+        return club;
     }
 
     /**
@@ -93,7 +90,7 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
      */
     @Override
     @Transactional
-    public ClubResponseDTO.ClubMemberDTO updateClubMemberStatus(Long clubId, Long targetClubMemberId, String currentMemberId, String status) {
+    public ClubMember updateClubMemberStatus(Long clubId, Long targetClubMemberId, String currentMemberId, String status) {
 
         // 1. 클럽 유효성 검증
         Club club = clubQueryService.validateClub(clubId);
@@ -124,9 +121,8 @@ public class ClubMembershipCommandServiceImpl implements ClubMembershipCommandSe
             eventPublisher.publishEvent(joinClubEvent);
         }
 
-        // 5. DTO 반환
-        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(targetMember.getMemberId());
-        return ClubConverter.toClubMemberDTO(targetMember, memberInfo);
+        // 5. 엔티티 반환
+        return targetMember;
     }
 
     /**
