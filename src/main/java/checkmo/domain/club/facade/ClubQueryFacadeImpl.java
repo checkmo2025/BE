@@ -4,10 +4,9 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
-import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.meeting.*;
-import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.*;
 import checkmo.domain.club.web.dto.MembershipResponseDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
@@ -48,9 +47,6 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationQueryService clubCommunicationQueryService;
-
-    // 자신의 Repository
-    private final ClubRepository clubRepository;
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
@@ -340,7 +336,25 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      */
     @Override
     public ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId, String memberId) {
-        return clubBookRecommendQueryService.getRecommendedBookDetail(clubId, memberId, bookRecommendId);
+        // 1. Service에서 순수 엔티티 조회
+        BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommendEntity(clubId, bookRecommendId, memberId);
+        
+        // 2. ClubMember 조회 (isStaff 확인용)
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        
+        // 3. 외부 도메인 정보 조회 (Facade에서 처리)
+        var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBookId());
+        var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
+        var currentMemberInfo = memberQueryFacade.getMemberBasicInfoForShare(memberId);
+        
+        // 4. DTO 변환 후 반환
+        return ClubConverter.toBookRecommendDetailDTO(
+            bookRecommend, 
+            bookInfo, 
+            authorInfo, 
+            currentMemberInfo.getNickname(), 
+            clubMember.isStaff()
+        );
     }
 
     @Override
@@ -818,10 +832,5 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return clubMember.isStaff();
-    }
-
-    @Override
-    public Club findClubReferenceById(Long clubId) {
-        return clubRepository.getReferenceById(clubId);
     }
 }
