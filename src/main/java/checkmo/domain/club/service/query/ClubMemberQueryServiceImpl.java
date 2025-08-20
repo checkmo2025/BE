@@ -61,38 +61,8 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
      * @return 내가 가입한 독서 클럽 목록 DTO
      */
     @Override
-    public ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId) {
-
-        // 1. ClubMember와 Club 엔티티 fetch join으로 조회
-        List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdWithClub(memberId);
-
-        // 2. 모든 클럽 ID 수집
-        List<Long> clubIds = clubMembers.stream()
-                .map(cm -> cm.getClub().getId())
-                .toList();
-
-        // 3. 모든 클럽의 카테고리 이름을 한 번에 조회
-        List<ClubCategory> allClubCategories = clubCategoryQueryService.findCategoriesByClubIds(clubIds);
-        Map<Long, List<String>> clubCategoryNamesMap = ClubConverter.fromClubCategoriesToCategoryNamesMap(allClubCategories);
-
-        // 4. DTO 변환
-        List<ClubResponseDTO.ClubDetailResponseDTO> responseList = clubMembers.stream()
-                .map(cm -> {
-                    Club c = cm.getClub();
-                    List<String> categoryNames = clubCategoryNamesMap.getOrDefault(c.getId(), Collections.emptyList());
-                    return ClubConverter.fromClubToResponseDTOWithCategoryNames(c, categoryNames, cm.isStaff());
-/*
-                    // 기존 방식: 카테고리 정보를 CategorySharedDTO로 변환, TODO : 팀원들과 상의 후 제거
-                    List<CategorySharedDTO.CategoryInfo> categories = clubCategoriesMap.getOrDefault(c.getId(), Collections.emptyList());
-                    return ClubConverter.fromClubToResponseDTO(c, categories, cm.isStaff());
-*/
-                })
-                .toList();
-
-        // 5. MyPageClubListDTO로 감싸서 반환
-        return ClubResponseDTO.MyPageClubListDTO.builder()
-                .clubList(responseList)
-                .build();
+    public List<ClubMember> getMyPageClubList(String memberId, Long cursorId, Integer size) {
+        return clubMemberRepository.findClubMembersByMemberIdOrderByIdAsc(memberId, cursorId, size);
     }
 
     /**

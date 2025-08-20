@@ -30,7 +30,7 @@ public interface ClubQueryFacade {
      * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
      * @return 내가 가입한 독서 클럽 목록 DTO
      */
-    ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId);
+    ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId, Long cursorId, Integer size);
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (외부용)
