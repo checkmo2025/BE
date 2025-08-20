@@ -52,6 +52,21 @@ public class ClubConverter {
     }
 
     /**
+     * ClubResponseDTO.ClubDetailResponseDTO -> ClubResponseDTO.MyPageClubListDTO 변환
+     */
+    public static ClubResponseDTO.MyPageClubListDTO toMyPageClubListDTO(
+            List<ClubResponseDTO.ClubDetailResponseDTO> clubList,
+            boolean hasNext,
+            Long nextCursor
+    ) {
+        return ClubResponseDTO.MyPageClubListDTO.builder()
+                .clubList(clubList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
+    }
+
+    /**
      * Club 리스트 → ClubResponseDTO.ClubListDTO 변환
      */
     public static ClubResponseDTO.ClubListDTO toClubListDTO(

@@ -51,6 +51,8 @@ public class ClubResponseDTO {
     @Builder
     public static class MyPageClubListDTO {
         private List<ClubDetailResponseDTO> clubList; // 모임 목록
+        private boolean hasNext;
+        private Long nextCursor;
     }
 
     @Getter

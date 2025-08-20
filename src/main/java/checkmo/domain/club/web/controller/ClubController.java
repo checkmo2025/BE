@@ -211,9 +211,11 @@ public class ClubController {
     })
     @GetMapping("/myPage")
     public ApiResponse<ClubResponseDTO.MyPageClubListDTO> getMyPageClubs(
-            @CurrentId String memberId
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false) Integer size
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getMyPageClubList(memberId));
+        return ApiResponse.onSuccess(clubQueryFacade.getMyPageClubList(memberId, cursorId, size));
     }
 
     /**

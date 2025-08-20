@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
     private final ClubCommunicationQueryService clubCommunicationQueryService;
+    private final ClubCategoryQueryService clubCategoryQueryService;
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
@@ -82,16 +84,43 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      * @return 내가 가입한 독서 클럽 목록 DTO
      */
     @Override
-    public ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId) {
+    public ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId, Long cursorId, Integer size) {
 
-        // 1. 회원이 가입한 모임 목록 조회
-        List<ClubResponseDTO.ClubDetailResponseDTO> myClubs =
-                clubMemberQueryService.getMyPageClubList(memberId).getClubList();
+        // 1. 기본 사이즈 처리
+        if (size == null) size = DEFAULT_PAGE_SIZE;
 
-        // 2. MyPageClubListDTO로 감싸서 반환
-        return ClubResponseDTO.MyPageClubListDTO.builder()
-                .clubList(myClubs)
-                .build();
+        // 2. 서비스 호출 (size+1로 조회 → hasNext 판단)
+        List<ClubMember> clubMembers = clubMemberQueryService.getMyPageClubList(memberId, cursorId, size + 1);
+
+        // 3. 페이징 처리
+        boolean hasNext = clubMembers.size() > size;
+        if (hasNext) {
+            clubMembers = clubMembers.subList(0, size);
+        }
+        Long nextCursor = hasNext ? clubMembers.get(clubMembers.size() - 1).getId() : null;
+
+        // 4. 클럽 ID 수집
+        List<Long> clubIds = clubMembers.stream()
+                .map(cm -> cm.getClub().getId())
+                .toList();
+
+        // 5. 카테고리 배치 조회
+        Map<Long, List<String>> clubCategoryNamesMap =
+                ClubConverter.fromClubCategoriesToCategoryNamesMap(
+                        clubCategoryQueryService.findCategoriesByClubIds(clubIds)
+                );
+
+        // 6. DTO 변환
+        List<ClubResponseDTO.ClubDetailResponseDTO> dtoList = clubMembers.stream()
+                .map(cm -> ClubConverter.fromClubToResponseDTOWithCategoryNames(
+                        cm.getClub(),
+                        clubCategoryNamesMap.getOrDefault(cm.getClub().getId(), Collections.emptyList()),
+                        cm.isStaff()
+                ))
+                .toList();
+
+        // 7. DTO 감싸서 반환
+        return ClubConverter.toMyPageClubListDTO(dtoList, hasNext, nextCursor);
     }
 
     @Override

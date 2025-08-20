@@ -43,7 +43,7 @@ public interface ClubMemberQueryService {
      * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
      * @return 내가 가입한 독서 클럽 목록 DTO
      */
-    ClubResponseDTO.MyPageClubListDTO getMyPageClubList(String memberId);
+    List<ClubMember> getMyPageClubList(String memberId, Long cursorId, Integer size);
 
     /**
      * 특정 회원이 해당 클럽에서 어떤 상태(등급)인지 조회합니다.
