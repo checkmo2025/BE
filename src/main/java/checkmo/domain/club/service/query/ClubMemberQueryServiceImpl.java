@@ -11,6 +11,7 @@ import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +63,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
      */
     @Override
     public List<ClubMember> getMyPageClubList(String memberId, Long cursorId, Integer size) {
-        return clubMemberRepository.findClubMembersByMemberIdOrderByIdAsc(memberId, cursorId, size);
+        return clubMemberRepository.findClubMembersByMemberIdOrderByIdAsc(memberId, cursorId, Pageable.ofSize(size));
     }
 
     /**
