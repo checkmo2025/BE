@@ -19,12 +19,12 @@ public class BookStoryCommandFacadeImpl implements BookStoryCommandFacade {
     private final BookStoryCommentCommandService bookStoryCommentCommandService;
 
     @Override
-    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequestDTO request) {
+    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequest request) {
         return bookStoryCommandService.createBookStory(memberId, request);
     }
 
     @Override
-    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request) {
+    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequest request) {
         return bookStoryCommandService.updateBookStory(memberId, bookStoryId, request);
     }
 

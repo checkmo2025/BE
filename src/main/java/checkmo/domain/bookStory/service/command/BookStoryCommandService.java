@@ -12,7 +12,7 @@ public interface BookStoryCommandService {
      * @param memberId 책이야기를 작성하는 회원의 ID
      * @param request 책이야기 요청 DTO
      */
-    Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequestDTO request);
+    Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequest request);
 
     /**
      * 책이야기를 수정
@@ -21,7 +21,7 @@ public interface BookStoryCommandService {
      * @param bookStoryId 수정할 책 이야기의 ID
      * @param request     수정할 책 이야기 정보 DTO
      */
-    Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request);
+    Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequest request);
 
     /**
      * 책이야기를 삭제

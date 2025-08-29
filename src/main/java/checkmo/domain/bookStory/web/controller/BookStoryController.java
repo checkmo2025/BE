@@ -33,7 +33,7 @@ public class BookStoryController {
     @PostMapping
     public ApiResponse<Long> createBookStory(
             @CurrentId String memberId,
-            @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequestDTO request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequest request
     ) {
         Long bookStoryId = bookStoryCommandFacade.createBookStory(memberId, request);
         return ApiResponse.onSuccess(bookStoryId);
@@ -133,7 +133,7 @@ public class BookStoryController {
     public ApiResponse<Long> updateBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId,
-            @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequestDTO request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequest request
     ) {
         Long updateBookStoryId = bookStoryCommandFacade.updateBookStory(memberId, bookStoryId, request);
         return ApiResponse.onSuccess(updateBookStoryId);

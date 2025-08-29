@@ -24,7 +24,7 @@ public class BookStoryConverter {
     /**
      * BookStoryCreateRequestDTO → BookStory 변환
      */
-    public static BookStory fromBookStoryRequestDTO(BookStoryRequestDTO.BookStoryCreateRequestDTO request, Member proxyMember, Book proxyBook) {
+    public static BookStory fromBookStoryRequestDTO(BookStoryRequestDTO.BookStoryCreateRequest request, Member proxyMember, Book proxyBook) {
         return BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())

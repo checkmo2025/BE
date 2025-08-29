@@ -15,7 +15,7 @@ public interface BookStoryCommandFacade {
      * @param request  작성할 책 이야기 정보 DTO
      * @return 생성된 책 이야기의 ID
      */
-    Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequestDTO request);
+    Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequest request);
 
     /**
      * 기존 책 이야기를 수정합니다. (내부용)
@@ -25,7 +25,7 @@ public interface BookStoryCommandFacade {
      * @param request     수정할 책 이야기 정보 DTO
      * @return 수정된 책 이야기의 ID
      */
-    Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request);
+    Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequest request);
 
     /**
      * 책 이야기를 삭제합니다. (내부용)
