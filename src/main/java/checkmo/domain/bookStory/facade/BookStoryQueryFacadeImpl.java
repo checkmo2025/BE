@@ -4,6 +4,7 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.bookStory.converter.BookStoryConverter;
 import checkmo.domain.bookStory.entity.BookStory;
+import checkmo.domain.bookStory.entity.Comment;
 import checkmo.domain.bookStory.service.query.BookStoryQueryService;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.domain.book.facade.BookQueryFacade;
@@ -17,8 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +44,7 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
     private final BookStoryQueryService bookStoryQueryService;
 
     @Override
-    public BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId) {
+    public BookStorySharedDTO.BookStoryDetailResponse getBookStory(String memberId, Long bookStoryId) {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
         
@@ -53,13 +58,35 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
         Boolean isLiked = bookStoryQueryService.checkLikesForBookStories(memberId, List.of(bookStory))
                 .getOrDefault(bookStory.getId(), false);
         
-        // 5. DTO 변환
-        return BookStoryConverter.fromBookStoryToResponse(
+        // 5. 댓글 조회 (부모 댓글만, 대댓글은 컨버터에서 DTO 변환 시 자동 포함)
+        List<Comment> comments = bookStoryQueryService.findCommentsByBookStoryId(bookStoryId);
+        
+        // 6. 댓글 작성자들 정보 조회
+        // 6-1. 댓글 작성자들 Id 목록 조회 (Set으로 중복 제거)
+        Set<String> commentMemberIds = comments.stream()
+                .flatMap(comment -> Stream.concat(
+                        Stream.of(comment.getMemberId()),
+                        comment.getChildrenComment().stream().map(Comment::getMemberId)
+                ))
+                .collect(Collectors.toSet());
+
+        // 6-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
+        Map<String, MemberSharedDTO.BasicInfoDTO> commentMemberInfoMap =
+                commentMemberIds.isEmpty() ? Map.of() :
+                memberQueryFacade.getMemberBasicInfoMapForShare(new ArrayList<>(commentMemberIds));
+        
+        // 7. 댓글 DTO 변환
+        List<BookStorySharedDTO.CommentResponse> commentDTOList =
+                BookStoryConverter.fromCommentsToResponses(comments, memberId, commentMemberInfoMap);
+        
+        // 8. DTO 변환
+        return BookStoryConverter.fromBookStoryToDetailResponse(
                 bookStory,
                 memberId,
                 bookInfo,
                 authorInfo,
-                isLiked
+                isLiked,
+                commentDTOList
         );
     }
 
@@ -147,16 +174,28 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
             List<BookStory> bookStories, 
             Map<Long, Boolean> isLikedMap, 
             Map<String, BookSharedDTO.BasicInfoDTO> bookInfoMap,
-            Map<String, MemberSharedDTO.WithFollowStatusDTO> authorInfoMap) {
+            Map<String, MemberSharedDTO.WithFollowStatusDTO> authorInfoMap
+    ) {
         
         return bookStories.stream()
-                .map(bookStory -> BookStoryConverter.fromBookStoryToResponse(
-                        bookStory,
-                        memberId,
-                        bookInfoMap.get(bookStory.getBookId()),
-                        authorInfoMap.get(bookStory.getMemberId()),
-                        isLikedMap.getOrDefault(bookStory.getId(), false)
-                )).toList();
+                .map(bookStory -> {
+                    // 부모 댓글 목록 가져오기
+                    List<Comment> comments = bookStoryQueryService.findCommentsByBookStoryId(bookStory.getId());
+
+                    // 대댓글의 갯수까지 한번에 계산
+                    int totalCommentCount = comments.stream()
+                            .mapToInt(comment -> 1 + comment.getChildrenComment().size())
+                            .sum();
+
+                    return BookStoryConverter.fromBookStoryToResponse(
+                            bookStory,
+                            memberId,
+                            bookInfoMap.get(bookStory.getBookId()),
+                            authorInfoMap.get(bookStory.getMemberId()),
+                            isLikedMap.getOrDefault(bookStory.getId(), false),
+                            totalCommentCount
+                    );
+                }).toList();
     }
 
     /**

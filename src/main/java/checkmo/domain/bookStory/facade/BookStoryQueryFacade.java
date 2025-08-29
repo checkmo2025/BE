@@ -16,7 +16,7 @@ public interface BookStoryQueryFacade {
      * @param bookStoryId 조회할 책 이야기 ID
      * @return 조회된 책 이야기 상세 정보 DTO
      */
-    BookStorySharedDTO.BookStoryResponse getBookStory(String memberId, Long bookStoryId);
+    BookStorySharedDTO.BookStoryDetailResponse getBookStory(String memberId, Long bookStoryId);
 
     /**
      * scope에 따라 책 이야기 목록을 조회합니다. (내부용)
