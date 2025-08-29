@@ -16,6 +16,7 @@ public interface BookStoryCommandService {
 
     /**
      * 책이야기를 수정
+     *
      * @param memberId    수정 요청 회원 ID
      * @param bookStoryId 수정할 책 이야기의 ID
      * @param request     수정할 책 이야기 정보 DTO
