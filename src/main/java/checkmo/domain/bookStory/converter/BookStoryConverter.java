@@ -105,10 +105,10 @@ public class BookStoryConverter {
             BookSharedDTO.BasicInfoDTO bookInfo,
             MemberSharedDTO.WithFollowStatusDTO authorInfo,
             boolean isLiked,
-            List<BookStorySharedDTO.CommentResponse> comments
+            List<BookStorySharedDTO.CommentResponse> commentList
     ) {
         // 댓글 + 대댓글 전체 개수 계산
-        int totalCommentCount = comments.stream()
+        int totalCommentCount = commentList.stream()
                 .mapToInt(comment -> 1 + comment.getReplies().size())
                 .sum();
         
@@ -123,7 +123,7 @@ public class BookStoryConverter {
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
                 .commentCount(totalCommentCount)
-                .comments(comments)
+                .comments(commentList)
                 .build();
     }
 
