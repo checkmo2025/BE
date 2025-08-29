@@ -26,6 +26,11 @@ public enum ErrorStatus implements BaseErrorCode {
     BOOK_STORY_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_STORY_4004", "책 이야기를 찾을 수 없습니다."),
     BOOK_STORY_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "BOOK_STORY_4005", "책 이야기 수정/삭제 권한이 없습니다."),
 
+    // 댓글
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_404", "댓글을 찾을 수 없습니다."),
+    INVALID_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "COMMENT_401", "부모 댓글이 해당 책 이야기에 속하지 않습니다."),
+    COMMENT_DEPTH_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "COMMENT_402", "댓글은 2단계까지만 허용됩니다."),
+
     // 모임
     CLUB_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4004", "독서클럽을 찾을 수 없습니다."),
     CLUB_DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "CLUB_4001", "이미 존재하는 독서클럽 이름입니다."),
