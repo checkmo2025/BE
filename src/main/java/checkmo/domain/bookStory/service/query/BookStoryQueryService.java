@@ -1,6 +1,7 @@
 package checkmo.domain.bookStory.service.query;
 
 import checkmo.domain.bookStory.entity.BookStory;
+import checkmo.domain.bookStory.entity.Comment;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
 
 import java.util.List;
@@ -44,4 +45,13 @@ public interface BookStoryQueryService {
      * @return 조회된 책 이야기 엔티티
      */
     BookStory findBookStoryById(Long bookStoryId);
+
+    /**
+     * 책 이야기의 부모 댓글 조회 (대댓글 포함안됨!!!!)
+     *
+     * @param bookStoryId 조회할 책 이야기 ID
+     *
+     * @return 조회된 댓글 목록
+     */
+    List<Comment> findCommentsByBookStoryId(Long bookStoryId);
 }

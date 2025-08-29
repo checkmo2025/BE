@@ -3,8 +3,10 @@ package checkmo.domain.bookStory.service.query;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.bookStory.entity.BookStory;
+import checkmo.domain.bookStory.entity.Comment;
 import checkmo.domain.bookStory.repository.BookStoryLikedRepository;
 import checkmo.domain.bookStory.repository.BookStoryRepository;
+import checkmo.domain.bookStory.repository.CommentRepository;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     // 자신의 Repository
     private final BookStoryRepository bookStoryRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, String targetMemberId, Long cursorId, int pageSize) {
@@ -61,5 +64,10 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     public BookStory findBookStoryById(Long bookStoryId) {
         return bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
+    }
+
+    @Override
+    public List<Comment> findCommentsByBookStoryId(Long bookStoryId) {
+        return commentRepository.findParentComments(bookStoryId);
     }
 }
