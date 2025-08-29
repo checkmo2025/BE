@@ -52,5 +52,45 @@ public class BookStorySharedDTO {
         private LocalDateTime createdAt;
 
         private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+        private int commentCount; // 댓글 개수
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookStoryDetailResponse {
+        private Long bookStoryId;
+        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.WithFollowStatusDTO authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private String bookStoryTitle;
+        private String description;
+        private int likes;
+
+        private boolean likedByMe; // 내가 좋아요를 눌렀는지 여부 (true: 눌렀음, false: 안누름)
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+        private LocalDateTime createdAt;
+
+        private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+        private int commentCount; // 댓글 전체 개수 (대댓글 포함)
+        
+        private List<CommentResponse> comments; // 댓글 목록
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CommentResponse {
+        private Long commentId;
+        private String content;
+        private MemberSharedDTO.BasicInfoDTO authorInfo; // 작성자 정보
+        
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+        private LocalDateTime createdAt;
+        
+        private boolean writtenByMe; // 작성자가 본인인지 여부
+        private List<CommentResponse> replies; // 대댓글 목록
     }
 }
