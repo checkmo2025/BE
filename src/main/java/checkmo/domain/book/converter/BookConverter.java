@@ -175,6 +175,7 @@ public class BookConverter {
             List<AladinApiResponseDTO.AladinBookItem> items
     ) {
         return items.stream()
+                .filter(item -> item.getIsbn13() != null && !item.getIsbn13().trim().isEmpty())
                 .map(BookConverter::fromAladinBookItem)
                 .toList();
     }
