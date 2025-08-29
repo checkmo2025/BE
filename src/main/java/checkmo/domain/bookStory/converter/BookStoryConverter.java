@@ -2,6 +2,7 @@ package checkmo.domain.bookStory.converter;
 
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.bookStory.entity.BookStory;
+import checkmo.domain.bookStory.entity.Comment;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.global.dto.BookStorySharedDTO;
 import checkmo.domain.member.entity.Member;
@@ -33,7 +34,7 @@ public class BookStoryConverter {
     }
 
     // =====================================================
-    // BookStory → BookStoryResponseDTO 변환
+    // BookStory → BookStorySharedDTO 변환
     // =====================================================
 
     /**
@@ -78,7 +79,8 @@ public class BookStoryConverter {
             String currentMemberId,
             BookSharedDTO.BasicInfoDTO bookInfo,
             MemberSharedDTO.WithFollowStatusDTO authorInfo,
-            boolean isLiked
+            boolean isLiked,
+            int commentCount
     ) {
         return BookStorySharedDTO.BookStoryResponse.builder()
                 .bookStoryId(bookStory.getId())
@@ -90,6 +92,107 @@ public class BookStoryConverter {
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
+                .commentCount(commentCount)
+                .build();
+    }
+
+    /**
+     * BookStory -> BookStoryDetailResponse 변환
+     */
+    public static BookStorySharedDTO.BookStoryDetailResponse fromBookStoryToDetailResponse(
+            BookStory bookStory,
+            String currentMemberId,
+            BookSharedDTO.BasicInfoDTO bookInfo,
+            MemberSharedDTO.WithFollowStatusDTO authorInfo,
+            boolean isLiked,
+            List<BookStorySharedDTO.CommentResponse> comments
+    ) {
+        // 댓글 + 대댓글 전체 개수 계산
+        int totalCommentCount = comments.stream()
+                .mapToInt(comment -> 1 + comment.getReplies().size())
+                .sum();
+        
+        return BookStorySharedDTO.BookStoryDetailResponse.builder()
+                .bookStoryId(bookStory.getId())
+                .bookInfo(bookInfo)
+                .authorInfo(authorInfo)
+                .bookStoryTitle(bookStory.getTitle())
+                .description(bookStory.getDescription())
+                .likes(bookStory.getLikes())
+                .likedByMe(isLiked)
+                .createdAt(bookStory.getCreatedAt())
+                .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
+                .commentCount(totalCommentCount)
+                .comments(comments)
+                .build();
+    }
+
+    // =====================================================
+    // CommentCreateRequestDTO → Comment 변환
+    // =====================================================
+
+    /**
+     * CommentCreateRequestDTO -> Comment 변환
+     */
+    public static Comment fromCommentCreateRequestDTO(
+            BookStoryRequestDTO.CommentCreateRequest request,
+            Member proxyMember,
+            BookStory bookStory,
+            Comment parentComment
+    ) {
+        return Comment.builder()
+                .content(request.getContent())
+                .member(proxyMember)
+                .bookStory(bookStory)
+                .parentComment(parentComment)
+                .build();
+    }
+
+    /**
+     * List<Comments> -> CommentResponse
+     */
+    public static List<BookStorySharedDTO.CommentResponse> fromCommentsToResponses(
+            List<Comment> comments,
+            String currentMemberId,
+            java.util.Map<String, MemberSharedDTO.BasicInfoDTO> memberInfoMap
+    ) {
+        return comments.stream()
+                .map(comment -> {
+                    // 대댓글들 변환
+                    List<BookStorySharedDTO.CommentResponse> replies = comment.getChildrenComment().stream()
+                            .map(reply -> fromCommentToResponse(
+                                    reply,
+                                    currentMemberId,
+                                    memberInfoMap.get(reply.getMemberId()),
+                                    null // 대댓글의 대댓글은 없으므로 빈 리스트
+                            )).toList();
+
+                    // 부모 댓글 변환
+                    return fromCommentToResponse(
+                            comment,
+                            currentMemberId,
+                            memberInfoMap.get(comment.getMemberId()),
+                            replies
+                    );
+                }).toList();
+    }
+
+    /**
+     * Comment -> CommentResponse
+     */
+    private static BookStorySharedDTO.CommentResponse fromCommentToResponse(
+            Comment comment,
+            String currentMemberId,
+            MemberSharedDTO.BasicInfoDTO authorInfo,
+            List<BookStorySharedDTO.CommentResponse> replies
+    ) {
+        return BookStorySharedDTO.CommentResponse.builder()
+                .commentId(comment.getId())
+                .content(comment.getContent())
+                .authorInfo(authorInfo)
+                .createdAt(comment.getCreatedAt())
+                .writtenByMe(comment.getMemberId().equals(currentMemberId))
+                .replies(replies)
                 .build();
     }
 }
