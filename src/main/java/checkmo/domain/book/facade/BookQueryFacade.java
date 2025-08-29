@@ -36,7 +36,7 @@ public interface BookQueryFacade {
      * @param bookId 책 ID (ISBN)
      * @return 공유용 기본 책 정보 DTO
      */
-    BookSharedDTO.BasicInfoDTO getBookBasicInfoForShare(String bookId);
+    BookSharedDTO.BasicInfo getBookBasicInfoForShare(String bookId);
 
     /**
      * 다른 도메인에서 사용할 상세 책 정보를 조회합니다. (외부용)
@@ -44,7 +44,7 @@ public interface BookQueryFacade {
      * @param bookId 책 ID (ISBN)
      * @return 공유용 상세 책 정보 DTO
      */
-    BookSharedDTO.DetailInfoDTO getBookDetailInfoForShare(String bookId);
+    BookSharedDTO.DetailInfo getBookDetailInfoForShare(String bookId);
 
     /**
      * 책 ID 목록으로 공유용 기본 책 정보를 조회합니다. (외부용)
@@ -52,7 +52,7 @@ public interface BookQueryFacade {
      * @param bookIds 조회할 책 ID 목록
      * @return 책 ID와 기본 정보 매핑 정보
      */
-    Map<String, BookSharedDTO.BasicInfoDTO> getBookBasicInfoMapForShare(List<String> bookIds);
+    Map<String, BookSharedDTO.BasicInfo> getBookBasicInfoMapForShare(List<String> bookIds);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)

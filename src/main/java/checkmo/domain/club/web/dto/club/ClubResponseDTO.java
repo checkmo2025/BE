@@ -128,7 +128,7 @@ public class ClubResponseDTO {
     @Builder
     public static class ClubMemberDTO {
         private Long clubMemberId; // 클럽 회원 ID
-        private MemberSharedDTO.BasicInfoDTO basicInfo; // 닉네임과 프로필 url
+        private MemberSharedDTO.BasicInfo basicInfo; // 닉네임과 프로필 url
         private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
         private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
     }
@@ -172,9 +172,9 @@ public class ClubResponseDTO {
             property = "tag",
             visible = true)
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = ClubSharedDTO.MeetingNoticePreviewDTO.class, name = "모임"),
-            @JsonSubTypes.Type(value = ClubSharedDTO.VotePreviewDTO.class, name = "투표"),
-            @JsonSubTypes.Type(value = ClubSharedDTO.PureNoticePreviewDTO.class, name = "공지")
+            @JsonSubTypes.Type(value = ClubSharedDTO.MeetingNoticePreview.class, name = "모임"),
+            @JsonSubTypes.Type(value = ClubSharedDTO.VotePreview.class, name = "투표"),
+            @JsonSubTypes.Type(value = ClubSharedDTO.PureNoticePreview.class, name = "공지")
     })
     public sealed interface NoticeItem
             permits PureNoticeDTO, MeetingNoticeDTO, VoteDTO {
@@ -237,7 +237,7 @@ public class ClubResponseDTO {
         private String item;
         private boolean isSelected;
         private int voteCount; // 투표한 사람 수
-        private List<MemberSharedDTO.BasicInfoDTO> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
+        private List<MemberSharedDTO.BasicInfo> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
     }
 
     @Getter
@@ -270,8 +270,8 @@ public class ClubResponseDTO {
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그
-        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.BasicInfoDTO authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.BasicInfo authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
         private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
         private boolean isStaff; // 본인이 모임의 스탭인지 여부
     }

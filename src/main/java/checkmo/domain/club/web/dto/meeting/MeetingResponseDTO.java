@@ -57,7 +57,7 @@ public class MeetingResponseDTO {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private String content; // 모임 내용, ClubNoticeDetailDTO-MeetingNoticeDTO-MeetingInfoDTO 에서만 이 필드에 값 넣고 나머지에선 다 NULL
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
     }
 
     @Getter
@@ -86,7 +86,7 @@ public class MeetingResponseDTO {
     public static class TopicDTO {
         private Long topicId; // 토픽 ID
         private String content; // 토픽 내용
-        private MemberSharedDTO.BasicInfoDTO authorInfo; // 작성자 정보
+        private MemberSharedDTO.BasicInfo authorInfo; // 작성자 정보
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TeamTopicDTO-TopicDTO에서는 이 필드 NULL
     }
@@ -127,7 +127,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMemberDTO {
-        private MemberSharedDTO.BasicInfoDTO memberInfo; // 참여자 정보
+        private MemberSharedDTO.BasicInfo memberInfo; // 참여자 정보
         private Integer teamNumber; // 배정된 팀 번호
     }
 
@@ -138,7 +138,7 @@ public class MeetingResponseDTO {
     public static class TeamMemberDTO {
         private MembershipResponseDTO.MembershipDTO membership;
         private Integer teamNumber; // 팀 번호
-        private List<MemberSharedDTO.BasicInfoDTO> members; // 해당 팀의 참여자 목록
+        private List<MemberSharedDTO.BasicInfo> members; // 해당 팀의 참여자 목록
     }
 
     @Getter

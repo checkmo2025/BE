@@ -212,12 +212,12 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         List<String> memberIds = extractMemberIds(members);
 
         // 5. 기본 정보 배치 조회
-        Map<String, MemberSharedDTO.BasicInfoDTO> memberInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberSharedDTO.BasicInfo> memberInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
 
         // 6. DTO 변환
         List<ClubResponseDTO.ClubMemberDTO> dtoList = members.stream()
                 .map(cm -> {
-                    MemberSharedDTO.BasicInfoDTO memberInfo = memberInfoMap.get(cm.getMemberId());
+                    MemberSharedDTO.BasicInfo memberInfo = memberInfoMap.get(cm.getMemberId());
                     return ClubConverter.toClubMemberDTO(cm, memberInfo);
                 })
                 .toList();
@@ -430,7 +430,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         List<String> authorIds = extractMemberIdsFromTopics(topics);
 
-        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap =
                 memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = ClubConverter.fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
@@ -463,7 +463,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         List<String> authorIds = extractMemberIdsFromTopics(topics);
 
-        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
+        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap =
                 memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = ClubConverter.fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
@@ -490,7 +490,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Long nextCursor = hasNext ? bookReviews.get(bookReviews.size() - 1).getId() : null;
 
         List<String> authorIds = extractMemberIdsFromBookReviews(bookReviews);
-        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
         List<BookShelfResponseDTO.BookReviewDTO> bookReviewDTOList = mapBookReviewsAndAuthorInfoToDTOs(bookReviews, authorInfoMap);
 
@@ -500,7 +500,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     private List<BookShelfResponseDTO.BookReviewDTO> mapBookReviewsAndAuthorInfoToDTOs(
             List<BookReview> bookReviews,
-            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap
+            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap
     ) {
         return bookReviews.stream()
                 .map(review -> ClubConverter.fromBookReviewAndMemberSharedDTOToBookReviewDTO(
@@ -523,7 +523,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Long nextCursor = hasNext ? meetings.getLast().getId() : null;
 
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
-        Map<String, BookSharedDTO.BasicInfoDTO> bookBasicInfoMap = bookQueryFacade.getBookBasicInfoMapForShare(bookIds);
+        Map<String, BookSharedDTO.BasicInfo> bookBasicInfoMap = bookQueryFacade.getBookBasicInfoMapForShare(bookIds);
 
         List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList = mapMeetingsWithBookBasicInfoToDTOs(meetings, bookBasicInfoMap);
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
@@ -532,7 +532,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     private List<MeetingResponseDTO.MeetingInfoDTO> mapMeetingsWithBookBasicInfoToDTOs(
             List<Meeting> meetings,
-            Map<String, BookSharedDTO.BasicInfoDTO> bookBasicInfoMap
+            Map<String, BookSharedDTO.BasicInfo> bookBasicInfoMap
     ) {
         return meetings.stream()
                 .map(meeting -> ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
@@ -573,7 +573,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
                 .toList();
 
         // 7. 발제의 작성자 정보 배치 조회
-        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
 
@@ -598,7 +598,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
         // 4. TeamTopic과 Team 배치 조회
         List<Long> topicIds = extractTopicIds(topics);
@@ -630,7 +630,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTeamTopics(teamTopics);
-        Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
         // 4. TeamTopicDTO로 변환
         List<MeetingResponseDTO.TopicDTO> topicDTOList = ClubConverter.fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
@@ -668,7 +668,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberSharedDTO.BasicInfoDTO 조회)
         List<String> memberIds = extractMemberIdsFromClubMembers(clubMembers);
-        Map<String, MemberSharedDTO.BasicInfoDTO> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberSharedDTO.BasicInfo> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
 
         // 4. 미팅에 존재하는 모든 팀 조회
         List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId);
@@ -689,11 +689,11 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     private MeetingResponseDTO.MeetingMemberDTO toMeetingMemberDTO(
             ClubMember clubMember,
-            Map<String, MemberSharedDTO.BasicInfoDTO> memberBasicInfoMap,
+            Map<String, MemberSharedDTO.BasicInfo> memberBasicInfoMap,
             Map<String, Integer> memberIdToTeamNumberMap
     ) {
         String memberId = clubMember.getMemberId();
-        MemberSharedDTO.BasicInfoDTO memberInfo = memberBasicInfoMap.get(memberId);
+        MemberSharedDTO.BasicInfo memberInfo = memberBasicInfoMap.get(memberId);
         Integer teamNumber = memberIdToTeamNumberMap.get(memberId);
         return ClubConverter.fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(memberInfo, teamNumber);
     }
@@ -739,7 +739,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
         // 3. 클럽 멤버의 기본 정보 배치 조회
         List<String> memberIds = extractMemberIdsFromMemberTeams(memberTeams);
-        Map<String, MemberSharedDTO.BasicInfoDTO> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberSharedDTO.BasicInfo> memberBasicInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(memberIds);
 
         // 4. TeamMemberDTO 변환
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);

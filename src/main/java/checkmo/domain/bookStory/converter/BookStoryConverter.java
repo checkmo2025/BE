@@ -77,8 +77,8 @@ public class BookStoryConverter {
     public static BookStorySharedDTO.BookStoryResponse fromBookStoryToResponse(
             BookStory bookStory,
             String currentMemberId,
-            BookSharedDTO.BasicInfoDTO bookInfo,
-            MemberSharedDTO.WithFollowStatusDTO authorInfo,
+            BookSharedDTO.BasicInfo bookInfo,
+            MemberSharedDTO.WithFollowStatus authorInfo,
             boolean isLiked,
             int commentCount
     ) {
@@ -102,8 +102,8 @@ public class BookStoryConverter {
     public static BookStorySharedDTO.BookStoryDetailResponse fromBookStoryToDetailResponse(
             BookStory bookStory,
             String currentMemberId,
-            BookSharedDTO.BasicInfoDTO bookInfo,
-            MemberSharedDTO.WithFollowStatusDTO authorInfo,
+            BookSharedDTO.BasicInfo bookInfo,
+            MemberSharedDTO.WithFollowStatus authorInfo,
             boolean isLiked,
             List<BookStorySharedDTO.CommentResponse> commentList
     ) {
@@ -154,7 +154,7 @@ public class BookStoryConverter {
     public static List<BookStorySharedDTO.CommentResponse> fromCommentsToResponses(
             List<Comment> comments,
             String currentMemberId,
-            java.util.Map<String, MemberSharedDTO.BasicInfoDTO> memberInfoMap
+            java.util.Map<String, MemberSharedDTO.BasicInfo> memberInfoMap
     ) {
         return comments.stream()
                 .map(comment -> {
@@ -183,7 +183,7 @@ public class BookStoryConverter {
     private static BookStorySharedDTO.CommentResponse fromCommentToResponse(
             Comment comment,
             String currentMemberId,
-            MemberSharedDTO.BasicInfoDTO authorInfo,
+            MemberSharedDTO.BasicInfo authorInfo,
             List<BookStorySharedDTO.CommentResponse> replies
     ) {
         return BookStorySharedDTO.CommentResponse.builder()

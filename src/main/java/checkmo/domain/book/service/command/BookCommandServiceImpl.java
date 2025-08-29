@@ -20,7 +20,7 @@ public class BookCommandServiceImpl implements BookCommandService {
 
     @Override
     @Transactional
-    public void saveBook(BookSharedDTO.BookCreateRequestDTO request) {
+    public void saveBook(BookSharedDTO.BookCreateRequest request) {
         Book book = BookConverter.fromBookCreateRequestDTO(request);
 
         // 이미 존재하는 책인지 확인

@@ -40,8 +40,8 @@ public class BookStorySharedDTO {
     @Builder
     public static class BookStoryResponse {
         private Long bookStoryId;
-        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.WithFollowStatusDTO authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
         private String description;
         private int likes;
@@ -61,8 +61,8 @@ public class BookStorySharedDTO {
     @Builder
     public static class BookStoryDetailResponse {
         private Long bookStoryId;
-        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.WithFollowStatusDTO authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberSharedDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
         private String description;
         private int likes;
@@ -85,7 +85,7 @@ public class BookStorySharedDTO {
     public static class CommentResponse {
         private Long commentId;
         private String content;
-        private MemberSharedDTO.BasicInfoDTO authorInfo; // 작성자 정보
+        private MemberSharedDTO.BasicInfo authorInfo; // 작성자 정보
         
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;

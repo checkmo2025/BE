@@ -39,7 +39,7 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
     }
 
     @Override
-    public BookSharedDTO.BasicInfoDTO getBookBasicInfoForShare(String bookId) {
+    public BookSharedDTO.BasicInfo getBookBasicInfoForShare(String bookId) {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
         
@@ -47,7 +47,7 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
     }
 
     @Override
-    public BookSharedDTO.DetailInfoDTO getBookDetailInfoForShare(String bookId) {
+    public BookSharedDTO.DetailInfo getBookDetailInfoForShare(String bookId) {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
         
@@ -55,7 +55,7 @@ public class BookQueryFacadeImpl implements BookQueryFacade {
     }
 
     @Override
-    public Map<String, BookSharedDTO.BasicInfoDTO> getBookBasicInfoMapForShare(List<String> bookIds) {
+    public Map<String, BookSharedDTO.BasicInfo> getBookBasicInfoMapForShare(List<String> bookIds) {
         if (bookIds == null || bookIds.isEmpty()) {
             return Map.of();
         }

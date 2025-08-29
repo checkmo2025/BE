@@ -80,7 +80,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                     throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
                 }
 
-                BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+                BookSharedDTO.BasicInfo bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
 
                 yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
                         .isStaff(clubMember.isStaff())
@@ -98,7 +98,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                 List<MemberVote> memberVotes = memberVoteRepository.findAllByVoteId(vote.getId());
 
                 // 항목별 투표자 정보 리스트 초기화
-                List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem = new ArrayList<>();
+                List<List<MemberSharedDTO.BasicInfo>> votedMembersByItem = new ArrayList<>();
                 for (int i = 0; i < itemCount; i++) {
                     votedMembersByItem.add(new ArrayList<>());
                 }
@@ -106,13 +106,13 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
                 // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
                 for (MemberVote mv : memberVotes) {
 
-                    MemberSharedDTO.BasicInfoDTO memberInfo = null;
+                    MemberSharedDTO.BasicInfo memberInfo = null;
 
                     // 익명 투표 여부 확인
                     if (vote.isAnonymity()) {
                         String voterName = "익명";
                         String profileImageUrl = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
-                        memberInfo = new MemberSharedDTO.BasicInfoDTO(voterName, profileImageUrl);
+                        memberInfo = new MemberSharedDTO.BasicInfo(voterName, profileImageUrl);
                     } else {
                         String voterId = mv.getMemberId();
                         memberInfo = memberQueryFacade.getMemberBasicInfoForShare(voterId);
@@ -247,7 +247,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
                 // 공지사항이 미팅 관련이면 책 정보도 조회하여 DTO 변환
                 if (notice.getMeeting() != null) {
-                    BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+                    BookSharedDTO.BasicInfo bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
                     dto = ClubConverter.toMeetingNoticeDTO(notice, bookInfo);
                 } else {
                     // 순수 공지사항 DTO 변환
@@ -287,7 +287,7 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
 
                 // 공지사항이 미팅 관련이면 책 정보도 조회하여 DTO 변환
                 if (notice.getMeeting() != null) {
-                    BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+                    BookSharedDTO.BasicInfo bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
                     dto = ClubConverter.toMeetingNoticeDTO(notice, bookInfo);
                 } else {
                     // 순수 공지사항 DTO 변환

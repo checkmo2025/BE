@@ -49,10 +49,10 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
         
         // 2. 책 정보 조회
-        BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookStory.getBookId());
+        BookSharedDTO.BasicInfo bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookStory.getBookId());
 
         // 3. 작성자 정보 조회
-        MemberSharedDTO.WithFollowStatusDTO authorInfo = memberQueryFacade.getMemberWithFollowStatusForShare(bookStory.getMemberId(), memberId);
+        MemberSharedDTO.WithFollowStatus authorInfo = memberQueryFacade.getMemberWithFollowStatusForShare(bookStory.getMemberId(), memberId);
 
         // 4. 좋아요 여부 조회
         Boolean isLiked = bookStoryQueryService.checkLikesForBookStories(memberId, List.of(bookStory))
@@ -71,7 +71,7 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
                 .collect(Collectors.toSet());
 
         // 6-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
-        Map<String, MemberSharedDTO.BasicInfoDTO> commentMemberInfoMap =
+        Map<String, MemberSharedDTO.BasicInfo> commentMemberInfoMap =
                 commentMemberIds.isEmpty() ? Map.of() :
                 memberQueryFacade.getMemberBasicInfoMapForShare(new ArrayList<>(commentMemberIds));
         
@@ -110,10 +110,10 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
         Map<Long, Boolean> isLikedMap = fetchLikedInfo(memberId, bookStories);
 
         // 5.책 정보 조회
-        Map<String, BookSharedDTO.BasicInfoDTO> bookInfoMap = fetchBookInfo(bookStories);
+        Map<String, BookSharedDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
 
         // 6. 작성자 정보 조회
-        Map<String, MemberSharedDTO.WithFollowStatusDTO> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
+        Map<String, MemberSharedDTO.WithFollowStatus> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // 7. DTO 변환
         List<BookStorySharedDTO.BookStoryResponse> bookStoryResponses = convertToBookStoryResponses(memberId, bookStories, isLikedMap, bookInfoMap, authorInfoMap);
@@ -147,7 +147,7 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
     /**
      * 책 정보 배치 조회
      */
-    private Map<String, BookSharedDTO.BasicInfoDTO> fetchBookInfo(List<BookStory> bookStories) {
+    private Map<String, BookSharedDTO.BasicInfo> fetchBookInfo(List<BookStory> bookStories) {
         List<String> bookIds = bookStories.stream()
                 .map(BookStory::getBookId)
                 .distinct()
@@ -158,7 +158,7 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
     /**
      * 작성자 정보 배치 조회
      */
-    private Map<String, MemberSharedDTO.WithFollowStatusDTO> fetchAuthorInfo(String memberId, List<BookStory> bookStories) {
+    private Map<String, MemberSharedDTO.WithFollowStatus> fetchAuthorInfo(String memberId, List<BookStory> bookStories) {
         List<String> memberIds = bookStories.stream()
                 .map(BookStory::getMemberId)
                 .distinct()
@@ -173,8 +173,8 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
             String memberId, 
             List<BookStory> bookStories, 
             Map<Long, Boolean> isLikedMap, 
-            Map<String, BookSharedDTO.BasicInfoDTO> bookInfoMap,
-            Map<String, MemberSharedDTO.WithFollowStatusDTO> authorInfoMap
+            Map<String, BookSharedDTO.BasicInfo> bookInfoMap,
+            Map<String, MemberSharedDTO.WithFollowStatus> authorInfoMap
     ) {
         
         return bookStories.stream()

@@ -22,8 +22,8 @@ public class BookConverter {
     /**
      * Book → BasicInfoDTO
      */
-    public static BookSharedDTO.BasicInfoDTO fromBookToBasicInfoDTO(Book book) {
-        return BookSharedDTO.BasicInfoDTO.builder()
+    public static BookSharedDTO.BasicInfo fromBookToBasicInfoDTO(Book book) {
+        return BookSharedDTO.BasicInfo.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -34,8 +34,8 @@ public class BookConverter {
     /**
      * Book → DetailInfoDTO
      */
-    public static BookSharedDTO.DetailInfoDTO fromBookToDetailInfoDTO(Book book) {
-        return BookSharedDTO.DetailInfoDTO.builder()
+    public static BookSharedDTO.DetailInfo fromBookToDetailInfoDTO(Book book) {
+        return BookSharedDTO.DetailInfo.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -48,7 +48,7 @@ public class BookConverter {
     /**
      * Book Map → BasicInfoDTO Map
      */
-    public static Map<String, BookSharedDTO.BasicInfoDTO> fromBooksMapToBasicInfoDTOMap(Map<String, Book> booksMap) {
+    public static Map<String, BookSharedDTO.BasicInfo> fromBooksMapToBasicInfoDTOMap(Map<String, Book> booksMap) {
         return booksMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -64,7 +64,7 @@ public class BookConverter {
      * BookCreateRequestDTO → Book 엔티티 변환
      */
     public static Book fromBookCreateRequestDTO(
-            BookSharedDTO.BookCreateRequestDTO request
+            BookSharedDTO.BookCreateRequest request
     ) {
         return Book.builder()
                 .id(request.getIsbn())

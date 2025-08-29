@@ -20,7 +20,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowList {
-        private List<MemberSharedDTO.WithFollowStatusDTO> followList; // 팔로워/팔로잉 목록
+        private List<MemberSharedDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
     }
@@ -30,7 +30,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowPreviewList {
-        private List<MemberSharedDTO.WithFollowStatusDTO> followList; // 팔로워/팔로잉 목록
+        private List<MemberSharedDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
     }
 
     @Getter
@@ -82,7 +82,7 @@ public class MemberResponseDTO {
     public static class BookStoryPreviewDTO {
         private Long bookStoryId;
         private String bookStoryTitle;
-        private BookSharedDTO.BasicInfoDTO bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
         private int likes;
         private LocalDateTime createdAt;
         private boolean isLiked; // 조회하는 사람의 좋아요 여부

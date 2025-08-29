@@ -46,7 +46,7 @@ public class CategorySharedDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class CategoryIdListDTO {
+    public static class CategoryIdList {
         private List<Long> categoryIdList;
     }
 }

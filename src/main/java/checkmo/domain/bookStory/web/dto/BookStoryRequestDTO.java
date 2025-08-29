@@ -14,7 +14,7 @@ public class BookStoryRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class BookStoryCreateRequest {
-        private BookSharedDTO.BookCreateRequestDTO bookInfo; // 책 정보
+        private BookSharedDTO.BookCreateRequest bookInfo; // 책 정보
 
         @NotBlank(message = "책 이야기에 제목을 입력해주세요.")
         private String title;

@@ -96,7 +96,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         ClubMember updatedClubMember = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId, currentMemberId, status);
         
         // 외부 도메인 정보 조회 및 DTO 변환
-        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(updatedClubMember.getMemberId());
+        MemberSharedDTO.BasicInfo memberInfo = memberQueryFacade.getMemberBasicInfoForShare(updatedClubMember.getMemberId());
         ClubResponseDTO.ClubMemberDTO updatedClubMemberDTO = ClubConverter.toClubMemberDTO(updatedClubMember, memberInfo);
 
         // 운영진 여부를 포함해서 반환

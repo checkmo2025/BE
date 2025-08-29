@@ -43,7 +43,7 @@ public interface MemberQueryService {
      * @param memberIds 회원 ID 목록
      * @return 회원 ID와 기본 정보 DTO의 매핑
      */
-    Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds);
+    Map<String, MemberSharedDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds);
 
     /**
      * 다른 사람 프로필 조회
@@ -93,5 +93,5 @@ public interface MemberQueryService {
      * @param memberIds 회원 ID 목록
      * @return 회원 ID와 닉네임, 프로필 이미지, 팔로우 상태 정보의 매핑
      */
-    Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds);
+    Map<String, MemberSharedDTO.WithFollowStatus> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds);
 }

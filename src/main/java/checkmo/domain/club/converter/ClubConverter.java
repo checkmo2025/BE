@@ -140,7 +140,7 @@ public class ClubConverter {
     /**
      * ClubMember 엔티티 + MemberSharedDTO.BasicInfoDTO -> ClubResponseDTO.ClubMemberDTO 변환
      */
-    public static ClubResponseDTO.ClubMemberDTO toClubMemberDTO(ClubMember targetMember, MemberSharedDTO.BasicInfoDTO memberInfo) {
+    public static ClubResponseDTO.ClubMemberDTO toClubMemberDTO(ClubMember targetMember, MemberSharedDTO.BasicInfo memberInfo) {
         return ClubResponseDTO.ClubMemberDTO.builder()
                 .clubMemberId(targetMember.getId())
                 .basicInfo(memberInfo)
@@ -196,8 +196,8 @@ public class ClubConverter {
     /**
      * ClubRequestDTO.ClubDetailDTO -> CategoryIdListDTO
      */
-    public static CategorySharedDTO.CategoryIdListDTO toCategoryListRequestDTO(ClubRequestDTO.ClubDetailDTO dto) {
-        return CategorySharedDTO.CategoryIdListDTO.builder()
+    public static CategorySharedDTO.CategoryIdList toCategoryListRequestDTO(ClubRequestDTO.ClubDetailDTO dto) {
+        return CategorySharedDTO.CategoryIdList.builder()
                 .categoryIdList(dto.getCategory())
                 .build();
     }
@@ -361,8 +361,8 @@ public class ClubConverter {
      */
     public static ClubResponseDTO.BookRecommendDetailDTO toBookRecommendDetailDTO(
             BookRecommend bookRecommend,
-            BookSharedDTO.BasicInfoDTO bookInfo,
-            MemberSharedDTO.BasicInfoDTO authorInfo,
+            BookSharedDTO.BasicInfo bookInfo,
+            MemberSharedDTO.BasicInfo authorInfo,
             String currentMemberNickname,
             boolean isStaff
     ) {
@@ -493,7 +493,7 @@ public class ClubConverter {
     public static ClubResponseDTO.EachItemDTO toEachItemDTO(
             String item,
             boolean isSelected,
-            List<MemberSharedDTO.BasicInfoDTO> votedMembers
+            List<MemberSharedDTO.BasicInfo> votedMembers
     ) {
         return ClubResponseDTO.EachItemDTO.builder()
                 .item(item)
@@ -537,7 +537,7 @@ public class ClubConverter {
      */
     public static List<BookShelfResponseDTO.TopicDTO> fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
             List<Topic> topics,
-            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
+            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap,
             String memberId
     ) {
         return topics.stream()
@@ -552,7 +552,7 @@ public class ClubConverter {
     /**
      * Notice 엔티티 + BookSharedDTO.BasicInfoDTO -> ClubResponseDTO.MeetingNoticeDTO 변환
      */
-    public static ClubResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(Notice notice, BookSharedDTO.BasicInfoDTO bookInfo) {
+    public static ClubResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(Notice notice, BookSharedDTO.BasicInfo bookInfo) {
         return ClubResponseDTO.MeetingNoticeDTO.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
@@ -568,7 +568,7 @@ public class ClubConverter {
      */
     public static BookShelfResponseDTO.BookShelfInfoDTO fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
             Meeting meeting,
-            BookSharedDTO.BasicInfoDTO bookSharedDTO
+            BookSharedDTO.BasicInfo bookSharedDTO
     ) {
         BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToBookshelfMeetingInfoDTO(meeting);
 
@@ -595,7 +595,7 @@ public class ClubConverter {
      */
     public static BookShelfResponseDTO.BookShelfDetailDTO fromBookShelfDTOToBookShelfDetailDTO(
             Meeting meeting,
-            BookSharedDTO.DetailInfoDTO bookSharedDTO,
+            BookSharedDTO.DetailInfo bookSharedDTO,
             BookShelfResponseDTO.TopicListDTO topicListDTO,
             MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
@@ -612,7 +612,7 @@ public class ClubConverter {
      */
     public static MeetingResponseDTO.MeetingInfoDTO fromMeetingAndBookSharedDTOToMeetingInfoDTO(
             Meeting meeting,
-            BookSharedDTO.BasicInfoDTO bookInfo
+            BookSharedDTO.BasicInfo bookInfo
     ) {
         return MeetingResponseDTO.MeetingInfoDTO.builder()
                 .meetingId(meeting.getId())
@@ -646,7 +646,7 @@ public class ClubConverter {
      */
     public static MeetingResponseDTO.TopicDTO fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
             Topic topic,
-            MemberSharedDTO.BasicInfoDTO authorSharedDTO,
+            MemberSharedDTO.BasicInfo authorSharedDTO,
             List<Integer> teamNumbers
     ) {
         return MeetingResponseDTO.TopicDTO.builder()
@@ -661,7 +661,7 @@ public class ClubConverter {
      * MemberSharedDTO.BasicInfoDTO + teamNumber -> MeetingResponseDTO.MeetingMemberDTO 변환
      */
     public static MeetingResponseDTO.MeetingMemberDTO fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(
-            MemberSharedDTO.BasicInfoDTO memberSharedDTO,
+            MemberSharedDTO.BasicInfo memberSharedDTO,
             Integer teamNumber
     ) {
         return MeetingResponseDTO.MeetingMemberDTO.builder()
@@ -675,12 +675,12 @@ public class ClubConverter {
      */
     public static MeetingResponseDTO.MeetingDetailDTO fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
             Meeting meeting,
-            BookSharedDTO.BasicInfoDTO bookSharedDTO,
+            BookSharedDTO.BasicInfo bookSharedDTO,
             List<Topic> topics,
             Map<Long, List<Integer>> topicIdToSelectTeamNumbers,
             List<Team> teams,
             Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber,
-            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
+            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap,
             MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, bookSharedDTO);
@@ -717,7 +717,7 @@ public class ClubConverter {
      */
     public static List<MeetingResponseDTO.TopicDTO> fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
             List<Topic> topics,
-            Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap,
+            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap,
             Map<Long, List<Integer>> topicIdToSelectTeamNumbers
     ) {
         return topics.stream()
@@ -756,7 +756,7 @@ public class ClubConverter {
      */
     public static BookShelfResponseDTO.BookReviewDTO fromBookReviewAndMemberSharedDTOToBookReviewDTO(
             BookReview bookReview,
-            MemberSharedDTO.BasicInfoDTO memberSharedDTO
+            MemberSharedDTO.BasicInfo memberSharedDTO
     ) {
         return BookShelfResponseDTO.BookReviewDTO.builder()
                 .bookReviewId(bookReview.getId())
@@ -907,7 +907,7 @@ public class ClubConverter {
      */
     public static MeetingResponseDTO.TeamMemberDTO fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
             Integer teamNumber,
-            List<MemberSharedDTO.BasicInfoDTO> memberSharedDTOs,
+            List<MemberSharedDTO.BasicInfo> memberSharedDTOs,
             MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.TeamMemberDTO.builder()
@@ -957,7 +957,7 @@ public class ClubConverter {
      */
     private static BookShelfResponseDTO.TopicDTO fromTopicAndMemberSharedDTOToTopicDTO(
             Topic topic,
-            MemberSharedDTO.BasicInfoDTO authorSharedDTO,
+            MemberSharedDTO.BasicInfo authorSharedDTO,
             String memberId
     ) {
         return BookShelfResponseDTO.TopicDTO.builder()
