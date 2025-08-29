@@ -29,4 +29,10 @@ public class BookStoryRequestDTO {
         @NotBlank(message = "책 이야기에 수정할 내용을 입력해주세요.")
         private String description;
     }
+
+    @Getter
+    @NoArgsConstructor
+    public static class CommentCreateRequest {
+        private String content;
+    }
 }
