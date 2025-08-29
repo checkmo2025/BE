@@ -44,6 +44,10 @@ public class Comment extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "parentComment")
-    @OrderBy("createdAt DESC")
+    @OrderBy("createdAt ASC")
     private List<Comment> childrenComment = new ArrayList<>(); // 대댓글 리스트들
+
+    public void addChildComment(Comment childComment) {
+        childrenComment.add(childComment);
+    }
 }
