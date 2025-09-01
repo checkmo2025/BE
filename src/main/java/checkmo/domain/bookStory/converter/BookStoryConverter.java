@@ -164,7 +164,7 @@ public class BookStoryConverter {
                                     reply,
                                     currentMemberId,
                                     memberInfoMap.get(reply.getMemberId()),
-                                    null // 대댓글의 대댓글은 없으므로 빈 리스트
+                                    List.of() // 대댓글의 대댓글은 없으므로 빈 리스트
                             )).toList();
 
                     // 부모 댓글 변환
