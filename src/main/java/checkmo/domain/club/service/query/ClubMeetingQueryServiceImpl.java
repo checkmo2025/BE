@@ -129,8 +129,14 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public Team validateTeam(Long meetingId, Integer teamNumber) {
+    public Team validateTeam(Long meetingId, Integer teamNumber) throws GeneralException {
         return teamRepository.findByMeetingIdAndTeamNumber(meetingId, teamNumber)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.TEAM_NOT_FOUND));
+    }
+
+    @Override
+    public BookReview validateBookReview(Long reviewId, Long meetingId) throws GeneralException {
+        return bookReviewRepository.findByIdAndMeetingId(reviewId, meetingId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_REVIEW_NOT_FOUND));
     }
 }

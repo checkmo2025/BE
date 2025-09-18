@@ -139,5 +139,14 @@ public interface ClubMeetingQueryService {
      * @param teamNumber 팀 번호 (1, 2, 3, 4... 팀)
      * @return Team 존재하는 팀 객체
      */
-    Team validateTeam(Long meetingId, Integer teamNumber);
+    Team validateTeam(Long meetingId, Integer teamNumber) throws GeneralException;
+
+    /**
+     * 독서모임의 한줄평이 존재하는지 확인합니다.
+     *
+     * @param reviewId 한줄평 ID
+     * @param meetingId 미팅 ID
+     * @return BookReview 존재하는 한줄평 객체
+     */
+    BookReview validateBookReview(Long reviewId, Long meetingId) throws GeneralException;
 }
