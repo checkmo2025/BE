@@ -26,7 +26,6 @@ public class BookReview extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
-    @Setter
     private ClubMember clubMember;
 
     @Column(name = "meeting_id", insertable = false, updatable = false)
@@ -34,11 +33,39 @@ public class BookReview extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
-    @Setter
     private Meeting meeting;
 
     public void updateBookReview(String description, double rate) {
         this.description = description;
         this.rate = rate;
+    }
+
+    // == 연관관계 메서드 == //
+    public void setClubMember(ClubMember clubMember) {
+        this.clubMember = clubMember;
+        if (!clubMember.getBookReviews().contains(this)) {
+            clubMember.getBookReviews().add(this);
+        }
+    }
+
+    public void removeClubMember() {
+        if (this.clubMember != null) {
+            this.clubMember.getBookReviews().remove(this);
+            this.clubMember = null;
+        }
+    }
+
+    public void setMeeting(Meeting meeting) {
+        this.meeting = meeting;
+        if (!meeting.getBookReviews().contains(this)) {
+            meeting.getBookReviews().add(this);
+        }
+    }
+
+    public void removeMeeting() {
+        if (this.meeting != null) {
+            this.meeting.getBookReviews().remove(this);
+            this.meeting = null;
+        }
     }
 }

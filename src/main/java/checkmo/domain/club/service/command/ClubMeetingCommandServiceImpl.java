@@ -105,9 +105,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         Topic topic = ClubConverter.fromTopicDTOToTopic(request);
-
-        meeting.addTopic(topic);
-        clubMember.addTopic(topic);
+        topic.setMeeting(meeting);
+        topic.setClubMember(clubMember);
 
         topicRepository.save(topic);
         return topic.getId();
@@ -134,15 +133,15 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         if (request.getIsSelected()) {
             // 4-1. 팀 발제 선택
             TeamTopic teamTopic = TeamTopic.builder().team(team).topic(topic).build();
-            // 연관관계 설정
-            team.addTeamTopic(teamTopic);
-            topic.addTeamTopic(teamTopic);
+            teamTopic.setTeam(team);
+            teamTopic.setTopic(topic);
+
             try {
                 teamTopicRepository.saveAndFlush(teamTopic);
             } catch (DataIntegrityViolationException e) {
                 // 다른 쓰레드가 먼저 팀 발제를 선택한 경우, 선택 성공으로 간주
-                team.removeTeamTopic(teamTopic);
-                topic.removeTeamTopic(teamTopic);
+                teamTopic.removeTeam();
+                teamTopic.removeTopic();
                 return true;
             }
             return true;
@@ -151,8 +150,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             try {
                 TeamTopic teamTopic = existingTeamTopic.get();
                 // 연관관계 해제 및 orphanRemoval로 삭제 처리
-                team.removeTeamTopic(teamTopic);
-                topic.removeTeamTopic(teamTopic);
+                teamTopic.removeTeam();
+                teamTopic.removeTopic();
                 teamTopicRepository.flush();
                 return false;
             } catch (OptimisticLockingFailureException e) {
@@ -190,8 +189,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        meeting.removeTopic(topic);
-        clubMember.removeTopic(topic);
+        topic.removeMeeting();
+        topic.removeClubMember();
     }
 
     @Override
@@ -227,7 +226,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                     Team team = Team.builder()
                             .teamNumber(teamNumber)
                             .build();
-                    meeting.addTeam(team);
+                    team.setMeeting(meeting);
                     existingTeams.add(team);
                     existingTeamNumberToTeam.put(teamNumber, team);
                 });
@@ -237,7 +236,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 .filter(t -> !requestTeamNumbers.contains(t.getTeamNumber()))
                 .toList();
         // 미팅과의 양방향 연관 끊기 -> orphanRemoval이 true이므로 미팅이 flush될 때 Team도 삭제됨
-        toDeleteTeams.forEach(meeting::removeTeam);
+        toDeleteTeams.forEach(Team::removeMeeting);
         // 기존 팀, 기존 teamNumber -> Team Map 메모리 컬렉션/맵 동기화
         existingTeams.removeAll(toDeleteTeams);
         existingTeamNumberToTeam.keySet().removeAll(toDeleteTeams.stream()
@@ -261,9 +260,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             for (String nick : e.getValue()) {
                 ClubMember cm = nicknameToClubMember.get(nick);
                 MemberTeam mt = MemberTeam.builder().build();
-
-                team.addMemberTeam(mt);
-                cm.addMemberTeam(mt);
+                mt.setClubMember(cm);
+                mt.setTeam(team);
             }
         }
 
@@ -278,9 +276,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         BookReview bookReview = ClubConverter.fromBookReviewDTOToBookReview(request);
-
-        clubMember.addBookReview(bookReview);
-        meeting.addBookReview(bookReview);
+        bookReview.setClubMember(clubMember);
+        bookReview.setMeeting(meeting);
 
         bookReviewRepository.save(bookReview);
 
@@ -328,7 +325,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
         meeting.subtractSumRate(bookReview.getRate());
 
-        clubMember.removeBookReview(bookReview);
-        meeting.removeBookReview(bookReview);
+        bookReview.removeClubMember();
+        bookReview.removeMeeting();
     }
 }

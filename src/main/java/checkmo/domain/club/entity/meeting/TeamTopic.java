@@ -24,7 +24,6 @@ public class TeamTopic extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
-    @Setter
     private Topic topic;
 
     @Column(name = "team_id", insertable = false, updatable = false)
@@ -32,10 +31,38 @@ public class TeamTopic extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
-    @Setter
     private Team team;
 
     @Version
     @Builder.Default
     private Long version = 0L; // 팀 발제 선택 취소에 대한 동시성 제어를 위한 버전 관리
+
+    // == 연관관계 메서드 == //
+    public void setTeam(Team team) {
+        this.team = team;
+        if (!team.getTeamTopics().contains(this)) {
+            team.getTeamTopics().add(this);
+        }
+    }
+
+    public void removeTeam() {
+        if (this.team != null) {
+            this.team.getTeamTopics().remove(this);
+            this.team = null;
+        }
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
+        if (!topic.getTeamTopics().contains(this)) {
+            topic.getTeamTopics().add(this);
+        }
+    }
+
+    public void removeTopic() {
+        if (this.topic != null) {
+            this.topic.getTeamTopics().remove(this);
+            this.topic = null;
+        }
+    }
 }

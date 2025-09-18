@@ -21,7 +21,6 @@ public class MemberTeam extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_member_id")
-    @Setter
     private ClubMember clubMember;
 
     @Column(name = "team_id", insertable = false, updatable = false)
@@ -29,7 +28,20 @@ public class MemberTeam extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
-    @Setter
     private Team team;
 
+    // == 연관관계 메서드 == //
+    public void setClubMember(ClubMember clubMember) {
+        this.clubMember = clubMember;
+        if (!clubMember.getMemberTeams().contains(this)) {
+            clubMember.getMemberTeams().add(this);
+        }
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+        if (!team.getMemberTeams().contains(this)) {
+            team.getMemberTeams().add(this);
+        }
+    }
 }
