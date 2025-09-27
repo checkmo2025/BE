@@ -2,13 +2,8 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.club.converter.ClubConverter;
-import checkmo.domain.club.entity.Club;
-import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.meeting.*;
-import checkmo.domain.club.web.dto.MembershipResponseDTO;
-import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,11 +19,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
-
-    // 자신의 QueryService
-    private final ClubMemberQueryService clubMemberQueryService;
-    private final ClubQueryService clubQueryService;
-
     // 자신의 Repository
     private final MeetingRepository meetingRepository;
     private final TopicRepository topicRepository;
@@ -48,26 +38,12 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds) {
-        if (topicIds == null || topicIds.isEmpty()) {
-            return Map.of();
-        }
-
-        List<TeamTopic> teamTopics = teamTopicRepository.findAllWithTeamByTopicIds(topicIds);
-        return teamTopics.stream()
-                .collect(Collectors.groupingBy(
-                        TeamTopic::getTopicId, //key: 토픽 ID(토픽 ID로 그룹화)
-                        Collectors.mapping(tt -> tt.getTeam().getTeamNumber(), Collectors.toList()) //value: 해당 토픽을 선택한 팀 번호 리스트(같은 그룹에 속하는 TeamTopic의 팀 번호 List 생성)
-                ));
+    public List<BookReview> findBookReviewsByMeeting(Long meetingId, Long cursorId, Integer size) {
+        return bookReviewRepository.findBookReviewsByCusor(meetingId, cursorId, size); // int로 암묵적 언박싱
     }
 
     @Override
-    public List<BookReview> findBookReviewsByMeeting(Long meetingId, Long lastReviewId, int size) {
-        return bookReviewRepository.findBookReviewsByCusor(meetingId, lastReviewId, size + 1);
-    }
-
-    @Override
-    public List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size, String memberId) {
+    public List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size) {
         return meetingRepository.findAllByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
     }
 
@@ -77,18 +53,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public MeetingResponseDTO.CalendarMeetingDTO getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
-        Club club = clubQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-
+    public List<Meeting> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1); //12월의 경우 다음 해 1월로 넘어감
 
-        List<Meeting> meetings = meetingRepository.findAllByClubIdBetweenMeetingTimeAsc(clubId, startDateTime, endDateTime);
-
-        MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
-
-        return ClubConverter.fromMeetingListToMCalendarMeetingDTO(meetings, membershipDTO);
+        return meetingRepository.findAllByClubIdBetweenMeetingTimeAsc(clubId, startDateTime, endDateTime);
     }
 
     @Override
@@ -113,6 +82,20 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
                         mt -> mt.getClubMember().getMemberId(), // key: 멤버 ID
                         MemberTeam::getTeamId // value: 팀 id
                         // 하나의 멤버는 하나의 미팅의 여러 팀에 속할 수 없으므로 병합 조건 존재하지 않아도 됨
+                ));
+    }
+
+    @Override
+    public Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds) {
+        if (topicIds == null || topicIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<TeamTopic> teamTopics = teamTopicRepository.findAllWithTeamByTopicIds(topicIds);
+        return teamTopics.stream()
+                .collect(Collectors.groupingBy(
+                        TeamTopic::getTopicId, //key: 토픽 ID(토픽 ID로 그룹화)
+                        Collectors.mapping(tt -> tt.getTeam().getTeamNumber(), Collectors.toList()) //value: 해당 토픽을 선택한 팀 번호 리스트(같은 그룹에 속하는 TeamTopic의 팀 번호 List 생성)
                 ));
     }
 

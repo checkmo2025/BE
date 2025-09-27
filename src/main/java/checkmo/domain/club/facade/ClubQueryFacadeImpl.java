@@ -5,6 +5,7 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.BookRecommend;
+import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.service.query.*;
@@ -36,6 +37,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     // 페이징 기본 크기 상수
     private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF = 3;
+    private static final int TOPIC_PREVIEW_SIZE_FOR_MEETING = 4;
 
     // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
@@ -368,46 +371,50 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     public ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId, String memberId) {
         // 1. Service에서 순수 엔티티 조회
         BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommendEntity(clubId, bookRecommendId, memberId);
-        
+
         // 2. ClubMember 조회 (isStaff 확인용)
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        
+
         // 3. 외부 도메인 정보 조회 (Facade에서 처리)
         var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBookId());
         var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
         var currentMemberInfo = memberQueryFacade.getMemberBasicInfoForShare(memberId);
-        
+
         // 4. DTO 변환 후 반환
         return ClubConverter.toBookRecommendDetailDTO(
-            bookRecommend, 
-            bookInfo, 
-            authorInfo, 
-            currentMemberInfo.getNickname(), 
-            clubMember.isStaff()
+                bookRecommend,
+                bookInfo,
+                authorInfo,
+                currentMemberInfo.getNickname(),
+                clubMember.isStaff()
         );
     }
 
     @Override
     public BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size, Integer generation, String memberId) {
+        // 1. 유효성 검증(club, clubMember)
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1, memberId);
+        // 2. [책장] 미팅 리스트 조회
+        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1);
+
+        // 3. 페이징 처리
         boolean hasNext = meetings.size() > size;
         if (hasNext) {
             meetings = meetings.subList(0, size);
         }
         Long nextCursor = hasNext ? meetings.getLast().getId() : null;
 
+        // 4. DTO 변환
         List<BookShelfResponseDTO.BookShelfInfoDTO> bookShelfInfoDTOS = meetings.stream()
                 .map(meeting ->
                         ClubConverter.fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
                                 meeting,
-                                bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId())
+                                bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId()) // TODO: 미팅에 사용된 책 배치 조회
                         )
                 )
                 .toList();
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromBookShelfInfoDTOListToBookShelfListDTO(bookShelfInfoDTOS, hasNext, nextCursor, membershipDTO);
     }
@@ -415,34 +422,35 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     @Override
     // TODO: getBookShelftDetail, findTopicsByMeeting 간 중복 제거
     public BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId, String memberId) {
-        final Integer TOPIC_SIZE = 3;
-
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, TOPIC_SIZE + 1);
+        // 2. [발제 미리보기] 발제 리스트 조회
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF + 1);
 
-        boolean hasNext = topics.size() > TOPIC_SIZE;
+        // 3. 페이징 처리
+        boolean hasNext = topics.size() > TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF;
         if (hasNext) {
-            topics = topics.subList(0, TOPIC_SIZE);
+            topics = topics.subList(0, TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF);
         }
         Long nextCursor = hasNext ? topics.getLast().getId() : null;
 
+        // 4. 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
                 memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 5. DTO 변환
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = ClubConverter.fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
                 topics,
                 authorInfoMap,
-                memberId
+                memberId // 요청한 회원 ID -> 작성자 본인 확인용
         );
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromBookShelfDTOToBookShelfDetailDTO(
                 meeting,
-                bookQueryFacade.getBookDetailInfoForShare(meeting.getBookId()),
+                bookQueryFacade.getBookDetailInfoForShare(meeting.getBookId()), // TODO: 책 상세정보 배치 조회로 변경
                 ClubConverter.fromTopicDTOListToTopicListDTOForBookshelf(topicListDTOs, hasNext, nextCursor, null),
                 membershipDTO
         );
@@ -450,50 +458,57 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
+        // 2. 발제 리스트 조회
         List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, cursorId, size + 1);
 
+        // 3. 페이징 처리
         boolean hasNext = topics.size() > size;
         if (hasNext) {
             topics = topics.subList(0, size);
         }
         Long nextCursor = hasNext ? topics.getLast().getId() : null;
 
+        // 4. 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
                 memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 5. DTO 변환
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = ClubConverter.fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
                 topics,
                 authorInfoMap,
-                memberId
+                memberId // 요청한 회원 ID -> 작성자 본인 확인용
         );
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromTopicDTOListToTopicListDTOForBookshelf(topicListDTOs, hasNext, nextCursor, membershipDTO);
     }
 
     @Override
     public BookShelfResponseDTO.BookReviewListDTO getBookReviewList(Long meetingId, Long lastReviewId, int size, String memberId) {
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size);
+        // 2. 한줄평 리스트 조회
+        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size + 1);
 
+        // 3. 페이징 처리
         boolean hasNext = bookReviews.size() > size;
         if (hasNext) {
             bookReviews = bookReviews.subList(0, size);
         }
         Long nextCursor = hasNext ? bookReviews.get(bookReviews.size() - 1).getId() : null;
 
+        // 4. 한줄평 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromBookReviews(bookReviews);
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 5. DTO 변환
         List<BookShelfResponseDTO.BookReviewDTO> bookReviewDTOList = mapBookReviewsAndAuthorInfoToDTOs(bookReviews, authorInfoMap);
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromBookReviewDTOListToBookReviewListDTO(bookReviewDTOList, hasNext, nextCursor, membershipDTO);
     }
@@ -512,19 +527,25 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.MeetingListDTO getMeetingsByClub(Long clubId, Long cursorId, Integer size, String memberId) {
+        // 1. 유효성 검증(club, clubMember)
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
+        // 2. 미팅 리스트 조회
         List<Meeting> meetings = clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size + 1);
+
+        // 3. 페이징 처리
         boolean hasNext = meetings.size() > size;
         if (hasNext) {
             meetings = meetings.subList(0, size);
         }
         Long nextCursor = hasNext ? meetings.getLast().getId() : null;
 
+        // 4. 미팅의 모든 도서 기본 정보 배치 조회
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
         Map<String, BookSharedDTO.BasicInfoDTO> bookBasicInfoMap = bookQueryFacade.getBookBasicInfoMapForShare(bookIds);
 
+        // 5. DTO 변환
         List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList = mapMeetingsWithBookBasicInfoToDTOs(meetings, bookBasicInfoMap);
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromMeetingInfoDTOListToMeetingListDTO(meetingInfoDTOList, hasNext, nextCursor, membershipDTO);
@@ -544,14 +565,14 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.MeetingDetailDTO findMeetingDetailById(Long meetingId, String memberId) {
-        // 1. 미팅과 클럽 멤버 검증
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. [발제 전체보기 - 미리보기] 발제 최신순 상위 4개 토픽 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, 4);
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, TOPIC_PREVIEW_SIZE_FOR_MEETING);
 
-        // 3. [발제 전체보기 - 미리보기] TeamTopic과 Team 배치 조회
+        // 3. [발제 전체보기 - 미리보기] TeamTopic(+Team) 배치 조회
         List<Long> topicIds = extractTopicIds(topics);
         Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
 
@@ -562,7 +583,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Map<Integer, List<TeamTopic>> teamNumberToTeamTopics = teams.stream()
                 .collect(Collectors.toMap(
                         Team::getTeamNumber, // key: 팀 번호
-                        team -> clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(), 4) //value : 해당 팀의 발제 최신순 상위 4개 팀 토픽 리스트
+                        team -> clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(), TOPIC_PREVIEW_SIZE_FOR_MEETING) //value : 해당 팀의 발제 최신순 상위 4개 팀 토픽 리스트
                 ));
 
         // 6. 조회한 모든 발제(topics와 teamTopics)의 작성자 id를 중복 없이 리스트 조회
@@ -575,9 +596,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         // 7. 발제의 작성자 정보 배치 조회
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 8. DTO 변환
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
-
-        // 7. DTO 변환
         return ClubConverter.fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
                 meeting, bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId()), // -> MeetingInfoDTO
                 topics, teamTopicsWithTeamByTopicIds, // -> List<TopicDTO>
@@ -589,7 +609,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.TopicDTOList findMeetingTopicsWithTeam(Long meetingId, String memberId) {
-        // 1. 미팅과 클럽 멤버 검증
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
@@ -604,15 +624,13 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         List<Long> topicIds = extractTopicIds(topics);
         Map<Long, List<Integer>> topicIdToSelectTeamNumbers = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
 
+        // 5. DTO 변환
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
-
-        // 5. MeetingResponseDTO.TopicListDTO 변환
         List<MeetingResponseDTO.TopicDTO> topicDTOList = ClubConverter.fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
                 topics,
                 authorInfoMap,
                 topicIdToSelectTeamNumbers
         );
-
         return ClubConverter.fromTopicDTOListAndMembershipDTOToTopicListDTO(
                 topicDTOList,
                 membershipDTO
@@ -646,7 +664,16 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.CalendarMeetingDTO getClubMeetingCalendar(Long clubId, int year, int month, String memberId) {
-        return clubMeetingQueryService.getClubMeetingByYearAndMonth(clubId, year, month, memberId);
+        // 1. 유효성 검증(club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 해당 연월의 미팅 리스트 조회
+        List<Meeting> meetings = clubMeetingQueryService.getClubMeetingByYearAndMonth(clubId, year, month, memberId);
+
+        // 3. DTO 변환
+        MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
+        return ClubConverter.fromMeetingListToMCalendarMeetingDTO(meetings, membershipDTO);
     }
 
     @Override
