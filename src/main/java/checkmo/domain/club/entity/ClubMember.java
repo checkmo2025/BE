@@ -63,6 +63,10 @@ public class ClubMember extends BaseEntity {
         return this.clubMemberStatus == ClubMemberStatus.STAFF;
     }
 
+    public boolean isActive() {
+        return this.clubMemberStatus == ClubMemberStatus.MEMBER || this.clubMemberStatus == ClubMemberStatus.STAFF;
+    }
+
     public void updateStatus(ClubMemberStatus newStatus) {
         this.clubMemberStatus = newStatus;
     }

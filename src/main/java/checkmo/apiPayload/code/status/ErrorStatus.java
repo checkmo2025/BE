@@ -38,10 +38,11 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUB_MEMBER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "CLUB_4017", "유효하지 않은 상태입니다."),
     CLUB_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4018", "해당 클럽 회원을 찾을 수 없습니다."),
     CLUB_STAFF_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "CLUB_4019", "운영진은 클럽을 탈퇴할 수 없습니다."),
+    CLUB_MEMBER_IS_NOT_ACTIVE(HttpStatus.FORBIDDEN, "CLUB_4020", "해당 클럽 회원은 활성화 상태(STAFF, MEMBER)가 아닙니다."),
 
     // 공지사항
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_4004", "공지사항을 찾을 수 없습니다."),
-    NOTICE_MEETING_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_4005", "모임 공지사항은 삭제할 수 없습니다."),
+    MEETING_NOTICE_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_4005", "모임 공지사항은 삭제할 수 없습니다."),
 
     // 투표
     VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_4004", "투표를 찾을 수 없습니다."),

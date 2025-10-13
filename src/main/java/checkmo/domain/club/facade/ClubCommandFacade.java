@@ -27,9 +27,9 @@ public interface ClubCommandFacade {
      * ClubManagementCommandService
      * 기존 독서 모임 정보를 수정합니다. (내부용)
      *
-     * @param clubId   수정할 모임 ID
+     * @param clubId 수정할 모임 ID
      * @param memberId 수정 요청한 회원 ID
-     * @param request  모임 수정 요청 정보 DTO
+     * @param request 모임 수정 요청 정보 DTO
      */
     void updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request);
 
@@ -72,9 +72,9 @@ public interface ClubCommandFacade {
      * @param clubId 모임 ID
      * @param memberId 작성자(운영진) 회원 ID
      * @param request 공지사항 작성 요청 DTO
-     * @return 작성된 공지사항의 상세 정보 DTO
+     * @return 생성된 공지사항 id
      */
-    ClubResponseDTO.ClubNoticeDetailDTO createNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request); //
+    ClubResponseDTO.ClubNoticeDetailDTO createPureNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request); //
 
     /**
      * ClubCommunicationCommandService
@@ -84,7 +84,7 @@ public interface ClubCommandFacade {
      * @param memberId 요청자(운영진) 회원 ID
      * @param noticeId 삭제할 공지사항 ID
      */
-    void deleteNotice(Long clubId, String memberId, Long noticeId); //
+    void deletePureNotice(Long clubId, String memberId, Long noticeId); //
 
     /**
      * ClubCommunicationCommandService
@@ -93,7 +93,7 @@ public interface ClubCommandFacade {
      * @param clubId 모임 ID
      * @param memberId 작성자(운영진) 회원 ID
      * @param request 투표 생성 요청 DTO
-     * @return 생성된 투표가 포함된 공지사항 상세 DTO
+     * @return 생성된 투표 ID
      */
     ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request); //
 
@@ -117,7 +117,7 @@ public interface ClubCommandFacade {
      * @param request 투표 선택 항목 DTO
      * @return 참여 결과가 반영된 투표 상세 DTO
      */
-    ClubResponseDTO.ClubNoticeDetailDTO participateInPoll(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request);
+    ClubResponseDTO.ClubNoticeDetailDTO haveVote(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request);
 
     /**
      * ClubBookRecommendCommandService

@@ -44,7 +44,6 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
     private final MemberVoteRepository memberVoteRepository;
 
 
-
     /**
      * 공지 or 투표 상세 조회
      *
@@ -304,4 +303,17 @@ public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQuery
         }
         return resultList;
     }
+
+    @Override
+    public Notice validateNotice(Long clubId, Long noticeId) throws GeneralException {
+        return noticeRepository.findByIdAndClubId(noticeId, clubId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+    }
+
+    @Override
+    public Vote validateVote(Long clubId, Long voteId) throws GeneralException {
+        return voteRepository.findByIdAndClubId(voteId, clubId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
+    }
+
 }

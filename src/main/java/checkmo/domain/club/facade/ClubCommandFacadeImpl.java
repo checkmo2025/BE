@@ -8,6 +8,8 @@ import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.entity.announcement.Notice;
+import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.entity.meeting.Team;
@@ -137,89 +139,62 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         clubMembershipCommandService.leaveClub(clubId, memberId);
     }
 
-    /**
-     * ClubCommunicationCommandService
-     * 모임에 공지사항을 작성합니다. (내부용)
-     *
-     * @param clubId 모임 ID
-     * @param memberId 작성자(운영진) 회원 ID
-     * @param request 공지사항 작성 요청 DTO
-     * @return 작성된 공지사항의 상세 정보 DTO
-     */
     @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO createNotice(
-            Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request
-    ) {
-        // 1. 공지 생성
-        Long noticeId = clubCommunicationCommandService.createNotice(clubId, memberId, request);
+    public ClubResponseDTO.ClubNoticeDetailDTO createPureNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request) {
+        // 1. 유효성 검증 (club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 2. 생성된 공지를 다시 조회
-        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, noticeId, "공지", memberId);
+        // 2. 공지 생성 및 DTO 반환
+        Notice notice = clubCommunicationCommandService.createPureNotice(club, clubMember, request);
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .isStaff(clubMember.isStaff())
+                .noticeItem(ClubConverter.toPureNoticeDTO(notice))
+                .build();
     }
 
-    /**
-     * ClubCommunicationCommandService
-     * 모임의 공지사항을 삭제합니다. (내부용)
-     *
-     * @param clubId 모임 ID
-     * @param memberId 요청자(운영진) 회원 ID
-     * @param noticeId 삭제할 공지사항 ID
-     */
     @Override
-    public void deleteNotice(Long clubId, String memberId, Long noticeId) {
-        clubCommunicationCommandService.deleteNotice(clubId, memberId, noticeId);
+    public void deletePureNotice(Long clubId, String memberId, Long noticeId) {
+        // 1. 유효성 검증(club, clubMember)
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 공지 삭제
+        clubCommunicationCommandService.deletePureNotice(clubId, clubMember, noticeId);
     }
 
-    /**
-     * ClubCommunicationCommandService
-     * 모임에 투표를 생성합니다. (내부용)
-     *
-     * @param clubId 모임 ID
-     * @param memberId 작성자(운영진) 회원 ID
-     * @param request 투표 생성 요청 DTO
-     * @return 생성된 투표가 포함된 공지사항 상세 DTO
-     */
     @Override
     public ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request) {
+        // 1. 유효성 검증(club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 1. 투표 생성
-        Long voteId = clubCommunicationCommandService.createVote(clubId, memberId, request);
-
-        // 2. 생성된 투표를 다시 조회
-        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId);
+        // 2. 투표 생성 및 DTO 반환
+        Vote vote = clubCommunicationCommandService.createVote(club, clubMember, request);
+        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, vote.getId(), "투표", memberId); //TODO: 너무 복잡해서 분리할 수 없었음, 반환값 일괄적으로 수정할 때 수정
     }
 
-    /**
-     * ClubCommunicationCommandService
-     * 모임의 투표를 삭제합니다. (내부용)
-     *
-     * @param clubId 모임 ID
-     * @param memberId 요청자(운영진) 회원 ID
-     * @param voteId 삭제할 투표 ID
-     */
     @Override
     public void deleteVote(Long clubId, String memberId, Long voteId) {
-        clubCommunicationCommandService.deleteVote(clubId, memberId, voteId);
+        // 1. 유효성 검증(club, clubMember)
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 투표 삭제
+        clubCommunicationCommandService.deleteVote(clubId, clubMember, voteId);
     }
 
-    /**
-     * ClubCommunicationCommandService
-     * 모임의 투표에 참여합니다. (내부용)
-     *
-     * @param clubId 모임 ID
-     * @param memberId 참여자 회원 ID
-     * @param voteId 투표 ID
-     * @param request 투표 선택 항목 DTO
-     * @return 참여 결과가 반영된 투표 상세 DTO
-     */
     @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO participateInPoll(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request) {
+    public ClubResponseDTO.ClubNoticeDetailDTO haveVote(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request) {
+        // 1. 유효성 검증(club, clubMember)
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 1. 투표 참여
-        voteId = clubCommunicationCommandService.participateInPoll(clubId, memberId, voteId, request);
+        // 2. 투표 참여
+        voteId = clubCommunicationCommandService.haveVote(clubId, clubMember, voteId, request);
 
         // 2. 투표 결과를 다시 조회
-        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId);
+        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId); //TODO: 너무 복잡해서 분리할 수 없었음, 반환값 일괄적으로 수정할 때 수정
     }
 
     /**
