@@ -1,7 +1,5 @@
 package checkmo.domain.club.facade;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.entity.Book;
 import checkmo.domain.book.facade.BookCommandFacade;
 import checkmo.domain.book.facade.BookQueryFacade;
@@ -10,10 +8,7 @@ import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.announcement.Vote;
-import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.entity.meeting.Team;
-import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.service.command.*;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
@@ -247,10 +242,6 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         Club club = clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
-
         // 2. 책 저장 후 프록시 객체 가져오기
         bookCommandFacade.saveBook(request.getBookInfo());
         Book proxyBook = bookQueryFacade.findBookReferenceById(request.getBookInfo().getIsbn());
@@ -260,7 +251,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         meeting.setClub(club);
 
         // 4. 미팅 저장 & 공지사항 자동 생성
-        return clubMeetingCommandService.createMeeting(club, meeting);
+        return clubMeetingCommandService.createMeeting(club, clubMember, meeting);
     }
 
     @Override
@@ -270,12 +261,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         Club club = clubQueryService.validateClub(meeting.getClubId());
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
-
         // 2. 미팅 수정
-        return clubMeetingCommandService.updateMeeting(meeting, club, request);
+        return clubMeetingCommandService.updateMeeting(meeting, club, clubMember, request);
     }
 
     @Override
@@ -290,44 +277,32 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     @Override
     public Long updateTopic(String memberId, Long meetingId, Long topicId, BookShelfRequestDTO.TopicDTO request) {
-        // 1. 유효성 검증 (meeting, clubMember, topic)
+        // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
-
-        if (!topic.isOwnedBy(clubMember)) {
-            throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
-        }
 
         // 2. 발제 수정
-        return clubMeetingCommandService.updateTopic(topic, request);
+        return clubMeetingCommandService.updateTopic(meeting.getClubId(), clubMember, meetingId, topicId, request);
     }
 
     @Override
     public void deleteTopic(String memberId, Long meetingId, Long topicId) {
-        // 1. 유효성 검증 (meeting, clubMember, topic)
+        // 1. 유효성 검증 (meeting clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
-
-        if (!topic.isOwnedBy(clubMember)) {
-            throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
-        }
 
         // 2. 발제 삭제
-        clubMeetingCommandService.deleteTopic(topic);
+        clubMeetingCommandService.deleteTopic(meeting.getClubId(), clubMember, meetingId, topicId);
     }
 
     @Override
     public MeetingResponseDTO.TopicSelectionDTO selectOrCancelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId) {
-        // 1. 유효성 검증 (meeting, clubMember, topic, team)
+        // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Team team = clubMeetingQueryService.validateTeam(meetingId, request.getTeamNumber());
-        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
-        clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 발제 선택 or 선택 취소
-        Boolean isSelected = clubMeetingCommandService.selectOrCancelTopic(team, topic, request);
+        Boolean isSelected = clubMeetingCommandService.selectOrCancelTopic(clubMember, meetingId, topicId, request);
 
         // 3. 응답 DTO 반환
         return ClubConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), isSelected);
@@ -339,12 +314,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
-
         // 2. 팀 구성
-        clubMeetingCommandService.manageTeam(meeting, request);
+        clubMeetingCommandService.manageTeam(clubMember, meeting, request);
     }
 
     // TODO: Aspect 로그
@@ -361,7 +332,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 한줄평 생성
-        return clubMeetingCommandService.createBookReview(meeting, clubMember, request);
+        return clubMeetingCommandService.createBookReview(clubMember, meeting, request);
     }
 
     @Override
@@ -374,14 +345,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         // 1. 유효성 검증 (meeting, clubMember, bookReview)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        BookReview bookReview = clubMeetingQueryService.validateBookReview(reviewId, meetingId);
-
-        if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
-            throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
-        }
 
         // 2. 한줄평 수정
-        return clubMeetingCommandService.updateBookReview(meeting, bookReview, request);
+        return clubMeetingCommandService.updateBookReview(clubMember, meeting, reviewId, request);
     }
 
     @Override
@@ -394,13 +360,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         // 1. 유효성 검증 (meeting, clubMember, bookReview)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        BookReview bookReview = clubMeetingQueryService.validateBookReview(reviewId, meetingId);
-
-        if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
-            throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
-        }
 
         // 2. 한줄평 삭제
-        clubMeetingCommandService.deleteBookReview(meeting, bookReview);
+        clubMeetingCommandService.deleteBookReview(clubMember, meeting, reviewId);
     }
 }
