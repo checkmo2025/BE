@@ -27,7 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ClubCommunicationQueryServiceImpl implements ClubCommunicationQueryService {
+public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
 
     // Domain level 2
     private final MemberQueryFacade memberQueryFacade;

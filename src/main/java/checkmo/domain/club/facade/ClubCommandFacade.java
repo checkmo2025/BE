@@ -66,7 +66,7 @@ public interface ClubCommandFacade {
     void leaveClub(Long clubId, String memberId);
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임에 공지사항을 작성합니다. (내부용)
      *
      * @param clubId 모임 ID
@@ -77,7 +77,7 @@ public interface ClubCommandFacade {
     ClubResponseDTO.ClubNoticeDetailDTO createPureNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request); //
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임의 공지사항을 삭제합니다. (내부용)
      *
      * @param clubId 모임 ID
@@ -87,7 +87,7 @@ public interface ClubCommandFacade {
     void deletePureNotice(Long clubId, String memberId, Long noticeId); //
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임에 투표를 생성합니다. (내부용)
      *
      * @param clubId 모임 ID
@@ -98,7 +98,7 @@ public interface ClubCommandFacade {
     ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request); //
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임의 투표를 삭제합니다. (내부용)
      *
      * @param clubId 모임 ID
@@ -108,7 +108,7 @@ public interface ClubCommandFacade {
     void deleteVote(Long clubId, String memberId, Long voteId); //
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임의 투표에 참여합니다. (내부용)
      *
      * @param clubId 모임 ID

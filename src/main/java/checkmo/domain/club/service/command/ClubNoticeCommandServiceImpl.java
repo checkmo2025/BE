@@ -11,7 +11,7 @@ import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.repository.announcement.MemberVoteRepository;
 import checkmo.domain.club.repository.announcement.NoticeRepository;
 import checkmo.domain.club.repository.announcement.VoteRepository;
-import checkmo.domain.club.service.query.ClubCommunicationQueryService;
+import checkmo.domain.club.service.query.ClubNoticeQueryService;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberQueryFacade;
@@ -24,13 +24,13 @@ import java.time.LocalDateTime;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ClubCommunicationCommandServiceImpl implements ClubCommunicationCommandService {
+public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
     // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
 
     // 자신의 QueryService
-    private final ClubCommunicationQueryService clubNoticeQueryService;
+    private final ClubNoticeQueryService clubNoticeQueryService;
 
     // 자신의 Repository
     private final VoteRepository voteRepository;

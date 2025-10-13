@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface ClubCommunicationQueryService {
+public interface ClubNoticeQueryService {
 
     /**
      * 공지 or 투표 상세 조회

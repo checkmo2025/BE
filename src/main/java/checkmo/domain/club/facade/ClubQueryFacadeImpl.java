@@ -50,7 +50,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
-    private final ClubCommunicationQueryService clubCommunicationQueryService;
+    private final ClubNoticeQueryService clubNoticeQueryService;
     private final ClubCategoryQueryService clubCategoryQueryService;
 
     /**
@@ -267,7 +267,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
         // 3. 공지(일반, 모임) + 투표 조회 및 변환
-        List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
+        List<ClubResponseDTO.NoticeItem> noticeItems = clubNoticeQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
 
         // 4. 페이징
         boolean hasNext = noticeItems.size() > pageSize;
@@ -292,7 +292,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
         // 3. 공지(일반, 모임) + 투표 조회 및 변환
-        List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems = clubCommunicationQueryService.getMemberNoticesAndVotes(memberId, onlyImportant, cursor, pageable);
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems = clubNoticeQueryService.getMemberNoticesAndVotes(memberId, onlyImportant, cursor, pageable);
 
         // 4. 페이징
         boolean hasNext = memberNoticeItems.size() > pageSize;
@@ -316,7 +316,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      */
     @Override
     public ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId, String tag, String memberId) {
-        return clubCommunicationQueryService.getNoticeOrVoteDetail(clubId, noticeId, tag, memberId);
+        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, noticeId, tag, memberId);
     }
 
     /**

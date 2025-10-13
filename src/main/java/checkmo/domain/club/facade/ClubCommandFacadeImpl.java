@@ -15,9 +15,9 @@ import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.entity.meeting.Team;
 import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.club.service.command.*;
-import checkmo.domain.club.service.query.ClubCommunicationQueryService;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
+import checkmo.domain.club.service.query.ClubNoticeQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
@@ -52,14 +52,14 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubManagementCommandService clubManagementCommandService;
     private final ClubBookRecommendCommandService clubBookRecommendCommandService;
-    private final ClubCommunicationCommandService clubCommunicationCommandService;
+    private final ClubNoticeCommandService clubNoticeCommandService;
     private final ClubMembershipCommandService clubMembershipCommandService;
 
     // 자신의 QueryService
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
-    private final ClubCommunicationQueryService clubNoticeQueryService;
+    private final ClubNoticeQueryService clubNoticeQueryService;
 
     /**
      * ClubManagementCommandService
@@ -146,7 +146,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 공지 생성 및 DTO 반환
-        Notice notice = clubCommunicationCommandService.createPureNotice(club, clubMember, request);
+        Notice notice = clubNoticeCommandService.createPureNotice(club, clubMember, request);
         return ClubResponseDTO.ClubNoticeDetailDTO.builder()
                 .isStaff(clubMember.isStaff())
                 .noticeItem(ClubConverter.toPureNoticeDTO(notice))
@@ -160,7 +160,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 공지 삭제
-        clubCommunicationCommandService.deletePureNotice(clubId, clubMember, noticeId);
+        clubNoticeCommandService.deletePureNotice(clubId, clubMember, noticeId);
     }
 
     @Override
@@ -170,7 +170,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 투표 생성 및 DTO 반환
-        Vote vote = clubCommunicationCommandService.createVote(club, clubMember, request);
+        Vote vote = clubNoticeCommandService.createVote(club, clubMember, request);
         return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, vote.getId(), "투표", memberId); //TODO: 너무 복잡해서 분리할 수 없었음, 반환값 일괄적으로 수정할 때 수정
     }
 
@@ -181,7 +181,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 투표 삭제
-        clubCommunicationCommandService.deleteVote(clubId, clubMember, voteId);
+        clubNoticeCommandService.deleteVote(clubId, clubMember, voteId);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 투표 참여
-        voteId = clubCommunicationCommandService.haveVote(clubId, clubMember, voteId, request);
+        voteId = clubNoticeCommandService.haveVote(clubId, clubMember, voteId, request);
 
         // 2. 투표 결과를 다시 조회
         return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId); //TODO: 너무 복잡해서 분리할 수 없었음, 반환값 일괄적으로 수정할 때 수정
