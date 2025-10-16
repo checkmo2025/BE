@@ -756,9 +756,6 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         // 1. 검증
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
         Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
 
         // 2. 팀 멤버 조회
