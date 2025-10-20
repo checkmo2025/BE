@@ -57,16 +57,16 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
 
     private void deleteBookStoryLiked(BookStory bookStory, BookStoryLiked bookStoryLiked) {
         bookStoryLikedRepository.delete(bookStoryLiked);
-        bookStory.removeLike();
+        bookStory.removeBookStoryLiked(bookStoryLiked);
     }
 
     private void createAndSaveBookStoryLiked(BookStory bookStory, Member member) {
-        bookStoryLikedRepository.save(
-                BookStoryLiked.builder()
-                        .bookStory(bookStory)
-                        .member(member)
-                        .build()
-        );
-        bookStory.addLike();
+        BookStoryLiked bookStoryLiked = BookStoryLiked.builder()
+                .bookStory(bookStory)
+                .member(member)
+                .build();
+
+        bookStoryLikedRepository.save(bookStoryLiked);
+        bookStory.addBookStoryLiked(bookStoryLiked);
     }
 }
