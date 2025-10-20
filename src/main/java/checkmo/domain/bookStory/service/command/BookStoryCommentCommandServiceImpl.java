@@ -61,10 +61,13 @@ public class BookStoryCommentCommandServiceImpl implements BookStoryCommentComma
             parentComment.addChildComment(comment);
         }
 
-        // 6. 댓글 저장
+        // 6. 책이야기의 댓글 리스트에 추가 및 댓글 수 증가
+        bookStory.addCommentToList(comment);
+
+        // 7. 댓글 저장
         commentRepository.save(comment);
 
-        // 6. 댓글 작성된 책이야기 ID 반환
+        // 8. 댓글 작성된 책이야기 ID 반환
         return bookStoryId;
     }
 }
