@@ -21,7 +21,12 @@ public class BookStory extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
+    @Builder.Default
     private int likes = 0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private int commentsCount = 0;
 
     private String title;
 
@@ -60,6 +65,40 @@ public class BookStory extends BaseEntity {
     }
 
     public void removeLike() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
+    public void addComment() {
+        this.commentsCount++;
+    }
+
+    public void removeComment() {
+        if (this.commentsCount > 0) {
+            this.commentsCount--;
+        }
+    }
+
+    public void addCommentToList(Comment comment) {
+        this.comments.add(comment);
+        this.commentsCount++;
+    }
+
+    public void removeCommentFromList(Comment comment) {
+        this.comments.remove(comment);
+        if (this.commentsCount > 0) {
+            this.commentsCount--;
+        }
+    }
+
+    public void addBookStoryLiked(BookStoryLiked bookStoryLiked) {
+        this.bookStoryLikedList.add(bookStoryLiked);
+        this.likes++;
+    }
+
+    public void removeBookStoryLiked(BookStoryLiked bookStoryLiked) {
+        this.bookStoryLikedList.remove(bookStoryLiked);
         if (this.likes > 0) {
             this.likes--;
         }
