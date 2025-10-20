@@ -178,24 +178,14 @@ public class BookStoryQueryFacadeImpl implements BookStoryQueryFacade {
     ) {
         
         return bookStories.stream()
-                .map(bookStory -> {
-                    // 부모 댓글 목록 가져오기
-                    List<Comment> comments = bookStoryQueryService.findCommentsByBookStoryId(bookStory.getId());
-
-                    // 대댓글의 갯수까지 한번에 계산
-                    int totalCommentCount = comments.stream()
-                            .mapToInt(comment -> 1 + comment.getChildrenComment().size())
-                            .sum();
-
-                    return BookStoryConverter.fromBookStoryToResponse(
-                            bookStory,
-                            memberId,
-                            bookInfoMap.get(bookStory.getBookId()),
-                            authorInfoMap.get(bookStory.getMemberId()),
-                            isLikedMap.getOrDefault(bookStory.getId(), false),
-                            totalCommentCount
-                    );
-                }).toList();
+                .map(bookStory -> BookStoryConverter.fromBookStoryToResponse(
+                        bookStory,
+                        memberId,
+                        bookInfoMap.get(bookStory.getBookId()),
+                        authorInfoMap.get(bookStory.getMemberId()),
+                        isLikedMap.getOrDefault(bookStory.getId(), false),
+                        bookStory.getCommentsCount()
+                )).toList();
     }
 
     /**
