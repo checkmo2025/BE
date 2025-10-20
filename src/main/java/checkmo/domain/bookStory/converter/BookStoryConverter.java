@@ -107,11 +107,6 @@ public class BookStoryConverter {
             boolean isLiked,
             List<BookStorySharedDTO.CommentResponse> commentList
     ) {
-        // 댓글 + 대댓글 전체 개수 계산
-        int totalCommentCount = commentList.stream()
-                .mapToInt(comment -> 1 + comment.getReplies().size())
-                .sum();
-        
         return BookStorySharedDTO.BookStoryDetailResponse.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
@@ -122,7 +117,7 @@ public class BookStoryConverter {
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
-                .commentCount(totalCommentCount)
+                .commentCount(bookStory.getCommentsCount())
                 .comments(commentList)
                 .build();
     }
