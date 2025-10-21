@@ -29,6 +29,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
 
+    // 태그 상수 정의
+    private static final String TAG_NOTICE = "공지";
+    private static final String TAG_MEETING = "모임";
+    private static final String TAG_VOTE = "투표";
+
     // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
     // Domain level 1
@@ -60,107 +65,154 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         return switch (tag) {
-            case "공지" -> {
-                Notice notice = noticeRepository.findByIdAndClubId(itemId, clubId)
-                        .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
-                if ("모임".equals(notice.getTag())) {
-                    throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
-                }
-
-                yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
-                        .isStaff(clubMember.isStaff())
-                        .noticeItem(ClubConverter.toPureNoticeDTO(notice))
-                        .build();
-            }
-            case "모임" -> {
-                Notice notice = noticeRepository.findWithMeetingByIdAndClubId(itemId, clubId)
-                        .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
-                if ("공지".equals(notice.getTag())) {
-                    throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
-                }
-
-                BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
-
-                yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
-                        .isStaff(clubMember.isStaff())
-                        .noticeItem(ClubConverter.toMeetingNoticeDTO(notice, bookInfo))
-                        .build();
-            }
-            case "투표" -> {
-                Vote vote = voteRepository.findByIdAndClubId(itemId, clubId)
-                        .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
-
-                List<String> voteItems = vote.getItems();
-                int itemCount = voteItems.size();
-
-                // 전체 투표 결과
-                List<MemberVote> memberVotes = memberVoteRepository.findAllByVoteId(vote.getId());
-
-                // 항목별 투표자 정보 리스트 초기화
-                List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem = new ArrayList<>();
-                for (int i = 0; i < itemCount; i++) {
-                    votedMembersByItem.add(new ArrayList<>());
-                }
-
-                // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
-                for (MemberVote mv : memberVotes) {
-
-                    MemberSharedDTO.BasicInfoDTO memberInfo = null;
-
-                    // 익명 투표 여부 확인
-                    if (vote.isAnonymity()) {
-                        String voterName = "익명";
-                        String profileImageUrl = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
-                        memberInfo = new MemberSharedDTO.BasicInfoDTO(voterName, profileImageUrl);
-                    } else {
-                        String voterId = mv.getMemberId();
-                        memberInfo = memberQueryFacade.getMemberBasicInfoForShare(voterId);
-                    }
-
-                    if (mv.isItem1()) votedMembersByItem.get(0).add(memberInfo);
-                    if (itemCount >= 2 && mv.isItem2()) votedMembersByItem.get(1).add(memberInfo);
-                    if (itemCount >= 3 && mv.isItem3()) votedMembersByItem.get(2).add(memberInfo);
-                    if (itemCount >= 4 && mv.isItem4()) votedMembersByItem.get(3).add(memberInfo);
-                    if (itemCount >= 5 && mv.isItem5()) votedMembersByItem.get(4).add(memberInfo);
-                }
-
-                // 본인 투표 정보
-                MemberVote myVote = memberVoteRepository.findByVoteIdAndMemberId(vote.getId(), memberId).orElse(null);
-
-                List<ClubResponseDTO.EachItemDTO> itemDTOs = new ArrayList<>();
-                for (int i = 0; i < itemCount; i++) {
-                    boolean isSelected = false;
-                    if (myVote != null) {
-                        isSelected = switch (i) {
-                            case 0 -> myVote.isItem1();
-                            case 1 -> myVote.isItem2();
-                            case 2 -> myVote.isItem3();
-                            case 3 -> myVote.isItem4();
-                            case 4 -> myVote.isItem5();
-                            default -> false;
-                        };
-                    }
-
-                    itemDTOs.add(
-                            ClubConverter.toEachItemDTO(
-                                    voteItems.get(i),
-                                    isSelected,
-                                    votedMembersByItem.get(i)
-                            )
-                    );
-                }
-
-                ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
-
-                yield ClubResponseDTO.ClubNoticeDetailDTO.builder()
-                        .isStaff(clubMember.isStaff())
-                        .noticeItem(voteDTO)
-                        .build();
-            }
-
+            case TAG_NOTICE -> getPureNoticeDetail(clubId, itemId, clubMember);
+            case TAG_MEETING -> getMeetingNoticeDetail(clubId, itemId, clubMember);
+            case TAG_VOTE -> getVoteDetail(clubId, itemId, memberId, clubMember);
             default -> throw new GeneralException(ErrorStatus.CLUB_INVALID_TAG_TYPE);
         };
+    }
 
+    /**
+     * 순수 공지사항 상세 조회
+     */
+    private ClubResponseDTO.ClubNoticeDetailDTO getPureNoticeDetail(Long clubId, Long itemId, ClubMember clubMember) {
+        Notice notice = noticeRepository.findByIdAndClubId(itemId, clubId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+
+        if (TAG_MEETING.equals(notice.getTag())) {
+            throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+        }
+
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .isStaff(clubMember.isStaff())
+                .noticeItem(ClubConverter.toPureNoticeDTO(notice))
+                .build();
+    }
+
+    /**
+     * 모임 공지사항 상세 조회
+     */
+    private ClubResponseDTO.ClubNoticeDetailDTO getMeetingNoticeDetail(Long clubId, Long itemId, ClubMember clubMember) {
+        Notice notice = noticeRepository.findWithMeetingByIdAndClubId(itemId, clubId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+
+        if (TAG_NOTICE.equals(notice.getTag())) {
+            throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+        }
+
+        BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .isStaff(clubMember.isStaff())
+                .noticeItem(ClubConverter.toMeetingNoticeDTO(notice, bookInfo))
+                .build();
+    }
+
+    /**
+     * 투표 상세 조회
+     */
+    private ClubResponseDTO.ClubNoticeDetailDTO getVoteDetail(Long clubId, Long itemId, String memberId, ClubMember clubMember) {
+        Vote vote = voteRepository.findByIdAndClubId(itemId, clubId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
+
+        List<String> voteItems = vote.getItems();
+        int itemCount = voteItems.size();
+
+        // 전체 투표 결과
+        List<MemberVote> memberVotes = memberVoteRepository.findAllByVoteId(vote.getId());
+
+        // 항목별 투표자 정보 수집
+        List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem = collectVotedMembersByItem(vote, memberVotes, itemCount);
+
+        // 본인 투표 정보
+        MemberVote myVote = memberVoteRepository.findByVoteIdAndMemberId(vote.getId(), memberId).orElse(null);
+
+        // 투표 항목 DTO 생성
+        List<ClubResponseDTO.EachItemDTO> itemDTOs = createVoteItemDTOs(voteItems, myVote, votedMembersByItem, itemCount);
+
+        ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
+
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .isStaff(clubMember.isStaff())
+                .noticeItem(voteDTO)
+                .build();
+    }
+
+    /**
+     * 투표 항목별 투표자 정보 수집
+     */
+    private List<List<MemberSharedDTO.BasicInfoDTO>> collectVotedMembersByItem(
+            Vote vote, List<MemberVote> memberVotes, int itemCount
+    ) {
+        // 항목별 투표자 정보 리스트 초기화
+        List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem = new ArrayList<>();
+        for (int i = 0; i < itemCount; i++) {
+            votedMembersByItem.add(new ArrayList<>());
+        }
+
+        // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
+        for (MemberVote mv : memberVotes) {
+            MemberSharedDTO.BasicInfoDTO memberInfo = getMemberInfoForVote(vote, mv);
+
+            if (mv.isItem1()) votedMembersByItem.get(0).add(memberInfo);
+            if (itemCount >= 2 && mv.isItem2()) votedMembersByItem.get(1).add(memberInfo);
+            if (itemCount >= 3 && mv.isItem3()) votedMembersByItem.get(2).add(memberInfo);
+            if (itemCount >= 4 && mv.isItem4()) votedMembersByItem.get(3).add(memberInfo);
+            if (itemCount >= 5 && mv.isItem5()) votedMembersByItem.get(4).add(memberInfo);
+        }
+
+        return votedMembersByItem;
+    }
+
+    /**
+     * 투표자의 멤버 정보 조회 (익명 여부에 따라 다르게 처리)
+     */
+    private MemberSharedDTO.BasicInfoDTO getMemberInfoForVote(Vote vote, MemberVote memberVote) {
+        if (vote.isAnonymity()) {
+            String voterName = "익명";
+            String profileImageUrl = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
+            return new MemberSharedDTO.BasicInfoDTO(voterName, profileImageUrl);
+        } else {
+            return memberQueryFacade.getMemberBasicInfoForShare(memberVote.getMemberId());
+        }
+    }
+
+    /**
+     * 투표 항목 DTO 리스트 생성
+     */
+    private List<ClubResponseDTO.EachItemDTO> createVoteItemDTOs(
+            List<String> voteItems, MemberVote myVote,
+            List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem, int itemCount
+    ) {
+        List<ClubResponseDTO.EachItemDTO> itemDTOs = new ArrayList<>();
+        for (int i = 0; i < itemCount; i++) {
+            boolean isSelected = isItemSelected(myVote, i);
+            itemDTOs.add(
+                    ClubConverter.toEachItemDTO(
+                            voteItems.get(i),
+                            isSelected,
+                            votedMembersByItem.get(i)
+                    )
+            );
+        }
+        return itemDTOs;
+    }
+
+    /**
+     * 특정 항목이 선택되었는지 확인
+     */
+    private boolean isItemSelected(MemberVote myVote, int itemIndex) {
+        if (myVote == null) {
+            return false;
+        }
+        return switch (itemIndex) {
+            case 0 -> myVote.isItem1();
+            case 1 -> myVote.isItem2();
+            case 2 -> myVote.isItem3();
+            case 3 -> myVote.isItem4();
+            case 4 -> myVote.isItem5();
+            default -> false;
+        };
     }
 
     /**
