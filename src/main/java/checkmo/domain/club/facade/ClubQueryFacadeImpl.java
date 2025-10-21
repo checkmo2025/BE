@@ -6,11 +6,13 @@ import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.service.query.*;
 import checkmo.domain.club.web.dto.MembershipResponseDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
@@ -133,52 +135,79 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     /**
      * ClubQueryService
-     * 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)
+     * 조건에 맞는 독서 모임 목록을 검색합니다.
      *
      * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
-     * @param keyword 검색 키워드 (모임명 등)
-     * @param name 클럽명 필터링 여부
-     * @param region 지역 필터링 여부
-     * @param participants 대상 필터링 여부
-     * @param cursorId 페이징 커서 ID
+     * @param filter 검색 필터 (keyword, name, region, participants)
+     * @param pageRequest 페이징 요청 (cursorId, size)
      * @return 검색된 모임 목록 DTO
      */
     @Override
-    public ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int name, int region, int participants, Long cursorId, Integer size) {
+    public ClubResponseDTO.ClubListDTO getClubList(String memberId, ClubRequestDTO.ClubSearchFilter filter, ClubRequestDTO.CursorPageRequest pageRequest) {
 
         // 1. 커서 초기화
-        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+        Long cursorId = (pageRequest.cursorId() == null || pageRequest.cursorId() == 0L) ? Long.MAX_VALUE : pageRequest.cursorId();
 
         // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
-        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize);
+        int pageSize = (pageRequest.size() == null || pageRequest.size() <= 0) ? DEFAULT_PAGE_SIZE : pageRequest.size();
 
-        // 2. 클럽 리스트 조회
-        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, name, region, participants, cursor, pageable);
+        // 3. Service에서 순수 엔티티 조회
+        List<Club> clubs = clubQueryService.getClubList(filter, cursorId, pageSize);
 
-        // 3. 페이징 처리
-        boolean hasNext = clubList.size() > pageSize;  // clubList의 크기가 PAGE_SIZE보다 크면 다음 페이지가 존재한다고 판단
-        if (hasNext) {
-            clubList = clubList.subList(0, pageSize); // 다음 페이지를 위해 마지막은 제거
-        }
-        Long nextCursor = hasNext && !clubList.isEmpty() ?
-                clubList.get(clubList.size() - 1).getClub().getClubId() : null; // 다음 커서 설정
+        // 4. 클럽 ID 리스트 추출
+        List<Long> clubIds = clubs.stream()
+                .map(Club::getId)
+                .toList();
 
-        // 4. 최종 DTO 변환
-        return ClubConverter.toClubListDTO(clubList, hasNext, nextCursor);
+        // 5. 클럽별 멤버 상태 배치 조회
+        Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
+
+        // 6. 클럽별 카테고리 ID 배치 조회
+        List<ClubCategory> allClubCategories = clubCategoryQueryService.findCategoriesByClubIds(clubIds);
+        Map<Long, List<Long>> categoryIdMap = ClubConverter.fromClubCategoriesToCategoryIdMap(allClubCategories);
+
+        // 7. DTO 변환
+        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubs.stream()
+                .map(club -> toClubWithMyStatusDTO(club, statusMap, categoryIdMap))
+                .toList();
+
+        // 8. 페이징 처리 (마지막 ID를 기반으로 다음 페이지 존재 여부 확인)
+        Long lastId = clubs.isEmpty() ? null : clubs.getLast().getId();
+        boolean hasNext = !clubs.isEmpty() && clubs.size() == pageSize;
+
+        // 9. 최종 DTO 변환
+        return ClubConverter.toClubListDTO(clubList, hasNext, lastId);
     }
 
     /**
      * ClubQueryService
-     * 독서 모임의 상세 정보를 조회합니다. (내부용)
+     * 독서 모임의 상세 정보를 조회합니다.
      *
      * @param clubId 조회할 모임 ID
-     * @param memberId 조회자 회원 ID
+     * @param memberId 조회자 회원 ID (운영진 권한 확인용)
      * @return 모임 상세 정보 DTO
      */
     @Override
     public ClubResponseDTO.ClubDetailDTO getClubInfo(Long clubId, String memberId) {
-        return clubQueryService.getClubInfo(clubId, memberId);
+
+        // 1. Service에서 순수 엔티티 조회
+        Club club = clubQueryService.getClubInfo(clubId);
+
+        // 2. 운영진 권한 확인
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        boolean isStaff = clubMember.isStaff();
+        if (!isStaff) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 3. 카테고리 ID 리스트 조회
+        List<ClubCategory> clubCategories = clubCategoryQueryService.findCategoriesByClub(clubId);
+        List<Long> categoryIds = clubCategories.stream()
+                .map(ClubCategory::getCategoryId)
+                .toList();
+
+        // 4. DTO 변환 후 반환
+        return ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
     }
 
     /**
@@ -886,5 +915,32 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return clubMember.isStaff();
+    }
+
+    /**
+     * Club 엔티티를 ClubWithMyStatusDTO로 변환합니다.
+     *
+     * @param club 클럽 엔티티
+     * @param statusMap 클럽별 멤버 상태 맵
+     * @param categoryIdMap 클럽별 카테고리 ID 맵
+     * @return ClubWithMyStatusDTO
+     */
+    private ClubResponseDTO.ClubWithMyStatusDTO toClubWithMyStatusDTO(
+            Club club,
+            Map<Long, ClubMember.ClubMemberStatus> statusMap,
+            Map<Long, List<Long>> categoryIdMap
+    ) {
+        ClubMember.ClubMemberStatus status = statusMap.get(club.getId());
+        boolean isStaff = status == ClubMember.ClubMemberStatus.STAFF;
+        boolean isMember = status != null;
+
+        List<Long> categoryIds = categoryIdMap.getOrDefault(club.getId(), List.of());
+
+        ClubResponseDTO.ClubDetailDTO clubDetailDTO = ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
+
+        return ClubResponseDTO.ClubWithMyStatusDTO.builder()
+                .club(clubDetailDTO)
+                .isMember(isMember)
+                .build();
     }
 }
