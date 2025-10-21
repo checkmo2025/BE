@@ -1,6 +1,7 @@
 package checkmo.domain.club.facade;
 
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.global.dto.ClubSharedDTO;
@@ -46,14 +47,11 @@ public interface ClubQueryFacade {
      * 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)
      *
      * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
-     * @param keyword 검색 키워드 (모임명 등)
-     * @param name 클럽명 필터링 여부
-     * @param region 지역 필터링 여부
-     * @param participants 대상 필터링 여부
-     * @param cursorId 페이징 커서 ID
+     * @param filter 검색 필터 (keyword, name, region, participants)
+     * @param pageRequest 페이징 요청 (cursorId, size)
      * @return 검색된 모임 목록 DTO
      */
-    ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int name, int region, int participants, Long cursorId, Integer size);
+    ClubResponseDTO.ClubListDTO getClubList(String memberId, ClubRequestDTO.ClubSearchFilter filter, ClubRequestDTO.CursorPageRequest pageRequest);
 
     /**
      * ClubQueryService

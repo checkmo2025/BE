@@ -13,6 +13,47 @@ import java.util.List;
 
 public class ClubRequestDTO {
 
+    /**
+     * 클럽 검색 필터
+     *
+     * @param keyword 검색 키워드
+     * @param name 클럽명 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
+     * @param region 지역 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
+     * @param participants 대상 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
+     */
+    public record ClubSearchFilter(
+            String keyword,
+            Integer name,
+            Integer region,
+            Integer participants
+    ) {
+        public ClubSearchFilter {
+            if (keyword == null) {
+                keyword = "";
+            }
+            if (name == null) {
+                name = 0;
+            }
+            if (region == null) {
+                region = 0;
+            }
+            if (participants == null) {
+                participants = 0;
+            }
+        }
+    }
+
+    /**
+     * 커서 기반 페이징 요청
+     *
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null)
+     * @param size 페이지 크기
+     */
+    public record CursorPageRequest(
+            Long cursorId,
+            Integer size
+    ) {}
+
     @Getter
     @NoArgsConstructor
     public static class ClubMemberJoinDTO {
