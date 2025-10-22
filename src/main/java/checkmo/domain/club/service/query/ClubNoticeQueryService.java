@@ -1,9 +1,9 @@
 package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
+import checkmo.domain.club.entity.announcement.MemberVote;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.announcement.Vote;
-import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -11,33 +11,92 @@ import java.util.List;
 public interface ClubNoticeQueryService {
 
     /**
-     * 공지 or 투표 상세 조회
+     * 순수 공지사항(일반 공지) 조회
      *
      * @param clubId 클럽 ID
-     * @param itemId 공지 또는 투표 ID
-     * @param tag "공지", "모임", "투표" 중 하나
-     * @return 공통된 NoticeItem DTO
+     * @param noticeId 공지사항 ID
+     * @return 공지사항 엔티티
      */
-    ClubResponseDTO.ClubNoticeDetailDTO getNoticeOrVoteDetail(Long clubId, Long itemId, String tag, String memberId);
+    Notice getNotice(Long clubId, Long noticeId);
 
     /**
-     * 클럽의 모든 공지와 투표를 조회합니다.
+     * 모임 공지사항 조회 (Meeting 포함)
      *
      * @param clubId 클럽 ID
-     * @param onlyImportant 중요 공지/투표만 조회할지 여부
-     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
-     * @return 공지와 투표 목록 DTO
+     * @param noticeId 공지사항 ID
+     * @return 공지사항 엔티티 (Meeting fetch join)
      */
-    List<ClubResponseDTO.NoticeItem> getAllNoticesAndVotes(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable);
+    Notice getNoticeWithMeeting(Long clubId, Long noticeId);
 
     /**
-     * 회원이 가입한 클럽의 모든 공지와 투표를 조회합니다.
+     * 투표 조회
      *
-     * @param onlyImportant 중요 공지/투표만 조회할지 여부
-     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
-     * @return 공지와 투표 목록 DTO
+     * @param clubId 클럽 ID
+     * @param voteId 투표 ID
+     * @return 투표 엔티티
      */
-    List<ClubResponseDTO.ClubNoticeWithClubDTO> getMemberNoticesAndVotes(String memberId, boolean onlyImportant, Long cursorId, Pageable pageable);
+    Vote getVote(Long clubId, Long voteId);
+
+    /**
+     * 특정 투표의 모든 투표 내역 조회
+     *
+     * @param voteId 투표 ID
+     * @return 투표 내역 리스트
+     */
+    List<MemberVote> getMemberVotesByVoteId(Long voteId);
+
+    /**
+     * 특정 회원의 투표 내역 조회
+     *
+     * @param voteId 투표 ID
+     * @param memberId 회원 ID
+     * @return 회원의 투표 내역 (없으면 null)
+     */
+    MemberVote getMyVote(Long voteId, String memberId);
+
+    /**
+     * 클럽의 공지사항 리스트 조회
+     *
+     * @param clubId 클럽 ID
+     * @param onlyImportant 중요 공지만 조회 여부
+     * @param cursorId 커서 ID
+     * @param pageable 페이징 정보
+     * @return 공지사항 리스트
+     */
+    List<Notice> getNoticeList(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable);
+
+    /**
+     * 클럽의 투표 리스트 조회
+     *
+     * @param clubId 클럽 ID
+     * @param onlyImportant 중요 투표만 조회 여부
+     * @param cursorId 커서 ID
+     * @param pageable 페이징 정보
+     * @return 투표 리스트
+     */
+    List<Vote> getVoteList(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable);
+
+    /**
+     * 여러 클럽의 공지사항 리스트 조회
+     *
+     * @param clubIds 클럽 ID 리스트
+     * @param onlyImportant 중요 공지만 조회 여부
+     * @param cursorId 커서 ID
+     * @param pageable 페이징 정보
+     * @return 공지사항 리스트
+     */
+    List<Notice> getNoticeListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId, Pageable pageable);
+
+    /**
+     * 여러 클럽의 투표 리스트 조회
+     *
+     * @param clubIds 클럽 ID 리스트
+     * @param onlyImportant 중요 투표만 조회 여부
+     * @param cursorId 커서 ID
+     * @param pageable 페이징 정보
+     * @return 투표 리스트
+     */
+    List<Vote> getVoteListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId, Pageable pageable);
 
     /**
      * 공지사항을 검증합니다.
