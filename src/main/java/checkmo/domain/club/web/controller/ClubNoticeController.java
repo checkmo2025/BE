@@ -112,7 +112,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
     })
     @PostMapping("/votes")
-    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> createVote(
+    public ApiResponse<Long> createVote(
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestBody @Valid ClubRequestDTO.CreateClubVoteDTO request
@@ -141,7 +141,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "투표를 찾을 수 없음")
     })
     @PostMapping("/votes/{voteId}/submit")
-    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> submitVote(
+    public ApiResponse<Long> submitVote(
             @PathVariable Long clubId,
             @PathVariable Long voteId,
             @CurrentId String memberId,
