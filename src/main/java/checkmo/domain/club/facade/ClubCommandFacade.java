@@ -95,7 +95,7 @@ public interface ClubCommandFacade {
      * @param request 투표 생성 요청 DTO
      * @return 생성된 투표 ID
      */
-    ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request); //
+    Long createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request);
 
     /**
      * ClubNoticeCommandService
@@ -115,9 +115,9 @@ public interface ClubCommandFacade {
      * @param memberId 참여자 회원 ID
      * @param voteId 투표 ID
      * @param request 투표 선택 항목 DTO
-     * @return 참여 결과가 반영된 투표 상세 DTO
+     * @return 투표 ID
      */
-    ClubResponseDTO.ClubNoticeDetailDTO haveVote(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request);
+    Long haveVote(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request);
 
     /**
      * ClubBookRecommendCommandService

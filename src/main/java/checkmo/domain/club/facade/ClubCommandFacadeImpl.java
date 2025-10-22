@@ -159,14 +159,14 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request) {
+    public Long createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request) {
         // 1. 유효성 검증(club, clubMember)
         Club club = clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 2. 투표 생성 및 DTO 반환
+        // 2. 투표 생성 및 ID 반환
         Vote vote = clubNoticeCommandService.createVote(club, clubMember, request);
-        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, vote.getId(), "투표", memberId); //TODO: 너무 복잡해서 분리할 수 없었음, 반환값 일괄적으로 수정할 때 수정
+        return vote.getId();
     }
 
     @Override
@@ -180,16 +180,13 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO haveVote(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request) {
+    public Long haveVote(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request) {
         // 1. 유효성 검증(club, clubMember)
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 2. 투표 참여
-        voteId = clubNoticeCommandService.haveVote(clubId, clubMember, voteId, request);
-
-        // 2. 투표 결과를 다시 조회
-        return clubNoticeQueryService.getNoticeOrVoteDetail(clubId, voteId, "투표", memberId); //TODO: 너무 복잡해서 분리할 수 없었음, 반환값 일괄적으로 수정할 때 수정
+        // 2. 투표 참여 및 투표 ID 반환
+        return clubNoticeCommandService.haveVote(clubId, clubMember, voteId, request);
     }
 
     /**
