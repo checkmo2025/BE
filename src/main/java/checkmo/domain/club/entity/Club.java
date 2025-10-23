@@ -2,13 +2,27 @@ package checkmo.domain.club.entity;
 
 import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.global.entity.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
@@ -20,29 +34,41 @@ public class Club extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, unique = true)
     private String name;
+
     private String description;
+
     private String profileImgUrl;
+
     @Column(nullable = false)
     private boolean open;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "club_participants", joinColumns = @JoinColumn(name = "club_id"))
     @Column(name = "participant_type")
     private List<ParticipantType> participantTypes = new ArrayList<>();
+
     private String region;
+
     private String insta;
+
     private String kakao;
+
     @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
     private List<ClubMember> clubMembers = new ArrayList<>();
+
     @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
     private List<ClubCategory> clubCategories = new ArrayList<>();
+
     @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.REMOVE)
     private List<Meeting> meetings = new ArrayList<>();
+
     @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
     private List<Vote> votes = new ArrayList<>();
@@ -52,31 +78,39 @@ public class Club extends BaseEntity {
         clubMember.setClub(this);
     }
 
-    public void updateFromDetailDTO(ClubRequestDTO.ClubDetailDTO dto) {
-        if (dto.getName() != null) {
-            this.name = dto.getName();
+    public void updateField(
+            String name,
+            String description,
+            String profileImgUrl,
+            List<ParticipantType> participantTypes,
+            String region,
+            String insta,
+            String kakao
+    ) {
+        if (name != null) {
+            this.name = name;
         }
-        if (dto.getDescription() != null) {
-            this.description = dto.getDescription();
+        if (description != null) {
+            this.description = description;
         }
-        if (dto.getProfileImageUrl() != null) {
-            this.profileImgUrl = dto.getProfileImageUrl();
+        if (profileImgUrl != null) {
+            this.profileImgUrl = profileImgUrl;
         }
 
         // open 필드는 수정 불가 → 반영하지 않음
 
-        if (dto.getParticipantTypes() != null) {
+        if (participantTypes != null) {
             this.participantTypes.clear();
-            this.participantTypes.addAll(dto.getParticipantTypes());
+            this.participantTypes.addAll(participantTypes);
         }
-        if (dto.getRegion() != null) {
-            this.region = dto.getRegion();
+        if (region != null) {
+            this.region = region;
         }
-        if (dto.getInsta() != null) {
-            this.insta = dto.getInsta();
+        if (insta != null) {
+            this.insta = insta;
         }
-        if (dto.getKakao() != null) {
-            this.kakao = dto.getKakao();
+        if (kakao != null) {
+            this.kakao = kakao;
         }
     }
 

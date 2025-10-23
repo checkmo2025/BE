@@ -9,16 +9,20 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.domain.club.service.command.*;
+import checkmo.domain.club.service.command.ClubBookRecommendCommandService;
+import checkmo.domain.club.service.command.ClubManagementCommandService;
+import checkmo.domain.club.service.command.ClubMeetingCommandService;
+import checkmo.domain.club.service.command.ClubMembershipCommandService;
+import checkmo.domain.club.service.command.ClubNoticeCommandService;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
-import checkmo.domain.club.service.query.ClubNoticeQueryService;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
+import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
@@ -54,66 +58,62 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
-    private final ClubNoticeQueryService clubNoticeQueryService;
 
-    /**
-     * ClubManagementCommandService
-     * 새로운 독서 모임을 생성합니다. (내부용)
-     *
-     * @param memberId 생성자 회원 ID
-     * @param request 모임 생성 요청 정보 DTO
-     * @return 생성된 독서 모임의 상세 정보 DTO
-     */
     @Override
     public Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
-        return clubManagementCommandService.createClub(memberId, request);
+        // 1. 운영진 멤버 엔티티 생성
+        Member memberProxy = memberQueryFacade.findMemberReferenceById(memberId);
+        ClubMember clubMember = ClubConverter.toClubMemberEntity(null, memberProxy, ClubMember.ClubMemberStatus.STAFF,
+                null);
+
+        // 2. 독서 모임 생성 및 ID 반환 (내부적으로 clubMember, clubCategory 처리)
+        return clubManagementCommandService.createClub(clubMember, request);
     }
 
-    /**
-     * ClubManagementCommandService
-     * 기존 독서 모임 정보를 수정합니다. (내부용)
-     *
-     * @param clubId 수정할 모임 ID
-     * @param memberId 수정 요청한 회원 ID
-     * @param request 모임 수정 요청 정보 DTO
-     */
     @Override
     public void updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request) {
-        clubManagementCommandService.updateClub(clubId, memberId, request);
+        // 1. 유효성 검증(club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        clubManagementCommandService.updateClub(club, clubMember, request);
     }
 
     /**
-     * ClubMembershipCommandService
-     * 독서 모임에 가입을 신청합니다. (내부용)
+     * ClubMembershipCommandService 독서 모임에 가입을 신청합니다. (내부용)
      *
-     * @param clubId 모임 ID
+     * @param clubId   모임 ID
      * @param memberId 신청자 회원 ID
-     * @param request 가입 신청 메시지 DTO
+     * @param request  가입 신청 메시지 DTO
      * @return 가입 신청 후의 모임 정보 DTO
      */
     @Override
-    public ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request) {
+    public ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId,
+                                                ClubRequestDTO.ClubMemberJoinDTO request) {
         Club club = clubMembershipCommandService.joinClub(clubId, memberId, request);
         return ClubConverter.toClubInfoDTO(club);
     }
 
     /**
-     * ClubMembershipCommandService
-     * 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
+     * ClubMembershipCommandService 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
      *
-     * @param clubId 독서 모임 ID
-     * @param targetMemberId 수정 대상 회원 ID
+     * @param clubId          독서 모임 ID
+     * @param targetMemberId  수정 대상 회원 ID
      * @param currentMemberId 요청자(운영진) 회원 ID
-     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @param status          수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
      * @return 수정된 회원의 응답 DTO
      */
     @Override
-    public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status) {
-        ClubMember updatedClubMember = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId, currentMemberId, status);
+    public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId,
+                                                                              String currentMemberId, String status) {
+        ClubMember updatedClubMember = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId,
+                currentMemberId, status);
 
         // 외부 도메인 정보 조회 및 DTO 변환
-        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(updatedClubMember.getMemberId());
-        ClubResponseDTO.ClubMemberDTO updatedClubMemberDTO = ClubConverter.toClubMemberDTO(updatedClubMember, memberInfo);
+        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(
+                updatedClubMember.getMemberId());
+        ClubResponseDTO.ClubMemberDTO updatedClubMemberDTO = ClubConverter.toClubMemberDTO(updatedClubMember,
+                memberInfo);
 
         // 운영진 여부를 포함해서 반환
         return ClubResponseDTO.ClubMemberUpdateResponseDTO.builder()
@@ -123,10 +123,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     /**
-     * ClubMembershipCommandService
-     * 독서 모임에서 탈퇴합니다. (내부용)
+     * ClubMembershipCommandService 독서 모임에서 탈퇴합니다. (내부용)
      *
-     * @param clubId 모임 ID
+     * @param clubId   모임 ID
      * @param memberId 탈퇴할 회원 ID
      */
     @Override
@@ -135,7 +134,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO createPureNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request) {
+    public ClubResponseDTO.ClubNoticeDetailDTO createPureNotice(Long clubId, String memberId,
+                                                                ClubRequestDTO.CreateClubNoticeDTO request) {
         // 1. 유효성 검증 (club, clubMember)
         Club club = clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
@@ -190,42 +190,43 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     /**
-     * ClubBookRecommendCommandService
-     * 모임에 책을 추천합니다. (내부용)
+     * ClubBookRecommendCommandService 모임에 책을 추천합니다. (내부용)
      *
-     * @param clubId 모임 ID
+     * @param clubId   모임 ID
      * @param memberId 추천자 회원 ID
-     * @param request 추천 책 정보 DTO
+     * @param request  추천 책 정보 DTO
      * @return 추천된 책의 상세 정보 DTO
      */
     @Override
-    public ClubResponseDTO.BookRecommendDetailDTO recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommendDTO request) {
+    public ClubResponseDTO.BookRecommendDetailDTO recommendBook(Long clubId, String memberId,
+                                                                ClubRequestDTO.CreateBookRecommendDTO request) {
         Long bookRecommendId = clubBookRecommendCommandService.recommendBook(clubId, memberId, request);
         return clubQueryFacade.getRecommendedBookDetail(clubId, bookRecommendId, memberId);
     }
 
     /**
-     * ClubBookRecommendCommandService
-     * 추천한 책 정보를 수정합니다. (내부용)
+     * ClubBookRecommendCommandService 추천한 책 정보를 수정합니다. (내부용)
      *
-     * @param clubId 모임 ID
-     * @param memberId 요청자 회원 ID
+     * @param clubId          모임 ID
+     * @param memberId        요청자 회원 ID
      * @param bookRecommendId 수정할 추천 책 ID
-     * @param request 수정할 정보 DTO
+     * @param request         수정할 정보 DTO
      * @return 수정된 책의 상세 정보 DTO
      */
     @Override
-    public ClubResponseDTO.BookRecommendDetailDTO updateBookRecommend(Long clubId, String memberId, Long bookRecommendId, ClubRequestDTO.UpdateBookRecommendDTO request) {
-        Long updateBookRecommendId = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId, bookRecommendId, request);
+    public ClubResponseDTO.BookRecommendDetailDTO updateBookRecommend(Long clubId, String memberId,
+                                                                      Long bookRecommendId,
+                                                                      ClubRequestDTO.UpdateBookRecommendDTO request) {
+        Long updateBookRecommendId = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId,
+                bookRecommendId, request);
         return clubQueryFacade.getRecommendedBookDetail(clubId, updateBookRecommendId, memberId);
     }
 
     /**
-     * ClubBookRecommendCommandService
-     * 추천한 책을 삭제합니다. (내부용)
+     * ClubBookRecommendCommandService 추천한 책을 삭제합니다. (내부용)
      *
-     * @param clubId 모임 ID
-     * @param memberId 요청자 회원 ID
+     * @param clubId          모임 ID
+     * @param memberId        요청자 회원 ID
      * @param bookRecommendId 삭제할 추천 책 ID
      */
     @Override
@@ -293,7 +294,9 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     }
 
     @Override
-    public MeetingResponseDTO.TopicSelectionDTO selectOrCancelTopic(Long meetingId, Long topicId, MeetingRequestDTO.TopicSelectionDTO request, String memberId) {
+    public MeetingResponseDTO.TopicSelectionDTO selectOrCancelTopic(Long meetingId, Long topicId,
+                                                                    MeetingRequestDTO.TopicSelectionDTO request,
+                                                                    String memberId) {
         // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
@@ -338,7 +341,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
             maxAttempts = 5,
             backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
     )
-    public Long updateBookReview(String memberId, Long meetingId, Long reviewId, BookShelfRequestDTO.BookReviewDTO request) {
+    public Long updateBookReview(String memberId, Long meetingId, Long reviewId,
+                                 BookShelfRequestDTO.BookReviewDTO request) {
         // 1. 유효성 검증 (meeting, clubMember, bookReview)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
