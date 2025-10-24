@@ -42,19 +42,19 @@ public interface ClubCommandFacade {
      * @param request 가입 신청 메시지 DTO
      * @return 가입 신청 후의 모임 정보 DTO
      */
-    ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request); //
+    Long joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request); //
 
     /**
-     * ClubMembershipCommandService
-     * 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
+     * ClubMemberCommandService 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
      *
-     * @param clubId 독서 모임 ID
-     * @param targetMemberId 수정 대상 회원 ID
-     * @param currentMemberId 요청자(운영진) 회원 ID
-     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @param clubId             독서 모임 ID
+     * @param actorId            요청자(운영진) 회원 ID
+     * @param targetClubMemberId 수정 대상 회원 ID
+     * @param status             수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
      * @return 수정된 회원의 응답 DTO
      */
-    ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status);
+    ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, String actorId,
+                                                                       Long targetClubMemberId, String status);
 
     /**
      * ClubMembershipCommandService

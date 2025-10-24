@@ -12,7 +12,7 @@ import checkmo.domain.club.entity.meeting.Meeting;
 import checkmo.domain.club.service.command.ClubBookRecommendCommandService;
 import checkmo.domain.club.service.command.ClubManagementCommandService;
 import checkmo.domain.club.service.command.ClubMeetingCommandService;
-import checkmo.domain.club.service.command.ClubMembershipCommandService;
+import checkmo.domain.club.service.command.ClubMemberCommandService;
 import checkmo.domain.club.service.command.ClubNoticeCommandService;
 import checkmo.domain.club.service.query.ClubMeetingQueryService;
 import checkmo.domain.club.service.query.ClubMemberQueryService;
@@ -52,7 +52,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     private final ClubManagementCommandService clubManagementCommandService;
     private final ClubBookRecommendCommandService clubBookRecommendCommandService;
     private final ClubNoticeCommandService clubNoticeCommandService;
-    private final ClubMembershipCommandService clubMembershipCommandService;
+    private final ClubMemberCommandService clubMemberCommandService;
 
     // 자신의 QueryService
     private final ClubQueryService clubQueryService;
@@ -62,8 +62,8 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     @Override
     public Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
         // 1. 운영진 멤버 엔티티 생성
-        Member memberProxy = memberQueryFacade.findMemberReferenceById(memberId);
-        ClubMember clubMember = ClubConverter.toClubMemberEntity(null, memberProxy, ClubMember.ClubMemberStatus.STAFF,
+        Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
+        ClubMember clubMember = ClubConverter.toClubMemberEntity(null, proxyMember, ClubMember.ClubMemberStatus.STAFF,
                 null);
 
         // 2. 독서 모임 생성 및 ID 반환 (내부적으로 clubMember, clubCategory 처리)
@@ -79,35 +79,31 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         clubManagementCommandService.updateClub(club, clubMember, request);
     }
 
-    /**
-     * ClubMembershipCommandService 독서 모임에 가입을 신청합니다. (내부용)
-     *
-     * @param clubId   모임 ID
-     * @param memberId 신청자 회원 ID
-     * @param request  가입 신청 메시지 DTO
-     * @return 가입 신청 후의 모임 정보 DTO
-     */
     @Override
-    public ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId,
-                                                ClubRequestDTO.ClubMemberJoinDTO request) {
-        Club club = clubMembershipCommandService.joinClub(clubId, memberId, request);
-        return ClubConverter.toClubInfoDTO(club);
+    public Long joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request) {
+        // 1. 유효성 검증(club)
+        Club club = clubQueryService.validateClub(clubId);
+
+        // 2. 회원 프록시 객체 조회
+        Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
+
+        // 3. 독서 모임 가입 신청 및 가입된 클럽 멤버 ID 반환
+        return clubMemberCommandService.joinClub(club, proxyMember, request).getId();
     }
 
-    /**
-     * ClubMembershipCommandService 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
-     *
-     * @param clubId          독서 모임 ID
-     * @param targetMemberId  수정 대상 회원 ID
-     * @param currentMemberId 요청자(운영진) 회원 ID
-     * @param status          수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
-     * @return 수정된 회원의 응답 DTO
-     */
     @Override
-    public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId,
-                                                                              String currentMemberId, String status) {
-        ClubMember updatedClubMember = clubMembershipCommandService.updateClubMemberStatus(clubId, targetMemberId,
-                currentMemberId, status);
+    public ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, String actorId,
+                                                                              Long targetClubMemberId,
+                                                                              String status) {
+        // 1. 유효성 검증(club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember actor = clubMemberQueryService.validateClubMember(clubId, actorId);
+
+        // 2. 독서 모임 회원 등급 수정
+        ClubMember updatedClubMember = clubMemberCommandService.updateClubMemberStatus(club, actor,
+                targetClubMemberId, status);
+
+        // === 3. DTO 변환 및 반환 준비 === //
 
         // 외부 도메인 정보 조회 및 DTO 변환
         MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(
@@ -122,15 +118,14 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
                 .build();
     }
 
-    /**
-     * ClubMembershipCommandService 독서 모임에서 탈퇴합니다. (내부용)
-     *
-     * @param clubId   모임 ID
-     * @param memberId 탈퇴할 회원 ID
-     */
     @Override
     public void leaveClub(Long clubId, String memberId) {
-        clubMembershipCommandService.leaveClub(clubId, memberId);
+        // 1. 유효성 검증(club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 독서 모임 탈퇴
+        clubMemberCommandService.leaveClub(club, clubMember);
     }
 
     @Override

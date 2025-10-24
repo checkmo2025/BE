@@ -226,7 +226,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 가입 신청을 했거나, 가입이 승인된 상태입니다."),
     })
     @PostMapping("/{clubId}/join")
-    public ApiResponse<ClubResponseDTO.ClubInfoDTO> joinClub(
+    public ApiResponse<Long> joinClub(
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.ClubMemberJoinDTO request
@@ -293,7 +293,8 @@ public class ClubController {
             @CurrentId String currentMemberId,
             @RequestParam(defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
     ) {
-        return ApiResponse.onSuccess(clubCommandFacade.updateClubMemberStatus(clubId, memberId, currentMemberId, status));
+        return ApiResponse.onSuccess(
+                clubCommandFacade.updateClubMemberStatus(clubId, currentMemberId, memberId, status));
     }
 
     /**
