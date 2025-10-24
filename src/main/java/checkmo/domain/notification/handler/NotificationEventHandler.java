@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
@@ -18,7 +19,7 @@ public class NotificationEventHandler {
     private final NotificationCommandService notificationCommandService;
 
     @Async("notificationExecutor")
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleNotificationEvent(LikeEvent event) {
         try {
             notificationCommandService.createNotification(event);
@@ -28,7 +29,7 @@ public class NotificationEventHandler {
     }
 
     @Async("notificationExecutor")
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleNotificationEvent(FollowEvent event) {
         try {
             notificationCommandService.createNotification(event);
@@ -38,7 +39,7 @@ public class NotificationEventHandler {
     }
 
     @Async("notificationExecutor")
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleNotificationEvent(JoinClubEvent event) {
         try {
             notificationCommandService.createNotification(event);
