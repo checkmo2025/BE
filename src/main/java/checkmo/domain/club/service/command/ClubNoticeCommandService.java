@@ -37,7 +37,7 @@ public interface ClubNoticeCommandService {
      * @param club 독서 모임
      * @param clubMember 투표 생성 요청자 (운영진인지 확인 필요)
      * @param request 투표 생성 요청 DTO
-     * @return 생성된 투표 ID
+     * @return 생성된 투표
      */
     Vote createVote(Club club, ClubMember clubMember, ClubRequestDTO.CreateClubVoteDTO request);
 
