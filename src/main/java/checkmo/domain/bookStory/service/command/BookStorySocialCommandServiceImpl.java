@@ -46,13 +46,18 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
                     return false;
                 })
                 .orElseGet(() -> {
-                    // 좋아요가 없다면 새로 생성하고 true 반환
+                    // 사전 체크: 대부분의 중복을 사전 차단 (race condition 최소화)
+                    if (bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStoryId)) {
+                        return true; // 이미 좋아요 존재
+                    }
+
+                    // 좋아요가 없다면 새로 생성
                     boolean created = createAndSaveBookStoryLiked(bookStory, proxyMember);
                     if (created && !memberId.equals(bookStory.getMemberId())) {
-                        // 좋아요가 생성되고, 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
+                        // 실제로 생성되었고, 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
                         eventPublisher.publishEvent(new LikeEvent(memberId, bookStory.getMemberId(), bookStory.getId()));
                     }
-                    return created;
+                    return true; // 생성되었거나 중복이거나, 최종적으로 좋아요 존재
                 });
     }
 
@@ -70,10 +75,10 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
 
             bookStoryLikedRepository.save(bookStoryLiked);
             bookStory.addBookStoryLiked(bookStoryLiked);
-            return true; // 정상적으로 생성됨
+            return true; // 이번 호출에서 새로 생성함
         } catch (DataIntegrityViolationException e) {
-            // 이미 존재하는 경우는 생성 X
-            return false; // 중복으로 인해 생성 안됨
+            // 유니크 제약 조건 위반 = 좋아요가 이미 존재 (exists와 save 사이의 race condition)
+            return false; // 이번 호출에서는 생성하지 않았음 (하지만 좋아요는 존재함)
         }
     }
 }
