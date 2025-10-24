@@ -42,8 +42,18 @@ public class BookReview extends BaseEntity {
 
     // == 연관관계 메서드 == //
     public void setClubMember(ClubMember clubMember) {
+        if (this.clubMember == clubMember) return; // 동일 객체 설정 방지
+
+        // 1. 이전 부모 객체로부터 분리
+        if (this.clubMember != null) {
+            this.clubMember.getBookReviews().remove(this);
+        }
+
+        // 2. 새로운 부모 객체와 연결
         this.clubMember = clubMember;
-        if (!clubMember.getBookReviews().contains(this)) {
+
+        // 3. null 검사 & 새로운 부모 객체 연결
+        if (clubMember != null && !clubMember.getBookReviews().contains(this)) {
             clubMember.getBookReviews().add(this);
         }
     }
@@ -56,7 +66,14 @@ public class BookReview extends BaseEntity {
     }
 
     public void setMeeting(Meeting meeting) {
+        if (this.meeting == meeting) return;
+
+        if (this.meeting != null) {
+            this.meeting.getBookReviews().remove(this);
+        }
+
         this.meeting = meeting;
+        
         if (!meeting.getBookReviews().contains(this)) {
             meeting.getBookReviews().add(this);
         }

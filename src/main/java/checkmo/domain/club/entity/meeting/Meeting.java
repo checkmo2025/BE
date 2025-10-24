@@ -107,8 +107,12 @@ public class Meeting extends BaseEntity {
 
     // == 연관관계 메서드 == //
     public void setClub(Club club) {
+        if (this.club == club) return;
+        if (this.club != null) {
+            this.club.getMeetings().remove(this);
+        }
         this.club = club;
-        if (!club.getMeetings().contains(this)) {
+        if (club != null && !club.getMeetings().contains(this)) {
             club.getMeetings().add(this);
         }
     }

@@ -39,8 +39,12 @@ public class TeamTopic extends BaseEntity {
 
     // == 연관관계 메서드 == //
     public void setTeam(Team team) {
+        if (this.team == team) return;
+        if (this.team != null) {
+            this.team.getTeamTopics().remove(this);
+        }
         this.team = team;
-        if (!team.getTeamTopics().contains(this)) {
+        if (team != null && !team.getTeamTopics().contains(this)) {
             team.getTeamTopics().add(this);
         }
     }
@@ -53,8 +57,12 @@ public class TeamTopic extends BaseEntity {
     }
 
     public void setTopic(Topic topic) {
+        if (this.topic == topic) return;
+        if (this.topic != null) {
+            this.topic.getTeamTopics().remove(this);
+        }
         this.topic = topic;
-        if (!topic.getTeamTopics().contains(this)) {
+        if (topic != null && !topic.getTeamTopics().contains(this)) {
             topic.getTeamTopics().add(this);
         }
     }

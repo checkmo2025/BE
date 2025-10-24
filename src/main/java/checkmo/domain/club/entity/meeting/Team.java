@@ -1,5 +1,7 @@
 package checkmo.domain.club.entity.meeting;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +47,13 @@ public class Team extends BaseEntity {
 
     // == 연관관계 메서드 == //
     public void setMeeting(Meeting meeting) {
+        if (meeting == null) {
+            throw new GeneralException(ErrorStatus.TEAM_MEETING_REQUIRED);
+        }
+        if (this.meeting == meeting) return;
+        if (this.meeting != null) {
+            this.meeting.getTeams().remove(this);
+        }
         this.meeting = meeting;
         if (!meeting.getTeams().contains(this)) {
             meeting.getTeams().add(this);
