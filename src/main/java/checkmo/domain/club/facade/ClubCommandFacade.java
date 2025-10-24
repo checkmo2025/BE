@@ -27,9 +27,9 @@ public interface ClubCommandFacade {
      * ClubManagementCommandService
      * 기존 독서 모임 정보를 수정합니다. (내부용)
      *
-     * @param clubId   수정할 모임 ID
+     * @param clubId 수정할 모임 ID
      * @param memberId 수정 요청한 회원 ID
-     * @param request  모임 수정 요청 정보 DTO
+     * @param request 모임 수정 요청 정보 DTO
      */
     void updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request);
 
@@ -42,19 +42,19 @@ public interface ClubCommandFacade {
      * @param request 가입 신청 메시지 DTO
      * @return 가입 신청 후의 모임 정보 DTO
      */
-    ClubResponseDTO.ClubInfoDTO joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request); //
+    Long joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request); //
 
     /**
-     * ClubMembershipCommandService
-     * 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
+     * ClubMemberCommandService 독서 모임 회원의 등급(상태/역할)을 수정합니다. (내부용)
      *
-     * @param clubId 독서 모임 ID
-     * @param targetMemberId 수정 대상 회원 ID
-     * @param currentMemberId 요청자(운영진) 회원 ID
-     * @param status 수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
+     * @param clubId             독서 모임 ID
+     * @param actorId            요청자(운영진) 회원 ID
+     * @param targetClubMemberId 수정 대상 회원 ID
+     * @param status             수정할 등급 (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
      * @return 수정된 회원의 응답 DTO
      */
-    ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, Long targetMemberId, String currentMemberId, String status);
+    ClubResponseDTO.ClubMemberUpdateResponseDTO updateClubMemberStatus(Long clubId, String actorId,
+                                                                       Long targetClubMemberId, String status);
 
     /**
      * ClubMembershipCommandService
@@ -66,39 +66,39 @@ public interface ClubCommandFacade {
     void leaveClub(Long clubId, String memberId);
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임에 공지사항을 작성합니다. (내부용)
      *
      * @param clubId 모임 ID
      * @param memberId 작성자(운영진) 회원 ID
      * @param request 공지사항 작성 요청 DTO
-     * @return 작성된 공지사항의 상세 정보 DTO
+     * @return 생성된 공지사항 id
      */
-    ClubResponseDTO.ClubNoticeDetailDTO createNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request); //
+    ClubResponseDTO.ClubNoticeDetailDTO createPureNotice(Long clubId, String memberId, ClubRequestDTO.CreateClubNoticeDTO request); //
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임의 공지사항을 삭제합니다. (내부용)
      *
      * @param clubId 모임 ID
      * @param memberId 요청자(운영진) 회원 ID
      * @param noticeId 삭제할 공지사항 ID
      */
-    void deleteNotice(Long clubId, String memberId, Long noticeId); //
+    void deletePureNotice(Long clubId, String memberId, Long noticeId); //
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임에 투표를 생성합니다. (내부용)
      *
      * @param clubId 모임 ID
      * @param memberId 작성자(운영진) 회원 ID
      * @param request 투표 생성 요청 DTO
-     * @return 생성된 투표가 포함된 공지사항 상세 DTO
+     * @return 생성된 투표 ID
      */
-    ClubResponseDTO.ClubNoticeDetailDTO createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request); //
+    Long createVote(Long clubId, String memberId, ClubRequestDTO.CreateClubVoteDTO request);
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임의 투표를 삭제합니다. (내부용)
      *
      * @param clubId 모임 ID
@@ -108,16 +108,16 @@ public interface ClubCommandFacade {
     void deleteVote(Long clubId, String memberId, Long voteId); //
 
     /**
-     * ClubCommunicationCommandService
+     * ClubNoticeCommandService
      * 모임의 투표에 참여합니다. (내부용)
      *
      * @param clubId 모임 ID
      * @param memberId 참여자 회원 ID
      * @param voteId 투표 ID
      * @param request 투표 선택 항목 DTO
-     * @return 참여 결과가 반영된 투표 상세 DTO
+     * @return 투표 ID
      */
-    ClubResponseDTO.ClubNoticeDetailDTO participateInPoll(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request);
+    Long haveVote(Long clubId, String memberId, Long voteId, ClubRequestDTO.VoteResultDTO request);
 
     /**
      * ClubBookRecommendCommandService

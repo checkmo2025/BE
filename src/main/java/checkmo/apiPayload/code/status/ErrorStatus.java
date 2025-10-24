@@ -40,15 +40,16 @@ public enum ErrorStatus implements BaseErrorCode {
     CLUB_MEMBER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "CLUB_408", "유효하지 않은 상태입니다."),
     CLUB_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_409", "해당 클럽 회원을 찾을 수 없습니다."),
     CLUB_STAFF_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "CLUB_410", "운영진은 클럽을 탈퇴할 수 없습니다."),
+    CLUB_MEMBER_IS_NOT_ACTIVE(HttpStatus.FORBIDDEN, "CLUB_411", "해당 클럽 회원은 활성화 상태(STAFF, MEMBER)가 아닙니다."),
 
     // 공지사항
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_400", "공지사항을 찾을 수 없습니다."),
     NOTICE_MEETING_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_405", "모임 공지사항은 삭제할 수 없습니다."),
 
     // 투표
-    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다."),
-    VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_403", "투표 가능 시간이 아닙니다."),
     MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_401", "하나의 항목에만 투표 가능합니다."),
+    VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_403", "투표 가능 시간이 아닙니다."),
+    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다."),
 
     // 이메일
     EMAIL_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "EMAIL_401", "인증번호가 만료되었습니다."),
@@ -61,8 +62,9 @@ public enum ErrorStatus implements BaseErrorCode {
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_404", "독서모임을 찾을 수 없습니다."),
 
     // 팀
-    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM_404", "팀을 찾을 수 없습니다."),
     TEAM_NUMBER_DUPLICATED_REQUEST(HttpStatus.BAD_REQUEST, "TEAM_401", "중복된 팀 번호가 요청되었습니다."),
+    TEAM_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "TEAM_402", "팀은 반드시 독서모임에 속해야 합니다."),
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM_404", "팀을 찾을 수 없습니다."),
 
     // 카테고리
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_404", "카테고리를 찾을 수 없습니다."),
@@ -83,8 +85,10 @@ public enum ErrorStatus implements BaseErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "MEMBER_500", "서버 내부 오류입니다. 관리자에게 문의 바랍니다."),
 
     // 발제
-    TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "TOPIC_404", "발제를 찾을 수 없습니다."),
+    TOPIC_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "TOPIC_401", "발제는 반드시 독서모임에 속해야 합니다."),
+    TOPIC_CLUB_MEMBER_REQUIRED(HttpStatus.BAD_REQUEST, "TOPIC_402", "발제는 반드시 독서클럽 회원이 작성해야 합니다."),
     TOPIC_FORBIDDEN(HttpStatus.FORBIDDEN, "TOPIC_403", "해당 발제에 대한 권한이 없습니다."),
+    TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "TOPIC_404", "발제를 찾을 수 없습니다."),
 
     // 한줄평
     BOOK_REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_REVIEW_403", "이 한줄평에 대한 수정/삭제 권한이 없습니다."),

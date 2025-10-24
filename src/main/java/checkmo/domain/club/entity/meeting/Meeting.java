@@ -49,7 +49,6 @@ public class Meeting extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
-    @Setter
     private Club club;
 
     @Column(name = "book_id", insertable = false, updatable = false)
@@ -106,14 +105,21 @@ public class Meeting extends BaseEntity {
         this.tag = tag;
     }
 
+    // == 연관관계 메서드 == //
+    public void setClub(Club club) {
+        if (this.club == club) return;
+        if (this.club != null) {
+            this.club.getMeetings().remove(this);
+        }
+        this.club = club;
+        if (club != null && !club.getMeetings().contains(this)) {
+            club.getMeetings().add(this);
+        }
+    }
+
     public void addNotice(Notice notice) {
         this.notice = notice;
         notice.setMeeting(this); // 주인 쪽에도 세팅
-    }
-
-    public void addBookReview(BookReview bookReview) {
-        this.bookReviews.add(bookReview);
-        bookReview.setMeeting(this); // 주인 쪽에도 세팅
     }
 
     public void replaceNotice(Notice newNotice) {
@@ -128,30 +134,4 @@ public class Meeting extends BaseEntity {
         }
     }
 
-    public void addTopic(Topic topic) {
-        this.topics.add(topic);
-        topic.setMeeting(this); // 주인 쪽에도 세팅
-    }
-
-    public void removeTopic(Topic topic) {
-        this.topics.remove(topic);
-        topic.setMeeting(null); // 주인 쪽에서 연결 끊기
-    }
-
-    public void removeBookReview(BookReview bookReview) {
-        this.bookReviews.remove(bookReview);
-        bookReview.setMeeting(null);
-    }
-
-    public void addTeam(Team team) {
-        if (team == null) return;
-        this.teams.add(team);
-        team.setMeeting(this);
-    }
-
-    public void removeTeam(Team team) {
-        if (team == null) return;
-        this.teams.remove(team);
-        team.setMeeting(null);
-    }
 }

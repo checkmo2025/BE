@@ -13,6 +13,48 @@ import java.util.List;
 
 public class ClubRequestDTO {
 
+    /**
+     * 클럽 검색 필터
+     *
+     * @param keyword 검색 키워드
+     * @param name 클럽명 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
+     * @param region 지역 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
+     * @param participants 대상 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
+     */
+    public record ClubSearchFilter(
+            String keyword,
+            Integer name,
+            Integer region,
+            Integer participants
+    ) {
+        public ClubSearchFilter {
+            if (keyword == null) {
+                keyword = "";
+            }
+            if (name == null) {
+                name = 0;
+            }
+            if (region == null) {
+                region = 0;
+            }
+            if (participants == null) {
+                participants = 0;
+            }
+        }
+    }
+
+    /**
+     * 커서 기반 페이징 요청
+     *
+     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null)
+     * @param size 페이지 크기
+     */
+    public record CursorPageRequest(
+            Long cursorId,
+            Integer size
+    ) {
+    }
+
     @Getter
     @NoArgsConstructor
     public static class ClubMemberJoinDTO {
@@ -22,6 +64,7 @@ public class ClubRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class ClubDetailDTO {
+        @NotBlank
         private String name;
         private String description;
         private String profileImageUrl;
@@ -47,7 +90,7 @@ public class ClubRequestDTO {
         @NotBlank                 // title은 필수
         private String title;
 
-        @Size(max = 255)           
+        @Size(max = 255)
         private String content;
 
         private boolean important;
@@ -75,6 +118,17 @@ public class ClubRequestDTO {
         private boolean item3;
         private boolean item4;
         private boolean item5;
+
+        // 몇 개를 선택했는지 확인하는 DTO용 메서드로, 복수 선택 검증에서 사용됨
+        public int countSelectedItems() {
+            int count = 0;
+            if (item1) count++;
+            if (item2) count++;
+            if (item3) count++;
+            if (item4) count++;
+            if (item5) count++;
+            return count;
+        }
     }
 
     @Getter

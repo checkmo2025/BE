@@ -1,5 +1,7 @@
 package checkmo.domain.club.entity.meeting;
 
+import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.apiPayload.exception.GeneralException;
 import checkmo.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,7 +31,6 @@ public class Team extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
-    @Setter
     private Meeting meeting;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -40,22 +41,29 @@ public class Team extends BaseEntity {
     @Builder.Default
     private List<MemberTeam> memberTeams = new ArrayList<>();
 
-    public void addTeamTopic(TeamTopic teamTopic) {
-        this.teamTopics.add(teamTopic);
-        teamTopic.setTeam(this);
-    }
-
-    public void removeTeamTopic(TeamTopic teamTopic) {
-        this.teamTopics.remove(teamTopic);
-        teamTopic.setTeam(null);
-    }
-
-    public void addMemberTeam(MemberTeam memberTeam) {
-        this.memberTeams.add(memberTeam);
-        memberTeam.setTeam(this);
-    }
-
     public void clearMemberTeams() {
         this.memberTeams.clear();
+    }
+
+    // == 연관관계 메서드 == //
+    public void setMeeting(Meeting meeting) {
+        if (meeting == null) {
+            throw new GeneralException(ErrorStatus.TEAM_MEETING_REQUIRED);
+        }
+        if (this.meeting == meeting) return;
+        if (this.meeting != null) {
+            this.meeting.getTeams().remove(this);
+        }
+        this.meeting = meeting;
+        if (!meeting.getTeams().contains(this)) {
+            meeting.getTeams().add(this);
+        }
+    }
+
+    public void removeMeeting() {
+        if (this.meeting != null) {
+            this.meeting.getTeams().remove(this);
+            this.meeting = null;
+        }
     }
 }

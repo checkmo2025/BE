@@ -2,6 +2,7 @@ package checkmo.domain.club.repository;
 
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.QClub;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -20,10 +21,10 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
     // 검색을 위한 메서드
     @Override
-    public List<Club> searchClubs(String keyword, int name, int region, int participants, Long cursorId, Integer size) {
+    public List<Club> searchClubs(ClubRequestDTO.ClubSearchFilter filter, Long cursorId, Integer size) {
 
         // 검색 조건 빌더 생성
-        BooleanBuilder builder = buildSearchCondition(keyword, name, region, participants);
+        BooleanBuilder builder = buildSearchCondition(filter);
 
         // 커서 ID가 null이 아니고 0이 아닐 경우, 커서 ID보다 작은 ID를 가진 클럽만 조회
         if (cursorId != null && cursorId != 0L) {
@@ -40,9 +41,14 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
     }
 
     // 검색 조건 빌더
-    private BooleanBuilder buildSearchCondition(String keyword, int name, int region, int participants) {
+    private BooleanBuilder buildSearchCondition(ClubRequestDTO.ClubSearchFilter filter) {
 
         BooleanBuilder builder = new BooleanBuilder();
+
+        String keyword = filter.keyword();
+        int name = filter.name();
+        int region = filter.region();
+        int participants = filter.participants();
 
         // 키워드가 비어있지 않은 경우에만 검색 조건 추가
         if (StringUtils.hasText(keyword)) {
