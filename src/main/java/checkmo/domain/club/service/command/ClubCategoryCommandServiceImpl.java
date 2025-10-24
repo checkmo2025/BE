@@ -7,13 +7,14 @@ import checkmo.domain.category.repository.CategoryRepository;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.repository.ClubCategoryRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,29 +29,33 @@ public class ClubCategoryCommandServiceImpl implements ClubCategoryCommandServic
 
     @Override
     public void createClubCategories(Club club, List<Long> categoryIds) {
+        // 0. 요청 가드
+        if (categoryIds == null || categoryIds.isEmpty()) return;
+
         // 1. 추가할 카테고리 엔티티들을 한 번에 조회 (N+1 문제 해결)
-        if (!categoryIds.isEmpty()) {
-            List<Category> categoriesToAdd = categoryRepository.findAllById(categoryIds);
+        List<Category> categoriesToAdd = categoryRepository.findAllById(categoryIds);
 
-            // ID로 조회한 엔티티 수와 요청한 ID 수가 다르면 예외 발생
-            if (categoriesToAdd.size() != categoryIds.size()) {
-                throw new GeneralException(ErrorStatus.CATEGORY_NOT_FOUND);
-            }
-
-            // 2. ClubCategory 엔티티 생성 및 배치 저장
-            List<ClubCategory> newClubCategories = categoriesToAdd.stream()
-                    .map(category -> ClubCategory.builder()
-                            .club(club)
-                            .category(category)
-                            .build())
-                    .toList();
-
-            clubCategoryRepository.saveAll(newClubCategories);
+        // 2. 조회한 엔티티 수와 요청한 ID 수가 다르면 예외 발생
+        if (categoriesToAdd.size() != categoryIds.size()) {
+            throw new GeneralException(ErrorStatus.CATEGORY_NOT_FOUND);
         }
+
+        // 3. ClubCategory 엔티티 생성 및 배치 저장
+        List<ClubCategory> newClubCategories = categoriesToAdd.stream()
+                .map(category -> ClubCategory.builder()
+                        .club(club)
+                        .category(category)
+                        .build())
+                .toList();
+
+        clubCategoryRepository.saveAll(newClubCategories);
     }
 
     @Override
     public void modifyClubCategories(Club club, List<Long> categoryIds) {
+        // 0. 요청 가드
+        if (categoryIds == null || categoryIds.isEmpty()) return;
+
         // 1. 기존 ClubCategory 목록 조회
         List<ClubCategory> existingClubCategories = clubCategoryRepository.findByClubId(club.getId());
 

@@ -8,10 +8,11 @@ import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.service.query.ClubQueryService;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,9 +46,7 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
 
         // 5. 카테고리 연관관계 설정
         List<Long> categoryIds = request.getCategory();
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            clubCategoryCommandService.createClubCategories(club, categoryIds);
-        }
+        clubCategoryCommandService.createClubCategories(club, categoryIds);
 
         // 6. 생성된 클럽의 ID 반환
         return club.getId();
@@ -78,8 +77,6 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
 
         // 4. 카테고리 연관관계 수정
         List<Long> categoryIds = request.getCategory();
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            clubCategoryCommandService.modifyClubCategories(club, categoryIds);
-        }
+        clubCategoryCommandService.modifyClubCategories(club, categoryIds);
     }
 }
