@@ -21,7 +21,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     @Override
     @Transactional
     public void saveBook(BookSharedDTO.BookCreateRequest request) {
-        Book book = BookConverter.fromBookCreateRequestDTO(request);
+        Book book = BookConverter.fromBookCreateRequest(request);
 
         // 이미 존재하는 책인지 확인
         if (bookRepository.existsById(book.getId())) {

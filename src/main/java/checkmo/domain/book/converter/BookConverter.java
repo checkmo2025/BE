@@ -61,9 +61,9 @@ public class BookConverter {
     // =====================================================
 
     /**
-     * BookCreateRequestDTO → Book 엔티티 변환
+     * BookCreateRequest → Book 엔티티 변환
      */
-    public static Book fromBookCreateRequestDTO(
+    public static Book fromBookCreateRequest(
             BookSharedDTO.BookCreateRequest request
     ) {
         return Book.builder()
