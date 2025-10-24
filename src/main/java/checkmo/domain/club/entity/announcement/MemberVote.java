@@ -9,6 +9,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"member_id", "vote_id"})
+})
 public class MemberVote {
 
     @Id

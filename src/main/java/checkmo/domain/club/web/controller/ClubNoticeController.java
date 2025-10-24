@@ -47,12 +47,12 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
     })
     @PostMapping("")
-    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> createNotice(
+    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> createPureVote(
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestBody @Valid ClubRequestDTO.CreateClubNoticeDTO request
     ) {
-        return ApiResponse.onSuccess(clubCommandFacade.createNotice(clubId, memberId, request));
+        return ApiResponse.onSuccess(clubCommandFacade.createPureNotice(clubId, memberId, request));
     }
 
     @Operation(summary = "순수 공지사항 상세 조회", description = "특정 순수 공지사항 상세 정보를 조회합니다.")
@@ -76,12 +76,12 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
     })
     @DeleteMapping("/{noticeId}")
-    public ApiResponse<String> deleteNotice(
+    public ApiResponse<String> deletePureNotice(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        clubCommandFacade.deleteNotice(clubId, memberId, noticeId);
+        clubCommandFacade.deletePureNotice(clubId, memberId, noticeId);
         return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
     }
 
@@ -112,7 +112,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
     })
     @PostMapping("/votes")
-    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> createVote(
+    public ApiResponse<Long> createVote(
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestBody @Valid ClubRequestDTO.CreateClubVoteDTO request
@@ -141,13 +141,13 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "투표를 찾을 수 없음")
     })
     @PostMapping("/votes/{voteId}/submit")
-    public ApiResponse<ClubResponseDTO.ClubNoticeDetailDTO> submitVote(
+    public ApiResponse<Long> submitVote(
             @PathVariable Long clubId,
             @PathVariable Long voteId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.VoteResultDTO request
     ) {
-        return ApiResponse.onSuccess(clubCommandFacade.participateInPoll(clubId, memberId, voteId, request));
+        return ApiResponse.onSuccess(clubCommandFacade.haveVote(clubId, memberId, voteId, request));
     }
 
     @Operation(summary = "투표 삭제", description = "특정 투표를 삭제합니다. (운영진만 삭제 가능)")

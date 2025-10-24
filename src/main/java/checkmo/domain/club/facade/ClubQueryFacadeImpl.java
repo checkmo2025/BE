@@ -5,11 +5,17 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.BookRecommend;
+import checkmo.domain.club.entity.Club;
+import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.entity.ClubMember;
+import checkmo.domain.club.entity.announcement.MemberVote;
+import checkmo.domain.club.entity.announcement.Notice;
+import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.service.query.*;
 import checkmo.domain.club.web.dto.MembershipResponseDTO;
 import checkmo.domain.club.web.dto.bookshelf.BookShelfResponseDTO;
+import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
@@ -22,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +43,13 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     // 페이징 기본 크기 상수
     private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF = 3;
+    private static final int TOPIC_PREVIEW_SIZE_FOR_MEETING = 4;
+
+    // 태그 상수 정의
+    private static final String TAG_NOTICE = "공지";
+    private static final String TAG_MEETING = "모임";
+    private static final String TAG_VOTE = "투표";
 
     // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
@@ -47,7 +61,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
-    private final ClubCommunicationQueryService clubCommunicationQueryService;
+    private final ClubNoticeQueryService clubNoticeQueryService;
     private final ClubCategoryQueryService clubCategoryQueryService;
 
     /**
@@ -130,52 +144,79 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     /**
      * ClubQueryService
-     * 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)
+     * 조건에 맞는 독서 모임 목록을 검색합니다.
      *
      * @param memberId 요청자 회원 ID (해당 클럽 회원인지 확인용)
-     * @param keyword 검색 키워드 (모임명 등)
-     * @param name 클럽명 필터링 여부
-     * @param region 지역 필터링 여부
-     * @param participants 대상 필터링 여부
-     * @param cursorId 페이징 커서 ID
+     * @param filter 검색 필터 (keyword, name, region, participants)
+     * @param pageRequest 페이징 요청 (cursorId, size)
      * @return 검색된 모임 목록 DTO
      */
     @Override
-    public ClubResponseDTO.ClubListDTO getClubList(String memberId, String keyword, int name, int region, int participants, Long cursorId, Integer size) {
+    public ClubResponseDTO.ClubListDTO getClubList(String memberId, ClubRequestDTO.ClubSearchFilter filter, ClubRequestDTO.CursorPageRequest pageRequest) {
 
         // 1. 커서 초기화
-        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+        Long cursorId = (pageRequest.cursorId() == null || pageRequest.cursorId() == 0L) ? Long.MAX_VALUE : pageRequest.cursorId();
 
         // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
-        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize);
+        int pageSize = (pageRequest.size() == null || pageRequest.size() <= 0) ? DEFAULT_PAGE_SIZE : pageRequest.size();
 
-        // 2. 클럽 리스트 조회
-        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubQueryService.getClubList(memberId, keyword, name, region, participants, cursor, pageable);
+        // 3. Service에서 순수 엔티티 조회
+        List<Club> clubs = clubQueryService.getClubList(filter, cursorId, pageSize);
 
-        // 3. 페이징 처리
-        boolean hasNext = clubList.size() > pageSize;  // clubList의 크기가 PAGE_SIZE보다 크면 다음 페이지가 존재한다고 판단
-        if (hasNext) {
-            clubList = clubList.subList(0, pageSize); // 다음 페이지를 위해 마지막은 제거
-        }
-        Long nextCursor = hasNext && !clubList.isEmpty() ?
-                clubList.get(clubList.size() - 1).getClub().getClubId() : null; // 다음 커서 설정
+        // 4. 클럽 ID 리스트 추출
+        List<Long> clubIds = clubs.stream()
+                .map(Club::getId)
+                .toList();
 
-        // 4. 최종 DTO 변환
-        return ClubConverter.toClubListDTO(clubList, hasNext, nextCursor);
+        // 5. 클럽별 멤버 상태 배치 조회
+        Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
+
+        // 6. 클럽별 카테고리 ID 배치 조회
+        List<ClubCategory> allClubCategories = clubCategoryQueryService.findCategoriesByClubIds(clubIds);
+        Map<Long, List<Long>> categoryIdMap = ClubConverter.fromClubCategoriesToCategoryIdMap(allClubCategories);
+
+        // 7. DTO 변환
+        List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubs.stream()
+                .map(club -> toClubWithMyStatusDTO(club, statusMap, categoryIdMap))
+                .toList();
+
+        // 8. 페이징 처리 (마지막 ID를 기반으로 다음 페이지 존재 여부 확인)
+        Long lastId = clubs.isEmpty() ? null : clubs.getLast().getId();
+        boolean hasNext = !clubs.isEmpty() && clubs.size() == pageSize;
+
+        // 9. 최종 DTO 변환
+        return ClubConverter.toClubListDTO(clubList, hasNext, lastId);
     }
 
     /**
      * ClubQueryService
-     * 독서 모임의 상세 정보를 조회합니다. (내부용)
+     * 독서 모임의 상세 정보를 조회합니다.
      *
      * @param clubId 조회할 모임 ID
-     * @param memberId 조회자 회원 ID
+     * @param memberId 조회자 회원 ID (운영진 권한 확인용)
      * @return 모임 상세 정보 DTO
      */
     @Override
     public ClubResponseDTO.ClubDetailDTO getClubInfo(Long clubId, String memberId) {
-        return clubQueryService.getClubInfo(clubId, memberId);
+
+        // 1. Service에서 순수 엔티티 조회
+        Club club = clubQueryService.getClubInfo(clubId);
+
+        // 2. 운영진 권한 확인
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        boolean isStaff = clubMember.isStaff();
+        if (!isStaff) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 3. 카테고리 ID 리스트 조회
+        List<ClubCategory> clubCategories = clubCategoryQueryService.findCategoriesByClub(clubId);
+        List<Long> categoryIds = clubCategories.stream()
+                .map(ClubCategory::getCategoryId)
+                .toList();
+
+        // 4. DTO 변환 후 반환
+        return ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
     }
 
     /**
@@ -263,10 +304,14 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
-        // 3. 공지(일반, 모임) + 투표 조회 및 변환
-        List<ClubResponseDTO.NoticeItem> noticeItems = clubCommunicationQueryService.getAllNoticesAndVotes(clubId, onlyImportant, cursor, pageable);
+        // 4. 공지사항과 투표 각각 조회
+        List<Notice> notices = clubNoticeQueryService.getNoticeList(clubId, onlyImportant, cursor, pageable);
+        List<Vote> votes = clubNoticeQueryService.getVoteList(clubId, onlyImportant, cursor, pageable);
 
-        // 4. 페이징
+        // 5. 생성시간 순으로 병합 및 DTO 변환
+        List<ClubResponseDTO.NoticeItem> noticeItems = mergeNoticesAndVotes(notices, votes, pageSize);
+
+        // 6. 페이징
         boolean hasNext = noticeItems.size() > pageSize;
         if (hasNext) {
             noticeItems = noticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
@@ -288,10 +333,21 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
-        // 3. 공지(일반, 모임) + 투표 조회 및 변환
-        List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems = clubCommunicationQueryService.getMemberNoticesAndVotes(memberId, onlyImportant, cursor, pageable);
+        // 3. 회원이 가입한 클럽 ID 리스트 조회
+        List<Long> clubIds = clubMemberQueryService.getMyClubListIds(memberId);
 
-        // 4. 페이징
+        if (clubIds.isEmpty()) {
+            return ClubConverter.toMemberNoticeListDTO(Collections.emptyList(), false, null);
+        }
+
+        // 4. 공지사항과 투표 각각 조회
+        List<Notice> notices = clubNoticeQueryService.getNoticeListByClubIds(clubIds, onlyImportant, cursor, pageable);
+        List<Vote> votes = clubNoticeQueryService.getVoteListByClubIds(clubIds, onlyImportant, cursor, pageable);
+
+        // 5. 생성시간 순으로 병합 및 DTO 변환 (클럽 정보 포함)
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems = mergeNoticesAndVotesWithClub(notices, votes, pageSize);
+
+        // 6. 페이징
         boolean hasNext = memberNoticeItems.size() > pageSize;
         if (hasNext) {
             memberNoticeItems = memberNoticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
@@ -313,7 +369,155 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
      */
     @Override
     public ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId, String tag, String memberId) {
-        return clubCommunicationQueryService.getNoticeOrVoteDetail(clubId, noticeId, tag, memberId);
+        // 1. 검증
+        clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        return switch (tag) {
+            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMember);
+            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMember);
+            case TAG_VOTE -> getVoteDetail(clubId, noticeId, memberId, clubMember);
+            default -> throw new GeneralException(ErrorStatus.CLUB_INVALID_TAG_TYPE);
+        };
+    }
+
+    /**
+     * 순수 공지사항 상세 조회
+     */
+    private ClubResponseDTO.ClubNoticeDetailDTO getPureNoticeDetail(Long clubId, Long itemId, ClubMember clubMember) {
+        Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
+
+        if (TAG_MEETING.equals(notice.getTag())) {
+            throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+        }
+
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .isStaff(clubMember.isStaff())
+                .noticeItem(ClubConverter.toPureNoticeDTO(notice))
+                .build();
+    }
+
+    /**
+     * 모임 공지사항 상세 조회
+     */
+    private ClubResponseDTO.ClubNoticeDetailDTO getMeetingNoticeDetail(Long clubId, Long itemId, ClubMember clubMember) {
+        Notice notice = clubNoticeQueryService.getNoticeWithMeeting(clubId, itemId);
+
+        if (TAG_NOTICE.equals(notice.getTag())) {
+            throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+        }
+
+        BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .isStaff(clubMember.isStaff())
+                .noticeItem(ClubConverter.toMeetingNoticeDTO(notice, bookInfo))
+                .build();
+    }
+
+    /**
+     * 투표 상세 조회
+     */
+    private ClubResponseDTO.ClubNoticeDetailDTO getVoteDetail(Long clubId, Long itemId, String memberId, ClubMember clubMember) {
+        Vote vote = clubNoticeQueryService.getVote(clubId, itemId);
+        List<String> voteItems = vote.getItems();
+        int itemCount = voteItems.size();
+
+        // 전체 투표 결과
+        List<MemberVote> memberVotes = clubNoticeQueryService.getMemberVotesByVoteId(vote.getId());
+
+        // 항목별 투표자 정보 수집
+        List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem = collectVotedMembersByItem(vote, memberVotes, itemCount);
+
+        // 본인 투표 정보
+        MemberVote myVote = clubNoticeQueryService.getMyVote(vote.getId(), memberId);
+
+        // 투표 항목 DTO 생성
+        List<ClubResponseDTO.EachItemDTO> itemDTOs = createVoteItemDTOs(voteItems, myVote, votedMembersByItem, itemCount);
+
+        ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
+
+        return ClubResponseDTO.ClubNoticeDetailDTO.builder()
+                .isStaff(clubMember.isStaff())
+                .noticeItem(voteDTO)
+                .build();
+    }
+
+    /**
+     * 투표 항목별 투표자 정보 수집
+     */
+    private List<List<MemberSharedDTO.BasicInfoDTO>> collectVotedMembersByItem(
+            Vote vote, List<MemberVote> memberVotes, int itemCount
+    ) {
+        // 항목별 투표자 정보 리스트 초기화
+        List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem = new ArrayList<>();
+        for (int i = 0; i < itemCount; i++) {
+            votedMembersByItem.add(new ArrayList<>());
+        }
+
+        // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
+        for (MemberVote mv : memberVotes) {
+            MemberSharedDTO.BasicInfoDTO memberInfo = getMemberInfoForVote(vote, mv);
+
+            if (mv.isItem1()) votedMembersByItem.get(0).add(memberInfo);
+            if (itemCount >= 2 && mv.isItem2()) votedMembersByItem.get(1).add(memberInfo);
+            if (itemCount >= 3 && mv.isItem3()) votedMembersByItem.get(2).add(memberInfo);
+            if (itemCount >= 4 && mv.isItem4()) votedMembersByItem.get(3).add(memberInfo);
+            if (itemCount >= 5 && mv.isItem5()) votedMembersByItem.get(4).add(memberInfo);
+        }
+
+        return votedMembersByItem;
+    }
+
+    /**
+     * 투표자의 멤버 정보 조회 (익명 여부에 따라 다르게 처리)
+     */
+    private MemberSharedDTO.BasicInfoDTO getMemberInfoForVote(Vote vote, MemberVote memberVote) {
+        if (vote.isAnonymity()) {
+            String voterName = "익명";
+            String profileImageUrl = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
+            return new MemberSharedDTO.BasicInfoDTO(voterName, profileImageUrl);
+        } else {
+            return memberQueryFacade.getMemberBasicInfoForShare(memberVote.getMemberId());
+        }
+    }
+
+    /**
+     * 투표 항목 DTO 리스트 생성
+     */
+    private List<ClubResponseDTO.EachItemDTO> createVoteItemDTOs(
+            List<String> voteItems, MemberVote myVote,
+            List<List<MemberSharedDTO.BasicInfoDTO>> votedMembersByItem, int itemCount
+    ) {
+        List<ClubResponseDTO.EachItemDTO> itemDTOs = new ArrayList<>();
+        for (int i = 0; i < itemCount; i++) {
+            boolean isSelected = isItemSelected(myVote, i);
+            itemDTOs.add(
+                    ClubConverter.toEachItemDTO(
+                            voteItems.get(i),
+                            isSelected,
+                            votedMembersByItem.get(i)
+                    )
+            );
+        }
+        return itemDTOs;
+    }
+
+    /**
+     * 특정 항목이 선택되었는지 확인
+     */
+    private boolean isItemSelected(MemberVote myVote, int itemIndex) {
+        if (myVote == null) {
+            return false;
+        }
+        return switch (itemIndex) {
+            case 0 -> myVote.isItem1();
+            case 1 -> myVote.isItem2();
+            case 2 -> myVote.isItem3();
+            case 3 -> myVote.isItem4();
+            case 4 -> myVote.isItem5();
+            default -> false;
+        };
     }
 
     /**
@@ -368,46 +572,50 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     public ClubResponseDTO.BookRecommendDetailDTO getRecommendedBookDetail(Long clubId, Long bookRecommendId, String memberId) {
         // 1. Service에서 순수 엔티티 조회
         BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommendEntity(clubId, bookRecommendId, memberId);
-        
+
         // 2. ClubMember 조회 (isStaff 확인용)
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        
+
         // 3. 외부 도메인 정보 조회 (Facade에서 처리)
         var bookInfo = bookQueryFacade.getBookBasicInfoForShare(bookRecommend.getBookId());
         var authorInfo = memberQueryFacade.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
         var currentMemberInfo = memberQueryFacade.getMemberBasicInfoForShare(memberId);
-        
+
         // 4. DTO 변환 후 반환
         return ClubConverter.toBookRecommendDetailDTO(
-            bookRecommend, 
-            bookInfo, 
-            authorInfo, 
-            currentMemberInfo.getNickname(), 
-            clubMember.isStaff()
+                bookRecommend,
+                bookInfo,
+                authorInfo,
+                currentMemberInfo.getNickname(),
+                clubMember.isStaff()
         );
     }
 
     @Override
     public BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size, Integer generation, String memberId) {
+        // 1. 유효성 검증(club, clubMember)
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1, memberId);
+        // 2. [책장] 미팅 리스트 조회
+        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1);
+
+        // 3. 페이징 처리
         boolean hasNext = meetings.size() > size;
         if (hasNext) {
             meetings = meetings.subList(0, size);
         }
         Long nextCursor = hasNext ? meetings.getLast().getId() : null;
 
+        // 4. DTO 변환
         List<BookShelfResponseDTO.BookShelfInfoDTO> bookShelfInfoDTOS = meetings.stream()
                 .map(meeting ->
                         ClubConverter.fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
                                 meeting,
-                                bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId())
+                                bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId()) // TODO: 미팅에 사용된 책 배치 조회
                         )
                 )
                 .toList();
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromBookShelfInfoDTOListToBookShelfListDTO(bookShelfInfoDTOS, hasNext, nextCursor, membershipDTO);
     }
@@ -415,34 +623,35 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
     @Override
     // TODO: getBookShelftDetail, findTopicsByMeeting 간 중복 제거
     public BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId, String memberId) {
-        final Integer TOPIC_SIZE = 3;
-
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, TOPIC_SIZE + 1);
+        // 2. [발제 미리보기] 발제 리스트 조회
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF + 1);
 
-        boolean hasNext = topics.size() > TOPIC_SIZE;
+        // 3. 페이징 처리
+        boolean hasNext = topics.size() > TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF;
         if (hasNext) {
-            topics = topics.subList(0, TOPIC_SIZE);
+            topics = topics.subList(0, TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF);
         }
         Long nextCursor = hasNext ? topics.getLast().getId() : null;
 
+        // 4. 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
                 memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 5. DTO 변환
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = ClubConverter.fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
                 topics,
                 authorInfoMap,
-                memberId
+                memberId // 요청한 회원 ID -> 작성자 본인 확인용
         );
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromBookShelfDTOToBookShelfDetailDTO(
                 meeting,
-                bookQueryFacade.getBookDetailInfoForShare(meeting.getBookId()),
+                bookQueryFacade.getBookDetailInfoForShare(meeting.getBookId()), // TODO: 책 상세정보 배치 조회로 변경
                 ClubConverter.fromTopicDTOListToTopicListDTOForBookshelf(topicListDTOs, hasNext, nextCursor, null),
                 membershipDTO
         );
@@ -450,50 +659,57 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size, String memberId) {
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
+        // 2. 발제 리스트 조회
         List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, cursorId, size + 1);
 
+        // 3. 페이징 처리
         boolean hasNext = topics.size() > size;
         if (hasNext) {
             topics = topics.subList(0, size);
         }
         Long nextCursor = hasNext ? topics.getLast().getId() : null;
 
+        // 4. 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap =
                 memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 5. DTO 변환
         List<BookShelfResponseDTO.TopicDTO> topicListDTOs = ClubConverter.fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
                 topics,
                 authorInfoMap,
-                memberId
+                memberId // 요청한 회원 ID -> 작성자 본인 확인용
         );
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromTopicDTOListToTopicListDTOForBookshelf(topicListDTOs, hasNext, nextCursor, membershipDTO);
     }
 
     @Override
     public BookShelfResponseDTO.BookReviewListDTO getBookReviewList(Long meetingId, Long lastReviewId, int size, String memberId) {
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
-        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size);
+        // 2. 한줄평 리스트 조회
+        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size + 1);
 
+        // 3. 페이징 처리
         boolean hasNext = bookReviews.size() > size;
         if (hasNext) {
             bookReviews = bookReviews.subList(0, size);
         }
         Long nextCursor = hasNext ? bookReviews.get(bookReviews.size() - 1).getId() : null;
 
+        // 4. 한줄평 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromBookReviews(bookReviews);
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 5. DTO 변환
         List<BookShelfResponseDTO.BookReviewDTO> bookReviewDTOList = mapBookReviewsAndAuthorInfoToDTOs(bookReviews, authorInfoMap);
-
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromBookReviewDTOListToBookReviewListDTO(bookReviewDTOList, hasNext, nextCursor, membershipDTO);
     }
@@ -512,19 +728,25 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.MeetingListDTO getMeetingsByClub(Long clubId, Long cursorId, Integer size, String memberId) {
+        // 1. 유효성 검증(club, clubMember)
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
+        // 2. 미팅 리스트 조회
         List<Meeting> meetings = clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size + 1);
+
+        // 3. 페이징 처리
         boolean hasNext = meetings.size() > size;
         if (hasNext) {
             meetings = meetings.subList(0, size);
         }
         Long nextCursor = hasNext ? meetings.getLast().getId() : null;
 
+        // 4. 미팅의 모든 도서 기본 정보 배치 조회
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
         Map<String, BookSharedDTO.BasicInfoDTO> bookBasicInfoMap = bookQueryFacade.getBookBasicInfoMapForShare(bookIds);
 
+        // 5. DTO 변환
         List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList = mapMeetingsWithBookBasicInfoToDTOs(meetings, bookBasicInfoMap);
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
         return ClubConverter.fromMeetingInfoDTOListToMeetingListDTO(meetingInfoDTOList, hasNext, nextCursor, membershipDTO);
@@ -544,14 +766,14 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.MeetingDetailDTO findMeetingDetailById(Long meetingId, String memberId) {
-        // 1. 미팅과 클럽 멤버 검증
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. [발제 전체보기 - 미리보기] 발제 최신순 상위 4개 토픽 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, 4);
+        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, TOPIC_PREVIEW_SIZE_FOR_MEETING);
 
-        // 3. [발제 전체보기 - 미리보기] TeamTopic과 Team 배치 조회
+        // 3. [발제 전체보기 - 미리보기] TeamTopic(+Team) 배치 조회
         List<Long> topicIds = extractTopicIds(topics);
         Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
 
@@ -562,7 +784,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         Map<Integer, List<TeamTopic>> teamNumberToTeamTopics = teams.stream()
                 .collect(Collectors.toMap(
                         Team::getTeamNumber, // key: 팀 번호
-                        team -> clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(), 4) //value : 해당 팀의 발제 최신순 상위 4개 팀 토픽 리스트
+                        team -> clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(), TOPIC_PREVIEW_SIZE_FOR_MEETING) //value : 해당 팀의 발제 최신순 상위 4개 팀 토픽 리스트
                 ));
 
         // 6. 조회한 모든 발제(topics와 teamTopics)의 작성자 id를 중복 없이 리스트 조회
@@ -575,9 +797,8 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         // 7. 발제의 작성자 정보 배치 조회
         Map<String, MemberSharedDTO.BasicInfoDTO> authorInfoMap = memberQueryFacade.getMemberBasicInfoMapForShare(authorIds);
 
+        // 8. DTO 변환
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
-
-        // 7. DTO 변환
         return ClubConverter.fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
                 meeting, bookQueryFacade.getBookBasicInfoForShare(meeting.getBookId()), // -> MeetingInfoDTO
                 topics, teamTopicsWithTeamByTopicIds, // -> List<TopicDTO>
@@ -589,7 +810,7 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.TopicDTOList findMeetingTopicsWithTeam(Long meetingId, String memberId) {
-        // 1. 미팅과 클럽 멤버 검증
+        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
@@ -604,15 +825,13 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         List<Long> topicIds = extractTopicIds(topics);
         Map<Long, List<Integer>> topicIdToSelectTeamNumbers = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
 
+        // 5. DTO 변환
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
-
-        // 5. MeetingResponseDTO.TopicListDTO 변환
         List<MeetingResponseDTO.TopicDTO> topicDTOList = ClubConverter.fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
                 topics,
                 authorInfoMap,
                 topicIdToSelectTeamNumbers
         );
-
         return ClubConverter.fromTopicDTOListAndMembershipDTOToTopicListDTO(
                 topicDTOList,
                 membershipDTO
@@ -646,7 +865,16 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
 
     @Override
     public MeetingResponseDTO.CalendarMeetingDTO getClubMeetingCalendar(Long clubId, int year, int month, String memberId) {
-        return clubMeetingQueryService.getClubMeetingByYearAndMonth(clubId, year, month, memberId);
+        // 1. 유효성 검증(club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 해당 연월의 미팅 리스트 조회
+        List<Meeting> meetings = clubMeetingQueryService.getClubMeetingByYearAndMonth(clubId, year, month, memberId);
+
+        // 3. DTO 변환
+        MembershipResponseDTO.MembershipDTO membershipDTO = ClubConverter.fromClubMembertoMembershipDTO(clubMember);
+        return ClubConverter.fromMeetingListToMCalendarMeetingDTO(meetings, membershipDTO);
     }
 
     @Override
@@ -729,9 +957,6 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         // 1. 검증
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
         Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
 
         // 2. 팀 멤버 조회
@@ -862,5 +1087,98 @@ public class ClubQueryFacadeImpl implements ClubQueryFacade {
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return clubMember.isStaff();
+    }
+
+    /**
+     * Club 엔티티를 ClubWithMyStatusDTO로 변환합니다.
+     *
+     * @param club 클럽 엔티티
+     * @param statusMap 클럽별 멤버 상태 맵
+     * @param categoryIdMap 클럽별 카테고리 ID 맵
+     * @return ClubWithMyStatusDTO
+     */
+    private ClubResponseDTO.ClubWithMyStatusDTO toClubWithMyStatusDTO(
+            Club club,
+            Map<Long, ClubMember.ClubMemberStatus> statusMap,
+            Map<Long, List<Long>> categoryIdMap
+    ) {
+        ClubMember.ClubMemberStatus status = statusMap.get(club.getId());
+        boolean isStaff = status == ClubMember.ClubMemberStatus.STAFF;
+        boolean isMember = status != null;
+
+        List<Long> categoryIds = categoryIdMap.getOrDefault(club.getId(), List.of());
+
+        ClubResponseDTO.ClubDetailDTO clubDetailDTO = ClubConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
+
+        return ClubResponseDTO.ClubWithMyStatusDTO.builder()
+                .club(clubDetailDTO)
+                .isMember(isMember)
+                .build();
+    }
+
+    /**
+     * 공지사항과 투표를 생성 시간 순서대로 병합하는 로직
+     */
+    private List<ClubResponseDTO.NoticeItem> mergeNoticesAndVotes(
+            List<Notice> notices, List<Vote> votes, int pageSize
+    ) {
+        List<ClubResponseDTO.NoticeItem> resultList = new ArrayList<>();
+        int n = notices.size();
+        int m = votes.size();
+
+        int i = 0, j = 0;
+        while (resultList.size() < pageSize + 1 && (i < n || j < m)) {
+            if (i < n && (j >= m || notices.get(i).getCreatedAt().isAfter(votes.get(j).getCreatedAt()))) {
+                Notice notice = notices.get(i++);
+                ClubResponseDTO.NoticeItem dto;
+
+                if (notice.getMeeting() != null) {
+                    BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+                    dto = ClubConverter.toMeetingNoticeDTO(notice, bookInfo);
+                } else {
+                    dto = ClubConverter.toPureNoticeDTO(notice);
+                }
+
+                resultList.add(dto);
+            } else if (j < m) {
+                Vote vote = votes.get(j++);
+                List<ClubResponseDTO.EachItemDTO> itemDTOs = ClubConverter.toEachItemDTOListFromItems(vote.getItems());
+                ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
+                resultList.add(voteDTO);
+            }
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 공지사항과 투표를 생성 시간 순서대로 병합하는 로직 (클럽 정보 포함)
+     */
+    private List<ClubResponseDTO.ClubNoticeWithClubDTO> mergeNoticesAndVotesWithClub(
+            List<Notice> notices, List<Vote> votes, int pageSize
+    ) {
+        List<ClubResponseDTO.ClubNoticeWithClubDTO> resultList = new ArrayList<>();
+
+        int i = 0, j = 0;
+        while (resultList.size() < pageSize + 1 && (i < notices.size() || j < votes.size())) {
+            if (i < notices.size() && (j >= votes.size() || notices.get(i).getCreatedAt().isAfter(votes.get(j).getCreatedAt()))) {
+                Notice notice = notices.get(i++);
+                ClubResponseDTO.NoticeItem dto;
+
+                if (notice.getMeeting() != null) {
+                    BookSharedDTO.BasicInfoDTO bookInfo = bookQueryFacade.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+                    dto = ClubConverter.toMeetingNoticeDTO(notice, bookInfo);
+                } else {
+                    dto = ClubConverter.toPureNoticeDTO(notice);
+                }
+                resultList.add(ClubConverter.toClubNoticeWithClubDTO(notice, dto));
+            } else if (j < votes.size()) {
+                Vote vote = votes.get(j++);
+                List<ClubResponseDTO.EachItemDTO> itemDTOs = ClubConverter.toEachItemDTOListFromItems(vote.getItems());
+                ClubResponseDTO.VoteDTO voteDTO = ClubConverter.toVoteDTO(vote, itemDTOs);
+                resultList.add(ClubConverter.toClubNoticeWithClubDTO(vote, voteDTO));
+            }
+        }
+        return resultList;
     }
 }

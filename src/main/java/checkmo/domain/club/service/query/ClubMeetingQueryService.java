@@ -2,7 +2,6 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.meeting.*;
-import checkmo.domain.club.web.dto.meeting.MeetingResponseDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -40,25 +39,16 @@ public interface ClubMeetingQueryService {
     List<Topic> findTopicsWithClubMemberByMeeting(Long meetingId, Long cursorId, Integer size);
 
     /**
-     * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후,
-     * 토픽 ID를 기준으로 해당 토픽을 선택한 팀 번호 리스트를 반환합니다.
-     *
-     * @param topicIds 조회할 토픽 ID 목록
-     * @return 토픽 id를 기준으로 선택한 팀 번호 리스트 Map
-     */
-    Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
-
-    /**
      * 독서 모임의 책장(한줄평) 리스트를 조회합니다.
      *
      * 피그마 참고 페이지: #독서모임(사용자) - 책장 [특정 책] 클릭시
      *
      * @param meetingId 미팅 ID
-     * @param lastReviewId 마지막으로 조회한 한줄평 ID (무한 스크롤용, 처음에는 null 또는 0)
+     * @param cursorId 마지막으로 조회한 한줄평 ID (무한 스크롤용, 처음에는 null 또는 0)
      * @param size 조회할 한줄평 개수
      * @return 조회한 한줄평 리스트
      */
-    List<BookReview> findBookReviewsByMeeting(Long meetingId, Long lastReviewId, int size);
+    List<BookReview> findBookReviewsByMeeting(Long meetingId, Long cursorId, Integer size);
 
     /**
      * 독서모임의 모임 캘린더를 조회합니다.
@@ -67,9 +57,9 @@ public interface ClubMeetingQueryService {
      * @param year 조회하고자 하는 연도
      * @param month 조회하고자 하는 달
      * @param memberId 요청자 회원 ID
-     * @return 독서모임의 모임 정보 리스트
+     * @return Meeting 리스트
      */
-    MeetingResponseDTO.CalendarMeetingDTO getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId);
+    List<Meeting> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId);
 
     /**
      * 모임을 책장 리스트로 조회
@@ -77,10 +67,12 @@ public interface ClubMeetingQueryService {
      * 피그마 참고 페이지 : #독서모임(사용자) - 책장 홈화면
      *
      * @param clubId 독서 클럽 ID
+     * @param generation 기수 (최신 기수의 모임을 조회하려면 null)
      * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
+     * @param size 조회할 미팅 개수
      * @return Meeting 리스트
      */
-    List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size, String memberId);
+    List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size);
 
     /**
      * 독서 모임 특정 미팅에 존재하는 모든 팀 정보를 조회합니다.
@@ -115,6 +107,15 @@ public interface ClubMeetingQueryService {
     Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds);
 
     /**
+     * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후,
+     * 토픽 ID를 기준으로 해당 토픽을 선택한 팀 번호 리스트를 반환합니다.
+     *
+     * @param topicIds 조회할 토픽 ID 목록
+     * @return 토픽 id를 기준으로 선택한 팀 번호 리스트 Map
+     */
+    Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
+
+    /**
      * 독서모임이 존재하는지 확인합니다.
      *
      * @param meetingId 미팅 ID
@@ -139,5 +140,14 @@ public interface ClubMeetingQueryService {
      * @param teamNumber 팀 번호 (1, 2, 3, 4... 팀)
      * @return Team 존재하는 팀 객체
      */
-    Team validateTeam(Long meetingId, Integer teamNumber);
+    Team validateTeam(Long meetingId, Integer teamNumber) throws GeneralException;
+
+    /**
+     * 독서모임의 한줄평이 존재하는지 확인합니다.
+     *
+     * @param reviewId 한줄평 ID
+     * @param meetingId 미팅 ID
+     * @return BookReview 존재하는 한줄평 객체
+     */
+    BookReview validateBookReview(Long reviewId, Long meetingId) throws GeneralException;
 }

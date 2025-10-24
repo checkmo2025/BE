@@ -63,33 +63,12 @@ public class ClubMember extends BaseEntity {
         return this.clubMemberStatus == ClubMemberStatus.STAFF;
     }
 
-    public void addBookReview(BookReview bookReview) {
-        this.bookReviews.add(bookReview);
-        bookReview.setClubMember(this);
-    }
-
-    public void addTopic(Topic topic) {
-        this.topics.add(topic);
-        topic.setClubMember(this);
+    public boolean isActive() {
+        return this.clubMemberStatus == ClubMemberStatus.MEMBER || this.clubMemberStatus == ClubMemberStatus.STAFF;
     }
 
     public void updateStatus(ClubMemberStatus newStatus) {
         this.clubMemberStatus = newStatus;
-    }
-
-    public void addMemberTeam(MemberTeam memberTeam) {
-        this.memberTeams.add(memberTeam);
-        memberTeam.setClubMember(this);
-    }
-
-    public void removeTopic(Topic topic) {
-        this.topics.remove(topic);
-        topic.setClubMember(null);
-    }
-
-    public void removeBookReview(BookReview bookReview) {
-        this.bookReviews.remove(bookReview);
-        bookReview.setClubMember(null);
     }
 
     public enum ClubMemberStatus {

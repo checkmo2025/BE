@@ -3,11 +3,8 @@ package checkmo.domain.club.service.query;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.converter.ClubConverter;
-import checkmo.domain.club.entity.Club;
-import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.ClubMemberRepository;
-import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +22,6 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     // Domain level 2
     private final MemberQueryFacade memberQueryFacade;
-
-    // 자신의 QueryService
-    private final ClubCategoryQueryService clubCategoryQueryService;
-
 
     // 자신의 Repository
     private final ClubMemberRepository clubMemberRepository;
@@ -51,6 +44,11 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .toList();
 
         return ClubConverter.fromClubInfoListToMyClubList(myClubInfoList);
+    }
+
+    @Override
+    public List<Long> getMyClubListIds(String memberId) {
+        return clubMemberRepository.findClubIdsByMemberId(memberId);
     }
 
     /**
