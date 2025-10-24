@@ -29,20 +29,20 @@ public enum ErrorStatus implements BaseErrorCode {
     COMMENT_DEPTH_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "COMMENT_402", "댓글은 2단계까지만 허용됩니다."),
 
     // 모임
-    CLUB_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4004", "독서클럽을 찾을 수 없습니다."),
-    CLUB_DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "CLUB_4001", "이미 존재하는 독서클럽 이름입니다."),
-    CLUB_MEMBER_ONLY(HttpStatus.FORBIDDEN, "CLUB_4002", "해당 클럽의 회원이 아닙니다."),
-    CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_4005", "독서클럽 운영진만 접근할 수 있습니다."),
-    CLUB_BOOK_RECOMMEND_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4014", "추천 책을 찾을 수 없습니다."),
-    CLUB_BOOK_RECOMMEND_FORBIDDEN(HttpStatus.FORBIDDEN, "CLUB_4015", "해당 추천 책에 대한 권한이 없습니다."),
-    CLUB_INVALID_TAG_TYPE(HttpStatus.BAD_REQUEST, "CLUB_4011", "유효하지 않은 공지 유형입니다. (공지, 모임, 투표 중 하나)"),
-    CLUB_MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "CLUB_4016", "이미 존재하는 클럽 회원입니다."),
-    CLUB_MEMBER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "CLUB_4017", "유효하지 않은 상태입니다."),
-    CLUB_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_4018", "해당 클럽 회원을 찾을 수 없습니다."),
-    CLUB_STAFF_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "CLUB_4019", "운영진은 클럽을 탈퇴할 수 없습니다."),
+    CLUB_DUPLICATED_NAME(HttpStatus.BAD_REQUEST, "CLUB_400", "이미 존재하는 독서클럽 이름입니다."),
+    CLUB_INVALID_TAG_TYPE(HttpStatus.BAD_REQUEST, "CLUB_401", "유효하지 않은 공지 유형입니다. (공지, 모임, 투표 중 하나)"),
+    CLUB_MEMBER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "CLUB_402", "이미 존재하는 클럽 회원입니다."),
+    CLUB_MEMBER_ONLY(HttpStatus.FORBIDDEN, "CLUB_403", "해당 클럽의 회원이 아닙니다."),
+    CLUB_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_404", "독서클럽을 찾을 수 없습니다."),
+    CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_405", "독서클럽 운영진만 접근할 수 있습니다."),
+    CLUB_BOOK_RECOMMEND_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_406", "추천 책을 찾을 수 없습니다."),
+    CLUB_BOOK_RECOMMEND_FORBIDDEN(HttpStatus.FORBIDDEN, "CLUB_407", "해당 추천 책에 대한 권한이 없습니다."),
+    CLUB_MEMBER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "CLUB_408", "유효하지 않은 상태입니다."),
+    CLUB_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_409", "해당 클럽 회원을 찾을 수 없습니다."),
+    CLUB_STAFF_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "CLUB_410", "운영진은 클럽을 탈퇴할 수 없습니다."),
 
     // 공지사항
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_004", "공지사항을 찾을 수 없습니다."),
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_400", "공지사항을 찾을 수 없습니다."),
     NOTICE_MEETING_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_405", "모임 공지사항은 삭제할 수 없습니다."),
 
     // 투표
