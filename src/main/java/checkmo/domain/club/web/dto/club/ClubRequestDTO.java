@@ -52,7 +52,8 @@ public class ClubRequestDTO {
     public record CursorPageRequest(
             Long cursorId,
             Integer size
-    ) {}
+    ) {
+    }
 
     @Getter
     @NoArgsConstructor
@@ -63,6 +64,7 @@ public class ClubRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class ClubDetailDTO {
+        @NotBlank
         private String name;
         private String description;
         private String profileImageUrl;
