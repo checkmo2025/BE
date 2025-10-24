@@ -194,6 +194,8 @@ public class ClubResponseDTO {
         private String title; // 공지사항 제목
         private String content; // 공지사항 내용
         private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+
+        @Builder.Default
         private String tag = "공지";
     }
 
@@ -206,6 +208,8 @@ public class ClubResponseDTO {
         private String title; // 공지사항 제목
         private String content; // 공지사항 내용
         private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+
+        @Builder.Default
         private String tag = "모임"; // 공지사항 태그 (예: "공지", "이벤트")
         private MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO; // 모임 정보 DTO
     }
@@ -225,6 +229,7 @@ public class ClubResponseDTO {
         private LocalDateTime startTime; // 시작 시간
         private LocalDateTime deadline; // 종료 시간
 
+        @Builder.Default
         private String tag = "투표";
         private List<EachItemDTO> items; // 투표 항목 목록
     }

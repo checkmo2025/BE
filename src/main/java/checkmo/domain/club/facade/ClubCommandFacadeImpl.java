@@ -106,7 +106,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         // === 3. DTO 변환 및 반환 준비 === //
 
         // 외부 도메인 정보 조회 및 DTO 변환
-        MemberSharedDTO.BasicInfoDTO memberInfo = memberQueryFacade.getMemberBasicInfoForShare(
+        MemberSharedDTO.BasicInfo memberInfo = memberQueryFacade.getMemberBasicInfoForShare(
                 updatedClubMember.getMemberId());
         ClubResponseDTO.ClubMemberDTO updatedClubMemberDTO = ClubConverter.toClubMemberDTO(updatedClubMember,
                 memberInfo);
@@ -317,7 +317,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     // TODO: Test DB 설정 후, 낙관적 락 동작 테스트
     @Override
     @Retryable( // OptimisticLockingFailureException 발생 시 재시도
-            value = OptimisticLockingFailureException.class,
+            retryFor = OptimisticLockingFailureException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
     )
@@ -332,7 +332,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     @Override
     @Retryable( // OptimisticLockingFailureException 발생 시 재시도
-            value = OptimisticLockingFailureException.class,
+            retryFor = OptimisticLockingFailureException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
     )
@@ -348,7 +348,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     @Override
     @Retryable( // OptimisticLockingFailureException 발생 시 재시도
-            value = OptimisticLockingFailureException.class,
+            retryFor = OptimisticLockingFailureException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
     )
