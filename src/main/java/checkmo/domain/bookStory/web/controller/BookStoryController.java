@@ -173,7 +173,7 @@ public class BookStoryController {
             @CurrentId String memberId,
             @PathVariable Long bookStoryId,
             @RequestParam(required = false) Long parentCommentId,
-            @RequestBody BookStoryRequestDTO.CommentCreateRequest request
+            @Valid @RequestBody BookStoryRequestDTO.CommentCreateRequest request
     ) {
         Long resultBookStoryId = bookStoryCommandFacade.createComment(memberId, bookStoryId, parentCommentId, request);
         return ApiResponse.onSuccess(resultBookStoryId);
