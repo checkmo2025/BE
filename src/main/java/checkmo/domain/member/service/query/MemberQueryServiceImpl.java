@@ -64,7 +64,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds) {
+    public Map<String, MemberSharedDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds) {
         // 1. Repository를 통해 IN 쿼리로 모든 회원 정보 조회
         // [0] memberId, [1] nickname, [2] profileImageUrl
         List<Object[]> results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
@@ -74,7 +74,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         return results.stream()
                 .collect(Collectors.toMap(
                         row -> (String) row[0], // memberId
-                        row -> MemberSharedDTO.BasicInfoDTO.builder()
+                        row -> MemberSharedDTO.BasicInfo.builder()
                                 .nickname((String) row[1]) // nickname
                                 .profileImageUrl((String) row[2]) // profileImageUrl
                                 .build()
@@ -133,7 +133,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
+    public Map<String, MemberSharedDTO.WithFollowStatus> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
         // 1. 배치로 회원 기본 정보 조회 (1번의 쿼리)
         var results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
 

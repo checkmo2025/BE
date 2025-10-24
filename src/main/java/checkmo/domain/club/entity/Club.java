@@ -45,6 +45,7 @@ public class Club extends BaseEntity {
     @Column(nullable = false)
     private boolean open;
 
+    @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "club_participants", joinColumns = @JoinColumn(name = "club_id"))

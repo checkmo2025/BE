@@ -15,7 +15,7 @@ public interface BookCommandService {
      *
      * @param request 알라딘 책 DTO
      */
-    void saveBook(BookSharedDTO.BookCreateRequestDTO request);
+    void saveBook(BookSharedDTO.BookCreateRequest request);
     // 책 고유번호는 ISBN 13자리로
 
     /**

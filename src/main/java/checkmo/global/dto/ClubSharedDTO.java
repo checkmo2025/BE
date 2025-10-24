@@ -43,24 +43,18 @@ public class ClubSharedDTO {
         private String clubName; // 모임 이름
     }
 
-    @Getter
-    @Builder
-    public static class ClubUpdatePreviewListDTO {
-        private List<ClubUpdatePreview> clubUpdates;
-    }
-
     @JsonTypeInfo(
             use = JsonTypeInfo.Id.NAME,
             include = JsonTypeInfo.As.EXISTING_PROPERTY,
             property = "tag",
             visible = true)
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = MeetingNoticePreviewDTO.class, name = "모임"),
-            @JsonSubTypes.Type(value = VotePreviewDTO.class, name = "투표"),
-            @JsonSubTypes.Type(value = PureNoticePreviewDTO.class, name = "공지")
+            @JsonSubTypes.Type(value = MeetingNoticePreview.class, name = "모임"),
+            @JsonSubTypes.Type(value = VotePreview.class, name = "투표"),
+            @JsonSubTypes.Type(value = PureNoticePreview.class, name = "공지")
     })
     public sealed interface ClubUpdatePreview
-            permits MeetingNoticePreviewDTO, VotePreviewDTO, PureNoticePreviewDTO {
+            permits MeetingNoticePreview, VotePreview, PureNoticePreview {
         Long getId();
         Long getClubId();
         String getClubName();
@@ -69,7 +63,7 @@ public class ClubSharedDTO {
     }
 
     @Getter
-    public static final class MeetingNoticePreviewDTO implements ClubUpdatePreview {
+    public static final class MeetingNoticePreview implements ClubUpdatePreview {
         private final Long id;
         private final Long clubId;
         private final String clubName;
@@ -82,7 +76,7 @@ public class ClubSharedDTO {
         private final String bookImageUrl;
 
         @Builder
-        public MeetingNoticePreviewDTO(Long id, Long clubId, String clubName, String title, LocalDateTime nextMeetingDate, String nextBookTitle, String bookImageUrl) {
+        public MeetingNoticePreview(Long id, Long clubId, String clubName, String title, LocalDateTime nextMeetingDate, String nextBookTitle, String bookImageUrl) {
             this.id = id;
             this.clubId = clubId;
             this.clubName = clubName;
@@ -94,7 +88,7 @@ public class ClubSharedDTO {
     }
 
     @Getter
-    public static final class VotePreviewDTO implements ClubUpdatePreview {
+    public static final class VotePreview implements ClubUpdatePreview {
         private final Long id; // 해당 클럽의 공지사항 ID
         private final Long clubId; // 해당 클럽의 ID
         private final String clubName;
@@ -108,7 +102,7 @@ public class ClubSharedDTO {
         private final List<String> voteItems;
 
         @Builder
-        public VotePreviewDTO(Long id, Long clubId, String clubName, String title, LocalDateTime meetingDate, String location, String details, List<String> voteItems) {
+        public VotePreview(Long id, Long clubId, String clubName, String title, LocalDateTime meetingDate, String location, String details, List<String> voteItems) {
             this.id = id;
             this.clubId = clubId;
             this.clubName = clubName;
@@ -121,7 +115,7 @@ public class ClubSharedDTO {
     }
 
     @Getter
-    public static final class PureNoticePreviewDTO implements ClubUpdatePreview {
+    public static final class PureNoticePreview implements ClubUpdatePreview {
         private final Long id;
         private final Long clubId;
         private final String clubName;
@@ -132,7 +126,7 @@ public class ClubSharedDTO {
         private final String content;
 
         @Builder
-        public PureNoticePreviewDTO(Long id, Long clubId, String clubName, String title, String content) {
+        public PureNoticePreview(Long id, Long clubId, String clubName, String title, String content) {
             this.id = id;
             this.clubId = clubId;
             this.clubName = clubName;

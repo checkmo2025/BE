@@ -62,7 +62,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
         // 2. 공지사항 존재 여부 및 "순수" 공지사항 여부 확인
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         if ("모임".equals(notice.getTag())) {
-            throw new GeneralException(ErrorStatus.MEETING_NOTICE_DELETE_FORBIDDEN);
+            throw new GeneralException(ErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
         }
 
         // 3. 공지사항 삭제

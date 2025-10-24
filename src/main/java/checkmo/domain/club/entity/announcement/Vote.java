@@ -24,6 +24,7 @@ public class Vote extends BaseEntity {
 
     private String content;
 
+    @Builder.Default
     private String tag = "투표";
 
     private boolean important;
