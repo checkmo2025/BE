@@ -5,7 +5,6 @@ import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.repository.ClubRepository;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
-import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,70 +19,19 @@ public class ClubQueryServiceImpl implements ClubQueryService {
     // 자신의 Repository
     private final ClubRepository clubRepository;
 
-    /**
-     * 독서 클럽 목록을 조회합니다.
-     *
-     * 피그마 참고 페이지 : #독서모임 - 모임 검색하기
-     *
-     * @param filter 검색 필터 (keyword, name, region, participants)
-     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null 또는 0)
-     * @param pageSize 페이지 크기
-     * @return 독서 클럽 목록
-     */
     @Override
     public List<Club> getClubList(ClubRequestDTO.ClubSearchFilter filter, Long cursorId, int pageSize) {
         return clubRepository.searchClubs(filter, cursorId, pageSize);
     }
 
     @Override
-    public ClubResponseDTO.MyClubListDTO getMyClubList(String memberId) {
-        return null;
-    }
-
-    @Override
-    public ClubResponseDTO.MyClubListDTO getMyClubList(String memberId, int size) {
-        return null;
-    }
-
-    /**
-     * 독서모임의 상세 정보를 조회합니다.
-     *
-     * 피그마 참고 페이지 : #독서모임 - 모임 검색하기 - 특정 모임 클릭시
-     *
-     * @param clubId 독서모임 ID
-     * @return 독서 클럽 엔티티
-     */
-    @Override
     public Club getClubInfo(Long clubId) {
         return validateClub(clubId);
     }
 
-    /**
-     * 독서모임의 이름 중복 여부를 확인 합니다.
-     *
-     * 피그마 참고 페이지 : #독서모임 - 모임 생성하기 첫화면 첫스크롤
-     *
-     * @param clubName 독서모임 이름
-     * @return 중복 여부 (true: 중복, false: 중복 아님)
-     */
     @Override
     public boolean isDuplicateClubName(String clubName) {
         return clubRepository.existsByName(clubName);
-    }
-
-    @Override
-    public ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, int size) {
-        return null;
-    }
-
-    @Override
-    public ClubResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId) {
-        return null;
-    }
-
-    @Override
-    public ClubResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId) {
-        return null;
     }
 
     @Override
