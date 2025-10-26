@@ -3,7 +3,6 @@ package checkmo.domain.member.service.authenticate;
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.member.service.security.jwt.JwtCookieUtil;
-import checkmo.domain.member.service.security.jwt.JwtLoginProcessor;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
 import checkmo.domain.member.service.security.jwt.TokenCacheService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
@@ -30,7 +29,7 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final JwtCookieUtil jwtCookieUtil;
 
     @Override
-    public Authentication login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
+    public Authentication login(MemberRequestDTO.LoginRequestDTO request) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());

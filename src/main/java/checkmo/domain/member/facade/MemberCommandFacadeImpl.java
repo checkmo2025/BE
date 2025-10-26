@@ -55,7 +55,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
         Member member = memberRegistrationCommandService.signUp(request);
 
-        Authentication authentication = memberAuthenticationService.login(new LoginRequestDTO(request.getEmail(), request.getPassword()), response);
+        Authentication authentication = memberAuthenticationService.login(new LoginRequestDTO(request.getEmail(), request.getPassword()));
 
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
@@ -89,7 +89,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     @Override
     public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
 
-        Authentication authentication = memberAuthenticationService.login(request, response);
+        Authentication authentication = memberAuthenticationService.login(request);
 
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
