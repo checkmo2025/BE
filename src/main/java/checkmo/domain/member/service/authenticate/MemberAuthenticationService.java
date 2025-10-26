@@ -4,6 +4,7 @@ import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
 
 /**
  * 로그인/로그아웃 로직
@@ -19,9 +20,9 @@ public interface MemberAuthenticationService {
      *
      * @param request 로그인 요청 DTO
      * @param response HttpServletResponse 객체
-     * @return 인증된 회원 엔티티
+     * @return 인증 정보(Authentication 객체)
      */
-    Member login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
+    Authentication login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
 
     /**
      * 로그아웃 처리 - JWT 토큰을 무효화하고 쿠키 삭제

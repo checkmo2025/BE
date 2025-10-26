@@ -11,6 +11,7 @@ import checkmo.domain.member.service.command.MemberProfileCommandService;
 import checkmo.domain.member.service.command.MemberRegistrationCommandService;
 import checkmo.domain.member.service.query.MemberCategoryQueryService;
 import checkmo.domain.member.service.security.auth.PrincipalDetails;
+import checkmo.domain.member.service.security.jwt.JwtLoginProcessor;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberRequestDTO.LoginRequestDTO;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
@@ -37,6 +38,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberProfileCommandService memberProfileCommandService;
     private final MemberCategoryQueryService memberCategoryQueryService;
+    private final JwtLoginProcessor jwtLoginProcessor;
 
     @Override
     public void sendEmailVerification(String email) {
@@ -53,7 +55,11 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
 
         Member member = memberRegistrationCommandService.signUp(request);
 
-        memberAuthenticationService.login(new LoginRequestDTO(request.getEmail(), request.getPassword()), response);
+        Authentication authentication = memberAuthenticationService.login(new LoginRequestDTO(request.getEmail(), request.getPassword()), response);
+
+        // JWT 토큰 생성 및 쿠키 설정
+        jwtLoginProcessor.processLogin(response, authentication);
+
         return MemberConverter.fromMember(member);
     }
 
@@ -83,7 +89,12 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     @Override
     public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
 
-        Member member = memberAuthenticationService.login(request, response);
+        Authentication authentication = memberAuthenticationService.login(request, response);
+
+        // JWT 토큰 생성 및 쿠키 설정
+        jwtLoginProcessor.processLogin(response, authentication);
+
+        Member member = ((PrincipalDetails) authentication.getPrincipal()).getMember();
         return MemberConverter.fromMemberToLoginResponseDTO(member);
     }
 

@@ -33,7 +33,7 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final JwtLoginProcessor jwtLoginProcessor;
 
     @Override
-    public Member login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
+    public Authentication login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
@@ -47,9 +47,6 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             /// 인증 성공 후 SecurityContext에 인증 정보 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // JWT 토큰 생성 및 쿠키 설정
-            jwtLoginProcessor.processLogin(response, authentication);
-
         } catch (AuthenticationException authEx) {
             // 인증 실패 시 예외 처리
             throw new GeneralException(ErrorStatus.INVALID_CREDENTIALS, "이메일 또는 비밀번호가 일치하지 않습니다");
@@ -58,8 +55,8 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             throw new GeneralException(ErrorStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류: 로그인 처리 중 오류가 발생했습니다");
         }
 
-        // 인증 성공 후 멤버 객체 반환
-        return ((PrincipalDetails) authentication.getPrincipal()).getMember();
+        // 인증 성공 후 Authentication 객체 반환
+        return authentication;
     }
 
     @Override
