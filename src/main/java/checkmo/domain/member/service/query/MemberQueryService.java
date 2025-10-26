@@ -1,7 +1,6 @@
 package checkmo.domain.member.service.query;
 
 import checkmo.domain.member.entity.Member;
-import checkmo.global.dto.MemberSharedDTO;
 import java.util.List;
 import java.util.Map;
 

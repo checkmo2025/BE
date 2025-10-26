@@ -4,7 +4,6 @@ import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
-import checkmo.domain.member.service.query.MemberCategoryQueryService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.global.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +19,6 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     // 자신의 CommandService
     private final MemberCategoryCommandService memberCategoryCommandService;
-
-    // 자신의 QueryService
-    private final MemberCategoryQueryService memberCategoryQueryService;
 
     // 자신의 Repository
     private final MemberRepository memberRepository;

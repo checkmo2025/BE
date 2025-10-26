@@ -2,8 +2,6 @@ package checkmo.domain.member.service.authenticate;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.member.entity.Member;
-import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.service.security.jwt.JwtCookieUtil;
 import checkmo.domain.member.service.security.jwt.JwtLoginProcessor;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
@@ -30,7 +28,6 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
-    private final JwtLoginProcessor jwtLoginProcessor;
 
     @Override
     public Authentication login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
