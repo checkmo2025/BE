@@ -8,10 +8,8 @@ import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.service.authenticate.MemberAuthenticationService;
 import checkmo.domain.member.service.common.EmailSender;
 import checkmo.domain.member.service.query.MemberQueryService;
-import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
 import checkmo.domain.member.web.dto.MemberRequestDTO.LoginRequestDTO;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -20,8 +18,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,7 +114,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     @Transactional
-    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
+    public Member signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
 
         // 이메일 중복 확인
         if (memberRepository.existsByEmail(request.getEmail())) {
@@ -143,29 +139,12 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
         memberAuthenticationService.login(loginRequest, response);
 
-        return MemberConverter.fromMember(newMember);
+        return newMember;
     }
 
     @Override
     @Transactional
-    public void addAdditionalInfo(MemberRequestDTO.AdditionalInfoDTO request) {
-
-        // 현재 사용자 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new GeneralException(ErrorStatus.MEMBER_UNAUTHORIZED);
-        }
-
-        // 사용자 정보 추출
-        Object principal = authentication.getPrincipal();
-
-        // PrincipalDetails 타입으로 캐스팅
-        if (!(principal instanceof PrincipalDetails)) {
-            throw new GeneralException(ErrorStatus.MEMBER_UNAUTHORIZED);
-        }
-
-        String memberId = ((PrincipalDetails) principal).getMember().getId();
+    public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfoDTO request) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));

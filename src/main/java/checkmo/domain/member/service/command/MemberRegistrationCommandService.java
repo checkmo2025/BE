@@ -1,7 +1,7 @@
 package checkmo.domain.member.service.command;
 
+import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -44,9 +44,9 @@ public interface MemberRegistrationCommandService {
      *
      * @param request id,pw DTO
      * @param response HttpServletResponse 객체
-     * @return 회원 가입 응답 DTO
+     * @return 회원 엔티티
      */
-    MemberResponseDTO.SignUpResponseDTO signUp(
+    Member signUp(
             MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response
     );
 
@@ -57,6 +57,6 @@ public interface MemberRegistrationCommandService {
      * @return void -> 어차피 회원 프로필 정보 완료 후에는 메인 화면에 로그인된 상태로 리다이렉트
      */
     void addAdditionalInfo(
-            MemberRequestDTO.AdditionalInfoDTO request
+            String memberId, MemberRequestDTO.AdditionalInfoDTO request
     );
 }

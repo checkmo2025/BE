@@ -2,16 +2,13 @@ package checkmo.domain.member.service.authenticate;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.service.security.auth.PrincipalDetails;
 import checkmo.domain.member.service.security.jwt.JwtCookieUtil;
 import checkmo.domain.member.service.security.jwt.JwtLoginProcessor;
-import checkmo.domain.member.service.security.jwt.JwtToken;
 import checkmo.domain.member.service.security.jwt.JwtTokenProvider;
 import checkmo.domain.member.service.security.jwt.TokenCacheService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +33,7 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final JwtLoginProcessor jwtLoginProcessor;
 
     @Override
-    public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
+    public Member login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
@@ -61,9 +58,8 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             throw new GeneralException(ErrorStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류: 로그인 처리 중 오류가 발생했습니다");
         }
 
-        // 인증 성공 후 MemberResponseDTO 반환
-        Member member = ((PrincipalDetails) authentication.getPrincipal()).getMember();
-        return MemberConverter.fromMemberToLoginResponseDTO(member);
+        // 인증 성공 후 멤버 객체 반환
+        return ((PrincipalDetails) authentication.getPrincipal()).getMember();
     }
 
     @Override

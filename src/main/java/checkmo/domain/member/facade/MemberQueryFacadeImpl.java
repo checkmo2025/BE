@@ -3,18 +3,21 @@ package checkmo.domain.member.facade;
 import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Follow;
 import checkmo.domain.member.entity.Member;
+import checkmo.domain.member.entity.MemberCategory;
 import checkmo.domain.member.repository.MemberRepository;
+import checkmo.domain.member.service.query.MemberCategoryQueryService;
 import checkmo.domain.member.service.query.MemberFollowQueryService;
 import checkmo.domain.member.service.query.MemberQueryService;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
+import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     // 자신의 QueryService
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
+    private final MemberCategoryQueryService memberCategoryQueryService;
 
     // 자신의 Repository (프록시용, TODO: 해결 불가한가?)
     private final MemberRepository memberRepository;
@@ -38,17 +42,29 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId) {
-        return memberQueryService.getMemberBasicInfo(memberId);
+        Member member = memberQueryService.getMemberBasicInfo(memberId);
+        return MemberConverter.toMemberProfileResponseDTO(member);
     }
 
     @Override
     public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
-        return memberQueryService.getMemberProfile(memberId);
+        Member member = memberQueryService.getMemberProfile(memberId);
+
+        List<MemberCategory> memberCategories = memberCategoryQueryService.findCategoriesByMember(memberId);
+        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(memberCategories);
+
+        return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
     }
 
     @Override
     public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
-        return memberQueryService.getOtherProfile(targetMemberNickname, memberId);
+        Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname, memberId);
+        boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
+
+        List<MemberCategory> targetMemberCategories = memberCategoryQueryService.findCategoriesByMember(targetMember.getId());
+        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(targetMemberCategories);
+
+        return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing, categories);
     }
 
     @Override
@@ -170,8 +186,10 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
      */
     @Override
     public MemberSharedDTO.BasicInfoDTO getMemberBasicInfoForShare(String memberId) {
-        var profile = memberQueryService.getMemberBasicInfo(memberId);
-        return MemberConverter.toBasicInfoDTO(profile);
+        Member member = memberQueryService.getMemberBasicInfo(memberId);
+        MemberResponseDTO.MemberProfileResponseDTO profileDTO = MemberConverter.toMemberProfileResponseDTO(member);
+
+        return MemberConverter.toBasicInfoDTO(profileDTO);
     }
 
     @Override
@@ -180,7 +198,20 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
             return Map.of();
         }
 
-        return memberQueryService.getMemberBasicInfoMapForShare(memberIds);
+        // 1. Repository를 통해 IN 쿼리로 모든 회원 정보 조회
+        // [0] memberId, [1] nickname, [2] profileImageUrl
+        List<Object[]> results = memberQueryService.getMemberBasicInfoMapForShare(memberIds);
+
+        // 2. 조회된 엔티티 리스트를 Map으로 변환
+        // memberId를 key로, BasicInfoDTO를 value로 사용
+        return results.stream()
+                      .collect(Collectors.toMap(
+                          row -> (String) row[0], // memberId
+                          row -> MemberSharedDTO.BasicInfoDTO.builder()
+                                                             .nickname((String) row[1]) // nickname
+                                                             .profileImageUrl((String) row[2]) // profileImageUrl
+                                                             .build()
+                      ));
     }
 
     /**
