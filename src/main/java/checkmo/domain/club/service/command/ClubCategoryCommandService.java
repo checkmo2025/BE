@@ -1,5 +1,6 @@
 package checkmo.domain.club.service.command;
 
+import checkmo.domain.club.entity.Club;
 import java.util.List;
 
 /**
@@ -8,10 +9,18 @@ import java.util.List;
 public interface ClubCategoryCommandService {
 
     /**
+     * 클럽의 카테고리 연관관계를 생성합니다.
+     *
+     * @param club        클럽
+     * @param categoryIds 카테고리 ID 목록
+     */
+    void createClubCategories(Club club, List<Long> categoryIds);
+
+    /**
      * 클럽의 카테고리 연관관계를 수정합니다.
      *
-     * @param clubId      클럽 ID
+     * @param club        클럽
      * @param categoryIds 새로운 카테고리 ID 목록
      */
-    void modifyClubCategories(Long clubId, List<Long> categoryIds);
+    void modifyClubCategories(Club club, List<Long> categoryIds);
 }

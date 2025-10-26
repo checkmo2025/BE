@@ -13,8 +13,8 @@ public class BookStoryRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class BookStoryCreateRequestDTO {
-        private BookSharedDTO.BookCreateRequestDTO bookInfo; // 책 정보
+    public static class BookStoryCreateRequest {
+        private BookSharedDTO.BookCreateRequest bookInfo; // 책 정보
 
         @NotBlank(message = "책 이야기에 제목을 입력해주세요.")
         private String title;
@@ -25,8 +25,15 @@ public class BookStoryRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class BookStoryUpdateRequestDTO {
+    public static class BookStoryUpdateRequest {
         @NotBlank(message = "책 이야기에 수정할 내용을 입력해주세요.")
         private String description;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class CommentCreateRequest {
+        @NotBlank(message = "댓글 내용을 입력해주세요.")
+        private String content;
     }
 }

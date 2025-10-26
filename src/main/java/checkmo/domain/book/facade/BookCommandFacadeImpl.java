@@ -16,7 +16,7 @@ public class BookCommandFacadeImpl implements BookCommandFacade {
 
     @Override
     @Transactional
-    public void saveBook(BookSharedDTO.BookCreateRequestDTO request) {
+    public void saveBook(BookSharedDTO.BookCreateRequest request) {
         bookCommandService.saveBook(request);
     }
 

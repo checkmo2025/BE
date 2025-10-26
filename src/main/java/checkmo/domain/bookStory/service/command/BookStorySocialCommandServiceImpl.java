@@ -11,6 +11,7 @@ import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.event.LikeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,28 +46,39 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
                     return false;
                 })
                 .orElseGet(() -> {
-                    // 좋아요가 없다면 새로 생성하고 true 반환
-                    createAndSaveBookStoryLiked(bookStory, proxyMember);
-                    if (!memberId.equals(bookStory.getMemberId())) {
-                        // 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
+                    // 사전 체크: 대부분의 중복을 사전 차단 (race condition 최소화)
+                    if (bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStoryId)) {
+                        return true; // 이미 좋아요 존재
+                    }
+
+                    // 좋아요가 없다면 새로 생성
+                    boolean created = createAndSaveBookStoryLiked(bookStory, proxyMember);
+                    if (created && !memberId.equals(bookStory.getMemberId())) {
+                        // 실제로 생성되었고, 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
                         eventPublisher.publishEvent(new LikeEvent(memberId, bookStory.getMemberId(), bookStory.getId()));
                     }
-                    return true;
+                    return true; // 생성되었거나 중복이거나, 최종적으로 좋아요 존재
                 });
     }
 
     private void deleteBookStoryLiked(BookStory bookStory, BookStoryLiked bookStoryLiked) {
         bookStoryLikedRepository.delete(bookStoryLiked);
-        bookStory.removeLike();
+        bookStory.removeBookStoryLiked(bookStoryLiked);
     }
 
-    private void createAndSaveBookStoryLiked(BookStory bookStory, Member member) {
-        bookStoryLikedRepository.save(
-                BookStoryLiked.builder()
-                        .bookStory(bookStory)
-                        .member(member)
-                        .build()
-        );
-        bookStory.addLike();
+    private boolean createAndSaveBookStoryLiked(BookStory bookStory, Member member) {
+        try {
+            BookStoryLiked bookStoryLiked = BookStoryLiked.builder()
+                    .bookStory(bookStory)
+                    .member(member)
+                    .build();
+
+            bookStoryLikedRepository.save(bookStoryLiked);
+            bookStory.addBookStoryLiked(bookStoryLiked);
+            return true; // 이번 호출에서 새로 생성함
+        } catch (DataIntegrityViolationException e) {
+            // 유니크 제약 조건 위반 = 좋아요가 이미 존재 (exists와 save 사이의 race condition)
+            return false; // 이번 호출에서는 생성하지 않았음 (하지만 좋아요는 존재함)
+        }
     }
 }

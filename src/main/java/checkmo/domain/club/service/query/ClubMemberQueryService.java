@@ -2,7 +2,6 @@ package checkmo.domain.club.service.query;
 
 import checkmo.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.ClubMember;
-import checkmo.domain.club.web.dto.club.ClubResponseDTO;
 import checkmo.global.dto.ClubSharedDTO;
 
 import java.util.List;
@@ -34,6 +33,14 @@ public interface ClubMemberQueryService {
      * @return 회원이 가입한 독서 클럽의 간략한 정보 목록 DTO
      */
     ClubSharedDTO.MyClubList getMyClubList(String memberId);
+
+    /**
+     * 특정 회원이 가입한 클럽의 ID 리스트를 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 클럽 ID 리스트
+     */
+    List<Long> getMyClubListIds(String memberId);
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (내부용)
@@ -68,7 +75,7 @@ public interface ClubMemberQueryService {
      * 특정 상태의 모임 회원 목록을 조회합니다.
      *
      * @param clubId 모임 ID
-     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL", *"ACTIVE"* 중 하나)
+     * @param status 조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL", "ACTIVE" 중 하나)
      * @param cursorId 페이징 커서 ID (null이면 처음부터 조회)
      * @param size 조회할 개수 (null이면 전체 조회)
      * @return ClubMember 엔티티 리스트

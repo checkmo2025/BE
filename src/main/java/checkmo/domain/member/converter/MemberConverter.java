@@ -105,8 +105,8 @@ public class MemberConverter {
     /**
      * MemberProfileResponseDTO → BasicInfoDTO 변환
      */
-    public static MemberSharedDTO.BasicInfoDTO toBasicInfoDTO(MemberResponseDTO.MemberProfileResponseDTO profile) {
-        return MemberSharedDTO.BasicInfoDTO.builder()
+    public static MemberSharedDTO.BasicInfo toBasicInfoDTO(MemberResponseDTO.MemberProfileResponseDTO profile) {
+        return MemberSharedDTO.BasicInfo.builder()
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())
                 .build();
@@ -115,8 +115,8 @@ public class MemberConverter {
     /**
      * BasicInfoDTO -> WithFollowStatusDTO 변환
      */
-    public static MemberSharedDTO.WithFollowStatusDTO toWithFollowStatusDTO(MemberSharedDTO.BasicInfoDTO basicInfo, boolean isFollowing) {
-        return MemberSharedDTO.WithFollowStatusDTO.builder()
+    public static MemberSharedDTO.WithFollowStatus toWithFollowStatusDTO(MemberSharedDTO.BasicInfo basicInfo, boolean isFollowing) {
+        return MemberSharedDTO.WithFollowStatus.builder()
                 .nickname(basicInfo.getNickname())
                 .profileImageUrl(basicInfo.getProfileImageUrl())
                 .following(isFollowing)
@@ -128,8 +128,8 @@ public class MemberConverter {
      * 배치 처리를 위한 조회 결과를 Object[]에 담아서 전달
      * 여기서 Object[]의 구성은 row[0]=memberId, row[1]=nickname, row[2]=profileImageUrl
      */
-    public static MemberSharedDTO.WithFollowStatusDTO toWithFollowStatusDTO(Object[] row, boolean isFollowing) {
-        return MemberSharedDTO.WithFollowStatusDTO.builder()
+    public static MemberSharedDTO.WithFollowStatus toWithFollowStatusDTO(Object[] row, boolean isFollowing) {
+        return MemberSharedDTO.WithFollowStatus.builder()
                 .nickname((String) row[1])
                 .profileImageUrl((String) row[2])
                 .following(isFollowing)
@@ -168,7 +168,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowList 변환
      */
     public static MemberResponseDTO.FollowList toFollowList(
-            List<MemberSharedDTO.WithFollowStatusDTO> followList,
+            List<MemberSharedDTO.WithFollowStatus> followList,
             boolean hasNext,
             Long nextCursor
     ) {
@@ -183,7 +183,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowPreviewList 변환
      */
     public static MemberResponseDTO.FollowPreviewList toFollowPreviewList(
-            List<MemberSharedDTO.WithFollowStatusDTO> followList
+            List<MemberSharedDTO.WithFollowStatus> followList
     ) {
         return MemberResponseDTO.FollowPreviewList.builder()
                 .followList(followList)

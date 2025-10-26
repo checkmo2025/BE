@@ -160,10 +160,9 @@ public class ClubController {
     /**
      * 독서 모임 검색 API
      *
-     * @param keyword 검색할 키워드
-     * @param region 지역 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
-     * @param participants 대상 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
-     * @param cursorId 페이징 커서 ID (null: 처음부터)
+     * @param memberId 현재 로그인한 회원 ID
+     * @param filter 검색 필터 (keyword, name, region, participants)
+     * @param pageRequest 페이징 요청 (cursorId, size)
      * @return 검색 결과를 포함한 성공 응답
      */
     @Operation(summary = "독서 모임 검색 API", description = "키워드를 기반으로 독서 모임을 검색합니다.")
@@ -174,14 +173,10 @@ public class ClubController {
     @GetMapping("/search")
     public ApiResponse<ClubResponseDTO.ClubListDTO> searchClubs(
             @CurrentId String memberId,
-            @RequestParam(required = false, defaultValue = "") String keyword, // 검색 키워드 (모임명 등)
-            @RequestParam(required = false, defaultValue = "0") int name, // 클럽명 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
-            @RequestParam(required = false, defaultValue = "0") int region, // 지역 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
-            @RequestParam(required = false, defaultValue = "0") int participants, // 대상 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
-            @RequestParam(required = false) Long cursorId, // 페이징 커서 ID
-            @RequestParam(required = false) Integer size // 페이지 사이즈
+            @ModelAttribute ClubRequestDTO.ClubSearchFilter filter,
+            @ModelAttribute ClubRequestDTO.CursorPageRequest pageRequest
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getClubList(memberId, keyword, name, region, participants, cursorId, size));
+        return ApiResponse.onSuccess(clubQueryFacade.getClubList(memberId, filter, pageRequest));
     }
 
     /**
@@ -231,7 +226,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 가입 신청을 했거나, 가입이 승인된 상태입니다."),
     })
     @PostMapping("/{clubId}/join")
-    public ApiResponse<ClubResponseDTO.ClubInfoDTO> joinClub(
+    public ApiResponse<Long> joinClub(
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.ClubMemberJoinDTO request
@@ -298,7 +293,8 @@ public class ClubController {
             @CurrentId String currentMemberId,
             @RequestParam(defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
     ) {
-        return ApiResponse.onSuccess(clubCommandFacade.updateClubMemberStatus(clubId, memberId, currentMemberId, status));
+        return ApiResponse.onSuccess(
+                clubCommandFacade.updateClubMemberStatus(clubId, currentMemberId, memberId, status));
     }
 
     /**

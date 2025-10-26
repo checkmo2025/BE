@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,8 +41,8 @@ public class ClubBookshelfController {
     @GetMapping("/api/clubs/{clubId}/bookshelves")
     public ApiResponse<BookShelfResponseDTO.BookShelfListDTO> getBookShelfList(
             @PathVariable Long clubId,
-            @RequestParam(required = false) @Positive Long cursorId,
-            @RequestParam(required = false, defaultValue = "9") @Positive Integer size,
+            @RequestParam(required = false) @ValidCursor Long cursorId,
+            @RequestParam(required = false, defaultValue = "9") @ValidSize Integer size,
             @RequestParam(required = false) Integer generation,
             @CurrentId String memberId
     ) {

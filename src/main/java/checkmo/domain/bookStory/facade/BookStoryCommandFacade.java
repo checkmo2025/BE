@@ -15,7 +15,7 @@ public interface BookStoryCommandFacade {
      * @param request  작성할 책 이야기 정보 DTO
      * @return 생성된 책 이야기의 ID
      */
-    Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequestDTO request);
+    Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequest request);
 
     /**
      * 기존 책 이야기를 수정합니다. (내부용)
@@ -25,7 +25,7 @@ public interface BookStoryCommandFacade {
      * @param request     수정할 책 이야기 정보 DTO
      * @return 수정된 책 이야기의 ID
      */
-    Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request);
+    Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequest request);
 
     /**
      * 책 이야기를 삭제합니다. (내부용)
@@ -43,4 +43,15 @@ public interface BookStoryCommandFacade {
      * @return 책이야기에 좋아요가 추가됐는지/제거됐는지 여부
      */
     boolean toggleLikeOnBookStory(String memberId, Long bookStoryId);
+
+    /**
+     * 책 이야기에 댓글/대댓글을 작성합니다. (내부용)
+     *
+     * @param memberId    작성자 회원 ID
+     * @param bookStoryId 댓글을 작성할 책 이야기 ID
+     * @param parentCommentId 부모 댓글 ID (값이 있으면 대댓글, null이면 일반 댓글)
+     * @param request     댓글 작성 요청 DTO
+     * @return 작성된 책 이야기의 ID
+     */
+    Long createComment(String memberId, Long bookStoryId, Long parentCommentId, BookStoryRequestDTO.CommentCreateRequest request);
 }

@@ -87,7 +87,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
+        List<MemberSharedDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followerDTOList, hasNext, nextCursor);
@@ -112,7 +112,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
+        List<MemberSharedDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followingDTOList, hasNext, nextCursor);
@@ -129,7 +129,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
+        List<MemberSharedDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followerDTOList);
     }
@@ -145,7 +145,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
+        List<MemberSharedDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
 
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followingDTOList);
@@ -177,7 +177,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
      * @return MemberSharedDTO.BasicInfo
      */
     @Override
-    public MemberSharedDTO.BasicInfoDTO getMemberBasicInfoForShare(String memberId) {
+    public MemberSharedDTO.BasicInfo getMemberBasicInfoForShare(String memberId) {
         Member member = memberQueryService.getMemberBasicInfo(memberId);
         MemberResponseDTO.MemberProfileResponseDTO profileDTO = MemberConverter.toMemberProfileResponseDTO(member);
 
@@ -185,7 +185,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds) {
+    public Map<String, MemberSharedDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds) {
         if (memberIds == null || memberIds.isEmpty()) {
             return Map.of();
         }
@@ -199,7 +199,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
         return results.stream()
                       .collect(Collectors.toMap(
                           row -> (String) row[0], // memberId
-                          row -> MemberSharedDTO.BasicInfoDTO.builder()
+                          row -> MemberSharedDTO.BasicInfo.builder()
                                                              .nickname((String) row[1]) // nickname
                                                              .profileImageUrl((String) row[2]) // profileImageUrl
                                                              .build()
@@ -214,7 +214,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
      * @return MemberSharedDTO.WithFollowStatusDTO
      */
     @Override
-    public MemberSharedDTO.WithFollowStatusDTO getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId) {
+    public MemberSharedDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId) {
         // 팔로우 상태를 조회
         boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
@@ -223,7 +223,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId) {
+    public Map<String, MemberSharedDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Map.of();
         }
@@ -264,12 +264,12 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
     }
 
     // 이걸로 여기서 DTO 생성
-    private List<MemberSharedDTO.WithFollowStatusDTO> createWithFollowStatusDTOs(String currentMemberId, List<String> targetMemberIds) {
+    private List<MemberSharedDTO.WithFollowStatus> createWithFollowStatusDTOs(String currentMemberId, List<String> targetMemberIds) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Collections.emptyList();
         }
         // 위 getMemberWithFollowStatusMapForShare 호출
-        Map<String, MemberSharedDTO.WithFollowStatusDTO> map = getMemberWithFollowStatusMapForShare(targetMemberIds, currentMemberId);
+        Map<String, MemberSharedDTO.WithFollowStatus> map = getMemberWithFollowStatusMapForShare(targetMemberIds, currentMemberId);
 
         return targetMemberIds.stream()
                               .map(map::get)

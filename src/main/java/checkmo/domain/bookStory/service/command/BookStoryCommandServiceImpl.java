@@ -33,7 +33,7 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
     @Override
     @Transactional
-    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequestDTO request) {
+    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequest request) {
 
         bookCommandFacade.saveBook(request.getBookInfo());
         Book proxyBook = bookQueryFacade.findBookReferenceById(request.getBookInfo().getIsbn());
@@ -48,7 +48,7 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
     @Override
     @Transactional
-    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequestDTO request) {
+    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequest request) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 

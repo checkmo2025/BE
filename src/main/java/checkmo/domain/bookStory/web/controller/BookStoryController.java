@@ -33,7 +33,7 @@ public class BookStoryController {
     @PostMapping
     public ApiResponse<Long> createBookStory(
             @CurrentId String memberId,
-            @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequestDTO request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequest request
     ) {
         Long bookStoryId = bookStoryCommandFacade.createBookStory(memberId, request);
         return ApiResponse.onSuccess(bookStoryId);
@@ -90,7 +90,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
-    public ApiResponse<BookStorySharedDTO.BookStoryResponse> getBookStory(
+    public ApiResponse<BookStorySharedDTO.BookStoryDetailResponse> getBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
@@ -133,7 +133,7 @@ public class BookStoryController {
     public ApiResponse<Long> updateBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId,
-            @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequestDTO request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequest request
     ) {
         Long updateBookStoryId = bookStoryCommandFacade.updateBookStory(memberId, bookStoryId, request);
         return ApiResponse.onSuccess(updateBookStoryId);
@@ -155,5 +155,27 @@ public class BookStoryController {
     ) {
         bookStoryCommandFacade.deleteBookStory(memberId, bookStoryId);
         return ApiResponse.onSuccess("책 이야기가 성공적으로 삭제되었습니다.");
+    }
+
+    @Operation(summary = "책 이야기 댓글 작성 API", description = "책 이야기에 댓글 또는 대댓글을 작성합니다.")
+    @Parameters({
+            @Parameter(name = "bookStoryId", description = "댓글을 작성할 책 이야기 ID", required = true, example = "1"),
+            @Parameter(name = "parentCommentId", description = "대댓글 작성 시 부모 댓글 ID (대댓글이 아닌 경우 생략 가능)", required = false, example = "10")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
+    })
+    @PostMapping("/{bookStoryId}/comments")
+    public ApiResponse<Long> createComment(
+            @CurrentId String memberId,
+            @PathVariable Long bookStoryId,
+            @RequestParam(required = false) Long parentCommentId,
+            @Valid @RequestBody BookStoryRequestDTO.CommentCreateRequest request
+    ) {
+        Long resultBookStoryId = bookStoryCommandFacade.createComment(memberId, bookStoryId, parentCommentId, request);
+        return ApiResponse.onSuccess(resultBookStoryId);
     }
 }

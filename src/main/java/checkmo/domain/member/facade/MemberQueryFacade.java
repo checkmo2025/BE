@@ -121,7 +121,7 @@ public interface MemberQueryFacade {
      * @param memberId 조회할 회원 ID
      * @return MemberSharedDTO.BasicInfo
      */
-    MemberSharedDTO.BasicInfoDTO getMemberBasicInfoForShare(String memberId);
+    MemberSharedDTO.BasicInfo getMemberBasicInfoForShare(String memberId);
 
     /**
      * 회원 ID 목록으로 공유용 기본 회원 정보 조회 (외부용)
@@ -129,7 +129,7 @@ public interface MemberQueryFacade {
      * @param memberIds 조회할 회원 ID 목록
      * @return 회원 ID와 기본 정보 매핑 리스트
      */
-    Map<String, MemberSharedDTO.BasicInfoDTO> getMemberBasicInfoMapForShare(List<String> memberIds);
+    Map<String, MemberSharedDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds);
 
     /**
      * 팔로우 상태를 포함한 공유용 회원 정보 조회 (외부용)
@@ -138,7 +138,7 @@ public interface MemberQueryFacade {
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return MemberSharedDTO.WithFollowStatus
      */
-    MemberSharedDTO.WithFollowStatusDTO getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId);
+    MemberSharedDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId);
 
     /**
      * 회원 ID 목록으로 팔로우 상태를 포함한 공유용 회원 정보를 조회합니다. (외부용)
@@ -147,7 +147,7 @@ public interface MemberQueryFacade {
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return 회원 ID와 팔로우 상태 포함 정보 매핑
      */
-    Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId);
+    Map<String, MemberSharedDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용)
