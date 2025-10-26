@@ -2,7 +2,6 @@ package checkmo.domain.member.service.command;
 
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
-import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 회원 가입 서비스
@@ -43,11 +42,10 @@ public interface MemberRegistrationCommandService {
      *  - 추가 정보 입력 안받으면 정식 회원 아님
      *
      * @param request id,pw DTO
-     * @param response HttpServletResponse 객체
      * @return 회원 엔티티
      */
     Member signUp(
-            MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response
+            MemberRequestDTO.SignUpRequestDTO request
     );
 
     /**

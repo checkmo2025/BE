@@ -37,7 +37,6 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     private final MemberRepository memberRepository;
     
     // 인증 관련 서비스
-    private final MemberAuthenticationService memberAuthenticationService;
     private final PasswordEncoder passwordEncoder;
     
     // 외부 서비스
@@ -114,7 +113,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     @Transactional
-    public Member signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
+    public Member signUp(MemberRequestDTO.SignUpRequestDTO request) {
 
         // 이메일 중복 확인
         if (memberRepository.existsByEmail(request.getEmail())) {
@@ -134,10 +133,6 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
         memberRepository.save(newMember);
         redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
-
-        MemberRequestDTO.LoginRequestDTO loginRequest = new LoginRequestDTO(request.getEmail(), request.getPassword());
-
-        memberAuthenticationService.login(loginRequest, response);
 
         return newMember;
     }
@@ -173,6 +168,5 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
         // 프로필 완료 상태로 변경
         member.completeProfile();
-
     }
 }

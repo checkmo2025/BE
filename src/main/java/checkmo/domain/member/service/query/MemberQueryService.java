@@ -48,10 +48,9 @@ public interface MemberQueryService {
      * 다른 사람 프로필 조회
      *
      * @param targetMemberNickname 조회 대상 회원 닉네임
-     * @param memberId 조회하는 회원 ID (팔로우 여부 확인용)
      * @return targetMember의 프로필 정보 DTO - 이때는 관심 카테고리 정보 DTO에 포함 X , -> 반드시 CategoryQueryFacade를 통해 조회해야 함
      */
-    Member getOtherProfile(String targetMemberNickname, String memberId);
+    Member getOtherProfile(String targetMemberNickname);
 
     /**
      * 닉네임으로 회원 ID 조회
@@ -88,9 +87,8 @@ public interface MemberQueryService {
     /**
      * 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회
      *
-     * @param memberId 조회하는 회원 ID (팔로우 여부 확인용)
      * @param memberIds 회원 ID 목록
      * @return 회원 ID와 닉네임, 프로필 이미지, 팔로우 상태 정보의 매핑
      */
-    Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds);
+    List<Object[]> getMemberNicknamesAndProfileImagesByMemberIds(List<String> memberIds);
 }

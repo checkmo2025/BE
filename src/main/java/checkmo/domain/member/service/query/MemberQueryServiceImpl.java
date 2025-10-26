@@ -20,13 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberQueryServiceImpl implements MemberQueryService {
 
-    // 자신의 QueryService
-    private final MemberCategoryQueryService memberCategoryQueryService;
-    private final MemberFollowQueryService memberFollowQueryService;
-
     // 자신의 Repository
     private final MemberRepository memberRepository;
-    private final FollowRepository followRepository;
 
     @Override
     public boolean isNicknameDuplicated(String nickname) {
@@ -57,7 +52,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Member getOtherProfile(String targetMemberNickname, String memberId) {
+    public Member getOtherProfile(String targetMemberNickname) {
         return memberRepository.findByNickName(targetMemberNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
     }
@@ -95,22 +90,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.WithFollowStatusDTO> getMemberNicknamesAndProfileImagesByMemberIds(String memberId, List<String> memberIds) {
-        // 1. 배치로 회원 기본 정보 조회 (1번의 쿼리)
-        var results = memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
-
-        // 2. 배치처리로 팔로잉 중인 회원의 id 목록 전부 조회 (2번의 쿼리)
-        Set<String> followingIds = followRepository.findFollowingIdsByFollowerId(memberId, memberIds);
-
-        // 3. DTO 생성
-        return results.stream()
-                .collect(Collectors.toMap(
-                        row -> (String) row[0], // targetMemberId
-                        row -> {
-                            String targetMemberId = (String) row[0];
-                            boolean isFollowing = targetMemberId.equals(memberId) || followingIds.contains(targetMemberId); // 본인인 경우 true, 그 외에는 팔로잉 여부 확인
-                            return MemberConverter.toWithFollowStatusDTO(row, isFollowing);
-                        }
-                ));
+    public List<Object[]> getMemberNicknamesAndProfileImagesByMemberIds(List<String> memberIds) {
+        return memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
     }
 }

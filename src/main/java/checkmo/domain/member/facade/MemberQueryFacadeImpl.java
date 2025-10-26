@@ -11,9 +11,10 @@ import checkmo.domain.member.service.query.MemberQueryService;
 import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.MemberSharedDTO;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
     @Override
     public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
-        Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname, memberId);
+        Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
 
         List<MemberCategory> targetMemberCategories = memberCategoryQueryService.findCategoriesByMember(targetMember.getId());
@@ -86,9 +87,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        var followerMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followerIdList);
-
-        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = new ArrayList<>(followerMap.values());
+        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followerDTOList, hasNext, nextCursor);
@@ -113,9 +112,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        var followingMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followingIdList);
-
-        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = new ArrayList<>(followingMap.values());
+        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followingDTOList, hasNext, nextCursor);
@@ -132,10 +129,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        var followerMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followerIdList);
-
-        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = new ArrayList<>(followerMap.values());
-
+        List<MemberSharedDTO.WithFollowStatusDTO> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followerDTOList);
     }
@@ -151,9 +145,7 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
                 .distinct()
                 .toList();
 
-        var followingMap = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(memberId, followingIdList);
-
-        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = new ArrayList<>(followingMap.values());
+        List<MemberSharedDTO.WithFollowStatusDTO> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
 
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followingDTOList);
@@ -237,7 +229,19 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
         }
 
         // 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회하기
-        return memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(currentMemberId, targetMemberIds);
+        List<Object[]> memberInfoList = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(targetMemberIds);
+
+        Map<String, Boolean> followStatusMap = memberFollowQueryService.getFollowStatusMapForMembers(currentMemberId, targetMemberIds);
+
+        return memberInfoList.stream()
+                             .collect(Collectors.toMap(
+                                 row -> (String) row[0],
+                                 row -> {
+                                     String targetMemberId = (String) row[0];
+                                     boolean isFollowing = followStatusMap.getOrDefault(targetMemberId, false);
+                                     return MemberConverter.toWithFollowStatusDTO(row, isFollowing);
+                                 }
+                             ));
     }
 
     @Override
@@ -258,4 +262,19 @@ public class MemberQueryFacadeImpl implements MemberQueryFacade {
 
         return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
     }
+
+    // 이걸로 여기서 DTO 생성
+    private List<MemberSharedDTO.WithFollowStatusDTO> createWithFollowStatusDTOs(String currentMemberId, List<String> targetMemberIds) {
+        if (targetMemberIds == null || targetMemberIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 위 getMemberWithFollowStatusMapForShare 호출
+        Map<String, MemberSharedDTO.WithFollowStatusDTO> map = getMemberWithFollowStatusMapForShare(targetMemberIds, currentMemberId);
+
+        return targetMemberIds.stream()
+                              .map(map::get)
+                              .filter(Objects::nonNull)
+                              .collect(Collectors.toList());
+    }
+
 }

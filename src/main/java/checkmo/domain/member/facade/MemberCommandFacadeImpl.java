@@ -51,7 +51,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade{
     @Override
     public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response) {
 
-        Member member = memberRegistrationCommandService.signUp(request, response);
+        Member member = memberRegistrationCommandService.signUp(request);
 
         memberAuthenticationService.login(new LoginRequestDTO(request.getEmail(), request.getPassword()), response);
         return MemberConverter.fromMember(member);
