@@ -2,15 +2,10 @@ package checkmo.domain.member.service.command;
 
 import checkmo.apiPayload.code.status.ErrorStatus;
 import checkmo.apiPayload.exception.GeneralException;
-import checkmo.domain.member.entity.MemberCategory;
-import checkmo.domain.member.converter.MemberConverter;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
-import checkmo.domain.member.service.query.MemberCategoryQueryService;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 import checkmo.global.s3.service.S3Service;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +20,6 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
     // 자신의 CommandService
     private final MemberCategoryCommandService memberCategoryCommandService;
 
-    // 자신의 QueryService
-    private final MemberCategoryQueryService memberCategoryQueryService;
-
     // 자신의 Repository
     private final MemberRepository memberRepository;
 
@@ -35,7 +27,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
     private final S3Service s3Service;
 
     @Override
-    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(
+    public Member updateMemberProfile(
         String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request
     ) {
         // 회원 조회
@@ -73,14 +65,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
             memberCategoryCommandService.modifyMemberCategories(memberId, request.getCategoryIds());
         }
 
-        // 수정된 회원의 카테고리 정보 조회
-        List<MemberCategory> categoryList = memberCategoryQueryService.findCategoriesByMember(memberId);
-
-        // 카테고리 정보를 DTO로 변환
-        var categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(categoryList);
-
-        // 회원 프로필과 카테고리 정보를 포함한 DTO 반환
-        return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
+        return member;
     }
 
     @Override

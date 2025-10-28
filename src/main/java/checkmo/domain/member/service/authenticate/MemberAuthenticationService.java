@@ -1,15 +1,16 @@
 package checkmo.domain.member.service.authenticate;
 
 import checkmo.domain.member.web.dto.MemberRequestDTO;
-import checkmo.domain.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
 
 /**
  * 로그인/로그아웃 로직
  *
  * JWT 기반 로그인 담당하는 서비스
- * 사용자가 제출한 로그인 정보를 검증하고 JWT 토큰 생성/쿠키 설정/SecurityContext 저장까지의 전체 과정 관리
+ * 사용자가 제출한 로그인 정보를 검증해 Authentication을 반환하고,
+ * JWT 토큰 생성/쿠키 설정/SecurityContext 저장은 Facade에서 처리
  * 로그아웃 시 토큰 무효화 및 쿠키 삭제
  */
 public interface MemberAuthenticationService {
@@ -18,9 +19,9 @@ public interface MemberAuthenticationService {
      * 로그인 처리
      *
      * @param request 로그인 요청 DTO
-     * @param response HttpServletResponse 객체
+     * @return 인증 정보(Authentication 객체)
      */
-    MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
+    Authentication login(MemberRequestDTO.LoginRequestDTO request);
 
     /**
      * 로그아웃 처리 - JWT 토큰을 무효화하고 쿠키 삭제
