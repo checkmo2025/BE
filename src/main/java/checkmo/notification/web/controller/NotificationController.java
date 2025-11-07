@@ -1,9 +1,9 @@
-package checkmo.domain.notification.web.controller;
+package checkmo.notification.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.domain.notification.facade.NotificationQueryFacade;
-import checkmo.domain.notification.service.command.NotificationCommandService;
-import checkmo.domain.notification.web.dto.NotificationResponseDTO;
+import checkmo.notification.facade.NotificationQueryFacade;
+import checkmo.notification.service.command.NotificationCommandService;
+import checkmo.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.auth.CurrentId;
 import checkmo.global.dto.NotificationSharedDTO;
 import io.swagger.v3.oas.annotations.Operation;

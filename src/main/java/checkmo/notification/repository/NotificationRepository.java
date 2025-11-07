@@ -1,6 +1,6 @@
-package checkmo.domain.notification.repository;
+package checkmo.notification.repository;
 
-import checkmo.domain.notification.entity.Notification;
+import checkmo.notification.entity.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
 

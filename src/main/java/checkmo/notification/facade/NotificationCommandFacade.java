@@ -1,4 +1,4 @@
-package checkmo.domain.notification.facade;
+package checkmo.notification.facade;
 
 /**
  * Notification Domain Command Facade

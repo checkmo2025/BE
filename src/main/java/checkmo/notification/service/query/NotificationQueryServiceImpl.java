@@ -1,7 +1,7 @@
-package checkmo.domain.notification.service.query;
+package checkmo.notification.service.query;
 
-import checkmo.domain.notification.entity.Notification;
-import checkmo.domain.notification.repository.NotificationRepository;
+import checkmo.notification.entity.Notification;
+import checkmo.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

@@ -4,7 +4,7 @@ import checkmo.bookStory.entity.BookStory;
 import checkmo.bookStory.entity.BookStoryLiked;
 import checkmo.bookStory.entity.Comment;
 import checkmo.club.entity.ClubMember;
-import checkmo.domain.notification.entity.Notification;
+import checkmo.notification.entity.Notification;
 import checkmo.club.entity.announcement.MemberVote;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.*;

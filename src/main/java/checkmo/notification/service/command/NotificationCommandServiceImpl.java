@@ -1,12 +1,12 @@
-package checkmo.domain.notification.service.command;
+package checkmo.notification.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.entity.Member;
 import checkmo.member.facade.MemberQueryFacade;
-import checkmo.domain.notification.converter.NotificationConverter;
-import checkmo.domain.notification.entity.Notification;
-import checkmo.domain.notification.repository.NotificationRepository;
+import checkmo.notification.converter.NotificationConverter;
+import checkmo.notification.entity.Notification;
+import checkmo.notification.repository.NotificationRepository;
 import checkmo.event.FollowEvent;
 import checkmo.event.JoinClubEvent;
 import checkmo.event.LikeEvent;

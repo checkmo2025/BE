@@ -1,10 +1,10 @@
-package checkmo.domain.notification.facade;
+package checkmo.notification.facade;
 
 import checkmo.member.facade.MemberQueryFacade;
-import checkmo.domain.notification.converter.NotificationConverter;
-import checkmo.domain.notification.entity.Notification;
-import checkmo.domain.notification.service.query.NotificationQueryService;
-import checkmo.domain.notification.web.dto.NotificationResponseDTO;
+import checkmo.notification.converter.NotificationConverter;
+import checkmo.notification.entity.Notification;
+import checkmo.notification.service.query.NotificationQueryService;
+import checkmo.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.dto.NotificationSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;

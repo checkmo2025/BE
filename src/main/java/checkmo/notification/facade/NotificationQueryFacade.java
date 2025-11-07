@@ -1,6 +1,6 @@
-package checkmo.domain.notification.facade;
+package checkmo.notification.facade;
 
-import checkmo.domain.notification.web.dto.NotificationResponseDTO;
+import checkmo.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.dto.NotificationSharedDTO;
 
 /**

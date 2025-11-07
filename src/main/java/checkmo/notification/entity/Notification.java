@@ -1,4 +1,4 @@
-package checkmo.domain.notification.entity;
+package checkmo.notification.entity;
 
 import checkmo.member.entity.Member;
 import checkmo.common.BaseEntity;

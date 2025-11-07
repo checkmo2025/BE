@@ -1,4 +1,4 @@
-package checkmo.domain.notification.web.dto;
+package checkmo.notification.web.dto;
 
 import checkmo.global.dto.NotificationSharedDTO;
 import lombok.AllArgsConstructor;

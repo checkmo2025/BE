@@ -1,8 +1,8 @@
-package checkmo.domain.notification.converter;
+package checkmo.notification.converter;
 
 import checkmo.member.entity.Member;
-import checkmo.domain.notification.entity.Notification;
-import checkmo.domain.notification.web.dto.NotificationResponseDTO;
+import checkmo.notification.entity.Notification;
+import checkmo.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.dto.NotificationSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

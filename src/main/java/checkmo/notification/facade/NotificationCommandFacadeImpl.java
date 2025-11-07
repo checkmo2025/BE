@@ -1,6 +1,6 @@
-package checkmo.domain.notification.facade;
+package checkmo.notification.facade;
 
-import checkmo.domain.notification.service.command.NotificationCommandService;
+import checkmo.notification.service.command.NotificationCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

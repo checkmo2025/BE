@@ -1,6 +1,6 @@
 package checkmo.global.dto;
 
-import checkmo.domain.notification.entity.Notification;
+import checkmo.notification.entity.Notification;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

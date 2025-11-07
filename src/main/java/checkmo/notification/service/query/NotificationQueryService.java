@@ -1,6 +1,6 @@
-package checkmo.domain.notification.service.query;
+package checkmo.notification.service.query;
 
-import checkmo.domain.notification.entity.Notification;
+import checkmo.notification.entity.Notification;
 
 import java.util.List;
 

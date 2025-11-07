@@ -1,4 +1,4 @@
-package checkmo.domain.notification.service.command;
+package checkmo.notification.service.command;
 
 import checkmo.event.FollowEvent;
 import checkmo.event.JoinClubEvent;

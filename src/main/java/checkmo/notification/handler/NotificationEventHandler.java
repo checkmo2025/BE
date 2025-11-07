@@ -1,6 +1,6 @@
-package checkmo.domain.notification.handler;
+package checkmo.notification.handler;
 
-import checkmo.domain.notification.service.command.NotificationCommandService;
+import checkmo.notification.service.command.NotificationCommandService;
 import checkmo.event.FollowEvent;
 import checkmo.event.JoinClubEvent;
 import checkmo.event.LikeEvent;
