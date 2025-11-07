@@ -6,7 +6,7 @@ import checkmo.member.converter.MemberConverter;
 import checkmo.member.entity.Member;
 import checkmo.member.repository.FollowRepository;
 import checkmo.member.repository.MemberRepository;
-import checkmo.event.FollowEvent;
+import checkmo.member.FollowEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

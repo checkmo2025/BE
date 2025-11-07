@@ -1,9 +1,9 @@
 package checkmo.notification.handler;
 
 import checkmo.notification.service.command.NotificationCommandService;
-import checkmo.event.FollowEvent;
-import checkmo.event.JoinClubEvent;
-import checkmo.event.LikeEvent;
+import checkmo.member.FollowEvent;
+import checkmo.club.JoinClubEvent;
+import checkmo.bookStory.LikeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;

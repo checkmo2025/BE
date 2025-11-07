@@ -1,4 +1,4 @@
-package checkmo.event;
+package checkmo.member;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -8,7 +8,7 @@ import checkmo.club.entity.ClubMember;
 import checkmo.club.repository.ClubMemberRepository;
 import checkmo.club.web.dto.club.ClubRequestDTO.ClubMemberJoinDTO;
 import checkmo.member.entity.Member;
-import checkmo.event.JoinClubEvent;
+import checkmo.club.JoinClubEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

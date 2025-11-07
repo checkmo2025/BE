@@ -8,7 +8,7 @@ import checkmo.bookStory.repository.BookStoryLikedRepository;
 import checkmo.bookStory.repository.BookStoryRepository;
 import checkmo.member.entity.Member;
 import checkmo.member.facade.MemberQueryFacade;
-import checkmo.event.LikeEvent;
+import checkmo.bookStory.LikeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;

@@ -1,8 +1,8 @@
 package checkmo.notification.service.command;
 
-import checkmo.event.FollowEvent;
-import checkmo.event.JoinClubEvent;
-import checkmo.event.LikeEvent;
+import checkmo.member.FollowEvent;
+import checkmo.club.JoinClubEvent;
+import checkmo.bookStory.LikeEvent;
 
 /**
  * 알림 생성, 수정, 삭제 서비스
