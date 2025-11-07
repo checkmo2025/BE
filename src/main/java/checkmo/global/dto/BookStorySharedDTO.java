@@ -1,6 +1,6 @@
 package checkmo.global.dto;
 
-import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
