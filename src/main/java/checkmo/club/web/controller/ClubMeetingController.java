@@ -7,7 +7,7 @@ import checkmo.club.validation.validCursor.ValidCursor;
 import checkmo.club.validation.validSize.ValidSize;
 import checkmo.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
-import checkmo.global.auth.CurrentId;
+import checkmo.member.auth_annotation.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

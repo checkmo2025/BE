@@ -1,6 +1,5 @@
-package checkmo.global.auth;
+package checkmo.member.auth_annotation;
 
-import checkmo.member.entity.Member;
 import checkmo.member.repository.MemberRepository;
 import checkmo.member.service.security.auth.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +23,11 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
 
-        // @CurrentMember Member 타입 지원
-        boolean isCurrentMemberAnnotation = parameter.getParameterAnnotation(CurrentMember.class) != null;
-        boolean isMemberClass = Member.class.equals(parameter.getParameterType());
-
         // @CurrentId String 타입 지원
         boolean isCurrentIdAnnotation = parameter.getParameterAnnotation(CurrentId.class) != null;
         boolean isStringClass = String.class.equals(parameter.getParameterType());
 
-        return (isCurrentMemberAnnotation && isMemberClass) || (isCurrentIdAnnotation && isStringClass);
+        return (isCurrentIdAnnotation && isStringClass);
     }
 
     @Override
@@ -57,24 +52,10 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
             return null;
         }
 
-        // @CurrentLoginId인 경우 memberId 반환
+        // @CurrentId인 경우 memberId 반환
         if (parameter.getParameterAnnotation(CurrentId.class) != null) {
             log.info("loginId 주입: {}", memberId);
             return memberId;
-        }
-
-        // @CurrentUser인 경우 User 객체 반환
-        if (parameter.getParameterAnnotation(CurrentMember.class) != null) {
-            Member currentUser = memberRepository.findById(memberId)
-                                                 .orElse(null);
-
-            if (currentUser != null) {
-                log.info("User 객체 주입: {}", currentUser.getId());
-            } else {
-                log.warn("사용자를 찾을 수 없음: {}", memberId);
-            }
-
-            return currentUser;
         }
 
         return null;

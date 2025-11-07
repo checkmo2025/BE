@@ -5,7 +5,7 @@ import checkmo.member.facade.MemberCommandFacade;
 import checkmo.member.facade.MemberQueryFacade;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
-import checkmo.global.auth.CurrentId;
+import checkmo.member.auth_annotation.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

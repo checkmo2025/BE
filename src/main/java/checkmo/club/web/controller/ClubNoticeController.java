@@ -5,7 +5,7 @@ import checkmo.club.facade.ClubCommandFacade;
 import checkmo.club.facade.ClubQueryFacade;
 import checkmo.club.web.dto.club.ClubRequestDTO;
 import checkmo.club.web.dto.club.ClubResponseDTO;
-import checkmo.global.auth.CurrentId;
+import checkmo.member.auth_annotation.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

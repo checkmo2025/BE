@@ -1,4 +1,4 @@
-package checkmo.global.auth;
+package checkmo.member.auth_annotation;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Parameter(hidden = true)
 @Schema(hidden = true)
-public @interface CurrentMember {
+public @interface CurrentId {
 }

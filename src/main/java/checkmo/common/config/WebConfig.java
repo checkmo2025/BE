@@ -1,6 +1,6 @@
 package checkmo.common.config;
 
-import checkmo.global.auth.CurrentMemberArgumentResolver;
+import checkmo.member.auth_annotation.CurrentMemberArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
