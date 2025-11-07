@@ -2,7 +2,7 @@ package checkmo.book.facade;
 
 import checkmo.book.entity.Book;
 import checkmo.book.web.dto.BookResponseDTO;
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 
 import java.util.List;
 import java.util.Map;

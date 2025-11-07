@@ -1,6 +1,6 @@
 package checkmo.bookStory.web.dto;
 
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

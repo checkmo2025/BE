@@ -4,11 +4,11 @@ import checkmo.book.entity.Book;
 import checkmo.bookStory.entity.BookStory;
 import checkmo.bookStory.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.global.dto.BookStorySharedDTO;
+import checkmo.bookStory.BookStorySharedDTO;
 import checkmo.member.entity.Member;
-import checkmo.global.dto.BookSharedDTO;
-import checkmo.global.dto.ClubSharedDTO;
-import checkmo.global.dto.MemberSharedDTO;
+import checkmo.book.BookSharedDTO;
+import checkmo.club.ClubSharedDTO;
+import checkmo.member.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

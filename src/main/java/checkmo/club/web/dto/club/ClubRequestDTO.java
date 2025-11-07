@@ -1,7 +1,7 @@
 package checkmo.club.web.dto.club;
 
 import checkmo.club.entity.Club;
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -5,7 +5,7 @@ import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.book.converter.BookConverter;
 import checkmo.book.entity.Book;
 import checkmo.book.repository.BookRepository;
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

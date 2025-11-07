@@ -1,8 +1,8 @@
 package checkmo.club.web.dto.bookshelf;
 
 import checkmo.club.web.dto.MembershipResponseDTO;
-import checkmo.global.dto.BookSharedDTO;
-import checkmo.global.dto.MemberSharedDTO;
+import checkmo.book.BookSharedDTO;
+import checkmo.member.MemberSharedDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

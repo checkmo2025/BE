@@ -15,7 +15,7 @@ import checkmo.member.service.security.jwt.JwtLoginProcessor;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberRequestDTO.LoginRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
-import checkmo.global.dto.CategorySharedDTO;
+import checkmo.category.CategorySharedDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;

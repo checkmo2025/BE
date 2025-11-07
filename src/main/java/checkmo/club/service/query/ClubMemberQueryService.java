@@ -2,7 +2,7 @@ package checkmo.club.service.query;
 
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.club.entity.ClubMember;
-import checkmo.global.dto.ClubSharedDTO;
+import checkmo.club.ClubSharedDTO;
 
 import java.util.List;
 import java.util.Map;

@@ -2,7 +2,7 @@ package checkmo.member.facade;
 
 import checkmo.member.entity.Member;
 import checkmo.member.web.dto.MemberResponseDTO;
-import checkmo.global.dto.MemberSharedDTO;
+import checkmo.member.MemberSharedDTO;
 
 import java.util.List;
 import java.util.Map;

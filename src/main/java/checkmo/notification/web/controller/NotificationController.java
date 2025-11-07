@@ -5,7 +5,7 @@ import checkmo.notification.facade.NotificationQueryFacade;
 import checkmo.notification.service.command.NotificationCommandService;
 import checkmo.notification.web.dto.NotificationResponseDTO;
 import checkmo.member.auth_annotation.CurrentId;
-import checkmo.global.dto.NotificationSharedDTO;
+import checkmo.notification.NotificationSharedDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

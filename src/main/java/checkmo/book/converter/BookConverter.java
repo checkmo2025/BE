@@ -3,7 +3,7 @@ package checkmo.book.converter;
 import checkmo.book.entity.Book;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.util.HtmlUtils;

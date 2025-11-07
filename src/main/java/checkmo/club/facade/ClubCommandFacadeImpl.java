@@ -24,7 +24,7 @@ import checkmo.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.member.entity.Member;
 import checkmo.member.facade.MemberQueryFacade;
-import checkmo.global.dto.MemberSharedDTO;
+import checkmo.member.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;

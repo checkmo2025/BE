@@ -1,6 +1,9 @@
-package checkmo.global.dto;
+package checkmo.bookStory;
 
+import checkmo.book.BookSharedDTO;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.club.ClubSharedDTO;
+import checkmo.member.MemberSharedDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

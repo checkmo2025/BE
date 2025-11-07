@@ -1,6 +1,6 @@
 package checkmo.category.facade;
 
-import checkmo.global.dto.CategorySharedDTO;
+import checkmo.category.CategorySharedDTO;
 
 /**
  * 카테고리 자체 정보 제공만 담당

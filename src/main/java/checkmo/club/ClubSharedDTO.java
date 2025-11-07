@@ -1,4 +1,4 @@
-package checkmo.global.dto;
+package checkmo.club;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

@@ -17,10 +17,10 @@ import checkmo.club.web.dto.club.ClubResponseDTO;
 import checkmo.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.member.entity.Member;
-import checkmo.global.dto.BookSharedDTO;
-import checkmo.global.dto.CategorySharedDTO;
-import checkmo.global.dto.ClubSharedDTO;
-import checkmo.global.dto.MemberSharedDTO;
+import checkmo.book.BookSharedDTO;
+import checkmo.category.CategorySharedDTO;
+import checkmo.club.ClubSharedDTO;
+import checkmo.member.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

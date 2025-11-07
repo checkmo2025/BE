@@ -1,6 +1,6 @@
 package checkmo.notification.web.dto;
 
-import checkmo.global.dto.NotificationSharedDTO;
+import checkmo.notification.NotificationSharedDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -2,9 +2,9 @@ package checkmo.club.web.dto.club;
 
 import checkmo.club.entity.Club;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
-import checkmo.global.dto.BookSharedDTO;
-import checkmo.global.dto.ClubSharedDTO;
-import checkmo.global.dto.MemberSharedDTO;
+import checkmo.book.BookSharedDTO;
+import checkmo.club.ClubSharedDTO;
+import checkmo.member.MemberSharedDTO;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;

@@ -5,7 +5,7 @@ import checkmo.notification.converter.NotificationConverter;
 import checkmo.notification.entity.Notification;
 import checkmo.notification.service.query.NotificationQueryService;
 import checkmo.notification.web.dto.NotificationResponseDTO;
-import checkmo.global.dto.NotificationSharedDTO;
+import checkmo.notification.NotificationSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

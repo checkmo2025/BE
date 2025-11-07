@@ -1,6 +1,6 @@
 package checkmo.book.facade;
 
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 
 /**
  * Book Domain Command Facade

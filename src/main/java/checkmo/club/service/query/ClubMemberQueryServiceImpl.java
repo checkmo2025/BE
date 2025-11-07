@@ -6,7 +6,7 @@ import checkmo.club.converter.ClubConverter;
 import checkmo.club.entity.ClubMember;
 import checkmo.club.repository.ClubMemberRepository;
 import checkmo.member.facade.MemberQueryFacade;
-import checkmo.global.dto.ClubSharedDTO;
+import checkmo.club.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

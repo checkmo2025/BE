@@ -1,7 +1,7 @@
 package checkmo.club.web.dto.meeting;
 
 import checkmo.club.validation.validTeamManage.ValidTeamManage;
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Getter;

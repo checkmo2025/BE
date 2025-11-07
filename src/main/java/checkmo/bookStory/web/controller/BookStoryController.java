@@ -5,7 +5,7 @@ import checkmo.bookStory.facade.BookStoryCommandFacade;
 import checkmo.bookStory.facade.BookStoryQueryFacade;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.member.auth_annotation.CurrentId;
-import checkmo.global.dto.BookStorySharedDTO;
+import checkmo.bookStory.BookStorySharedDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

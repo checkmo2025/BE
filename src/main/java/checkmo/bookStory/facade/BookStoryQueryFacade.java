@@ -1,7 +1,7 @@
 package checkmo.bookStory.facade;
 
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.global.dto.BookStorySharedDTO;
+import checkmo.bookStory.BookStorySharedDTO;
 
 /**
  * BookStory Domain Query Facade

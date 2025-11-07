@@ -1,4 +1,4 @@
-package checkmo.global.dto;
+package checkmo.notification;
 
 import checkmo.notification.entity.Notification;
 import com.fasterxml.jackson.annotation.JsonFormat;

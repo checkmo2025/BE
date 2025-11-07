@@ -3,7 +3,7 @@ package checkmo.notification.converter;
 import checkmo.member.entity.Member;
 import checkmo.notification.entity.Notification;
 import checkmo.notification.web.dto.NotificationResponseDTO;
-import checkmo.global.dto.NotificationSharedDTO;
+import checkmo.notification.NotificationSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

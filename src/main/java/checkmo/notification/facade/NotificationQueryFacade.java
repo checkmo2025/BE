@@ -1,7 +1,7 @@
 package checkmo.notification.facade;
 
 import checkmo.notification.web.dto.NotificationResponseDTO;
-import checkmo.global.dto.NotificationSharedDTO;
+import checkmo.notification.NotificationSharedDTO;
 
 /**
  * Notification Domain Query Facade

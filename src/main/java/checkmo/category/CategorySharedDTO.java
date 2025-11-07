@@ -1,4 +1,4 @@
-package checkmo.global.dto;
+package checkmo.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

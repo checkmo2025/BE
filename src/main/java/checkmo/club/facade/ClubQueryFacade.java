@@ -4,7 +4,7 @@ import checkmo.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.club.web.dto.club.ClubRequestDTO;
 import checkmo.club.web.dto.club.ClubResponseDTO;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
-import checkmo.global.dto.ClubSharedDTO;
+import checkmo.club.ClubSharedDTO;
 
 /**
  * Club Domain Query Facade

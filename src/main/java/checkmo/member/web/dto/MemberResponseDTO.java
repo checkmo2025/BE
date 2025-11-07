@@ -1,8 +1,8 @@
 package checkmo.member.web.dto;
 
-import checkmo.global.dto.BookSharedDTO;
-import checkmo.global.dto.CategorySharedDTO;
-import checkmo.global.dto.MemberSharedDTO;
+import checkmo.book.BookSharedDTO;
+import checkmo.category.CategorySharedDTO;
+import checkmo.member.MemberSharedDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;

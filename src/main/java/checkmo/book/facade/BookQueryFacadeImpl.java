@@ -6,7 +6,7 @@ import checkmo.book.repository.BookRepository;
 import checkmo.book.service.query.AladinApiService;
 import checkmo.book.service.query.BookQueryService;
 import checkmo.book.web.dto.BookResponseDTO;
-import checkmo.global.dto.BookSharedDTO;
+import checkmo.book.BookSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
