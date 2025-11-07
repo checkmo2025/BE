@@ -1,8 +1,8 @@
-package checkmo.domain.book.converter;
+package checkmo.book.converter;
 
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.web.dto.AladinApiResponseDTO;
-import checkmo.domain.book.web.dto.BookResponseDTO;
+import checkmo.book.entity.Book;
+import checkmo.book.web.dto.AladinApiResponseDTO;
+import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
-package checkmo.domain.book.facade;
+package checkmo.book.facade;
 
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.web.dto.BookResponseDTO;
+import checkmo.book.entity.Book;
+import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 
 import java.util.List;

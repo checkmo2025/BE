@@ -1,8 +1,8 @@
-package checkmo.domain.book.web.controller;
+package checkmo.book.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.domain.book.web.dto.BookResponseDTO;
-import checkmo.domain.book.facade.BookQueryFacade;
+import checkmo.book.web.dto.BookResponseDTO;
+import checkmo.book.facade.BookQueryFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

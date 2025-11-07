@@ -2,9 +2,9 @@ package checkmo.domain.bookStory.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.facade.BookCommandFacade;
-import checkmo.domain.book.facade.BookQueryFacade;
+import checkmo.book.entity.Book;
+import checkmo.book.facade.BookCommandFacade;
+import checkmo.book.facade.BookQueryFacade;
 import checkmo.domain.bookStory.converter.BookStoryConverter;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.repository.BookStoryRepository;

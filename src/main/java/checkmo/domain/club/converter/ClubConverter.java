@@ -1,6 +1,6 @@
 package checkmo.domain.club.converter;
 
-import checkmo.domain.book.entity.Book;
+import checkmo.book.entity.Book;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubCategory;

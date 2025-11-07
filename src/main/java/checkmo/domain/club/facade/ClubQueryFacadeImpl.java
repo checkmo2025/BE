@@ -2,7 +2,7 @@ package checkmo.domain.club.facade;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.domain.book.facade.BookQueryFacade;
+import checkmo.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.Club;

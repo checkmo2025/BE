@@ -1,4 +1,4 @@
-package checkmo.domain.book.entity;
+package checkmo.book.entity;
 
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.common.BaseEntity;

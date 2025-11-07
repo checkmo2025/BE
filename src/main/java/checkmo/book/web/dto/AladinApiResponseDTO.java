@@ -1,4 +1,4 @@
-package checkmo.domain.book.web.dto;
+package checkmo.book.web.dto;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;

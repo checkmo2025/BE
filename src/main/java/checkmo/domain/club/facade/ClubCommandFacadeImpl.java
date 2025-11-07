@@ -1,8 +1,8 @@
 package checkmo.domain.club.facade;
 
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.facade.BookCommandFacade;
-import checkmo.domain.book.facade.BookQueryFacade;
+import checkmo.book.entity.Book;
+import checkmo.book.facade.BookCommandFacade;
+import checkmo.book.facade.BookQueryFacade;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;

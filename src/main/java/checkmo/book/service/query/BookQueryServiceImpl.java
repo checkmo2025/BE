@@ -1,7 +1,7 @@
-package checkmo.domain.book.service.query;
+package checkmo.book.service.query;
 
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.repository.BookRepository;
+import checkmo.book.entity.Book;
+import checkmo.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

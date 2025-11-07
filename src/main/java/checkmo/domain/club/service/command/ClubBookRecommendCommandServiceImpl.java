@@ -2,9 +2,9 @@ package checkmo.domain.club.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.facade.BookCommandFacade;
-import checkmo.domain.book.facade.BookQueryFacade;
+import checkmo.book.entity.Book;
+import checkmo.book.facade.BookCommandFacade;
+import checkmo.book.facade.BookQueryFacade;
 import checkmo.domain.club.entity.BookRecommend;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.club.repository.BookRecommendRepository;

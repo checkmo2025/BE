@@ -1,6 +1,6 @@
 package checkmo.domain.club.entity.meeting;
 
-import checkmo.domain.book.entity.Book;
+import checkmo.book.entity.Book;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.announcement.Notice;
 import checkmo.common.BaseEntity;

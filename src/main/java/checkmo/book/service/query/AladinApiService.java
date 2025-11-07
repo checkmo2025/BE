@@ -1,6 +1,6 @@
-package checkmo.domain.book.service.query;
+package checkmo.book.service.query;
 
-import checkmo.domain.book.web.dto.BookResponseDTO;
+import checkmo.book.web.dto.BookResponseDTO;
 
 public interface AladinApiService {
 

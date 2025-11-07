@@ -1,6 +1,6 @@
-package checkmo.domain.book.service.query;
+package checkmo.book.service.query;
 
-import checkmo.domain.book.entity.Book;
+import checkmo.book.entity.Book;
 
 import java.util.List;
 import java.util.Map;

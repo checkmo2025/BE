@@ -1,10 +1,10 @@
-package checkmo.domain.book.service.command;
+package checkmo.book.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.domain.book.converter.BookConverter;
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.repository.BookRepository;
+import checkmo.book.converter.BookConverter;
+import checkmo.book.entity.Book;
+import checkmo.book.repository.BookRepository;
 import checkmo.global.dto.BookSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package checkmo.domain.book.service.command;
+package checkmo.book.service.command;
 
 import checkmo.global.dto.BookSharedDTO;
 

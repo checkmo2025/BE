@@ -1,11 +1,11 @@
-package checkmo.domain.book.facade;
+package checkmo.book.facade;
 
-import checkmo.domain.book.converter.BookConverter;
-import checkmo.domain.book.entity.Book;
-import checkmo.domain.book.repository.BookRepository;
-import checkmo.domain.book.service.query.AladinApiService;
-import checkmo.domain.book.service.query.BookQueryService;
-import checkmo.domain.book.web.dto.BookResponseDTO;
+import checkmo.book.converter.BookConverter;
+import checkmo.book.entity.Book;
+import checkmo.book.repository.BookRepository;
+import checkmo.book.service.query.AladinApiService;
+import checkmo.book.service.query.BookQueryService;
+import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.global.dto.BookSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

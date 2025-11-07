@@ -1,6 +1,6 @@
 package checkmo.domain.bookStory.converter;
 
-import checkmo.domain.book.entity.Book;
+import checkmo.book.entity.Book;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.entity.Comment;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
