@@ -2,7 +2,7 @@ package checkmo.bookStory.repository;
 
 import checkmo.bookStory.entity.BookStory;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.domain.club.entity.ClubMember;
+import checkmo.club.entity.ClubMember;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static checkmo.bookStory.entity.QBookStory.bookStory;
-import static checkmo.domain.club.entity.QClubMember.clubMember;
+import static checkmo.club.entity.QClubMember.clubMember;
 import static checkmo.domain.member.entity.QFollow.follow;
 
 @Repository

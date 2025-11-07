@@ -8,7 +8,7 @@ import checkmo.bookStory.entity.Comment;
 import checkmo.bookStory.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.book.facade.BookQueryFacade;
-import checkmo.domain.club.facade.ClubQueryFacade;
+import checkmo.club.facade.ClubQueryFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.BookStorySharedDTO;
