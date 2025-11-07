@@ -2,8 +2,8 @@ package checkmo.domain.club.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.domain.category.entity.Category;
-import checkmo.domain.category.repository.CategoryRepository;
+import checkmo.category.entity.Category;
+import checkmo.category.repository.CategoryRepository;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.club.repository.ClubCategoryRepository;

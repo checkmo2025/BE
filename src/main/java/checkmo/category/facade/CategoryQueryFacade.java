@@ -1,4 +1,4 @@
-package checkmo.domain.category.facade;
+package checkmo.category.facade;
 
 import checkmo.global.dto.CategorySharedDTO;
 

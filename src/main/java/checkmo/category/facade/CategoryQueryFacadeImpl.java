@@ -1,8 +1,8 @@
-package checkmo.domain.category.facade;
+package checkmo.category.facade;
 
-import checkmo.domain.category.converter.CategoryConverter;
-import checkmo.domain.category.entity.Category;
-import checkmo.domain.category.service.query.CategoryQueryService;
+import checkmo.category.converter.CategoryConverter;
+import checkmo.category.entity.Category;
+import checkmo.category.service.query.CategoryQueryService;
 import checkmo.global.dto.CategorySharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

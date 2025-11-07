@@ -1,6 +1,6 @@
-package checkmo.domain.category.service.query;
+package checkmo.category.service.query;
 
-import checkmo.domain.category.entity.Category;
+import checkmo.category.entity.Category;
 
 import java.util.List;
 

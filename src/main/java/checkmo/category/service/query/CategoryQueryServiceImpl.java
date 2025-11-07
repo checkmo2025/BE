@@ -1,7 +1,7 @@
-package checkmo.domain.category.service.query;
+package checkmo.category.service.query;
 
-import checkmo.domain.category.entity.Category;
-import checkmo.domain.category.repository.CategoryRepository;
+import checkmo.category.entity.Category;
+import checkmo.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

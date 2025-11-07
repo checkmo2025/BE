@@ -1,4 +1,4 @@
-package checkmo.domain.category.entity;
+package checkmo.category.entity;
 
 import checkmo.domain.club.entity.ClubCategory;
 import checkmo.domain.member.entity.MemberCategory;

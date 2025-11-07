@@ -1,6 +1,6 @@
-package checkmo.domain.category.converter;
+package checkmo.category.converter;
 
-import checkmo.domain.category.entity.Category;
+import checkmo.category.entity.Category;
 import checkmo.global.dto.CategorySharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
