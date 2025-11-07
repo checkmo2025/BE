@@ -1,6 +1,6 @@
 package checkmo.club.entity.announcement;
 
-import checkmo.domain.member.entity.Member;
+import checkmo.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 

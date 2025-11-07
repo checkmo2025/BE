@@ -3,7 +3,7 @@ package checkmo.club.entity;
 import checkmo.club.entity.meeting.BookReview;
 import checkmo.club.entity.meeting.MemberTeam;
 import checkmo.club.entity.meeting.Topic;
-import checkmo.domain.member.entity.Member;
+import checkmo.member.entity.Member;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

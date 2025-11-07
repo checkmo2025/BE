@@ -3,7 +3,7 @@ package checkmo.club.service.command;
 import checkmo.club.entity.Club;
 import checkmo.club.entity.ClubMember;
 import checkmo.club.web.dto.club.ClubRequestDTO;
-import checkmo.domain.member.entity.Member;
+import checkmo.member.entity.Member;
 
 /**
  * 독서모임의 가입 신청, 승인, 탈퇴, 권한 변경 등등 독서모임 내부의 멤버십 관련 작업을 처리하는 Service Service는 순수 엔티티만 반환, DTO 변환은 Facade에서 처리

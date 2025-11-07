@@ -1,8 +1,8 @@
 package checkmo.global.auth;
 
-import checkmo.domain.member.entity.Member;
-import checkmo.domain.member.repository.MemberRepository;
-import checkmo.domain.member.service.security.auth.PrincipalDetails;
+import checkmo.member.entity.Member;
+import checkmo.member.repository.MemberRepository;
+import checkmo.member.service.security.auth.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;

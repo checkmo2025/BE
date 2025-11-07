@@ -18,7 +18,7 @@ import checkmo.club.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.club.web.dto.club.ClubRequestDTO;
 import checkmo.club.web.dto.club.ClubResponseDTO;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
-import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.member.facade.MemberQueryFacade;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;

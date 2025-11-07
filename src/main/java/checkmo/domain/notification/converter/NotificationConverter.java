@@ -1,6 +1,6 @@
 package checkmo.domain.notification.converter;
 
-import checkmo.domain.member.entity.Member;
+import checkmo.member.entity.Member;
 import checkmo.domain.notification.entity.Notification;
 import checkmo.domain.notification.web.dto.NotificationResponseDTO;
 import checkmo.global.dto.NotificationSharedDTO;

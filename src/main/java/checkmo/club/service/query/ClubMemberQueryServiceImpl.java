@@ -5,7 +5,7 @@ import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.club.converter.ClubConverter;
 import checkmo.club.entity.ClubMember;
 import checkmo.club.repository.ClubMemberRepository;
-import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.member.facade.MemberQueryFacade;
 import checkmo.global.dto.ClubSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

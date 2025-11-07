@@ -12,7 +12,7 @@ import java.util.List;
 
 import static checkmo.bookStory.entity.QBookStory.bookStory;
 import static checkmo.club.entity.QClubMember.clubMember;
-import static checkmo.domain.member.entity.QFollow.follow;
+import static checkmo.member.entity.QFollow.follow;
 
 @Repository
 @RequiredArgsConstructor

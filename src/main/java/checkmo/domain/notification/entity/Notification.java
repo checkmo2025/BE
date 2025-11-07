@@ -1,6 +1,6 @@
 package checkmo.domain.notification.entity;
 
-import checkmo.domain.member.entity.Member;
+import checkmo.member.entity.Member;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

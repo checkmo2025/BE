@@ -16,7 +16,7 @@ import checkmo.club.web.dto.club.ClubRequestDTO;
 import checkmo.club.web.dto.club.ClubResponseDTO;
 import checkmo.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
-import checkmo.domain.member.entity.Member;
+import checkmo.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.CategorySharedDTO;
 import checkmo.global.dto.ClubSharedDTO;

@@ -5,7 +5,7 @@ import checkmo.bookStory.entity.BookStory;
 import checkmo.bookStory.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.global.dto.BookStorySharedDTO;
-import checkmo.domain.member.entity.Member;
+import checkmo.member.entity.Member;
 import checkmo.global.dto.BookSharedDTO;
 import checkmo.global.dto.ClubSharedDTO;
 import checkmo.global.dto.MemberSharedDTO;

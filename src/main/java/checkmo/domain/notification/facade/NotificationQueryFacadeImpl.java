@@ -1,6 +1,6 @@
 package checkmo.domain.notification.facade;
 
-import checkmo.domain.member.facade.MemberQueryFacade;
+import checkmo.member.facade.MemberQueryFacade;
 import checkmo.domain.notification.converter.NotificationConverter;
 import checkmo.domain.notification.entity.Notification;
 import checkmo.domain.notification.service.query.NotificationQueryService;
