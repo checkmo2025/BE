@@ -1,11 +1,11 @@
 package checkmo.domain.member.service.command;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
 import checkmo.domain.member.web.dto.MemberRequestDTO;
-import checkmo.global.s3.service.S3Service;
+import checkmo.common.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

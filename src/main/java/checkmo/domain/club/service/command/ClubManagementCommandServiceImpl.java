@@ -1,7 +1,7 @@
 package checkmo.domain.club.service.command;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.domain.club.converter.ClubConverter;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.entity.ClubMember;

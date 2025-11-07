@@ -1,8 +1,8 @@
 package checkmo.domain.book.service.query;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
-import checkmo.config.properties.AladinProperties;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.common.config.properties.AladinProperties;
 import checkmo.domain.book.converter.BookConverter;
 import checkmo.domain.book.web.dto.AladinApiResponseDTO;
 import checkmo.domain.book.web.dto.BookResponseDTO;

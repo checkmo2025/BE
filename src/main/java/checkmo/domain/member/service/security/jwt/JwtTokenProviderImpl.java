@@ -1,7 +1,6 @@
 package checkmo.domain.member.service.security.jwt;
 
-import checkmo.config.properties.JwtProperties;
-import checkmo.config.properties.MailProperties.Auth;
+import checkmo.common.config.properties.JwtProperties;
 import checkmo.domain.member.service.security.auth.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

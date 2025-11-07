@@ -1,7 +1,7 @@
 package checkmo.domain.bookStory.service.command;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.domain.bookStory.entity.BookStory;
 import checkmo.domain.bookStory.entity.BookStoryLiked;
 import checkmo.domain.bookStory.repository.BookStoryLikedRepository;

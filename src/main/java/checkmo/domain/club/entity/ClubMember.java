@@ -4,7 +4,7 @@ import checkmo.domain.club.entity.meeting.BookReview;
 import checkmo.domain.club.entity.meeting.MemberTeam;
 import checkmo.domain.club.entity.meeting.Topic;
 import checkmo.domain.member.entity.Member;
-import checkmo.global.entity.BaseEntity;
+import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

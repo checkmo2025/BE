@@ -1,7 +1,7 @@
 package checkmo.domain.club.service.query;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.meeting.*;
 import checkmo.domain.club.repository.meeting.*;
 import lombok.RequiredArgsConstructor;

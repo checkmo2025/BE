@@ -6,7 +6,7 @@ import checkmo.domain.bookStory.entity.Comment;
 import checkmo.domain.club.entity.ClubMember;
 import checkmo.domain.notification.entity.Notification;
 import checkmo.domain.club.entity.announcement.MemberVote;
-import checkmo.global.entity.BaseEntity;
+import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

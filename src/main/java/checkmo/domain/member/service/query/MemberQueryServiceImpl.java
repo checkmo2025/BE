@@ -1,7 +1,7 @@
 package checkmo.domain.member.service.query;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
-import checkmo.apiPayload.exception.GeneralException;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.domain.member.entity.Member;
 import checkmo.domain.member.repository.MemberRepository;
 import java.util.List;

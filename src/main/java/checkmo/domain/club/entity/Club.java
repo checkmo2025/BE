@@ -2,7 +2,7 @@ package checkmo.domain.club.entity;
 
 import checkmo.domain.club.entity.announcement.Vote;
 import checkmo.domain.club.entity.meeting.Meeting;
-import checkmo.global.entity.BaseEntity;
+import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;

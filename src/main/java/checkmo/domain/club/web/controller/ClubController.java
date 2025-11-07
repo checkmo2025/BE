@@ -1,6 +1,6 @@
 package checkmo.domain.club.web.controller;
 
-import checkmo.apiPayload.ApiResponse;
+import checkmo.common.apiPayload.ApiResponse;
 import checkmo.domain.club.facade.ClubCommandFacade;
 import checkmo.domain.club.facade.ClubQueryFacade;
 import checkmo.domain.club.validation.validCursor.ValidCursor;

@@ -1,7 +1,7 @@
 package checkmo.domain.book.entity;
 
 import checkmo.domain.bookStory.entity.BookStory;
-import checkmo.global.entity.BaseEntity;
+import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,6 +1,6 @@
 package checkmo.domain.notification.web.controller;
 
-import checkmo.apiPayload.ApiResponse;
+import checkmo.common.apiPayload.ApiResponse;
 import checkmo.domain.notification.facade.NotificationQueryFacade;
 import checkmo.domain.notification.service.command.NotificationCommandService;
 import checkmo.domain.notification.web.dto.NotificationResponseDTO;

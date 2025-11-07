@@ -1,6 +1,6 @@
 package checkmo.domain.club.service.query;
 
-import checkmo.apiPayload.exception.GeneralException;
+import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.domain.club.entity.Club;
 import checkmo.domain.club.web.dto.club.ClubRequestDTO;
 

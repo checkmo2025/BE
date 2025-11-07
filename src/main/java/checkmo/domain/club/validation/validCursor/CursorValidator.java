@@ -1,6 +1,6 @@
 package checkmo.domain.club.validation.validCursor;
 
-import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;

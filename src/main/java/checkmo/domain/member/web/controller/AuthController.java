@@ -1,6 +1,6 @@
 package checkmo.domain.member.web.controller;
 
-import checkmo.apiPayload.ApiResponse;
+import checkmo.common.apiPayload.ApiResponse;
 import checkmo.domain.member.facade.MemberCommandFacade;
 import checkmo.domain.member.facade.MemberQueryFacade;
 import checkmo.domain.member.web.dto.MemberRequestDTO;

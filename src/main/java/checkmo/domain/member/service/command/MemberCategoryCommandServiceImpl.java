@@ -1,7 +1,7 @@
 package checkmo.domain.member.service.command;
 
-import checkmo.apiPayload.exception.GeneralException;
-import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.domain.category.entity.Category;
 import checkmo.domain.category.repository.CategoryRepository;
 import checkmo.domain.member.entity.Member;

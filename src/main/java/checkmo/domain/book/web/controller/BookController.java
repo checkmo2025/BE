@@ -1,6 +1,6 @@
 package checkmo.domain.book.web.controller;
 
-import checkmo.apiPayload.ApiResponse;
+import checkmo.common.apiPayload.ApiResponse;
 import checkmo.domain.book.web.dto.BookResponseDTO;
 import checkmo.domain.book.facade.BookQueryFacade;
 import io.swagger.v3.oas.annotations.Operation;

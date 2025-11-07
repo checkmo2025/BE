@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;
 
-import static checkmo.apiPayload.code.status.ErrorStatus.SIZE_POSITIVE;
+import static checkmo.common.apiPayload.code.status.ErrorStatus.SIZE_POSITIVE;
 
 @Component
 public class SizeValidator implements ConstraintValidator<ValidSize, Integer> {

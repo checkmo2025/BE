@@ -1,7 +1,7 @@
 package checkmo.domain.member.service.security.auth;
 
-import checkmo.apiPayload.ApiResponse;
-import checkmo.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.ApiResponse;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;

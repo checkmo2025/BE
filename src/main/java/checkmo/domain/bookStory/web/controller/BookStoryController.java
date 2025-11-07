@@ -1,6 +1,6 @@
 package checkmo.domain.bookStory.web.controller;
 
-import checkmo.apiPayload.ApiResponse;
+import checkmo.common.apiPayload.ApiResponse;
 import checkmo.domain.bookStory.facade.BookStoryCommandFacade;
 import checkmo.domain.bookStory.facade.BookStoryQueryFacade;
 import checkmo.domain.bookStory.web.dto.BookStoryRequestDTO;
