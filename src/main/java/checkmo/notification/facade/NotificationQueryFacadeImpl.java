@@ -1,9 +1,9 @@
 package checkmo.notification.facade;
 
-import checkmo.member.facade.MemberQueryFacade;
+import checkmo.member.MemberAPI;
 import checkmo.notification.converter.NotificationConverter;
 import checkmo.notification.entity.Notification;
-import checkmo.notification.service.query.NotificationQueryService;
+import checkmo.notification.internal.service.query.NotificationQueryService;
 import checkmo.notification.web.dto.NotificationResponseDTO;
 import checkmo.notification.NotificationSharedDTO;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
     public static final int DEFAULT_PAGE_SIZE = 20;
 
     // Domain level 2
-    private final MemberQueryFacade memberQueryFacade;
+    private final MemberAPI memberAPI;
 
     // 자신의 QueryService
     private final NotificationQueryService notificationQueryService;
@@ -41,7 +41,7 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
                 .toList();
 
         // 3. 발신자 닉네임 배치 조회로 처리
-        Map<String, String> senderNicknameMap = memberQueryFacade.getMemberNicknamesByMemberIds(senderIds);
+        Map<String, String> senderNicknameMap = memberAPI.getMemberNicknamesByMemberIds(senderIds);
 
         // 4. DTO 변환
         return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap);
@@ -67,7 +67,7 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
                 .toList();
 
         // 4. 알림 보낸 사람 닉네임 배치 조회
-        Map<String, String> senderNicknameMap = memberQueryFacade.getMemberNicknamesByMemberIds(senderIds);
+        Map<String, String> senderNicknameMap = memberAPI.getMemberNicknamesByMemberIds(senderIds);
 
         // 5. DTO 변환
         return NotificationConverter.convertToNotificationListDTO(

@@ -2,7 +2,7 @@ package checkmo.book.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.book.web.dto.BookResponseDTO;
-import checkmo.book.facade.BookQueryFacade;
+import checkmo.book.BookAPI;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "책 검색", description = "알라딘 API를 이용한 책 검색 API")
 public class BookController {
 
-    private final BookQueryFacade bookQueryFacade;
+    private final BookAPI bookAPI;
 
     @Operation(summary = "책 검색 API", description = "키워드를 이용해 알라딘에서 책 목록을 검색합니다.")
     @Parameters({
@@ -36,7 +36,7 @@ public class BookController {
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
             int page
     ) {
-        BookResponseDTO.BookListResponse result = bookQueryFacade.searchBookFromAladin(keyword, page);
+        BookResponseDTO.BookListResponse result = bookAPI.searchBookFromAladin(keyword, page);
         return ApiResponse.onSuccess(result);
     }
 
@@ -49,7 +49,7 @@ public class BookController {
     @GetMapping({"/{isbn}"})
     public ApiResponse<BookResponseDTO.BookInfoDetailResponse> getBookDetail(@PathVariable String isbn) {
 
-        BookResponseDTO.BookInfoDetailResponse result = bookQueryFacade.getBookDetailFromAladin(isbn);
+        BookResponseDTO.BookInfoDetailResponse result = bookAPI.getBookDetailFromAladin(isbn);
         return ApiResponse.onSuccess(result);
     }
 }

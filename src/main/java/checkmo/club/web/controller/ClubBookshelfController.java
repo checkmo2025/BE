@@ -2,7 +2,7 @@ package checkmo.club.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.club.facade.ClubCommandFacade;
-import checkmo.club.facade.ClubQueryFacade;
+import checkmo.club.ClubAPI;
 import checkmo.club.validation.validCursor.ValidCursor;
 import checkmo.club.validation.validSize.ValidSize;
 import checkmo.club.web.dto.bookshelf.BookShelfRequestDTO;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class ClubBookshelfController {
 
     private final ClubCommandFacade clubCommandFacade;
-    private final ClubQueryFacade clubQueryFacade;
+    private final ClubAPI clubAPI;
 
     @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 사이즈만큼 조회합니다.(최신순 정렬)")
     @Parameters({
@@ -46,7 +46,7 @@ public class ClubBookshelfController {
             @RequestParam(required = false) Integer generation,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfListDTO bookShelfList = clubQueryFacade.getBookShelfList(clubId, cursorId, size, generation, memberId);
+        BookShelfResponseDTO.BookShelfListDTO bookShelfList = clubAPI.getBookShelfList(clubId, cursorId, size, generation, memberId);
         return ApiResponse.onSuccess(bookShelfList);
     }
 
@@ -64,7 +64,7 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfDetailDTO bookShelfDetail = clubQueryFacade.getBookShelfDetail(meetingId, memberId);
+        BookShelfResponseDTO.BookShelfDetailDTO bookShelfDetail = clubAPI.getBookShelfDetail(meetingId, memberId);
         return ApiResponse.onSuccess(bookShelfDetail);
     }
 
@@ -86,7 +86,7 @@ public class ClubBookshelfController {
             @RequestParam @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubQueryFacade.getBookReviewList(meetingId, cursorId, size, memberId);
+        BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubAPI.getBookReviewList(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(bookReviewList);
     }
 
@@ -242,7 +242,7 @@ public class ClubBookshelfController {
             @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.TopicListDTO topicList = clubQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+        BookShelfResponseDTO.TopicListDTO topicList = clubAPI.findTopicsByMeeting(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(topicList);
     }
 }

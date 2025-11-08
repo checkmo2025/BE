@@ -2,7 +2,7 @@ package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.facade.MemberCommandFacade;
-import checkmo.member.facade.MemberQueryFacade;
+import checkmo.member.MemberAPI;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.auth_annotation.CurrentId;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberCommandFacade memberCommandFacade;
-    private final MemberQueryFacade memberQueryFacade;
+    private final MemberAPI memberAPI;
 
     // 마이페이지 관련
     // GET /api/members/me - 마이페이지 조회
@@ -101,7 +101,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followingList = memberQueryFacade.getFollowingList(memberId, cursorId);
+        var followingList = memberAPI.getFollowingList(memberId, cursorId);
         return ApiResponse.onSuccess(followingList);
     }
 
@@ -117,7 +117,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followerList = memberQueryFacade.getFollowerList(memberId, cursorId);
+        var followerList = memberAPI.getFollowerList(memberId, cursorId);
         return ApiResponse.onSuccess(followerList);
     }
 
@@ -148,7 +148,7 @@ public class MemberController {
     public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
+        return ApiResponse.onSuccess(memberAPI.getMemberProfile(memberId));
     }
 
     @Operation(summary = "다른 사람 프로필 조회 API", description = "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태를 포함합니다.\n" +
@@ -158,6 +158,6 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        return ApiResponse.onSuccess(memberQueryFacade.getOtherProfile(memberNickname, memberId));
+        return ApiResponse.onSuccess(memberAPI.getOtherProfile(memberNickname, memberId));
     }
 }

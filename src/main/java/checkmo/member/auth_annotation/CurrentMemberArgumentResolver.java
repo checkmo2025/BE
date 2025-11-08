@@ -1,7 +1,7 @@
 package checkmo.member.auth_annotation;
 
 import checkmo.member.repository.MemberRepository;
-import checkmo.member.service.security.auth.PrincipalDetails;
+import checkmo.member.internal.service.security.auth.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;

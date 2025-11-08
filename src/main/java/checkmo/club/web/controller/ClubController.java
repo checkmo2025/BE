@@ -2,7 +2,7 @@ package checkmo.club.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.club.facade.ClubCommandFacade;
-import checkmo.club.facade.ClubQueryFacade;
+import checkmo.club.ClubAPI;
 import checkmo.club.validation.validCursor.ValidCursor;
 import checkmo.club.validation.validSize.ValidSize;
 import checkmo.club.web.dto.club.ClubRequestDTO;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "독서 모임", description = "독서 모임 생성, 검색, 가입, 기본 정보 관리 API")
 public class ClubController {
 
-    private final ClubQueryFacade clubQueryFacade;
+    private final ClubAPI clubAPI;
     private final ClubCommandFacade clubCommandFacade;
 
 
@@ -41,7 +41,7 @@ public class ClubController {
             @RequestParam(required = false, defaultValue = "false") boolean onlyImportant,
             @RequestParam(required = false) Integer size // 페이지 사이즈
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getNoticeForHome(memberId, cursorId, onlyImportant, size));
+        return ApiResponse.onSuccess(clubAPI.getNoticeForHome(memberId, cursorId, onlyImportant, size));
     }
 
     /**
@@ -61,7 +61,7 @@ public class ClubController {
     public ApiResponse<Boolean> checkClubNameDuplicate(
             @RequestParam String clubName
     ) {
-        boolean isDuplicate = clubQueryFacade.isDuplicateClubName(clubName);
+        boolean isDuplicate = clubAPI.isDuplicateClubName(clubName);
         return ApiResponse.onSuccess(isDuplicate);
     }
 
@@ -85,7 +85,7 @@ public class ClubController {
             @CurrentId String memberId
     ) {
         Long clubId = clubCommandFacade.createClub(memberId, request);
-        ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
+        ClubResponseDTO.ClubDetailDTO result = clubAPI.getClubInfo(clubId, memberId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -107,7 +107,7 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId
     ) {
-        ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
+        ClubResponseDTO.ClubDetailDTO result = clubAPI.getClubInfo(clubId, memberId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -153,7 +153,7 @@ public class ClubController {
             @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request
     ) {
         clubCommandFacade.updateClub(clubId, memberId, request);
-        ClubResponseDTO.ClubDetailDTO result = clubQueryFacade.getClubInfo(clubId, memberId);
+        ClubResponseDTO.ClubDetailDTO result = clubAPI.getClubInfo(clubId, memberId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -176,7 +176,7 @@ public class ClubController {
             @ModelAttribute ClubRequestDTO.ClubSearchFilter filter,
             @ModelAttribute ClubRequestDTO.CursorPageRequest pageRequest
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getClubList(memberId, filter, pageRequest));
+        return ApiResponse.onSuccess(clubAPI.getClubList(memberId, filter, pageRequest));
     }
 
     /**
@@ -193,7 +193,7 @@ public class ClubController {
     public ApiResponse<ClubResponseDTO.MyClubListDTO> getMyClubs(
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getMyClubList(memberId));
+        return ApiResponse.onSuccess(clubAPI.getMyClubList(memberId));
     }
 
     /**
@@ -210,7 +210,7 @@ public class ClubController {
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false) Integer size
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getMyPageClubList(memberId, cursorId, size));
+        return ApiResponse.onSuccess(clubAPI.getMyPageClubList(memberId, cursorId, size));
     }
 
     /**
@@ -262,7 +262,7 @@ public class ClubController {
             @RequestParam(required = false) @ValidCursor Long cursorId, // 페이징을 위한 커서 ID
             @RequestParam(required = false) @ValidSize Integer size // 페이지 사이즈
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId, size));
+        return ApiResponse.onSuccess(clubAPI.getClubMemberListByStatus(clubId, memberId, status, cursorId, size));
     }
 
     /**
@@ -339,7 +339,7 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId
     ) {
-        Boolean isStaff = clubQueryFacade.checkStaffStatus(clubId, memberId);
+        Boolean isStaff = clubAPI.checkStaffStatus(clubId, memberId);
         return ApiResponse.onSuccess(isStaff);
     }
 }

@@ -1,6 +1,6 @@
 package checkmo.book.facade;
 
-import checkmo.book.service.command.BookCommandService;
+import checkmo.book.internal.service.command.BookCommandService;
 import checkmo.book.BookSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

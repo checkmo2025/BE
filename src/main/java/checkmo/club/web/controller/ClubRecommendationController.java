@@ -2,7 +2,7 @@ package checkmo.club.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.club.facade.ClubCommandFacade;
-import checkmo.club.facade.ClubQueryFacade;
+import checkmo.club.ClubAPI;
 import checkmo.club.web.dto.club.ClubRequestDTO;
 import checkmo.club.web.dto.club.ClubResponseDTO;
 import checkmo.member.auth_annotation.CurrentId;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class ClubRecommendationController {
 
     private final ClubCommandFacade clubCommandFacade;
-    private final ClubQueryFacade clubQueryFacade;
+    private final ClubAPI clubAPI;
 
     @Operation(summary = "추천 책 작성", description = "특정 모임에 추천 책을 작성합니다.")
     @ApiResponses({
@@ -63,7 +63,7 @@ public class ClubRecommendationController {
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getRecommendedBooks(clubId, cursorId, memberId));
+        return ApiResponse.onSuccess(clubAPI.getRecommendedBooks(clubId, cursorId, memberId));
     }
 
     @Operation(summary = "추천 책 상세 조회", description = "추천 책 ID를 기반으로 상세 정보를 조회합니다.")
@@ -77,7 +77,7 @@ public class ClubRecommendationController {
             @PathVariable Long recommendId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubQueryFacade.getRecommendedBookDetail(clubId, recommendId, memberId));
+        return ApiResponse.onSuccess(clubAPI.getRecommendedBookDetail(clubId, recommendId, memberId));
     }
 
     @Operation(summary = "추천 책 삭제", description = "추천 책을 삭제합니다. 작성자만 삭제할 수 있습니다.")

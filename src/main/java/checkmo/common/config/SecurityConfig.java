@@ -1,10 +1,10 @@
 package checkmo.common.config;
 
-import checkmo.member.service.security.auth.ProfileCompletionAuthorizationFilter;
-import checkmo.member.service.security.jwt.JwtAuthenticationFilter;
-import checkmo.member.service.security.oauth2.CustomOAuth2UserService;
-import checkmo.member.service.security.oauth2.OAuth2AuthenticationFailureHandler;
-import checkmo.member.service.security.oauth2.OAuth2AuthenticationSuccessHandler;
+import checkmo.member.internal.service.security.auth.ProfileCompletionAuthorizationFilter;
+import checkmo.member.internal.service.security.jwt.JwtAuthenticationFilter;
+import checkmo.member.internal.service.security.oauth2.CustomOAuth2UserService;
+import checkmo.member.internal.service.security.oauth2.OAuth2AuthenticationFailureHandler;
+import checkmo.member.internal.service.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

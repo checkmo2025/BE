@@ -2,28 +2,29 @@ package checkmo.club.facade;
 
 import checkmo.book.entity.Book;
 import checkmo.book.facade.BookCommandFacade;
-import checkmo.book.facade.BookQueryFacade;
+import checkmo.book.BookAPI;
+import checkmo.club.ClubAPI;
 import checkmo.club.converter.ClubConverter;
 import checkmo.club.entity.Club;
 import checkmo.club.entity.ClubMember;
 import checkmo.club.entity.announcement.Notice;
 import checkmo.club.entity.announcement.Vote;
 import checkmo.club.entity.meeting.Meeting;
-import checkmo.club.service.command.ClubBookRecommendCommandService;
-import checkmo.club.service.command.ClubManagementCommandService;
-import checkmo.club.service.command.ClubMeetingCommandService;
-import checkmo.club.service.command.ClubMemberCommandService;
-import checkmo.club.service.command.ClubNoticeCommandService;
-import checkmo.club.service.query.ClubMeetingQueryService;
-import checkmo.club.service.query.ClubMemberQueryService;
-import checkmo.club.service.query.ClubQueryService;
+import checkmo.club.internal.service.command.ClubBookRecommendCommandService;
+import checkmo.club.internal.service.command.ClubManagementCommandService;
+import checkmo.club.internal.service.command.ClubMeetingCommandService;
+import checkmo.club.internal.service.command.ClubMemberCommandService;
+import checkmo.club.internal.service.command.ClubNoticeCommandService;
+import checkmo.club.internal.service.query.ClubMeetingQueryService;
+import checkmo.club.internal.service.query.ClubMemberQueryService;
+import checkmo.club.internal.service.query.ClubQueryService;
 import checkmo.club.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.club.web.dto.club.ClubRequestDTO;
 import checkmo.club.web.dto.club.ClubResponseDTO;
 import checkmo.club.web.dto.meeting.MeetingRequestDTO;
 import checkmo.club.web.dto.meeting.MeetingResponseDTO;
 import checkmo.member.entity.Member;
-import checkmo.member.facade.MemberQueryFacade;
+import checkmo.member.MemberAPI;
 import checkmo.member.MemberSharedDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -39,13 +40,13 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
     // Domain level 1
     private final BookCommandFacade bookCommandFacade;
-    private final BookQueryFacade bookQueryFacade;
+    private final BookAPI bookAPI;
 
     // Domain level 2
-    private final MemberQueryFacade memberQueryFacade;
+    private final MemberAPI memberAPI;
 
     // 자신의 QueryFacade
-    private final ClubQueryFacade clubQueryFacade;
+    private final ClubAPI clubAPI;
 
     // 자신의 CommandService
     private final ClubMeetingCommandService clubMeetingCommandService;
@@ -62,7 +63,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     @Override
     public Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request) {
         // 1. 운영진 멤버 엔티티 생성
-        Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
+        Member proxyMember = memberAPI.findMemberReferenceById(memberId);
         ClubMember clubMember = ClubConverter.toClubMemberEntity(null, proxyMember, ClubMember.ClubMemberStatus.STAFF,
                 null);
 
@@ -85,7 +86,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         Club club = clubQueryService.validateClub(clubId);
 
         // 2. 회원 프록시 객체 조회
-        Member proxyMember = memberQueryFacade.findMemberReferenceById(memberId);
+        Member proxyMember = memberAPI.findMemberReferenceById(memberId);
 
         // 3. 독서 모임 가입 신청 및 가입된 클럽 멤버 ID 반환
         return clubMemberCommandService.joinClub(club, proxyMember, request).getId();
@@ -106,7 +107,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
         // === 3. DTO 변환 및 반환 준비 === //
 
         // 외부 도메인 정보 조회 및 DTO 변환
-        MemberSharedDTO.BasicInfo memberInfo = memberQueryFacade.getMemberBasicInfoForShare(
+        MemberSharedDTO.BasicInfo memberInfo = memberAPI.getMemberBasicInfoForShare(
                 updatedClubMember.getMemberId());
         ClubResponseDTO.ClubMemberDTO updatedClubMemberDTO = ClubConverter.toClubMemberDTO(updatedClubMember,
                 memberInfo);
@@ -196,7 +197,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
     public ClubResponseDTO.BookRecommendDetailDTO recommendBook(Long clubId, String memberId,
                                                                 ClubRequestDTO.CreateBookRecommendDTO request) {
         Long bookRecommendId = clubBookRecommendCommandService.recommendBook(clubId, memberId, request);
-        return clubQueryFacade.getRecommendedBookDetail(clubId, bookRecommendId, memberId);
+        return clubAPI.getRecommendedBookDetail(clubId, bookRecommendId, memberId);
     }
 
     /**
@@ -214,7 +215,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
                                                                       ClubRequestDTO.UpdateBookRecommendDTO request) {
         Long updateBookRecommendId = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId,
                 bookRecommendId, request);
-        return clubQueryFacade.getRecommendedBookDetail(clubId, updateBookRecommendId, memberId);
+        return clubAPI.getRecommendedBookDetail(clubId, updateBookRecommendId, memberId);
     }
 
     /**
@@ -237,7 +238,7 @@ public class ClubCommandFacadeImpl implements ClubCommandFacade {
 
         // 2. 책 저장 후 프록시 객체 가져오기
         bookCommandFacade.saveBook(request.getBookInfo());
-        Book proxyBook = bookQueryFacade.findBookReferenceById(request.getBookInfo().getIsbn());
+        Book proxyBook = bookAPI.findBookReferenceById(request.getBookInfo().getIsbn());
 
         // 3. 저장할 미팅 생성
         Meeting meeting = ClubConverter.fromMeetingCreateRequestDTOToMeeting(request, proxyBook);

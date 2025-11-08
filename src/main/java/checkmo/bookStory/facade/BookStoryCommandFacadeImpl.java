@@ -1,8 +1,8 @@
 package checkmo.bookStory.facade;
 
-import checkmo.bookStory.service.command.BookStoryCommandService;
-import checkmo.bookStory.service.command.BookStoryCommentCommandService;
-import checkmo.bookStory.service.command.BookStorySocialCommandService;
+import checkmo.bookStory.internal.service.command.BookStoryCommandService;
+import checkmo.bookStory.internal.service.command.BookStoryCommentCommandService;
+import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

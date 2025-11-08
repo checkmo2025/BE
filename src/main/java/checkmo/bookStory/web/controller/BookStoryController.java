@@ -2,7 +2,7 @@ package checkmo.bookStory.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.bookStory.facade.BookStoryCommandFacade;
-import checkmo.bookStory.facade.BookStoryQueryFacade;
+import checkmo.bookStory.BookStoryAPI;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.member.auth_annotation.CurrentId;
 import checkmo.bookStory.BookStorySharedDTO;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class BookStoryController {
 
     private final BookStoryCommandFacade bookStoryCommandFacade;
-    private final BookStoryQueryFacade bookStoryQueryFacade;
+    private final BookStoryAPI bookStoryAPI;
 
     @Operation(summary = "책 이야기 업로드 API", description = "새로운 책 이야기를 작성합니다.")
     @ApiResponses({
@@ -77,7 +77,7 @@ public class BookStoryController {
             throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
         }
 
-        var bookStoriesByScope = bookStoryQueryFacade.getBookStoriesByScope(memberId, scope, clubId, targetMemberNickname, cursorId);
+        var bookStoriesByScope = bookStoryAPI.getBookStoriesByScope(memberId, scope, clubId, targetMemberNickname, cursorId);
         return ApiResponse.onSuccess(bookStoriesByScope);
     }
 
@@ -94,7 +94,7 @@ public class BookStoryController {
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
-        var bookStory = bookStoryQueryFacade.getBookStory(memberId, bookStoryId);
+        var bookStory = bookStoryAPI.getBookStory(memberId, bookStoryId);
         return ApiResponse.onSuccess(bookStory);
     }
 

@@ -2,7 +2,7 @@ package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.facade.MemberCommandFacade;
-import checkmo.member.facade.MemberQueryFacade;
+import checkmo.member.MemberAPI;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final MemberCommandFacade memberCommandFacade;
-    private final MemberQueryFacade memberQueryFacade;
+    private final MemberAPI memberAPI;
 
     // 이메일 인증 요청
     @Operation(summary = "이메일 인증번호 요청", description = "회원가입 시 이메일 인증번호를 요청합니다.")
@@ -98,7 +98,7 @@ public class AuthController {
     public ApiResponse<Boolean> checkNickname(@RequestParam
                                               @NotBlank(message = "닉네임은 필수입니다")
                                               @Size(max = 6, message = "닉네임은 최대 6자까지 가능합니다") String nickname) {
-        boolean isDuplicated = memberQueryFacade.isNicknameDuplicated(nickname);
+        boolean isDuplicated = memberAPI.isNicknameDuplicated(nickname);
         return ApiResponse.onSuccess(isDuplicated);
     }
 

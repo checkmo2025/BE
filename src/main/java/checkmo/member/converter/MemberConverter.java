@@ -3,7 +3,7 @@ package checkmo.member.converter;
 import checkmo.member.entity.Follow;
 import checkmo.member.entity.Member;
 import checkmo.member.entity.MemberCategory;
-import checkmo.member.service.security.oauth2.OAuth2Attributes;
+import checkmo.member.internal.service.security.oauth2.OAuth2Attributes;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.category.CategorySharedDTO;
