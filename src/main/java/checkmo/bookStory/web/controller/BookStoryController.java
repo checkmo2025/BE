@@ -2,7 +2,9 @@ package checkmo.bookStory.web.controller;
 
 import checkmo.bookStory.BookStoryAPI;
 import checkmo.bookStory.BookStoryExternalDTO;
-import checkmo.bookStory.internal.facade.BookStoryCommandFacade;
+import checkmo.bookStory.internal.service.command.BookStoryCommandService;
+import checkmo.bookStory.internal.service.command.BookStoryCommentCommandService;
+import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.internal.authAnnotation.CurrentId;
@@ -29,7 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "책 이야기", description = "책 이야기 업로드, 조회, 좋아요, 수정, 삭제 관련 API")
 public class BookStoryController {
 
-    private final BookStoryCommandFacade bookStoryCommandFacade;
+    private final BookStoryCommentCommandService bookStoryCommentCommandService;
+    private final BookStoryCommandService bookStoryCommandService;
+    private final BookStorySocialCommandService bookStorySocialCommandService;
     private final BookStoryAPI bookStoryAPI;
 
     @Operation(summary = "책 이야기 업로드 API", description = "새로운 책 이야기를 작성합니다.")
@@ -43,7 +47,7 @@ public class BookStoryController {
             @CurrentId String memberId,
             @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequest request
     ) {
-        Long bookStoryId = bookStoryCommandFacade.createBookStory(memberId, request);
+        Long bookStoryId = bookStoryCommandService.createBookStory(memberId, request);
         return ApiResponse.onSuccess(bookStoryId);
     }
 
@@ -120,7 +124,7 @@ public class BookStoryController {
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
-        boolean isLiked = bookStoryCommandFacade.toggleLikeOnBookStory(memberId, bookStoryId);
+        boolean isLiked = bookStorySocialCommandService.toggleLikeOnBookStory(memberId, bookStoryId);
 
         if (isLiked) {
             return ApiResponse.onSuccess("좋아요가 추가되었습니다.", bookStoryId);
@@ -144,7 +148,7 @@ public class BookStoryController {
             @PathVariable Long bookStoryId,
             @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequest request
     ) {
-        Long updateBookStoryId = bookStoryCommandFacade.updateBookStory(memberId, bookStoryId, request);
+        Long updateBookStoryId = bookStoryCommandService.updateBookStory(memberId, bookStoryId, request);
         return ApiResponse.onSuccess(updateBookStoryId);
     }
 
@@ -162,7 +166,7 @@ public class BookStoryController {
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
-        bookStoryCommandFacade.deleteBookStory(memberId, bookStoryId);
+        bookStoryCommandService.deleteBookStory(memberId, bookStoryId);
         return ApiResponse.onSuccess("책 이야기가 성공적으로 삭제되었습니다.");
     }
 
@@ -184,7 +188,7 @@ public class BookStoryController {
             @RequestParam(required = false) Long parentCommentId,
             @Valid @RequestBody BookStoryRequestDTO.CommentCreateRequest request
     ) {
-        Long resultBookStoryId = bookStoryCommandFacade.createComment(memberId, bookStoryId, parentCommentId, request);
+        Long resultBookStoryId = bookStoryCommentCommandService.createComment(memberId, bookStoryId, parentCommentId, request);
         return ApiResponse.onSuccess(resultBookStoryId);
     }
 }
