@@ -1,6 +1,5 @@
 package checkmo.bookStory.entity;
 
-import checkmo.book.entity.Book;
 import checkmo.member.entity.Member;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
@@ -40,12 +39,8 @@ public class BookStory extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "book_id", insertable = false, updatable = false)
+    @Column(name = "book_id", nullable = false)
     private String bookId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
 
     @Builder.Default
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL)
@@ -58,26 +53,6 @@ public class BookStory extends BaseEntity {
     public Long updateDescription(String description) {
         this.description = description;
         return this.id;
-    }
-
-    public void addLike() {
-        this.likes++;
-    }
-
-    public void removeLike() {
-        if (this.likes > 0) {
-            this.likes--;
-        }
-    }
-
-    public void addComment() {
-        this.commentsCount++;
-    }
-
-    public void removeComment() {
-        if (this.commentsCount > 0) {
-            this.commentsCount--;
-        }
     }
 
     public void addCommentToList(Comment comment) {
