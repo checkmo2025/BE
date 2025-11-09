@@ -1,12 +1,8 @@
 package checkmo.book.entity;
 
-import checkmo.bookStory.entity.BookStory;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Builder
@@ -27,8 +23,4 @@ public class Book extends BaseEntity {
     private String publisher;
 
     private String description;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private List<BookStory> bookStories = new ArrayList<>();
 }
