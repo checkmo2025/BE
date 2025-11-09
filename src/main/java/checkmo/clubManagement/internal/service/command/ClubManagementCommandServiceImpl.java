@@ -1,0 +1,81 @@
+package checkmo.clubManagement.internal.service.command;
+
+import checkmo.clubManagement.converter.ClubManagementConverter;
+import checkmo.clubManagement.entity.Club;
+import checkmo.clubManagement.entity.ClubMember;
+import checkmo.clubManagement.internal.service.query.ClubQueryService;
+import checkmo.clubManagement.repository.ClubRepository;
+import checkmo.clubManagement.web.dto.ClubRequestDTO;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class ClubManagementCommandServiceImpl implements ClubManagementCommandService {
+
+    // 자신의 CommandService
+    private final ClubCategoryCommandService clubCategoryCommandService;
+
+    // 자신의 QueryService
+    private final ClubQueryService clubQueryService;
+
+    // 자신의 Repository
+    private final ClubRepository clubRepository;
+
+    @Override
+    @Transactional
+    public Long createClub(ClubMember clubMember, ClubRequestDTO.ClubDetailDTO request) {
+        // 1. 클럽 이름 중복 검사
+        if (clubQueryService.isDuplicateClubName(request.getName())) {
+            throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
+        }
+
+        // 2. 클럽 엔티티 생성
+        Club club = ClubManagementConverter.fromClubDetailDTOToClub(request);
+
+        // 3. 클럽과 클럽 멤버 연관관계 설정
+        club.addClubMember(clubMember);
+
+        // 4. 클럽 저장
+        clubRepository.save(club);
+
+        // 5. 카테고리 연관관계 설정
+        List<Long> categoryIds = request.getCategory();
+        clubCategoryCommandService.createClubCategories(club, categoryIds);
+
+        // 6. 생성된 클럽의 ID 반환
+        return club.getId();
+    }
+
+    @Override
+    @Transactional
+    public void updateClub(Club club, ClubMember clubMember, ClubRequestDTO.ClubDetailDTO request) {
+        // 1. 운영진 여부 검증
+        if (!clubMember.isStaff()) {
+            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 2. 클럽 이름 중복 검사 (단, 기존 이름과 다를 때만)
+        if (!club.getName().equals(request.getName()) &&
+                clubQueryService.isDuplicateClubName(request.getName())) {
+            throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
+        }
+
+        // 3. 엔티티 필드 수정
+        club.updateField(request.getName(),
+                request.getDescription(),
+                request.getProfileImageUrl(),
+                request.getParticipantTypes(),
+                request.getRegion(),
+                request.getInsta(),
+                request.getKakao());
+
+        // 4. 카테고리 연관관계 수정
+        List<Long> categoryIds = request.getCategory();
+        clubCategoryCommandService.modifyClubCategories(club, categoryIds);
+    }
+}
