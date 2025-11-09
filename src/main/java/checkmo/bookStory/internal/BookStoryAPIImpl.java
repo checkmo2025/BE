@@ -92,10 +92,12 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     }
 
     @Override
-    public BookStoryExternalDTO.BookStoryListResponse getBookStoriesByScope(String memberId,
-                                                                            BookStoryRequestDTO.BookStoryScope scope,
-                                                                            Long clubId, String targetMemberNickname,
-                                                                            Long cursorId) {
+    public BookStoryExternalDTO.BookStoryListResponse getBookStoriesByScope(
+            String memberId,
+            BookStoryRequestDTO.BookStoryScope scope,
+            Long clubId, String targetMemberNickname,
+            Long cursorId
+    ) {
         // 1. targetMemberId 조회 (SCOPE=TARGET인 경우)
         String targetMemberId = resolveTargetMemberId(scope, targetMemberNickname);
 
@@ -165,8 +167,10 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 작성자 정보 배치 조회
      */
-    private Map<String, MemberExternalDTO.WithFollowStatus> fetchAuthorInfo(String memberId,
-                                                                            List<BookStory> bookStories) {
+    private Map<String, MemberExternalDTO.WithFollowStatus> fetchAuthorInfo(
+            String memberId,
+            List<BookStory> bookStories
+    ) {
         List<String> memberIds = bookStories.stream()
                 .map(BookStory::getMemberId)
                 .distinct()
@@ -199,9 +203,11 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 스코프에 해당하는 클럽 정보 조회
      */
-    private ClubManagementExternalDTO.MyClubInfo findClubInfoForScope(BookStoryRequestDTO.BookStoryScope scope,
-                                                                      Long clubId,
-                                                                      ClubManagementExternalDTO.MyClubList myClubList) {
+    private ClubManagementExternalDTO.MyClubInfo findClubInfoForScope(
+            BookStoryRequestDTO.BookStoryScope scope,
+            Long clubId,
+            ClubManagementExternalDTO.MyClubList myClubList
+    ) {
         if (scope == BookStoryRequestDTO.BookStoryScope.CLUB) {
             return myClubList.getClubList().stream()
                     .filter(club -> club.getClubId().equals(clubId))
