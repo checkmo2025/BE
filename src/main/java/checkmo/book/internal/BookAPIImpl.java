@@ -74,4 +74,19 @@ public class BookAPIImpl implements BookAPI {
     public Book findBookReferenceById(String bookId) {
         return bookRepository.getReferenceById(bookId);
     }
+
+    @Override
+    @Transactional
+    public String getOrCreateBook(BookSharedDTO.BookCreateRequest request) {
+
+        // 이미 존재하는지 확인
+        if (bookRepository.existsById(request.getIsbn())) {
+            return request.getIsbn();
+        }
+
+        Book book = BookConverter.fromBookCreateRequest(request);
+
+        // 없으면 저장 후 ID 반환
+        return bookRepository.save(book).getId();
+    }
 }

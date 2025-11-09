@@ -62,4 +62,12 @@ public interface BookAPI {
      * @return Book 엔티티의 프록시 객체
      */
     Book findBookReferenceById(String bookId);
+
+    /**
+     * 책을 조회하거나, 존재하지 않으면 생성합니다. (외부용)
+     *
+     * @param request 생성할 책 정보 DTO
+     * @return 조회되거나 생성된 책의 ID (ISBN)
+     */
+    String getOrCreateBook(BookSharedDTO.BookCreateRequest request);
 }
