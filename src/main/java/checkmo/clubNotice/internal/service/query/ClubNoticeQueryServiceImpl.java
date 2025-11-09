@@ -1,18 +1,17 @@
-package checkmo.club.internal.service.query;
+package checkmo.clubNotice.internal.service.query;
 
+import checkmo.clubNotice.entity.MemberVote;
+import checkmo.clubNotice.entity.Notice;
+import checkmo.clubNotice.entity.Vote;
+import checkmo.clubNotice.repository.MemberVoteRepository;
+import checkmo.clubNotice.repository.NoticeRepository;
+import checkmo.clubNotice.repository.VoteRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.club.entity.announcement.MemberVote;
-import checkmo.club.entity.announcement.Notice;
-import checkmo.club.entity.announcement.Vote;
-import checkmo.club.repository.announcement.MemberVoteRepository;
-import checkmo.club.repository.announcement.NoticeRepository;
-import checkmo.club.repository.announcement.VoteRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -61,12 +60,14 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
     }
 
     @Override
-    public List<Notice> getNoticeListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId, Pageable pageable) {
+    public List<Notice> getNoticeListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId,
+                                               Pageable pageable) {
         return noticeRepository.findAllByClubIdsAndCursorPaging(clubIds, onlyImportant, cursorId, pageable);
     }
 
     @Override
-    public List<Vote> getVoteListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId, Pageable pageable) {
+    public List<Vote> getVoteListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId,
+                                           Pageable pageable) {
         return voteRepository.findByClubIdsAndCursorPaging(clubIds, onlyImportant, cursorId, pageable);
     }
 

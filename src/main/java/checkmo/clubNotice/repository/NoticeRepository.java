@@ -1,14 +1,13 @@
-package checkmo.club.repository.announcement;
+package checkmo.clubNotice.repository;
 
-import checkmo.club.entity.Club;
-import checkmo.club.entity.announcement.Notice;
+import checkmo.clubManagement.entity.Club;
+import checkmo.clubNotice.entity.Notice;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
-import java.util.Optional;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 

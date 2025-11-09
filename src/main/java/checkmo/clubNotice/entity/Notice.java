@@ -1,10 +1,23 @@
-package checkmo.club.entity.announcement;
+package checkmo.clubNotice.entity;
 
-import checkmo.club.entity.Club;
-import checkmo.club.entity.meeting.Meeting;
+import checkmo.clubMeeting.entity.Meeting;
+import checkmo.clubManagement.entity.Club;
 import checkmo.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Builder

@@ -1,25 +1,24 @@
-package checkmo.club.internal.service.command;
+package checkmo.clubNotice.internal.service.command;
 
+import checkmo.clubManagement.entity.Club;
+import checkmo.clubManagement.entity.ClubMember;
+import checkmo.clubNotice.converter.ClubNoticeConverter;
+import checkmo.clubNotice.entity.MemberVote;
+import checkmo.clubNotice.entity.Notice;
+import checkmo.clubNotice.entity.Vote;
+import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
+import checkmo.clubNotice.repository.MemberVoteRepository;
+import checkmo.clubNotice.repository.NoticeRepository;
+import checkmo.clubNotice.repository.VoteRepository;
+import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.club.converter.ClubConverter;
-import checkmo.club.entity.Club;
-import checkmo.club.entity.ClubMember;
-import checkmo.club.entity.announcement.MemberVote;
-import checkmo.club.entity.announcement.Notice;
-import checkmo.club.entity.announcement.Vote;
-import checkmo.club.repository.announcement.MemberVoteRepository;
-import checkmo.club.repository.announcement.NoticeRepository;
-import checkmo.club.repository.announcement.VoteRepository;
-import checkmo.club.internal.service.query.ClubNoticeQueryService;
-import checkmo.club.web.dto.club.ClubRequestDTO;
-import checkmo.member.entity.Member;
 import checkmo.member.MemberAPI;
+import checkmo.member.entity.Member;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -38,14 +37,14 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     private final MemberVoteRepository memberVoteRepository;
 
     @Override
-    public Notice createPureNotice(Club club, ClubMember clubMember, ClubRequestDTO.CreateClubNoticeDTO request) {
+    public Notice createPureNotice(Club club, ClubMember clubMember, ClubNoticeRequestDTO.CreateClubNoticeDTO request) {
         // 1. 운영진 여부 확인
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
         // 2. 공지사항 생성 및 저장
-        Notice notice = ClubConverter.fromCreateNoticeDTOToNotice(request, club);
+        Notice notice = ClubNoticeConverter.fromCreateNoticeDTOToNotice(request, club);
         noticeRepository.save(notice);
 
         // 3. 공지사항 ID 반환
@@ -70,14 +69,14 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     }
 
     @Override
-    public Vote createVote(Club club, ClubMember clubMember, ClubRequestDTO.CreateClubVoteDTO request) {
+    public Vote createVote(Club club, ClubMember clubMember, ClubNoticeRequestDTO.CreateClubVoteDTO request) {
         // 1. 운영진 여부 확인
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
         // 2. 투표 생성 및 저장
-        Vote vote = ClubConverter.fromCreateVoteDTOToVote(request, club);
+        Vote vote = ClubNoticeConverter.fromCreateVoteDTOToVote(request, club);
         //TODO: 데드라인이 현재 시간보다 이전인지, 시작시간이 데드라인보다 이전인지, 시작시간이 현재시간보다 이전인지 검증이 필요하지 않나
         voteRepository.save(vote);
 
@@ -100,7 +99,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     }
 
     @Override
-    public Long haveVote(Long clubId, ClubMember clubMember, Long voteId, ClubRequestDTO.VoteResultDTO request) {
+    public Long haveVote(Long clubId, ClubMember clubMember, Long voteId, ClubNoticeRequestDTO.VoteResultDTO request) {
         // 1. 투표 참여자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
@@ -124,7 +123,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
         // 6. MemberVote 생성 및 저장
         Member memberProxy = memberAPI.findMemberReferenceById(clubMember.getMemberId());
-        MemberVote memberVote = ClubConverter.fromVoteRequestToMemberVote(
+        MemberVote memberVote = ClubNoticeConverter.fromVoteRequestToMemberVote(
                 vote, clubMember.getMemberId(), memberProxy, request
         );
         memberVoteRepository.save(memberVote);
