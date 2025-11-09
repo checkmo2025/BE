@@ -1,6 +1,5 @@
 package checkmo.bookStory.converter;
 
-import checkmo.book.entity.Book;
 import checkmo.bookStory.entity.BookStory;
 import checkmo.bookStory.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
@@ -24,12 +23,12 @@ public class BookStoryConverter {
     /**
      * BookStoryCreateRequestDTO → BookStory 변환
      */
-    public static BookStory fromBookStoryRequestDTO(BookStoryRequestDTO.BookStoryCreateRequest request, Member proxyMember, Book proxyBook) {
+    public static BookStory fromBookStoryRequestDTO(BookStoryRequestDTO.BookStoryCreateRequest request, Member proxyMember, String bookId) {
         return BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .member(proxyMember)
-                .book(proxyBook)
+                .bookId(bookId)
                 .build();
     }
 
