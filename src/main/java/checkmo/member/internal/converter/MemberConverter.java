@@ -1,7 +1,7 @@
 package checkmo.member.internal.converter;
 
-import checkmo.category.CategorySharedDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.category.CategoryExternalDTO;
+import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberCategory;
@@ -95,7 +95,7 @@ public class MemberConverter {
      * Member 엔티티 → MemberResponseDTO.FollowResponse 변환
      */
     public static MemberResponseDTO.MemberProfileWithCategoryResponseDTO toMemberProfileWithCategoryResponseDTO(
-            Member member, List<CategorySharedDTO.CategoryInfo> categories) {
+            Member member, List<CategoryExternalDTO.CategoryInfo> categories) {
         return MemberResponseDTO.MemberProfileWithCategoryResponseDTO.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
@@ -107,8 +107,8 @@ public class MemberConverter {
     /**
      * MemberProfileResponseDTO → BasicInfoDTO 변환
      */
-    public static MemberSharedDTO.BasicInfo toBasicInfoDTO(MemberResponseDTO.MemberProfileResponseDTO profile) {
-        return MemberSharedDTO.BasicInfo.builder()
+    public static MemberExternalDTO.BasicInfo toBasicInfoDTO(MemberResponseDTO.MemberProfileResponseDTO profile) {
+        return MemberExternalDTO.BasicInfo.builder()
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())
                 .build();
@@ -117,9 +117,9 @@ public class MemberConverter {
     /**
      * BasicInfoDTO -> WithFollowStatusDTO 변환
      */
-    public static MemberSharedDTO.WithFollowStatus toWithFollowStatusDTO(MemberSharedDTO.BasicInfo basicInfo,
-                                                                         boolean isFollowing) {
-        return MemberSharedDTO.WithFollowStatus.builder()
+    public static MemberExternalDTO.WithFollowStatus toWithFollowStatusDTO(MemberExternalDTO.BasicInfo basicInfo,
+                                                                           boolean isFollowing) {
+        return MemberExternalDTO.WithFollowStatus.builder()
                 .nickname(basicInfo.getNickname())
                 .profileImageUrl(basicInfo.getProfileImageUrl())
                 .following(isFollowing)
@@ -130,8 +130,8 @@ public class MemberConverter {
      * Object[] -> WithFollowStatusDTO 변환 (공유용) 배치 처리를 위한 조회 결과를 Object[]에 담아서 전달 여기서 Object[]의 구성은 row[0]=memberId,
      * row[1]=nickname, row[2]=profileImageUrl
      */
-    public static MemberSharedDTO.WithFollowStatus toWithFollowStatusDTO(Object[] row, boolean isFollowing) {
-        return MemberSharedDTO.WithFollowStatus.builder()
+    public static MemberExternalDTO.WithFollowStatus toWithFollowStatusDTO(Object[] row, boolean isFollowing) {
+        return MemberExternalDTO.WithFollowStatus.builder()
                 .nickname((String) row[1])
                 .profileImageUrl((String) row[2])
                 .following(isFollowing)
@@ -140,7 +140,7 @@ public class MemberConverter {
 
     public static MemberResponseDTO.otherProfileResponseDTO toOtherProfileResponseDTO(Member member,
                                                                                       boolean isFollowing,
-                                                                                      List<CategorySharedDTO.CategoryInfo> categories) {
+                                                                                      List<CategoryExternalDTO.CategoryInfo> categories) {
         return MemberResponseDTO.otherProfileResponseDTO.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
@@ -172,7 +172,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowList 변환
      */
     public static MemberResponseDTO.FollowList toFollowList(
-            List<MemberSharedDTO.WithFollowStatus> followList,
+            List<MemberExternalDTO.WithFollowStatus> followList,
             boolean hasNext,
             Long nextCursor
     ) {
@@ -187,7 +187,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowPreviewList 변환
      */
     public static MemberResponseDTO.FollowPreviewList toFollowPreviewList(
-            List<MemberSharedDTO.WithFollowStatus> followList
+            List<MemberExternalDTO.WithFollowStatus> followList
     ) {
         return MemberResponseDTO.FollowPreviewList.builder()
                 .followList(followList)
@@ -201,10 +201,10 @@ public class MemberConverter {
     /**
      * List<MemberCategory> → CategoryInfoList 변환
      */
-    public static List<CategorySharedDTO.CategoryInfo> fromMemberCategoriesToCategoryInfoList(
+    public static List<CategoryExternalDTO.CategoryInfo> fromMemberCategoriesToCategoryInfoList(
             List<MemberCategory> memberCategories) {
         return memberCategories.stream()
-                .map(mc -> CategorySharedDTO.CategoryInfo.builder()
+                .map(mc -> CategoryExternalDTO.CategoryInfo.builder()
                         .id(mc.getCategory().getId())
                         .name(mc.getCategory().getName())
                         .build())

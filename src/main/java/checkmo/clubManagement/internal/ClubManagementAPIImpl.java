@@ -2,7 +2,7 @@ package checkmo.clubManagement.internal;
 
 import checkmo.book.BookAPI;
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.ClubManagementSharedDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
@@ -17,7 +17,7 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +49,8 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     public ClubResponseDTO.MyClubListDTO getMyClubList(String memberId) {
 
         // 1. 회원이 가입한 모임 목록 조회
-        List<ClubManagementSharedDTO.MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId).getClubList();
+        List<ClubManagementExternalDTO.MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId)
+                .getClubList();
 
         // 2. 모임 정보 DTO로 변환
         List<ClubResponseDTO.ClubInfoDTO> clubInfoDTOList = myClubs.stream()
@@ -105,7 +106,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public ClubManagementSharedDTO.MyClubList getMyClubListForShare(String memberId) {
+    public ClubManagementExternalDTO.MyClubList getMyClubListForShare(String memberId) {
         return clubMemberQueryService.getMyClubList(memberId);
     }
 
@@ -229,12 +230,12 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
         List<String> memberIds = extractMemberIds(members);
 
         // 5. 기본 정보 배치 조회
-        Map<String, MemberSharedDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
 
         // 6. DTO 변환
         List<ClubResponseDTO.ClubMemberDTO> dtoList = members.stream()
                 .map(cm -> {
-                    MemberSharedDTO.BasicInfo memberInfo = memberInfoMap.get(cm.getMemberId());
+                    MemberExternalDTO.BasicInfo memberInfo = memberInfoMap.get(cm.getMemberId());
                     return ClubManagementConverter.toClubMemberDTO(cm, memberInfo);
                 })
                 .toList();

@@ -1,6 +1,6 @@
 package checkmo.bookStory.web.dto;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ public class BookStoryRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class BookStoryCreateRequest {
-        private BookSharedDTO.BookCreateRequest bookInfo; // 책 정보
+        private BookExternalDTO.BookCreateRequest bookInfo; // 책 정보
 
         @NotBlank(message = "책 이야기에 제목을 입력해주세요.")
         private String title;

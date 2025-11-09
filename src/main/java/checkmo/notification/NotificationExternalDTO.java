@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 /**
  * 알림 도메인과 관련된 공유 DTO 클래스 다른 도메인에서 알림 정보를 참조할 때 사용
  */
-public class NotificationSharedDTO {
+public class NotificationExternalDTO {
 
     /**
      * 알림 미리보기 목록 응답 DTO 홈 화면 같은 곳에서 알림을 몇개만 보여줄 때 사용

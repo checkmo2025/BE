@@ -1,20 +1,20 @@
 package checkmo.bookStory.internal;
 
 import checkmo.book.BookAPI;
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.BookStoryAPI;
-import checkmo.bookStory.BookStorySharedDTO;
+import checkmo.bookStory.BookStoryExternalDTO;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.ClubManagementSharedDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,15 +44,15 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     private final BookStoryQueryService bookStoryQueryService;
 
     @Override
-    public BookStorySharedDTO.BookStoryDetailResponse getBookStory(String memberId, Long bookStoryId) {
+    public BookStoryExternalDTO.BookStoryDetailResponse getBookStory(String memberId, Long bookStoryId) {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
 
         // 2. 책 정보 조회
-        BookSharedDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(bookStory.getBookId());
+        BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(bookStory.getBookId());
 
         // 3. 작성자 정보 조회
-        MemberSharedDTO.WithFollowStatus authorInfo = memberAPI.getMemberWithFollowStatusForShare(
+        MemberExternalDTO.WithFollowStatus authorInfo = memberAPI.getMemberWithFollowStatusForShare(
                 bookStory.getMemberId(), memberId);
 
         // 4. 좋아요 여부 조회
@@ -72,12 +72,12 @@ public class BookStoryAPIImpl implements BookStoryAPI {
                 .collect(Collectors.toSet());
 
         // 6-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
-        Map<String, MemberSharedDTO.BasicInfo> commentMemberInfoMap =
+        Map<String, MemberExternalDTO.BasicInfo> commentMemberInfoMap =
                 commentMemberIds.isEmpty() ? Map.of() :
                         memberAPI.getMemberBasicInfoMapForShare(new ArrayList<>(commentMemberIds));
 
         // 7. 댓글 DTO 변환
-        List<BookStorySharedDTO.CommentResponse> commentDTOList =
+        List<BookStoryExternalDTO.CommentResponse> commentDTOList =
                 BookStoryConverter.fromCommentsToResponses(comments, memberId, commentMemberInfoMap);
 
         // 8. DTO 변환
@@ -92,10 +92,10 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     }
 
     @Override
-    public BookStorySharedDTO.BookStoryListResponse getBookStoriesByScope(String memberId,
-                                                                          BookStoryRequestDTO.BookStoryScope scope,
-                                                                          Long clubId, String targetMemberNickname,
-                                                                          Long cursorId) {
+    public BookStoryExternalDTO.BookStoryListResponse getBookStoriesByScope(String memberId,
+                                                                            BookStoryRequestDTO.BookStoryScope scope,
+                                                                            Long clubId, String targetMemberNickname,
+                                                                            Long cursorId) {
         // 1. targetMemberId 조회 (SCOPE=TARGET인 경우)
         String targetMemberId = resolveTargetMemberId(scope, targetMemberNickname);
 
@@ -115,18 +115,18 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         Map<Long, Boolean> isLikedMap = fetchLikedInfo(memberId, bookStories);
 
         // 5.책 정보 조회
-        Map<String, BookSharedDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
+        Map<String, BookExternalDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
 
         // 6. 작성자 정보 조회
-        Map<String, MemberSharedDTO.WithFollowStatus> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
+        Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // 7. DTO 변환
-        List<BookStorySharedDTO.BookStoryResponse> bookStoryResponses = convertToBookStoryResponses(memberId,
+        List<BookStoryExternalDTO.BookStoryResponse> bookStoryResponses = convertToBookStoryResponses(memberId,
                 bookStories, isLikedMap, bookInfoMap, authorInfoMap);
 
         // 8. 클럽 정보 조회
-        ClubManagementSharedDTO.MyClubList myClubList = clubManagementAPI.getMyClubListForShare(memberId);
-        ClubManagementSharedDTO.MyClubInfo myClubInfo = findClubInfoForScope(scope, clubId, myClubList);
+        ClubManagementExternalDTO.MyClubList myClubList = clubManagementAPI.getMyClubListForShare(memberId);
+        ClubManagementExternalDTO.MyClubInfo myClubInfo = findClubInfoForScope(scope, clubId, myClubList);
 
         // 9. 스코프 정보 변환 및 최종 응답 DTO 변환
         var scopeInfo = BookStoryConverter.fromScopeInfo(scope, myClubInfo);
@@ -154,7 +154,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 책 정보 배치 조회
      */
-    private Map<String, BookSharedDTO.BasicInfo> fetchBookInfo(List<BookStory> bookStories) {
+    private Map<String, BookExternalDTO.BasicInfo> fetchBookInfo(List<BookStory> bookStories) {
         List<String> bookIds = bookStories.stream()
                 .map(BookStory::getBookId)
                 .distinct()
@@ -165,8 +165,8 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 작성자 정보 배치 조회
      */
-    private Map<String, MemberSharedDTO.WithFollowStatus> fetchAuthorInfo(String memberId,
-                                                                          List<BookStory> bookStories) {
+    private Map<String, MemberExternalDTO.WithFollowStatus> fetchAuthorInfo(String memberId,
+                                                                            List<BookStory> bookStories) {
         List<String> memberIds = bookStories.stream()
                 .map(BookStory::getMemberId)
                 .distinct()
@@ -177,12 +177,12 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * BookStory 엔티티들을 Response DTO로 변환
      */
-    private List<BookStorySharedDTO.BookStoryResponse> convertToBookStoryResponses(
+    private List<BookStoryExternalDTO.BookStoryResponse> convertToBookStoryResponses(
             String memberId,
             List<BookStory> bookStories,
             Map<Long, Boolean> isLikedMap,
-            Map<String, BookSharedDTO.BasicInfo> bookInfoMap,
-            Map<String, MemberSharedDTO.WithFollowStatus> authorInfoMap
+            Map<String, BookExternalDTO.BasicInfo> bookInfoMap,
+            Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap
     ) {
 
         return bookStories.stream()
@@ -199,9 +199,9 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 스코프에 해당하는 클럽 정보 조회
      */
-    private ClubManagementSharedDTO.MyClubInfo findClubInfoForScope(BookStoryRequestDTO.BookStoryScope scope,
-                                                                    Long clubId,
-                                                                    ClubManagementSharedDTO.MyClubList myClubList) {
+    private ClubManagementExternalDTO.MyClubInfo findClubInfoForScope(BookStoryRequestDTO.BookStoryScope scope,
+                                                                      Long clubId,
+                                                                      ClubManagementExternalDTO.MyClubList myClubList) {
         if (scope == BookStoryRequestDTO.BookStoryScope.CLUB) {
             return myClubList.getClubList().stream()
                     .filter(club -> club.getClubId().equals(clubId))

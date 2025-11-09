@@ -1,6 +1,6 @@
 package checkmo.book.internal.service.command;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.converter.BookConverter;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.repository.BookRepository;
@@ -20,7 +20,7 @@ public class BookCommandServiceImpl implements BookCommandService {
 
     @Override
     @Transactional
-    public void saveBook(BookSharedDTO.BookCreateRequest request) {
+    public void saveBook(BookExternalDTO.BookCreateRequest request) {
         Book book = BookConverter.fromBookCreateRequest(request);
 
         // 이미 존재하는 책인지 확인

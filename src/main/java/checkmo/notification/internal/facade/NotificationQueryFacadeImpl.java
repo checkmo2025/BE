@@ -1,7 +1,7 @@
 package checkmo.notification.internal.facade;
 
 import checkmo.member.MemberAPI;
-import checkmo.notification.NotificationSharedDTO;
+import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.service.query.NotificationQueryService;
@@ -29,7 +29,7 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
 
     @Override
     @Cacheable(value = "notifications", key = "#memberId")
-    public NotificationSharedDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size) {
+    public NotificationExternalDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size) {
         // 1. Service에서 순수 엔티티 조회
         List<Notification> notifications = notificationQueryService.findUnreadNotifications(memberId, size);
 

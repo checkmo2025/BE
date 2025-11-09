@@ -1,7 +1,7 @@
 package checkmo.book.internal;
 
 import checkmo.book.BookAPI;
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.converter.BookConverter;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.repository.BookRepository;
@@ -39,7 +39,7 @@ public class BookAPIImpl implements BookAPI {
     }
 
     @Override
-    public BookSharedDTO.BasicInfo getBookBasicInfoForShare(String bookId) {
+    public BookExternalDTO.BasicInfo getBookBasicInfoForShare(String bookId) {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
 
@@ -47,7 +47,7 @@ public class BookAPIImpl implements BookAPI {
     }
 
     @Override
-    public BookSharedDTO.DetailInfo getBookDetailInfoForShare(String bookId) {
+    public BookExternalDTO.DetailInfo getBookDetailInfoForShare(String bookId) {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
 
@@ -55,7 +55,7 @@ public class BookAPIImpl implements BookAPI {
     }
 
     @Override
-    public Map<String, BookSharedDTO.BasicInfo> getBookBasicInfoMapForShare(List<String> bookIds) {
+    public Map<String, BookExternalDTO.BasicInfo> getBookBasicInfoMapForShare(List<String> bookIds) {
         if (bookIds == null || bookIds.isEmpty()) {
             return Map.of();
         }
@@ -76,7 +76,7 @@ public class BookAPIImpl implements BookAPI {
 
     @Override
     @Transactional
-    public String getOrCreateBook(BookSharedDTO.BookCreateRequest request) {
+    public String getOrCreateBook(BookExternalDTO.BookCreateRequest request) {
 
         // 이미 존재하는지 확인
         if (bookRepository.existsById(request.getIsbn())) {

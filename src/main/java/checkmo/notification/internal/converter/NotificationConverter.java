@@ -1,7 +1,7 @@
 package checkmo.notification.internal.converter;
 
 import checkmo.member.internal.entity.Member;
-import checkmo.notification.NotificationSharedDTO;
+import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.web.dto.NotificationResponseDTO;
 import java.util.List;
@@ -60,35 +60,35 @@ public class NotificationConverter {
     }
 
     // =====================================================
-    // Notification → NotificationSharedDTO 변환
+    // Notification → NotificationExternalDTO 변환
     // =====================================================
 
     /**
      * NotificationPreviewDTO -> NotificationPreviewListDTO
      */
-    public static NotificationSharedDTO.NotificationPreviewList convertToPreviewListDTO(
+    public static NotificationExternalDTO.NotificationPreviewList convertToPreviewListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap
     ) {
 
-        List<NotificationSharedDTO.NotificationPreview> previewList = notifications.stream()
+        List<NotificationExternalDTO.NotificationPreview> previewList = notifications.stream()
                 .map(notification -> convertToPreviewDTO(
                         notification,
                         notification.getSenderId() != null ? senderNicknameMap.get(notification.getSenderId()) : null
                 ))
                 .toList();
 
-        return NotificationSharedDTO.NotificationPreviewList.builder()
+        return NotificationExternalDTO.NotificationPreviewList.builder()
                 .notifications(previewList)
                 .build();
     }
 
     /**
-     * Notification → NotificationSharedDTO 변환
+     * Notification → NotificationExternalDTO 변환
      */
-    public static NotificationSharedDTO.NotificationPreview convertToPreviewDTO(Notification notification,
-                                                                                String senderNickname) {
-        return NotificationSharedDTO.NotificationPreview.builder()
+    public static NotificationExternalDTO.NotificationPreview convertToPreviewDTO(Notification notification,
+                                                                                  String senderNickname) {
+        return NotificationExternalDTO.NotificationPreview.builder()
                 .notificationId(notification.getId())
                 .notificationType(notification.getNotificationType())
                 .senderNickname(senderNickname)

@@ -1,8 +1,8 @@
 package checkmo.clubManagement.web.dto;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.Club;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -122,7 +122,7 @@ public class ClubResponseDTO {
     @Builder
     public static class ClubMemberDTO {
         private Long clubMemberId; // 클럽 회원 ID
-        private MemberSharedDTO.BasicInfo basicInfo; // 닉네임과 프로필 url
+        private MemberExternalDTO.BasicInfo basicInfo; // 닉네임과 프로필 url
         private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
         private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
     }
@@ -148,8 +148,8 @@ public class ClubResponseDTO {
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.BasicInfo authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberExternalDTO.BasicInfo authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
         private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
         private boolean isStaff; // 본인이 모임의 스탭인지 여부
     }

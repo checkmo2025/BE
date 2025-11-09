@@ -1,8 +1,8 @@
 package checkmo.member.internal;
 
-import checkmo.category.CategorySharedDTO;
+import checkmo.category.CategoryExternalDTO;
 import checkmo.member.MemberAPI;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
@@ -53,7 +53,7 @@ public class MemberAPIImpl implements MemberAPI {
         Member member = memberQueryService.getMemberProfile(memberId);
 
         List<MemberCategory> memberCategories = memberCategoryQueryService.findCategoriesByMember(memberId);
-        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
+        List<CategoryExternalDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
                 memberCategories);
 
         return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
@@ -66,7 +66,7 @@ public class MemberAPIImpl implements MemberAPI {
 
         List<MemberCategory> targetMemberCategories = memberCategoryQueryService.findCategoriesByMember(
                 targetMember.getId());
-        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
+        List<CategoryExternalDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
                 targetMemberCategories);
 
         return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing, categories);
@@ -91,7 +91,7 @@ public class MemberAPIImpl implements MemberAPI {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
+        List<MemberExternalDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followerDTOList, hasNext, nextCursor);
@@ -117,7 +117,8 @@ public class MemberAPIImpl implements MemberAPI {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
+        List<MemberExternalDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId,
+                followingIdList);
 
         // 4. DTO 변환
         return MemberConverter.toFollowList(followingDTOList, hasNext, nextCursor);
@@ -134,7 +135,7 @@ public class MemberAPIImpl implements MemberAPI {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
+        List<MemberExternalDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followerDTOList);
     }
@@ -150,7 +151,8 @@ public class MemberAPIImpl implements MemberAPI {
                 .distinct()
                 .toList();
 
-        List<MemberSharedDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId, followingIdList);
+        List<MemberExternalDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId,
+                followingIdList);
 
         // 3. DTO 변환
         return MemberConverter.toFollowPreviewList(followingDTOList);
@@ -179,10 +181,10 @@ public class MemberAPIImpl implements MemberAPI {
      * 공유용 기본 회원 정보 조회 (외부용)
      *
      * @param memberId 조회할 회원 ID
-     * @return MemberSharedDTO.BasicInfo
+     * @return MemberExternalDTO.BasicInfo
      */
     @Override
-    public MemberSharedDTO.BasicInfo getMemberBasicInfoForShare(String memberId) {
+    public MemberExternalDTO.BasicInfo getMemberBasicInfoForShare(String memberId) {
         Member member = memberQueryService.getMemberBasicInfo(memberId);
         MemberResponseDTO.MemberProfileResponseDTO profileDTO = MemberConverter.toMemberProfileResponseDTO(member);
 
@@ -190,7 +192,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds) {
+    public Map<String, MemberExternalDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds) {
         if (memberIds == null || memberIds.isEmpty()) {
             return Map.of();
         }
@@ -204,7 +206,7 @@ public class MemberAPIImpl implements MemberAPI {
         return results.stream()
                 .collect(Collectors.toMap(
                         row -> (String) row[0], // memberId
-                        row -> MemberSharedDTO.BasicInfo.builder()
+                        row -> MemberExternalDTO.BasicInfo.builder()
                                 .nickname((String) row[1]) // nickname
                                 .profileImageUrl((String) row[2]) // profileImageUrl
                                 .build()
@@ -216,11 +218,11 @@ public class MemberAPIImpl implements MemberAPI {
      *
      * @param targetMemberId  조회 대상 회원 ID
      * @param currentMemberId 현재 로그인한 회원 ID
-     * @return MemberSharedDTO.WithFollowStatusDTO
+     * @return MemberExternalDTO.WithFollowStatusDTO
      */
     @Override
-    public MemberSharedDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId,
-                                                                              String currentMemberId) {
+    public MemberExternalDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId,
+                                                                                String currentMemberId) {
         // 팔로우 상태를 조회
         boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
@@ -229,7 +231,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(
+    public Map<String, MemberExternalDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(
             List<String> targetMemberIds, String currentMemberId) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Map.of();
@@ -273,13 +275,13 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     // 이걸로 여기서 DTO 생성
-    private List<MemberSharedDTO.WithFollowStatus> createWithFollowStatusDTOs(String currentMemberId,
-                                                                              List<String> targetMemberIds) {
+    private List<MemberExternalDTO.WithFollowStatus> createWithFollowStatusDTOs(String currentMemberId,
+                                                                                List<String> targetMemberIds) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Collections.emptyList();
         }
         // 위 getMemberWithFollowStatusMapForShare 호출
-        Map<String, MemberSharedDTO.WithFollowStatus> map = getMemberWithFollowStatusMapForShare(targetMemberIds,
+        Map<String, MemberExternalDTO.WithFollowStatus> map = getMemberWithFollowStatusMapForShare(targetMemberIds,
                 currentMemberId);
 
         return targetMemberIds.stream()

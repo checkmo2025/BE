@@ -1,6 +1,6 @@
 package checkmo.book.internal.facade;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.service.command.BookCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ public class BookCommandFacadeImpl implements BookCommandFacade {
 
     @Override
     @Transactional
-    public void saveBook(BookSharedDTO.BookCreateRequest request) {
+    public void saveBook(BookExternalDTO.BookCreateRequest request) {
         bookCommandService.saveBook(request);
     }
 

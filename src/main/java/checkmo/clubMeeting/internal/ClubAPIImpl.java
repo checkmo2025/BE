@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.internal;
 
 import checkmo.book.BookAPI;
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -22,7 +22,7 @@ import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +103,7 @@ public class ClubAPIImpl implements ClubAPI {
 
         // 4. 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap =
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap =
                 memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 5. DTO 변환
@@ -142,7 +142,7 @@ public class ClubAPIImpl implements ClubAPI {
 
         // 4. 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap =
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap =
                 memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 5. DTO 변환
@@ -177,7 +177,7 @@ public class ClubAPIImpl implements ClubAPI {
 
         // 4. 한줄평 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromBookReviews(bookReviews);
-        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 5. DTO 변환
         List<BookShelfResponseDTO.BookReviewDTO> bookReviewDTOList = mapBookReviewsAndAuthorInfoToDTOs(bookReviews,
@@ -190,7 +190,7 @@ public class ClubAPIImpl implements ClubAPI {
 
     private List<BookShelfResponseDTO.BookReviewDTO> mapBookReviewsAndAuthorInfoToDTOs(
             List<BookReview> bookReviews,
-            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap
+            Map<String, MemberExternalDTO.BasicInfo> authorInfoMap
     ) {
         return bookReviews.stream()
                 .map(review -> ClubMeetingConverter.fromBookReviewAndMemberSharedDTOToBookReviewDTO(
@@ -219,7 +219,7 @@ public class ClubAPIImpl implements ClubAPI {
 
         // 4. 미팅의 모든 도서 기본 정보 배치 조회
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
-        Map<String, BookSharedDTO.BasicInfo> bookBasicInfoMap = bookAPI.getBookBasicInfoMapForShare(bookIds);
+        Map<String, BookExternalDTO.BasicInfo> bookBasicInfoMap = bookAPI.getBookBasicInfoMapForShare(bookIds);
 
         // 5. DTO 변환
         List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList = mapMeetingsWithBookBasicInfoToDTOs(meetings,
@@ -232,7 +232,7 @@ public class ClubAPIImpl implements ClubAPI {
 
     private List<MeetingResponseDTO.MeetingInfoDTO> mapMeetingsWithBookBasicInfoToDTOs(
             List<Meeting> meetings,
-            Map<String, BookSharedDTO.BasicInfo> bookBasicInfoMap
+            Map<String, BookExternalDTO.BasicInfo> bookBasicInfoMap
     ) {
         return meetings.stream()
                 .map(meeting -> ClubMeetingConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
@@ -276,7 +276,7 @@ public class ClubAPIImpl implements ClubAPI {
                 .toList();
 
         // 7. 발제의 작성자 정보 배치 조회
-        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 8. DTO 변환
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubManagementConverter.fromClubMembertoMembershipDTO(
@@ -301,7 +301,7 @@ public class ClubAPIImpl implements ClubAPI {
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 4. TeamTopic과 Team 배치 조회
         List<Long> topicIds = extractTopicIds(topics);
@@ -335,7 +335,7 @@ public class ClubAPIImpl implements ClubAPI {
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTeamTopics(teamTopics);
-        Map<String, MemberSharedDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 4. TeamTopicDTO로 변환
         List<MeetingResponseDTO.TopicDTO> topicDTOList = ClubMeetingConverter.fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
@@ -385,9 +385,10 @@ public class ClubAPIImpl implements ClubAPI {
         }
         Long nextCursor = hasNext ? clubMembers.getLast().getId() : null;
 
-        // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberSharedDTO.BasicInfoDTO 조회)
+        // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberExternalDTO.BasicInfoDTO 조회)
         List<String> memberIds = extractMemberIdsFromClubMembers(clubMembers);
-        Map<String, MemberSharedDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(
+                memberIds);
 
         // 4. 미팅에 존재하는 모든 팀 조회
         List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId);
@@ -411,11 +412,11 @@ public class ClubAPIImpl implements ClubAPI {
 
     private MeetingResponseDTO.MeetingMemberDTO toMeetingMemberDTO(
             ClubMember clubMember,
-            Map<String, MemberSharedDTO.BasicInfo> memberBasicInfoMap,
+            Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
             Map<String, Integer> memberIdToTeamNumberMap
     ) {
         String memberId = clubMember.getMemberId();
-        MemberSharedDTO.BasicInfo memberInfo = memberBasicInfoMap.get(memberId);
+        MemberExternalDTO.BasicInfo memberInfo = memberBasicInfoMap.get(memberId);
         Integer teamNumber = memberIdToTeamNumberMap.get(memberId);
         return ClubMeetingConverter.fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(memberInfo, teamNumber);
     }
@@ -460,7 +461,8 @@ public class ClubAPIImpl implements ClubAPI {
 
         // 3. 클럽 멤버의 기본 정보 배치 조회
         List<String> memberIds = extractMemberIdsFromMemberTeams(memberTeams);
-        Map<String, MemberSharedDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(
+                memberIds);
 
         // 4. TeamMemberDTO 변환
         MembershipResponseDTO.MembershipDTO membershipDTO = ClubManagementConverter.fromClubMembertoMembershipDTO(

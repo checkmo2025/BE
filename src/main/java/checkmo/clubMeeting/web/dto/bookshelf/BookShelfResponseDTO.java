@@ -1,8 +1,8 @@
 package checkmo.clubMeeting.web.dto.bookshelf;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -29,7 +29,7 @@ public class BookShelfResponseDTO {
     @Builder
     public static class BookShelfInfoDTO {
         private MeetingInfoDTO meetingInfo;
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
     }
 
     @Getter
@@ -50,7 +50,7 @@ public class BookShelfResponseDTO {
     public static class BookShelfDetailDTO {
         MembershipResponseDTO.MembershipDTO membership;
         private MeetingInfoDTO meetingInfo; // Meeting 기본 정보
-        private BookSharedDTO.DetailInfo bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
+        private BookExternalDTO.DetailInfo bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
         private TopicListDTO topicList; // 발제 리스트(등록순 3개 미리보기)
     }
 
@@ -73,7 +73,7 @@ public class BookShelfResponseDTO {
         private Long bookReviewId; // BookReview ID
         private String description; // 한줄평 내용
         private double rate; // 평점
-        private MemberSharedDTO.BasicInfo authorInfo; // 작성자 정보 (globalDTO 사용)
+        private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보 (globalDTO 사용)
     }
 
     @Getter
@@ -95,7 +95,7 @@ public class BookShelfResponseDTO {
     public static class TopicDTO {
         private Long topicId; // 토픽 ID
         private String content; // 토픽 내용
-        private MemberSharedDTO.BasicInfo authorInfo; // 작성자 정보
+        private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보
         private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
     }
 

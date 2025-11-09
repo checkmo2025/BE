@@ -1,8 +1,8 @@
 package checkmo.member.web.dto;
 
-import checkmo.book.BookSharedDTO;
-import checkmo.category.CategorySharedDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.book.BookExternalDTO;
+import checkmo.category.CategoryExternalDTO;
+import checkmo.member.MemberExternalDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowList {
-        private List<MemberSharedDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
+        private List<MemberExternalDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
     }
@@ -30,7 +30,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowPreviewList {
-        private List<MemberSharedDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
+        private List<MemberExternalDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
     }
 
     @Getter
@@ -51,7 +51,7 @@ public class MemberResponseDTO {
         private String nickname;
         private String description;
         private String profileImageUrl;
-        private List<CategorySharedDTO.CategoryInfo> categories; // 카테고리 정보 리스트
+        private List<CategoryExternalDTO.CategoryInfo> categories; // 카테고리 정보 리스트
     }
 
     @Getter
@@ -72,7 +72,7 @@ public class MemberResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean following;
-        private List<CategorySharedDTO.CategoryInfo> categories;
+        private List<CategoryExternalDTO.CategoryInfo> categories;
     }
 
     @Getter
@@ -82,7 +82,7 @@ public class MemberResponseDTO {
     public static class BookStoryPreviewDTO {
         private Long bookStoryId;
         private String bookStoryTitle;
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
         private int likes;
         private LocalDateTime createdAt;
         private boolean isLiked; // 조회하는 사람의 좋아요 여부

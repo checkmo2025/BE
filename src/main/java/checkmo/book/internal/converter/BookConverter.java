@@ -1,6 +1,6 @@
 package checkmo.book.internal.converter;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
@@ -15,14 +15,14 @@ import org.springframework.web.util.HtmlUtils;
 public class BookConverter {
 
     // =====================================================
-    // Book Entity → BookSharedDTO 변환
+    // Book Entity → BookExternalDTO 변환
     // =====================================================
 
     /**
      * Book → BasicInfoDTO
      */
-    public static BookSharedDTO.BasicInfo fromBookToBasicInfoDTO(Book book) {
-        return BookSharedDTO.BasicInfo.builder()
+    public static BookExternalDTO.BasicInfo fromBookToBasicInfoDTO(Book book) {
+        return BookExternalDTO.BasicInfo.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -33,8 +33,8 @@ public class BookConverter {
     /**
      * Book → DetailInfoDTO
      */
-    public static BookSharedDTO.DetailInfo fromBookToDetailInfoDTO(Book book) {
-        return BookSharedDTO.DetailInfo.builder()
+    public static BookExternalDTO.DetailInfo fromBookToDetailInfoDTO(Book book) {
+        return BookExternalDTO.DetailInfo.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -47,7 +47,7 @@ public class BookConverter {
     /**
      * Book Map → BasicInfoDTO Map
      */
-    public static Map<String, BookSharedDTO.BasicInfo> fromBooksMapToBasicInfoDTOMap(Map<String, Book> booksMap) {
+    public static Map<String, BookExternalDTO.BasicInfo> fromBooksMapToBasicInfoDTOMap(Map<String, Book> booksMap) {
         return booksMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -63,7 +63,7 @@ public class BookConverter {
      * BookCreateRequest → Book 엔티티 변환
      */
     public static Book fromBookCreateRequest(
-            BookSharedDTO.BookCreateRequest request
+            BookExternalDTO.BookCreateRequest request
     ) {
         return Book.builder()
                 .id(request.getIsbn())

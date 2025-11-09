@@ -1,6 +1,6 @@
 package checkmo.category.internal.converter;
 
-import checkmo.category.CategorySharedDTO;
+import checkmo.category.CategoryExternalDTO;
 import checkmo.category.internal.entity.Category;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,15 +17,15 @@ public class CategoryConverter {
     /**
      * List<Category> → CategoryInfoList
      */
-    public static CategorySharedDTO.CategoryInfoList fromCategoriesToCategoryInfoList(List<Category> categories) {
-        List<CategorySharedDTO.CategoryInfo> categoryList = categories.stream()
-                .map(category -> CategorySharedDTO.CategoryInfo.builder()
+    public static CategoryExternalDTO.CategoryInfoList fromCategoriesToCategoryInfoList(List<Category> categories) {
+        List<CategoryExternalDTO.CategoryInfo> categoryList = categories.stream()
+                .map(category -> CategoryExternalDTO.CategoryInfo.builder()
                         .id(category.getId())
                         .name(category.getName())
                         .build())
                 .collect(Collectors.toList());
 
-        return CategorySharedDTO.CategoryInfoList.builder()
+        return CategoryExternalDTO.CategoryInfoList.builder()
                 .categoryList(categoryList)
                 .build();
     }

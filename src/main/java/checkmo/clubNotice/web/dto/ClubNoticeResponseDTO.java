@@ -1,8 +1,8 @@
 package checkmo.clubNotice.web.dto;
 
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
-import checkmo.clubNotice.ClubNoticeSharedDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.clubNotice.ClubNoticeExternalDTO;
+import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.time.LocalDateTime;
@@ -20,9 +20,9 @@ public class ClubNoticeResponseDTO {
             property = "tag",
             visible = true)
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = ClubNoticeSharedDTO.MeetingNoticePreview.class, name = "모임"),
-            @JsonSubTypes.Type(value = ClubNoticeSharedDTO.VotePreview.class, name = "투표"),
-            @JsonSubTypes.Type(value = ClubNoticeSharedDTO.PureNoticePreview.class, name = "공지")
+            @JsonSubTypes.Type(value = ClubNoticeExternalDTO.MeetingNoticePreview.class, name = "모임"),
+            @JsonSubTypes.Type(value = ClubNoticeExternalDTO.VotePreview.class, name = "투표"),
+            @JsonSubTypes.Type(value = ClubNoticeExternalDTO.PureNoticePreview.class, name = "공지")
     })
     public sealed interface NoticeItem
             permits PureNoticeDTO, MeetingNoticeDTO, VoteDTO {
@@ -126,7 +126,7 @@ public class ClubNoticeResponseDTO {
         private String item;
         private boolean isSelected;
         private int voteCount; // 투표한 사람 수
-        private List<MemberSharedDTO.BasicInfo> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
+        private List<MemberExternalDTO.BasicInfo> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
     }
 
     @Getter

@@ -1,6 +1,6 @@
 package checkmo.book.internal.facade;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 
 /**
  * Book Domain Command Facade Book 도메인의 Command(생성, 수정, 삭제) 관련 서비스들을 통합적으로 제공하는 Facade 입니다.
@@ -12,7 +12,7 @@ public interface BookCommandFacade {
      *
      * @param request 저장할 책 정보 DTO
      */
-    void saveBook(BookSharedDTO.BookCreateRequest request); //
+    void saveBook(BookExternalDTO.BookCreateRequest request); //
 
     /**
      * 특정 책 정보를 삭제합니다. (내부용)

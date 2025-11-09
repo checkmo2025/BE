@@ -1,7 +1,7 @@
 package checkmo.clubNotice.internal;
 
 import checkmo.book.BookAPI;
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
@@ -15,7 +15,7 @@ import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -101,7 +101,7 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
                 ClubNoticeResponseDTO.NoticeItem dto;
 
                 if (notice.getMeeting() != null) {
-                    BookSharedDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(
+                    BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(
                             notice.getMeeting().getBookId());
                     dto = ClubNoticeConverter.toMeetingNoticeDTO(notice, bookInfo);
                 } else {
@@ -178,7 +178,7 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
                 ClubNoticeResponseDTO.NoticeItem dto;
 
                 if (notice.getMeeting() != null) {
-                    BookSharedDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(
+                    BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(
                             notice.getMeeting().getBookId());
                     dto = ClubNoticeConverter.toMeetingNoticeDTO(notice, bookInfo);
                 } else {
@@ -239,7 +239,7 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
             throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
         }
 
-        BookSharedDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+        BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(notice.getMeeting().getBookId());
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
                 .isStaff(clubMember.isStaff())
@@ -260,7 +260,7 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
         List<MemberVote> memberVotes = clubNoticeQueryService.getMemberVotesByVoteId(vote.getId());
 
         // 항목별 투표자 정보 수집
-        List<List<MemberSharedDTO.BasicInfo>> votedMembersByItem = collectVotedMembersByItem(vote, memberVotes,
+        List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem = collectVotedMembersByItem(vote, memberVotes,
                 itemCount);
 
         // 본인 투표 정보
@@ -281,18 +281,18 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
     /**
      * 투표 항목별 투표자 정보 수집
      */
-    private List<List<MemberSharedDTO.BasicInfo>> collectVotedMembersByItem(
+    private List<List<MemberExternalDTO.BasicInfo>> collectVotedMembersByItem(
             Vote vote, List<MemberVote> memberVotes, int itemCount
     ) {
         // 항목별 투표자 정보 리스트 초기화
-        List<List<MemberSharedDTO.BasicInfo>> votedMembersByItem = new ArrayList<>();
+        List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem = new ArrayList<>();
         for (int i = 0; i < itemCount; i++) {
             votedMembersByItem.add(new ArrayList<>());
         }
 
         // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
         for (MemberVote mv : memberVotes) {
-            MemberSharedDTO.BasicInfo memberInfo = getMemberInfoForVote(vote, mv);
+            MemberExternalDTO.BasicInfo memberInfo = getMemberInfoForVote(vote, mv);
 
             if (mv.isItem1()) {
                 votedMembersByItem.get(0).add(memberInfo);
@@ -317,11 +317,11 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
     /**
      * 투표자의 멤버 정보 조회 (익명 여부에 따라 다르게 처리)
      */
-    private MemberSharedDTO.BasicInfo getMemberInfoForVote(Vote vote, MemberVote memberVote) {
+    private MemberExternalDTO.BasicInfo getMemberInfoForVote(Vote vote, MemberVote memberVote) {
         if (vote.isAnonymity()) {
             String voterName = "익명";
             String profileImageUrl = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
-            return new MemberSharedDTO.BasicInfo(voterName, profileImageUrl);
+            return new MemberExternalDTO.BasicInfo(voterName, profileImageUrl);
         } else {
             return memberAPI.getMemberBasicInfoForShare(memberVote.getMemberId());
         }
@@ -332,7 +332,7 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
      */
     private List<ClubNoticeResponseDTO.EachItemDTO> createVoteItemDTOs(
             List<String> voteItems, MemberVote myVote,
-            List<List<MemberSharedDTO.BasicInfo>> votedMembersByItem, int itemCount
+            List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem, int itemCount
     ) {
         List<ClubNoticeResponseDTO.EachItemDTO> itemDTOs = new ArrayList<>();
         for (int i = 0; i < itemCount; i++) {

@@ -10,7 +10,7 @@ import lombok.Getter;
 /**
  * 클럽 공지사항 모듈과 관련된 다른 모듈에게 public한 DTO 클래스
  */
-public class ClubNoticeSharedDTO {
+public class ClubNoticeExternalDTO {
 
     @JsonTypeInfo(
             use = JsonTypeInfo.Id.NAME,

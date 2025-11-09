@@ -1,12 +1,12 @@
 package checkmo.bookStory.internal.converter;
 
-import checkmo.book.BookSharedDTO;
-import checkmo.bookStory.BookStorySharedDTO;
+import checkmo.book.BookExternalDTO;
+import checkmo.bookStory.BookStoryExternalDTO;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.clubManagement.ClubManagementSharedDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO;
+import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
 import java.util.List;
 import lombok.AccessLevel;
@@ -33,21 +33,21 @@ public class BookStoryConverter {
     }
 
     // =====================================================
-    // BookStory → BookStorySharedDTO 변환
+    // BookStory → BookStoryExternalDTO 변환
     // =====================================================
 
     /**
      * BookStoryResponseDTO -> BookStoryListResponse 변환
      */
-    public static BookStorySharedDTO.BookStoryListResponse fromBookStoryResponses(
-            List<BookStorySharedDTO.BookStoryResponse> bookStoryResponses,
+    public static BookStoryExternalDTO.BookStoryListResponse fromBookStoryResponses(
+            List<BookStoryExternalDTO.BookStoryResponse> bookStoryResponses,
             boolean hasNext,
             Long nextCursor,
             int pageSize,
-            BookStorySharedDTO.ScopeInfo scopeInfo,
-            ClubManagementSharedDTO.MyClubList myClubList
+            BookStoryExternalDTO.ScopeInfo scopeInfo,
+            ClubManagementExternalDTO.MyClubList myClubList
     ) {
-        return BookStorySharedDTO.BookStoryListResponse.builder()
+        return BookStoryExternalDTO.BookStoryListResponse.builder()
                 .scopeInfo(scopeInfo)
                 .memberClubList(myClubList)
                 .bookStoryResponses(bookStoryResponses)
@@ -60,11 +60,11 @@ public class BookStoryConverter {
     /**
      * BookStoryScope + MyClubInfoDTO -> ScopeInfo 변환
      */
-    public static BookStorySharedDTO.ScopeInfo fromScopeInfo(
+    public static BookStoryExternalDTO.ScopeInfo fromScopeInfo(
             BookStoryRequestDTO.BookStoryScope scope,
-            ClubManagementSharedDTO.MyClubInfo selectedClub
+            ClubManagementExternalDTO.MyClubInfo selectedClub
     ) {
-        return BookStorySharedDTO.ScopeInfo.builder()
+        return BookStoryExternalDTO.ScopeInfo.builder()
                 .scope(scope)
                 .selectedClub(selectedClub)
                 .build();
@@ -73,15 +73,15 @@ public class BookStoryConverter {
     /**
      * BookStory -> BookStoryResponseDTO 변환
      */
-    public static BookStorySharedDTO.BookStoryResponse fromBookStoryToResponse(
+    public static BookStoryExternalDTO.BookStoryResponse fromBookStoryToResponse(
             BookStory bookStory,
             String currentMemberId,
-            BookSharedDTO.BasicInfo bookInfo,
-            MemberSharedDTO.WithFollowStatus authorInfo,
+            BookExternalDTO.BasicInfo bookInfo,
+            MemberExternalDTO.WithFollowStatus authorInfo,
             boolean isLiked,
             int commentCount
     ) {
-        return BookStorySharedDTO.BookStoryResponse.builder()
+        return BookStoryExternalDTO.BookStoryResponse.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
@@ -98,15 +98,15 @@ public class BookStoryConverter {
     /**
      * BookStory -> BookStoryDetailResponse 변환
      */
-    public static BookStorySharedDTO.BookStoryDetailResponse fromBookStoryToDetailResponse(
+    public static BookStoryExternalDTO.BookStoryDetailResponse fromBookStoryToDetailResponse(
             BookStory bookStory,
             String currentMemberId,
-            BookSharedDTO.BasicInfo bookInfo,
-            MemberSharedDTO.WithFollowStatus authorInfo,
+            BookExternalDTO.BasicInfo bookInfo,
+            MemberExternalDTO.WithFollowStatus authorInfo,
             boolean isLiked,
-            List<BookStorySharedDTO.CommentResponse> commentList
+            List<BookStoryExternalDTO.CommentResponse> commentList
     ) {
-        return BookStorySharedDTO.BookStoryDetailResponse.builder()
+        return BookStoryExternalDTO.BookStoryDetailResponse.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
@@ -145,15 +145,15 @@ public class BookStoryConverter {
     /**
      * List<Comments> -> CommentResponse
      */
-    public static List<BookStorySharedDTO.CommentResponse> fromCommentsToResponses(
+    public static List<BookStoryExternalDTO.CommentResponse> fromCommentsToResponses(
             List<Comment> comments,
             String currentMemberId,
-            java.util.Map<String, MemberSharedDTO.BasicInfo> memberInfoMap
+            java.util.Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
     ) {
         return comments.stream()
                 .map(comment -> {
                     // 대댓글들 변환
-                    List<BookStorySharedDTO.CommentResponse> replies = comment.getChildrenComment().stream()
+                    List<BookStoryExternalDTO.CommentResponse> replies = comment.getChildrenComment().stream()
                             .map(reply -> fromCommentToResponse(
                                     reply,
                                     currentMemberId,
@@ -174,13 +174,13 @@ public class BookStoryConverter {
     /**
      * Comment -> CommentResponse
      */
-    private static BookStorySharedDTO.CommentResponse fromCommentToResponse(
+    private static BookStoryExternalDTO.CommentResponse fromCommentToResponse(
             Comment comment,
             String currentMemberId,
-            MemberSharedDTO.BasicInfo authorInfo,
-            List<BookStorySharedDTO.CommentResponse> replies
+            MemberExternalDTO.BasicInfo authorInfo,
+            List<BookStoryExternalDTO.CommentResponse> replies
     ) {
-        return BookStorySharedDTO.CommentResponse.builder()
+        return BookStoryExternalDTO.CommentResponse.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .authorInfo(authorInfo)

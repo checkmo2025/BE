@@ -1,6 +1,6 @@
 package checkmo.notification.internal.facade;
 
-import checkmo.notification.NotificationSharedDTO;
+import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.web.dto.NotificationResponseDTO;
 
 /**
@@ -17,7 +17,7 @@ public interface NotificationQueryFacade {
      * @param size     조회할 개수
      * @return 알림 DTO
      */
-    NotificationSharedDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size);
+    NotificationExternalDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size);
 
     /**
      * 특정 회원의 알림 목록을 커서 기반으로 조회합니다. (내부용)

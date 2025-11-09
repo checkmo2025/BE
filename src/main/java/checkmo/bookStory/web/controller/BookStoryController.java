@@ -1,7 +1,7 @@
 package checkmo.bookStory.web.controller;
 
 import checkmo.bookStory.BookStoryAPI;
-import checkmo.bookStory.BookStorySharedDTO;
+import checkmo.bookStory.BookStoryExternalDTO;
 import checkmo.bookStory.internal.facade.BookStoryCommandFacade;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.common.apiPayload.ApiResponse;
@@ -70,7 +70,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
     @GetMapping
-    public ApiResponse<BookStorySharedDTO.BookStoryListResponse> getBookStories(
+    public ApiResponse<BookStoryExternalDTO.BookStoryListResponse> getBookStories(
             @CurrentId String memberId,
             @RequestParam(required = false, defaultValue = "ALL") BookStoryRequestDTO.BookStoryScope scope,
             @RequestParam(required = false) Long clubId,
@@ -99,7 +99,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
-    public ApiResponse<BookStorySharedDTO.BookStoryDetailResponse> getBookStory(
+    public ApiResponse<BookStoryExternalDTO.BookStoryDetailResponse> getBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {

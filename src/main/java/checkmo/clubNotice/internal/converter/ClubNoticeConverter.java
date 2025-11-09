@@ -2,7 +2,7 @@ package checkmo.clubNotice.internal.converter;
 
 import static checkmo.clubMeeting.internal.converter.ClubMeetingConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubNotice.internal.entity.MemberVote;
@@ -10,7 +10,7 @@ import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
 import java.util.List;
 import lombok.AccessLevel;
@@ -191,7 +191,7 @@ public class ClubNoticeConverter {
     public static ClubNoticeResponseDTO.EachItemDTO toEachItemDTO(
             String item,
             boolean isSelected,
-            List<MemberSharedDTO.BasicInfo> votedMembers
+            List<MemberExternalDTO.BasicInfo> votedMembers
     ) {
         return ClubNoticeResponseDTO.EachItemDTO.builder()
                 .item(item)
@@ -220,10 +220,10 @@ public class ClubNoticeConverter {
     }
 
     /**
-     * Notice 엔티티 + BookSharedDTO.BasicInfoDTO -> ClubResponseDTO.MeetingNoticeDTO 변환
+     * Notice 엔티티 + BookExternalDTO.BasicInfoDTO -> ClubResponseDTO.MeetingNoticeDTO 변환
      */
     public static ClubNoticeResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(Notice notice,
-                                                                            BookSharedDTO.BasicInfo bookInfo) {
+                                                                            BookExternalDTO.BasicInfo bookInfo) {
         return ClubNoticeResponseDTO.MeetingNoticeDTO.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())

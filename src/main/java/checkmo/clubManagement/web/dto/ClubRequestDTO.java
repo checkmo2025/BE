@@ -1,6 +1,6 @@
 package checkmo.clubManagement.web.dto;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.Club;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
@@ -76,7 +76,7 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class CreateBookRecommendDTO {
         private String title;
-        private BookSharedDTO.BookCreateRequest bookDetail; // 책 정보
+        private BookExternalDTO.BookCreateRequest bookDetail; // 책 정보
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그

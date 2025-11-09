@@ -1,6 +1,6 @@
 package checkmo.clubMeeting.internal.converter;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.entity.Book;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
 import checkmo.clubMeeting.internal.entity.BookReview;
@@ -12,7 +12,7 @@ import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class ClubMeetingConverter {
      */
     public static List<BookShelfResponseDTO.TopicDTO> fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
             List<Topic> topics,
-            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap,
+            Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
             String memberId
     ) {
         return topics.stream()
@@ -83,11 +83,11 @@ public class ClubMeetingConverter {
     }
 
     /**
-     * Meeting 엔티티 + BookSharedDTO.BasicInfoDTO -> BookShelfResponseDTO.BookShelfInfoDTO 변환
+     * Meeting 엔티티 + BookExternalDTO.BasicInfoDTO -> BookShelfResponseDTO.BookShelfInfoDTO 변환
      */
     public static BookShelfResponseDTO.BookShelfInfoDTO fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
             Meeting meeting,
-            BookSharedDTO.BasicInfo bookSharedDTO
+            BookExternalDTO.BasicInfo bookSharedDTO
     ) {
         BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToBookshelfMeetingInfoDTO(meeting);
 
@@ -110,12 +110,12 @@ public class ClubMeetingConverter {
     }
 
     /**
-     * Meeting 엔티티 + BookSharedDTO.DetailInfoDTO + BookShelfResponseDTO.TopicListDTO ->
+     * Meeting 엔티티 + BookExternalDTO.DetailInfoDTO + BookShelfResponseDTO.TopicListDTO ->
      * BookShelfResponseDTO.BookShelfDetailDTO 변환
      */
     public static BookShelfResponseDTO.BookShelfDetailDTO fromBookShelfDTOToBookShelfDetailDTO(
             Meeting meeting,
-            BookSharedDTO.DetailInfo bookSharedDTO,
+            BookExternalDTO.DetailInfo bookSharedDTO,
             BookShelfResponseDTO.TopicListDTO topicListDTO,
             MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
@@ -132,7 +132,7 @@ public class ClubMeetingConverter {
      */
     public static MeetingResponseDTO.MeetingInfoDTO fromMeetingAndBookSharedDTOToMeetingInfoDTO(
             Meeting meeting,
-            BookSharedDTO.BasicInfo bookInfo
+            BookExternalDTO.BasicInfo bookInfo
     ) {
         return MeetingResponseDTO.MeetingInfoDTO.builder()
                 .meetingId(meeting.getId())
@@ -162,11 +162,11 @@ public class ClubMeetingConverter {
     }
 
     /**
-     * Topic 엔티티 + MemberSharedDTO.BasicInfoDTO + 팀 번호 리스트 -> MeetingResponseDTO.TopicDTO 변환
+     * Topic 엔티티 + MemberExternalDTO.BasicInfoDTO + 팀 번호 리스트 -> MeetingResponseDTO.TopicDTO 변환
      */
     public static MeetingResponseDTO.TopicDTO fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
             Topic topic,
-            MemberSharedDTO.BasicInfo authorSharedDTO,
+            MemberExternalDTO.BasicInfo authorSharedDTO,
             List<Integer> teamNumbers
     ) {
         return MeetingResponseDTO.TopicDTO.builder()
@@ -178,10 +178,10 @@ public class ClubMeetingConverter {
     }
 
     /**
-     * MemberSharedDTO.BasicInfoDTO + teamNumber -> MeetingResponseDTO.MeetingMemberDTO 변환
+     * MemberExternalDTO.BasicInfoDTO + teamNumber -> MeetingResponseDTO.MeetingMemberDTO 변환
      */
     public static MeetingResponseDTO.MeetingMemberDTO fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(
-            MemberSharedDTO.BasicInfo memberSharedDTO,
+            MemberExternalDTO.BasicInfo memberSharedDTO,
             Integer teamNumber
     ) {
         return MeetingResponseDTO.MeetingMemberDTO.builder()
@@ -191,16 +191,16 @@ public class ClubMeetingConverter {
     }
 
     /**
-     * Meeting 엔티티 + BookSharedDTO.BasicInfoDTO + Topic 리스트 + 팀별 Topic 리스트 -> MeetingResponseDTO.MeetingDetailDTO 변환
+     * Meeting 엔티티 + BookExternalDTO.BasicInfoDTO + Topic 리스트 + 팀별 Topic 리스트 -> MeetingResponseDTO.MeetingDetailDTO 변환
      */
     public static MeetingResponseDTO.MeetingDetailDTO fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
             Meeting meeting,
-            BookSharedDTO.BasicInfo bookSharedDTO,
+            BookExternalDTO.BasicInfo bookSharedDTO,
             List<Topic> topics,
             Map<Long, List<Integer>> topicIdToSelectTeamNumbers,
             List<Team> teams,
             Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber,
-            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap,
+            Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
             MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubMeetingConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
@@ -239,7 +239,7 @@ public class ClubMeetingConverter {
      */
     public static List<MeetingResponseDTO.TopicDTO> fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
             List<Topic> topics,
-            Map<String, MemberSharedDTO.BasicInfo> authorInfoMap,
+            Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
             Map<Long, List<Integer>> topicIdToSelectTeamNumbers
     ) {
         return topics.stream()
@@ -256,11 +256,11 @@ public class ClubMeetingConverter {
     // =====================================================
 
     /**
-     * BookReview 엔티티 + MemberSharedDTO -> BookReviewDTO 변환
+     * BookReview 엔티티 + MemberExternalDTO -> BookReviewDTO 변환
      */
     public static BookShelfResponseDTO.BookReviewDTO fromBookReviewAndMemberSharedDTOToBookReviewDTO(
             BookReview bookReview,
-            MemberSharedDTO.BasicInfo memberSharedDTO
+            MemberExternalDTO.BasicInfo memberSharedDTO
     ) {
         return BookShelfResponseDTO.BookReviewDTO.builder()
                 .bookReviewId(bookReview.getId())
@@ -397,11 +397,11 @@ public class ClubMeetingConverter {
     }
 
     /**
-     * 팀 번호 + List<MemberSharedDTO> -> MeetingResponseDTO.TeamMemberDTO 변환
+     * 팀 번호 + List<MemberExternalDTO> -> MeetingResponseDTO.TeamMemberDTO 변환
      */
     public static MeetingResponseDTO.TeamMemberDTO fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
             Integer teamNumber,
-            List<MemberSharedDTO.BasicInfo> memberSharedDTOs,
+            List<MemberExternalDTO.BasicInfo> memberSharedDTOs,
             MembershipResponseDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.TeamMemberDTO.builder()
@@ -453,7 +453,7 @@ public class ClubMeetingConverter {
      */
     private static BookShelfResponseDTO.TopicDTO fromTopicAndMemberSharedDTOToTopicDTO(
             Topic topic,
-            MemberSharedDTO.BasicInfo authorSharedDTO,
+            MemberExternalDTO.BasicInfo authorSharedDTO,
             String memberId
     ) {
         return BookShelfResponseDTO.TopicDTO.builder()

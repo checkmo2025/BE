@@ -1,9 +1,9 @@
 package checkmo.bookStory;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.clubManagement.ClubManagementSharedDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO;
+import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class BookStorySharedDTO {
+public class BookStoryExternalDTO {
 
     @Getter
     @NoArgsConstructor
@@ -20,7 +20,7 @@ public class BookStorySharedDTO {
     @Builder
     public static class BookStoryListResponse {
         private ScopeInfo scopeInfo;    // 현재 선택된 범위 정보
-        private ClubManagementSharedDTO.MyClubList memberClubList; // 사용자가 속한 클럽 목록
+        private ClubManagementExternalDTO.MyClubList memberClubList; // 사용자가 속한 클럽 목록
         private List<BookStoryResponse> bookStoryResponses;
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
@@ -33,7 +33,7 @@ public class BookStorySharedDTO {
     @Builder
     public static class ScopeInfo {
         private BookStoryRequestDTO.BookStoryScope scope; // 현재 범위 (ALL, MY, CLUB)
-        private ClubManagementSharedDTO.MyClubInfo selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
+        private ClubManagementExternalDTO.MyClubInfo selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
     }
 
     @Getter
@@ -42,8 +42,8 @@ public class BookStorySharedDTO {
     @Builder
     public static class BookStoryResponse {
         private Long bookStoryId;
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberExternalDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
         private String description;
         private int likes;
@@ -63,8 +63,8 @@ public class BookStorySharedDTO {
     @Builder
     public static class BookStoryDetailResponse {
         private Long bookStoryId;
-        private BookSharedDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberSharedDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private MemberExternalDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
         private String bookStoryTitle;
         private String description;
         private int likes;
@@ -87,7 +87,7 @@ public class BookStorySharedDTO {
     public static class CommentResponse {
         private Long commentId;
         private String content;
-        private MemberSharedDTO.BasicInfo authorInfo; // 작성자 정보
+        private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;

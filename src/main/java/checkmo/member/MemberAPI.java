@@ -116,9 +116,9 @@ public interface MemberAPI {
      * 공유용 기본 회원 정보 조회 (외부용)
      *
      * @param memberId 조회할 회원 ID
-     * @return MemberSharedDTO.BasicInfo
+     * @return MemberExternalDTO.BasicInfo
      */
-    MemberSharedDTO.BasicInfo getMemberBasicInfoForShare(String memberId);
+    MemberExternalDTO.BasicInfo getMemberBasicInfoForShare(String memberId);
 
     /**
      * 회원 ID 목록으로 공유용 기본 회원 정보 조회 (외부용)
@@ -126,16 +126,16 @@ public interface MemberAPI {
      * @param memberIds 조회할 회원 ID 목록
      * @return 회원 ID와 기본 정보 매핑 리스트
      */
-    Map<String, MemberSharedDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds);
+    Map<String, MemberExternalDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds);
 
     /**
      * 팔로우 상태를 포함한 공유용 회원 정보 조회 (외부용)
      *
      * @param targetMemberId  조회 대상 회원 ID
      * @param currentMemberId 현재 로그인한 회원 ID
-     * @return MemberSharedDTO.WithFollowStatus
+     * @return MemberExternalDTO.WithFollowStatus
      */
-    MemberSharedDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId);
+    MemberExternalDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId);
 
     /**
      * 회원 ID 목록으로 팔로우 상태를 포함한 공유용 회원 정보를 조회합니다. (외부용)
@@ -144,8 +144,8 @@ public interface MemberAPI {
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return 회원 ID와 팔로우 상태 포함 정보 매핑
      */
-    Map<String, MemberSharedDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds,
-                                                                                       String currentMemberId);
+    Map<String, MemberExternalDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds,
+                                                                                         String currentMemberId);
 
     /**
      * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용) ‼️ 이 메소드는 실제 DB 조회를 발생시키지 않는 메소드!!! ‼️ 그리고 반드시 외래 키를 설정하는 용도로만

@@ -1,6 +1,6 @@
 package checkmo.member.internal.facade;
 
-import checkmo.category.CategorySharedDTO;
+import checkmo.category.CategoryExternalDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.internal.converter.MemberConverter;
@@ -118,7 +118,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
         Member updatedMember = memberProfileCommandService.updateMemberProfile(memberId, request);
 
         List<MemberCategory> categoryList = memberCategoryQueryService.findCategoriesByMember(memberId);
-        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
+        List<CategoryExternalDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
                 categoryList);
 
         return MemberConverter.toMemberProfileWithCategoryResponseDTO(updatedMember, categories);

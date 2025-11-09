@@ -12,7 +12,7 @@ import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.member.MemberAPI;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -84,7 +84,7 @@ public class ClubManagementCommandFacadeImpl implements ClubManagementCommandFac
         // === 3. DTO 변환 및 반환 준비 === //
 
         // 외부 도메인 정보 조회 및 DTO 변환
-        MemberSharedDTO.BasicInfo memberInfo = memberAPI.getMemberBasicInfoForShare(
+        MemberExternalDTO.BasicInfo memberInfo = memberAPI.getMemberBasicInfoForShare(
                 updatedClubMember.getMemberId());
         ClubResponseDTO.ClubMemberDTO updatedClubMemberDTO = ClubManagementConverter.toClubMemberDTO(updatedClubMember,
                 memberInfo);

@@ -1,10 +1,10 @@
 package checkmo.clubManagement.internal.converter;
 
-import checkmo.book.BookSharedDTO;
+import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.entity.Book;
-import checkmo.category.CategorySharedDTO;
-import checkmo.category.CategorySharedDTO.CategoryInfo;
-import checkmo.clubManagement.ClubManagementSharedDTO;
+import checkmo.category.CategoryExternalDTO;
+import checkmo.category.CategoryExternalDTO.CategoryInfo;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubCategory;
@@ -13,7 +13,7 @@ import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailResponseDTO;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
-import checkmo.member.MemberSharedDTO;
+import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
 import java.util.List;
 import java.util.Map;
@@ -103,10 +103,10 @@ public class ClubManagementConverter {
     }
 
     /**
-     * ClubManagementSharedDTO.MyClubInfo -> ClubResponseDTO.ClubInfoDTO
+     * ClubManagementExternalDTO.MyClubInfo -> ClubResponseDTO.ClubInfoDTO
      */
     public static ClubResponseDTO.ClubInfoDTO toClubInfoDTOFromMyClubInfo(
-            ClubManagementSharedDTO.MyClubInfo myClubInfo) {
+            ClubManagementExternalDTO.MyClubInfo myClubInfo) {
         return ClubResponseDTO.ClubInfoDTO.builder()
                 .clubId(myClubInfo.getClubId())
                 .clubName(myClubInfo.getClubName())
@@ -130,10 +130,10 @@ public class ClubManagementConverter {
     }
 
     /**
-     * ClubMember 엔티티 + MemberSharedDTO.BasicInfoDTO -> ClubResponseDTO.ClubMemberDTO 변환
+     * ClubMember 엔티티 + MemberExternalDTO.BasicInfoDTO -> ClubResponseDTO.ClubMemberDTO 변환
      */
     public static ClubResponseDTO.ClubMemberDTO toClubMemberDTO(ClubMember targetMember,
-                                                                MemberSharedDTO.BasicInfo memberInfo) {
+                                                                MemberExternalDTO.BasicInfo memberInfo) {
         return ClubResponseDTO.ClubMemberDTO.builder()
                 .clubMemberId(targetMember.getId())
                 .basicInfo(memberInfo)
@@ -162,8 +162,8 @@ public class ClubManagementConverter {
     /**
      * ClubRequestDTO.ClubDetailDTO -> CategoryIdListDTO
      */
-    public static CategorySharedDTO.CategoryIdList toCategoryListRequestDTO(ClubRequestDTO.ClubDetailDTO dto) {
-        return CategorySharedDTO.CategoryIdList.builder()
+    public static CategoryExternalDTO.CategoryIdList toCategoryListRequestDTO(ClubRequestDTO.ClubDetailDTO dto) {
+        return CategoryExternalDTO.CategoryIdList.builder()
                 .categoryIdList(dto.getCategory())
                 .build();
     }
@@ -189,13 +189,13 @@ public class ClubManagementConverter {
     }
 
     /**
-     * Club, CategorySharedDTO -> ClubResponseDTO.ClubDetailResponseDTO 변환
+     * Club, CategoryExternalDTO -> ClubResponseDTO.ClubDetailResponseDTO 변환
      */
     public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTO(
-            Club club, List<CategorySharedDTO.CategoryInfo> categories, boolean isStaff) {
+            Club club, List<CategoryExternalDTO.CategoryInfo> categories, boolean isStaff) {
 
         List<String> categoryNames = categories.stream()
-                .map(CategorySharedDTO.CategoryInfo::getName)
+                .map(CategoryExternalDTO.CategoryInfo::getName)
                 .toList();
 
         return ClubResponseDTO.ClubDetailResponseDTO.builder()
@@ -259,8 +259,8 @@ public class ClubManagementConverter {
      */
     public static ClubResponseDTO.BookRecommendDetailDTO toBookRecommendDetailDTO(
             BookRecommend bookRecommend,
-            BookSharedDTO.BasicInfo bookInfo,
-            MemberSharedDTO.BasicInfo authorInfo,
+            BookExternalDTO.BasicInfo bookInfo,
+            MemberExternalDTO.BasicInfo authorInfo,
             String currentMemberNickname,
             boolean isStaff
     ) {
@@ -299,12 +299,12 @@ public class ClubManagementConverter {
     // =====================================================
 
     /**
-     * List<ClubNoticeSharedDTO.MyClubInfo> -> ClubNoticeSharedDTO.MyClubList 변환
+     * List<ClubNoticeExternalDTO.MyClubInfo> -> ClubNoticeExternalDTO.MyClubList 변환
      */
-    public static ClubManagementSharedDTO.MyClubList fromClubInfoListToMyClubList(
-            List<ClubManagementSharedDTO.MyClubInfo> clubInfoList
+    public static ClubManagementExternalDTO.MyClubList fromClubInfoListToMyClubList(
+            List<ClubManagementExternalDTO.MyClubInfo> clubInfoList
     ) {
-        return ClubManagementSharedDTO.MyClubList.builder()
+        return ClubManagementExternalDTO.MyClubList.builder()
                 .clubList(clubInfoList)
                 .build();
     }
@@ -322,7 +322,7 @@ public class ClubManagementConverter {
         return allClubCategories.stream()
                 .collect(Collectors.groupingBy(
                         ClubCategory::getClubId,
-                        Collectors.mapping(cc -> CategorySharedDTO.CategoryInfo.builder()
+                        Collectors.mapping(cc -> CategoryExternalDTO.CategoryInfo.builder()
                                         .id(cc.getCategory().getId())
                                         .name(cc.getCategory().getName())
                                         .build(),

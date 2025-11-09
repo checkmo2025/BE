@@ -31,7 +31,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
      */
-    ClubManagementSharedDTO.MyClubList getMyClubListForShare(String memberId);
+    ClubManagementExternalDTO.MyClubList getMyClubListForShare(String memberId);
 
     /**
      * ClubQueryService 조건에 맞는 독서 모임 목록을 검색합니다. (내부용)

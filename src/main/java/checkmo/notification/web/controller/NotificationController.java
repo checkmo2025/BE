@@ -2,7 +2,7 @@ package checkmo.notification.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.internal.authAnnotation.CurrentId;
-import checkmo.notification.NotificationSharedDTO;
+import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.internal.facade.NotificationQueryFacade;
 import checkmo.notification.internal.service.command.NotificationCommandService;
 import checkmo.notification.web.dto.NotificationResponseDTO;
@@ -53,7 +53,7 @@ public class NotificationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
     })
     @GetMapping("/preview")
-    public ApiResponse<NotificationSharedDTO.NotificationPreviewList> getUnreadNotifications(
+    public ApiResponse<NotificationExternalDTO.NotificationPreviewList> getUnreadNotifications(
             @CurrentId String memberId,
             @RequestParam(required = false, defaultValue = "5") int size
     ) {
