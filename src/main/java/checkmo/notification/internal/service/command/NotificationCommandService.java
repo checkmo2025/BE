@@ -1,7 +1,7 @@
 package checkmo.notification.internal.service.command;
 
 import checkmo.member.FollowEvent;
-import checkmo.club.JoinClubEvent;
+import checkmo.clubMeeting.JoinClubEvent;
 import checkmo.bookStory.LikeEvent;
 
 /**

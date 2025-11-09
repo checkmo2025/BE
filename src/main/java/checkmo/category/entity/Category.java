@@ -1,13 +1,22 @@
 package checkmo.category.entity;
 
-import checkmo.club.entity.ClubCategory;
-import checkmo.member.entity.MemberCategory;
+import checkmo.clubManagement.entity.ClubCategory;
 import checkmo.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
-
+import checkmo.member.entity.MemberCategory;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder

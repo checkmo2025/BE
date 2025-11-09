@@ -2,7 +2,7 @@ package checkmo.notification.handler;
 
 import checkmo.notification.internal.service.command.NotificationCommandService;
 import checkmo.member.FollowEvent;
-import checkmo.club.JoinClubEvent;
+import checkmo.clubMeeting.JoinClubEvent;
 import checkmo.bookStory.LikeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

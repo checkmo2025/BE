@@ -7,7 +7,7 @@ import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.BookStorySharedDTO;
 import checkmo.member.entity.Member;
 import checkmo.book.BookSharedDTO;
-import checkmo.club.ClubSharedDTO;
+import checkmo.clubMeeting.ClubSharedDTO;
 import checkmo.member.MemberSharedDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

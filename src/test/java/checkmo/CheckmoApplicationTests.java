@@ -11,7 +11,8 @@ class CheckmoApplicationTests {
     @DisplayName("각 모듈이 논리적으로 분리가 완료되었는지 Spring Modulith를 통해 확인합니다.")
     @Test
     void Spring_Modulith_Test() {
-        ApplicationModules.of(CheckmoApplication.class).verify();
+        ApplicationModules modules = ApplicationModules.of(CheckmoApplication.class).verify();
+        System.out.println(modules);
     }
 
 }

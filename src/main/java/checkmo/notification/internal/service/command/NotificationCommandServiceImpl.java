@@ -8,7 +8,7 @@ import checkmo.notification.converter.NotificationConverter;
 import checkmo.notification.entity.Notification;
 import checkmo.notification.repository.NotificationRepository;
 import checkmo.member.FollowEvent;
-import checkmo.club.JoinClubEvent;
+import checkmo.clubMeeting.JoinClubEvent;
 import checkmo.bookStory.LikeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
