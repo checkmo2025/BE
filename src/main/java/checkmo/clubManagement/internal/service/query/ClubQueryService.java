@@ -1,6 +1,6 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.entity.Club;
+import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;

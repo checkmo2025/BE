@@ -1,11 +1,11 @@
 package checkmo.clubMeeting.internal.service.query;
 
-import checkmo.clubMeeting.entity.BookReview;
-import checkmo.clubMeeting.entity.Meeting;
-import checkmo.clubMeeting.entity.MemberTeam;
-import checkmo.clubMeeting.entity.Team;
-import checkmo.clubMeeting.entity.TeamTopic;
-import checkmo.clubMeeting.entity.Topic;
+import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.entity.MemberTeam;
+import checkmo.clubMeeting.internal.entity.Team;
+import checkmo.clubMeeting.internal.entity.TeamTopic;
+import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.common.apiPayload.exception.GeneralException;
 
 import java.util.List;

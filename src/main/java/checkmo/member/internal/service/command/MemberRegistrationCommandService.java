@@ -1,13 +1,12 @@
 package checkmo.member.internal.service.command;
 
-import checkmo.member.entity.Member;
+import checkmo.member.internal.entity.Member;
 import checkmo.member.web.dto.MemberRequestDTO;
 
 /**
  * 회원 가입 서비스
- *
- * 새로운 회원의 계정 생성, 이메일 인증, 초기 설정 등을 담당 (이건 일반 회원만)
- * 추가 정보 입력 프로세스 모두 포함 (닉네임, 프로필 이미지, 관심 도서 분야 등) <- 이건 일반회원/소셜 회원 공동 사용
+ * <p>
+ * 새로운 회원의 계정 생성, 이메일 인증, 초기 설정 등을 담당 (이건 일반 회원만) 추가 정보 입력 프로세스 모두 포함 (닉네임, 프로필 이미지, 관심 도서 분야 등) <- 이건 일반회원/소셜 회원 공동 사용
  */
 public interface MemberRegistrationCommandService {
 
@@ -38,8 +37,7 @@ public interface MemberRegistrationCommandService {
     );
 
     /**
-     * 회원 가입 - 이 정보를 전달받으면 Access Token, RefreshToken 생성
-     *  - 추가 정보 입력 안받으면 정식 회원 아님
+     * 회원 가입 - 이 정보를 전달받으면 Access Token, RefreshToken 생성 - 추가 정보 입력 안받으면 정식 회원 아님
      *
      * @param request id,pw DTO
      * @return 회원 엔티티

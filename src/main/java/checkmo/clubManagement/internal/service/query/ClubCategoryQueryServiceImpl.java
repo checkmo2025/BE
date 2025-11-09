@@ -1,7 +1,7 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.entity.ClubCategory;
-import checkmo.clubManagement.repository.ClubCategoryRepository;
+import checkmo.clubManagement.internal.entity.ClubCategory;
+import checkmo.clubManagement.internal.repository.ClubCategoryRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,13 +1,12 @@
 package checkmo.member.internal.service.query;
 
-import checkmo.member.entity.Follow;
-
+import checkmo.member.internal.entity.Follow;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 팔로우/팔로잉 조회 서비스
- *
+ * <p>
  * 팔로워/팔로잉 목록 조회
  */
 public interface MemberFollowQueryService {

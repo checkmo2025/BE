@@ -1,11 +1,11 @@
 package checkmo.clubManagement.web.controller;
 
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.facade.ClubManagementCommandFacade;
+import checkmo.clubManagement.internal.facade.ClubManagementCommandFacade;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.auth_annotation.CurrentId;
+import checkmo.member.internal.authAnnotation.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,7 +1,7 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.entity.Club;
-import checkmo.clubManagement.repository.ClubRepository;
+import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;

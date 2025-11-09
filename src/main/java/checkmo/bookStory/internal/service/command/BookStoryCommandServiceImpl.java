@@ -1,14 +1,14 @@
 package checkmo.bookStory.internal.service.command;
 
+import checkmo.book.BookAPI;
+import checkmo.bookStory.internal.converter.BookStoryConverter;
+import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.repository.BookStoryRepository;
+import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.book.BookAPI;
-import checkmo.bookStory.converter.BookStoryConverter;
-import checkmo.bookStory.entity.BookStory;
-import checkmo.bookStory.repository.BookStoryRepository;
-import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.member.entity.Member;
 import checkmo.member.MemberAPI;
+import checkmo.member.internal.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

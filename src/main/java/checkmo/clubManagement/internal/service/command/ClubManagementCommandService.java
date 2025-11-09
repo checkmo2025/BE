@@ -1,7 +1,7 @@
 package checkmo.clubManagement.internal.service.command;
 
-import checkmo.clubManagement.entity.Club;
-import checkmo.clubManagement.entity.ClubMember;
+import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 
 /**

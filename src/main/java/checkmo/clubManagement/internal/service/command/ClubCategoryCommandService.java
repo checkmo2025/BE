@@ -1,6 +1,6 @@
 package checkmo.clubManagement.internal.service.command;
 
-import checkmo.clubManagement.entity.Club;
+import checkmo.clubManagement.internal.entity.Club;
 import java.util.List;
 
 /**

@@ -1,6 +1,6 @@
 package checkmo.clubMeeting.web.dto.meeting;
 
-import checkmo.clubMeeting.validation.validTeamManage.ValidTeamManage;
+import checkmo.clubMeeting.internal.validation.validTeamManage.ValidTeamManage;
 import checkmo.book.BookSharedDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;

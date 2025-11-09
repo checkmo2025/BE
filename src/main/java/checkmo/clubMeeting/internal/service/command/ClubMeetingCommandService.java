@@ -1,10 +1,10 @@
 package checkmo.clubMeeting.internal.service.command;
 
-import checkmo.clubMeeting.entity.Meeting;
+import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
-import checkmo.clubManagement.entity.Club;
-import checkmo.clubManagement.entity.ClubMember;
+import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubMember;
 
 /**
  * 독서모임의 미팅 생성, 발제 작성, 팀 구성, 독서 후기 등등 독서모임의 토론 전체를 관리

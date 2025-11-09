@@ -1,10 +1,10 @@
 package checkmo.clubManagement.internal.service.command;
 
-import checkmo.category.entity.Category;
-import checkmo.category.repository.CategoryRepository;
-import checkmo.clubManagement.entity.Club;
-import checkmo.clubManagement.entity.ClubCategory;
-import checkmo.clubManagement.repository.ClubCategoryRepository;
+import checkmo.category.internal.entity.Category;
+import checkmo.category.internal.repository.CategoryRepository;
+import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubCategory;
+import checkmo.clubManagement.internal.repository.ClubCategoryRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.HashSet;

@@ -1,7 +1,7 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.entity.BookRecommend;
-import checkmo.clubManagement.repository.BookRecommendRepository;
+import checkmo.clubManagement.internal.entity.BookRecommend;
+import checkmo.clubManagement.internal.repository.BookRecommendRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;

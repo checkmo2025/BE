@@ -1,7 +1,6 @@
 package checkmo.book.internal.service.query;
 
-import checkmo.book.entity.Book;
-
+import checkmo.book.internal.entity.Book;
 import java.util.List;
 import java.util.Map;
 

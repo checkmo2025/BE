@@ -1,23 +1,22 @@
 package checkmo.bookStory.internal.service.query;
 
+import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
+import checkmo.bookStory.internal.repository.BookStoryRepository;
+import checkmo.bookStory.internal.repository.CommentRepository;
+import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.bookStory.entity.BookStory;
-import checkmo.bookStory.entity.Comment;
-import checkmo.bookStory.repository.BookStoryLikedRepository;
-import checkmo.bookStory.repository.BookStoryRepository;
-import checkmo.bookStory.repository.CommentRepository;
-import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -31,7 +30,8 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     private final CommentRepository commentRepository;
 
     @Override
-    public List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId, String targetMemberId, Long cursorId, int pageSize) {
+    public List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId,
+                                           String targetMemberId, Long cursorId, int pageSize) {
         // TODO: 현재 내부에서 외부 도메인의 Q클래스를 호출해서 QueryDSL 사용하고 있는데, 이 부분도 리팩토링 필요
         return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize + 1);
     }
@@ -48,7 +48,8 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
                 .toList();
 
         // 배치로 좋아요한 BookStory ID 목록 조회
-        List<Long> likedBookStoryIds = bookStoryLikedRepository.findLikedBookStoryIdsByMemberIdAndBookStoryIds(memberId, bookStoryIds);
+        List<Long> likedBookStoryIds = bookStoryLikedRepository.findLikedBookStoryIdsByMemberIdAndBookStoryIds(memberId,
+                bookStoryIds);
         Set<Long> likedIdSet = new HashSet<>(likedBookStoryIds);
 
         // 모든 BookStory에 대해 좋아요 여부 매핑

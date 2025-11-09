@@ -1,14 +1,13 @@
 package checkmo.book.internal.service.query;
 
-import checkmo.book.entity.Book;
-import checkmo.book.repository.BookRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import checkmo.book.internal.entity.Book;
+import checkmo.book.internal.repository.BookRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class BookQueryServiceImpl implements BookQueryService {
 
         // 배치로 책 엔티티 조회하여 Map으로 변환
         List<Book> books = bookRepository.findAllById(bookIds);
-        
+
         return books.stream()
                 .collect(Collectors.toMap(
                         Book::getId,

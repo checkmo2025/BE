@@ -1,13 +1,12 @@
 package checkmo.notification.internal.service.query;
 
-import checkmo.notification.entity.Notification;
-import checkmo.notification.repository.NotificationRepository;
+import checkmo.notification.internal.entity.Notification;
+import checkmo.notification.internal.repository.NotificationRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +24,8 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
             return notificationRepository.findByReceiverIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));
         } else {
             // 다음 페이지: 커서보다 작은 ID의 알림 조회
-            return notificationRepository.findByReceiverIdAndIdLessThanOrderByIdDesc(memberId, cursorId, PageRequest.of(0, pageSize));
+            return notificationRepository.findByReceiverIdAndIdLessThanOrderByIdDesc(memberId, cursorId,
+                    PageRequest.of(0, pageSize));
         }
     }
 

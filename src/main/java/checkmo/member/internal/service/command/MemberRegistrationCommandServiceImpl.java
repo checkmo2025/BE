@@ -2,9 +2,9 @@ package checkmo.member.internal.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.converter.MemberConverter;
-import checkmo.member.entity.Member;
-import checkmo.member.repository.MemberRepository;
+import checkmo.member.internal.converter.MemberConverter;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.service.common.EmailSender;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
@@ -24,28 +24,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberRegistrationCommandServiceImpl implements MemberRegistrationCommandService {
 
-    // 자신의 CommandService
-    private final MemberCategoryCommandService memberCategoryCommandService;
-    
-    // 자신의 QueryService
-    private final MemberQueryService memberQueryService;
-    
-    // 자신의 Repository
-    private final MemberRepository memberRepository;
-    
-    // 인증 관련 서비스
-    private final PasswordEncoder passwordEncoder;
-    
-    // 외부 서비스
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final EmailSender emailSender;
-
     // 이메일 인증 관련 상수
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
-    
     // 랜덤 인증번호 생성용 정적 필드
     private static final SecureRandom secureRandom = new SecureRandom();
+    // 자신의 CommandService
+    private final MemberCategoryCommandService memberCategoryCommandService;
+    // 자신의 QueryService
+    private final MemberQueryService memberQueryService;
+    // 자신의 Repository
+    private final MemberRepository memberRepository;
+    // 인증 관련 서비스
+    private final PasswordEncoder passwordEncoder;
+    // 외부 서비스
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final EmailSender emailSender;
 
     @Override
     public void sendEmailVerification(String email) {

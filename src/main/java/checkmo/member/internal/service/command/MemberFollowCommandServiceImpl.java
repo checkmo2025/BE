@@ -2,11 +2,11 @@ package checkmo.member.internal.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.converter.MemberConverter;
-import checkmo.member.entity.Member;
-import checkmo.member.repository.FollowRepository;
-import checkmo.member.repository.MemberRepository;
 import checkmo.member.FollowEvent;
+import checkmo.member.internal.converter.MemberConverter;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.repository.FollowRepository;
+import checkmo.member.internal.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -37,7 +37,7 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
         if (memberId.equals(following.getId())) {
             throw new GeneralException(ErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
         }
-        
+
         // 이미 팔로잉 중인지 확인
         if (followRepository.existsByFollowerIdAndFollowingId(memberId, following.getId())) {
             throw new GeneralException(ErrorStatus.MEMBER_ALREADY_FOLLOWING);
@@ -49,7 +49,7 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
 
         // 팔로잉 관계 생성
         followRepository.save(MemberConverter.toFollow(follower, following));
-        
+
         // 팔로잉 이벤트 발행
         eventPublisher.publishEvent(new FollowEvent(memberId, following.getId()));
     }

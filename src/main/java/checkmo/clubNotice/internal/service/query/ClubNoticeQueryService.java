@@ -1,8 +1,8 @@
 package checkmo.clubNotice.internal.service.query;
 
-import checkmo.clubNotice.entity.MemberVote;
-import checkmo.clubNotice.entity.Notice;
-import checkmo.clubNotice.entity.Vote;
+import checkmo.clubNotice.internal.entity.MemberVote;
+import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import org.springframework.data.domain.Pageable;

@@ -1,17 +1,17 @@
 package checkmo.member.internal;
 
+import checkmo.category.CategorySharedDTO;
 import checkmo.member.MemberAPI;
-import checkmo.member.converter.MemberConverter;
-import checkmo.member.entity.Follow;
-import checkmo.member.entity.Member;
-import checkmo.member.entity.MemberCategory;
-import checkmo.member.repository.MemberRepository;
+import checkmo.member.MemberSharedDTO;
+import checkmo.member.internal.converter.MemberConverter;
+import checkmo.member.internal.entity.Follow;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberCategory;
+import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.service.query.MemberCategoryQueryService;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberResponseDTO;
-import checkmo.category.CategorySharedDTO;
-import checkmo.member.MemberSharedDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,8 @@ public class MemberAPIImpl implements MemberAPI {
         Member member = memberQueryService.getMemberProfile(memberId);
 
         List<MemberCategory> memberCategories = memberCategoryQueryService.findCategoriesByMember(memberId);
-        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(memberCategories);
+        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
+                memberCategories);
 
         return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
     }
@@ -63,8 +64,10 @@ public class MemberAPIImpl implements MemberAPI {
         Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
 
-        List<MemberCategory> targetMemberCategories = memberCategoryQueryService.findCategoriesByMember(targetMember.getId());
-        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(targetMemberCategories);
+        List<MemberCategory> targetMemberCategories = memberCategoryQueryService.findCategoriesByMember(
+                targetMember.getId());
+        List<CategorySharedDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
+                targetMemberCategories);
 
         return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing, categories);
     }
@@ -97,7 +100,8 @@ public class MemberAPIImpl implements MemberAPI {
     @Override
     public MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId) {
         // 1. 팔로잉 목록 조회
-        List<Follow> followingList = memberFollowQueryService.getFollowingList(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
+        List<Follow> followingList = memberFollowQueryService.getFollowingList(memberId, cursorId,
+                DEFAULT_PAGE_SIZE + 1);
 
         // 2. 커서 기반 페이징 처리
         boolean hasNext = followingList.size() > DEFAULT_PAGE_SIZE;
@@ -198,24 +202,25 @@ public class MemberAPIImpl implements MemberAPI {
         // 2. 조회된 엔티티 리스트를 Map으로 변환
         // memberId를 key로, BasicInfoDTO를 value로 사용
         return results.stream()
-                      .collect(Collectors.toMap(
-                          row -> (String) row[0], // memberId
-                          row -> MemberSharedDTO.BasicInfo.builder()
-                                                             .nickname((String) row[1]) // nickname
-                                                             .profileImageUrl((String) row[2]) // profileImageUrl
-                                                             .build()
-                      ));
+                .collect(Collectors.toMap(
+                        row -> (String) row[0], // memberId
+                        row -> MemberSharedDTO.BasicInfo.builder()
+                                .nickname((String) row[1]) // nickname
+                                .profileImageUrl((String) row[2]) // profileImageUrl
+                                .build()
+                ));
     }
 
     /**
      * 공유용 기본 회원 정보 + 팔로우 상태 조회 (외부용)
      *
-     * @param targetMemberId 조회 대상 회원 ID
+     * @param targetMemberId  조회 대상 회원 ID
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return MemberSharedDTO.WithFollowStatusDTO
      */
     @Override
-    public MemberSharedDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId) {
+    public MemberSharedDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId,
+                                                                              String currentMemberId) {
         // 팔로우 상태를 조회
         boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
@@ -224,25 +229,28 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberSharedDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId) {
+    public Map<String, MemberSharedDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(
+            List<String> targetMemberIds, String currentMemberId) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Map.of();
         }
 
         // 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회하기
-        List<Object[]> memberInfoList = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(targetMemberIds);
+        List<Object[]> memberInfoList = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(
+                targetMemberIds);
 
-        Map<String, Boolean> followStatusMap = memberFollowQueryService.getFollowStatusMapForMembers(currentMemberId, targetMemberIds);
+        Map<String, Boolean> followStatusMap = memberFollowQueryService.getFollowStatusMapForMembers(currentMemberId,
+                targetMemberIds);
 
         return memberInfoList.stream()
-                             .collect(Collectors.toMap(
-                                 row -> (String) row[0],
-                                 row -> {
-                                     String targetMemberId = (String) row[0];
-                                     boolean isFollowing = followStatusMap.getOrDefault(targetMemberId, false);
-                                     return MemberConverter.toWithFollowStatusDTO(row, isFollowing);
-                                 }
-                             ));
+                .collect(Collectors.toMap(
+                        row -> (String) row[0],
+                        row -> {
+                            String targetMemberId = (String) row[0];
+                            boolean isFollowing = followStatusMap.getOrDefault(targetMemberId, false);
+                            return MemberConverter.toWithFollowStatusDTO(row, isFollowing);
+                        }
+                ));
     }
 
     @Override
@@ -265,17 +273,19 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     // 이걸로 여기서 DTO 생성
-    private List<MemberSharedDTO.WithFollowStatus> createWithFollowStatusDTOs(String currentMemberId, List<String> targetMemberIds) {
+    private List<MemberSharedDTO.WithFollowStatus> createWithFollowStatusDTOs(String currentMemberId,
+                                                                              List<String> targetMemberIds) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Collections.emptyList();
         }
         // 위 getMemberWithFollowStatusMapForShare 호출
-        Map<String, MemberSharedDTO.WithFollowStatus> map = getMemberWithFollowStatusMapForShare(targetMemberIds, currentMemberId);
+        Map<String, MemberSharedDTO.WithFollowStatus> map = getMemberWithFollowStatusMapForShare(targetMemberIds,
+                currentMemberId);
 
         return targetMemberIds.stream()
-                              .map(map::get)
-                              .filter(Objects::nonNull)
-                              .collect(Collectors.toList());
+                .map(map::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
 }

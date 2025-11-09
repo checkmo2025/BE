@@ -1,15 +1,15 @@
 package checkmo.notification.internal.service.command;
 
+import checkmo.bookStory.LikeEvent;
+import checkmo.clubMeeting.JoinClubEvent;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.entity.Member;
-import checkmo.member.MemberAPI;
-import checkmo.notification.converter.NotificationConverter;
-import checkmo.notification.entity.Notification;
-import checkmo.notification.repository.NotificationRepository;
 import checkmo.member.FollowEvent;
-import checkmo.clubMeeting.JoinClubEvent;
-import checkmo.bookStory.LikeEvent;
+import checkmo.member.MemberAPI;
+import checkmo.member.internal.entity.Member;
+import checkmo.notification.internal.converter.NotificationConverter;
+import checkmo.notification.internal.entity.Notification;
+import checkmo.notification.internal.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -35,14 +35,15 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         Member proxyReceiver = memberAPI.findMemberReferenceById(event.getReceiverId());
 
         // 리다이렉트 경로를 생성
-        String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.LIKE, event.getBookStoryId());
+        String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.LIKE,
+                event.getBookStoryId());
 
         // Notification 객체를 생성하고 저장 (targetName = null)
         Notification notification = NotificationConverter.fromEvent(
-                Notification.NotificationType.LIKE, 
-                redirectPath, 
-                null, 
-                proxySender, 
+                Notification.NotificationType.LIKE,
+                redirectPath,
+                null,
+                proxySender,
                 proxyReceiver
         );
         notificationRepository.save(notification);
@@ -60,14 +61,15 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         String FollowerNickname = memberAPI.getMemberNicknameById(event.getFollowerId());
 
         // 리다이렉트 경로를 생성
-        String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.FOLLOW, FollowerNickname);
+        String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.FOLLOW,
+                FollowerNickname);
 
         // Notification 객체를 생성하고 저장 (targetName = followerNickname)
         Notification notification = NotificationConverter.fromEvent(
-                Notification.NotificationType.FOLLOW, 
-                redirectPath, 
-                FollowerNickname, 
-                proxyFollower, 
+                Notification.NotificationType.FOLLOW,
+                redirectPath,
+                FollowerNickname,
+                proxyFollower,
                 proxyFollowing
         );
         notificationRepository.save(notification);
@@ -81,12 +83,13 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         Member proxyJoinedMember = memberAPI.findMemberReferenceById(event.getMemberId()); // 클럽에 새로 가입된 사람
 
         // 리다이렉트 경로를 생성
-        String redirectPath = NotificationConverter.getRedirectPathForClub(Notification.NotificationType.JOIN_CLUB, event.getClubId());
+        String redirectPath = NotificationConverter.getRedirectPathForClub(Notification.NotificationType.JOIN_CLUB,
+                event.getClubId());
 
         // Notification 객체를 생성하고 저장 (sender 없이, targetName 포함)
         Notification notification = NotificationConverter.fromEvent(
-                Notification.NotificationType.JOIN_CLUB, 
-                redirectPath, 
+                Notification.NotificationType.JOIN_CLUB,
+                redirectPath,
                 event.getClubName(),
                 null, // 시스템 알림이므로 sender는 null
                 proxyJoinedMember

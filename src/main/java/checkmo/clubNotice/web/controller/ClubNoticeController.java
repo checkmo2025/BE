@@ -1,11 +1,11 @@
 package checkmo.clubNotice.web.controller;
 
 import checkmo.clubNotice.ClubNoticeAPI;
-import checkmo.clubNotice.facade.ClubNoticeCommandFacade;
+import checkmo.clubNotice.internal.facade.ClubNoticeCommandFacade;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.auth_annotation.CurrentId;
+import checkmo.member.internal.authAnnotation.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

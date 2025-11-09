@@ -1,11 +1,11 @@
 package checkmo.bookStory.web.controller;
 
-import checkmo.common.apiPayload.ApiResponse;
-import checkmo.bookStory.facade.BookStoryCommandFacade;
 import checkmo.bookStory.BookStoryAPI;
-import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.member.auth_annotation.CurrentId;
 import checkmo.bookStory.BookStorySharedDTO;
+import checkmo.bookStory.internal.facade.BookStoryCommandFacade;
+import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.common.apiPayload.ApiResponse;
+import checkmo.member.internal.authAnnotation.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -13,7 +13,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/book-stories")
@@ -77,7 +85,8 @@ public class BookStoryController {
             throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
         }
 
-        var bookStoriesByScope = bookStoryAPI.getBookStoriesByScope(memberId, scope, clubId, targetMemberNickname, cursorId);
+        var bookStoriesByScope = bookStoryAPI.getBookStoriesByScope(memberId, scope, clubId, targetMemberNickname,
+                cursorId);
         return ApiResponse.onSuccess(bookStoriesByScope);
     }
 

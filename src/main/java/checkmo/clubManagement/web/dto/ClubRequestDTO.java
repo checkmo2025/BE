@@ -1,7 +1,7 @@
 package checkmo.clubManagement.web.dto;
 
 import checkmo.book.BookSharedDTO;
-import checkmo.clubManagement.entity.Club;
+import checkmo.clubManagement.internal.entity.Club;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import lombok.Getter;

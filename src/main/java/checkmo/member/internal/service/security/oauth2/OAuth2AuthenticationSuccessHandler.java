@@ -1,6 +1,6 @@
 package checkmo.member.internal.service.security.oauth2;
 
-import checkmo.member.entity.Member;
+import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.service.security.auth.PrincipalDetails;
 import checkmo.member.internal.service.security.jwt.JwtLoginProcessor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +15,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * 소셜 로그인 성공 후의 성공 처리 핸들러
- *
- * CustomOAuth2UserService에서 인증 성공 후 이 Success Handler로 요청이 자동으로 넘어와서
- * JWT 토큰 생성, 쿠키 설정등등 작업 수행
+ * <p>
+ * CustomOAuth2UserService에서 인증 성공 후 이 Success Handler로 요청이 자동으로 넘어와서 JWT 토큰 생성, 쿠키 설정등등 작업 수행
  */
 
 @Component
@@ -30,7 +29,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private String baseUri;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
@@ -42,8 +42,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 기본 리다이렉트 URI
         String targetUrl = UriComponentsBuilder.fromUriString(baseUri)
-                                               .pathSegment(path)
-                                               .build().toUriString();
+                .pathSegment(path)
+                .build().toUriString();
 
         // 성공 후 리다이렉트 URL 설정
         clearAuthenticationAttributes(request);

@@ -1,11 +1,10 @@
 package checkmo.member.internal.service.query;
 
-import checkmo.member.entity.MemberCategory;
-import checkmo.member.repository.MemberCategoryRepository;
+import checkmo.member.internal.entity.MemberCategory;
+import checkmo.member.internal.repository.MemberCategoryRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

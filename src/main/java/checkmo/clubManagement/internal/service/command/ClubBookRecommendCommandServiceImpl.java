@@ -1,14 +1,14 @@
 package checkmo.clubManagement.internal.service.command;
 
 import checkmo.book.BookAPI;
-import checkmo.book.entity.Book;
-import checkmo.book.facade.BookCommandFacade;
-import checkmo.clubManagement.converter.ClubManagementConverter;
-import checkmo.clubManagement.entity.BookRecommend;
-import checkmo.clubManagement.entity.ClubMember;
+import checkmo.book.internal.entity.Book;
+import checkmo.book.internal.facade.BookCommandFacade;
+import checkmo.clubManagement.internal.converter.ClubManagementConverter;
+import checkmo.clubManagement.internal.entity.BookRecommend;
+import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
-import checkmo.clubManagement.repository.BookRecommendRepository;
+import checkmo.clubManagement.internal.repository.BookRecommendRepository;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;

@@ -1,8 +1,8 @@
 package checkmo.member.internal.service.security.oauth2;
 
-import checkmo.member.converter.MemberConverter;
-import checkmo.member.entity.Member;
-import checkmo.member.repository.MemberRepository;
+import checkmo.member.internal.converter.MemberConverter;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.service.security.auth.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -15,9 +15,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Spring Security DefaultOAuth2UserService 구현체
- *
- * 소셜 로그인 시 카카오, 구글로부터 받은 사용자 정보를 처리 기존 회원 인지 신규 회원인지에 따라 다르게 처리하기 추가 정보 입력(닉네임, 관심 도서 분야 등) 필요 여부도
- * 결정
+ * <p>
+ * 소셜 로그인 시 카카오, 구글로부터 받은 사용자 정보를 처리 기존 회원 인지 신규 회원인지에 따라 다르게 처리하기 추가 정보 입력(닉네임, 관심 도서 분야 등) 필요 여부도 결정
  */
 
 @Service
@@ -43,7 +42,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 기존 회원인지 확인, 신규 회원이면 생성
         Member member = memberRepository.findByEmail(email)
-                                        .orElseGet(() -> registerNewMember(attributes, registrationId));
+                .orElseGet(() -> registerNewMember(attributes, registrationId));
         return new PrincipalDetails(member, oAuth2User.getAttributes());
     }
 

@@ -1,18 +1,17 @@
 package checkmo.member.internal.service.command;
 
-import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.category.internal.entity.Category;
+import checkmo.category.internal.repository.CategoryRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.category.entity.Category;
-import checkmo.category.repository.CategoryRepository;
-import checkmo.member.entity.Member;
-import checkmo.member.entity.MemberCategory;
-import checkmo.member.repository.MemberCategoryRepository;
-import checkmo.member.repository.MemberRepository;
+import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberCategory;
+import checkmo.member.internal.repository.MemberCategoryRepository;
+import checkmo.member.internal.repository.MemberRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -65,8 +64,8 @@ public class MemberCategoryCommandServiceImpl implements MemberCategoryCommandSe
 
         // 6. 제거
         categoriesToRemove.forEach(categoryId -> existingMemberCategories.stream()
-                                                                     .filter(mc -> mc.getCategory().getId().equals(categoryId))
-                                                                     .findFirst()
-                                                                     .ifPresent(memberCategoryRepository::delete));
+                .filter(mc -> mc.getCategory().getId().equals(categoryId))
+                .findFirst()
+                .ifPresent(memberCategoryRepository::delete));
     }
 }

@@ -1,6 +1,6 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.entity.ClubCategory;
+import checkmo.clubManagement.internal.entity.ClubCategory;
 import java.util.List;
 
 /**

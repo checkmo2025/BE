@@ -1,14 +1,14 @@
 package checkmo.clubManagement.internal.service.command;
 
-import checkmo.clubManagement.converter.ClubManagementConverter;
-import checkmo.clubManagement.entity.Club;
-import checkmo.clubManagement.entity.ClubMember;
-import checkmo.clubManagement.repository.ClubMemberRepository;
+import checkmo.clubManagement.internal.converter.ClubManagementConverter;
+import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberJoinDTO;
 import checkmo.clubMeeting.JoinClubEvent;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.entity.Member;
+import checkmo.member.internal.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package checkmo.member.internal.service.security.auth;
 
-import checkmo.member.entity.Member;
+import checkmo.member.internal.entity.Member;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;

@@ -1,6 +1,6 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.entity.BookRecommend;
+import checkmo.clubManagement.internal.entity.BookRecommend;
 import java.util.List;
 
 public interface ClubBookRecommendQueryService {

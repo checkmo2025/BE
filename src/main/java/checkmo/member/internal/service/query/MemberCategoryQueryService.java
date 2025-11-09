@@ -1,7 +1,6 @@
 package checkmo.member.internal.service.query;
 
-import checkmo.member.entity.MemberCategory;
-
+import checkmo.member.internal.entity.MemberCategory;
 import java.util.List;
 
 /**

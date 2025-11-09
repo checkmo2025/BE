@@ -1,7 +1,7 @@
 package checkmo.clubManagement.internal.service.query;
 
 import checkmo.clubManagement.ClubManagementSharedDTO;
-import checkmo.clubManagement.entity.ClubMember;
+import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;

@@ -2,8 +2,8 @@ package checkmo.member.internal.service.query;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.entity.Member;
-import checkmo.member.repository.MemberRepository;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.repository.MemberRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

@@ -2,10 +2,10 @@ package checkmo.member.internal.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.entity.Member;
-import checkmo.member.repository.MemberRepository;
-import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.common.s3.service.S3Service;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.web.dto.MemberRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +28,12 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     @Override
     public Member updateMemberProfile(
-        String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request
+            String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request
     ) {
         // 회원 조회
         Member member = memberRepository.findById(memberId)
-                                        .orElseThrow(() -> new GeneralException(
-                                            ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(
+                        ErrorStatus.MEMBER_NOT_FOUND));
 
         // 기존에 저장된 이미지 url 가져오기
         String existingImageUrl = member.getImgUrl();
@@ -70,7 +70,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     @Override
     public void updatePassword(
-        String memberId, MemberRequestDTO.PasswordUpdateRequestDTO request
+            String memberId, MemberRequestDTO.PasswordUpdateRequestDTO request
     ) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }

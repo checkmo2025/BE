@@ -1,9 +1,9 @@
 package checkmo.clubNotice.internal.service.command;
 
-import checkmo.clubManagement.entity.Club;
-import checkmo.clubManagement.entity.ClubMember;
-import checkmo.clubNotice.entity.Notice;
-import checkmo.clubNotice.entity.Vote;
+import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 
 /**

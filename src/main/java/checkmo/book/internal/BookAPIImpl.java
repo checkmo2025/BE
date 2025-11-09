@@ -1,19 +1,18 @@
 package checkmo.book.internal;
 
 import checkmo.book.BookAPI;
-import checkmo.book.converter.BookConverter;
-import checkmo.book.entity.Book;
-import checkmo.book.repository.BookRepository;
+import checkmo.book.BookSharedDTO;
+import checkmo.book.internal.converter.BookConverter;
+import checkmo.book.internal.entity.Book;
+import checkmo.book.internal.repository.BookRepository;
 import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.service.query.BookQueryService;
 import checkmo.book.web.dto.BookResponseDTO;
-import checkmo.book.BookSharedDTO;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +42,7 @@ public class BookAPIImpl implements BookAPI {
     public BookSharedDTO.BasicInfo getBookBasicInfoForShare(String bookId) {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
-        
+
         return BookConverter.fromBookToBasicInfoDTO(book);
     }
 
@@ -51,7 +50,7 @@ public class BookAPIImpl implements BookAPI {
     public BookSharedDTO.DetailInfo getBookDetailInfoForShare(String bookId) {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
-        
+
         return BookConverter.fromBookToDetailInfoDTO(book);
     }
 
@@ -62,10 +61,10 @@ public class BookAPIImpl implements BookAPI {
         }
 
         List<String> distinctBookIds = bookIds.stream().distinct().toList();
-        
+
         // 배치로 책 엔티티 조회
         Map<String, Book> booksMap = bookQueryService.findBooksMap(distinctBookIds);
-        
+
         // 엔티티 → SharedDTO 직접 변환
         return BookConverter.fromBooksMapToBasicInfoDTOMap(booksMap);
     }

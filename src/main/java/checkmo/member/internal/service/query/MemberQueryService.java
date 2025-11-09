@@ -1,12 +1,12 @@
 package checkmo.member.internal.service.query;
 
-import checkmo.member.entity.Member;
+import checkmo.member.internal.entity.Member;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 회원 기본 정보 조회 서비스
- *
+ * <p>
  * 회원과 관련된 모든 조회 서비스 여기서 처리
  */
 public interface MemberQueryService {

@@ -1,7 +1,7 @@
 package checkmo.clubManagement.web.dto;
 
 import checkmo.book.BookSharedDTO;
-import checkmo.clubManagement.entity.Club;
+import checkmo.clubManagement.internal.entity.Club;
 import checkmo.member.MemberSharedDTO;
 import java.util.List;
 import lombok.AllArgsConstructor;

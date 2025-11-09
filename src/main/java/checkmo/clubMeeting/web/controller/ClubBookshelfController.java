@@ -1,13 +1,13 @@
 package checkmo.clubMeeting.web.controller;
 
 import checkmo.clubMeeting.ClubAPI;
-import checkmo.clubMeeting.facade.ClubMeetingCommandFacade;
-import checkmo.clubMeeting.validation.validCursor.ValidCursor;
-import checkmo.clubMeeting.validation.validSize.ValidSize;
+import checkmo.clubMeeting.internal.facade.ClubMeetingCommandFacade;
+import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
+import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.auth_annotation.CurrentId;
+import checkmo.member.internal.authAnnotation.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
