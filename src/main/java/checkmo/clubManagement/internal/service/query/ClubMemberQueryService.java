@@ -1,7 +1,7 @@
 package checkmo.clubManagement.internal.service.query;
 
+import checkmo.clubManagement.ClubManagementSharedDTO;
 import checkmo.clubManagement.entity.ClubMember;
-import checkmo.clubMeeting.ClubSharedDTO;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ public interface ClubMemberQueryService {
      * @param memberId 회원 ID
      * @return 회원이 가입한 독서 클럽의 간략한 정보 목록 DTO
      */
-    ClubSharedDTO.MyClubList getMyClubList(String memberId);
+    ClubManagementSharedDTO.MyClubList getMyClubList(String memberId);
 
     /**
      * 특정 회원이 가입한 클럽의 ID 리스트를 조회합니다.

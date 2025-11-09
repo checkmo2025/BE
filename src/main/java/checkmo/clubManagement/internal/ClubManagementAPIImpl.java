@@ -2,6 +2,7 @@ package checkmo.clubManagement.internal;
 
 import checkmo.book.BookAPI;
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.ClubManagementSharedDTO;
 import checkmo.clubManagement.converter.ClubManagementConverter;
 import checkmo.clubManagement.entity.BookRecommend;
 import checkmo.clubManagement.entity.Club;
@@ -13,8 +14,6 @@ import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
-import checkmo.clubMeeting.ClubSharedDTO;
-import checkmo.clubMeeting.ClubSharedDTO.MyClubInfo;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
@@ -50,7 +49,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     public ClubResponseDTO.MyClubListDTO getMyClubList(String memberId) {
 
         // 1. 회원이 가입한 모임 목록 조회
-        List<MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId).getClubList();
+        List<ClubManagementSharedDTO.MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId).getClubList();
 
         // 2. 모임 정보 DTO로 변환
         List<ClubResponseDTO.ClubInfoDTO> clubInfoDTOList = myClubs.stream()
@@ -106,7 +105,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public ClubSharedDTO.MyClubList getMyClubListForShare(String memberId) {
+    public ClubManagementSharedDTO.MyClubList getMyClubListForShare(String memberId) {
         return clubMemberQueryService.getMyClubList(memberId);
     }
 

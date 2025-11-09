@@ -4,6 +4,7 @@ import checkmo.book.BookSharedDTO;
 import checkmo.book.entity.Book;
 import checkmo.category.CategorySharedDTO;
 import checkmo.category.CategorySharedDTO.CategoryInfo;
+import checkmo.clubManagement.ClubManagementSharedDTO;
 import checkmo.clubManagement.entity.BookRecommend;
 import checkmo.clubManagement.entity.Club;
 import checkmo.clubManagement.entity.ClubCategory;
@@ -12,7 +13,6 @@ import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailResponseDTO;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
-import checkmo.clubMeeting.ClubSharedDTO;
 import checkmo.member.MemberSharedDTO;
 import checkmo.member.entity.Member;
 import java.util.List;
@@ -103,9 +103,10 @@ public class ClubManagementConverter {
     }
 
     /**
-     * ClubSharedDTO.MyClubInfo -> ClubResponseDTO.ClubInfoDTO
+     * ClubManagementSharedDTO.MyClubInfo -> ClubResponseDTO.ClubInfoDTO
      */
-    public static ClubResponseDTO.ClubInfoDTO toClubInfoDTOFromMyClubInfo(ClubSharedDTO.MyClubInfo myClubInfo) {
+    public static ClubResponseDTO.ClubInfoDTO toClubInfoDTOFromMyClubInfo(
+            ClubManagementSharedDTO.MyClubInfo myClubInfo) {
         return ClubResponseDTO.ClubInfoDTO.builder()
                 .clubId(myClubInfo.getClubId())
                 .clubName(myClubInfo.getClubName())
@@ -298,12 +299,12 @@ public class ClubManagementConverter {
     // =====================================================
 
     /**
-     * List<ClubSharedDTO.MyClubInfo> -> ClubSharedDTO.MyClubList 변환
+     * List<ClubNoticeSharedDTO.MyClubInfo> -> ClubNoticeSharedDTO.MyClubList 변환
      */
-    public static ClubSharedDTO.MyClubList fromClubInfoListToMyClubList(
-            List<ClubSharedDTO.MyClubInfo> clubInfoList
+    public static ClubManagementSharedDTO.MyClubList fromClubInfoListToMyClubList(
+            List<ClubManagementSharedDTO.MyClubInfo> clubInfoList
     ) {
-        return ClubSharedDTO.MyClubList.builder()
+        return ClubManagementSharedDTO.MyClubList.builder()
                 .clubList(clubInfoList)
                 .build();
     }

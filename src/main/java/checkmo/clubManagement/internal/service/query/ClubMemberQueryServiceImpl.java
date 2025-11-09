@@ -1,9 +1,9 @@
 package checkmo.clubManagement.internal.service.query;
 
+import checkmo.clubManagement.ClubManagementSharedDTO;
 import checkmo.clubManagement.converter.ClubManagementConverter;
 import checkmo.clubManagement.entity.ClubMember;
 import checkmo.clubManagement.repository.ClubMemberRepository;
-import checkmo.clubMeeting.ClubSharedDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
@@ -35,14 +35,14 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     }
 
     @Override
-    public ClubSharedDTO.MyClubList getMyClubList(String memberId) {
+    public ClubManagementSharedDTO.MyClubList getMyClubList(String memberId) {
 
         // 회원ID를 통해 JPQL로 클럽 ID와 이름을 조회하고 DTO로 변환
         var clubIdAndNameByMemberId = clubMemberRepository.findClubIdAndNameByMemberId(memberId);
 
-        // Object[] -> ClubSharedDTO.MyClubInfo 변환
+        // Object[] -> ClubNoticeSharedDTO.MyClubInfo 변환
         var myClubInfoList = clubIdAndNameByMemberId.stream()
-                .map(row -> new ClubSharedDTO.MyClubInfo((Long) row[0], (String) row[1]))
+                .map(row -> new ClubManagementSharedDTO.MyClubInfo((Long) row[0], (String) row[1]))
                 .toList();
 
         return ClubManagementConverter.fromClubInfoListToMyClubList(myClubInfoList);

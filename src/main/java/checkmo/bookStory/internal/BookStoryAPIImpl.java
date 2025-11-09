@@ -10,7 +10,7 @@ import checkmo.bookStory.entity.Comment;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubMeeting.ClubSharedDTO;
+import checkmo.clubManagement.ClubManagementSharedDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
@@ -125,8 +125,8 @@ public class BookStoryAPIImpl implements BookStoryAPI {
                 bookStories, isLikedMap, bookInfoMap, authorInfoMap);
 
         // 8. 클럽 정보 조회
-        ClubSharedDTO.MyClubList myClubList = clubManagementAPI.getMyClubListForShare(memberId);
-        ClubSharedDTO.MyClubInfo myClubInfo = findClubInfoForScope(scope, clubId, myClubList);
+        ClubManagementSharedDTO.MyClubList myClubList = clubManagementAPI.getMyClubListForShare(memberId);
+        ClubManagementSharedDTO.MyClubInfo myClubInfo = findClubInfoForScope(scope, clubId, myClubList);
 
         // 9. 스코프 정보 변환 및 최종 응답 DTO 변환
         var scopeInfo = BookStoryConverter.fromScopeInfo(scope, myClubInfo);
@@ -199,8 +199,9 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 스코프에 해당하는 클럽 정보 조회
      */
-    private ClubSharedDTO.MyClubInfo findClubInfoForScope(BookStoryRequestDTO.BookStoryScope scope, Long clubId,
-                                                          ClubSharedDTO.MyClubList myClubList) {
+    private ClubManagementSharedDTO.MyClubInfo findClubInfoForScope(BookStoryRequestDTO.BookStoryScope scope,
+                                                                    Long clubId,
+                                                                    ClubManagementSharedDTO.MyClubList myClubList) {
         if (scope == BookStoryRequestDTO.BookStoryScope.CLUB) {
             return myClubList.getClubList().stream()
                     .filter(club -> club.getClubId().equals(clubId))

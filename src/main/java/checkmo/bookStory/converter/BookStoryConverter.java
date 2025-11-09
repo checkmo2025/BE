@@ -1,17 +1,16 @@
 package checkmo.bookStory.converter;
 
+import checkmo.book.BookSharedDTO;
+import checkmo.bookStory.BookStorySharedDTO;
 import checkmo.bookStory.entity.BookStory;
 import checkmo.bookStory.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.bookStory.BookStorySharedDTO;
-import checkmo.member.entity.Member;
-import checkmo.book.BookSharedDTO;
-import checkmo.clubMeeting.ClubSharedDTO;
+import checkmo.clubManagement.ClubManagementSharedDTO;
 import checkmo.member.MemberSharedDTO;
+import checkmo.member.entity.Member;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookStoryConverter {
@@ -23,7 +22,8 @@ public class BookStoryConverter {
     /**
      * BookStoryCreateRequestDTO → BookStory 변환
      */
-    public static BookStory fromBookStoryRequestDTO(BookStoryRequestDTO.BookStoryCreateRequest request, Member proxyMember, String bookId) {
+    public static BookStory fromBookStoryRequestDTO(BookStoryRequestDTO.BookStoryCreateRequest request,
+                                                    Member proxyMember, String bookId) {
         return BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -45,7 +45,7 @@ public class BookStoryConverter {
             Long nextCursor,
             int pageSize,
             BookStorySharedDTO.ScopeInfo scopeInfo,
-            ClubSharedDTO.MyClubList myClubList
+            ClubManagementSharedDTO.MyClubList myClubList
     ) {
         return BookStorySharedDTO.BookStoryListResponse.builder()
                 .scopeInfo(scopeInfo)
@@ -62,7 +62,7 @@ public class BookStoryConverter {
      */
     public static BookStorySharedDTO.ScopeInfo fromScopeInfo(
             BookStoryRequestDTO.BookStoryScope scope,
-            ClubSharedDTO.MyClubInfo selectedClub
+            ClubManagementSharedDTO.MyClubInfo selectedClub
     ) {
         return BookStorySharedDTO.ScopeInfo.builder()
                 .scope(scope)
