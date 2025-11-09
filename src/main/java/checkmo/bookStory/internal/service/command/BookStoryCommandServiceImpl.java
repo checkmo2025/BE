@@ -2,8 +2,6 @@ package checkmo.bookStory.internal.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.book.entity.Book;
-import checkmo.book.facade.BookCommandFacade;
 import checkmo.book.BookAPI;
 import checkmo.bookStory.converter.BookStoryConverter;
 import checkmo.bookStory.entity.BookStory;
@@ -25,7 +23,6 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     // Domain level 2
     private final MemberAPI memberAPI;
     // Domain level 1
-    private final BookCommandFacade bookCommandFacade;
     private final BookAPI bookAPI;
 
     // 자신의 Repository
@@ -35,12 +32,11 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     @Transactional
     public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequest request) {
 
-        bookCommandFacade.saveBook(request.getBookInfo());
-        Book proxyBook = bookAPI.findBookReferenceById(request.getBookInfo().getIsbn());
+        String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
         Member proxyMember = memberAPI.findMemberReferenceById(memberId);
 
-        BookStory bookStory = BookStoryConverter.fromBookStoryRequestDTO(request, proxyMember, proxyBook);
+        BookStory bookStory = BookStoryConverter.fromBookStoryRequestDTO(request, proxyMember, bookId);
         BookStory savedBookStory = bookStoryRepository.save(bookStory);
 
         return savedBookStory.getId();
