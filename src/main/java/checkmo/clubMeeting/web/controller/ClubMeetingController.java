@@ -2,6 +2,7 @@ package checkmo.clubMeeting.web.controller;
 
 import checkmo.clubMeeting.ClubAPI;
 import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
+import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
 import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClubMeetingController {
 
     private final ClubMeetingCommandService clubMeetingCommandService;
+    private final ClubTopicCommandService clubTopicCommandService;
     private final ClubAPI clubAPI;
 
     @Operation(summary = "정기 독서모임 생성 API", description = "정기 독서모임을 생성합니다.")
@@ -268,7 +270,7 @@ public class ClubMeetingController {
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TopicSelectionDTO result
-                = clubMeetingCommandService.selectOrCancelTopic(meetingId, topicId, memberId, request);
+                = clubTopicCommandService.selectOrCancelTopic(meetingId, topicId, memberId, request);
         return ApiResponse.onSuccess(result);
     }
 }
