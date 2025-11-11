@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.web.controller;
 
 import checkmo.clubMeeting.ClubAPI;
-import checkmo.clubMeeting.internal.facade.ClubMeetingCommandFacade;
+import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
 import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "독서모임-책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
 public class ClubBookshelfController {
 
-    private final ClubMeetingCommandFacade clubMeetingCommandFacade;
+    private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubAPI clubAPI;
 
     @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 사이즈만큼 조회합니다.(최신순 정렬)")
@@ -118,7 +118,7 @@ public class ClubBookshelfController {
             @RequestBody @Valid BookShelfRequestDTO.BookReviewDTO request,
             @CurrentId String memberId
     ) {
-        Long bookReviewId = clubMeetingCommandFacade.createBookReview(memberId, meetingId, request);
+        Long bookReviewId = clubMeetingCommandService.createBookReview(meetingId, memberId, request);
         return ApiResponse.onSuccess(bookReviewId);
     }
 
@@ -144,7 +144,7 @@ public class ClubBookshelfController {
             @RequestBody @Valid BookShelfRequestDTO.BookReviewDTO request,
             @CurrentId String memberId
     ) {
-        Long updatedReviewId = clubMeetingCommandFacade.updateBookReview(memberId, meetingId, reviewId, request);
+        Long updatedReviewId = clubMeetingCommandService.updateBookReview(meetingId, reviewId, memberId, request);
         return ApiResponse.onSuccess(updatedReviewId);
     }
 
@@ -166,7 +166,7 @@ public class ClubBookshelfController {
             @PathVariable Long reviewId,
             @CurrentId String memberId
     ) {
-        clubMeetingCommandFacade.deleteBookReview(memberId, meetingId, reviewId);
+        clubMeetingCommandService.deleteBookReview(meetingId, reviewId, memberId);
         return ApiResponse.onSuccess(null);
     }
 
@@ -185,7 +185,7 @@ public class ClubBookshelfController {
             @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
             @CurrentId String memberId
     ) {
-        Long topicId = clubMeetingCommandFacade.createTopic(memberId, meetingId, request);
+        Long topicId = clubMeetingCommandService.createTopic(meetingId, memberId, request);
         return ApiResponse.onSuccess(topicId);
     }
 
@@ -208,7 +208,7 @@ public class ClubBookshelfController {
             @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
             @CurrentId String memberId
     ) {
-        Long updatedTopicId = clubMeetingCommandFacade.updateTopic(memberId, meetingId, topicId, request);
+        Long updatedTopicId = clubMeetingCommandService.updateTopic(meetingId, topicId, memberId, request);
         return ApiResponse.onSuccess(updatedTopicId);
     }
 
@@ -230,7 +230,7 @@ public class ClubBookshelfController {
             @PathVariable Long topicId,
             @CurrentId String memberId
     ) {
-        clubMeetingCommandFacade.deleteTopic(memberId, meetingId, topicId);
+        clubMeetingCommandService.deleteTopic(meetingId, topicId, memberId);
         return ApiResponse.onSuccess(null);
     }
 

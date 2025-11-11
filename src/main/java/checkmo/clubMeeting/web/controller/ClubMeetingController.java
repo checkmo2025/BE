@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.web.controller;
 
 import checkmo.clubMeeting.ClubAPI;
-import checkmo.clubMeeting.internal.facade.ClubMeetingCommandFacade;
+import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
 import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class ClubMeetingController {
 
-    private final ClubMeetingCommandFacade clubMeetingCommandFacade;
+    private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubAPI clubAPI;
 
     @Operation(summary = "정기 독서모임 생성 API", description = "정기 독서모임을 생성합니다.")
@@ -54,7 +54,7 @@ public class ClubMeetingController {
             @RequestBody @Valid MeetingRequestDTO.MeetingCreateRequestDTO request,
             @CurrentId String memberId
     ) {
-        Long meetingId = clubMeetingCommandFacade.createMeeting(clubId, memberId, request);
+        Long meetingId = clubMeetingCommandService.createMeeting(clubId, memberId, request);
         return ApiResponse.onSuccess(meetingId);
     }
 
@@ -74,7 +74,7 @@ public class ClubMeetingController {
             @RequestBody @Valid MeetingRequestDTO.MeetingUpdateRequestDTO request,
             @CurrentId String memberId
     ) {
-        Long updateMeetingId = clubMeetingCommandFacade.updateMeeting(meetingId, memberId, request);
+        Long updateMeetingId = clubMeetingCommandService.updateMeeting(meetingId, memberId, request);
         return ApiResponse.onSuccess(updateMeetingId);
     }
 
@@ -181,7 +181,7 @@ public class ClubMeetingController {
             @RequestBody @Valid MeetingRequestDTO.TeamManageDTO request,
             @CurrentId String memberId
     ) {
-        clubMeetingCommandFacade.manageTeams(memberId, meetingId, request);
+        clubMeetingCommandService.manageTeam(meetingId, memberId, request);
         return ApiResponse.onSuccess(null);
     }
     // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
@@ -267,8 +267,8 @@ public class ClubMeetingController {
             @RequestBody @Valid MeetingRequestDTO.TopicSelectionDTO request,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TopicSelectionDTO result = clubMeetingCommandFacade.selectOrCancelTopic(meetingId, topicId,
-                request, memberId);
+        MeetingResponseDTO.TopicSelectionDTO result
+                = clubMeetingCommandService.selectOrCancelTopic(meetingId, topicId, memberId, request);
         return ApiResponse.onSuccess(result);
     }
 }

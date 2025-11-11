@@ -1,8 +1,12 @@
 package checkmo.clubMeeting.internal.service.command;
 
+import checkmo.book.BookAPI;
+import checkmo.book.internal.entity.Book;
+import checkmo.book.internal.facade.BookCommandFacade;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
+import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -10,14 +14,18 @@ import checkmo.clubMeeting.internal.entity.MemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
 import checkmo.clubMeeting.internal.entity.Topic;
-import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.internal.repository.BookReviewRepository;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
 import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.repository.TeamTopicRepository;
 import checkmo.clubMeeting.internal.repository.TopicRepository;
-import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
+import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookReviewDTO;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.TopicDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingCreateRequestDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingUpdateRequestDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
@@ -31,6 +39,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +48,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService {
+    // Domain level 1
+    private final BookCommandFacade bookCommandFacade;
+    private final BookAPI bookAPI;
+
+    // 외부의 QueryService
+    private final ClubQueryService clubQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
 
     // 자신의 QueryService
-    private final ClubMemberQueryService clubMemberQueryService;
     private final ClubMeetingQueryService clubMeetingQueryService;
 
     // 자신의 Repository
@@ -53,29 +69,45 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     // TODO: 전체적으로 Meeting 존재 여부 검증을 Service에서 해야 함 -> 따라서 API endpoint를 club/{clubId}/meeting/{meetingId}/... 이런 식으로 바꿔야 함
 
     @Override
-    public Long createMeeting(Club club, ClubMember clubMember, Meeting meeting) {
-        // 1. 운영진 여부 검증
+    public Long createMeeting(Long clubId, String memberId, MeetingCreateRequestDTO request) {
+        // 1. 유효성 검증(club, clubMember)
+        Club club = clubQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        // 2. 책 저장 후 프록시 객체 가져오기
+        bookCommandFacade.saveBook(request.getBookInfo());
+        Book proxyBook = bookAPI.findBookReferenceById(request.getBookInfo().getIsbn());
+
+        // 3. 저장할 미팅 생성
+        Meeting meeting = ClubMeetingConverter.fromMeetingCreateRequestDTOToMeeting(request, proxyBook);
+        meeting.setClub(club);
+
+        // 4. 운영진 여부 검증
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        // 2. 미팅 기반 공지사항 생성
+        // 5. 미팅 기반 공지사항 생성
         Notice notice = ClubNoticeConverter.fromMeetingToNotice(meeting, club);
         meeting.addNotice(notice);
 
-        // 3. 미팅 명시적 저장 -> 공지사항도 함께 저장됨
+        // 6. 미팅 명시적 저장 -> 공지사항도 함께 저장됨
         return meetingRepository.save(meeting).getId();
     }
 
     @Override
-    public Long updateMeeting(Meeting meeting, Club club, ClubMember clubMember,
-                              MeetingRequestDTO.MeetingUpdateRequestDTO request) {
-        // 1. 운영진 여부 검증
+    public Long updateMeeting(Long meetingId, String memberId, MeetingUpdateRequestDTO request) {
+        // 1. 유효성 검증(meeting, club, clubMember)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Club club = clubQueryService.validateClub(meeting.getClubId());
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 운영진 여부 검증
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        // 2. 미팅 정보 수정
+        // 3. 미팅 정보 수정
         meeting.updateMeeting(
                 request.getTitle(),
                 request.getMeetingTime(),
@@ -85,7 +117,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 request.getTag()
         );
 
-        // 3. 새로운 공지사항 생성 및 교체(고아객체 자동 삭제)
+        // 4. 새로운 공지사항 생성 및 교체(고아객체 자동 삭제)
         Notice newNotice = ClubNoticeConverter.fromMeetingToNotice(meeting, club);
         meeting.replaceNotice(newNotice);
 
@@ -93,38 +125,45 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long createTopic(Meeting meeting, ClubMember clubMember, BookShelfRequestDTO.TopicDTO request) {
-        // 1. 발제 생성자 활성화 여부 확인
+    public Long createTopic(Long meetingId, String memberId, TopicDTO request) {
+        // 1. 유효성 검증 (meeting, clubMember)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 발제 생성자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
-        // 2. 발제 생성
+        // 3. 발제 생성
         Topic topic = ClubMeetingConverter.fromTopicDTOToTopic(request);
         topic.setMeeting(meeting);
         topic.setClubMember(clubMember);
 
-        // 3. 발제 저장
+        // 4. 발제 저장
         return topicRepository.save(topic).getId();
     }
 
     @Override
-    public Long updateTopic(Long clubId, ClubMember clubMember, Long meetingId, Long topicId,
-                            BookShelfRequestDTO.TopicDTO request) {
-        // 1. 발제 수정자 활성화 여부 확인
+    public Long updateTopic(Long meetingId, Long topicId, String memberId, TopicDTO request) {
+        // 1. 유효성 검증 (meeting, clubMember)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 발제 수정자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
-        // 2. 발제 조회 및 존재 여부 확인
+        // 3. 발제 조회 및 존재 여부 확인
         Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
 
-        // 3. 발제 작성자와 수정자가 같은지 확인
+        // 4. 발제 작성자와 수정자가 같은지 확인
         if (!topic.isOwnedBy(clubMember)) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        // 4. 발제 수정
+        // 5. 발제 수정
         topic.updateTopic(
                 request.getDescription()
         );
@@ -133,49 +172,57 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public void deleteTopic(Long clubId, ClubMember clubMember, Long meetingId, Long topicId) {
-        // 1. 발제 삭제자 활성화 여부 확인
+    public void deleteTopic(Long meetingId, Long topicId, String memberId) {
+        // 1. 유효성 검증 (meeting clubMember)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 발제 삭제자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
-        // 2. 발제 조회 및 존재 여부 확인
+        // 3. 발제 조회 및 존재 여부 확인
         Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
 
-        // 3. 발제 작성자와 삭제자가 같은지 확인
+        // 4. 발제 작성자와 삭제자가 같은지 확인
         if (!topic.isOwnedBy(clubMember)) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        // 4. 발제 삭제
+        // 5. 발제 삭제
         topic.removeMeeting();
         topic.removeClubMember();
     }
 
     @Override
-    public Boolean selectOrCancelTopic(ClubMember clubMember, Long meetingId, Long topicId,
-                                       MeetingRequestDTO.TopicSelectionDTO request) {
-        // 1. 발제 선택자 활성화 여부 확인
+    public MeetingResponseDTO.TopicSelectionDTO selectOrCancelTopic(Long meetingId, Long topicId, String memberId,
+                                                                    MeetingRequestDTO.TopicSelectionDTO request) {
+        // 1. 유효성 검증 (meeting, clubMember)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 발제 선택자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
-        // 2. 팀, 발제 존재 여부 및 일치 여부 확인
+        // 3. 팀, 발제 존재 여부 및 일치 여부 확인
         Team team = clubMeetingQueryService.validateTeam(meetingId, request.getTeamNumber());
         Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
 
-        // 3. 팀 발제가 존재하는지(선택된 상태인지) 확인
+        // 4. 팀 발제가 존재하는지(선택된 상태인지) 확인
         Optional<TeamTopic> existingTeamTopic = teamTopicRepository.findByTeamIdAndTopicId(team.getId(), topic.getId());
         boolean isSelected = existingTeamTopic.isPresent();
 
-        // 4. 요청과 상태가 같으면 무시
+        // 5. 요청과 상태가 같으면 무시
         if (request.getIsSelected() == isSelected) {
-            return isSelected;
+            return ClubMeetingConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), isSelected);
         }
 
-        // 5. 상태 변경
+        // 6. 상태 변경
         if (request.getIsSelected()) {
-            // 5-1. 팀 발제 선택
+            // 6-1. 팀 발제 선택
             TeamTopic teamTopic = TeamTopic.builder()
                     .team(team)
                     .topic(topic)
@@ -189,33 +236,37 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 // 다른 쓰레드가 먼저 팀 발제를 선택한 경우, 선택 성공으로 간주
                 teamTopic.removeTeam();
                 teamTopic.removeTopic();
-                return true;
+                return ClubMeetingConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), true);
             }
-            return true;
+            return ClubMeetingConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), true);
         } else {
-            // 5-2. 팀 발제 선택 취소
+            // 6-2. 팀 발제 선택 취소
             try {
                 TeamTopic teamTopic = existingTeamTopic.get();
                 // 연관관계 해제 및 orphanRemoval로 삭제 처리
                 teamTopic.removeTeam();
                 teamTopic.removeTopic();
                 teamTopicRepository.flush();
-                return false;
+                return ClubMeetingConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), false);
             } catch (OptimisticLockingFailureException e) {
                 // 다른 트랜잭션이 이미 삭제했거나 수정한 경우, 선택 해제 성공으로 간주
-                return false;
+                return ClubMeetingConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), false);
             }
         }
     }
 
     @Override
-    public void manageTeam(ClubMember clubMember, Meeting meeting, MeetingRequestDTO.TeamManageDTO request) {
-        // 1. 운영진 여부 검증
+    public void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManageDTO request) {
+        // 1. 유효성 검증(meeting, clubMember)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 운영진 여부 검증
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        // 2. 요청 teamNumber와 nicknameList 검증 및 정리
+        // 3. 요청 teamNumber와 nicknameList 검증 및 정리
         Map<Integer, List<String>> requestTeamNumberToNicknameList =
                 request.getTeamMemberDTOList().stream()
                         .collect(Collectors.toMap(
@@ -227,12 +278,12 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 .flatMap(List::stream)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        // 3. 해당 미팅의 기존 팀들 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
+        // 4. 해당 미팅의 기존 팀들 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
         List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meeting.getId());
         Map<Integer, Team> existingTeamNumberToTeam = existingTeams.stream()
                 .collect(Collectors.toMap(Team::getTeamNumber, t -> t));
 
-        // 4. 요청에 있는데 아직 없는 teamNumber는 Team 생성
+        // 5. 요청에 있는데 아직 없는 teamNumber는 Team 생성
         requestTeamNumbers.stream()
                 .filter(teamNumber -> !existingTeamNumberToTeam.containsKey(teamNumber))
                 .forEach(teamNumber -> {
@@ -244,7 +295,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                     existingTeamNumberToTeam.put(teamNumber, team);
                 });
 
-        // 5. 요청에는 없는데 존재하는 teamNumber는 Team 삭제
+        // 6. 요청에는 없는데 존재하는 teamNumber는 Team 삭제
         List<Team> toDeleteTeams = existingTeams.stream()
                 .filter(t -> !requestTeamNumbers.contains(t.getTeamNumber()))
                 .toList();
@@ -256,7 +307,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 .map(Team::getTeamNumber)
                 .collect(Collectors.toSet()));
 
-        // 6. 기존 MemberTeam orphanRemoval = true 삭제
+        // 7. 기존 MemberTeam orphanRemoval = true 삭제
         if (!existingTeams.isEmpty()) {
             existingTeams.forEach(Team::clearMemberTeams);
             // 기존 멤버 삭제 시 소유자만 끊고 orphanRemoval=true로 고아 삭제를 걸면 DB 행은 사라지고,
@@ -264,11 +315,11 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             // 이때 이 하나의 트랜잭션에서 clubMember.memberTeams를 사용하지 않습니다!!!
         }
 
-        // 7. 닉네임 → memberId → ClubMember 일괄 매핑
+        // 8. 닉네임 → memberId → ClubMember 일괄 매핑
         Map<String, ClubMember> nicknameToClubMember = clubMemberQueryService.getNicknameToClubMember(
                 meeting.getClubId(), requestNicknames.stream().toList());
 
-        // 8. 요청대로 MemberTeam 배치 재생성
+        // 9. 요청대로 MemberTeam 배치 재생성
         for (Map.Entry<Integer, List<String>> e : requestTeamNumberToNicknameList.entrySet()) {
             Team team = existingTeamNumberToTeam.get(e.getKey());
             for (String nick : e.getValue()) {
@@ -279,24 +330,35 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             }
         }
 
-        // 9. 기존 팀과 새로 생성된 Team을 명시적으로 저장 (내부적으로 MemberTeam도 저장됨)
+        // 10. 기존 팀과 새로 생성된 Team을 명시적으로 저장 (내부적으로 MemberTeam도 저장됨)
         meetingRepository.save(meeting);
         teamRepository.saveAll(existingTeams);
     }
 
+    // TODO: Aspect 로그
+    // TODO: Test DB 설정 후, 낙관적 락 동작 테스트
     @Override
-    public Long createBookReview(ClubMember clubMember, Meeting meeting, BookShelfRequestDTO.BookReviewDTO request) {
-        // 1. 한줄평 작성자 활성화 여부 확인
+    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+    )
+    public Long createBookReview(Long meetingId, String memberId, BookReviewDTO request) {
+        // 1. 유효성 검증 (meeting, clubMember)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 한줄평 작성자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
-        // 2. 한줄평 생성
+        // 3. 한줄평 생성
         BookReview bookReview = ClubMeetingConverter.fromBookReviewDTOToBookReview(request);
         bookReview.setClubMember(clubMember);
         bookReview.setMeeting(meeting);
 
-        // 3. 미팅의 별점 합산
+        // 4. 미팅의 별점 합산
         meeting.addSumRate(bookReview.getRate());
 
         // 4. 한줄평 저장
@@ -304,22 +366,30 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long updateBookReview(ClubMember clubMember, Meeting meeting, Long reviewId,
-                                 BookShelfRequestDTO.BookReviewDTO request) {
-        // 1. 한줄평 수정자 활성화 여부 확인
+    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+    )
+    public Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookReviewDTO request) {
+        // 1. 유효성 검증 (meeting, clubMember, bookReview)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 한줄평 수정자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
-        // 2. 한줄평 조회 및 존재 여부 확인
+        // 3. 한줄평 조회 및 존재 여부 확인
         BookReview bookReview = clubMeetingQueryService.validateBookReview(reviewId, meeting.getId());
 
-        // 3. 한줄평 작성자와 수정자가 같은지 확인
+        // 4. 한줄평 작성자와 수정자가 같은지 확인
         if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
-        // 4. 한줄평 수정
+        // 5. 한줄평 수정
         double oldRate = bookReview.getRate();
         double newRate = request.getRate();
 
@@ -328,7 +398,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 request.getRate()
         );
 
-        // 5. 별점이 변경된 경우에만 미팅의 별점 합산
+        // 6. 별점이 변경된 경우에만 미팅의 별점 합산
         if (oldRate != newRate) {
             meeting.subtractSumRate(oldRate);
             meeting.addSumRate(newRate);
@@ -338,24 +408,33 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public void deleteBookReview(ClubMember clubMember, Meeting meeting, Long reviewId) {
-        // 1. 한줄평 삭제자 활성화 여부 확인
+    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+    )
+    public void deleteBookReview(Long meetingId, Long reviewId, String memberId) {
+        // 1. 유효성 검증 (meeting, clubMember, bookReview)
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+
+        // 2. 한줄평 삭제자 활성화 여부 확인
         if (!clubMember.isActive()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
-        // 2. 한줄평 조회 및 존재 여부 확인
-        BookReview bookReview = clubMeetingQueryService.validateBookReview(reviewId, meeting.getId());
+        // 3. 한줄평 조회 및 존재 여부 확인
+        BookReview bookReview = clubMeetingQueryService.validateBookReview(reviewId, meetingId);
 
-        // 3. 한줄평 작성자와 삭제자가 같은지 확인
+        // 4. 한줄평 작성자와 삭제자가 같은지 확인
         if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
-        // 4. 미팅의 별점 합산에서 제외
+        // 5. 미팅의 별점 합산에서 제외
         meeting.subtractSumRate(bookReview.getRate());
 
-        // 5. 한줄평 삭제
+        // 6. 한줄평 삭제
         bookReview.removeClubMember();
         bookReview.removeMeeting();
     }
