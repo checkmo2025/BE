@@ -1,7 +1,5 @@
 package checkmo.clubNotice.internal.service.command;
 
-import checkmo.clubManagement.internal.entity.Club;
-import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
@@ -14,49 +12,49 @@ public interface ClubNoticeCommandService {
     /**
      * 독서 모임에 공지사항을 작성합니다. (모임이랑 연결되지 않은 순수 공지사항)
      *
-     * @param club       독서 모임
-     * @param clubMember 공지사항 작성 요청자 (운영진인지 확인 필요)
-     * @param request    공지사항 작성 요청 DTO
+     * @param clubId   독서모임 ID
+     * @param memberId 작성자(운영진) 회원 ID
+     * @param request  공지사항 작성 요청 DTO
      * @return 작성된 공지사항
      */
-    Notice createPureNotice(Club club, ClubMember clubMember, ClubNoticeRequestDTO.CreateClubNoticeDTO request);
+    Notice createPureNotice(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubNoticeDTO request);
 
     /**
      * 독서 모임의 공지사항을 삭제합니다. (모임이랑 연결되지 않은 순수 공지사항)
      *
-     * @param clubId     독서 모임 ID
-     * @param clubMember 공지사항 삭제 요청자 (운영진인지 확인 필요)
-     * @param noticeId   삭제할 공지사항
+     * @param clubId   독서 모임 ID
+     * @param noticeId 삭제할 공지사항
+     * @param memberId 요청자(운영진) 회원 ID
      */
-    void deletePureNotice(Long clubId, ClubMember clubMember, Long noticeId);
+    void deletePureNotice(Long clubId, Long noticeId, String memberId);
 
     /**
      * 독서 모임에 투표를 생성합니다.
      *
-     * @param club       독서 모임
-     * @param clubMember 투표 생성 요청자 (운영진인지 확인 필요)
-     * @param request    투표 생성 요청 DTO
+     * @param clubId   독서모임 ID
+     * @param memberId 작성자(운영진) 회원 ID
+     * @param request  투표 생성 요청 DTO
      * @return 생성된 투표
      */
-    Vote createVote(Club club, ClubMember clubMember, ClubNoticeRequestDTO.CreateClubVoteDTO request);
+    Vote createVote(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubVoteDTO request);
 
     /**
      * 독서 모임에 투표를 삭제합니다.
      *
-     * @param clubId     독서 모임 ID
-     * @param clubMember 투표 삭제 요청자 (운영진인지 확인 필요)
-     * @param voteId     삭제할 투표 ID
+     * @param clubId   독서 모임 ID
+     * @param voteId   삭제할 투표 ID
+     * @param memberId 요청자(운영진) 회원 ID
      */
-    void deleteVote(Long clubId, ClubMember clubMember, Long voteId);
+    void deleteVote(Long clubId, Long voteId, String memberId);
 
     /**
      * 독서 모임의 투표에 참여합니다.
      *
-     * @param clubId     독서 모임 ID
-     * @param clubMember 참여자 회원 -> 독서 클럽의 회원인지만 확인
-     * @param voteId     투표 ID
-     * @param request    투표 내역 DTO
+     * @param clubId   독서 모임 ID
+     * @param voteId   투표 ID
+     * @param memberId 참여자 회원 ID
+     * @param request  투표 내역 DTO
      * @return 참여한 투표 ID
      */
-    Long haveVote(Long clubId, ClubMember clubMember, Long voteId, ClubNoticeRequestDTO.VoteResultDTO request);
+    Long haveVote(Long clubId, Long voteId, String memberId, ClubNoticeRequestDTO.VoteResultDTO request);
 }

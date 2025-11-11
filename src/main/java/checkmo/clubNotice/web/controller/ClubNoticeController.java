@@ -1,7 +1,9 @@
 package checkmo.clubNotice.web.controller;
 
 import checkmo.clubNotice.ClubNoticeAPI;
-import checkmo.clubNotice.internal.facade.ClubNoticeCommandFacade;
+import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.Vote;
+import checkmo.clubNotice.internal.service.command.ClubNoticeCommandService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
@@ -28,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모임 공지사항", description = "독서 모임 공지사항, 투표 생성 및 관리 API")
 public class ClubNoticeController {
 
-    private final ClubNoticeCommandFacade clubNoticeCommandFacade;
+    private final ClubNoticeCommandService clubNoticeCommandService;
     private final ClubNoticeAPI clubNoticeAPI;
 
     @Operation(summary = "회원의 공지사항 목록 조회 (미팅, 투표, 공지 모두 포함)", description = "회원의 공지사항 목록을 조회합니다. onlyImportant=true 면 중요 공지사항만 조회합니다.")
@@ -69,12 +71,13 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
     })
     @PostMapping("/api/clubs/{clubId}/notices")
-    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetailDTO> createPureVote(
+    public ApiResponse<String> createPureVote(
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestBody @Valid ClubNoticeRequestDTO.CreateClubNoticeDTO request
     ) {
-        return ApiResponse.onSuccess(clubNoticeCommandFacade.createPureNotice(clubId, memberId, request));
+        Notice createdNotice = clubNoticeCommandService.createPureNotice(clubId, memberId, request);
+        return ApiResponse.onSuccess("공지사항(id:" + createdNotice.getId() + "이 정상적으로 생성되었습니다.");
     }
 
     @Operation(summary = "순수 공지사항 상세 조회", description = "특정 순수 공지사항 상세 정보를 조회합니다.")
@@ -103,7 +106,7 @@ public class ClubNoticeController {
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        clubNoticeCommandFacade.deletePureNotice(clubId, memberId, noticeId);
+        clubNoticeCommandService.deletePureNotice(clubId, noticeId, memberId);
         return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
     }
 
@@ -134,12 +137,13 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
     })
     @PostMapping("/api/clubs/{clubId}/notices/votes")
-    public ApiResponse<Long> createVote(
+    public ApiResponse<String> createVote(
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestBody @Valid ClubNoticeRequestDTO.CreateClubVoteDTO request
     ) {
-        return ApiResponse.onSuccess(clubNoticeCommandFacade.createVote(clubId, memberId, request));
+        Vote createdVote = clubNoticeCommandService.createVote(clubId, memberId, request);
+        return ApiResponse.onSuccess("투표(id:" + createdVote.getId() + "가 정상적으로 생성되었습니다.");
     }
 
     @Operation(summary = "투표 상세 조회", description = "특정 투표의 상세 정보를 조회합니다.")
@@ -163,13 +167,14 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "투표를 찾을 수 없음")
     })
     @PostMapping("/api/clubs/{clubId}/notices/votes/{voteId}/submit")
-    public ApiResponse<Long> submitVote(
+    public ApiResponse<String> submitVote(
             @PathVariable Long clubId,
             @PathVariable Long voteId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubNoticeRequestDTO.VoteResultDTO request
     ) {
-        return ApiResponse.onSuccess(clubNoticeCommandFacade.haveVote(clubId, memberId, voteId, request));
+        Long participatingVoteId = clubNoticeCommandService.haveVote(clubId, voteId, memberId, request);
+        return ApiResponse.onSuccess("투표(id:" + participatingVoteId + ")에 투표했습니다.");
     }
 
     @Operation(summary = "투표 삭제", description = "특정 투표를 삭제합니다. (운영진만 삭제 가능)")
@@ -184,7 +189,7 @@ public class ClubNoticeController {
             @PathVariable Long voteId,
             @CurrentId String memberId
     ) {
-        clubNoticeCommandFacade.deleteVote(clubId, memberId, voteId);
+        clubNoticeCommandService.deleteVote(clubId, voteId, memberId);
         return ApiResponse.onSuccess("투표가 삭제되었습니다.");
     }
 
