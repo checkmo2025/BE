@@ -1,7 +1,9 @@
 package checkmo.clubManagement.web.controller;
 
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.internal.facade.ClubManagementCommandFacade;
+import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
+import checkmo.clubManagement.internal.service.command.ClubMemberCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
@@ -34,7 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClubController {
 
     private final ClubManagementAPI clubManagementAPI;
-    private final ClubManagementCommandFacade clubManagementCommandFacade;
+    private final ClubMemberCommandService clubMemberCommandService;
+    private final ClubManagementCommandService clubManagementCommandService;
 
     @Operation(summary = "모임 이름 중복 검사", description = "중복 여부 확인할 모임 이름을 전달하면 존재 여부를 반환합니다.")
     @Parameters({
@@ -58,13 +61,12 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "중복된 모임 이름입니다."),
     })
     @PostMapping("")
-    public ApiResponse<ClubResponseDTO.ClubDetailDTO> createClub(
+    public ApiResponse<String> createClub(
             @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request,
             @CurrentId String memberId
     ) {
-        Long clubId = clubManagementCommandFacade.createClub(memberId, request);
-        ClubResponseDTO.ClubDetailDTO result = clubManagementAPI.getClubInfo(clubId, memberId);
-        return ApiResponse.onSuccess(result);
+        Long clubId = clubManagementCommandService.createClub(memberId, request);
+        return ApiResponse.onSuccess("독서 모임(id:" + clubId + ")가 정상적으로 생성되었습니다.");
     }
 
     @Operation(summary = "독서 모임 상세 조회", description = "지정한 클럽의 상세 정보를 반환합니다.")
@@ -110,14 +112,13 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "클럽을 찾을 수 없음")
     })
     @PutMapping("/{clubId}")
-    public ApiResponse<ClubResponseDTO.ClubDetailDTO> updateClub(
+    public ApiResponse<String> updateClub(
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request
     ) {
-        clubManagementCommandFacade.updateClub(clubId, memberId, request);
-        ClubResponseDTO.ClubDetailDTO result = clubManagementAPI.getClubInfo(clubId, memberId);
-        return ApiResponse.onSuccess(result);
+        Long updatedClubId = clubManagementCommandService.updateClub(clubId, memberId, request);
+        return ApiResponse.onSuccess("독서모임(id:" + updatedClubId + ")이 정상적으로 수정되었습니다.");
     }
 
     @Operation(summary = "독서 모임 검색 API", description = "키워드를 기반으로 독서 모임을 검색합니다.")
@@ -167,12 +168,13 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 가입 신청을 했거나, 가입이 승인된 상태입니다."),
     })
     @PostMapping("/{clubId}/join")
-    public ApiResponse<Long> joinClub(
+    public ApiResponse<String> joinClub(
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.ClubMemberJoinDTO request
     ) {
-        return ApiResponse.onSuccess(clubManagementCommandFacade.joinClub(clubId, memberId, request));
+        ClubMember joinedClubMember = clubMemberCommandService.joinClub(clubId, memberId, request);
+        return ApiResponse.onSuccess("독서 모임 가입 신청이 완료되었습니다." + joinedClubMember.getId());
     }
 
     @Operation(summary = "독서 모임 회원 조회 API", description = "독서 모임의 회원 정보를 조회합니다.")
@@ -213,14 +215,15 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 사용할 수 있는 API입니다."),
     })
     @PatchMapping("/{clubId}/members/{memberId}/status")
-    public ApiResponse<ClubResponseDTO.ClubMemberUpdateResponseDTO> updateClubMemberStatus(
+    public ApiResponse<String> updateClubMemberStatus(
             @PathVariable Long clubId,
             @PathVariable Long memberId,
             @CurrentId String currentMemberId,
             @RequestParam(defaultValue = "STAFF") String status // (MEMBER, STAFF, PENDING, BLOCKED 중 선택)
     ) {
-        return ApiResponse.onSuccess(
-                clubManagementCommandFacade.updateClubMemberStatus(clubId, currentMemberId, memberId, status));
+        ClubMember updatedClubMember = clubMemberCommandService.updateClubMemberStatus(clubId, currentMemberId,
+                memberId, status);
+        return ApiResponse.onSuccess(updatedClubMember.getId() + "의 상태가 정상적으로 변경되었습니다.");
     }
 
     @Operation(summary = "독서 모임 탈퇴 API", description = "본인이 가입한 독서 모임에서 탈퇴합니다.")
@@ -230,12 +233,12 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "본인만 탈퇴할 수 있습니다."),
     })
     @DeleteMapping("/{clubId}/leave")
-    public ApiResponse<Void> leaveClub(
+    public ApiResponse<String> leaveClub(
             @PathVariable Long clubId,
             @CurrentId String memberId
     ) {
-        clubManagementCommandFacade.leaveClub(clubId, memberId);
-        return ApiResponse.onSuccess(null);
+        clubMemberCommandService.leaveClub(clubId, memberId);
+        return ApiResponse.onSuccess("정상적으로 독서모임에서 탈퇴되었습니다.");
     }
 
     @Operation(summary = "클럽 스태프 여부 확인 API", description = "로그인한 회원이 해당 클럽의 스태프인지 확인합니다.")

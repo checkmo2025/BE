@@ -1,7 +1,5 @@
 package checkmo.clubManagement.internal.service.command;
 
-import checkmo.clubManagement.internal.entity.Club;
-import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 
 /**
@@ -14,18 +12,18 @@ public interface ClubManagementCommandService {
      * <p>
      * 피그마 참고 페이지 : #독서모임 - 모임 생성하기 첫화면 첫스크롤
      *
-     * @param clubMember 모임 생성 요청한 회원
-     * @param request    모임 생성 요청 DTO
+     * @param memberId 사용자 ID
+     * @param request  모임 생성 요청 DTO
      * @return 생성된 독서모임 ID
      */
-    Long createClub(ClubMember clubMember, ClubRequestDTO.ClubDetailDTO request);
+    Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request);
 
     /**
      * ClubManagementCommandService 기존 독서 모임 정보를 수정합니다.
      *
-     * @param club       수정할 모임
-     * @param clubMember 수정 요청한 회원
-     * @param request    모임 수정 요청 정보 DTO
+     * @param clubId   수정할 모임
+     * @param memberId 사용자 ID
+     * @param request  모임 수정 요청 정보 DTO
      */
-    void updateClub(Club club, ClubMember clubMember, ClubRequestDTO.ClubDetailDTO request);
+    Long updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request);
 }

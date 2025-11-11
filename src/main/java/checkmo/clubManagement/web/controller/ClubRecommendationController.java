@@ -1,7 +1,7 @@
 package checkmo.clubManagement.web.controller;
 
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.internal.facade.ClubManagementCommandFacade;
+import checkmo.clubManagement.internal.service.command.ClubBookRecommendCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모임 추천 책", description = "독서 모임 내 책 추천 및 관리 API")
 public class ClubRecommendationController {
 
-    private final ClubManagementCommandFacade clubManagementCommandFacade;
+    private final ClubBookRecommendCommandService clubBookRecommendCommandService;
     private final ClubManagementAPI clubManagementAPI;
 
     @Operation(summary = "추천 책 작성", description = "특정 모임에 추천 책을 작성합니다.")
@@ -36,12 +36,13 @@ public class ClubRecommendationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "입력 값이 유효하지 않음")
     })
     @PostMapping
-    public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> createRecommendation(
+    public ApiResponse<String> createRecommendation(
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.CreateBookRecommendDTO request
     ) {
-        return ApiResponse.onSuccess(clubManagementCommandFacade.recommendBook(clubId, memberId, request));
+        Long bookRecommendId = clubBookRecommendCommandService.recommendBook(clubId, memberId, request);
+        return ApiResponse.onSuccess(bookRecommendId + "가 정상적으로 추천되었습니다.");
     }
 
     @Operation(summary = "추천 책 전체 조회", description = "해당 독서모임의 추천 책 목록을 커서 기반으로 조회합니다.")
@@ -79,14 +80,15 @@ public class ClubRecommendationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "작성자가 아님")
     })
     @PatchMapping("/{recommendId}")
-    public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> updateRecommendation(
+    public ApiResponse<String> updateRecommendation(
             @PathVariable Long clubId,
             @PathVariable Long recommendId,
             @CurrentId String memberId,
             @RequestBody @Valid ClubRequestDTO.UpdateBookRecommendDTO request
     ) {
-        return ApiResponse.onSuccess(
-                clubManagementCommandFacade.updateBookRecommend(clubId, memberId, recommendId, request));
+        Long updatedBookRecommend = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId, recommendId,
+                request);
+        return ApiResponse.onSuccess(updatedBookRecommend + "가 정상적으로 수정되었습니다.");
     }
 
     @Operation(summary = "추천 책 삭제", description = "추천 책을 삭제합니다. 작성자만 삭제할 수 있습니다.")
@@ -96,14 +98,13 @@ public class ClubRecommendationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "추천 책 또는 클럽을 찾을 수 없음")
     })
     @DeleteMapping("/{recommendId}")
-    public ApiResponse<Void> deleteRecommendation(
+    public ApiResponse<String> deleteRecommendation(
             @PathVariable Long clubId,
             @PathVariable Long recommendId,
             @CurrentId String memberId
     ) {
-        clubManagementCommandFacade.deleteRecommendedBook(clubId, memberId, recommendId);
-        return ApiResponse.onSuccess(null);
+        clubBookRecommendCommandService.deleteRecommendedBook(clubId, memberId, recommendId);
+        return ApiResponse.onSuccess("책 추천이 정상적으로 삭제되었습니다.");
     }
-
 
 }

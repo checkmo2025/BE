@@ -6,9 +6,9 @@ import checkmo.book.internal.facade.BookCommandFacade;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.repository.BookRecommendRepository;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
-import checkmo.clubManagement.internal.repository.BookRecommendRepository;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
@@ -34,7 +34,6 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
     @Override
     @Transactional
     public Long recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommendDTO request) {
-
         // 1. 검증
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
@@ -58,7 +57,6 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
     @Transactional
     public Long updateBookRecommend(Long clubId, String memberId, Long bookRecommendId,
                                     ClubRequestDTO.UpdateBookRecommendDTO request) {
-
         // 1. 클럽 및 클럽 멤버 유효성 검증
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
