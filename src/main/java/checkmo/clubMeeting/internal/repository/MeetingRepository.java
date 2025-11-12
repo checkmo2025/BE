@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MeetingRepository extends JpaRepository<Meeting, Long>, MeetingRepositoryCustom {
     @Query("SELECT m FROM Meeting m " +
-            "WHERE m.club.id = :clubId " +
+            "WHERE m.clubId = :clubId " +
             "AND m.meetingTime >= :startDate " +
             "AND m.meetingTime < :endDate " +
             "ORDER BY m.meetingTime ASC")

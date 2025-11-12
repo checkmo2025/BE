@@ -1,7 +1,6 @@
 package checkmo.clubMeeting.internal.entity;
 
 import checkmo.book.internal.entity.Book;
-import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
@@ -59,12 +58,8 @@ public class Meeting extends BaseEntity {
     @Builder.Default
     private Long version = 0L; // sumRate 동시성 문제 해결을 위한 버전 관리(낙관적 락)
 
-    @Column(name = "club_id", insertable = false, updatable = false)
+    @Column(name = "club_id", nullable = false)
     private Long clubId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id")
-    private Club club;
 
     @Column(name = "book_id", insertable = false, updatable = false)
     private String bookId; // null 허용
@@ -118,20 +113,6 @@ public class Meeting extends BaseEntity {
         this.content = content;
         this.generation = generation;
         this.tag = tag;
-    }
-
-    // == 연관관계 메서드 == //
-    public void setClub(Club club) {
-        if (this.club == club) {
-            return;
-        }
-        if (this.club != null) {
-            this.club.getMeetings().remove(this);
-        }
-        this.club = club;
-        if (club != null && !club.getMeetings().contains(this)) {
-            club.getMeetings().add(this);
-        }
     }
 
     public void addNotice(Notice notice) {

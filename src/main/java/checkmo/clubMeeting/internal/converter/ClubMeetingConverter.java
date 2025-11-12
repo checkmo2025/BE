@@ -31,6 +31,7 @@ public class ClubMeetingConverter {
      */
     public static Meeting fromMeetingCreateRequestDTOToMeeting(
             MeetingRequestDTO.MeetingCreateRequestDTO request,
+            Long clubId,
             Book proxyBook
     ) {
         return Meeting.builder()
@@ -40,6 +41,7 @@ public class ClubMeetingConverter {
                 .content(request.getContent())
                 .generation(request.getGeneration())
                 .tag(request.getTag())
+                .clubId(clubId)
                 .book(proxyBook)
                 .build();
     }

@@ -61,8 +61,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         Book proxyBook = bookAPI.findBookReferenceById(request.getBookInfo().getIsbn());
 
         // 3. 저장할 미팅 생성
-        Meeting meeting = ClubMeetingConverter.fromMeetingCreateRequestDTOToMeeting(request, proxyBook);
-        meeting.setClub(club);
+        Meeting meeting = ClubMeetingConverter.fromMeetingCreateRequestDTOToMeeting(request, clubId, proxyBook);
 
         // 4. 운영진 여부 검증
         if (!clubMember.isStaff()) {
