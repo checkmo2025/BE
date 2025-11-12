@@ -1,21 +1,17 @@
 package checkmo.member.internal;
 
-import checkmo.category.CategoryExternalDTO;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.converter.MemberConverter;
-import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.entity.MemberCategory;
 import checkmo.member.internal.repository.MemberRepository;
-import checkmo.member.internal.service.query.MemberCategoryQueryService;
+import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
+import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberResponseDTO;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,137 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberAPIImpl implements MemberAPI {
 
-    // 페이징 기본 크기 상수
-    public static final int DEFAULT_PAGE_SIZE = 20;
-
     // 자신의 QueryService
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
-    private final MemberCategoryQueryService memberCategoryQueryService;
+
+    // 내부 Facade (배치 조회 로직 재사용)
+    private final MemberQueryFacade memberQueryFacade;
 
     // 자신의 Repository (프록시용, TODO: 해결 불가한가?)
     private final MemberRepository memberRepository;
-
-    @Override
-    public boolean isNicknameDuplicated(String nickname) {
-        return memberQueryService.isNicknameDuplicated(nickname);
-    }
-
-    @Override
-    public MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId) {
-        Member member = memberQueryService.getMemberBasicInfo(memberId);
-        return MemberConverter.toMemberProfileResponseDTO(member);
-    }
-
-    @Override
-    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
-        Member member = memberQueryService.getMemberProfile(memberId);
-
-        List<MemberCategory> memberCategories = memberCategoryQueryService.findCategoriesByMember(memberId);
-        List<CategoryExternalDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
-                memberCategories);
-
-        return MemberConverter.toMemberProfileWithCategoryResponseDTO(member, categories);
-    }
-
-    @Override
-    public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
-        Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname);
-        boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
-
-        List<MemberCategory> targetMemberCategories = memberCategoryQueryService.findCategoriesByMember(
-                targetMember.getId());
-        List<CategoryExternalDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
-                targetMemberCategories);
-
-        return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing, categories);
-    }
-
-    @Override
-    public MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId) {
-        // 1. 팔로워 목록 조회
-        List<Follow> followerList = memberFollowQueryService.getFollowerList(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
-
-        // 2. 커서 기반 페이징 처리
-        boolean hasNext = followerList.size() > DEFAULT_PAGE_SIZE;
-        Long nextCursor = null;
-        if (hasNext) {
-            followerList.removeLast();
-            nextCursor = followerList.getLast().getId();
-        }
-
-        // 3. 팔로워 목록의 닉네임, 프로필 이미지 배치 조회
-        List<String> followerIdList = followerList.stream()
-                .map(Follow::getFollowerId)
-                .distinct()
-                .toList();
-
-        List<MemberExternalDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
-
-        // 4. DTO 변환
-        return MemberConverter.toFollowList(followerDTOList, hasNext, nextCursor);
-    }
-
-    @Override
-    public MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId) {
-        // 1. 팔로잉 목록 조회
-        List<Follow> followingList = memberFollowQueryService.getFollowingList(memberId, cursorId,
-                DEFAULT_PAGE_SIZE + 1);
-
-        // 2. 커서 기반 페이징 처리
-        boolean hasNext = followingList.size() > DEFAULT_PAGE_SIZE;
-        Long nextCursor = null;
-        if (hasNext) {
-            followingList.removeLast();
-            nextCursor = followingList.getLast().getId();
-        }
-
-        // 3. 팔로잉 목록의 닉네임, 프로필 이미지 배치 조회
-        List<String> followingIdList = followingList.stream()
-                .map(Follow::getFollowingId)
-                .distinct()
-                .toList();
-
-        List<MemberExternalDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId,
-                followingIdList);
-
-        // 4. DTO 변환
-        return MemberConverter.toFollowList(followingDTOList, hasNext, nextCursor);
-    }
-
-    @Override
-    public MemberResponseDTO.FollowPreviewList getFollowers(String memberId, int size) {
-        // 1. 팔로워 목록 size 개수만큼 조회
-        List<Follow> followerList = memberFollowQueryService.getFollowers(memberId, size);
-
-        // 2. 팔로워 목록의 닉네임, 프로필 이미지 배치 조회
-        List<String> followerIdList = followerList.stream()
-                .map(Follow::getFollowerId)
-                .distinct()
-                .toList();
-
-        List<MemberExternalDTO.WithFollowStatus> followerDTOList = createWithFollowStatusDTOs(memberId, followerIdList);
-        // 3. DTO 변환
-        return MemberConverter.toFollowPreviewList(followerDTOList);
-    }
-
-    @Override
-    public MemberResponseDTO.FollowPreviewList getFollowings(String memberId, int size) {
-        // 1. 팔로잉 목록 size 개수만큼 조회
-        List<Follow> followingList = memberFollowQueryService.getFollowings(memberId, size);
-
-        // 2. 팔로잉 목록의 닉네임, 프로필 이미지 배치 조회
-        List<String> followingIdList = followingList.stream()
-                .map(Follow::getFollowingId)
-                .distinct()
-                .toList();
-
-        List<MemberExternalDTO.WithFollowStatus> followingDTOList = createWithFollowStatusDTOs(memberId,
-                followingIdList);
-
-        // 3. DTO 변환
-        return MemberConverter.toFollowPreviewList(followingDTOList);
-    }
 
     @Override
     public String getMemberIdByNickname(String nickname) {
@@ -169,12 +43,6 @@ public class MemberAPIImpl implements MemberAPI {
             return Map.of();
         }
         return memberQueryService.getMemberIdsByNicknames(nicknames);
-    }
-
-    @Override
-    public boolean isFollowing(String memberId, String targetMemberNickname) {
-        String targetMemberId = memberQueryService.getMemberIdByNickname(targetMemberNickname);
-        return memberFollowQueryService.isFollowing(memberId, targetMemberId);
     }
 
     /**
@@ -197,18 +65,17 @@ public class MemberAPIImpl implements MemberAPI {
             return Map.of();
         }
 
-        // 1. Repository를 통해 IN 쿼리로 모든 회원 정보 조회
-        // [0] memberId, [1] nickname, [2] profileImageUrl
-        List<Object[]> results = memberQueryService.getMemberBasicInfoMapForShare(memberIds);
+        // 1. Repository를 통해 IN 쿼리로 모든 회원 정보 조회 (Projection 사용)
+        List<MemberBasicInfoProjection> results = memberQueryService.getMemberBasicInfoMapForShare(memberIds);
 
-        // 2. 조회된 엔티티 리스트를 Map으로 변환
+        // 2. 조회된 Projection 리스트를 Map으로 변환
         // memberId를 key로, BasicInfoDTO를 value로 사용
         return results.stream()
                 .collect(Collectors.toMap(
-                        row -> (String) row[0], // memberId
-                        row -> MemberExternalDTO.BasicInfo.builder()
-                                .nickname((String) row[1]) // nickname
-                                .profileImageUrl((String) row[2]) // profileImageUrl
+                        MemberBasicInfoProjection::getId,
+                        projection -> MemberExternalDTO.BasicInfo.builder()
+                                .nickname(projection.getNickName())
+                                .profileImageUrl(projection.getImgUrl())
                                 .build()
                 ));
     }
@@ -237,22 +104,20 @@ public class MemberAPIImpl implements MemberAPI {
             return Map.of();
         }
 
-        // 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회하기
-        List<Object[]> memberInfoList = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(
-                targetMemberIds);
+        // 1. Facade에서 내부 DTO로 배치 조회
+        List<MemberResponseDTO.MemberProfile> profiles = memberQueryFacade.getMemberProfiles(targetMemberIds,
+                currentMemberId);
 
-        Map<String, Boolean> followStatusMap = memberFollowQueryService.getFollowStatusMapForMembers(currentMemberId,
-                targetMemberIds);
+        // 2. 내부 DTO → 외부 DTO 변환 후 Map으로 변환
+        // targetMemberIds와 profiles는 순서가 일치하므로 zip 형태로 매핑
+        Map<String, MemberExternalDTO.WithFollowStatus> result = new java.util.HashMap<>();
+        for (int i = 0; i < targetMemberIds.size() && i < profiles.size(); i++) {
+            String memberId = targetMemberIds.get(i);
+            MemberResponseDTO.MemberProfile profile = profiles.get(i);
+            result.put(memberId, MemberConverter.toExternalDTO(profile));
+        }
 
-        return memberInfoList.stream()
-                .collect(Collectors.toMap(
-                        row -> (String) row[0],
-                        row -> {
-                            String targetMemberId = (String) row[0];
-                            boolean isFollowing = followStatusMap.getOrDefault(targetMemberId, false);
-                            return MemberConverter.toWithFollowStatusDTO(row, isFollowing);
-                        }
-                ));
+        return result;
     }
 
     @Override
@@ -272,22 +137,6 @@ public class MemberAPIImpl implements MemberAPI {
         }
 
         return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
-    }
-
-    // 이걸로 여기서 DTO 생성
-    private List<MemberExternalDTO.WithFollowStatus> createWithFollowStatusDTOs(String currentMemberId,
-                                                                                List<String> targetMemberIds) {
-        if (targetMemberIds == null || targetMemberIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        // 위 getMemberWithFollowStatusMapForShare 호출
-        Map<String, MemberExternalDTO.WithFollowStatus> map = getMemberWithFollowStatusMapForShare(targetMemberIds,
-                currentMemberId);
-
-        return targetMemberIds.stream()
-                .map(map::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 
 }

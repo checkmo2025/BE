@@ -1,7 +1,6 @@
 package checkmo.member;
 
 import checkmo.member.internal.entity.Member;
-import checkmo.member.web.dto.MemberResponseDTO;
 import java.util.List;
 import java.util.Map;
 
@@ -9,83 +8,6 @@ import java.util.Map;
  * Member Domain Query Facade Member 도메인의 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade
  */
 public interface MemberAPI {
-
-    //== MemberQueryService ==//
-
-    /**
-     * 닉네임 중복 확인 (내부용)
-     *
-     * @param nickname 확인할 닉네임
-     * @return 중복 여부 (true: 중복됨, false: 사용 가능)
-     */
-    boolean isNicknameDuplicated(String nickname);
-
-    /**
-     * 회원 기본 정보 조회 (내부용)
-     *
-     * @param memberId 회원 ID
-     * @return 회원 기본 정보 DTO
-     */
-    MemberResponseDTO.MemberProfileResponseDTO getMemberBasicInfo(String memberId);
-
-    /**
-     * 회원 프로필 정보 (카테고리 포함) 조회 (내부용)
-     *
-     * @param memberId 회원 ID
-     * @return 회원 프로필 정보 DTO
-     */
-    MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId);
-
-    /**
-     * 다른 사람 프로필 조회 (내부용)
-     *
-     * @param targetMemberNickname 조회 대상 회원 닉네임
-     * @param memberId             조회하는 회원 ID (팔로우 여부 확인용)
-     * @return targetMember의 프로필 정보 DTO
-     */
-    MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId);
-
-    //== MemberFollowQueryService ==//
-
-    /**
-     * 특정 회원의 팔로워 목록 전체 조회 (내부용)
-     *
-     * @param memberId 조회할 회원의 ID
-     * @param cursorId 커서 ID
-     * @return 팔로워 목록
-     */
-    MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId);
-
-    /**
-     * 특정 회원의 팔로잉 목록 전체 조회 (내부용)
-     *
-     * @param memberId 조회할 회원의 ID
-     * @param cursorId 커서 ID
-     * @return 팔로잉 목록
-     */
-    MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId);
-
-    /**
-     * 특정 회원의 팔로워 목록 size 개수만큼 조회 (내부용)
-     * <p>
-     * ‼️ 마이페이지 구성할 때 사용하세요~~
-     *
-     * @param memberId 조회할 회원의 ID
-     * @param size     조회할 개수
-     * @return 팔로워 목록
-     */
-    MemberResponseDTO.FollowPreviewList getFollowers(String memberId, int size);
-
-    /**
-     * 특정 회원의 팔로잉 목록 size 개수만큼 조회 (내부용)
-     * <p>
-     * ‼️ 마이페이지 구성할 때 사용하세요~~
-     *
-     * @param memberId 조회할 회원의 ID
-     * @param size     조회할 개수
-     * @return 팔로잉 목록
-     */
-    MemberResponseDTO.FollowPreviewList getFollowings(String memberId, int size);
 
     /**
      * 닉네임으로 회원 ID 조회 (외부용)
@@ -102,15 +24,6 @@ public interface MemberAPI {
      * @return 닉네임과 회원 ID 매핑 정보
      */
     Map<String, String> getMemberIdsByNicknames(List<String> nicknames);
-
-    /**
-     * 특정 회원의 팔로우 여부 확인 (외부용)
-     *
-     * @param memberId             조회하는 회원 ID
-     * @param targetMemberNickname 조회 대상 회원 닉네임
-     * @return 팔로우 여부
-     */
-    boolean isFollowing(String memberId, String targetMemberNickname);
 
     /**
      * 공유용 기본 회원 정보 조회 (외부용)
