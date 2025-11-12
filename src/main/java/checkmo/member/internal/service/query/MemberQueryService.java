@@ -1,6 +1,7 @@
 package checkmo.member.internal.service.query;
 
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public interface MemberQueryService {
      * @param memberIds 회원 ID 목록
      * @return 회원 ID와 기본 정보 DTO의 매핑
      */
-    List<Object[]> getMemberBasicInfoMapForShare(List<String> memberIds);
+    List<MemberBasicInfoProjection> getMemberBasicInfoMapForShare(List<String> memberIds);
 
     /**
      * 다른 사람 프로필 조회
@@ -87,7 +88,7 @@ public interface MemberQueryService {
      * 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회
      *
      * @param memberIds 회원 ID 목록
-     * @return 회원 ID와 닉네임, 프로필 이미지, 팔로우 상태 정보의 매핑
+     * @return 회원 ID와 닉네임, 프로필 이미지 정보
      */
-    List<Object[]> getMemberNicknamesAndProfileImagesByMemberIds(List<String> memberIds);
+    List<MemberBasicInfoProjection> getMemberNicknamesAndProfileImagesByMemberIds(List<String> memberIds);
 }
