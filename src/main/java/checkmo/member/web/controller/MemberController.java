@@ -1,9 +1,9 @@
 package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.MemberAPI;
 import checkmo.member.internal.authAnnotation.CurrentId;
 import checkmo.member.internal.facade.MemberCommandFacade;
+import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,24 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberCommandFacade memberCommandFacade;
-    private final MemberAPI memberAPI;
+    private final MemberQueryFacade memberQueryFacade;
 
-    // 마이페이지 관련
-    // GET /api/members/me - 마이페이지 조회
-    // PATCH /api/members/me - 프로필 편집
-    // DELETE /api/members/me - 탈퇴
-
-    // 모임 관리 관련
-    // GET /api/members/me/clubs?status=all - 모임관리 페이지
-    // DELETE /api/clubs/{clubId}/members/me - 모임 탈퇴
-
-    // 알림 설정 관련
-    // PATCH /api/members/me/notification-settings - 알림 설정
-
-    // 다른 사람 프로필 관련
-    // GET /api/members/{memberNickname} - 다른 사람 프로필 조회
-
-    // 팔로우 관련
     @Operation(summary = "회원 팔로잉 API", description = "특정 회원을 팔로잉합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -109,7 +93,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followingList = memberAPI.getFollowingList(memberId, cursorId);
+        var followingList = memberQueryFacade.getFollowingList(memberId, cursorId);
         return ApiResponse.onSuccess(followingList);
     }
 
@@ -125,7 +109,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followerList = memberAPI.getFollowerList(memberId, cursorId);
+        var followerList = memberQueryFacade.getFollowerList(memberId, cursorId);
         return ApiResponse.onSuccess(followerList);
     }
 
@@ -156,7 +140,7 @@ public class MemberController {
     public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(memberAPI.getMemberProfile(memberId));
+        return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
     }
 
     @Operation(summary = "다른 사람 프로필 조회 API", description =
@@ -167,6 +151,6 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        return ApiResponse.onSuccess(memberAPI.getOtherProfile(memberNickname, memberId));
+        return ApiResponse.onSuccess(memberQueryFacade.getOtherProfile(memberNickname, memberId));
     }
 }
