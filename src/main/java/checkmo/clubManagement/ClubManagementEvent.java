@@ -5,6 +5,10 @@ import lombok.Builder;
 public class ClubManagementEvent {
 
     @Builder
-    public record ClubDeleted(Long clubId) {
+    public record JoinClubEvent(String memberId, Long clubId, String clubName) {
+    }
+
+    @Builder
+    public record ClubDeletedEvent(Long clubId) {
     }
 }

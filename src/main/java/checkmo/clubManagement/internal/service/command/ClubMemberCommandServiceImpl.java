@@ -1,5 +1,6 @@
 package checkmo.clubManagement.internal.service.command;
 
+import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -7,7 +8,6 @@ import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberJoinDTO;
-import checkmo.clubMeeting.JoinClubEvent;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;

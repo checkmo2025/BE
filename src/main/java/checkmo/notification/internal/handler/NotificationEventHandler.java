@@ -1,7 +1,7 @@
 package checkmo.notification.internal.handler;
 
 import checkmo.bookStory.LikeEvent;
-import checkmo.clubMeeting.JoinClubEvent;
+import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.member.FollowEvent;
 import checkmo.notification.internal.service.command.NotificationCommandService;
 import lombok.RequiredArgsConstructor;

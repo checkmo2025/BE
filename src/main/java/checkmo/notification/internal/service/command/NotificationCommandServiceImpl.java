@@ -1,7 +1,7 @@
 package checkmo.notification.internal.service.command;
 
 import checkmo.bookStory.LikeEvent;
-import checkmo.clubMeeting.JoinClubEvent;
+import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.FollowEvent;
@@ -80,17 +80,17 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     @CacheEvict(value = "notifications", key = "#event.getMemberId()")
     public void createNotification(JoinClubEvent event) {
         // 독서 클럽 가입 승인 이벤트에서 멤버 정보를 가져옴 (프록시로)
-        Member proxyJoinedMember = memberAPI.findMemberReferenceById(event.getMemberId()); // 클럽에 새로 가입된 사람
+        Member proxyJoinedMember = memberAPI.findMemberReferenceById(event.memberId()); // 클럽에 새로 가입된 사람
 
         // 리다이렉트 경로를 생성
         String redirectPath = NotificationConverter.getRedirectPathForClub(Notification.NotificationType.JOIN_CLUB,
-                event.getClubId());
+                event.clubId());
 
         // Notification 객체를 생성하고 저장 (sender 없이, targetName 포함)
         Notification notification = NotificationConverter.fromEvent(
                 Notification.NotificationType.JOIN_CLUB,
                 redirectPath,
-                event.getClubName(),
+                event.clubName(),
                 null, // 시스템 알림이므로 sender는 null
                 proxyJoinedMember
         );
