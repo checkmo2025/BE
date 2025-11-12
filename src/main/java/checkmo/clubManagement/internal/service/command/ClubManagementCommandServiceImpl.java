@@ -13,6 +13,7 @@ import checkmo.member.MemberAPI;
 import checkmo.member.internal.entity.Member;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,9 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
 
     // 자신의 Repository
     private final ClubRepository clubRepository;
+
+    // Event Publisher
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional
@@ -95,5 +99,14 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         clubCategoryCommandService.modifyClubCategories(club, categoryIds);
 
         return club.getId();
+    }
+
+    @Override
+    @Transactional
+    // TODO: 클럽이 삭제될 때, 이벤트 발행
+    public void deleteClub(Long clubId, String memberId) {
+        // Club을 삭제함으로써 Cascade.REMOVE가 동작되어 ClubManagement 모듈 내 모든 엔티티(클럽 멤버, 책 추천, 클럽 카테고리) 제거
+        // Meeting을 삭제함으로써 Cascade.REMOVE가 동작되어 ClubMeeting 모듈 내 모든 엔티티(토픽, 팀, 팀 토픽, 멤터 팀, 한줄평) 제거
+        // Notice를 삭제함으로써 Cascade.REMOVE가 동작되어 ClubNotice 모듈 내 모든 엔티티(투표, 회원 투표) 제거 (단, 비즈니스 요구사항 변경에 따라 Notice와 Vote는 연관관계 수정되어야 함 -2025.11.12 기준-)
     }
 }

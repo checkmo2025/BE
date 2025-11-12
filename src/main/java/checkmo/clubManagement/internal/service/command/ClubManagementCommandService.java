@@ -26,4 +26,12 @@ public interface ClubManagementCommandService {
      * @param request  모임 수정 요청 정보 DTO
      */
     Long updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request);
+
+    /**
+     * 독서 모임을 삭제합니다.
+     *
+     * @param clubId   삭제할 모임
+     * @param memberId 사용자 ID
+     */
+    void deleteClub(Long clubId, String memberId);
 }
