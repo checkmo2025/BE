@@ -1,6 +1,6 @@
 package checkmo.clubMeeting.web.controller;
 
-import checkmo.clubMeeting.ClubAPI;
+import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
@@ -38,7 +38,7 @@ public class ClubMeetingController {
 
     private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubTopicCommandService clubTopicCommandService;
-    private final ClubAPI clubAPI;
+    private final ClubMeetingAPI clubMeetingAPI;
 
     @Operation(summary = "정기 독서모임 생성 API", description = "정기 독서모임을 생성합니다.")
     @Parameters({
@@ -98,7 +98,7 @@ public class ClubMeetingController {
             @RequestParam(required = false, defaultValue = "5") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.MeetingListDTO meetings = clubAPI.getMeetingsByClub(clubId, cursorId, size, memberId);
+        MeetingResponseDTO.MeetingListDTO meetings = clubMeetingAPI.getMeetingsByClub(clubId, cursorId, size, memberId);
         return ApiResponse.onSuccess(meetings);
     }
 
@@ -116,7 +116,7 @@ public class ClubMeetingController {
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.MeetingDetailDTO meetingDetail = clubAPI.findMeetingDetailById(meetingId, memberId);
+        MeetingResponseDTO.MeetingDetailDTO meetingDetail = clubMeetingAPI.findMeetingDetailById(meetingId, memberId);
         return ApiResponse.onSuccess(meetingDetail);
     }
 
@@ -138,7 +138,7 @@ public class ClubMeetingController {
             @RequestParam @Min(1) @Max(12) int month,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubAPI.getClubMeetingCalendar(clubId, year, month, memberId));
+        return ApiResponse.onSuccess(clubMeetingAPI.getClubMeetingCalendar(clubId, year, month, memberId));
     }
 
     // 토론조 관리
@@ -162,7 +162,8 @@ public class ClubMeetingController {
             @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.MeetingMemberListDTO members = clubAPI.findMeetingMembersByMeeting(meetingId, cursorId, size,
+        MeetingResponseDTO.MeetingMemberListDTO members = clubMeetingAPI.findMeetingMembersByMeeting(meetingId,
+                cursorId, size,
                 memberId);
         return ApiResponse.onSuccess(members);
     }
@@ -206,7 +207,7 @@ public class ClubMeetingController {
             @PathVariable @Min(value = 1) Integer teamNumber,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TeamMemberDTO teamMembers = clubAPI.findTeamMembersByMeeting(meetingId, teamNumber,
+        MeetingResponseDTO.TeamMemberDTO teamMembers = clubMeetingAPI.findTeamMembersByMeeting(meetingId, teamNumber,
                 memberId);
         return ApiResponse.onSuccess(teamMembers);
     }
@@ -225,7 +226,7 @@ public class ClubMeetingController {
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TopicDTOList topics = clubAPI.findMeetingTopicsWithTeam(meetingId, memberId);
+        MeetingResponseDTO.TopicDTOList topics = clubMeetingAPI.findMeetingTopicsWithTeam(meetingId, memberId);
         return ApiResponse.onSuccess(topics);
     }
 
@@ -246,7 +247,8 @@ public class ClubMeetingController {
             @PathVariable @Min(value = 1) Integer teamNumber,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TeamTopicDTO teamTopicDTO = clubAPI.findMeetingTopicsByTeam(meetingId, teamNumber, memberId);
+        MeetingResponseDTO.TeamTopicDTO teamTopicDTO = clubMeetingAPI.findMeetingTopicsByTeam(meetingId, teamNumber,
+                memberId);
         return ApiResponse.onSuccess(teamTopicDTO);
     }
 

@@ -8,7 +8,7 @@ import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
  * <p>
  * Club 도메인의 모든 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade 입니다.
  */
-public interface ClubAPI {
+public interface ClubMeetingAPI {
 
     /**
      * ClubMeetingQueryService [책장] 모임의 책장 목록을 조회합니다. (내부용)

@@ -8,7 +8,7 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
-import checkmo.clubMeeting.ClubAPI;
+import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ClubAPIImpl implements ClubAPI {
+public class ClubMeetingAPIImpl implements ClubMeetingAPI {
 
     // 페이징 기본 크기 상수
     private static final int TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF = 3;
