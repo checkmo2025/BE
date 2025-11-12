@@ -323,5 +323,4 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
         return clubMember.isStaff();
     }
 
-
 }

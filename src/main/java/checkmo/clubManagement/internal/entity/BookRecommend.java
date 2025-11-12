@@ -1,6 +1,5 @@
 package checkmo.clubManagement.internal.entity;
 
-import checkmo.book.internal.entity.Book;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,12 +42,8 @@ public class BookRecommend extends BaseEntity {
     @JoinColumn(name = "club_member_id")
     private ClubMember clubMember;
 
-    @Column(name = "book_id", insertable = false, updatable = false)
+    @Column(name = "book_id", nullable = false)
     private String bookId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
 
     public void updateRecommendInfo(String title, String content, double rate, String tag) {
         this.title = title;

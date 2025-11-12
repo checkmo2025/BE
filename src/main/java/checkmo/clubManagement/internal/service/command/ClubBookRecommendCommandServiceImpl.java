@@ -1,8 +1,6 @@
 package checkmo.clubManagement.internal.service.command;
 
 import checkmo.book.BookAPI;
-import checkmo.book.internal.entity.Book;
-import checkmo.book.internal.facade.BookCommandFacade;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -22,7 +20,6 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
 
     // Domain level 1
     private final BookAPI bookAPI;
-    private final BookCommandFacade bookCommandFacade;
 
     // 자신의 QueryService
     private final ClubQueryService clubQueryService;
@@ -38,12 +35,11 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 2. 책 저장 후 프록시 가져오기
-        bookCommandFacade.saveBook(request.getBookDetail());
-        Book bookProxy = bookAPI.findBookReferenceById(request.getBookDetail().getIsbn());
+        // 2. 외부 모듈 Book으로부터 bookId 반환 받기
+        String bookId = bookAPI.getOrCreateBook(request.getBookDetail());
 
         // 3. 책 추천 엔티티 생성
-        BookRecommend bookRecommend = ClubManagementConverter.fromCreateBookRecommendDTOToEntity(request, bookProxy,
+        BookRecommend bookRecommend = ClubManagementConverter.fromCreateBookRecommendDTOToEntity(request, bookId,
                 clubMember);
 
         // 4. 저장
@@ -79,7 +75,6 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
 
     @Override
     public void deleteRecommendedBook(Long clubId, String memberId, Long bookRecommendId) {
-
         // 1. 클럽 및 클럽 멤버 유효성 검증
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);

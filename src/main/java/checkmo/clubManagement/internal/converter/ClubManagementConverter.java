@@ -1,7 +1,6 @@
 package checkmo.clubManagement.internal.converter;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.book.internal.entity.Book;
 import checkmo.category.CategoryExternalDTO;
 import checkmo.category.CategoryExternalDTO.CategoryInfo;
 import checkmo.clubManagement.ClubManagementExternalDTO;
@@ -240,7 +239,7 @@ public class ClubManagementConverter {
      */
     public static BookRecommend fromCreateBookRecommendDTOToEntity(
             ClubRequestDTO.CreateBookRecommendDTO request,
-            Book proxyBook,
+            String bookId,
             ClubMember clubMember
     ) {
         return BookRecommend.builder()
@@ -249,8 +248,7 @@ public class ClubManagementConverter {
                 .rate(request.getRate())
                 .tag(request.getTag())
                 .clubMember(clubMember)
-                .book(proxyBook)
-                .bookId(proxyBook.getId())
+                .bookId(bookId)
                 .build();
     }
 
