@@ -70,11 +70,6 @@ public class BookAPIImpl implements BookAPI {
     }
 
     @Override
-    public Book findBookReferenceById(String bookId) {
-        return bookRepository.getReferenceById(bookId);
-    }
-
-    @Override
     @Transactional
     public String getOrCreateBook(BookExternalDTO.BookCreateRequest request) {
 
