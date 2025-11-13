@@ -171,11 +171,11 @@ public class BookStoryAPIImpl implements BookStoryAPI {
             String memberId,
             List<BookStory> bookStories
     ) {
-        List<String> memberIds = bookStories.stream()
+        List<String> targetMemberIds = bookStories.stream()
                 .map(BookStory::getMemberId)
                 .distinct()
                 .toList();
-        return memberAPI.getMemberWithFollowStatusMapForShare(memberIds, memberId);
+        return memberAPI.getMemberWithFollowStatusMapForShare(targetMemberIds, memberId);
     }
 
     /**
