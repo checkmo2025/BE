@@ -11,6 +11,7 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +30,6 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
     // 랜덤 인증번호 생성용 정적 필드
     private static final SecureRandom secureRandom = new SecureRandom();
-    // 자신의 CommandService
-    private final MemberCategoryCommandService memberCategoryCommandService;
     // 자신의 QueryService
     private final MemberQueryService memberQueryService;
     // 자신의 Repository
@@ -73,7 +72,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     }
 
     @Override
-    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request) {
+    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequest request) {
 
         String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
 
@@ -104,7 +103,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     @Transactional
-    public Member signUp(MemberRequestDTO.SignUpRequestDTO request) {
+    public Member signUp(MemberRequestDTO.SignUpRequest request) {
 
         // 이메일 중복 확인
         if (memberRepository.existsByEmail(request.getEmail())) {
@@ -120,7 +119,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
         // 회원 정보 저장
         String encodedPassword = passwordEncoder.encode(request.getPassword());
-        Member newMember = MemberConverter.fromSignUpRequestDTO(request, encodedPassword);
+        Member newMember = MemberConverter.fromSignUpRequest(request, encodedPassword);
 
         memberRepository.save(newMember);
         redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
@@ -130,7 +129,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     @Transactional
-    public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfoDTO request) {
+    public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
@@ -147,7 +146,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
             throw new GeneralException(ErrorStatus.NICKNAME_ALREADY_EXISTS);
         }
 
-        // 멤버 엔티티 업데이트 (일단 카테고리 빼고)
+        // 멤버 엔티티 업데이트
         member.updateAdditionalInfo(
                 request.getNickname(),
                 request.getDescription(),
@@ -155,7 +154,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         );
 
         // 관심 카테고리 저장
-        memberCategoryCommandService.modifyMemberCategories(memberId, request.getCategoryIds());
+        member.updateInterestCategories(new HashSet<>(request.getCategories()));
 
         // 프로필 완료 상태로 변경
         member.completeProfile();

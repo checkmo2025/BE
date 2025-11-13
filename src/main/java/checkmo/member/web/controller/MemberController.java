@@ -1,9 +1,10 @@
 package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.MemberAPI;
-import checkmo.member.internal.authAnnotation.CurrentId;
-import checkmo.member.internal.facade.MemberCommandFacade;
+import checkmo.member.CurrentId;
+import checkmo.member.internal.service.MemberCommandFacade;
+import checkmo.member.internal.service.MemberQueryFacade;
+import checkmo.member.internal.service.command.MemberFollowCommandService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,24 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberCommandFacade memberCommandFacade;
-    private final MemberAPI memberAPI;
+    private final MemberQueryFacade memberQueryFacade;
+    private final MemberFollowCommandService memberFollowCommandService;
 
-    // 마이페이지 관련
-    // GET /api/members/me - 마이페이지 조회
-    // PATCH /api/members/me - 프로필 편집
-    // DELETE /api/members/me - 탈퇴
-
-    // 모임 관리 관련
-    // GET /api/members/me/clubs?status=all - 모임관리 페이지
-    // DELETE /api/clubs/{clubId}/members/me - 모임 탈퇴
-
-    // 알림 설정 관련
-    // PATCH /api/members/me/notification-settings - 알림 설정
-
-    // 다른 사람 프로필 관련
-    // GET /api/members/{memberNickname} - 다른 사람 프로필 조회
-
-    // 팔로우 관련
     @Operation(summary = "회원 팔로잉 API", description = "특정 회원을 팔로잉합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -57,7 +43,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberCommandFacade.followingMember(memberId, memberNickname);
+        memberFollowCommandService.followingMember(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님 팔로잉에 성공했습니다.");
     }
 
@@ -75,7 +61,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberCommandFacade.unfollowingMember(memberId, memberNickname);
+        memberFollowCommandService.unfollowingMember(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님을 언팔로잉 하였습니다.");
     }
 
@@ -93,7 +79,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberCommandFacade.deleteFollower(memberId, memberNickname);
+        memberFollowCommandService.deleteFollower(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님을 팔로워 목록에서 제거하였습니다.");
     }
 
@@ -109,7 +95,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followingList = memberAPI.getFollowingList(memberId, cursorId);
+        var followingList = memberQueryFacade.getFollowingList(memberId, cursorId);
         return ApiResponse.onSuccess(followingList);
     }
 
@@ -125,7 +111,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followerList = memberAPI.getFollowerList(memberId, cursorId);
+        var followerList = memberQueryFacade.getFollowerList(memberId, cursorId);
         return ApiResponse.onSuccess(followerList);
     }
 
@@ -138,9 +124,9 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
-    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> updateMemberProfile(
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategory> updateMemberProfile(
             @CurrentId String memberId,
-            @RequestBody MemberRequestDTO.MemberProfileUpdateRequestDTO request
+            @RequestBody MemberRequestDTO.MemberProfileUpdateRequest request
     ) {
         return ApiResponse.onSuccess(memberCommandFacade.updateMemberProfile(memberId, request));
     }
@@ -153,20 +139,20 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
-    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategory> getMemberProfile(
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(memberAPI.getMemberProfile(memberId));
+        return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
     }
 
     @Operation(summary = "다른 사람 프로필 조회 API", description =
             "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태를 포함합니다.\n" +
                     "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
-    public ApiResponse<MemberResponseDTO.otherProfileResponseDTO> getOtherProfile(
+    public ApiResponse<MemberResponseDTO.otherProfileResponse> getOtherProfile(
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        return ApiResponse.onSuccess(memberAPI.getOtherProfile(memberNickname, memberId));
+        return ApiResponse.onSuccess(memberQueryFacade.getOtherProfile(memberNickname, memberId));
     }
 }

@@ -10,8 +10,6 @@ import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberJoinDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.MemberAPI;
-import checkmo.member.internal.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -20,9 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
-
-    // Domain level 2
-    private final MemberAPI memberAPI;
 
     // 자신의 Service
     private final ClubQueryService clubQueryService;
@@ -40,28 +35,25 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
         // 1. 유효성 검증(club)
         Club club = clubQueryService.validateClub(clubId);
 
-        // 2. 회원 프록시 객체 조회
-        Member proxyMember = memberAPI.findMemberReferenceById(memberId);
-
-        // 3. 이미 신청 또는 가입되어 있는 경우
-        clubMemberRepository.findByClubIdAndMemberId(club.getId(), proxyMember.getId())
+        // 2. 이미 신청 또는 가입되어 있는 경우
+        clubMemberRepository.findByClubIdAndMemberId(club.getId(), memberId)
                 .ifPresent(cm -> {
                     throw new GeneralException(ErrorStatus.CLUB_MEMBER_ALREADY_EXISTS);
                 });
 
-        // 4. 클럽 오픈 여부에 따른 사용자 상태 설정
+        // 3. 클럽 오픈 여부에 따른 사용자 상태 설정
         ClubMember.ClubMemberStatus status = club.isOpen()
                 ? ClubMember.ClubMemberStatus.MEMBER
                 : ClubMember.ClubMemberStatus.PENDING;
 
-        // 5. 공개 클럽이면 즉시 가입 완료 이벤트 발행
+        // 4. 공개 클럽이면 즉시 가입 완료 이벤트 발행
         if (club.isOpen()) {
-            JoinClubEvent joinClubEvent = new JoinClubEvent(proxyMember.getId(), club.getId(), club.getName());
+            JoinClubEvent joinClubEvent = new JoinClubEvent(memberId, club.getId(), club.getName());
             eventPublisher.publishEvent(joinClubEvent);
         }
 
-        // 6. ClubMember 생성 및 연관관계 설정
-        ClubMember clubMember = ClubManagementConverter.toClubMemberEntity(club, proxyMember, status,
+        // 5. ClubMember 생성 및 연관관계 설정
+        ClubMember clubMember = ClubManagementConverter.toClubMemberEntity(club, memberId, status,
                 request.getJoinMessage());
         club.addClubMember(clubMember);
 

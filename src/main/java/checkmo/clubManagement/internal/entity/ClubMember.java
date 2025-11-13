@@ -4,7 +4,6 @@ import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.MemberTeam;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.common.BaseEntity;
-import checkmo.member.internal.entity.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,12 +50,8 @@ public class ClubMember extends BaseEntity {
     @Setter
     private Club club;
 
-    @Column(name = "member_id", insertable = false, updatable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private String memberId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
 
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.REMOVE)

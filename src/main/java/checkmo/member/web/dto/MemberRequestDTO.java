@@ -1,5 +1,6 @@
 package checkmo.member.web.dto;
 
+import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -12,18 +13,18 @@ public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class MemberProfileUpdateRequestDTO {
+    public static class MemberProfileUpdateRequest {
         @Size(max = 20, message = "소개는 20자 이하여야 합니다")
         private String description;
 
         private String imgUrl;
 
-        private List<Long> categoryIds;
+        private List<MemberInterestCategory> categories;
     }
 
     @Getter
     @NoArgsConstructor
-    public static class PasswordUpdateRequestDTO {
+    public static class PasswordUpdateRequest {
         @NotBlank(message = "현재 비밀번호는 필수입니다")
         private String currentPassword;
 
@@ -35,7 +36,7 @@ public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class EmailVerificationRequestDTO {
+    public static class EmailVerificationRequest {
         @NotBlank(message = "이메일은 필수입니다")
         @Email(message = "유효한 이메일 형식이 아닙니다")
         private String email;
@@ -46,7 +47,7 @@ public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class SignUpRequestDTO {
+    public static class SignUpRequest {
         @NotBlank(message = "이메일은 필수입니다")
         @Email(message = "유효한 이메일 형식이 아닙니다")
         @Schema(description = "이메일 주소", example = "test@example.com")
@@ -61,7 +62,7 @@ public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class AdditionalInfoDTO {
+    public static class AdditionalInfo {
 
         @NotBlank(message = "닉네임은 필수입니다")
         @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
@@ -75,13 +76,13 @@ public class MemberRequestDTO {
         private String imgUrl;
 
         @NotEmpty(message = "관심 카테고리는 최소 1개 이상 선택해야 합니다")
-        private List<Long> categoryIds;
+        private List<MemberInterestCategory> categories;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LoginRequestDTO {
+    public static class LoginRequest {
         @NotBlank(message = "이메일은 필수입니다")
         @Email(message = "유효한 이메일 형식이 아닙니다")
         private String email;

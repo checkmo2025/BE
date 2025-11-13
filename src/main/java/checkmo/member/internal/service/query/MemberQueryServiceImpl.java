@@ -4,6 +4,8 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
+import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,7 +45,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public List<Object[]> getMemberBasicInfoMapForShare(List<String> memberIds) {
+    public List<MemberBasicInfoProjection> getMemberBasicInfoMapForShare(List<String> memberIds) {
         return memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
     }
 
@@ -61,11 +63,11 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public Map<String, String> getMemberIdsByNicknames(List<String> nicknames) {
-        List<Object[]> results = memberRepository.findNicknameAndIdByNicknameIn(nicknames);
+        List<MemberIdAndNicknameProjection> results = memberRepository.findNicknameAndIdByNicknameIn(nicknames);
         return results.stream()
                 .collect(Collectors.toMap(
-                        row -> (String) row[0], // key: nickname
-                        row -> (String) row[1]  // value: memberId
+                        MemberIdAndNicknameProjection::getNickName, // key: nickname
+                        MemberIdAndNicknameProjection::getId      // value: memberId
                 ));
     }
 
@@ -77,16 +79,16 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
-        var results = memberRepository.findIdAndNicknameByIdIn(memberIds);
+        List<MemberIdAndNicknameProjection> results = memberRepository.findIdAndNicknameByIdIn(memberIds);
         return results.stream()
                 .collect(Collectors.toMap(
-                        row -> (String) row[0], // memberId
-                        row -> (String) row[1]  // nickname
+                        MemberIdAndNicknameProjection::getId,       // memberId
+                        MemberIdAndNicknameProjection::getNickName  // nickname
                 ));
     }
 
     @Override
-    public List<Object[]> getMemberNicknamesAndProfileImagesByMemberIds(List<String> memberIds) {
+    public List<MemberBasicInfoProjection> getMemberNicknamesAndProfileImagesByMemberIds(List<String> memberIds) {
         return memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
     }
 }

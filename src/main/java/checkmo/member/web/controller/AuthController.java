@@ -1,8 +1,9 @@
 package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.MemberAPI;
-import checkmo.member.internal.facade.MemberCommandFacade;
+import checkmo.member.internal.service.MemberCommandFacade;
+import checkmo.member.internal.service.command.MemberRegistrationCommandService;
+import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,8 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "인증", description = "회원가입, 로그인, 로그아웃, 이메일 인증, 소셜 로그인 관련 API")
 public class AuthController {
 
+    private final MemberRegistrationCommandService memberRegistrationCommandService;
     private final MemberCommandFacade memberCommandFacade;
-    private final MemberAPI memberAPI;
+    private final MemberQueryService memberQueryService;
 
     // 이메일 인증 요청
     @Operation(summary = "이메일 인증번호 요청", description = "회원가입 시 이메일 인증번호를 요청합니다.")
@@ -42,7 +44,7 @@ public class AuthController {
                                                      @Email(message = "유효한 이메일 주소를 입력해주세요")
                                                      @NotBlank(message = "이메일은 필수입니다")
                                                      String email) {
-        memberCommandFacade.sendEmailVerification(email);
+        memberRegistrationCommandService.sendEmailVerification(email);
         return ApiResponse.onSuccess("인증번호가 이메일로 발송되었습니다.");
     }
 
@@ -54,8 +56,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다.")
     })
     public ApiResponse<Boolean> verifyEmailCode(
-            @Valid @RequestBody MemberRequestDTO.EmailVerificationRequestDTO request) {
-        boolean isVerified = memberCommandFacade.verifyEmailCode(request);
+            @Valid @RequestBody MemberRequestDTO.EmailVerificationRequest request) {
+        boolean isVerified = memberRegistrationCommandService.verifyEmailCode(request);
         return ApiResponse.onSuccess(isVerified);
     }
 
@@ -67,8 +69,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류입니다. 관리자에게 문의 바랍니다.")
     })
-    public ApiResponse<MemberResponseDTO.SignUpResponseDTO> signUp(
-            @Valid @RequestBody MemberRequestDTO.SignUpRequestDTO request,
+    public ApiResponse<MemberResponseDTO.SignUpResponse> signUp(
+            @Valid @RequestBody MemberRequestDTO.SignUpRequest request,
             HttpServletResponse response) {
         return ApiResponse.onSuccess(memberCommandFacade.signUp(request, response));
     }
@@ -83,7 +85,7 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Void> addAdditionalInfo(
-            @Valid @RequestBody MemberRequestDTO.AdditionalInfoDTO request) {
+            @Valid @RequestBody MemberRequestDTO.AdditionalInfo request) {
         memberCommandFacade.addAdditionalInfo(request);
         return ApiResponse.onSuccess(null);
     }
@@ -98,7 +100,7 @@ public class AuthController {
     public ApiResponse<Boolean> checkNickname(@RequestParam
                                               @NotBlank(message = "닉네임은 필수입니다")
                                               @Size(max = 6, message = "닉네임은 최대 6자까지 가능합니다") String nickname) {
-        boolean isDuplicated = memberAPI.isNicknameDuplicated(nickname);
+        boolean isDuplicated = memberQueryService.isNicknameDuplicated(nickname);
         return ApiResponse.onSuccess(isDuplicated);
     }
 
@@ -110,8 +112,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호가 일치하지 않습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류입니다. 관리자에게 문의 바랍니다.")
     })
-    public ApiResponse<MemberResponseDTO.LoginResponseDTO> login(
-            @Valid @RequestBody MemberRequestDTO.LoginRequestDTO request,
+    public ApiResponse<MemberResponseDTO.LoginResponse> login(
+            @Valid @RequestBody MemberRequestDTO.LoginRequest request,
             HttpServletResponse response) {
         return ApiResponse.onSuccess(memberCommandFacade.login(request, response));
     }

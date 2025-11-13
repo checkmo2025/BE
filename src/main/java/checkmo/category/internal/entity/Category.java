@@ -2,7 +2,6 @@ package checkmo.category.internal.entity;
 
 import checkmo.clubManagement.internal.entity.ClubCategory;
 import checkmo.common.BaseEntity;
-import checkmo.member.internal.entity.MemberCategory;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,10 +30,6 @@ public class Category extends BaseEntity {
 
     @Column(nullable = false)
     private String name;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<MemberCategory> memberCategories = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)

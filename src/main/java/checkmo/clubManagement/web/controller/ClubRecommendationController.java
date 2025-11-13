@@ -5,7 +5,7 @@ import checkmo.clubManagement.internal.service.command.ClubBookRecommendCommandS
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.internal.authAnnotation.CurrentId;
+import checkmo.member.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;

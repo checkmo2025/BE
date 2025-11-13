@@ -13,7 +13,6 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailResponseDTO;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
 import checkmo.member.MemberExternalDTO;
-import checkmo.member.internal.entity.Member;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,7 +77,7 @@ public class ClubManagementConverter {
      */
     public static ClubMember toClubMemberEntity(
             Club club,
-            Member member,
+            String memberId,
             ClubMember.ClubMemberStatus status,
             String joinMessage
     ) {
@@ -86,7 +85,7 @@ public class ClubManagementConverter {
                 .clubMemberStatus(status)
                 .joinMessage(joinMessage)
                 .club(club)
-                .member(member)
+                .memberId(memberId)
                 .build();
     }
 

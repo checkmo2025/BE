@@ -1,10 +1,9 @@
 package checkmo.member.web.dto;
 
-import checkmo.book.BookExternalDTO;
-import checkmo.category.CategoryExternalDTO;
 import checkmo.member.MemberExternalDTO;
-import java.time.LocalDateTime;
+import checkmo.member.internal.entity.MemberInterestCategory;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,15 +28,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class FollowPreviewList {
-        private List<MemberExternalDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MemberProfileResponseDTO {
+    public static class MemberProfileWithProfileImage {
         private String nickname;
         private String description;
         private String profileImageUrl;
@@ -47,18 +38,18 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MemberProfileWithCategoryResponseDTO {
+    public static class MemberProfileWithCategory {
         private String nickname;
         private String description;
         private String profileImageUrl;
-        private List<CategoryExternalDTO.CategoryInfo> categories; // 카테고리 정보 리스트
+        private Set<MemberInterestCategory> categories;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class SignUpResponseDTO {
+    public static class SignUpResponse {
         private String email;
         private boolean isProfileCompleted;
     }
@@ -67,32 +58,29 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class otherProfileResponseDTO {
+    public static class otherProfileResponse {
         private String nickname;
         private String description;
         private String profileImageUrl;
         private boolean following;
-        private List<CategoryExternalDTO.CategoryInfo> categories;
+        private Set<MemberInterestCategory> categories;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookStoryPreviewDTO {
-        private Long bookStoryId;
-        private String bookStoryTitle;
-        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private int likes;
-        private LocalDateTime createdAt;
-        private boolean isLiked; // 조회하는 사람의 좋아요 여부
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class LoginResponseDTO {
+    public static class LoginResponse {
         private String nickname;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberProfileWithFollow {
+        private String nickname;
+        private String profileImageUrl;
+        private boolean isFollowing;
     }
 }

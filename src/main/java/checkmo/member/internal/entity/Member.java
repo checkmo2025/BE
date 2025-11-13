@@ -1,22 +1,22 @@
 package checkmo.member.internal.entity;
 
-import checkmo.bookStory.internal.entity.BookStory;
-import checkmo.bookStory.internal.entity.BookStoryLiked;
-import checkmo.bookStory.internal.entity.Comment;
-import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubNotice.internal.entity.MemberVote;
 import checkmo.common.BaseEntity;
-import checkmo.notification.internal.entity.Notification;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,49 +33,47 @@ public class Member extends BaseEntity {
     @Id
     @Column(nullable = false, unique = true)
     private String id;
+
     @Column(nullable = false)
     private String email;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false)
     private String nickName;
+
     @Column(length = 20, nullable = false)
     private String description;
+
     private String imgUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
     private LocalDateTime deactivated;
+
     private boolean isProfileCompleted;
+
     @Builder.Default
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
     private List<Follow> followers = new ArrayList<>();
+
     @Builder.Default
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
     private List<Follow> followings = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<Comment> comments = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<BookStory> bookStories = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<BookStoryLiked> bookStoryLikedList = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
-    private List<Notification> receivedNotifications = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<MemberCategory> memberCategories = new ArrayList<>();
 
-    // 사용자 입장에서 자신이 보낸(sender) 알림은 필요하지 않으므로 제외
+    // 회원 관심 카테고리 (ENUM으로 관리)
     @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<ClubMember> clubMembers = new ArrayList<>();
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<MemberVote> memberVotes = new ArrayList<>();
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "member_interest_categories",
+            joinColumns = @JoinColumn(name = "member_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private Set<MemberInterestCategory> interestCategories = new HashSet<>();
 
     // 프로필 추가 정보 업데이트
     public void updateAdditionalInfo(String nickName, String description, String imgUrl) {
@@ -93,6 +91,14 @@ public class Member extends BaseEntity {
     public void updateProfile(String description, String imgUrl) {
         this.description = description != null ? description : "";
         this.imgUrl = imgUrl != null ? imgUrl : "";
+    }
+
+    // 관심 카테고리 업데이트
+    public void updateInterestCategories(Set<MemberInterestCategory> newCategories) {
+        this.interestCategories.clear();
+        if (newCategories != null) {
+            this.interestCategories.addAll(newCategories);
+        }
     }
 
     public enum Role {

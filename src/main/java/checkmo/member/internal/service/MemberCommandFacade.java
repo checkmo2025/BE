@@ -1,24 +1,19 @@
-package checkmo.member.internal.facade;
+package checkmo.member.internal.service;
 
-import checkmo.category.CategoryExternalDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.entity.MemberCategory;
 import checkmo.member.internal.service.authenticate.MemberAuthenticationService;
-import checkmo.member.internal.service.command.MemberFollowCommandService;
 import checkmo.member.internal.service.command.MemberProfileCommandService;
 import checkmo.member.internal.service.command.MemberRegistrationCommandService;
-import checkmo.member.internal.service.query.MemberCategoryQueryService;
 import checkmo.member.internal.service.security.auth.PrincipalDetails;
 import checkmo.member.internal.service.security.jwt.JwtLoginProcessor;
 import checkmo.member.web.dto.MemberRequestDTO;
-import checkmo.member.web.dto.MemberRequestDTO.LoginRequestDTO;
+import checkmo.member.web.dto.MemberRequestDTO.LoginRequest;
 import checkmo.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -28,36 +23,25 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MemberCommandFacadeImpl implements MemberCommandFacade {
+public class MemberCommandFacade {
 
     // 자신의 인증 관련 Service
     private final MemberAuthenticationService memberAuthenticationService;
 
     // 자신의 CommandService
     private final MemberRegistrationCommandService memberRegistrationCommandService;
-    private final MemberFollowCommandService memberFollowCommandService;
     private final MemberProfileCommandService memberProfileCommandService;
-    private final MemberCategoryQueryService memberCategoryQueryService;
     private final JwtLoginProcessor jwtLoginProcessor;
 
-    @Override
-    public void sendEmailVerification(String email) {
-        memberRegistrationCommandService.sendEmailVerification(email);
-    }
-
-    @Override
-    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request) {
-        return memberRegistrationCommandService.verifyEmailCode(request);
-    }
-
-    @Override
-    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request,
-                                                      HttpServletResponse response) {
+    public MemberResponseDTO.SignUpResponse signUp(
+            MemberRequestDTO.SignUpRequest request,
+            HttpServletResponse response
+    ) {
 
         Member member = memberRegistrationCommandService.signUp(request);
 
-        Authentication authentication = memberAuthenticationService.login(
-                new LoginRequestDTO(request.getEmail(), request.getPassword()));
+        Authentication authentication = memberAuthenticationService
+                .login(new LoginRequest(request.getEmail(), request.getPassword()));
 
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
@@ -65,8 +49,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
         return MemberConverter.fromMember(member);
     }
 
-    @Override
-    public void addAdditionalInfo(MemberRequestDTO.AdditionalInfoDTO request) {
+    public void addAdditionalInfo(MemberRequestDTO.AdditionalInfo request) {
 
         // 현재 사용자 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -88,69 +71,45 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
         memberRegistrationCommandService.addAdditionalInfo(memberId, request);
     }
 
-    @Override
-    public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request,
-                                                    HttpServletResponse response) {
-
+    public MemberResponseDTO.LoginResponse login(
+            LoginRequest request,
+            HttpServletResponse response
+    ) {
         Authentication authentication = memberAuthenticationService.login(request);
 
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
 
         Member member = ((PrincipalDetails) authentication.getPrincipal()).getMember();
-        return MemberConverter.fromMemberToLoginResponseDTO(member);
+        return MemberConverter.fromMemberToLoginResponse(member);
     }
 
-    @Override
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         memberAuthenticationService.logout(request, response);
     }
 
-    @Override
     public void reactivateMember() {
         throw new UnsupportedOperationException("추후 구현 예정");
     }
 
-    @Override
-    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(String memberId,
-                                                                                      MemberRequestDTO.MemberProfileUpdateRequestDTO request) {
-
+    public MemberResponseDTO.MemberProfileWithCategory updateMemberProfile(
+            String memberId,
+            MemberRequestDTO.MemberProfileUpdateRequest request
+    ) {
         Member updatedMember = memberProfileCommandService.updateMemberProfile(memberId, request);
 
-        List<MemberCategory> categoryList = memberCategoryQueryService.findCategoriesByMember(memberId);
-        List<CategoryExternalDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
-                categoryList);
-
-        return MemberConverter.toMemberProfileWithCategoryResponseDTO(updatedMember, categories);
+        return MemberConverter.toMemberProfileWithCategory(updatedMember);
     }
 
-    @Override
-    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdateRequestDTO request) {
+    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdateRequest request) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }
 
-    @Override
     public void deactivateMember(String memberId) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }
 
-    @Override
     public void deleteMember(String memberId) {
         throw new UnsupportedOperationException("추후 구현 예정");
-    }
-
-    @Override
-    public void followingMember(String memberId, String followingNickname) {
-        memberFollowCommandService.followingMember(memberId, followingNickname);
-    }
-
-    @Override
-    public void unfollowingMember(String memberId, String followingNickname) {
-        memberFollowCommandService.unfollowingMember(memberId, followingNickname);
-    }
-
-    @Override
-    public void deleteFollower(String memberId, String followerNickname) {
-        memberFollowCommandService.deleteFollower(memberId, followerNickname);
     }
 }

@@ -7,7 +7,6 @@ import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
-import checkmo.member.internal.entity.Member;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -22,12 +21,15 @@ public class BookStoryConverter {
     /**
      * BookStoryCreateRequestDTO → BookStory 변환
      */
-    public static BookStory fromBookStoryRequestDTO(BookStoryRequestDTO.BookStoryCreateRequest request,
-                                                    Member proxyMember, String bookId) {
+    public static BookStory fromBookStoryRequestDTO(
+            BookStoryRequestDTO.BookStoryCreateRequest request,
+            String memberId,
+            String bookId
+    ) {
         return BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .member(proxyMember)
+                .memberId(memberId)
                 .bookId(bookId)
                 .build();
     }
@@ -130,13 +132,13 @@ public class BookStoryConverter {
      */
     public static Comment fromCommentCreateRequestDTO(
             BookStoryRequestDTO.CommentCreateRequest request,
-            Member proxyMember,
+            String memberId,
             BookStory bookStory,
             Comment parentComment
     ) {
         return Comment.builder()
                 .content(request.getContent())
-                .member(proxyMember)
+                .memberId(memberId)
                 .bookStory(bookStory)
                 .parentComment(parentComment)
                 .build();
