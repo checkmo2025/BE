@@ -1,9 +1,10 @@
 package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.internal.authAnnotation.CurrentId;
-import checkmo.member.internal.facade.MemberCommandFacade;
+import checkmo.member.CurrentId;
+import checkmo.member.internal.service.MemberCommandFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
+import checkmo.member.internal.service.command.MemberFollowCommandService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,7 @@ public class MemberController {
 
     private final MemberCommandFacade memberCommandFacade;
     private final MemberQueryFacade memberQueryFacade;
+    private final MemberFollowCommandService memberFollowCommandService;
 
     @Operation(summary = "회원 팔로잉 API", description = "특정 회원을 팔로잉합니다.")
     @ApiResponses({
@@ -41,7 +43,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberCommandFacade.followingMember(memberId, memberNickname);
+        memberFollowCommandService.followingMember(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님 팔로잉에 성공했습니다.");
     }
 
@@ -59,7 +61,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberCommandFacade.unfollowingMember(memberId, memberNickname);
+        memberFollowCommandService.unfollowingMember(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님을 언팔로잉 하였습니다.");
     }
 
@@ -77,7 +79,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberCommandFacade.deleteFollower(memberId, memberNickname);
+        memberFollowCommandService.deleteFollower(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님을 팔로워 목록에서 제거하였습니다.");
     }
 
