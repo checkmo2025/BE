@@ -1,6 +1,5 @@
 package checkmo.member.web.dto;
 
-import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import java.util.List;
 import java.util.Set;
@@ -19,7 +18,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowList {
-        private List<MemberExternalDTO.WithFollowStatus> followList; // 팔로워/팔로잉 목록
+        private List<MemberProfileWithFollow> followList; // 팔로워/팔로잉 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
     }

@@ -1,6 +1,5 @@
 package checkmo.member.internal.service;
 
-import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
@@ -60,13 +59,8 @@ public class MemberQueryFacade {
         // 4. 배치 조회 (내부 DTO)
         List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followerIdList, memberId);
 
-        // 5. 내부 DTO → 외부 DTO 변환
-        List<MemberExternalDTO.WithFollowStatus> followerDTOList = profiles.stream()
-                .map(MemberConverter::toMemberExternalDTOWithFollowStatus)
-                .toList();
-
-        // 6. 응답 DTO 변환
-        return MemberConverter.toFollowList(followerDTOList, hasNext, nextCursor);
+        // 5. 응답 DTO 변환
+        return MemberConverter.toFollowList(profiles, hasNext, nextCursor);
     }
 
     public MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId) {
@@ -91,13 +85,8 @@ public class MemberQueryFacade {
         // 4. 배치 조회 (내부 DTO)
         List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followingIdList, memberId);
 
-        // 5. 내부 DTO → 외부 DTO 변환
-        List<MemberExternalDTO.WithFollowStatus> followingDTOList = profiles.stream()
-                .map(MemberConverter::toMemberExternalDTOWithFollowStatus)
-                .toList();
-
-        // 6. 응답 DTO 변환
-        return MemberConverter.toFollowList(followingDTOList, hasNext, nextCursor);
+        // 5. 응답 DTO 변환
+        return MemberConverter.toFollowList(profiles, hasNext, nextCursor);
     }
 
     /**
@@ -138,6 +127,6 @@ public class MemberQueryFacade {
         return targetMemberIds.stream()
                 .map(profileMap::get)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 }
