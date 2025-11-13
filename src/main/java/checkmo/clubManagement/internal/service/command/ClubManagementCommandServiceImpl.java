@@ -9,8 +9,6 @@ import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubDetailDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.MemberAPI;
-import checkmo.member.internal.entity.Member;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,9 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ClubManagementCommandServiceImpl implements ClubManagementCommandService {
-
-    // Domain level 2
-    private final MemberAPI memberAPI;
 
     // 자신의 CommandService
     private final ClubCategoryCommandService clubCategoryCommandService;
@@ -37,9 +32,8 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
     @Transactional
     public Long createClub(String memberId, ClubDetailDTO request) {
         // 1. 운영진 멤버 엔티티 생성
-        Member proxyMember = memberAPI.findMemberReferenceById(memberId);
-        ClubMember clubMember = ClubManagementConverter.toClubMemberEntity(null, proxyMember,
-                ClubMember.ClubMemberStatus.STAFF, null);
+        ClubMember clubMember = ClubManagementConverter
+                .toClubMemberEntity(null, memberId, ClubMember.ClubMemberStatus.STAFF, null);
 
         // 2. 클럽 이름 중복 검사
         if (clubQueryService.isDuplicateClubName(request.getName())) {
