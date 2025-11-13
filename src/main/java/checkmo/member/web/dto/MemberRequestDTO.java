@@ -1,5 +1,6 @@
 package checkmo.member.web.dto;
 
+import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class MemberRequestDTO {
 
         private String imgUrl;
 
-        private List<Long> categoryIds;
+        private List<MemberInterestCategory> categories;
     }
 
     @Getter
@@ -75,7 +76,7 @@ public class MemberRequestDTO {
         private String imgUrl;
 
         @NotEmpty(message = "관심 카테고리는 최소 1개 이상 선택해야 합니다")
-        private List<Long> categoryIds;
+        private List<MemberInterestCategory> categories;
     }
 
     @Getter

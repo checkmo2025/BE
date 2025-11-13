@@ -1,16 +1,13 @@
 package checkmo.member.internal.facade;
 
-import checkmo.category.CategoryExternalDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.entity.MemberCategory;
 import checkmo.member.internal.service.authenticate.MemberAuthenticationService;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
 import checkmo.member.internal.service.command.MemberProfileCommandService;
 import checkmo.member.internal.service.command.MemberRegistrationCommandService;
-import checkmo.member.internal.service.query.MemberCategoryQueryService;
 import checkmo.member.internal.service.security.auth.PrincipalDetails;
 import checkmo.member.internal.service.security.jwt.JwtLoginProcessor;
 import checkmo.member.web.dto.MemberRequestDTO;
@@ -18,7 +15,6 @@ import checkmo.member.web.dto.MemberRequestDTO.LoginRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -37,7 +33,6 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
     private final MemberRegistrationCommandService memberRegistrationCommandService;
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberProfileCommandService memberProfileCommandService;
-    private final MemberCategoryQueryService memberCategoryQueryService;
     private final JwtLoginProcessor jwtLoginProcessor;
 
     @Override
@@ -51,8 +46,10 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
     }
 
     @Override
-    public MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request,
-                                                      HttpServletResponse response) {
+    public MemberResponseDTO.SignUpResponseDTO signUp(
+            MemberRequestDTO.SignUpRequestDTO request,
+            HttpServletResponse response
+    ) {
 
         Member member = memberRegistrationCommandService.signUp(request);
 
@@ -112,16 +109,14 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
     }
 
     @Override
-    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(String memberId,
-                                                                                      MemberRequestDTO.MemberProfileUpdateRequestDTO request) {
+    public MemberResponseDTO.MemberProfileWithCategoryDTO updateMemberProfile(
+            String memberId,
+            MemberRequestDTO.MemberProfileUpdateRequestDTO request
+    ) {
 
         Member updatedMember = memberProfileCommandService.updateMemberProfile(memberId, request);
 
-        List<MemberCategory> categoryList = memberCategoryQueryService.findCategoriesByMember(memberId);
-        List<CategoryExternalDTO.CategoryInfo> categories = MemberConverter.fromMemberCategoriesToCategoryInfoList(
-                categoryList);
-
-        return MemberConverter.toMemberProfileWithCategoryResponseDTO(updatedMember, categories);
+        return MemberConverter.toMemberProfileWithCategoryDTO(updatedMember);
     }
 
     @Override

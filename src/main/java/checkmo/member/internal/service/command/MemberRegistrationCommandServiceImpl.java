@@ -11,6 +11,7 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +30,6 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
     // 랜덤 인증번호 생성용 정적 필드
     private static final SecureRandom secureRandom = new SecureRandom();
-    // 자신의 CommandService
-    private final MemberCategoryCommandService memberCategoryCommandService;
     // 자신의 QueryService
     private final MemberQueryService memberQueryService;
     // 자신의 Repository
@@ -147,7 +146,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
             throw new GeneralException(ErrorStatus.NICKNAME_ALREADY_EXISTS);
         }
 
-        // 멤버 엔티티 업데이트 (일단 카테고리 빼고)
+        // 멤버 엔티티 업데이트
         member.updateAdditionalInfo(
                 request.getNickname(),
                 request.getDescription(),
@@ -155,7 +154,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         );
 
         // 관심 카테고리 저장
-        memberCategoryCommandService.modifyMemberCategories(memberId, request.getCategoryIds());
+        member.updateInterestCategories(new HashSet<>(request.getCategories()));
 
         // 프로필 완료 상태로 변경
         member.completeProfile();

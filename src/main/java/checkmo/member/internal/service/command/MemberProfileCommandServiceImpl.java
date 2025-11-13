@@ -6,6 +6,7 @@ import checkmo.common.s3.service.S3Service;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +17,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @RequiredArgsConstructor
 @Transactional
 public class MemberProfileCommandServiceImpl implements MemberProfileCommandService {
-
-    // 자신의 CommandService
-    private final MemberCategoryCommandService memberCategoryCommandService;
 
     // 자신의 Repository
     private final MemberRepository memberRepository;
@@ -61,8 +59,8 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
         member.updateProfile(request.getDescription(), newImageUrl);
 
         // 관심 카테고리 수정
-        if (request.getCategoryIds() != null) {
-            memberCategoryCommandService.modifyMemberCategories(memberId, request.getCategoryIds());
+        if (request.getCategories() != null) {
+            member.updateInterestCategories(new HashSet<>(request.getCategories()));
         }
 
         return member;
