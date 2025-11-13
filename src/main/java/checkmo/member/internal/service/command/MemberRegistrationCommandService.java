@@ -32,9 +32,7 @@ public interface MemberRegistrationCommandService {
      * @param request 이메일 인증 요청 DTO
      * @return 인증 성공 여부
      */
-    boolean verifyEmailCode(
-            MemberRequestDTO.EmailVerificationRequest request
-    );
+    boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequest request);
 
     /**
      * 회원 가입 - 이 정보를 전달받으면 Access Token, RefreshToken 생성 - 추가 정보 입력 안받으면 정식 회원 아님
@@ -42,9 +40,7 @@ public interface MemberRegistrationCommandService {
      * @param request id,pw DTO
      * @return 회원 엔티티
      */
-    Member signUp(
-            MemberRequestDTO.SignUpRequest request
-    );
+    Member signUp(MemberRequestDTO.SignUpRequest request);
 
     /**
      * 회원 추가 정보 입력
