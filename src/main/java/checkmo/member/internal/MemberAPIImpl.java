@@ -54,9 +54,9 @@ public class MemberAPIImpl implements MemberAPI {
     @Override
     public MemberExternalDTO.BasicInfo getMemberBasicInfoForShare(String memberId) {
         Member member = memberQueryService.getMemberBasicInfo(memberId);
-        MemberResponseDTO.MemberProfileResponseDTO profileDTO = MemberConverter.toMemberProfileResponseDTO(member);
+        MemberResponseDTO.MemberProfileWithProfileImage profileDTO = MemberConverter.toMemberProfileWithProfileImage(member);
 
-        return MemberConverter.toBasicInfoDTO(profileDTO);
+        return MemberConverter.toBasicInfo(profileDTO);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class MemberAPIImpl implements MemberAPI {
         boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
         var basicInfoDTO = getMemberBasicInfoForShare(targetMemberId);
-        return MemberConverter.toWithFollowStatusDTO(basicInfoDTO, isFollowing);
+        return MemberConverter.toWithFollowStatus(basicInfoDTO, isFollowing);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class MemberAPIImpl implements MemberAPI {
         }
 
         // 1. Facade에서 내부 DTO로 배치 조회
-        List<MemberResponseDTO.MemberProfile> profiles = memberQueryFacade.getMemberProfiles(targetMemberIds,
+        List<MemberResponseDTO.MemberProfileWithFollow> profiles = memberQueryFacade.getMemberProfiles(targetMemberIds,
                 currentMemberId);
 
         // 2. 내부 DTO → 외부 DTO 변환 후 Map으로 변환
@@ -113,8 +113,8 @@ public class MemberAPIImpl implements MemberAPI {
         Map<String, MemberExternalDTO.WithFollowStatus> result = new java.util.HashMap<>();
         for (int i = 0; i < targetMemberIds.size() && i < profiles.size(); i++) {
             String memberId = targetMemberIds.get(i);
-            MemberResponseDTO.MemberProfile profile = profiles.get(i);
-            result.put(memberId, MemberConverter.toExternalDTO(profile));
+            MemberResponseDTO.MemberProfileWithFollow profile = profiles.get(i);
+            result.put(memberId, MemberConverter.toMemberExternalDTOWithFollowStatus(profile));
         }
 
         return result;

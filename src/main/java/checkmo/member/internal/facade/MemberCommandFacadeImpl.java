@@ -11,7 +11,7 @@ import checkmo.member.internal.service.command.MemberRegistrationCommandService;
 import checkmo.member.internal.service.security.auth.PrincipalDetails;
 import checkmo.member.internal.service.security.jwt.JwtLoginProcessor;
 import checkmo.member.web.dto.MemberRequestDTO;
-import checkmo.member.web.dto.MemberRequestDTO.LoginRequestDTO;
+import checkmo.member.web.dto.MemberRequestDTO.LoginRequest;
 import checkmo.member.web.dto.MemberResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,20 +41,20 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
     }
 
     @Override
-    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request) {
+    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequest request) {
         return memberRegistrationCommandService.verifyEmailCode(request);
     }
 
     @Override
-    public MemberResponseDTO.SignUpResponseDTO signUp(
-            MemberRequestDTO.SignUpRequestDTO request,
+    public MemberResponseDTO.SignUpResponse signUp(
+            MemberRequestDTO.SignUpRequest request,
             HttpServletResponse response
     ) {
 
         Member member = memberRegistrationCommandService.signUp(request);
 
-        Authentication authentication = memberAuthenticationService.login(
-                new LoginRequestDTO(request.getEmail(), request.getPassword()));
+        Authentication authentication = memberAuthenticationService
+                .login(new LoginRequest(request.getEmail(), request.getPassword()));
 
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
@@ -63,7 +63,7 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
     }
 
     @Override
-    public void addAdditionalInfo(MemberRequestDTO.AdditionalInfoDTO request) {
+    public void addAdditionalInfo(MemberRequestDTO.AdditionalInfo request) {
 
         // 현재 사용자 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -86,16 +86,17 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
     }
 
     @Override
-    public MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request,
-                                                    HttpServletResponse response) {
-
+    public MemberResponseDTO.LoginResponse login(
+            LoginRequest request,
+            HttpServletResponse response
+    ) {
         Authentication authentication = memberAuthenticationService.login(request);
 
         // JWT 토큰 생성 및 쿠키 설정
         jwtLoginProcessor.processLogin(response, authentication);
 
         Member member = ((PrincipalDetails) authentication.getPrincipal()).getMember();
-        return MemberConverter.fromMemberToLoginResponseDTO(member);
+        return MemberConverter.fromMemberToLoginResponse(member);
     }
 
     @Override
@@ -109,18 +110,17 @@ public class MemberCommandFacadeImpl implements MemberCommandFacade {
     }
 
     @Override
-    public MemberResponseDTO.MemberProfileWithCategoryDTO updateMemberProfile(
+    public MemberResponseDTO.MemberProfileWithCategory updateMemberProfile(
             String memberId,
-            MemberRequestDTO.MemberProfileUpdateRequestDTO request
+            MemberRequestDTO.MemberProfileUpdateRequest request
     ) {
-
         Member updatedMember = memberProfileCommandService.updateMemberProfile(memberId, request);
 
-        return MemberConverter.toMemberProfileWithCategoryDTO(updatedMember);
+        return MemberConverter.toMemberProfileWithCategory(updatedMember);
     }
 
     @Override
-    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdateRequestDTO request) {
+    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdateRequest request) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }
 

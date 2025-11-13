@@ -54,7 +54,7 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다.")
     })
     public ApiResponse<Boolean> verifyEmailCode(
-            @Valid @RequestBody MemberRequestDTO.EmailVerificationRequestDTO request) {
+            @Valid @RequestBody MemberRequestDTO.EmailVerificationRequest request) {
         boolean isVerified = memberCommandFacade.verifyEmailCode(request);
         return ApiResponse.onSuccess(isVerified);
     }
@@ -67,8 +67,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류입니다. 관리자에게 문의 바랍니다.")
     })
-    public ApiResponse<MemberResponseDTO.SignUpResponseDTO> signUp(
-            @Valid @RequestBody MemberRequestDTO.SignUpRequestDTO request,
+    public ApiResponse<MemberResponseDTO.SignUpResponse> signUp(
+            @Valid @RequestBody MemberRequestDTO.SignUpRequest request,
             HttpServletResponse response) {
         return ApiResponse.onSuccess(memberCommandFacade.signUp(request, response));
     }
@@ -83,7 +83,7 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Void> addAdditionalInfo(
-            @Valid @RequestBody MemberRequestDTO.AdditionalInfoDTO request) {
+            @Valid @RequestBody MemberRequestDTO.AdditionalInfo request) {
         memberCommandFacade.addAdditionalInfo(request);
         return ApiResponse.onSuccess(null);
     }
@@ -110,8 +110,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호가 일치하지 않습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류입니다. 관리자에게 문의 바랍니다.")
     })
-    public ApiResponse<MemberResponseDTO.LoginResponseDTO> login(
-            @Valid @RequestBody MemberRequestDTO.LoginRequestDTO request,
+    public ApiResponse<MemberResponseDTO.LoginResponse> login(
+            @Valid @RequestBody MemberRequestDTO.LoginRequest request,
             HttpServletResponse response) {
         return ApiResponse.onSuccess(memberCommandFacade.login(request, response));
     }

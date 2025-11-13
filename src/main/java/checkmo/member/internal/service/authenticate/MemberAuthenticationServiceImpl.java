@@ -29,7 +29,7 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
     private final JwtCookieUtil jwtCookieUtil;
 
     @Override
-    public Authentication login(MemberRequestDTO.LoginRequestDTO request) {
+    public Authentication login(MemberRequestDTO.LoginRequest request) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());

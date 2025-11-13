@@ -33,7 +33,7 @@ public interface MemberRegistrationCommandService {
      * @return 인증 성공 여부
      */
     boolean verifyEmailCode(
-            MemberRequestDTO.EmailVerificationRequestDTO request
+            MemberRequestDTO.EmailVerificationRequest request
     );
 
     /**
@@ -43,7 +43,7 @@ public interface MemberRegistrationCommandService {
      * @return 회원 엔티티
      */
     Member signUp(
-            MemberRequestDTO.SignUpRequestDTO request
+            MemberRequestDTO.SignUpRequest request
     );
 
     /**
@@ -52,7 +52,5 @@ public interface MemberRegistrationCommandService {
      * @param request 추가 정보 DTO (닉네임, 프로필 이미지, 관심 카테고리)
      * @return void -> 어차피 회원 프로필 정보 완료 후에는 메인 화면에 로그인된 상태로 리다이렉트
      */
-    void addAdditionalInfo(
-            String memberId, MemberRequestDTO.AdditionalInfoDTO request
-    );
+    void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request);
 }

@@ -25,7 +25,7 @@ public interface MemberCommandFacade {
      * @param request 이메일 인증 요청 DTO
      * @return 인증 성공 여부
      */
-    boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request);
+    boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequest request);
 
     /**
      * 회원 가입 (내부용)
@@ -34,14 +34,14 @@ public interface MemberCommandFacade {
      * @param response HttpServletResponse 객체
      * @return 회원 가입 응답 DTO
      */
-    MemberResponseDTO.SignUpResponseDTO signUp(MemberRequestDTO.SignUpRequestDTO request, HttpServletResponse response);
+    MemberResponseDTO.SignUpResponse signUp(MemberRequestDTO.SignUpRequest request, HttpServletResponse response);
 
     /**
      * 회원 추가 정보 입력 (내부용)
      *
      * @param request 추가 정보 DTO
      */
-    void addAdditionalInfo(MemberRequestDTO.AdditionalInfoDTO request);
+    void addAdditionalInfo(MemberRequestDTO.AdditionalInfo request);
 
     //== MemberAuthenticationService ==//
 
@@ -51,7 +51,7 @@ public interface MemberCommandFacade {
      * @param request  로그인 요청 DTO
      * @param response HttpServletResponse 객체
      */
-    MemberResponseDTO.LoginResponseDTO login(MemberRequestDTO.LoginRequestDTO request, HttpServletResponse response);
+    MemberResponseDTO.LoginResponse login(MemberRequestDTO.LoginRequest request, HttpServletResponse response);
 
     /**
      * 로그아웃 처리 (내부용)
@@ -75,8 +75,7 @@ public interface MemberCommandFacade {
      * @param request  수정할 프로필 정보 DTO
      * @return 수정된 회원 프로필 정보 DTO
      */
-    MemberResponseDTO.MemberProfileWithCategoryResponseDTO updateMemberProfile(String memberId,
-                                                                               MemberRequestDTO.MemberProfileUpdateRequestDTO request);
+    MemberResponseDTO.MemberProfileWithCategory updateMemberProfile(String memberId, MemberRequestDTO.MemberProfileUpdateRequest request);
 
     /**
      * 회원 비밀번호 변경 (내부용)
@@ -84,7 +83,7 @@ public interface MemberCommandFacade {
      * @param memberId 비밀번호를 변경할 회원의 ID
      * @param request  비밀번호 변경 정보 DTO
      */
-    void updatePassword(String memberId, MemberRequestDTO.PasswordUpdateRequestDTO request);
+    void updatePassword(String memberId, MemberRequestDTO.PasswordUpdateRequest request);
 
     /**
      * 회원 계정 비활성화 (내부용)

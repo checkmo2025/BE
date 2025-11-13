@@ -26,17 +26,17 @@ public class MemberQueryFacade {
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
 
-    public MemberResponseDTO.MemberProfileWithCategoryResponseDTO getMemberProfile(String memberId) {
+    public MemberResponseDTO.MemberProfileWithCategory getMemberProfile(String memberId) {
         Member member = memberQueryService.getMemberProfile(memberId);
 
-        return MemberConverter.toMemberProfileWithCategoryResponseDTO(member);
+        return MemberConverter.toMemberProfileWithCategory(member);
     }
 
-    public MemberResponseDTO.otherProfileResponseDTO getOtherProfile(String targetMemberNickname, String memberId) {
+    public MemberResponseDTO.otherProfileResponse getOtherProfile(String targetMemberNickname, String memberId) {
         Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
 
-        return MemberConverter.toOtherProfileResponseDTO(targetMember, isFollowing);
+        return MemberConverter.toOtherProfileResponse(targetMember, isFollowing);
     }
 
     public MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId) {
@@ -58,11 +58,11 @@ public class MemberQueryFacade {
                 .toList();
 
         // 4. 배치 조회 (내부 DTO)
-        List<MemberResponseDTO.MemberProfile> profiles = getMemberProfiles(followerIdList, memberId);
+        List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followerIdList, memberId);
 
         // 5. 내부 DTO → 외부 DTO 변환
         List<MemberExternalDTO.WithFollowStatus> followerDTOList = profiles.stream()
-                .map(MemberConverter::toExternalDTO)
+                .map(MemberConverter::toMemberExternalDTOWithFollowStatus)
                 .toList();
 
         // 6. 응답 DTO 변환
@@ -89,11 +89,11 @@ public class MemberQueryFacade {
                 .toList();
 
         // 4. 배치 조회 (내부 DTO)
-        List<MemberResponseDTO.MemberProfile> profiles = getMemberProfiles(followingIdList, memberId);
+        List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followingIdList, memberId);
 
         // 5. 내부 DTO → 외부 DTO 변환
         List<MemberExternalDTO.WithFollowStatus> followingDTOList = profiles.stream()
-                .map(MemberConverter::toExternalDTO)
+                .map(MemberConverter::toMemberExternalDTOWithFollowStatus)
                 .toList();
 
         // 6. 응답 DTO 변환
@@ -108,7 +108,7 @@ public class MemberQueryFacade {
      * @param currentMemberId 현재 회원 ID (팔로우 상태 확인용)
      * @return 회원 프로필 목록 (내부 DTO)
      */
-    public List<MemberResponseDTO.MemberProfile> getMemberProfiles(
+    public List<MemberResponseDTO.MemberProfileWithFollow> getMemberProfiles(
             List<String> targetMemberIds,
             String currentMemberId) {
 
@@ -124,7 +124,7 @@ public class MemberQueryFacade {
                 .getFollowStatusMapForMembers(currentMemberId, targetMemberIds);
 
         // 3. 내부 DTO로 변환
-        Map<String, MemberResponseDTO.MemberProfile> profileMap = memberInfoList.stream()
+        Map<String, MemberResponseDTO.MemberProfileWithFollow> profileMap = memberInfoList.stream()
                 .collect(Collectors.toMap(
                         MemberBasicInfoProjection::getId,
                         projection -> {

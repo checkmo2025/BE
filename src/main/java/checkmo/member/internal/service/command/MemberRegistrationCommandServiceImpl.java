@@ -72,7 +72,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     }
 
     @Override
-    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequestDTO request) {
+    public boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequest request) {
 
         String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
 
@@ -103,7 +103,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     @Transactional
-    public Member signUp(MemberRequestDTO.SignUpRequestDTO request) {
+    public Member signUp(MemberRequestDTO.SignUpRequest request) {
 
         // 이메일 중복 확인
         if (memberRepository.existsByEmail(request.getEmail())) {
@@ -119,7 +119,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
         // 회원 정보 저장
         String encodedPassword = passwordEncoder.encode(request.getPassword());
-        Member newMember = MemberConverter.fromSignUpRequestDTO(request, encodedPassword);
+        Member newMember = MemberConverter.fromSignUpRequest(request, encodedPassword);
 
         memberRepository.save(newMember);
         redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
@@ -129,7 +129,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     @Transactional
-    public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfoDTO request) {
+    public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));

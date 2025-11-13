@@ -28,7 +28,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MemberProfileWithProfileImageResponseDTO {
+    public static class MemberProfileWithProfileImage {
         private String nickname;
         private String description;
         private String profileImageUrl;
@@ -38,7 +38,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MemberProfileWithCategoryDTO {
+    public static class MemberProfileWithCategory {
         private String nickname;
         private String description;
         private String profileImageUrl;
@@ -49,7 +49,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class SignUpResponseDTO {
+    public static class SignUpResponse {
         private String email;
         private boolean isProfileCompleted;
     }
@@ -58,7 +58,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class otherProfileResponseDTO {
+    public static class otherProfileResponse {
         private String nickname;
         private String description;
         private String profileImageUrl;
@@ -70,7 +70,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class LoginResponseDTO {
+    public static class LoginResponse {
         private String nickname;
     }
 

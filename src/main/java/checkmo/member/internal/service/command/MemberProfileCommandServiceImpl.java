@@ -26,7 +26,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     @Override
     public Member updateMemberProfile(
-            String memberId, MemberRequestDTO.MemberProfileUpdateRequestDTO request
+            String memberId, MemberRequestDTO.MemberProfileUpdateRequest request
     ) {
         // 회원 조회
         Member member = memberRepository.findById(memberId)
@@ -68,7 +68,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     @Override
     public void updatePassword(
-            String memberId, MemberRequestDTO.PasswordUpdateRequestDTO request
+            String memberId, MemberRequestDTO.PasswordUpdateRequest request
     ) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }

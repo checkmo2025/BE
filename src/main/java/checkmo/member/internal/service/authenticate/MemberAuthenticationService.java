@@ -21,7 +21,7 @@ public interface MemberAuthenticationService {
      * @param request 로그인 요청 DTO
      * @return 인증 정보(Authentication 객체)
      */
-    Authentication login(MemberRequestDTO.LoginRequestDTO request);
+    Authentication login(MemberRequestDTO.LoginRequest request);
 
     /**
      * 로그아웃 처리 - JWT 토큰을 무효화하고 쿠키 삭제

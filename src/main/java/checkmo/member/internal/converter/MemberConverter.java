@@ -21,8 +21,8 @@ public class MemberConverter {
     /**
      * Member 엔티티 → MemberSignUpResponseDTO 변환
      */
-    public static MemberResponseDTO.SignUpResponseDTO fromMember(Member member) {
-        return MemberResponseDTO.SignUpResponseDTO.builder()
+    public static MemberResponseDTO.SignUpResponse fromMember(Member member) {
+        return MemberResponseDTO.SignUpResponse.builder()
                 .email(member.getEmail())
                 .isProfileCompleted(member.isProfileCompleted())
                 .build();
@@ -31,8 +31,8 @@ public class MemberConverter {
     /**
      * SignUpRequestDTO → Member 엔티티 변환
      */
-    public static Member fromSignUpRequestDTO(MemberRequestDTO.SignUpRequestDTO request,
-                                              String encodedPassword) {
+    public static Member fromSignUpRequest(MemberRequestDTO.SignUpRequest request,
+                                           String encodedPassword) {
 
         String uuid = UUID.randomUUID().toString().substring(0, 8);
         String newMemberId = "LOCAL_" + uuid;
@@ -72,8 +72,8 @@ public class MemberConverter {
     /**
      * Member 엔티티 → MemberLoginResponseDTO 변환
      */
-    public static MemberResponseDTO.LoginResponseDTO fromMemberToLoginResponseDTO(Member member) {
-        return MemberResponseDTO.LoginResponseDTO.builder()
+    public static MemberResponseDTO.LoginResponse fromMemberToLoginResponse(Member member) {
+        return MemberResponseDTO.LoginResponse.builder()
                 .nickname(member.getNickName())
                 .build();
     }
@@ -81,8 +81,8 @@ public class MemberConverter {
     /**
      * Member 엔티티 → MemberProfileResponseDTO 변환
      */
-    public static MemberResponseDTO.MemberProfileWithProfileImageResponseDTO toMemberProfileResponseDTO(Member member) {
-        return MemberResponseDTO.MemberProfileWithProfileImageResponseDTO.builder()
+    public static MemberResponseDTO.MemberProfileWithProfileImage toMemberProfileWithProfileImage(Member member) {
+        return MemberResponseDTO.MemberProfileWithProfileImage.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
@@ -92,8 +92,8 @@ public class MemberConverter {
     /**
      * Member 엔티티 → MemberProfileWithCategoryResponseDTO 변환
      */
-    public static MemberResponseDTO.MemberProfileWithCategoryDTO toMemberProfileWithCategoryDTO(Member member) {
-        return MemberResponseDTO.MemberProfileWithCategoryDTO.builder()
+    public static MemberResponseDTO.MemberProfileWithCategory toMemberProfileWithCategory(Member member) {
+        return MemberResponseDTO.MemberProfileWithCategory.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
@@ -104,7 +104,7 @@ public class MemberConverter {
     /**
      * MemberProfileResponseDTO → BasicInfoDTO 변환
      */
-    public static MemberExternalDTO.BasicInfo toBasicInfoDTO(MemberResponseDTO.MemberProfileWithProfileImageResponseDTO profile) {
+    public static MemberExternalDTO.BasicInfo toBasicInfo(MemberResponseDTO.MemberProfileWithProfileImage profile) {
         return MemberExternalDTO.BasicInfo.builder()
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())
@@ -114,7 +114,7 @@ public class MemberConverter {
     /**
      * BasicInfoDTO -> WithFollowStatusDTO 변환
      */
-    public static MemberExternalDTO.WithFollowStatus toWithFollowStatusDTO(
+    public static MemberExternalDTO.WithFollowStatus toWithFollowStatus(
             MemberExternalDTO.BasicInfo basicInfo,
             boolean isFollowing
     ) {
@@ -125,11 +125,11 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.otherProfileResponseDTO toOtherProfileResponseDTO(
+    public static MemberResponseDTO.otherProfileResponse toOtherProfileResponse(
             Member member,
             boolean isFollowing
     ) {
-        return MemberResponseDTO.otherProfileResponseDTO.builder()
+        return MemberResponseDTO.otherProfileResponse.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
@@ -183,7 +183,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberExternalDTO.WithFollowStatus toExternalDTO(MemberResponseDTO.MemberProfileWithFollow profile) {
+    public static MemberExternalDTO.WithFollowStatus toMemberExternalDTOWithFollowStatus(MemberResponseDTO.MemberProfileWithFollow profile) {
         return MemberExternalDTO.WithFollowStatus.builder()
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())

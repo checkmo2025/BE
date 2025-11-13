@@ -122,9 +122,9 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
-    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> updateMemberProfile(
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategory> updateMemberProfile(
             @CurrentId String memberId,
-            @RequestBody MemberRequestDTO.MemberProfileUpdateRequestDTO request
+            @RequestBody MemberRequestDTO.MemberProfileUpdateRequest request
     ) {
         return ApiResponse.onSuccess(memberCommandFacade.updateMemberProfile(memberId, request));
     }
@@ -137,7 +137,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
-    public ApiResponse<MemberResponseDTO.MemberProfileWithCategoryResponseDTO> getMemberProfile(
+    public ApiResponse<MemberResponseDTO.MemberProfileWithCategory> getMemberProfile(
             @CurrentId String memberId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
@@ -147,7 +147,7 @@ public class MemberController {
             "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태를 포함합니다.\n" +
                     "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
-    public ApiResponse<MemberResponseDTO.otherProfileResponseDTO> getOtherProfile(
+    public ApiResponse<MemberResponseDTO.otherProfileResponse> getOtherProfile(
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
