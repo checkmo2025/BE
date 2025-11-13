@@ -31,7 +31,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     public void createNotification(LikeEvent event) {
 
         // 리다이렉트 경로를 생성
-        String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.LIKE, event.getBookStoryId());
+        String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.LIKE,
+                event.getBookStoryId());
 
         // Notification 객체를 생성하고 저장 (targetName = null)
         Notification notification = NotificationConverter.fromEvent(
@@ -82,7 +83,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 redirectPath,
                 event.clubName(),
                 null, // 시스템 알림이므로 sender는 null
-                event.getMemberId() // 독서 클럽 가입 승인 이벤트에서 멤버의 ID를 가져옴 (새로 가입 된 사람)
+                event.memberId() // 독서 클럽 가입 승인 이벤트에서 멤버의 ID를 가져옴 (새로 가입 된 사람)
         );
         notificationRepository.save(notification);
     }
