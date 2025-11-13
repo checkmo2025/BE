@@ -1,6 +1,7 @@
 package checkmo.clubManagement.web.controller;
 
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.internal.service.ClubManagementQueryFacade;
 import checkmo.clubManagement.internal.service.command.ClubBookRecommendCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
@@ -27,8 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모임 추천 책", description = "독서 모임 내 책 추천 및 관리 API")
 public class ClubRecommendationController {
 
-    private final ClubBookRecommendCommandService clubBookRecommendCommandService;
     private final ClubManagementAPI clubManagementAPI;
+    private final ClubManagementQueryFacade clubManagementQueryFacade;
+    private final ClubBookRecommendCommandService clubBookRecommendCommandService;
 
     @Operation(summary = "추천 책 작성", description = "특정 모임에 추천 책을 작성합니다.")
     @ApiResponses({
@@ -56,7 +58,7 @@ public class ClubRecommendationController {
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubManagementAPI.getRecommendedBooks(clubId, cursorId, memberId));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.getRecommendedBooks(clubId, cursorId, memberId));
     }
 
     @Operation(summary = "추천 책 상세 조회", description = "추천 책 ID를 기반으로 상세 정보를 조회합니다.")
@@ -70,7 +72,7 @@ public class ClubRecommendationController {
             @PathVariable Long recommendId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubManagementAPI.getRecommendedBookDetail(clubId, recommendId, memberId));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.getRecommendedBookDetail(clubId, recommendId, memberId));
     }
 
     @Operation(summary = "추천 책 수정", description = "추천 책의 소개 이유, 별점, 태그를 수정합니다. 책 자체는 변경할 수 없습니다.")

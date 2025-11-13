@@ -30,8 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모임 공지사항", description = "독서 모임 공지사항, 투표 생성 및 관리 API")
 public class ClubNoticeController {
 
-    private final ClubNoticeCommandService clubNoticeCommandService;
     private final ClubNoticeAPI clubNoticeAPI;
+    private final ClubNoticeCommandService clubNoticeCommandService;
 
     @Operation(summary = "공지사항 목록 조회 (미팅, 투표, 공지 모두 포함)", description = "특정 모임의 공지사항 목록을 조회합니다. onlyImportant=true 면 중요 공지사항만 조회합니다.")
     @ApiResponses({
