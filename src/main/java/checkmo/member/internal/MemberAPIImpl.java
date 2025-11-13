@@ -4,7 +4,6 @@ import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
@@ -29,9 +28,6 @@ public class MemberAPIImpl implements MemberAPI {
     // 내부 Facade (배치 조회 로직 재사용)
     private final MemberQueryFacade memberQueryFacade;
 
-    // 자신의 Repository (프록시용, TODO: 해결 불가한가?)
-    private final MemberRepository memberRepository;
-
     @Override
     public String getMemberIdByNickname(String nickname) {
         return memberQueryService.getMemberIdByNickname(nickname);
@@ -45,12 +41,20 @@ public class MemberAPIImpl implements MemberAPI {
         return memberQueryService.getMemberIdsByNicknames(nicknames);
     }
 
-    /**
-     * 공유용 기본 회원 정보 조회 (외부용)
-     *
-     * @param memberId 조회할 회원 ID
-     * @return MemberExternalDTO.BasicInfo
-     */
+    @Override
+    public String getMemberNicknameById(String memberId) {
+        return memberQueryService.getMemberNicknameById(memberId);
+    }
+
+    @Override
+    public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
+    }
+
     @Override
     public MemberExternalDTO.BasicInfo getMemberBasicInfoForShare(String memberId) {
         Member member = memberQueryService.getMemberBasicInfo(memberId);
@@ -80,13 +84,6 @@ public class MemberAPIImpl implements MemberAPI {
                 ));
     }
 
-    /**
-     * 공유용 기본 회원 정보 + 팔로우 상태 조회 (외부용)
-     *
-     * @param targetMemberId  조회 대상 회원 ID
-     * @param currentMemberId 현재 로그인한 회원 ID
-     * @return MemberExternalDTO.WithFollowStatusDTO
-     */
     @Override
     public MemberExternalDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId,
                                                                                 String currentMemberId) {
@@ -118,25 +115,6 @@ public class MemberAPIImpl implements MemberAPI {
         }
 
         return result;
-    }
-
-    @Override
-    public Member findMemberReferenceById(String memberId) {
-        return memberRepository.getReferenceById(memberId);
-    }
-
-    @Override
-    public String getMemberNicknameById(String memberId) {
-        return memberQueryService.getMemberNicknameById(memberId);
-    }
-
-    @Override
-    public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
-        if (memberIds == null || memberIds.isEmpty()) {
-            return Map.of();
-        }
-
-        return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
     }
 
 }
