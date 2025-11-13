@@ -91,7 +91,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
         }
 
         // 3. 투표 생성 및 저장
-        Vote vote = ClubNoticeConverter.fromCreateVoteDTOToVote(request, club);
+        Vote vote = ClubNoticeConverter.fromCreateVoteDTOToVote(request, clubId);
         //TODO: 데드라인이 현재 시간보다 이전인지, 시작시간이 데드라인보다 이전인지, 시작시간이 현재시간보다 이전인지 검증이 필요하지 않나
         voteRepository.save(vote);
 

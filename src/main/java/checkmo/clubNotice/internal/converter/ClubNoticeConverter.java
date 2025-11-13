@@ -99,7 +99,7 @@ public class ClubNoticeConverter {
      */
     public static Vote fromCreateVoteDTOToVote(
             ClubNoticeRequestDTO.CreateClubVoteDTO request,
-            Club club
+            Long clubId
     ) {
         return Vote.builder()
                 .title(request.getTitle())
@@ -115,8 +115,7 @@ public class ClubNoticeConverter {
                 .duplication(request.isDuplication())
                 .startTime(request.getStartTime())
                 .deadline(request.getDeadline())
-                .clubId(club.getId())
-                .club(club)
+                .clubId(clubId)
                 .build();
     }
 

@@ -12,7 +12,7 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 
     @Query("""
             SELECT v FROM Vote v
-            WHERE v.club.id = :clubId
+            WHERE v.clubId = :clubId
               AND (:onlyImportant = false OR v.important = true)
               AND (:cursorId IS NULL OR v.id < :cursorId)
             ORDER BY v.createdAt DESC
@@ -26,7 +26,7 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 
     @Query("""
             SELECT v FROM Vote v 
-            WHERE v.club.id IN :clubIds
+            WHERE v.clubId IN :clubIds
               AND (:onlyImportant = false OR v.important = true)
               AND (:cursorId IS NULL OR v.id < :cursorId)
             ORDER BY v.createdAt DESC

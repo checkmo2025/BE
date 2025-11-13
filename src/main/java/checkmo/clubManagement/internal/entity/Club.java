@@ -1,6 +1,5 @@
 package checkmo.clubManagement.internal.entity;
 
-import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -64,10 +63,6 @@ public class Club extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
     private List<ClubCategory> clubCategories = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<Vote> votes = new ArrayList<>();
 
     public void addClubMember(ClubMember clubMember) {
         this.clubMembers.add(clubMember);
