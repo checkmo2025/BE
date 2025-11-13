@@ -1,8 +1,7 @@
 package checkmo.member.internal.authAnnotation;
 
-import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.CurrentId;
 import checkmo.member.internal.service.security.auth.PrincipalDetails;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -14,11 +13,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
 public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResolver {
-
-    private final MemberRepository memberRepository;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -32,7 +28,7 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -43,8 +39,7 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
 
         // PrincipalDetails에서 memberId 추출 (Member 엔티티의 id가 memberId로 사용됨)
         String memberId = null;
-        if (authentication.getPrincipal() instanceof PrincipalDetails) {
-            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        if (authentication.getPrincipal() instanceof PrincipalDetails principalDetails) {
             memberId = principalDetails.getUsername();
         }
 
