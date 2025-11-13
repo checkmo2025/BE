@@ -1,6 +1,5 @@
 package checkmo.notification.internal.converter;
 
-import checkmo.member.internal.entity.Member;
 import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.web.dto.NotificationResponseDTO;
@@ -23,15 +22,15 @@ public class NotificationConverter {
             Notification.NotificationType notificationType,
             String redirectPath,
             String targetName,
-            Member proxySender,
-            Member proxyReceiver
+            String senderId,
+            String receiverId
     ) {
         return Notification.builder()
                 .notificationType(notificationType)
                 .redirectPath(redirectPath)
                 .targetName(targetName)
-                .sender(proxySender)
-                .receiver(proxyReceiver)
+                .senderId(senderId)
+                .receiverId(receiverId)
                 .build();
     }
 
