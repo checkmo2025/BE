@@ -11,7 +11,6 @@ import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.member.MemberExternalDTO;
-import checkmo.member.internal.entity.Member;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -154,14 +153,12 @@ public class ClubNoticeConverter {
     public static MemberVote fromVoteRequestToMemberVote(
             Vote vote,
             String memberId,
-            Member memberProxy,
             ClubNoticeRequestDTO.VoteResultDTO request
     ) {
         return MemberVote.builder()
                 .vote(vote)
                 .voteId(vote.getId())
                 .memberId(memberId)
-                .member(memberProxy)
                 .item1(request.isItem1())
                 .item2(request.isItem2())
                 .item3(request.isItem3())

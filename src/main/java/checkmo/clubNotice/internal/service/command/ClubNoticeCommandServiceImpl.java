@@ -17,8 +17,6 @@ import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVoteDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResultDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.MemberAPI;
-import checkmo.member.internal.entity.Member;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,9 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
-
-    // Domain level 2
-    private final MemberAPI memberAPI;
 
     // 외부의 QueryService
     private final ClubQueryService clubQueryService;
@@ -150,9 +145,8 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
         memberVoteRepository.deleteByVoteIdAndMemberId(voteId, clubMember.getMemberId());
 
         // 7. MemberVote 생성 및 저장
-        Member memberProxy = memberAPI.findMemberReferenceById(clubMember.getMemberId());
         MemberVote memberVote = ClubNoticeConverter.fromVoteRequestToMemberVote(
-                vote, clubMember.getMemberId(), memberProxy, request
+                vote, clubMember.getMemberId(), request
         );
         memberVoteRepository.save(memberVote);
 
