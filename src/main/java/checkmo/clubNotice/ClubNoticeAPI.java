@@ -18,16 +18,6 @@ public interface ClubNoticeAPI {
                                                              boolean onlyImportant, Integer size);
 
     /**
-     * 특정 회원이 가입한 모든 클럽의 최신 소식을 조회합니다. 홈 화면 피드를 구성할 때 사용됩니다.
-     *
-     * @param memberId 조회할 회원의 ID
-     * @param size     조회할 개수
-     * @return 모든 클럽의 최신 소식이 통합된 미리보기 DTO
-     */
-    ClubNoticeResponseDTO.MemberNoticeListDTO getNoticeForHome(String memberId, Long cursorId, boolean onlyImportant,
-                                                               Integer size);
-
-    /**
      * ClubQueryService 공지사항(투표 포함)의 상세 정보를 조회합니다. (내부용)
      *
      * @param clubId   모임 ID

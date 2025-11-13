@@ -17,7 +17,6 @@ import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -118,81 +117,6 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
             }
         }
 
-        return resultList;
-    }
-
-
-    @Override
-    public ClubNoticeResponseDTO.MemberNoticeListDTO getNoticeForHome(String memberId, Long cursorId,
-                                                                      boolean onlyImportant,
-                                                                      Integer size) {
-
-        // 1. 커서 초기화
-        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
-
-        // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
-        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize + 1);
-
-        // 3. 회원이 가입한 클럽 ID 리스트 조회
-        List<Long> clubIds = clubMemberQueryService.getMyClubListIds(memberId);
-
-        if (clubIds.isEmpty()) {
-            return ClubNoticeConverter.toMemberNoticeListDTO(Collections.emptyList(), false, null);
-        }
-
-        // 4. 공지사항과 투표 각각 조회
-        List<Notice> notices = clubNoticeQueryService.getNoticeListByClubIds(clubIds, onlyImportant, cursor, pageable);
-        List<Vote> votes = clubNoticeQueryService.getVoteListByClubIds(clubIds, onlyImportant, cursor, pageable);
-
-        // 5. 생성시간 순으로 병합 및 DTO 변환 (클럽 정보 포함)
-        List<ClubNoticeResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems = mergeNoticesAndVotesWithClub(notices,
-                votes,
-                pageSize);
-
-        // 6. 페이징
-        boolean hasNext = memberNoticeItems.size() > pageSize;
-        if (hasNext) {
-            memberNoticeItems = memberNoticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
-        }
-        Long nextCursor = hasNext && memberNoticeItems.size() >= pageSize
-                ? memberNoticeItems.get(pageSize - 1).getNotice().getId()
-                : null;
-
-        return ClubNoticeConverter.toMemberNoticeListDTO(memberNoticeItems, hasNext, nextCursor);
-    }
-
-    /**
-     * 공지사항과 투표를 생성 시간 순서대로 병합하는 로직 (클럽 정보 포함)
-     */
-    private List<ClubNoticeResponseDTO.ClubNoticeWithClubDTO> mergeNoticesAndVotesWithClub(
-            List<Notice> notices, List<Vote> votes, int pageSize
-    ) {
-        List<ClubNoticeResponseDTO.ClubNoticeWithClubDTO> resultList = new ArrayList<>();
-
-        int i = 0, j = 0;
-        while (resultList.size() < pageSize + 1 && (i < notices.size() || j < votes.size())) {
-            if (i < notices.size() && (j >= votes.size() || notices.get(i).getCreatedAt()
-                    .isAfter(votes.get(j).getCreatedAt()))) {
-                Notice notice = notices.get(i++);
-                ClubNoticeResponseDTO.NoticeItem dto;
-
-                if (notice.getMeeting() != null) {
-                    BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(
-                            notice.getMeeting().getBookId());
-                    dto = ClubNoticeConverter.toMeetingNoticeDTO(notice, bookInfo);
-                } else {
-                    dto = ClubNoticeConverter.toPureNoticeDTO(notice);
-                }
-                resultList.add(ClubNoticeConverter.toClubNoticeWithClubDTO(notice, dto));
-            } else if (j < votes.size()) {
-                Vote vote = votes.get(j++);
-                List<ClubNoticeResponseDTO.EachItemDTO> itemDTOs = ClubNoticeConverter.toEachItemDTOListFromItems(
-                        vote.getItems());
-                ClubNoticeResponseDTO.VoteDTO voteDTO = ClubNoticeConverter.toVoteDTO(vote, itemDTOs);
-                resultList.add(ClubNoticeConverter.toClubNoticeWithClubDTO(vote, voteDTO));
-            }
-        }
         return resultList;
     }
 

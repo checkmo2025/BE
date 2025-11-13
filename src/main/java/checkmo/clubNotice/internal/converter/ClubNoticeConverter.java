@@ -82,19 +82,6 @@ public class ClubNoticeConverter {
     }
 
     /**
-     * ClubResponseDTO.VoteDTO -> ClubResponseDTO.ClubNoticeWithClubDTO
-     */
-    public static ClubNoticeResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Vote vote,
-                                                                                      ClubNoticeResponseDTO.VoteDTO voteDTO) {
-        return ClubNoticeResponseDTO.ClubNoticeWithClubDTO.builder()
-                .clubId(vote.getClub().getId())
-                .clubName(vote.getClub().getName())
-                .notice(voteDTO)
-                .build();
-    }
-
-
-    /**
      * Notice 엔티티 → PureNoticeDTO 변환
      */
     public static ClubNoticeResponseDTO.PureNoticeDTO toPureNoticeDTO(Notice notice) {

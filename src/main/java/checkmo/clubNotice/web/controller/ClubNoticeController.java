@@ -33,21 +33,6 @@ public class ClubNoticeController {
     private final ClubNoticeCommandService clubNoticeCommandService;
     private final ClubNoticeAPI clubNoticeAPI;
 
-    @Operation(summary = "회원의 공지사항 목록 조회 (미팅, 투표, 공지 모두 포함)", description = "회원의 공지사항 목록을 조회합니다. onlyImportant=true 면 중요 공지사항만 조회합니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
-    })
-    @GetMapping("/api/clubs/notices")
-    public ApiResponse<ClubNoticeResponseDTO.MemberNoticeListDTO> getMemberNoticeList(
-            @CurrentId String memberId,
-            @RequestParam(required = false) Long cursorId,
-            @RequestParam(required = false, defaultValue = "false") boolean onlyImportant,
-            @RequestParam(required = false) Integer size // 페이지 사이즈
-    ) {
-        return ApiResponse.onSuccess(clubNoticeAPI.getNoticeForHome(memberId, cursorId, onlyImportant, size));
-    }
-
     @Operation(summary = "공지사항 목록 조회 (미팅, 투표, 공지 모두 포함)", description = "특정 모임의 공지사항 목록을 조회합니다. onlyImportant=true 면 중요 공지사항만 조회합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
