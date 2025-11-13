@@ -7,7 +7,7 @@ import checkmo.clubNotice.internal.service.command.ClubNoticeCommandService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.internal.authAnnotation.CurrentId;
+import checkmo.member.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

@@ -1,7 +1,7 @@
 package checkmo.notification.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.internal.authAnnotation.CurrentId;
+import checkmo.member.CurrentId;
 import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.internal.facade.NotificationQueryFacade;
 import checkmo.notification.internal.service.command.NotificationCommandService;
