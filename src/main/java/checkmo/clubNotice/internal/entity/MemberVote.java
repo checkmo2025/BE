@@ -1,6 +1,5 @@
 package checkmo.clubNotice.internal.entity;
 
-import checkmo.member.internal.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,12 +36,8 @@ public class MemberVote {
     private boolean item4;
     private boolean item5;
 
-    @Column(name = "member_id", insertable = false, updatable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private String memberId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
 
     @Column(name = "vote_id", insertable = false, updatable = false)
     private Long voteId;
