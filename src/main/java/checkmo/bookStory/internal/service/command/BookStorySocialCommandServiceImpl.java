@@ -7,8 +7,6 @@ import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.MemberAPI;
-import checkmo.member.internal.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,9 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookStorySocialCommandServiceImpl implements BookStorySocialCommandService {
-
-    // Domain level 2
-    private final MemberAPI memberAPI;
 
     // 자신의 Repository
     private final BookStoryRepository bookStoryRepository;
@@ -37,8 +32,6 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 
-        Member proxyMember = memberAPI.findMemberReferenceById(memberId);
-
         return bookStoryLikedRepository.findBookStoryLikedByBookStoryIdAndMemberId(bookStoryId, memberId)
                 .map(bookStoryLiked -> {
                     // 좋아요가 이미 있다면 제거하고 false 반환
@@ -52,7 +45,7 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
                     }
 
                     // 좋아요가 없다면 새로 생성
-                    boolean created = createAndSaveBookStoryLiked(bookStory, proxyMember);
+                    boolean created = createAndSaveBookStoryLiked(bookStory, memberId);
                     if (created && !memberId.equals(bookStory.getMemberId())) {
                         // 실제로 생성되었고, 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
                         eventPublisher.publishEvent(
@@ -67,11 +60,11 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
         bookStory.removeBookStoryLiked(bookStoryLiked);
     }
 
-    private boolean createAndSaveBookStoryLiked(BookStory bookStory, Member member) {
+    private boolean createAndSaveBookStoryLiked(BookStory bookStory, String memberId) {
         try {
             BookStoryLiked bookStoryLiked = BookStoryLiked.builder()
                     .bookStory(bookStory)
-                    .member(member)
+                    .memberId(memberId)
                     .build();
 
             bookStoryLikedRepository.save(bookStoryLiked);
