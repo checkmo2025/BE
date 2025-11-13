@@ -1,8 +1,6 @@
 package checkmo.clubManagement.internal.service.command;
 
 import checkmo.book.BookAPI;
-import checkmo.book.internal.entity.Book;
-import checkmo.book.internal.facade.BookCommandFacade;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -22,7 +20,6 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
 
     // Domain level 1
     private final BookAPI bookAPI;
-    private final BookCommandFacade bookCommandFacade;
 
     // 자신의 QueryService
     private final ClubQueryService clubQueryService;
@@ -39,12 +36,10 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 책 저장 후 프록시 가져오기
-        bookCommandFacade.saveBook(request.getBookDetail());
-        Book bookProxy = bookAPI.findBookReferenceById(request.getBookDetail().getIsbn());
+        String bookId = bookAPI.getOrCreateBook(request.getBookDetail());
 
         // 3. 책 추천 엔티티 생성
-        BookRecommend bookRecommend = ClubManagementConverter.fromCreateBookRecommendDTOToEntity(request, bookProxy,
-                clubMember);
+        BookRecommend bookRecommend = ClubManagementConverter.fromCreateBookRecommendDTOToEntity(request, bookId, clubMember);
 
         // 4. 저장
         BookRecommend savedRecommend = bookRecommendRepository.save(bookRecommend);

@@ -239,7 +239,7 @@ public class ClubManagementConverter {
      */
     public static BookRecommend fromCreateBookRecommendDTOToEntity(
             ClubRequestDTO.CreateBookRecommendDTO request,
-            Book proxyBook,
+            String bookId,
             ClubMember clubMember
     ) {
         return BookRecommend.builder()
@@ -248,8 +248,7 @@ public class ClubManagementConverter {
                 .rate(request.getRate())
                 .tag(request.getTag())
                 .clubMember(clubMember)
-                .book(proxyBook)
-                .bookId(proxyBook.getId())
+                .bookId(bookId)
                 .build();
     }
 
