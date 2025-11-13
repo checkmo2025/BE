@@ -1,8 +1,6 @@
 package checkmo.clubMeeting.internal.service.command;
 
 import checkmo.book.BookAPI;
-import checkmo.book.internal.entity.Book;
-import checkmo.book.internal.facade.BookCommandFacade;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
@@ -35,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService {
     // Domain level 1
-    private final BookCommandFacade bookCommandFacade;
     private final BookAPI bookAPI;
 
     // 외부의 QueryService
@@ -57,11 +54,10 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 책 저장 후 프록시 객체 가져오기
-        bookCommandFacade.saveBook(request.getBookInfo());
-        Book proxyBook = bookAPI.findBookReferenceById(request.getBookInfo().getIsbn());
+        String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
         // 3. 저장할 미팅 생성
-        Meeting meeting = ClubMeetingConverter.fromMeetingCreateRequestDTOToMeeting(request, proxyBook);
+        Meeting meeting = ClubMeetingConverter.fromMeetingCreateRequestDTOToMeeting(request, bookId);
         meeting.setClub(club);
 
         // 4. 운영진 여부 검증

@@ -1,6 +1,5 @@
 package checkmo.clubMeeting.internal.entity;
 
-import checkmo.book.internal.entity.Book;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.common.BaseEntity;
@@ -24,7 +23,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 
 @Getter
@@ -66,13 +64,8 @@ public class Meeting extends BaseEntity {
     @JoinColumn(name = "club_id")
     private Club club;
 
-    @Column(name = "book_id", insertable = false, updatable = false)
+    @Column(name = "book_id", nullable = false)
     private String bookId; // null 허용
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    @Setter
-    private Book book; // null 허용
 
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
