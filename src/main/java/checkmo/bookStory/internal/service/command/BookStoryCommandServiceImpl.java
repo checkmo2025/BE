@@ -7,8 +7,6 @@ import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.MemberAPI;
-import checkmo.member.internal.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
-    // Domain level 2
-    private final MemberAPI memberAPI;
     // Domain level 1
     private final BookAPI bookAPI;
 
@@ -34,9 +30,7 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
         String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
-        Member proxyMember = memberAPI.findMemberReferenceById(memberId);
-
-        BookStory bookStory = BookStoryConverter.fromBookStoryRequestDTO(request, proxyMember, bookId);
+        BookStory bookStory = BookStoryConverter.fromBookStoryRequestDTO(request, memberId, bookId);
         BookStory savedBookStory = bookStoryRepository.save(bookStory);
 
         return savedBookStory.getId();

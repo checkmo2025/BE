@@ -1,7 +1,6 @@
 package checkmo.bookStory.internal.entity;
 
 import checkmo.common.BaseEntity;
-import checkmo.member.internal.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,12 +31,8 @@ public class BookStoryLiked extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "member_id", insertable = false, updatable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private String memberId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
 
     @Column(name = "book_story_id", insertable = false, updatable = false)
     private Long bookStoryId;
