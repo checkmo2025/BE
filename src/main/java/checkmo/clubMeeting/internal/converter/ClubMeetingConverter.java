@@ -1,7 +1,6 @@
 package checkmo.clubMeeting.internal.converter;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.book.internal.entity.Book;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -32,7 +31,7 @@ public class ClubMeetingConverter {
     public static Meeting fromMeetingCreateRequestDTOToMeeting(
             MeetingRequestDTO.MeetingCreateRequestDTO request,
             Long clubId,
-            Book proxyBook
+            String bookId
     ) {
         return Meeting.builder()
                 .title(request.getTitle())
@@ -42,7 +41,7 @@ public class ClubMeetingConverter {
                 .generation(request.getGeneration())
                 .tag(request.getTag())
                 .clubId(clubId)
-                .book(proxyBook)
+                .bookId(bookId)
                 .build();
     }
 

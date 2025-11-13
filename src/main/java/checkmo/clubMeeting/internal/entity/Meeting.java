@@ -1,17 +1,13 @@
 package checkmo.clubMeeting.internal.entity;
 
-import checkmo.book.internal.entity.Book;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Version;
@@ -23,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 
 @Getter
@@ -63,11 +58,6 @@ public class Meeting extends BaseEntity {
 
     @Column(name = "book_id", insertable = false, updatable = false)
     private String bookId; // null 허용
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    @Setter
-    private Book book; // null 허용
 
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)

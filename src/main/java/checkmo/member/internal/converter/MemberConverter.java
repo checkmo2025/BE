@@ -160,7 +160,7 @@ public class MemberConverter {
      * follow -> MemberResponseDTO.FollowList 변환
      */
     public static MemberResponseDTO.FollowList toFollowList(
-            List<MemberExternalDTO.WithFollowStatus> followList,
+            List<MemberResponseDTO.MemberProfileWithFollow> followList,
             boolean hasNext,
             Long nextCursor
     ) {

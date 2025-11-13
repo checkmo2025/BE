@@ -1,6 +1,5 @@
 package checkmo.book;
 
-import checkmo.book.internal.entity.Book;
 import checkmo.book.web.dto.BookResponseDTO;
 import java.util.List;
 import java.util.Map;
@@ -50,15 +49,6 @@ public interface BookAPI {
      * @return 책 ID와 기본 정보 매핑 정보
      */
     Map<String, BookExternalDTO.BasicInfo> getBookBasicInfoMapForShare(List<String> bookIds);
-
-    /**
-     * 다른 도메인에서 관계 설정을 위해 엔티티의 프록시(참조)를 조회합니다. (외부용) ‼️ 이 메소드는 실제 DB 조회를 발생시키지 않는 메소드!!! ‼️ 그리고 반드시 외래 키를 설정하는 용도로만
-     * 사용되어야 함!
-     *
-     * @param bookId 참조할 책의 ID (ISBN)
-     * @return Book 엔티티의 프록시 객체
-     */
-    Book findBookReferenceById(String bookId);
 
     /**
      * 책을 조회하거나, 존재하지 않으면 생성합니다. (외부용)
