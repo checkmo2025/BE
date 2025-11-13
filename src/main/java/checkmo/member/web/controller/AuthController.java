@@ -1,7 +1,8 @@
 package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.internal.facade.MemberCommandFacade;
+import checkmo.member.internal.service.MemberCommandFacade;
+import checkmo.member.internal.service.command.MemberRegistrationCommandService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "인증", description = "회원가입, 로그인, 로그아웃, 이메일 인증, 소셜 로그인 관련 API")
 public class AuthController {
 
+    private final MemberRegistrationCommandService memberRegistrationCommandService;
     private final MemberCommandFacade memberCommandFacade;
     private final MemberQueryService memberQueryService;
 
@@ -42,7 +44,7 @@ public class AuthController {
                                                      @Email(message = "유효한 이메일 주소를 입력해주세요")
                                                      @NotBlank(message = "이메일은 필수입니다")
                                                      String email) {
-        memberCommandFacade.sendEmailVerification(email);
+        memberRegistrationCommandService.sendEmailVerification(email);
         return ApiResponse.onSuccess("인증번호가 이메일로 발송되었습니다.");
     }
 
@@ -55,7 +57,7 @@ public class AuthController {
     })
     public ApiResponse<Boolean> verifyEmailCode(
             @Valid @RequestBody MemberRequestDTO.EmailVerificationRequest request) {
-        boolean isVerified = memberCommandFacade.verifyEmailCode(request);
+        boolean isVerified = memberRegistrationCommandService.verifyEmailCode(request);
         return ApiResponse.onSuccess(isVerified);
     }
 
