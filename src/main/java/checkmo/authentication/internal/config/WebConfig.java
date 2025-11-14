@@ -1,6 +1,6 @@
-package checkmo.common.config;
+package checkmo.authentication.internal.config;
 
-import checkmo.member.internal.authAnnotation.CurrentMemberArgumentResolver;
+import checkmo.authentication.internal.resolver.CurrentMemberArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

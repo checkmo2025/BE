@@ -1,4 +1,4 @@
-package checkmo.member.internal.service.security.auth;
+package checkmo.authentication.internal.security.auth;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
@@ -25,9 +25,9 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
 
     private final List<String> excludedPaths = List.of(
             "/api/auth/logout",
-            "/api/auth/additional-info",
+            "/api/members/additional-info",
             "/api/auth/redirect/oauth2",
-            "/api/auth/check-nickname",
+            "/api/members/check-nickname",
             "/api/s3/image/upload-url",
             "/swagger-ui/**",
             "/v3/api-docs/**"
@@ -52,9 +52,9 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
             && authentication.getPrincipal() instanceof PrincipalDetails principalDetails) {
 
             //  프로필이 완료되지 않은 회원은 에러
-            if (!principalDetails.getMember().isProfileCompleted()) {
+            if (!principalDetails.getUser().isProfileCompleted()) {
                 log.warn("프로필 미완료 회원 접근 차단: {}, 요청 URI: {}",
-                    principalDetails.getMember().getId(), request.getRequestURI());
+                    principalDetails.getUser().getId(), request.getRequestURI());
                 sendErrorResponse(response);
                 return;
             }

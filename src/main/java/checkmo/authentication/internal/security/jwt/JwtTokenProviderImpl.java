@@ -1,7 +1,7 @@
-package checkmo.member.internal.service.security.jwt;
+package checkmo.authentication.internal.security.jwt;
 
 import checkmo.common.config.properties.JwtProperties;
-import checkmo.member.internal.service.security.auth.CustomUserDetailsService;
+import checkmo.authentication.internal.security.auth.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -28,8 +28,10 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     private final JwtProperties jwtProperties;
     private final CustomUserDetailsService customUserDetailsService;
 
-    public JwtTokenProviderImpl(JwtProperties jwtProperties,
-                                CustomUserDetailsService customUserDetailsService) {
+    public JwtTokenProviderImpl(
+            JwtProperties jwtProperties,
+            CustomUserDetailsService customUserDetailsService
+    ) {
         byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.jwtProperties = jwtProperties;

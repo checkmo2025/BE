@@ -1,9 +1,9 @@
-package checkmo.member.internal.service.security.auth;
+package checkmo.authentication.internal.security.auth;
 
+import checkmo.authentication.internal.entity.AuthUser;
+import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,30 +20,30 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final MemberRepository memberRepository;
+    private final AuthRepository authRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(email)
+        AuthUser user = authRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "해당 이메일을 가진 사용자를 찾을 수 없습니다: " + email));
 
         // 비활성화된 계정, 탈퇴한 계정 등의 상태 검증
-        validateMemberStatus(member);
-        return new PrincipalDetails(member);
+        validateMemberStatus(user);
+        return new PrincipalDetails(user);
     }
 
     public UserDetails loadUserById(String id) {
-        Member member = memberRepository.findById(id)
+        AuthUser user = authRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(
                         ErrorStatus.MEMBER_NOT_FOUND));
 
-        validateMemberStatus(member);
-        return new PrincipalDetails(member);
+        validateMemberStatus(user);
+        return new PrincipalDetails(user);
     }
 
-    private void validateMemberStatus(Member member) {
-        if (member.getDeactivated() != null) {
+    private void validateMemberStatus(AuthUser user) {
+        if (user.getDeactivatedAt() != null) {
             throw new GeneralException(ErrorStatus.MEMBER_INACTIVE);
         }
     }

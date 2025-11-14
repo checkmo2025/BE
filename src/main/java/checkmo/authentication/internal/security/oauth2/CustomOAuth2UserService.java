@@ -1,9 +1,9 @@
-package checkmo.member.internal.service.security.oauth2;
+package checkmo.authentication.internal.security.oauth2;
 
-import checkmo.member.internal.converter.MemberConverter;
-import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.repository.MemberRepository;
-import checkmo.member.internal.service.security.auth.PrincipalDetails;
+import checkmo.authentication.internal.converter.AuthConverter;
+import checkmo.authentication.internal.entity.AuthUser;
+import checkmo.authentication.internal.repository.AuthRepository;
+import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final MemberRepository memberRepository;
+    private final AuthRepository authRepository;
 
     @Override
     @Transactional
@@ -41,13 +41,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // 기존 회원인지 확인, 신규 회원이면 생성
-        Member member = memberRepository.findByEmail(email)
+        AuthUser user = authRepository.findByEmail(email)
                 .orElseGet(() -> registerNewMember(attributes, registrationId));
-        return new PrincipalDetails(member, oAuth2User.getAttributes());
+        return new PrincipalDetails(user, oAuth2User.getAttributes());
     }
 
-    private Member registerNewMember(OAuth2Attributes attributes, String registrationId) {
-        Member newMember = MemberConverter.fromOAuth2Attributes(attributes, registrationId);
-        return memberRepository.save(newMember);
+    private AuthUser registerNewMember(OAuth2Attributes attributes, String registrationId) {
+        AuthUser newUser = AuthConverter.fromOAuth2Attributes(attributes, registrationId);
+        return authRepository.save(newUser);
     }
 }

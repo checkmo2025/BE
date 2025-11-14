@@ -1,6 +1,5 @@
 package checkmo.member.internal.service.command;
 
-import checkmo.member.internal.entity.Member;
 import checkmo.member.web.dto.MemberRequestDTO;
 
 /**
@@ -10,37 +9,7 @@ import checkmo.member.web.dto.MemberRequestDTO;
  */
 public interface MemberRegistrationCommandService {
 
-    /**
-     * Redis Hash 구조 사용해서
-     * key : kiroro0814@naver.com
-     * field :
-     *      code : [인증 코드]
-     *      verified : true/false
-     * 이렇게 1개의 이메일 키 값에 두개의 값 저장
-     */
-
-    /**
-     * 이메일 인증 요청
-     *
-     * @param email 인증할 이메일
-     */
-    void sendEmailVerification(String email);
-
-    /**
-     * 이메일 인증번호 확인
-     *
-     * @param request 이메일 인증 요청 DTO
-     * @return 인증 성공 여부
-     */
-    boolean verifyEmailCode(MemberRequestDTO.EmailVerificationRequest request);
-
-    /**
-     * 회원 가입 - 이 정보를 전달받으면 Access Token, RefreshToken 생성 - 추가 정보 입력 안받으면 정식 회원 아님
-     *
-     * @param request id,pw DTO
-     * @return 회원 엔티티
-     */
-    Member signUp(MemberRequestDTO.SignUpRequest request);
+    void createMember(String memberId, String email);
 
     /**
      * 회원 추가 정보 입력

@@ -1,7 +1,7 @@
-package checkmo.member.internal.authAnnotation;
+package checkmo.authentication.internal.resolver;
 
-import checkmo.member.CurrentId;
-import checkmo.member.internal.service.security.auth.PrincipalDetails;
+import checkmo.common.CurrentId;
+import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;

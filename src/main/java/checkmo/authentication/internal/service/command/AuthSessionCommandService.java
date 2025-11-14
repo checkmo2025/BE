@@ -1,11 +1,11 @@
-package checkmo.member.internal.service.authenticate;
+package checkmo.authentication.internal.service.command;
 
+import checkmo.authentication.internal.security.jwt.JwtCookieUtil;
+import checkmo.authentication.internal.security.jwt.JwtTokenProvider;
+import checkmo.authentication.internal.security.jwt.TokenCacheService;
+import checkmo.authentication.web.dto.AuthRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.internal.service.security.jwt.JwtCookieUtil;
-import checkmo.member.internal.service.security.jwt.JwtTokenProvider;
-import checkmo.member.internal.service.security.jwt.TokenCacheService;
-import checkmo.member.web.dto.MemberRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,21 +18,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-@Service
-@RequiredArgsConstructor
 @Slf4j
-public class MemberAuthenticationServiceImpl implements MemberAuthenticationService {
+@RequiredArgsConstructor
+@Service
+public class AuthSessionCommandService {
 
+    // 인증 관련 서비스
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
 
-    @Override
-    public Authentication login(MemberRequestDTO.LoginRequest request) {
+    public Authentication login(AuthRequestDTO.Login request) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
         Authentication authentication;
 
@@ -55,18 +55,17 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
         return authentication;
     }
 
-    @Override
     public void logout(HttpServletRequest request, HttpServletResponse response) {
 
-        // 0. 쿠키에서 jwt 토큰 가져오기
+        // 1. 쿠키에서 jwt 토큰 가져오기
         String accessToken = jwtCookieUtil.resolveToken(request, "accessToken");
         String refreshToken = jwtCookieUtil.resolveToken(request, "refreshToken");
 
-        // 1. jwt 토큰을 쿠키에서 삭제
+        // 2. jwt 토큰을 쿠키에서 삭제
         jwtCookieUtil.deleteTokenFromCookie(response, "accessToken");
         jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
 
-        // 2. redis에 저장된 Access Token을 블랙리스트에 추가하여 무효화
+        // 3. redis에 저장된 Access Token을 블랙리스트에 추가하여 무효화
         if (StringUtils.hasText(accessToken)) {
             try {
                 tokenCacheService.saveBlacklistToken(accessToken);
@@ -75,7 +74,7 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
             }
         }
 
-        // 3. redis에 저장된 Refresh Token을 redis에서 삭제
+        // 4. redis에 저장된 Refresh Token을 redis에서 삭제
         if (StringUtils.hasText(refreshToken)) {
             try{
                 String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
@@ -86,8 +85,8 @@ public class MemberAuthenticationServiceImpl implements MemberAuthenticationServ
         }
     }
 
-    @Override
     public void reactivateMember() {
         // TODO: 계정 복구 로직 구현
     }
 }
+

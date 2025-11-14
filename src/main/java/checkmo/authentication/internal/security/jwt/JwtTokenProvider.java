@@ -1,4 +1,4 @@
-package checkmo.member.internal.service.security.jwt;
+package checkmo.authentication.internal.security.jwt;
 
 import org.springframework.security.core.Authentication;
 
@@ -12,11 +12,18 @@ import org.springframework.security.core.Authentication;
 public interface JwtTokenProvider {
 
     JwtToken generateToken(Authentication authentication);
+
     Authentication getAuthentication(String accessToken);
+
     boolean validateToken(String token);
+
     String getUserIdFromToken(String token);
+
     boolean isRefreshTokenValid(String refreshToken);
+
     Authentication getAuthenticationFromMemberId(String memberId);
+
     long getAccessTokenExpirationTime();
+
     long getRefreshTokenExpirationTime();
 }

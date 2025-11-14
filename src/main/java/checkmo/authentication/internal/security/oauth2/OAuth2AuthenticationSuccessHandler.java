@@ -1,8 +1,8 @@
-package checkmo.member.internal.service.security.oauth2;
+package checkmo.authentication.internal.security.oauth2;
 
-import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.service.security.auth.PrincipalDetails;
-import checkmo.member.internal.service.security.jwt.JwtLoginProcessor;
+import checkmo.authentication.internal.entity.AuthUser;
+import checkmo.authentication.internal.security.auth.PrincipalDetails;
+import checkmo.authentication.internal.security.jwt.JwtLoginProcessor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,9 +36,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         jwtLoginProcessor.processLogin(response, authentication);
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-        Member member = principalDetails.getMember();
+        AuthUser user = principalDetails.getUser();
 
-        String path = member.isProfileCompleted() ? "home" : "profile";
+        String path = user.isProfileCompleted() ? "home" : "profile";
 
         // 기본 리다이렉트 URI
         String targetUrl = UriComponentsBuilder.fromUriString(baseUri)

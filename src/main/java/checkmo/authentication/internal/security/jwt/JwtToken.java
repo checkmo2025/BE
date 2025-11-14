@@ -1,4 +1,4 @@
-package checkmo.member.internal.service.security.jwt;
+package checkmo.authentication.internal.security.jwt;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

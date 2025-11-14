@@ -1,4 +1,4 @@
-package checkmo.member.internal.service.security.jwt;
+package checkmo.authentication.internal.security.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.annotation.Nonnull;

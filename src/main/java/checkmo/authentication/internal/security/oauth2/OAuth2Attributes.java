@@ -1,6 +1,7 @@
-package checkmo.member.internal.service.security.oauth2;
+package checkmo.authentication.internal.security.oauth2;
 
 import java.util.Map;
+import checkmo.authentication.internal.entity.Provider;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,24 +16,24 @@ public class OAuth2Attributes {
 
     public static OAuth2Attributes of(String registrationId, Map<String, Object> attributes) {
         return switch (registrationId.toLowerCase()) {
-            case "google" -> ofGoogle(attributes);
-            case "kakao" -> ofKakao(attributes);
+            case Provider.GOOGLE -> ofGoogle(attributes);
+            case Provider.KAKAO -> ofKakao(attributes);
             default -> throw new IllegalArgumentException("지원하지 않는 소셜 로그인입니다: " + registrationId);
         };
     }
 
     private static OAuth2Attributes ofGoogle(Map<String, Object> attributes) {
         return OAuth2Attributes.builder()
-                .email((String) attributes.get("email"))
-                .providerId((String) attributes.get("sub"))
+                .email((String) attributes.get(Provider.Google.EMAIL))
+                .providerId((String) attributes.get(Provider.Google.PROVIDER_ID))
                 .build();
     }
 
     private static OAuth2Attributes ofKakao(Map<String, Object> attributes) {
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get(Provider.Kakao.ACCOUNT);
         return OAuth2Attributes.builder()
-                .email((String) kakaoAccount.get("email"))
-                .providerId(String.valueOf(attributes.get("id")))
+                .email((String) kakaoAccount.get(Provider.Kakao.EMAIL))
+                .providerId(String.valueOf(attributes.get(Provider.Kakao.PROVIDER_ID)))
                 .build();
     }
 }

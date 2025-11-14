@@ -1,4 +1,4 @@
-package checkmo.member.internal.service.security.oauth2;
+package checkmo.authentication.internal.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

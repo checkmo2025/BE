@@ -1,10 +1,10 @@
-package checkmo.common.config;
+package checkmo.authentication.internal.config;
 
-import checkmo.member.internal.service.security.auth.ProfileCompletionAuthorizationFilter;
-import checkmo.member.internal.service.security.jwt.JwtAuthenticationFilter;
-import checkmo.member.internal.service.security.oauth2.CustomOAuth2UserService;
-import checkmo.member.internal.service.security.oauth2.OAuth2AuthenticationFailureHandler;
-import checkmo.member.internal.service.security.oauth2.OAuth2AuthenticationSuccessHandler;
+import checkmo.authentication.internal.security.auth.ProfileCompletionAuthorizationFilter;
+import checkmo.authentication.internal.security.jwt.JwtAuthenticationFilter;
+import checkmo.authentication.internal.security.oauth2.CustomOAuth2UserService;
+import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationFailureHandler;
+import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/").permitAll() // 홈페이지 접근 허용
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/health").permitAll() // Swagger UI 접근 허용
                         .requestMatchers("/login/oauth2/**").permitAll() // OAuth2 로그인 허용
-                        .requestMatchers("/api/auth/additional-info").authenticated()
+                        .requestMatchers("/api/members/additional-info", "/api/members/check-nickname").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )

@@ -1,6 +1,6 @@
-package checkmo.member.internal.service.security.auth;
+package checkmo.authentication.internal.security.auth;
 
-import checkmo.member.internal.entity.Member;
+import checkmo.authentication.internal.entity.AuthUser;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -13,34 +13,34 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @Getter
 public class PrincipalDetails implements UserDetails, OAuth2User {
 
-    private final Member member;
+    private final AuthUser user;
     private final Map<String, Object> attributes;
 
     // 이건 이메일 로그인 시 사용하는 생성자
-    public PrincipalDetails(Member member) {
-        this.member = member;
+    public PrincipalDetails(AuthUser user) {
+        this.user = user;
         this.attributes = null;
     }
 
     // 이건 OAuth2 로그인 시 사용하는 생성자
-    public PrincipalDetails(Member member, Map<String, Object> attributes) {
-        this.member = member;
+    public PrincipalDetails(AuthUser user, Map<String, Object> attributes) {
+        this.user = user;
         this.attributes = attributes;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return member.getPassword();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return member.getId();
+        return user.getId();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 
     @Override
     public boolean isEnabled() {
-        return member.getDeactivated() == null;
+        return user.getDeactivatedAt() == null;
     }
 
     // OAuth2User methods

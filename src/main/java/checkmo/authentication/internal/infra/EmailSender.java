@@ -1,4 +1,4 @@
-package checkmo.member.internal.service.common;
+package checkmo.authentication.internal.infra;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
+@Component
 public class EmailSender {
 
     private final JavaMailSender javaMailSender;

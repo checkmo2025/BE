@@ -1,6 +1,6 @@
-package checkmo.member.internal.service.security.jwt;
+package checkmo.authentication.internal.security.jwt;
 
-import checkmo.member.internal.service.security.auth.PrincipalDetails;
+import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -27,8 +27,8 @@ public class JwtLoginProcessor {
         jwtCookieUtil.addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenMaxAge);
 
         // RefreshToken Redis에 저장
-        String memberId = ((PrincipalDetails) authentication.getPrincipal()).getMember().getId();
-        tokenCacheService.saveRefreshToken(memberId, jwtToken.getRefreshToken());
+        String userId = ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
+        tokenCacheService.saveRefreshToken(userId, jwtToken.getRefreshToken());
     }
 }
 
