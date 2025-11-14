@@ -1,10 +1,10 @@
 package checkmo.clubNotice.internal.service;
 
-import checkmo.book.BookAPI;
-import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
+import checkmo.clubMeeting.ClubMeetingAPI;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.MemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -17,6 +17,10 @@ import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,8 +41,7 @@ public class ClubNoticeQueryFacade {
     // Domain level 2
     private final MemberAPI memberAPI;
 
-    // Domain level 1
-    private final BookAPI bookAPI;
+    private final ClubMeetingAPI clubMeetingAPI;
 
     // 자신의 Query Service
     private final ClubQueryService clubQueryService;
@@ -64,10 +67,15 @@ public class ClubNoticeQueryFacade {
         List<Notice> notices = clubNoticeQueryService.getNoticeList(clubId, onlyImportant, cursor, pageable);
         List<Vote> votes = clubNoticeQueryService.getVoteList(clubId, onlyImportant, cursor, pageable);
 
-        // 5. 생성시간 순으로 병합 및 DTO 변환
-        List<ClubNoticeResponseDTO.NoticeItem> noticeItems = mergeNoticesAndVotes(notices, votes, pageSize);
+        // 5. 공지사항에 모임 정보 미리 조회
+        Set<Long> meetingIds = extractNoticeMeetingIds(notices);
+        Map<Long, MeetingInfo> meetingInfos = clubMeetingAPI.getMeetings(meetingIds);
 
-        // 6. 페이징
+        // 6. 생성시간 순으로 병합 및 DTO 변환
+        List<ClubNoticeResponseDTO.NoticeItem> noticeItems
+                = mergeNoticesAndVotes(notices, meetingInfos, votes, pageSize);
+
+        // 7. 페이징
         boolean hasNext = noticeItems.size() > pageSize;
         if (hasNext) {
             noticeItems = noticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
@@ -83,7 +91,7 @@ public class ClubNoticeQueryFacade {
      * 공지사항과 투표를 생성 시간 순서대로 병합하는 로직
      */
     private List<ClubNoticeResponseDTO.NoticeItem> mergeNoticesAndVotes(
-            List<Notice> notices, List<Vote> votes, int pageSize
+            List<Notice> notices, Map<Long, MeetingInfo> meetingInfos, List<Vote> votes, int pageSize
     ) {
         List<ClubNoticeResponseDTO.NoticeItem> resultList = new ArrayList<>();
         int n = notices.size();
@@ -95,10 +103,8 @@ public class ClubNoticeQueryFacade {
                 Notice notice = notices.get(i++);
                 ClubNoticeResponseDTO.NoticeItem dto;
 
-                if (notice.getMeeting() != null) {
-                    BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(
-                            notice.getMeeting().getBookId());
-                    dto = ClubNoticeConverter.toMeetingNoticeDTO(notice, bookInfo);
+                if (notice.getMeetingId() != null) { // 모임 공지사항인 경우
+                    dto = ClubNoticeConverter.toMeetingNoticeDTO(notice, meetingInfos.get(notice.getMeetingId()));
                 } else {
                     dto = ClubNoticeConverter.toPureNoticeDTO(notice);
                 }
@@ -114,6 +120,19 @@ public class ClubNoticeQueryFacade {
         }
 
         return resultList;
+    }
+
+    /**
+     * 공지사항 리스트에서 모임 공지사항인 경우 meetingId 추출
+     */
+    private Set<Long> extractNoticeMeetingIds(List<Notice> notices) {
+        if (notices == null) {
+            return Set.of();
+        }
+        return notices.stream()
+                .map(Notice::getMeetingId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     public ClubNoticeResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId, String tag,
@@ -152,17 +171,17 @@ public class ClubNoticeQueryFacade {
      */
     private ClubNoticeResponseDTO.ClubNoticeDetailDTO getMeetingNoticeDetail(Long clubId, Long itemId,
                                                                              ClubMember clubMember) {
-        Notice notice = clubNoticeQueryService.getNoticeWithMeeting(clubId, itemId);
+        Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
 
         if (TAG_NOTICE.equals(notice.getTag())) {
             throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
         }
 
-        BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(notice.getMeeting().getBookId());
+        MeetingInfo meetingInfo = clubMeetingAPI.getMeeting(notice.getMeetingId());
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
                 .isStaff(clubMember.isStaff())
-                .noticeItem(ClubNoticeConverter.toMeetingNoticeDTO(notice, bookInfo))
+                .noticeItem(ClubNoticeConverter.toMeetingNoticeDTO(notice, meetingInfo))
                 .build();
     }
 
