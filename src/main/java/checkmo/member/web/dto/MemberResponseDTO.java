@@ -48,29 +48,12 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class SignUpResponse {
-        private String email;
-        private boolean isProfileCompleted;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     public static class otherProfileResponse {
         private String nickname;
         private String description;
         private String profileImageUrl;
         private boolean following;
         private Set<MemberInterestCategory> categories;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class LoginResponse {
-        private String nickname;
     }
 
     @Getter
