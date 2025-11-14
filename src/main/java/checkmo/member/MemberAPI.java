@@ -73,4 +73,12 @@ public interface MemberAPI {
      * @return 회원 ID와 팔로우 상태 포함 정보 매핑
      */
     Map<String, MemberExternalDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(List<String> targetMemberIds, String currentMemberId);
+
+    /**
+     * 특정 회원이 팔로우하는 회원 ID 목록을 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 팔로우하는 회원 ID 목록
+     */
+    List<String> getFollowingMemberIds(String memberId);
 }

@@ -1,11 +1,11 @@
 package checkmo.bookStory.internal.repository;
 
 import static checkmo.bookStory.internal.entity.QBookStory.bookStory;
-import static checkmo.member.internal.entity.QFollow.follow;
 
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.member.MemberAPI;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -18,6 +18,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
 
     private final JPAQueryFactory queryFactory;
     private final ClubManagementAPI clubManagementAPI;
+    private final MemberAPI memberAPI;
 
     @Override
     public List<BookStory> searchBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId,
@@ -121,11 +122,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private List<String> getFollowingMemberIds(String memberId) {
-        return queryFactory
-                .select(follow.followingId)
-                .from(follow)
-                .where(follow.followerId.eq(memberId))
-                .fetch();
+        return memberAPI.getFollowingMemberIds(memberId);
     }
 
     private List<String> getClubMemberIds(Long clubId) {

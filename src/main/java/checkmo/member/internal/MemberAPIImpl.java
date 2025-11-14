@@ -124,4 +124,9 @@ public class MemberAPIImpl implements MemberAPI {
         return result;
     }
 
+    @Override
+    public List<String> getFollowingMemberIds(String memberId) {
+        return memberFollowQueryService.getFollowingMemberIds(memberId);
+    }
+
 }

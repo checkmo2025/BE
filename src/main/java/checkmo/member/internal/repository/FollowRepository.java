@@ -24,6 +24,9 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     List<Follow> findByFollowerIdAndIdLessThanOrderByIdDesc(String memberId, Long cursorId, Pageable pageable);
 
+    @Query("SELECT f.followingId FROM Follow f WHERE f.followerId = :memberId")
+    List<String> getFollowingMemberIds(@Param("memberId") String memberId);
+
     /**
      * 배치 조회, 팔로잉 관계 확인 - N+1 문제 해결용
      *
