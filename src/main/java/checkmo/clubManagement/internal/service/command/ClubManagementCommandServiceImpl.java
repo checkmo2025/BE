@@ -9,7 +9,7 @@ import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubDetailDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import java.util.List;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -18,9 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ClubManagementCommandServiceImpl implements ClubManagementCommandService {
-
-    // 자신의 CommandService
-    private final ClubCategoryCommandService clubCategoryCommandService;
 
     // 자신의 QueryService
     private final ClubQueryService clubQueryService;
@@ -50,12 +47,11 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         // 4. 클럽과 클럽 멤버 연관관계 설정
         club.addClubMember(clubMember);
 
-        // 5. 클럽 저장
-        clubRepository.save(club);
+        // 5. 카테고리 연관관계 설정
+        club.updateInterestCategories(new HashSet<>(request.getCategory()));
 
-        // 6. 카테고리 연관관계 설정
-        List<Long> categoryIds = request.getCategory();
-        clubCategoryCommandService.createClubCategories(club, categoryIds);
+        // 6. 클럽 저장
+        clubRepository.save(club);
 
         // 7. 생성된 클럽의 ID 반환
         return club.getId();
@@ -88,9 +84,8 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
                 request.getInsta(),
                 request.getKakao());
 
-        // 4. 카테고리 연관관계 수정
-        List<Long> categoryIds = request.getCategory();
-        clubCategoryCommandService.modifyClubCategories(club, categoryIds);
+        // 5. 카테고리 수정
+        club.updateInterestCategories(new HashSet<>(request.getCategory()));
 
         return club.getId();
     }

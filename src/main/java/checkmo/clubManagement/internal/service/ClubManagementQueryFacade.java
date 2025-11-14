@@ -5,10 +5,8 @@ import checkmo.clubManagement.ClubManagementExternalDTO.MyClubInfo;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
-import checkmo.clubManagement.internal.entity.ClubCategory;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubBookRecommendQueryService;
-import checkmo.clubManagement.internal.service.query.ClubCategoryQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
@@ -17,7 +15,6 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +32,6 @@ public class ClubManagementQueryFacade {
 
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
-    private final ClubCategoryQueryService clubCategoryQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
 
     public ClubResponseDTO.ClubListDTO getClubList(String memberId, ClubRequestDTO.ClubSearchFilter filter,
@@ -59,21 +55,16 @@ public class ClubManagementQueryFacade {
         // 5. 클럽별 멤버 상태 배치 조회
         Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
 
-        // 6. 클럽별 카테고리 ID 배치 조회
-        List<ClubCategory> allClubCategories = clubCategoryQueryService.findCategoriesByClubIds(clubIds);
-        Map<Long, List<Long>> categoryIdMap = ClubManagementConverter.fromClubCategoriesToCategoryIdMap(
-                allClubCategories);
-
-        // 7. DTO 변환
+        // 6. DTO 변환
         List<ClubResponseDTO.ClubWithMyStatusDTO> clubList = clubs.stream()
-                .map(club -> toClubWithMyStatusDTO(club, statusMap, categoryIdMap))
+                .map(club -> toClubWithMyStatusDTO(club, statusMap))
                 .toList();
 
-        // 8. 페이징 처리 (마지막 ID를 기반으로 다음 페이지 존재 여부 확인)
+        // 7. 페이징 처리 (마지막 ID를 기반으로 다음 페이지 존재 여부 확인)
         Long lastId = clubs.isEmpty() ? null : clubs.getLast().getId();
         boolean hasNext = !clubs.isEmpty() && clubs.size() == pageSize;
 
-        // 9. 최종 DTO 변환
+        // 8. 최종 DTO 변환
         return ClubManagementConverter.toClubListDTO(clubList, hasNext, lastId);
     }
 
@@ -82,17 +73,13 @@ public class ClubManagementQueryFacade {
      */
     private ClubResponseDTO.ClubWithMyStatusDTO toClubWithMyStatusDTO(
             Club club,
-            Map<Long, ClubMember.ClubMemberStatus> statusMap,
-            Map<Long, List<Long>> categoryIdMap
+            Map<Long, ClubMember.ClubMemberStatus> statusMap
     ) {
         ClubMember.ClubMemberStatus status = statusMap.get(club.getId());
         boolean isStaff = status == ClubMember.ClubMemberStatus.STAFF;
         boolean isMember = status != null;
 
-        List<Long> categoryIds = categoryIdMap.getOrDefault(club.getId(), List.of());
-
-        ClubResponseDTO.ClubDetailDTO clubDetailDTO = ClubManagementConverter.fromClubToClubDetailDTO(club, categoryIds,
-                isStaff);
+        ClubResponseDTO.ClubDetailDTO clubDetailDTO = ClubManagementConverter.fromClubToClubDetailDTO(club, isStaff);
 
         return ClubResponseDTO.ClubWithMyStatusDTO.builder()
                 .club(clubDetailDTO)
@@ -139,17 +126,10 @@ public class ClubManagementQueryFacade {
                 .map(cm -> cm.getClub().getId())
                 .toList();
 
-        // 5. 카테고리 배치 조회
-        Map<Long, List<String>> clubCategoryNamesMap =
-                ClubManagementConverter.fromClubCategoriesToCategoryNamesMap(
-                        clubCategoryQueryService.findCategoriesByClubIds(clubIds)
-                );
-
-        // 6. DTO 변환
+        // 5. DTO 변환
         List<ClubResponseDTO.ClubDetailResponseDTO> dtoList = clubMembers.stream()
                 .map(cm -> ClubManagementConverter.fromClubToResponseDTOWithCategoryNames(
                         cm.getClub(),
-                        clubCategoryNamesMap.getOrDefault(cm.getClub().getId(), Collections.emptyList()),
                         cm.isStaff()
                 ))
                 .toList();
@@ -170,14 +150,8 @@ public class ClubManagementQueryFacade {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        // 3. 카테고리 ID 리스트 조회
-        List<ClubCategory> clubCategories = clubCategoryQueryService.findCategoriesByClub(clubId);
-        List<Long> categoryIds = clubCategories.stream()
-                .map(ClubCategory::getCategoryId)
-                .toList();
-
-        // 4. DTO 변환 후 반환
-        return ClubManagementConverter.fromClubToClubDetailDTO(club, categoryIds, isStaff);
+        // 3. DTO 변환 후 반환
+        return ClubManagementConverter.fromClubToClubDetailDTO(club, isStaff);
     }
 
     public ClubResponseDTO.ClubMemberListDTO getClubMemberListByStatus(Long clubId, String memberId,

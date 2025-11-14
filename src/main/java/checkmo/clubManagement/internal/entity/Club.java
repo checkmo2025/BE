@@ -113,6 +113,14 @@ public class Club extends BaseEntity {
         }
     }
 
+    public void updateInterestCategories(Set<ClubInterestCategory> categories) {
+        if (categories == null) {
+            return;
+        }
+        this.interestCategories.clear();
+        this.interestCategories.addAll(categories);
+    }
+
     public enum ParticipantType {
         STUDENT("대학생"),
         WORKER("직장인"),

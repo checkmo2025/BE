@@ -1,12 +1,9 @@
 package checkmo.clubManagement.internal.converter;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.category.CategoryExternalDTO;
-import checkmo.category.CategoryExternalDTO.CategoryInfo;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
-import checkmo.clubManagement.internal.entity.ClubCategory;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
@@ -14,8 +11,6 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailResponseDTO;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -90,17 +85,6 @@ public class ClubManagementConverter {
     }
 
     /**
-     * Club -> ClubResponseDTO.ClubInfoDTO
-     */
-    public static ClubResponseDTO.ClubInfoDTO toClubInfoDTO(Club club) {
-        return ClubResponseDTO.ClubInfoDTO.builder()
-                .clubId(club.getId())
-                .clubName(club.getName())
-                .open(club.isOpen())
-                .build();
-    }
-
-    /**
      * ClubManagementExternalDTO.MyClubInfo -> ClubResponseDTO.ClubInfoDTO
      */
     public static ClubResponseDTO.ClubInfoDTO toClubInfoDTOFromMyClubInfo(
@@ -158,26 +142,16 @@ public class ClubManagementConverter {
     }
 
     /**
-     * ClubRequestDTO.ClubDetailDTO -> CategoryIdListDTO
-     */
-    public static CategoryExternalDTO.CategoryIdList toCategoryListRequestDTO(ClubRequestDTO.ClubDetailDTO dto) {
-        return CategoryExternalDTO.CategoryIdList.builder()
-                .categoryIdList(dto.getCategory())
-                .build();
-    }
-
-    /**
      * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
      */
-    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, List<Long> categoryIds,
-                                                                        boolean isStaff) {
+    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, boolean isStaff) {
         return ClubResponseDTO.ClubDetailDTO.builder()
                 .clubId(club.getId())
                 .name(club.getName())
                 .description(club.getDescription())
                 .profileImageUrl(club.getProfileImgUrl())
                 .open(club.isOpen())
-                .category(categoryIds)
+                .category(club.getInterestCategories().stream().toList())
                 .region(club.getRegion())
                 .participantTypes(club.getParticipantTypes())
                 .insta(club.getInsta())
@@ -187,44 +161,19 @@ public class ClubManagementConverter {
     }
 
     /**
-     * Club, CategoryExternalDTO -> ClubResponseDTO.ClubDetailResponseDTO 변환
-     */
-    public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTO(
-            Club club, List<CategoryExternalDTO.CategoryInfo> categories, boolean isStaff) {
-
-        List<String> categoryNames = categories.stream()
-                .map(CategoryExternalDTO.CategoryInfo::getName)
-                .toList();
-
-        return ClubResponseDTO.ClubDetailResponseDTO.builder()
-                .clubId(club.getId())
-                .name(club.getName())
-                .description(club.getDescription())
-                .profileImageUrl(club.getProfileImgUrl())
-                .open(club.isOpen())
-                .category(categoryNames)
-                .region(club.getRegion())
-                .participantTypes(club.getParticipantTypes())
-                .insta(club.getInsta())
-                .kakao(club.getKakao())
-                .isStaff(isStaff)
-                .build();
-    }
-
-
-    /**
-     * Club 엔티티 + 카테고리 이름 리스트 → ClubDetailResponseDTO 변환 (효율적 버전)
+     * Club 엔티티 → ClubDetailResponseDTO 변환 (효율적 버전)
      */
     public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTOWithCategoryNames(
-            Club club, List<String> categoryNames, boolean isStaff) {
-
+            Club club,
+            boolean isStaff
+    ) {
         return ClubResponseDTO.ClubDetailResponseDTO.builder()
                 .clubId(club.getId())
                 .name(club.getName())
                 .description(club.getDescription())
                 .profileImageUrl(club.getProfileImgUrl())
                 .open(club.isOpen())
-                .category(categoryNames)
+                .category(club.getInterestCategories().stream().toList())
                 .region(club.getRegion())
                 .participantTypes(club.getParticipantTypes())
                 .insta(club.getInsta())
@@ -304,53 +253,6 @@ public class ClubManagementConverter {
         return ClubManagementExternalDTO.MyClubList.builder()
                 .clubList(clubInfoList)
                 .build();
-    }
-
-    // =====================================================
-    // ClubCategory 관련 변환
-    // =====================================================
-
-    /**
-     * List<ClubCategory> → CategoryInfoList 변환
-     */
-    public static Map<Long, List<CategoryInfo>> fromClubCategoriesToCategoryInfoListMap(
-            List<ClubCategory> allClubCategories
-    ) {
-        return allClubCategories.stream()
-                .collect(Collectors.groupingBy(
-                        ClubCategory::getClubId,
-                        Collectors.mapping(cc -> CategoryExternalDTO.CategoryInfo.builder()
-                                        .id(cc.getCategory().getId())
-                                        .name(cc.getCategory().getName())
-                                        .build(),
-                                Collectors.toList())
-                ));
-    }
-
-    /**
-     * List<ClubCategory> → 클럽별 카테고리 이름 Map 변환
-     */
-    public static Map<Long, List<String>> fromClubCategoriesToCategoryNamesMap(
-            List<ClubCategory> allClubCategories
-    ) {
-        return allClubCategories.stream()
-                .collect(Collectors.groupingBy(
-                        ClubCategory::getClubId,
-                        Collectors.mapping(cc -> cc.getCategory().getName(), Collectors.toList())
-                ));
-    }
-
-    /**
-     * List<ClubCategory> → 클럽별 카테고리 ID Map 변환
-     */
-    public static Map<Long, List<Long>> fromClubCategoriesToCategoryIdMap(
-            List<ClubCategory> allClubCategories
-    ) {
-        return allClubCategories.stream()
-                .collect(Collectors.groupingBy(
-                        ClubCategory::getClubId,
-                        Collectors.mapping(ClubCategory::getCategoryId, Collectors.toList())
-                ));
     }
 
 }

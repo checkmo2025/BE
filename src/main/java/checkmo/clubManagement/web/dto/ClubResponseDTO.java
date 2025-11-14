@@ -2,6 +2,7 @@ package checkmo.clubManagement.web.dto;
 
 import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -59,7 +60,7 @@ public class ClubResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean open;
-        private List<String> category; // String으로 주기 -> 마이페이지용
+        private List<ClubInterestCategory> category;
         private String region;
         private List<Club.ParticipantType> participantTypes;
         private String insta;
@@ -87,7 +88,7 @@ public class ClubResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean open;
-        private List<Long> category;
+        private List<ClubInterestCategory> category;
         private String region;
         private List<Club.ParticipantType> participantTypes;
         private String insta;
@@ -105,15 +106,6 @@ public class ClubResponseDTO {
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
         private int pageSize; // 현재 페이지 크기
         private boolean isStaff; // 본인이 모임의 스탭인지 여부
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class ClubMemberUpdateResponseDTO {
-        private ClubResponseDTO.ClubMemberDTO updatedMember;
-        private boolean isRequesterStaff; // 현재 로그인한 요청자가 운영진인지 여부
     }
 
     @Getter

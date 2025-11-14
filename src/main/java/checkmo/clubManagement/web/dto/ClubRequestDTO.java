@@ -2,6 +2,7 @@ package checkmo.clubManagement.web.dto;
 
 import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import lombok.Getter;
@@ -65,7 +66,7 @@ public class ClubRequestDTO {
         private String description;
         private String profileImageUrl;
         private boolean open;
-        private List<Long> category;
+        private List<ClubInterestCategory> category;
         private String region;
         private List<Club.ParticipantType> participantTypes;
         private String insta;
