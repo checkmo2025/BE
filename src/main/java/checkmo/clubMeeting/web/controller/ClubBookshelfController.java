@@ -1,8 +1,7 @@
 package checkmo.clubMeeting.web.controller;
 
-import checkmo.clubMeeting.ClubMeetingAPI;
+import checkmo.clubMeeting.internal.service.ClubMeetingQueryFacade;
 import checkmo.clubMeeting.internal.service.command.ClubBookReviewCommandService;
-import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
 import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
@@ -33,10 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "독서모임-책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
 public class ClubBookshelfController {
 
-    private final ClubMeetingCommandService clubMeetingCommandService;
+    private final ClubMeetingQueryFacade clubMeetingQueryFacade;
     private final ClubTopicCommandService clubTopicCommandService;
     private final ClubBookReviewCommandService clubBookReviewCommandService;
-    private final ClubMeetingAPI clubMeetingAPI;
 
     @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 사이즈만큼 조회합니다.(최신순 정렬)")
     @Parameters({
@@ -58,8 +56,8 @@ public class ClubBookshelfController {
             @RequestParam(required = false) Integer generation,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfListDTO bookShelfList = clubMeetingAPI.getBookShelfList(clubId, cursorId, size,
-                generation, memberId);
+        BookShelfResponseDTO.BookShelfListDTO bookShelfList
+                = clubMeetingQueryFacade.getBookShelfList(clubId, cursorId, size, generation, memberId);
         return ApiResponse.onSuccess(bookShelfList);
     }
 
@@ -77,8 +75,8 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfDetailDTO bookShelfDetail = clubMeetingAPI.getBookShelfDetail(meetingId,
-                memberId);
+        BookShelfResponseDTO.BookShelfDetailDTO bookShelfDetail
+                = clubMeetingQueryFacade.getBookShelfDetail(meetingId, memberId);
         return ApiResponse.onSuccess(bookShelfDetail);
     }
 
@@ -100,9 +98,8 @@ public class ClubBookshelfController {
             @RequestParam @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookReviewListDTO bookReviewList = clubMeetingAPI.getBookReviewList(meetingId, cursorId,
-                size,
-                memberId);
+        BookShelfResponseDTO.BookReviewListDTO bookReviewList
+                = clubMeetingQueryFacade.getBookReviewList(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(bookReviewList);
     }
 
@@ -258,8 +255,8 @@ public class ClubBookshelfController {
             @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.TopicListDTO topicList = clubMeetingAPI.findTopicsByMeeting(meetingId, cursorId, size,
-                memberId);
+        BookShelfResponseDTO.TopicListDTO topicList
+                = clubMeetingQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(topicList);
     }
 }

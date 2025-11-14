@@ -1,4 +1,4 @@
-package checkmo.clubMeeting.internal;
+package checkmo.clubMeeting.internal.service;
 
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
@@ -8,7 +8,6 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
-import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -23,6 +22,7 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +30,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class ClubMeetingAPIImpl implements ClubMeetingAPI {
+public class ClubMeetingQueryFacade {
 
     // 페이징 기본 크기 상수
     private static final int TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF = 3;
@@ -51,7 +49,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
 
-    @Override
     public BookShelfResponseDTO.BookShelfListDTO getBookShelfList(Long clubId, Long cursorId, Integer size,
                                                                   Integer generation, String memberId) {
         // 1. 유효성 검증(club, clubMember)
@@ -83,7 +80,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 membershipDTO);
     }
 
-    @Override
     // TODO: getBookShelftDetail, findTopicsByMeeting 간 중복 제거
     public BookShelfResponseDTO.BookShelfDetailDTO getBookShelfDetail(Long meetingId, String memberId) {
         // 1. 유효성 검증(meeting, clubMember)
@@ -103,7 +99,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
 
         // 4. 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap =
+        Map<String, BasicInfo> authorInfoMap =
                 memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 5. DTO 변환
@@ -123,7 +119,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         );
     }
 
-    @Override
     public BookShelfResponseDTO.TopicListDTO findTopicsByMeeting(Long meetingId, Long cursorId, Integer size,
                                                                  String memberId) {
         // 1. 유효성 검증(meeting, clubMember)
@@ -157,7 +152,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 membershipDTO);
     }
 
-    @Override
     public BookShelfResponseDTO.BookReviewListDTO getBookReviewList(Long meetingId, Long lastReviewId, int size,
                                                                     String memberId) {
         // 1. 유효성 검증(meeting, clubMember)
@@ -200,7 +194,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 .toList();
     }
 
-    @Override
     public MeetingResponseDTO.MeetingListDTO getMeetingsByClub(Long clubId, Long cursorId, Integer size,
                                                                String memberId) {
         // 1. 유효성 검증(club, clubMember)
@@ -242,7 +235,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 .toList();
     }
 
-    @Override
     public MeetingResponseDTO.MeetingDetailDTO findMeetingDetailById(Long meetingId, String memberId) {
         // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
@@ -290,7 +282,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         );
     }
 
-    @Override
     public MeetingResponseDTO.TopicDTOList findMeetingTopicsWithTeam(Long meetingId, String memberId) {
         // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
@@ -350,7 +341,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         return ClubMeetingConverter.fromTopicDTOListToTeamTopicDTO(teamNumber, topicDTOList, membershipDTO);
     }
 
-    @Override
     public MeetingResponseDTO.CalendarMeetingDTO getClubMeetingCalendar(Long clubId, int year, int month,
                                                                         String memberId) {
         // 1. 유효성 검증(club, clubMember)
@@ -366,7 +356,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         return ClubMeetingConverter.fromMeetingListToMCalendarMeetingDTO(meetings, membershipDTO);
     }
 
-    @Override
     public MeetingResponseDTO.MeetingMemberListDTO findMeetingMembersByMeeting(Long meetingId, Long cursorId,
                                                                                Integer size, String memberId) {
         // 1. 미팅, 클럽 멤버 검증
@@ -448,7 +437,6 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 ));
     }
 
-    @Override
     public MeetingResponseDTO.TeamMemberDTO findTeamMembersByMeeting(Long meetingId, Integer teamNumber,
                                                                      String memberId) {
         // 1. 검증
