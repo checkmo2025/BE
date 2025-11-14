@@ -12,7 +12,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,23 +37,12 @@ public class Member extends BaseEntity {
     private String email;
 
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
     private String nickName;
 
     @Column(length = 20, nullable = false)
     private String description;
 
     private String imgUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
-    private LocalDateTime deactivated;
-
-    private boolean isProfileCompleted;
 
     @Builder.Default
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
@@ -82,11 +70,6 @@ public class Member extends BaseEntity {
         this.imgUrl = imgUrl != null ? imgUrl : "";
     }
 
-    // 프로필 완료 상태 업데이트
-    public void completeProfile() {
-        this.isProfileCompleted = true;
-    }
-
     // 프로필 수정
     public void updateProfile(String description, String imgUrl) {
         this.description = description != null ? description : "";
@@ -99,9 +82,5 @@ public class Member extends BaseEntity {
         if (newCategories != null) {
             this.interestCategories.addAll(newCategories);
         }
-    }
-
-    public enum Role {
-        USER, ADMIN
     }
 }
