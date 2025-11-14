@@ -6,6 +6,7 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,11 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
         LocalDateTime endDateTime = startDateTime.plusMonths(1); //12월의 경우 다음 해 1월로 넘어감
 
         return meetingRepository.findAllByClubIdBetweenMeetingTimeAsc(clubId, startDateTime, endDateTime);
+    }
+
+    @Override
+    public List<Meeting> getMeetingsByIds(Set<Long> meetingIds) {
+        return meetingRepository.findAllById(meetingIds);
     }
 
     @Override

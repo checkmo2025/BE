@@ -1,7 +1,9 @@
 package checkmo.clubMeeting.internal.converter;
 
 import checkmo.book.BookExternalDTO;
+import checkmo.book.BookExternalDTO.BasicInfo;
 import checkmo.clubManagement.web.dto.MembershipResponseDTO;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Team;
@@ -15,6 +17,7 @@ import checkmo.member.MemberExternalDTO;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -431,8 +434,42 @@ public class ClubMeetingConverter {
                 .build();
     }
 
+    /**
+     * Meeting 리스트 + BookBasicInfo 맵 -> MeetingInfo 리스트 변환
+     */
+    public static Map<Long, MeetingInfo> fromMeetingListToMeetingInfoList(
+            List<Meeting> meetings,
+            Map<String, BasicInfo> bookBasicInfoMapForShare
+    ) {
+        return meetings.stream()
+                .collect(Collectors.toMap(
+                        Meeting::getId,
+                        meeting -> fromMeetingToMeetingInfo(
+                                meeting,
+                                bookBasicInfoMapForShare.get(meeting.getBookId())
+                        )
+                ));
+    }
+
+    /**
+     * /** Meeting 엔티티 + BookBasicInfo -> MeetingInfo 변환
+     */
+    public static MeetingInfo fromMeetingToMeetingInfo(Meeting meeting, BasicInfo bookBasicInfoForShare) {
+        return MeetingInfo.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .content(meeting.getContent())
+                .generation(meeting.getGeneration())
+                .tag(meeting.getTag())
+                .bookInfo(bookBasicInfoForShare)
+                .build();
+    }
+
     // =====================================================
     // Parameter ->  DTO 변환
+
     // =====================================================
 
     /**

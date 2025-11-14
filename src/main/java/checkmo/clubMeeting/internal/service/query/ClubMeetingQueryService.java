@@ -3,6 +3,7 @@ package checkmo.clubMeeting.internal.service.query;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 독서 모임의 미팅 조회 서비스
@@ -44,6 +45,14 @@ public interface ClubMeetingQueryService {
      * @return Meeting 리스트
      */
     List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size);
+
+    /**
+     * 여러 미팅 ID로 미팅 리스트를 조회합니다.
+     *
+     * @param meetingIds 미팅 ID 리스트
+     * @return 미팅 리스트
+     */
+    List<Meeting> getMeetingsByIds(Set<Long> meetingIds);
 
     /**
      * 독서모임이 존재하는지 확인합니다.
