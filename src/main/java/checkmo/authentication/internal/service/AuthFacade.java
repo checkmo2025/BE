@@ -5,7 +5,7 @@ import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import checkmo.authentication.internal.security.jwt.JwtLoginProcessor;
 import checkmo.authentication.internal.service.command.AuthSessionCommandService;
-import checkmo.authentication.internal.service.command.SignUpCommandService;
+import checkmo.authentication.internal.service.command.AuthUserCommandService;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import checkmo.authentication.web.dto.AuthResponseDTO;
 import checkmo.member.MemberAPI;
@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service;
 public class AuthFacade {
 
     private final MemberAPI memberAPI;
-    private final SignUpCommandService signUpCommandService;
+    private final AuthUserCommandService authUserCommandService;
     private final AuthSessionCommandService authSessionCommandService;
     private final JwtLoginProcessor jwtLoginProcessor;
 
     public AuthResponseDTO.SignUp signUp(AuthRequestDTO.SignUp request, HttpServletResponse response) {
 
-        AuthUser user = signUpCommandService.signUp(request);
+        AuthUser user = authUserCommandService.signUp(request);
 
         Authentication authentication = authSessionCommandService
                 .login(new AuthRequestDTO.Login(request.getEmail(), request.getPassword()));
