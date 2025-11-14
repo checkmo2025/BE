@@ -1,6 +1,5 @@
 package checkmo.clubMeeting.internal.entity;
 
-import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,12 +32,11 @@ public class BookReview extends BaseEntity {
 
     private double rate;
 
-    @Column(name = "club_member_id", insertable = false, updatable = false)
+    @Column(name = "club_member_id", nullable = false)
     private Long clubMemberId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_member_id")
-    private ClubMember clubMember;
+    @Column(name = "member_id", nullable = false)
+    private String memberId;
 
     @Column(name = "meeting_id", insertable = false, updatable = false)
     private Long meetingId;
@@ -50,33 +48,6 @@ public class BookReview extends BaseEntity {
     public void updateBookReview(String description, double rate) {
         this.description = description;
         this.rate = rate;
-    }
-
-    // == 연관관계 메서드 == //
-    public void setClubMember(ClubMember clubMember) {
-        if (this.clubMember == clubMember) {
-            return; // 동일 객체 설정 방지
-        }
-
-        // 1. 이전 부모 객체로부터 분리
-        if (this.clubMember != null) {
-            this.clubMember.getBookReviews().remove(this);
-        }
-
-        // 2. 새로운 부모 객체와 연결
-        this.clubMember = clubMember;
-
-        // 3. null 검사 & 새로운 부모 객체 연결
-        if (clubMember != null && !clubMember.getBookReviews().contains(this)) {
-            clubMember.getBookReviews().add(this);
-        }
-    }
-
-    public void removeClubMember() {
-        if (this.clubMember != null) {
-            this.clubMember.getBookReviews().remove(this);
-            this.clubMember = null;
-        }
     }
 
     public void setMeeting(Meeting meeting) {

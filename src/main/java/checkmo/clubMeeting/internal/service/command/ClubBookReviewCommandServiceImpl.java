@@ -52,8 +52,8 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         }
 
         // 3. 한줄평 생성
-        BookReview bookReview = ClubMeetingConverter.fromBookReviewDTOToBookReview(request);
-        bookReview.setClubMember(clubMember);
+        BookReview bookReview
+                = ClubMeetingConverter.fromBookReviewDTOToBookReview(request, clubMember.getId(), memberId);
         bookReview.setMeeting(meeting);
 
         // 4. 미팅의 별점 합산
@@ -133,7 +133,6 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         meeting.subtractSumRate(bookReview.getRate());
 
         // 6. 한줄평 삭제
-        bookReview.removeClubMember();
         bookReview.removeMeeting();
     }
 }

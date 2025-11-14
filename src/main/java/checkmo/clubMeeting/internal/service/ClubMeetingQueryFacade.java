@@ -44,6 +44,7 @@ public class ClubMeetingQueryFacade {
 
     // Domain level 2
     private final MemberAPI memberAPI;
+
     // Domain level 1
     private final BookAPI bookAPI;
 
@@ -196,7 +197,7 @@ public class ClubMeetingQueryFacade {
         return bookReviews.stream()
                 .map(review -> ClubMeetingConverter.fromBookReviewAndMemberSharedDTOToBookReviewDTO(
                         review,
-                        authorInfoMap.get(review.getClubMember().getMemberId())
+                        authorInfoMap.get(review.getMemberId())
                 ))
                 .toList();
     }
@@ -489,7 +490,7 @@ public class ClubMeetingQueryFacade {
 
     private List<String> extractMemberIdsFromBookReviews(List<BookReview> bookReviews) {
         return bookReviews.stream()
-                .map(bookReview -> bookReview.getClubMember().getMemberId())
+                .map(BookReview::getMemberId)
                 .distinct()
                 .toList();
     }

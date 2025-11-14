@@ -1,6 +1,5 @@
 package checkmo.clubManagement.internal.entity;
 
-import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.MemberTeam;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.common.BaseEntity;
@@ -52,10 +51,6 @@ public class ClubMember extends BaseEntity {
 
     @JoinColumn(name = "member_id", nullable = false)
     private String memberId;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.REMOVE)
-    private List<BookReview> bookReviews = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)

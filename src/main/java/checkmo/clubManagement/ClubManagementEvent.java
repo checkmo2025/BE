@@ -9,6 +9,10 @@ public class ClubManagementEvent {
     }
 
     @Builder
+    public record LeaveClubEvent(Long clubMemberId) {
+    }
+
+    @Builder
     public record ClubDeletedEvent(Long clubId) {
     }
 }

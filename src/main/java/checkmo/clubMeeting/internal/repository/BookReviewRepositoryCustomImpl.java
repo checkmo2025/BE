@@ -1,6 +1,5 @@
 package checkmo.clubMeeting.internal.repository;
 
-import static checkmo.clubManagement.internal.entity.QClubMember.clubMember;
 import static checkmo.clubMeeting.internal.entity.QBookReview.bookReview;
 
 import checkmo.clubMeeting.internal.entity.BookReview;
@@ -30,8 +29,6 @@ public class BookReviewRepositoryCustomImpl implements BookReviewRepositoryCusto
                 .selectFrom(bookReview)
                 .distinct()
                 .where(predicate)
-                .join(bookReview.clubMember, clubMember)
-                .fetchJoin() //review -> clubMember -> member 작성자 정보를 맵핑시키기 위해 fetchJoin
                 .orderBy(bookReview.id.desc())
                 .limit(size)
                 .fetch();
