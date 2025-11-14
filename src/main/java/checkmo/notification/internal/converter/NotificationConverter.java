@@ -1,6 +1,5 @@
 package checkmo.notification.internal.converter;
 
-import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.web.dto.NotificationResponseDTO;
 import java.util.List;
@@ -65,19 +64,19 @@ public class NotificationConverter {
     /**
      * NotificationPreviewDTO -> NotificationPreviewListDTO
      */
-    public static NotificationExternalDTO.NotificationPreviewList convertToPreviewListDTO(
+    public static NotificationResponseDTO.NotificationPreviewList convertToPreviewListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap
     ) {
 
-        List<NotificationExternalDTO.NotificationPreview> previewList = notifications.stream()
+        List<NotificationResponseDTO.NotificationPreview> previewList = notifications.stream()
                 .map(notification -> convertToPreviewDTO(
                         notification,
                         notification.getSenderId() != null ? senderNicknameMap.get(notification.getSenderId()) : null
                 ))
                 .toList();
 
-        return NotificationExternalDTO.NotificationPreviewList.builder()
+        return NotificationResponseDTO.NotificationPreviewList.builder()
                 .notifications(previewList)
                 .build();
     }
@@ -85,9 +84,9 @@ public class NotificationConverter {
     /**
      * Notification → NotificationExternalDTO 변환
      */
-    public static NotificationExternalDTO.NotificationPreview convertToPreviewDTO(Notification notification,
+    public static NotificationResponseDTO.NotificationPreview convertToPreviewDTO(Notification notification,
                                                                                   String senderNickname) {
-        return NotificationExternalDTO.NotificationPreview.builder()
+        return NotificationResponseDTO.NotificationPreview.builder()
                 .notificationId(notification.getId())
                 .notificationType(notification.getNotificationType())
                 .senderNickname(senderNickname)
@@ -105,7 +104,7 @@ public class NotificationConverter {
     /**
      * Notification -> NotificationListResponseDTO 변환
      */
-    public static NotificationResponseDTO.NotificationListResponse convertToNotificationListDTO(
+    public static NotificationResponseDTO.NotificationList convertToNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
             boolean hasNext,
@@ -120,7 +119,7 @@ public class NotificationConverter {
                 ))
                 .toList();
 
-        return NotificationResponseDTO.NotificationListResponse.builder()
+        return NotificationResponseDTO.NotificationList.builder()
                 .notifications(notificationList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
