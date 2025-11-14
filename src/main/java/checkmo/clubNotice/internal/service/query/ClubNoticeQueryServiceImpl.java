@@ -28,12 +28,6 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
     }
 
     @Override
-    public Notice getNoticeWithMeeting(Long clubId, Long noticeId) {
-        return noticeRepository.findWithMeetingByIdAndClubId(noticeId, clubId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
-    }
-
-    @Override
     public Vote getVote(Long clubId, Long voteId) {
         return voteRepository.findByIdAndClubId(voteId, clubId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));

@@ -1,6 +1,5 @@
 package checkmo.clubNotice.internal.entity;
 
-import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
@@ -11,13 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Builder
@@ -40,13 +37,8 @@ public class Notice extends BaseEntity {
     @Column(nullable = false)
     private String tag; //TODO: "공지", "모임" 2개 값만 가능
 
-    @Column(name = "meeting_id", insertable = false, updatable = false)
+    @Column(name = "meeting_id")
     private Long meetingId;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_id")
-    @Setter
-    private Meeting meeting;
 
     @Column(name = "club_id", insertable = false, updatable = false)
     private Long clubId;

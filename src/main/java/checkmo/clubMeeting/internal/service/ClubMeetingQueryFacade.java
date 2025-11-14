@@ -468,16 +468,6 @@ public class ClubMeetingQueryFacade {
                 memberBasicInfoMap.values().stream().toList(), membershipDTO);
     }
 
-    private List<String> extractMemberIds(List<ClubMember> members) {
-        if (members == null) {
-            return List.of();
-        }
-        return members.stream()
-                .map(ClubMember::getMemberId)
-                .distinct()
-                .toList();
-    }
-
     private List<String> extractMemberIdsFromMemberTeams(List<MemberTeam> memberTeams) {
         if (memberTeams == null) {
             return List.of();

@@ -1,5 +1,6 @@
 package checkmo.clubNotice.internal.service.command;
 
+import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
@@ -27,6 +28,13 @@ public interface ClubNoticeCommandService {
      * @param memberId 요청자(운영진) 회원 ID
      */
     void deletePureNotice(Long clubId, Long noticeId, String memberId);
+
+    /**
+     * 독서 모임의 모임 생성 시 공지사항을 작성합니다.
+     *
+     * @param event 모임 생성 이벤트
+     */
+    void createMeetingNotice(ClubMeetingCreatedEvent event);
 
     /**
      * 독서 모임에 투표를 생성합니다.

@@ -19,15 +19,6 @@ public interface ClubNoticeQueryService {
     Notice getNotice(Long clubId, Long noticeId);
 
     /**
-     * 모임 공지사항 조회 (Meeting 포함)
-     *
-     * @param clubId   클럽 ID
-     * @param noticeId 공지사항 ID
-     * @return 공지사항 엔티티 (Meeting fetch join)
-     */
-    Notice getNoticeWithMeeting(Long clubId, Long noticeId);
-
-    /**
      * 투표 조회
      *
      * @param clubId 클럽 ID

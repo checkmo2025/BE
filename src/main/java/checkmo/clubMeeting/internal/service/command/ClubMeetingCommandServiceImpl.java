@@ -5,6 +5,7 @@ import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
+import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.MemberTeam;
@@ -15,8 +16,6 @@ import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingCreateRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingUpdateRequestDTO;
-import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
-import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.LinkedHashSet;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +46,10 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final MeetingRepository meetingRepository;
     private final TeamRepository teamRepository;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     // TODO: 전체적으로 Meeting 존재 여부 검증을 Service에서 해야 함 -> 따라서 API endpoint를 club/{clubId}/meeting/{meetingId}/... 이런 식으로 바꿔야 함
+
     @Override
     public Long createMeeting(Long clubId, String memberId, MeetingCreateRequestDTO request) {
         // 1. 유효성 검증(club, clubMember)
@@ -64,11 +67,10 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        // 5. 미팅 기반 공지사항 생성
-        Notice notice = ClubNoticeConverter.fromMeetingToNotice(meeting, club);
-        meeting.addNotice(notice);
+        // 5. 미팅 기반 공지사항 생성 이벤트 발행
+        publishMeetingCreatedEvent(meeting);
 
-        // 6. 미팅 명시적 저장 -> 공지사항도 함께 저장됨
+        // 6. 미팅 명시적 저장
         return meetingRepository.save(meeting).getId();
     }
 
@@ -94,11 +96,21 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 request.getTag()
         );
 
-        // 4. 새로운 공지사항 생성 및 교체(고아객체 자동 삭제)
-        Notice newNotice = ClubNoticeConverter.fromMeetingToNotice(meeting, club);
-        meeting.replaceNotice(newNotice);
+        // 4. 새로운 공지사항 삭제 후 생성 이벤트 발행
+        publishMeetingCreatedEvent(meeting);
 
         return meeting.getId();
+    }
+
+    private void publishMeetingCreatedEvent(Meeting meeting) {
+        ClubMeetingCreatedEvent event = ClubMeetingCreatedEvent.builder()
+                .clubId(meeting.getId())
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .content(meeting.getContent())
+                .build();
+
+        applicationEventPublisher.publishEvent(event);
     }
 
     @Override

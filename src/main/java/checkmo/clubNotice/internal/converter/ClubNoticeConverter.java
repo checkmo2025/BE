@@ -1,10 +1,8 @@
 package checkmo.clubNotice.internal.converter;
 
-import static checkmo.clubMeeting.internal.converter.ClubMeetingConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO;
-
-import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.Club;
-import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
+import checkmo.clubMeeting.ClubMeetingExternalDTO;
 import checkmo.clubNotice.internal.entity.MemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
@@ -203,40 +201,30 @@ public class ClubNoticeConverter {
     }
 
     /**
-     * Notice 엔티티 + BookExternalDTO.BasicInfoDTO -> ClubResponseDTO.MeetingNoticeDTO 변환
+     * Notice 엔티티 + MeetingInfo -> ClubResponseDTO.MeetingNoticeDTO 변환
      */
-    public static ClubNoticeResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(Notice notice,
-                                                                            BookExternalDTO.BasicInfo bookInfo) {
+    public static ClubNoticeResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(
+            Notice notice,
+            ClubMeetingExternalDTO.MeetingInfo meetingInfo
+    ) {
         return ClubNoticeResponseDTO.MeetingNoticeDTO.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
                 .important(notice.isImportant())
                 .tag(notice.getTag())
-                .meetingInfoDTO(fromMeetingAndBookSharedDTOToMeetingInfoDTO(notice.getMeeting(), bookInfo))
+                .meetingInfoDTO(meetingInfo)
                 .build();
     }
 
-    // =====================================================
-    // Entity -> Entity 변환
-    // =====================================================
-
-    /**
-     * Meeting 엔티티 -> Notice 엔티티 변환 (자동 생성)
-     */
-    public static Notice fromMeetingToNotice(Meeting meeting, Club club) {
+    public static Notice fromMeetingCreatedEventToNotice(ClubMeetingCreatedEvent event) {
         return Notice.builder()
-                .title(meeting.getTitle())
-                .content(meeting.getContent())
-                .important(true)
+                .clubId(event.clubId())
+                .meetingId(event.meetingId())
+                .title(event.title())
+                .content(event.content())
                 .tag("모임")
-                .club(club)
-                .clubId(club.getId())
+                .important(true)
                 .build();
     }
-
-    // =====================================================
-    // DTO -> DTO 변환
-    // =====================================================
-
 }

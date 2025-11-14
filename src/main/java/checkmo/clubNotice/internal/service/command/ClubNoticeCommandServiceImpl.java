@@ -4,6 +4,7 @@ import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
+import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.MemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -77,6 +78,18 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
         // 4. 공지사항 삭제
         noticeRepository.delete(notice);
+    }
+
+    @Override
+    public void createMeetingNotice(ClubMeetingCreatedEvent event) {
+        Club club = clubQueryService.validateClub(event.clubId());
+
+        // 기존 미팅 공지가 존재하면 삭제
+        noticeRepository.findByMeetingId(event.meetingId())
+                .ifPresent(noticeRepository::delete);
+
+        Notice notice = ClubNoticeConverter.fromMeetingCreatedEventToNotice(event);
+        noticeRepository.save(notice);
     }
 
     @Override

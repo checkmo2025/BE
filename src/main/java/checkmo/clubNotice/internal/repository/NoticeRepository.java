@@ -1,6 +1,5 @@
 package checkmo.clubNotice.internal.repository;
 
-import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubNotice.internal.entity.Notice;
 import java.util.List;
 import java.util.Optional;
@@ -39,11 +38,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
             Pageable pageable
     );
 
-
-    List<Notice> club(Club club);
-
     Optional<Notice> findByIdAndClubId(Long id, Long clubId);
 
-    @Query("SELECT n FROM Notice n JOIN FETCH n.meeting m WHERE n.id = :id AND n.club.id = :clubId")
-    Optional<Notice> findWithMeetingByIdAndClubId(Long id, Long clubId);
+    Optional<Notice> findByMeetingId(Long meetingId);
 }
