@@ -1,8 +1,8 @@
 package checkmo.clubNotice.web.controller;
 
-import checkmo.clubNotice.ClubNoticeAPI;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
+import checkmo.clubNotice.internal.service.ClubNoticeQueryFacade;
 import checkmo.clubNotice.internal.service.command.ClubNoticeCommandService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모임 공지사항", description = "독서 모임 공지사항, 투표 생성 및 관리 API")
 public class ClubNoticeController {
 
-    private final ClubNoticeAPI clubNoticeAPI;
+    private final ClubNoticeQueryFacade clubNoticeQueryFacade;
     private final ClubNoticeCommandService clubNoticeCommandService;
 
     @Operation(summary = "공지사항 목록 조회 (미팅, 투표, 공지 모두 포함)", description = "특정 모임의 공지사항 목록을 조회합니다. onlyImportant=true 면 중요 공지사항만 조회합니다.")
@@ -46,7 +46,8 @@ public class ClubNoticeController {
             @RequestParam(required = false, defaultValue = "false") boolean onlyImportant,
             @RequestParam(required = false) Integer size // 페이지 사이즈
     ) {
-        return ApiResponse.onSuccess(clubNoticeAPI.getLatestNotices(clubId, memberId, cursorId, onlyImportant, size));
+        return ApiResponse.onSuccess(
+                clubNoticeQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant, size));
     }
 
     @Operation(summary = "순수 공지사항 작성", description = "특정 모임에 순수 공지사항을 작성합니다. (운영진만 작성 가능)")
@@ -76,7 +77,7 @@ public class ClubNoticeController {
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeAPI.getNoticeDetail(clubId, noticeId, "공지", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.getNoticeDetail(clubId, noticeId, "공지", memberId));
     }
 
     @Operation(summary = "순수 공지사항 삭제", description = "순수 공지사항을 삭제합니다. (운영진만 삭제 가능)")
@@ -112,7 +113,7 @@ public class ClubNoticeController {
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeAPI.getNoticeDetail(clubId, noticeId, "모임", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.getNoticeDetail(clubId, noticeId, "모임", memberId));
     }
 
     @Operation(summary = "투표 생성", description = "특정 모임에 투표를 생성합니다. (운영진만 생성 가능)")
@@ -142,7 +143,7 @@ public class ClubNoticeController {
             @PathVariable Long voteId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeAPI.getNoticeDetail(clubId, voteId, "투표", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.getNoticeDetail(clubId, voteId, "투표", memberId));
     }
 
     @Operation(summary = "투표하기", description = "특정 투표에 참여합니다.")

@@ -1,11 +1,10 @@
-package checkmo.clubNotice.internal;
+package checkmo.clubNotice.internal.service;
 
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
-import checkmo.clubNotice.ClubNoticeAPI;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.MemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -22,12 +21,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class ClubNoticeAPIImpl implements ClubNoticeAPI {
+public class ClubNoticeQueryFacade {
 
     // 페이징 기본 크기 상수 정의
     private static final int DEFAULT_PAGE_SIZE = 10;
@@ -48,7 +45,6 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubNoticeQueryService clubNoticeQueryService;
 
-    @Override
     public ClubNoticeResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId,
                                                                     boolean onlyImportant, Integer size) {
 
@@ -120,7 +116,6 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
         return resultList;
     }
 
-    @Override
     public ClubNoticeResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId, String tag,
                                                                      String memberId) {
         // 1. 검증
