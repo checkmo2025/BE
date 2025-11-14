@@ -11,6 +11,8 @@ import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.internal.repository.TeamTopicRepository;
 import checkmo.clubMeeting.internal.repository.TopicRepository;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
+import checkmo.clubMeeting.internal.service.query.ClubMeetingTeamQueryService;
+import checkmo.clubMeeting.internal.service.query.ClubTopicQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.TopicDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
@@ -34,6 +36,8 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
 
     // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
+    private final ClubTopicQueryService clubTopicQueryService;
+    private final ClubMeetingTeamQueryService clubMeetingTeamQueryService;
 
     // 자신의 Repository
     private final TopicRepository topicRepository;
@@ -71,7 +75,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
         }
 
         // 3. 발제 조회 및 존재 여부 확인
-        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
+        Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
         // 4. 발제 작성자와 수정자가 같은지 확인
         if (!topic.isOwnedBy(clubMember)) {
@@ -98,7 +102,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
         }
 
         // 3. 발제 조회 및 존재 여부 확인
-        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
+        Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
         // 4. 발제 작성자와 삭제자가 같은지 확인
         if (!topic.isOwnedBy(clubMember)) {
@@ -123,8 +127,8 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
         }
 
         // 3. 팀, 발제 존재 여부 및 일치 여부 확인
-        Team team = clubMeetingQueryService.validateTeam(meetingId, request.getTeamNumber());
-        Topic topic = clubMeetingQueryService.validateTopic(topicId, meetingId);
+        Team team = clubMeetingTeamQueryService.validateTeam(meetingId, request.getTeamNumber());
+        Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
         // 4. 팀 발제가 존재하는지(선택된 상태인지) 확인
         Optional<TeamTopic> existingTeamTopic = teamTopicRepository.findByTeamIdAndTopicId(team.getId(), topic.getId());

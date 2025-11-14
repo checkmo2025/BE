@@ -1,26 +1,12 @@
 package checkmo.clubMeeting.internal.service.query;
 
-import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.entity.MemberTeam;
-import checkmo.clubMeeting.internal.entity.Team;
-import checkmo.clubMeeting.internal.entity.TeamTopic;
-import checkmo.clubMeeting.internal.entity.Topic;
-import checkmo.clubMeeting.internal.repository.BookReviewRepository;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
-import checkmo.clubMeeting.internal.repository.MemberTeamRepository;
-import checkmo.clubMeeting.internal.repository.TeamRepository;
-import checkmo.clubMeeting.internal.repository.TeamTopicRepository;
-import checkmo.clubMeeting.internal.repository.TopicRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
-    // 자신의 Repository
     private final MeetingRepository meetingRepository;
-    private final TopicRepository topicRepository;
-    private final TeamRepository teamRepository;
-    private final TeamTopicRepository teamTopicRepository;
-    private final MemberTeamRepository memberTeamRepository;
-    private final BookReviewRepository bookReviewRepository;
 
     @Override
     public List<Meeting> findMeetingsByClubAndCursor(Long clubId, Long cursorId, Integer size) {
@@ -42,23 +22,8 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public List<Topic> findTopicsWithClubMemberByMeeting(Long meetingId, Long cursorId, Integer size) {
-        return topicRepository.findAllWithClubMemberByCursorOrderByIdDesc(meetingId, cursorId, size);
-    }
-
-    @Override
-    public List<BookReview> findBookReviewsByMeeting(Long meetingId, Long cursorId, Integer size) {
-        return bookReviewRepository.findBookReviewsByCusor(meetingId, cursorId, size); // int로 암묵적 언박싱
-    }
-
-    @Override
     public List<Meeting> getBookShelfList(Long clubId, Integer generation, Long cursorId, Integer size) {
         return meetingRepository.findAllByClubIdAndGenerationAndCursorDesc(clubId, generation, cursorId, size);
-    }
-
-    @Override
-    public List<Team> findTeamsByMeeting(Long meetingId) {
-        return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
     }
 
     @Override
@@ -70,66 +35,9 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size) {
-        Pageable pageable = (size == null) ? Pageable.unpaged() : PageRequest.of(0, size);
-        return teamTopicRepository.findAllWithTopicAndClubMemberByTeamIdOrderByDesc(teamId, pageable);
-    }
-
-    @Override
-    public List<MemberTeam> getMemberTeamsByTeam(Long teamId) {
-        return memberTeamRepository.findAllWithClubMemberByTeamIds(List.of(teamId));
-    }
-
-    @Override
-    public Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds) {
-        if (teamIds == null || teamIds.isEmpty()) {
-            return Map.of();
-        }
-        List<MemberTeam> memberTeams = memberTeamRepository.findAllWithClubMemberByTeamIds(teamIds);
-        return memberTeams.stream()
-                .collect(Collectors.toMap(
-                        mt -> mt.getClubMember().getMemberId(), // key: 멤버 ID
-                        MemberTeam::getTeamId // value: 팀 id
-                        // 하나의 멤버는 하나의 미팅의 여러 팀에 속할 수 없으므로 병합 조건 존재하지 않아도 됨
-                ));
-    }
-
-    @Override
-    public Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds) {
-        if (topicIds == null || topicIds.isEmpty()) {
-            return Map.of();
-        }
-
-        List<TeamTopic> teamTopics = teamTopicRepository.findAllWithTeamByTopicIds(topicIds);
-        return teamTopics.stream()
-                .collect(Collectors.groupingBy(
-                        TeamTopic::getTopicId, //key: 토픽 ID(토픽 ID로 그룹화)
-                        Collectors.mapping(tt -> tt.getTeam().getTeamNumber(), Collectors.toList())
-                        //value: 해당 토픽을 선택한 팀 번호 리스트(같은 그룹에 속하는 TeamTopic의 팀 번호 List 생성)
-                ));
-    }
-
-    @Override
     public Meeting validateMeeting(Long meetingId) throws GeneralException {
         return meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEETING_NOT_FOUND));
     }
 
-    @Override
-    public Topic validateTopic(Long topicId, Long meetingId) throws GeneralException {
-        return topicRepository.findByIdAndMeetingId(topicId, meetingId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.TOPIC_NOT_FOUND));
-    }
-
-    @Override
-    public Team validateTeam(Long meetingId, Integer teamNumber) throws GeneralException {
-        return teamRepository.findByMeetingIdAndTeamNumber(meetingId, teamNumber)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.TEAM_NOT_FOUND));
-    }
-
-    @Override
-    public BookReview validateBookReview(Long reviewId, Long meetingId) throws GeneralException {
-        return bookReviewRepository.findByIdAndMeetingId(reviewId, meetingId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_REVIEW_NOT_FOUND));
-    }
 }

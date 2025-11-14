@@ -15,7 +15,10 @@ import checkmo.clubMeeting.internal.entity.MemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
 import checkmo.clubMeeting.internal.entity.Topic;
+import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
+import checkmo.clubMeeting.internal.service.query.ClubMeetingTeamQueryService;
+import checkmo.clubMeeting.internal.service.query.ClubTopicQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
@@ -46,6 +49,10 @@ public class ClubMeetingQueryFacade {
 
     // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
+    private final ClubTopicQueryService clubTopicQueryService;
+    private final ClubBookReviewQueryService clubBookReviewQueryService;
+    private final ClubMeetingTeamQueryService clubMeetingTeamQueryService;
+
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubQueryService clubQueryService;
 
@@ -87,7 +94,7 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. [발제 미리보기] 발제 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null,
+        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, null,
                 TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF + 1);
 
         // 3. 페이징 처리
@@ -126,7 +133,7 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 발제 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, cursorId, size + 1);
+        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, cursorId, size + 1);
 
         // 3. 페이징 처리
         boolean hasNext = topics.size() > size;
@@ -159,8 +166,8 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 한줄평 리스트 조회
-        List<BookReview> bookReviews = clubMeetingQueryService.findBookReviewsByMeeting(meetingId, lastReviewId,
-                size + 1);
+        List<BookReview> bookReviews =
+                clubBookReviewQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size + 1);
 
         // 3. 페이징 처리
         boolean hasNext = bookReviews.size() > size;
@@ -241,22 +248,22 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. [발제 전체보기 - 미리보기] 발제 최신순 상위 4개 토픽 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null,
+        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, null,
                 TOPIC_PREVIEW_SIZE_FOR_MEETING);
 
         // 3. [발제 전체보기 - 미리보기] TeamTopic(+Team) 배치 조회
         List<Long> topicIds = extractTopicIds(topics);
-        Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(
-                topicIds);
+        Map<Long, List<Integer>> teamTopicsWithTeamByTopicIds
+                = clubMeetingTeamQueryService.findTeamTopicsWithTeamByTopicIds(topicIds);
 
         // 4. [토론 x조 - 미리보기] 해당하는 미팅의 존재하는 모든 팀 조회
-        List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId);
+        List<Team> teams = clubMeetingTeamQueryService.findTeamsByMeeting(meetingId);
 
         // 5. [토론 x조 - 미리보기] 모든 팀의 발제 등록순 상위 4개 토픽 조회
         Map<Integer, List<TeamTopic>> teamNumberToTeamTopics = teams.stream()
                 .collect(Collectors.toMap(
                         Team::getTeamNumber, // key: 팀 번호
-                        team -> clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(),
+                        team -> clubMeetingTeamQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(),
                                 TOPIC_PREVIEW_SIZE_FOR_MEETING) //value : 해당 팀의 발제 최신순 상위 4개 팀 토픽 리스트
                 ));
 
@@ -288,7 +295,7 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 토픽 리스트 조회
-        List<Topic> topics = clubMeetingQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, null);
+        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, null);
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
@@ -296,7 +303,7 @@ public class ClubMeetingQueryFacade {
 
         // 4. TeamTopic과 Team 배치 조회
         List<Long> topicIds = extractTopicIds(topics);
-        Map<Long, List<Integer>> topicIdToSelectTeamNumbers = clubMeetingQueryService.findTeamTopicsWithTeamByTopicIds(
+        Map<Long, List<Integer>> topicIdToSelectTeamNumbers = clubMeetingTeamQueryService.findTeamTopicsWithTeamByTopicIds(
                 topicIds);
 
         // 5. DTO 변환
@@ -318,10 +325,11 @@ public class ClubMeetingQueryFacade {
         // 1. 미팅과 클럽 멤버, 팀 검증
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
+        Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
 
         // 2. 팀 토픽 > 토픽 > 클럽 멤버 정보 전체 조회
-        List<TeamTopic> teamTopics = clubMeetingQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(),
+        List<TeamTopic> teamTopics = clubMeetingTeamQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(
+                team.getId(),
                 null);
 
         // 3. 토픽 작성자 정보 배치 조회
@@ -380,12 +388,12 @@ public class ClubMeetingQueryFacade {
                 memberIds);
 
         // 4. 미팅에 존재하는 모든 팀 조회
-        List<Team> teams = clubMeetingQueryService.findTeamsByMeeting(meetingId);
+        List<Team> teams = clubMeetingTeamQueryService.findTeamsByMeeting(meetingId);
         List<Long> teamIds = extractTeamIds(teams);
         Map<Long, Integer> teamIdToTeamNumberMap = mapTeamIdToTeamNumberMap(teams);
 
         // 5. Map<memberId, teamId> 형태로 모든 팀의 팀원 조회
-        Map<String, Long> memberIdToTeamIdMap = clubMeetingQueryService.getMemberIdToTeamIdMap(teamIds);
+        Map<String, Long> memberIdToTeamIdMap = clubMeetingTeamQueryService.getMemberIdToTeamIdMap(teamIds);
 
         // 6. 응답 DTO로 변환
         Map<String, Integer> memberIdToTeamNumberMap = mapMemberIdToTeamNumberMap(memberIdToTeamIdMap,
@@ -442,10 +450,10 @@ public class ClubMeetingQueryFacade {
         // 1. 검증
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
-        Team team = clubMeetingQueryService.validateTeam(meetingId, teamNumber);
+        Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
 
         // 2. 팀 멤버 조회
-        List<MemberTeam> memberTeams = clubMeetingQueryService.getMemberTeamsByTeam(team.getId());
+        List<MemberTeam> memberTeams = clubMeetingTeamQueryService.getMemberTeamsByTeam(team.getId());
 
         // 3. 클럽 멤버의 기본 정보 배치 조회
         List<String> memberIds = extractMemberIdsFromMemberTeams(memberTeams);

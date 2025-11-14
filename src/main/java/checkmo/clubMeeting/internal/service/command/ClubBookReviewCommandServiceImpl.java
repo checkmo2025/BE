@@ -6,6 +6,7 @@ import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.repository.BookReviewRepository;
+import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookReviewDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
@@ -27,6 +28,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
 
     // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
+    private final ClubBookReviewQueryService clubBookReviewQueryService;
 
     // 자신의 Repository
     private final BookReviewRepository bookReviewRepository;
@@ -78,7 +80,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         }
 
         // 3. 한줄평 조회 및 존재 여부 확인
-        BookReview bookReview = clubMeetingQueryService.validateBookReview(reviewId, meeting.getId());
+        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
 
         // 4. 한줄평 작성자와 수정자가 같은지 확인
         if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
@@ -120,7 +122,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         }
 
         // 3. 한줄평 조회 및 존재 여부 확인
-        BookReview bookReview = clubMeetingQueryService.validateBookReview(reviewId, meetingId);
+        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
 
         // 4. 한줄평 작성자와 삭제자가 같은지 확인
         if (!bookReview.getClubMemberId().equals(clubMember.getId())) {
