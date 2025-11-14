@@ -6,10 +6,8 @@ import checkmo.member.MemberEvent;
 import checkmo.notification.internal.service.command.NotificationCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,8 +16,7 @@ public class NotificationEventListener {
 
     private final NotificationCommandService notificationCommandService;
 
-    @Async("notificationExecutor")
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @ApplicationModuleListener
     public void handleNotificationEvent(LikeEvent event) {
         try {
             notificationCommandService.createNotification(event);
@@ -28,8 +25,7 @@ public class NotificationEventListener {
         }
     }
 
-    @Async("notificationExecutor")
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @ApplicationModuleListener
     public void handleNotificationEvent(MemberEvent.Follow event) {
         try {
             notificationCommandService.createNotification(event);
@@ -38,8 +34,7 @@ public class NotificationEventListener {
         }
     }
 
-    @Async("notificationExecutor")
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @ApplicationModuleListener
     public void handleNotificationEvent(JoinClubEvent event) {
         try {
             notificationCommandService.createNotification(event);
