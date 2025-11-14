@@ -34,4 +34,13 @@ public class ClubManagementExternalDTO {
         private String clubName; // 모임 이름
     }
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MembershipDTO {
+        private Long clubMemberId;
+        private boolean active;
+        private boolean staff;
+    }
 }

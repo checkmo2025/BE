@@ -1,8 +1,17 @@
 package checkmo.clubManagement;
 
+import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 
 public interface ClubManagementAPI {
+
+    /**
+     * 특정 모임이 존재하는지 검증. (외부용)
+     *
+     * @param clubId 모임 ID
+     * @return clubId
+     */
+    Long getClubInfo(Long clubId) throws GeneralException;
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (외부용) 마이페이지 등 다른 서비스에서 사용됩니다.
@@ -22,11 +31,37 @@ public interface ClubManagementAPI {
     boolean isMemberInClub(String memberId, Long clubId);
 
     /**
+     * 특정 모임의 특정 회원이 STAFF 상태인지 검증 (외부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 회원 ID
+     * @return ClubMemberId
+     */
+    Long getStaffClubMemberInfo(Long clubId, String memberId) throws GeneralException;
+
+    /**
+     * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증 (외부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 회원 ID
+     * @return ClubMemberId
+     */
+    Long getActiveClubMemberInfo(Long clubId, String memberId) throws GeneralException;
+
+    /**
+     * 특정 모임의 특정 회원의 멤버십 정보를 조회 (외부용)
+     *
+     * @param clubId   모임 ID
+     * @param memberId 회원 ID
+     * @return MembershipDTO
+     */
+    ClubManagementExternalDTO.MembershipDTO getClubMembershipInfo(Long clubId, String memberId) throws GeneralException;
+
+    /**
      * 특정 클럽에 속한 회원 ID 목록을 조회합니다.
      *
      * @param clubId 클럽 ID
      * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
      */
     List<String> getClubMemberIds(Long clubId);
-
 }
