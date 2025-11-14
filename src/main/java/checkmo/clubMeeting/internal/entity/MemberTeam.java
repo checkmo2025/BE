@@ -1,6 +1,5 @@
 package checkmo.clubMeeting.internal.entity;
 
-import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,12 +26,11 @@ public class MemberTeam extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "club_member_id", insertable = false, updatable = false)
+    @Column(name = "club_member_id", nullable = false)
     private Long clubMemberId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_member_id")
-    private ClubMember clubMember;
+    @Column(name = "member_id", nullable = false)
+    private String memberId;
 
     @Column(name = "team_id", insertable = false, updatable = false)
     private Long teamId;
@@ -42,13 +40,6 @@ public class MemberTeam extends BaseEntity {
     private Team team;
 
     // == 연관관계 메서드 == //
-    public void setClubMember(ClubMember clubMember) {
-        this.clubMember = clubMember;
-        if (!clubMember.getMemberTeams().contains(this)) {
-            clubMember.getMemberTeams().add(this);
-        }
-    }
-
     public void setTeam(Team team) {
         this.team = team;
         if (!team.getMemberTeams().contains(this)) {

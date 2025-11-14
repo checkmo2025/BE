@@ -170,8 +170,9 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             Team team = existingTeamNumberToTeam.get(e.getKey());
             for (String nick : e.getValue()) {
                 ClubMember cm = nicknameToClubMember.get(nick);
-                MemberTeam mt = MemberTeam.builder().build();
-                mt.setClubMember(cm);
+                MemberTeam mt = MemberTeam.builder()
+                        .clubMemberId(clubMember.getId())
+                        .build();
                 mt.setTeam(team);
             }
         }

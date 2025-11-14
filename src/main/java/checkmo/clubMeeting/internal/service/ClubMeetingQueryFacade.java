@@ -483,7 +483,7 @@ public class ClubMeetingQueryFacade {
             return List.of();
         }
         return memberTeams.stream()
-                .map(mt -> mt.getClubMember().getMemberId())
+                .map(MemberTeam::getMemberId)
                 .distinct()
                 .toList();
     }
