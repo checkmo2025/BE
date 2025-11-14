@@ -55,9 +55,8 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
         }
 
         // 3. 발제 생성
-        Topic topic = ClubMeetingConverter.fromTopicDTOToTopic(request);
+        Topic topic = ClubMeetingConverter.fromTopicDTOToTopic(request, clubMember.getId());
         topic.setMeeting(meeting);
-        topic.setClubMember(clubMember);
 
         // 4. 발제 저장
         return topicRepository.save(topic).getId();
@@ -78,7 +77,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
         // 4. 발제 작성자와 수정자가 같은지 확인
-        if (!topic.isOwnedBy(clubMember)) {
+        if (!topic.isOwnedBy(clubMember.getId())) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
@@ -105,13 +104,12 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
         // 4. 발제 작성자와 삭제자가 같은지 확인
-        if (!topic.isOwnedBy(clubMember)) {
+        if (!topic.isOwnedBy(clubMember.getClubId())) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        // 5. 발제 삭제
+        // 5. 발제 삭제(Meeting의 orphanRemoval로 처리)
         topic.removeMeeting();
-        topic.removeClubMember();
     }
 
     @Override

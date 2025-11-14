@@ -8,7 +8,6 @@ import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
-import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookReviewDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
@@ -61,10 +60,12 @@ public class ClubMeetingConverter {
      * TopicDTO -> Topic 엔티티 변환
      */
     public static Topic fromTopicDTOToTopic(
-            BookShelfRequestDTO.TopicDTO topicDTO
+            BookShelfRequestDTO.TopicDTO topicDTO,
+            Long clubMemberId
     ) {
         return Topic.builder()
                 .description(topicDTO.getDescription())
+                .clubMemberId(clubMemberId)
                 .build();
     }
 
@@ -79,7 +80,7 @@ public class ClubMeetingConverter {
         return topics.stream()
                 .map(topic -> fromTopicAndMemberSharedDTOToTopicDTO(
                         topic,
-                        authorInfoMap.get(topic.getClubMember().getMemberId()),
+                        authorInfoMap.get(topic.getMemberId()),
                         memberId
                 ))
                 .toList();
@@ -221,7 +222,7 @@ public class ClubMeetingConverter {
                     List<MeetingResponseDTO.TopicDTO> teamTopicDTOs = teamTopics.stream()
                             .map(tt -> ClubMeetingConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
                                     tt.getTopic(),
-                                    authorInfoMap.get(tt.getTopic().getClubMember().getMemberId()),
+                                    authorInfoMap.get(tt.getTopic().getMemberId()),
                                     null // TeamTopicDTO-TopicDTO에서는 teamNumbers 필드가 NULL이어야 함
                             ))
                             .toList();
@@ -248,7 +249,7 @@ public class ClubMeetingConverter {
         return topics.stream()
                 .map(topic -> ClubMeetingConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
                         topic,
-                        authorInfoMap.get(topic.getClubMember().getMemberId()),
+                        authorInfoMap.get(topic.getMemberId()),
                         topicIdToSelectTeamNumbers.getOrDefault(topic.getId(), List.of())
                 ))
                 .toList();
@@ -463,7 +464,7 @@ public class ClubMeetingConverter {
                 .topicId(topic.getId())
                 .content(topic.getDescription())
                 .authorInfo(authorSharedDTO)
-                .isAuthor(topic.getClubMember().getMemberId().equals(memberId))
+                .isAuthor(topic.getMemberId().equals(memberId))
                 .build();
     }
 }

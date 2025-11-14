@@ -113,7 +113,7 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
 
         // 3. 탈퇴 처리
         // TODO: 탈퇴 시 BLOCKED 상태로 변경하는 것으로 알고 있는데... 확인해보아야 함
-        // TODO: 추가적으로, 탈퇴 시 연관된 엔티티(BookReview, MemberTeam)를 어떻게 처리할지 결정 필요(PM) -2025.11.14-
+        // TODO: 추가적으로, 탈퇴 시 연관된 엔티티(BookReview, MemberTeam, Topic)를 어떻게 처리할지 결정 필요(PM) -2025.11.14-
         clubMemberRepository.delete(clubMember);
     }
 

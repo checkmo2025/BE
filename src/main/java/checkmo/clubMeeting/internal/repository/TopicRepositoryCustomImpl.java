@@ -16,7 +16,7 @@ public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Topic> findAllWithClubMemberByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
+    public List<Topic> findAllByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(topic.meetingId.eq(meetingId));
 
@@ -28,7 +28,6 @@ public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
                 .selectFrom(topic)
                 .distinct()
                 .where(predicate)
-                .join(topic.clubMember).fetchJoin()
                 .orderBy(topic.id.desc());
 
         if (size != null) {

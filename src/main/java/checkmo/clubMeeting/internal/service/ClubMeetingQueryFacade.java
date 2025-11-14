@@ -95,7 +95,7 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. [발제 미리보기] 발제 리스트 조회
-        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, null,
+        List<Topic> topics = clubTopicQueryService.findTopicsByMeeting(meetingId, null,
                 TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF + 1);
 
         // 3. 페이징 처리
@@ -134,7 +134,7 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 발제 리스트 조회
-        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, cursorId, size + 1);
+        List<Topic> topics = clubTopicQueryService.findTopicsByMeeting(meetingId, cursorId, size + 1);
 
         // 3. 페이징 처리
         boolean hasNext = topics.size() > size;
@@ -249,7 +249,7 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. [발제 전체보기 - 미리보기] 발제 최신순 상위 4개 토픽 리스트 조회
-        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, null,
+        List<Topic> topics = clubTopicQueryService.findTopicsByMeeting(meetingId, null,
                 TOPIC_PREVIEW_SIZE_FOR_MEETING);
 
         // 3. [발제 전체보기 - 미리보기] TeamTopic(+Team) 배치 조회
@@ -264,7 +264,7 @@ public class ClubMeetingQueryFacade {
         Map<Integer, List<TeamTopic>> teamNumberToTeamTopics = teams.stream()
                 .collect(Collectors.toMap(
                         Team::getTeamNumber, // key: 팀 번호
-                        team -> clubMeetingTeamQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(team.getId(),
+                        team -> clubMeetingTeamQueryService.findTeamTopicsWithTopicByTeamId(team.getId(),
                                 TOPIC_PREVIEW_SIZE_FOR_MEETING) //value : 해당 팀의 발제 최신순 상위 4개 팀 토픽 리스트
                 ));
 
@@ -296,7 +296,7 @@ public class ClubMeetingQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
 
         // 2. 토픽 리스트 조회
-        List<Topic> topics = clubTopicQueryService.findTopicsWithClubMemberByMeeting(meetingId, null, null);
+        List<Topic> topics = clubTopicQueryService.findTopicsByMeeting(meetingId, null, null);
 
         // 3. 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
@@ -329,7 +329,7 @@ public class ClubMeetingQueryFacade {
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
 
         // 2. 팀 토픽 > 토픽 > 클럽 멤버 정보 전체 조회
-        List<TeamTopic> teamTopics = clubMeetingTeamQueryService.findTeamTopicsWithTopicAndClubMemberByTeamId(
+        List<TeamTopic> teamTopics = clubMeetingTeamQueryService.findTeamTopicsWithTopicByTeamId(
                 team.getId(),
                 null);
 
@@ -500,7 +500,7 @@ public class ClubMeetingQueryFacade {
             return List.of();
         }
         return topics.stream()
-                .map(topic -> topic.getClubMember().getMemberId())
+                .map(Topic::getMemberId)
                 .distinct()
                 .toList();
     }
@@ -522,7 +522,7 @@ public class ClubMeetingQueryFacade {
         }
         return teamNumberToTeamTopics.values().stream()
                 .flatMap(List::stream)
-                .map(tt -> tt.getTopic().getClubMember().getMemberId())
+                .map(tt -> tt.getTopic().getMemberId())
                 .distinct()
                 .toList();
     }
@@ -543,7 +543,7 @@ public class ClubMeetingQueryFacade {
             return List.of();
         }
         return teamTopics.stream()
-                .map(tt -> tt.getTopic().getClubMember().getMemberId())
+                .map(tt -> tt.getTopic().getMemberId())
                 .distinct()
                 .toList();
     }

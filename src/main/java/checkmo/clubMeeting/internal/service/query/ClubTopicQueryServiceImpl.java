@@ -17,8 +17,8 @@ public class ClubTopicQueryServiceImpl implements ClubTopicQueryService {
     private final TopicRepository topicRepository;
 
     @Override
-    public List<Topic> findTopicsWithClubMemberByMeeting(Long meetingId, Long cursorId, Integer size) {
-        return topicRepository.findAllWithClubMemberByCursorOrderByIdDesc(meetingId, cursorId, size);
+    public List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size) {
+        return topicRepository.findAllByCursorOrderByIdDesc(meetingId, cursorId, size);
     }
 
     @Override
@@ -26,5 +26,5 @@ public class ClubTopicQueryServiceImpl implements ClubTopicQueryService {
         return topicRepository.findByIdAndMeetingId(topicId, meetingId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.TOPIC_NOT_FOUND));
     }
-    
+
 }

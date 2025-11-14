@@ -42,7 +42,7 @@ public interface ClubMeetingTeamQueryService {
      * @param size   조회할 팀 토픽 개수 (null이면 전체 조회)
      * @return TeamTopic 리스트
      */
-    List<TeamTopic> findTeamTopicsWithTopicAndClubMemberByTeamId(Long teamId, Integer size);
+    List<TeamTopic> findTeamTopicsWithTopicByTeamId(Long teamId, Integer size);
 
     /**
      * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후, 토픽 ID를 기준으로 해당 토픽을 선택한 팀 번호 리스트를 반환합니다.

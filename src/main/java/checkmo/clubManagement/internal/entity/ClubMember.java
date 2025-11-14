@@ -1,6 +1,5 @@
 package checkmo.clubManagement.internal.entity;
 
-import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -54,10 +53,6 @@ public class ClubMember extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
     private List<BookRecommend> bookRecommends = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.REMOVE)
-    private List<Topic> topics = new ArrayList<>();
 
     public boolean isStaff() {
         return this.clubMemberStatus == ClubMemberStatus.STAFF;

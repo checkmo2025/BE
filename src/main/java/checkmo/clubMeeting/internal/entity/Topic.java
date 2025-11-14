@@ -1,6 +1,5 @@
 package checkmo.clubMeeting.internal.entity;
 
-import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.common.BaseEntity;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
@@ -44,19 +43,18 @@ public class Topic extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    @Column(name = "club_member_id", insertable = false, updatable = false)
+    @Column(name = "club_member_id", nullable = false)
     private Long clubMemberId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_member_id")
-    private ClubMember clubMember;
+    @Column(name = "member_id", nullable = false)
+    private String memberId;
 
     @Builder.Default
     @OneToMany(mappedBy = "topic", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
-    public boolean isOwnedBy(ClubMember clubMember) {
-        return this.clubMember != null && this.clubMemberId.equals(clubMember.getId());
+    public boolean isOwnedBy(Long anotherClubMemberId) {
+        return this.clubMemberId.equals(anotherClubMemberId);
     }
 
     public void updateTopic(String description) {
@@ -84,29 +82,6 @@ public class Topic extends BaseEntity {
         if (this.meeting != null) {
             this.meeting.getTopics().remove(this);
             this.meeting = null;
-        }
-    }
-
-    public void setClubMember(ClubMember clubMember) {
-        if (clubMember == null) {
-            throw new GeneralException(ErrorStatus.TOPIC_CLUB_MEMBER_REQUIRED);
-        }
-        if (this.clubMember == clubMember) {
-            return;
-        }
-        if (this.clubMember != null) {
-            this.clubMember.getTopics().remove(this);
-        }
-        this.clubMember = clubMember;
-        if (!clubMember.getTopics().contains(this)) {
-            clubMember.getTopics().add(this);
-        }
-    }
-
-    public void removeClubMember() {
-        if (this.clubMember != null) {
-            this.clubMember.getTopics().remove(this);
-            this.clubMember = null;
         }
     }
 }

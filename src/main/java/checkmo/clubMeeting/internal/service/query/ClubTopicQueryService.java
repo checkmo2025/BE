@@ -18,7 +18,7 @@ public interface ClubTopicQueryService {
      * @param size      조회할 토픽 개수 (null이면 전체 조회)
      * @return 조회한 토픽 정보 DTO
      */
-    List<Topic> findTopicsWithClubMemberByMeeting(Long meetingId, Long cursorId, Integer size);
+    List<Topic> findTopicsByMeeting(Long meetingId, Long cursorId, Integer size);
 
     /**
      * 독서모임의 발제가 존재하는지 확인합니다.
