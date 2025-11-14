@@ -1,4 +1,4 @@
-package checkmo.notification.internal.handler;
+package checkmo.notification.internal.listener;
 
 import checkmo.bookStory.LikeEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
@@ -12,9 +12,9 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
-public class NotificationEventHandler {
+@Component
+public class NotificationEventListener {
 
     private final NotificationCommandService notificationCommandService;
 
