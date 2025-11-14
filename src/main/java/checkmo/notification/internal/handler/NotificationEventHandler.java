@@ -2,7 +2,7 @@ package checkmo.notification.internal.handler;
 
 import checkmo.bookStory.LikeEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
-import checkmo.member.FollowEvent;
+import checkmo.member.MemberEvent;
 import checkmo.notification.internal.service.command.NotificationCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class NotificationEventHandler {
 
     @Async("notificationExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleNotificationEvent(FollowEvent event) {
+    public void handleNotificationEvent(MemberEvent.Follow event) {
         try {
             notificationCommandService.createNotification(event);
         } catch (Exception e) {

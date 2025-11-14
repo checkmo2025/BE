@@ -4,8 +4,8 @@ import checkmo.bookStory.LikeEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.FollowEvent;
 import checkmo.member.MemberAPI;
+import checkmo.member.MemberEvent;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.repository.NotificationRepository;
@@ -48,10 +48,10 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     @Override
     @Transactional
     @CacheEvict(value = "notifications", key = "#event.getFollowingId()")
-    public void createNotification(FollowEvent event) {
+    public void createNotification(MemberEvent.Follow event) {
 
         // 팔로우 누른 사람의 닉네임을 가져옴
-        String FollowerNickname = memberAPI.getMemberNicknameById(event.getFollowerId());
+        String FollowerNickname = memberAPI.getMemberNicknameById(event.followerId());
 
         // 리다이렉트 경로를 생성
         String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.FOLLOW,
@@ -62,8 +62,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 Notification.NotificationType.FOLLOW,
                 redirectPath,
                 FollowerNickname,
-                event.getFollowerId(), // 팔로우 누른 사람
-                event.getFollowingId() // 팔로우 당하는 사람
+                event.followerId(), // 팔로우 누른 사람
+                event.followingId() // 팔로우 당하는 사람
         );
         notificationRepository.save(notification);
     }

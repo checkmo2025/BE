@@ -2,7 +2,7 @@ package checkmo.notification.internal.service.command;
 
 import checkmo.bookStory.LikeEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
-import checkmo.member.FollowEvent;
+import checkmo.member.MemberEvent;
 
 /**
  * 알림 생성, 수정, 삭제 서비스
@@ -23,7 +23,7 @@ public interface NotificationCommandService {
      *
      * @param event 팔로우 알림 정보 DTO
      */
-    void createNotification(FollowEvent event);
+    void createNotification(MemberEvent.Follow event);
 
     /**
      * 독서 클럽 가입 승인 알림 생성
