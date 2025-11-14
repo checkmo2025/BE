@@ -1,8 +1,6 @@
 package checkmo.clubMeeting.internal.service.command;
 
-import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
-import checkmo.clubManagement.internal.service.query.ClubQueryService;
+import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Team;
@@ -30,9 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
 
-    // 외부의 QueryService
-    private final ClubQueryService clubQueryService;
-    private final ClubMemberQueryService clubMemberQueryService;
+    private final ClubManagementAPI clubManagementAPI;
 
     // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
@@ -47,18 +43,13 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     public Long createTopic(Long meetingId, String memberId, TopicDTO request) {
         // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 2. 발제 생성자 활성화 여부 확인
-        if (!clubMember.isActive()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
-
-        // 3. 발제 생성
-        Topic topic = ClubMeetingConverter.fromTopicDTOToTopic(request, clubMember.getId());
+        // 2. 발제 생성
+        Topic topic = ClubMeetingConverter.fromTopicDTOToTopic(request, clubMemberId);
         topic.setMeeting(meeting);
 
-        // 4. 발제 저장
+        // 3. 발제 저장
         return topicRepository.save(topic).getId();
     }
 
@@ -66,22 +57,17 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     public Long updateTopic(Long meetingId, Long topicId, String memberId, TopicDTO request) {
         // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 2. 발제 수정자 활성화 여부 확인
-        if (!clubMember.isActive()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
-
-        // 3. 발제 조회 및 존재 여부 확인
+        // 발제 조회 및 존재 여부 확인
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
-        // 4. 발제 작성자와 수정자가 같은지 확인
-        if (!topic.isOwnedBy(clubMember.getId())) {
+        // 발제 작성자와 수정자가 같은지 확인
+        if (!topic.isOwnedBy(clubMemberId)) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        // 5. 발제 수정
+        // 발제 수정
         topic.updateTopic(
                 request.getDescription()
         );
@@ -93,22 +79,17 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     public void deleteTopic(Long meetingId, Long topicId, String memberId) {
         // 1. 유효성 검증 (meeting clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 2. 발제 삭제자 활성화 여부 확인
-        if (!clubMember.isActive()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
-
-        // 3. 발제 조회 및 존재 여부 확인
+        // 발제 조회 및 존재 여부 확인
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
-        // 4. 발제 작성자와 삭제자가 같은지 확인
-        if (!topic.isOwnedBy(clubMember.getClubId())) {
+        // 발제 작성자와 삭제자가 같은지 확인
+        if (!topic.isOwnedBy(clubMemberId)) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        // 5. 발제 삭제(Meeting의 orphanRemoval로 처리)
+        // 발제 삭제(Meeting의 orphanRemoval로 처리)
         topic.removeMeeting();
     }
 
@@ -117,29 +98,24 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
                                                                     MeetingRequestDTO.TopicSelectionDTO request) {
         // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(meeting.getClubId(), memberId);
+        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 2. 발제 선택자 활성화 여부 확인
-        if (!clubMember.isActive()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
-
-        // 3. 팀, 발제 존재 여부 및 일치 여부 확인
+        // 팀, 발제 존재 여부 및 일치 여부 확인
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, request.getTeamNumber());
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
-        // 4. 팀 발제가 존재하는지(선택된 상태인지) 확인
+        // 팀 발제가 존재하는지(선택된 상태인지) 확인
         Optional<TeamTopic> existingTeamTopic = teamTopicRepository.findByTeamIdAndTopicId(team.getId(), topic.getId());
         boolean isSelected = existingTeamTopic.isPresent();
 
-        // 5. 요청과 상태가 같으면 무시
+        // 요청과 상태가 같으면 무시
         if (request.getIsSelected() == isSelected) {
             return ClubMeetingConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), isSelected);
         }
 
-        // 6. 상태 변경
+        // 상태 변경
         if (request.getIsSelected()) {
-            // 6-1. 팀 발제 선택
+            // 팀 발제 선택
             TeamTopic teamTopic = TeamTopic.builder()
                     .team(team)
                     .topic(topic)
@@ -157,7 +133,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
             }
             return ClubMeetingConverter.fromParametersToTopicSelectionDTO(topicId, request.getTeamNumber(), true);
         } else {
-            // 6-2. 팀 발제 선택 취소
+            // 팀 발제 선택 취소
             try {
                 TeamTopic teamTopic = existingTeamTopic.get();
                 // 연관관계 해제 및 orphanRemoval로 삭제 처리

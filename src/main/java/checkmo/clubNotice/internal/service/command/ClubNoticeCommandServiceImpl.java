@@ -1,9 +1,8 @@
 package checkmo.clubNotice.internal.service.command;
 
-import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
-import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.MemberVote;
@@ -28,8 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
-    // 외부의 QueryService
-    private final ClubQueryService clubQueryService;
+    private final ClubManagementAPI clubManagementAPI;
     private final ClubMemberQueryService clubMemberQueryService;
 
     // 자신의 QueryService
@@ -43,46 +41,36 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public Notice createPureNotice(Long clubId, String memberId, CreateClubNoticeDTO request) {
         // 1. 유효성 검증 (club, clubMember)
-        Club club = clubQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
-        // 2. 운영진 여부 확인
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
-
-        // 3. 공지사항 생성 및 저장
-        Notice notice = ClubNoticeConverter.fromCreateNoticeDTOToNotice(request, club);
+        // 공지사항 생성 및 저장
+        Notice notice = ClubNoticeConverter.fromCreateNoticeDTOToNotice(request, clubId);
         noticeRepository.save(notice);
 
-        // 4. 공지사항 ID 반환
+        // 공지사항 ID 반환
         return notice;
     }
 
     @Override
     public void deletePureNotice(Long clubId, Long noticeId, String memberId) {
         // 1. 유효성 검증(club, clubMember)
-        clubQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
-        // 2. 운영진 여부 확인
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
-
-        // 3. 공지사항 존재 여부 및 "순수" 공지사항 여부 확인
+        // 공지사항 존재 여부 및 "순수" 공지사항 여부 확인
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         if ("모임".equals(notice.getTag())) {
             throw new GeneralException(ErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
         }
 
-        // 4. 공지사항 삭제
+        // 공지사항 삭제
         noticeRepository.delete(notice);
     }
 
     @Override
     public void createMeetingNotice(ClubMeetingCreatedEvent event) {
-        Club club = clubQueryService.validateClub(event.clubId());
+        clubManagementAPI.getClubInfo(event.clubId());
 
         // 기존 미팅 공지가 존재하면 삭제
         noticeRepository.findByMeetingId(event.meetingId())
@@ -95,45 +83,35 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public Vote createVote(Long clubId, String memberId, CreateClubVoteDTO request) {
         // 1. 유효성 검증(club, clubMember)
-        Club club = clubQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
-        // 2. 운영진 여부 확인
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
-
-        // 3. 투표 생성 및 저장
+        // 투표 생성 및 저장
         Vote vote = ClubNoticeConverter.fromCreateVoteDTOToVote(request, clubId);
         //TODO: 데드라인이 현재 시간보다 이전인지, 시작시간이 데드라인보다 이전인지, 시작시간이 현재시간보다 이전인지 검증이 필요하지 않나
         voteRepository.save(vote);
 
-        // 4. 투표 ID 반환
+        // 투표 ID 반환
         return vote;
     }
 
     @Override
     public void deleteVote(Long clubId, Long voteId, String memberId) {
         // 1. 유효성 검증(club, clubMember)
-        clubQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
-        // 2. 운영진 여부 확인
-        if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
-        }
-
-        // 3. 투표 조회 및 존재 여부 확인
+        // 투표 조회 및 존재 여부 확인
         Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
 
-        // 4. 삭제
+        // 삭제
         voteRepository.delete(vote);
     }
 
     @Override
     public Long haveVote(Long clubId, Long voteId, String memberId, VoteResultDTO request) {
         // 1. 유효성 검증(club, clubMember)
-        clubQueryService.validateClub(clubId);
+        clubManagementAPI.getClubInfo(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 투표 참여자 활성화 여부 확인

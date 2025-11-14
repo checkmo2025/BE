@@ -8,7 +8,6 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailResponseDTO;
-import checkmo.clubManagement.web.dto.MembershipResponseDTO;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
 import lombok.AccessLevel;
@@ -24,14 +23,13 @@ public class ClubManagementConverter {
     /**
      * ClubMember 엔티티 -> MembershipResponseDTO.MembershipDTO 변환
      */
-    public static MembershipResponseDTO.MembershipDTO fromClubMembertoMembershipDTO(ClubMember clubMember) {
-        return MembershipResponseDTO.MembershipDTO.builder()
+    public static ClubManagementExternalDTO.MembershipDTO fromClubMembertoMembershipDTO(ClubMember clubMember) {
+        return ClubManagementExternalDTO.MembershipDTO.builder()
                 .clubMemberId(clubMember.getId())
-                .clubMemberStatus(clubMember.getClubMemberStatus().name())
-                .updatedAt(clubMember.getUpdatedAt())
+                .active(clubMember.isActive())
+                .staff(clubMember.isStaff())
                 .build();
     }
-
 
     /**
      * ClubResponseDTO.ClubDetailResponseDTO -> ClubResponseDTO.MyPageClubListDTO 변환

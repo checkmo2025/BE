@@ -1,6 +1,5 @@
 package checkmo.clubNotice.internal.converter;
 
-import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.ClubMeetingExternalDTO;
 import checkmo.clubNotice.internal.entity.MemberVote;
@@ -156,13 +155,14 @@ public class ClubNoticeConverter {
      */
     public static Notice fromCreateNoticeDTOToNotice(
             ClubNoticeRequestDTO.CreateClubNoticeDTO request,
-            Club club) {
+            Long clubId
+    ) {
         return Notice.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .important(request.isImportant())
                 .tag("공지")
-                .club(club)
+                .clubId(clubId)
                 .build();
     }
 

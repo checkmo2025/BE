@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.web.dto.bookshelf;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.clubManagement.web.dto.MembershipResponseDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
@@ -17,8 +17,8 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfListDTO {
-        List<BookShelfInfoDTO> bookShelfInfoList;
-        MembershipResponseDTO.MembershipDTO membership;
+        private List<BookShelfInfoDTO> bookShelfInfoList;
+        private ClubManagementExternalDTO.MembershipDTO membership;
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
     }
@@ -48,7 +48,7 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfDetailDTO {
-        MembershipResponseDTO.MembershipDTO membership;
+        private ClubManagementExternalDTO.MembershipDTO membership;
         private MeetingInfoDTO meetingInfo; // Meeting 기본 정보
         private BookExternalDTO.DetailInfo bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
         private TopicListDTO topicList; // 발제 리스트(등록순 3개 미리보기)
@@ -59,8 +59,8 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookReviewListDTO {
-        List<BookReviewDTO> bookReviewList; // 한줄평 리스트
-        MembershipResponseDTO.MembershipDTO membership;
+        private List<BookReviewDTO> bookReviewList; // 한줄평 리스트
+        private ClubManagementExternalDTO.MembershipDTO membership;
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
     }
@@ -82,7 +82,7 @@ public class BookShelfResponseDTO {
     @Builder
     public static class TopicListDTO {
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        MembershipResponseDTO.MembershipDTO membership;
+        private ClubManagementExternalDTO.MembershipDTO membership;
         private List<TopicDTO> topics; // 토픽 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서

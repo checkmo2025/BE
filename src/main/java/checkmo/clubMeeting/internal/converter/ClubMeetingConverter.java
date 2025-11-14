@@ -2,7 +2,7 @@ package checkmo.clubMeeting.internal.converter;
 
 import checkmo.book.BookExternalDTO;
 import checkmo.book.BookExternalDTO.BasicInfo;
-import checkmo.clubManagement.web.dto.MembershipResponseDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -124,7 +124,7 @@ public class ClubMeetingConverter {
             Meeting meeting,
             BookExternalDTO.DetailInfo bookSharedDTO,
             BookShelfResponseDTO.TopicListDTO topicListDTO,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.BookShelfDetailDTO.builder()
                 .meetingInfo(fromMeetingToBookshelfMeetingInfoDTO(meeting))
@@ -158,7 +158,7 @@ public class ClubMeetingConverter {
      */
     public static MeetingResponseDTO.CalendarMeetingDTO fromMeetingListToMCalendarMeetingDTO(
             List<Meeting> meetings,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.CalendarMeetingDTO.builder()
                 .meetingInfoList(meetings.stream()
@@ -208,7 +208,7 @@ public class ClubMeetingConverter {
             List<Team> teams,
             Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber,
             Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubMeetingConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
                 meeting, bookSharedDTO);
@@ -284,7 +284,7 @@ public class ClubMeetingConverter {
             List<BookShelfResponseDTO.BookReviewDTO> bookReviewList,
             boolean hasNext,
             Long nextCursor,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.BookReviewListDTO.builder()
                 .bookReviewList(bookReviewList)
@@ -301,7 +301,7 @@ public class ClubMeetingConverter {
             List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
             boolean hasNext,
             Long nextCursor,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.TopicListDTO.builder()
                 .topics(topicListDTOs)
@@ -318,7 +318,7 @@ public class ClubMeetingConverter {
             List<BookShelfResponseDTO.BookShelfInfoDTO> bookShelfInfoDTOs,
             boolean hasNext,
             Long nextCursor,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return BookShelfResponseDTO.BookShelfListDTO.builder()
                 .bookShelfInfoList(bookShelfInfoDTOs)
@@ -335,7 +335,7 @@ public class ClubMeetingConverter {
             List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList,
             boolean hasNext,
             Long nextCursor,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.MeetingListDTO.builder()
                 .meetingInfoList(meetingInfoDTOList)
@@ -366,7 +366,7 @@ public class ClubMeetingConverter {
     public static MeetingResponseDTO.TeamTopicDTO fromTopicDTOListToTeamTopicDTO(
             Integer teamNumber,
             List<MeetingResponseDTO.TopicDTO> topicList,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.TeamTopicDTO.builder()
                 .teamNumber(teamNumber)
@@ -383,7 +383,7 @@ public class ClubMeetingConverter {
             MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO,
             List<MeetingResponseDTO.TopicDTO> topicDTOList,
             List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.MeetingDetailDTO.builder()
                 .meetingInfo(meetingInfoDTO)
@@ -395,7 +395,7 @@ public class ClubMeetingConverter {
 
     public static MeetingResponseDTO.TopicDTOList fromTopicDTOListAndMembershipDTOToTopicListDTO(
             List<MeetingResponseDTO.TopicDTO> topicDTOs,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.TopicDTOList.builder()
                 .topics(topicDTOs)
@@ -409,7 +409,7 @@ public class ClubMeetingConverter {
     public static MeetingResponseDTO.TeamMemberDTO fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
             Integer teamNumber,
             List<MemberExternalDTO.BasicInfo> memberSharedDTOs,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.TeamMemberDTO.builder()
                 .teamNumber(teamNumber)
@@ -424,7 +424,7 @@ public class ClubMeetingConverter {
     public static MeetingResponseDTO.MeetingMemberListDTO fromMeetingMemberDTOListToMeetingMemberListDTO(
             List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList,
             boolean hasNext, Long nextCursor,
-            MembershipResponseDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.MembershipDTO membershipDTO
     ) {
         return MeetingResponseDTO.MeetingMemberListDTO.builder()
                 .members(meetingMemberDTOList)

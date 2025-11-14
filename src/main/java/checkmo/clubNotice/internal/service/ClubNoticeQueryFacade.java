@@ -1,8 +1,7 @@
 package checkmo.clubNotice.internal.service;
 
-import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
-import checkmo.clubManagement.internal.service.query.ClubQueryService;
+import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.ClubManagementExternalDTO.MembershipDTO;
 import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
@@ -41,20 +40,18 @@ public class ClubNoticeQueryFacade {
     // Domain level 2
     private final MemberAPI memberAPI;
 
+    private final ClubManagementAPI clubManagementAPI;
     private final ClubMeetingAPI clubMeetingAPI;
 
     // 자신의 Query Service
-    private final ClubQueryService clubQueryService;
-    private final ClubMemberQueryService clubMemberQueryService;
     private final ClubNoticeQueryService clubNoticeQueryService;
 
     public ClubNoticeResponseDTO.ClubNoticeListDTO getLatestNotices(Long clubId, String memberId, Long cursorId,
                                                                     boolean onlyImportant, Integer size) {
 
         // 1. 검증 -> 소식은 클럽에 속한 사람만 조회할 수 있음
-        clubQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        boolean isStaff = clubMember.isStaff();
+        clubManagementAPI.getClubInfo(clubId);
+        MembershipDTO clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
         // 2. 커서 초기화
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
@@ -84,7 +81,7 @@ public class ClubNoticeQueryFacade {
                 ? noticeItems.get(pageSize - 1).getId()
                 : null;
 
-        return ClubNoticeConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor, isStaff);
+        return ClubNoticeConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor, clubMembershipInfo.isStaff());
     }
 
     /**
@@ -138,13 +135,14 @@ public class ClubNoticeQueryFacade {
     public ClubNoticeResponseDTO.ClubNoticeDetailDTO getNoticeDetail(Long clubId, Long noticeId, String tag,
                                                                      String memberId) {
         // 1. 검증
-        clubQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        clubManagementAPI.getClubInfo(clubId);
+        MembershipDTO clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
+        boolean isStaff = clubMembershipInfo.isStaff();
 
         return switch (tag) {
-            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMember);
-            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMember);
-            case TAG_VOTE -> getVoteDetail(clubId, noticeId, memberId, clubMember);
+            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, isStaff);
+            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, isStaff);
+            case TAG_VOTE -> getVoteDetail(clubId, noticeId, memberId, isStaff);
             default -> throw new GeneralException(ErrorStatus.CLUB_INVALID_TAG_TYPE);
         };
     }
@@ -153,7 +151,7 @@ public class ClubNoticeQueryFacade {
      * 순수 공지사항 상세 조회
      */
     private ClubNoticeResponseDTO.ClubNoticeDetailDTO getPureNoticeDetail(Long clubId, Long itemId,
-                                                                          ClubMember clubMember) {
+                                                                          boolean isStaff) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
 
         if (TAG_MEETING.equals(notice.getTag())) {
@@ -161,7 +159,7 @@ public class ClubNoticeQueryFacade {
         }
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
-                .isStaff(clubMember.isStaff())
+                .isStaff(isStaff)
                 .noticeItem(ClubNoticeConverter.toPureNoticeDTO(notice))
                 .build();
     }
@@ -170,7 +168,7 @@ public class ClubNoticeQueryFacade {
      * 모임 공지사항 상세 조회
      */
     private ClubNoticeResponseDTO.ClubNoticeDetailDTO getMeetingNoticeDetail(Long clubId, Long itemId,
-                                                                             ClubMember clubMember) {
+                                                                             boolean isStaff) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
 
         if (TAG_NOTICE.equals(notice.getTag())) {
@@ -180,7 +178,7 @@ public class ClubNoticeQueryFacade {
         MeetingInfo meetingInfo = clubMeetingAPI.getMeeting(notice.getMeetingId());
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
-                .isStaff(clubMember.isStaff())
+                .isStaff(isStaff)
                 .noticeItem(ClubNoticeConverter.toMeetingNoticeDTO(notice, meetingInfo))
                 .build();
     }
@@ -189,7 +187,7 @@ public class ClubNoticeQueryFacade {
      * 투표 상세 조회
      */
     private ClubNoticeResponseDTO.ClubNoticeDetailDTO getVoteDetail(Long clubId, Long itemId, String memberId,
-                                                                    ClubMember clubMember) {
+                                                                    boolean isStaff) {
         Vote vote = clubNoticeQueryService.getVote(clubId, itemId);
         List<String> voteItems = vote.getItems();
         int itemCount = voteItems.size();
@@ -211,7 +209,7 @@ public class ClubNoticeQueryFacade {
         ClubNoticeResponseDTO.VoteDTO voteDTO = ClubNoticeConverter.toVoteDTO(vote, itemDTOs);
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
-                .isStaff(clubMember.isStaff())
+                .isStaff(isStaff)
                 .noticeItem(voteDTO)
                 .build();
     }
