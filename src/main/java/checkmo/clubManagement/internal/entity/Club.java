@@ -15,7 +15,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,8 +63,14 @@ public class Club extends BaseEntity {
     private List<ClubMember> clubMembers = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<ClubCategory> clubCategories = new ArrayList<>();
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "club_interest_categories",
+            joinColumns = @JoinColumn(name = "club_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private Set<ClubInterestCategory> interestCategories = new HashSet<>();
 
     public void addClubMember(ClubMember clubMember) {
         this.clubMembers.add(clubMember);
