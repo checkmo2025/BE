@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 @Service
-public class SignUpCommandService {
+public class AuthUserCommandService {
 
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
 
@@ -50,5 +50,16 @@ public class SignUpCommandService {
         memberAPI.createInitialMember(savedUser.getId(), savedUser.getEmail());
 
         return newUser;
+    }
+
+    public void completeProfile(String userId) {
+        AuthUser authUser = authRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        if (authUser.isProfileCompleted()) {
+            return;
+        }
+
+        authUser.completeProfile();
     }
 }
