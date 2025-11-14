@@ -1,7 +1,6 @@
-package checkmo.notification.internal.facade;
+package checkmo.notification.internal.service;
 
 import checkmo.member.MemberAPI;
-import checkmo.notification.NotificationExternalDTO;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.service.query.NotificationQueryService;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
+public class NotificationQueryFacade {
 
     // 페이징 기본 크기 상수
     public static final int DEFAULT_PAGE_SIZE = 20;
@@ -27,9 +26,8 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
     // 자신의 QueryService
     private final NotificationQueryService notificationQueryService;
 
-    @Override
     @Cacheable(value = "notifications", key = "#memberId")
-    public NotificationExternalDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size) {
+    public NotificationResponseDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size) {
         // 1. Service에서 순수 엔티티 조회
         List<Notification> notifications = notificationQueryService.findUnreadNotifications(memberId, size);
 
@@ -46,8 +44,7 @@ public class NotificationQueryFacadeImpl implements NotificationQueryFacade {
         return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap);
     }
 
-    @Override
-    public NotificationResponseDTO.NotificationListResponse getNotifications(String memberId, Long cursorId) {
+    public NotificationResponseDTO.NotificationList getNotifications(String memberId, Long cursorId) {
         // 1. 알림 목록 조회
         List<Notification> notifications = notificationQueryService.findNotifications(memberId, cursorId,
                 DEFAULT_PAGE_SIZE + 1);
