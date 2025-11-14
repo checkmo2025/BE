@@ -1,4 +1,4 @@
-package checkmo.member.internal.service.security.jwt;
+package checkmo.authentication.internal.security.jwt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,22 +14,22 @@ public class TokenCacheService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @CachePut(value = "refreshToken", key = "#memberId")
-    public String saveRefreshToken(String memberId, String refreshToken) {
-        log.info("리프레시 토큰 저장 - memberId={}", memberId);
+    @CachePut(value = "refreshToken", key = "#userId")
+    public String saveRefreshToken(String userId, String refreshToken) {
+        log.info("리프레시 토큰 저장 - userId={}", userId);
         return refreshToken;
     }
 
     // 이건 Redis에서 직접 조회하는 메서드로, @Cacheable을 사용하지 않고 RedisTemplate을 통해 조회
-    public String getRefreshToken(String memberId) {
-        log.info("리프레시 토큰 조회 - memberId={}", memberId);
-        return (String) redisTemplate.opsForValue().get("refreshToken::" + memberId);
+    public String getRefreshToken(String userId) {
+        log.info("리프레시 토큰 조회 - userId={}", userId);
+        return (String) redisTemplate.opsForValue().get("refreshToken::" + userId);
     }
 
     // Redis에서 리프레시 토큰 삭제
-    @CacheEvict(value = "refreshToken", key = "#memberId")
-    public void deleteRefreshToken(String memberId) {
-        log.info("리프레시 토큰 삭제 - memberId={}", memberId);
+    @CacheEvict(value = "refreshToken", key = "#userId")
+    public void deleteRefreshToken(String userId) {
+        log.info("리프레시 토큰 삭제 - userId={}", userId);
     }
 
     // 블랙리스트 토큰 저장
