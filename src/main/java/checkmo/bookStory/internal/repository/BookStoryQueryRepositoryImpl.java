@@ -1,23 +1,23 @@
 package checkmo.bookStory.internal.repository;
 
 import static checkmo.bookStory.internal.entity.QBookStory.bookStory;
-import static checkmo.clubManagement.internal.entity.QClubMember.clubMember;
 import static checkmo.member.internal.entity.QFollow.follow;
 
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.ClubManagementAPI;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-@Repository
 @RequiredArgsConstructor
+@Repository
 public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
 
-    private final JPAQueryFactory JpaQueryFactory;
+    private final JPAQueryFactory queryFactory;
+    private final ClubManagementAPI clubManagementAPI;
 
     @Override
     public List<BookStory> searchBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId,
@@ -33,7 +33,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
 
     private List<BookStory> findAllBookStories(Long cursorId, int pageSize) {
 
-        return JpaQueryFactory
+        return queryFactory
                 .selectFrom(bookStory)
                 .where(createCursorExp(cursorId))
                 .orderBy(bookStory.id.desc())
@@ -48,7 +48,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             return List.of();
         }
 
-        return JpaQueryFactory
+        return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         createCursorExp(cursorId),
@@ -60,7 +60,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private List<BookStory> findMyBookStories(String memberId, Long cursorId, int pageSize) {
-        return JpaQueryFactory
+        return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         createCursorExp(cursorId),
@@ -85,7 +85,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             return List.of();
         }
 
-        return JpaQueryFactory
+        return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         createCursorExp(cursorId),
@@ -101,7 +101,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             throw new IllegalArgumentException("scope가 target인 경우 targetMemberId는 필수입니다.");
         }
 
-        return JpaQueryFactory
+        return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         createCursorExp(cursorId),
@@ -117,19 +117,11 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private boolean isMemberInClub(String memberId, Long clubId) {
-        return JpaQueryFactory
-                .selectFrom(clubMember)
-                .where(clubMember.clubId.eq(clubId)
-                        .and(clubMember.memberId.eq(memberId))
-                        .and(clubMember.clubMemberStatus.in(
-                                ClubMember.ClubMemberStatus.MEMBER,
-                                ClubMember.ClubMemberStatus.STAFF
-                        )))
-                .fetchFirst() != null;
+        return clubManagementAPI.isMemberInClub(memberId, clubId);
     }
 
     private List<String> getFollowingMemberIds(String memberId) {
-        return JpaQueryFactory
+        return queryFactory
                 .select(follow.followingId)
                 .from(follow)
                 .where(follow.followerId.eq(memberId))
@@ -137,14 +129,6 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private List<String> getClubMemberIds(Long clubId) {
-        return JpaQueryFactory
-                .select(clubMember.memberId)
-                .from(clubMember)
-                .where(clubMember.clubId.eq(clubId)
-                        .and(clubMember.clubMemberStatus.in(
-                                ClubMember.ClubMemberStatus.MEMBER,
-                                ClubMember.ClubMemberStatus.STAFF
-                        )))
-                .fetch();
+        return clubManagementAPI.getClubMemberIds(clubId);
     }
 }

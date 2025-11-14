@@ -10,4 +10,8 @@ public interface ClubMemberRepositoryCustom {
             Long cursorId,
             Integer size
     );
+
+    boolean isMemberInClub(String memberId, Long clubId);
+
+    List<String> getClubMemberIds(Long clubId);
 }
