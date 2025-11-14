@@ -58,4 +58,12 @@ public interface MemberFollowQueryService {
      * @return 대상 회원 ID별 팔로우 여부 매핑
      */
     Map<String, Boolean> getFollowStatusMapForMembers(String currentMemberId, List<String> targetMemberIds);
+
+    /**
+     * 특정 회원이 팔로우하는 회원 ID 목록을 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 팔로우하는 회원 ID 목록
+     */
+    List<String> getFollowingMemberIds(String memberId);
 }

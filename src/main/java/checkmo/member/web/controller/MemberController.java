@@ -1,16 +1,21 @@
 package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.CurrentId;
+import checkmo.common.CurrentId;
 import checkmo.member.internal.service.MemberCommandFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
+import checkmo.member.internal.service.command.MemberRegistrationCommandService;
+import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +35,43 @@ public class MemberController {
 
     private final MemberCommandFacade memberCommandFacade;
     private final MemberQueryFacade memberQueryFacade;
+
     private final MemberFollowCommandService memberFollowCommandService;
+    private final MemberRegistrationCommandService memberRegistrationCommandService;
+
+    private final MemberQueryService memberQueryService;
+
+    @Operation(summary = "회원 추가 정보 입력", description = "회원가입 후 추가 정보를 입력합니다.")
+    @PostMapping("/additional-info")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 회원입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    public ApiResponse<Void> addAdditionalInfo(
+            @CurrentId String memberId,
+            @Valid @RequestBody MemberRequestDTO.AdditionalInfo request
+    ) {
+        memberRegistrationCommandService.addAdditionalInfo(memberId, request);
+        return ApiResponse.onSuccess(null);
+    }
+
+    @Operation(summary = "닉네임 중복 확인", description = "회원가입 시 닉네임 중복을 확인합니다.")
+    @PostMapping("/check-nickname")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다.")
+    })
+    public ApiResponse<Boolean> checkNickname(
+            @RequestParam
+            @NotBlank(message = "닉네임은 필수입니다")
+            @Size(max = 6, message = "닉네임은 최대 6자까지 가능합니다")
+            String nickname
+    ) {
+        boolean isDuplicated = memberQueryService.isNicknameDuplicated(nickname);
+        return ApiResponse.onSuccess(isDuplicated);
+    }
 
     @Operation(summary = "회원 팔로잉 API", description = "특정 회원을 팔로잉합니다.")
     @ApiResponses({

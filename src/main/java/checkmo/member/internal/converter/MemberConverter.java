@@ -3,11 +3,8 @@ package checkmo.member.internal.converter;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
-import checkmo.member.internal.service.security.oauth2.OAuth2Attributes;
-import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import java.util.List;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -17,66 +14,6 @@ public class MemberConverter {
     // =====================================================
     // Entity ↔ DTO 변환
     // =====================================================
-
-    /**
-     * Member 엔티티 → MemberSignUpResponseDTO 변환
-     */
-    public static MemberResponseDTO.SignUpResponse fromMember(Member member) {
-        return MemberResponseDTO.SignUpResponse.builder()
-                .email(member.getEmail())
-                .isProfileCompleted(member.isProfileCompleted())
-                .build();
-    }
-
-    /**
-     * SignUpRequestDTO → Member 엔티티 변환
-     */
-    public static Member fromSignUpRequest(MemberRequestDTO.SignUpRequest request,
-                                           String encodedPassword) {
-
-        String uuid = UUID.randomUUID().toString().substring(0, 8);
-        String newMemberId = "LOCAL_" + uuid;
-        String tempNickname = "TEMP_" + newMemberId; // 닉넴 임시로 일단 넣기
-
-        return Member.builder()
-                .id(newMemberId)
-                .email(request.getEmail())
-                .password(encodedPassword)
-                .nickName(tempNickname)
-                .description("")
-                .role(Member.Role.USER)
-                .deactivated(null)
-                .isProfileCompleted(false)
-                .build();
-    }
-
-    /**
-     * OAuth2 소셜 로그인 → Member 엔티티 변환
-     */
-    public static Member fromOAuth2Attributes(OAuth2Attributes attributes, String registrationId) {
-        String newMemberId = registrationId.toUpperCase() + "_" + attributes.getProviderId();
-        String tempNickname = "TEMP_" + newMemberId; // 닉넴 임시로 일단 넣기
-
-        return Member.builder()
-                .id(newMemberId)
-                .email(attributes.getEmail())
-                .password("") // OAuth2 사용자는 비밀번호가 없음
-                .nickName(tempNickname)
-                .description("")
-                .role(Member.Role.USER) // 기본 역할 설정
-                .deactivated(null)
-                .isProfileCompleted(false) // 프로필 미완료 상태로 설정
-                .build();
-    }
-
-    /**
-     * Member 엔티티 → MemberLoginResponseDTO 변환
-     */
-    public static MemberResponseDTO.LoginResponse fromMemberToLoginResponse(Member member) {
-        return MemberResponseDTO.LoginResponse.builder()
-                .nickname(member.getNickName())
-                .build();
-    }
 
     /**
      * Member 엔티티 → MemberProfileResponseDTO 변환
@@ -188,6 +125,16 @@ public class MemberConverter {
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())
                 .following(profile.isFollowing())
+                .build();
+    }
+
+    public static Member toMember(String memberId, String email) {
+        return Member.builder()
+                .id(memberId)
+                .email(email)
+                .nickName("")
+                .description("")
+                .imgUrl(null)
                 .build();
     }
 }

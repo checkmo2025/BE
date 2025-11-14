@@ -80,4 +80,9 @@ public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
                         targetId -> currentMemberId.equals(targetId) || followingIds.contains(targetId)
                 ));
     }
+
+    @Override
+    public List<String> getFollowingMemberIds(String memberId) {
+        return followRepository.getFollowingMemberIds(memberId);
+    }
 }

@@ -1,9 +1,8 @@
 package checkmo.notification.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.CurrentId;
-import checkmo.notification.NotificationExternalDTO;
-import checkmo.notification.internal.facade.NotificationQueryFacade;
+import checkmo.common.CurrentId;
+import checkmo.notification.internal.service.NotificationQueryFacade;
 import checkmo.notification.internal.service.command.NotificationCommandService;
 import checkmo.notification.web.dto.NotificationResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 @Tag(name = "알림", description = "알림 조회, 읽음 처리, 알림 설정 관련 API")
+@RequestMapping("/api/notifications")
+@RestController
 public class NotificationController {
 
     private final NotificationQueryFacade notificationQueryFacade;
@@ -36,7 +35,7 @@ public class NotificationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
     })
     @GetMapping()
-    public ApiResponse<NotificationResponseDTO.NotificationListResponse> getNotifications(
+    public ApiResponse<NotificationResponseDTO.NotificationList> getNotifications(
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
@@ -53,7 +52,7 @@ public class NotificationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
     })
     @GetMapping("/preview")
-    public ApiResponse<NotificationExternalDTO.NotificationPreviewList> getUnreadNotifications(
+    public ApiResponse<NotificationResponseDTO.NotificationPreviewList> getUnreadNotifications(
             @CurrentId String memberId,
             @RequestParam(required = false, defaultValue = "5") int size
     ) {

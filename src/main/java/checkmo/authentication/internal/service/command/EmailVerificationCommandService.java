@@ -1,0 +1,88 @@
+package checkmo.authentication.internal.service.command;
+
+import checkmo.authentication.internal.infra.EmailSender;
+import checkmo.authentication.internal.repository.AuthRepository;
+import checkmo.authentication.web.dto.AuthRequestDTO;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+@RequiredArgsConstructor
+@Service
+public class EmailVerificationCommandService {
+
+    private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
+    private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofMinutes(10); // 10분
+
+    // 랜덤 인증번호 생성용 정적 필드
+    private static final SecureRandom secureRandom = new SecureRandom();
+
+    // 외부 서비스
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final EmailSender emailSender;
+
+    private final AuthRepository authRepository;
+
+    public void sendEmailVerification(String email) {
+
+        // 이미 인증번호가 Redis에 존재하면 예외 처리
+        String redisKey = EMAIL_VERIFICATION_PREFIX + email;
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_SENT);
+        }
+
+        // 이미 회원가입이 완료된 이메일인지 확인하는 로직
+        if (authRepository.existsByEmail(email)) {
+            throw new GeneralException(ErrorStatus.MEMBER_ALREADY_EXISTS);
+        }
+
+        // 6자리 랜덤 인증번호 생성
+        String verificationCode = String.format("%06d", secureRandom.nextInt(1000000));
+
+        // Redis에 인증번호 저장
+        Map<String, Object> verificationData = new HashMap<>();
+        verificationData.put("code", verificationCode);
+        verificationData.put("verified", false);
+
+        redisTemplate.opsForHash().putAll(redisKey, verificationData);
+        redisTemplate.expire(redisKey, EMAIL_VERIFICATION_TTL);
+
+        // 이메일 발송 메서드 호출
+        emailSender.sendEmail(email, verificationCode);
+    }
+
+    public boolean verifyEmailCode(AuthRequestDTO.EmailVerification request) {
+
+        String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
+
+        // redis에서 인증 정보 조회
+        String storedCode = (String) redisTemplate.opsForHash().get(redisKey, "code");
+        Boolean isVerified = (Boolean) redisTemplate.opsForHash().get(redisKey, "verified");
+
+        // 인증번호가 만료된 경우
+        if (storedCode == null) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_EXPIRED);
+        }
+
+        // 인증번호가 일치하지 않는 경우
+        if (!request.getVerificationCode().equals(storedCode)) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_INVALID);
+        }
+
+        // 이미 인증된 경우
+        if (Boolean.TRUE.equals(isVerified)) {
+            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED);
+        }
+
+        // 인증 성공 시 verified 상태 업데이트
+        redisTemplate.opsForHash().put(redisKey, "verified", true);
+
+        return true;
+    }
+}
