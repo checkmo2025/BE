@@ -5,7 +5,7 @@ import checkmo.clubManagement.ClubManagementExternalDTO.MembershipDTO;
 import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
-import checkmo.clubNotice.internal.entity.MemberVote;
+import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
@@ -14,7 +14,9 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfo;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +38,10 @@ public class ClubNoticeQueryFacade {
     private static final String TAG_NOTICE = "공지";
     private static final String TAG_MEETING = "모임";
     private static final String TAG_VOTE = "투표";
+
+    // 익명 상수 정의
+    private static final String ANONYMOUS_NAME = "익명";
+    private static final String ANONYMOUS_PROFILE_URL = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
 
     // Domain level 2
     private final MemberAPI memberAPI;
@@ -137,12 +143,11 @@ public class ClubNoticeQueryFacade {
         // 1. 검증
         clubManagementAPI.getClubInfo(clubId);
         MembershipDTO clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
-        boolean isStaff = clubMembershipInfo.isStaff();
 
         return switch (tag) {
-            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, isStaff);
-            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, isStaff);
-            case TAG_VOTE -> getVoteDetail(clubId, noticeId, memberId, isStaff);
+            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMembershipInfo);
+            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMembershipInfo);
+            case TAG_VOTE -> getVoteDetail(clubId, noticeId, memberId, clubMembershipInfo);
             default -> throw new GeneralException(ErrorStatus.CLUB_INVALID_TAG_TYPE);
         };
     }
@@ -151,7 +156,8 @@ public class ClubNoticeQueryFacade {
      * 순수 공지사항 상세 조회
      */
     private ClubNoticeResponseDTO.ClubNoticeDetailDTO getPureNoticeDetail(Long clubId, Long itemId,
-                                                                          boolean isStaff) {
+                                                                          MembershipDTO clubMembershipInfo
+    ) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
 
         if (TAG_MEETING.equals(notice.getTag())) {
@@ -159,7 +165,7 @@ public class ClubNoticeQueryFacade {
         }
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
-                .isStaff(isStaff)
+                .isStaff(clubMembershipInfo.isStaff())
                 .noticeItem(ClubNoticeConverter.toPureNoticeDTO(notice))
                 .build();
     }
@@ -168,7 +174,7 @@ public class ClubNoticeQueryFacade {
      * 모임 공지사항 상세 조회
      */
     private ClubNoticeResponseDTO.ClubNoticeDetailDTO getMeetingNoticeDetail(Long clubId, Long itemId,
-                                                                             boolean isStaff) {
+                                                                             MembershipDTO clubMembershipInfo) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
 
         if (TAG_NOTICE.equals(notice.getTag())) {
@@ -178,7 +184,7 @@ public class ClubNoticeQueryFacade {
         MeetingInfo meetingInfo = clubMeetingAPI.getMeeting(notice.getMeetingId());
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
-                .isStaff(isStaff)
+                .isStaff(clubMembershipInfo.isStaff())
                 .noticeItem(ClubNoticeConverter.toMeetingNoticeDTO(notice, meetingInfo))
                 .build();
     }
@@ -187,20 +193,20 @@ public class ClubNoticeQueryFacade {
      * 투표 상세 조회
      */
     private ClubNoticeResponseDTO.ClubNoticeDetailDTO getVoteDetail(Long clubId, Long itemId, String memberId,
-                                                                    boolean isStaff) {
+                                                                    MembershipDTO clubMembershipInfo) {
         Vote vote = clubNoticeQueryService.getVote(clubId, itemId);
         List<String> voteItems = vote.getItems();
         int itemCount = voteItems.size();
 
         // 전체 투표 결과
-        List<MemberVote> memberVotes = clubNoticeQueryService.getMemberVotesByVoteId(vote.getId());
+        List<ClubMemberVote> clubMemberVotes = clubNoticeQueryService.getMemberVotesByVoteId(vote.getId());
 
         // 항목별 투표자 정보 수집
-        List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem = collectVotedMembersByItem(vote, memberVotes,
+        List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem = collectVotedMembersByItem(vote, clubMemberVotes,
                 itemCount);
 
         // 본인 투표 정보
-        MemberVote myVote = clubNoticeQueryService.getMyVote(vote.getId(), memberId);
+        ClubMemberVote myVote = clubNoticeQueryService.getMyVote(vote.getId(), clubMembershipInfo.getClubMemberId());
 
         // 투표 항목 DTO 생성
         List<ClubNoticeResponseDTO.EachItemDTO> itemDTOs = createVoteItemDTOs(voteItems, myVote, votedMembersByItem,
@@ -209,7 +215,7 @@ public class ClubNoticeQueryFacade {
         ClubNoticeResponseDTO.VoteDTO voteDTO = ClubNoticeConverter.toVoteDTO(vote, itemDTOs);
 
         return ClubNoticeResponseDTO.ClubNoticeDetailDTO.builder()
-                .isStaff(isStaff)
+                .isStaff(clubMembershipInfo.isStaff())
                 .noticeItem(voteDTO)
                 .build();
     }
@@ -267,7 +273,7 @@ public class ClubNoticeQueryFacade {
      * 투표 항목 DTO 리스트 생성
      */
     private List<ClubNoticeResponseDTO.EachItemDTO> createVoteItemDTOs(
-            List<String> voteItems, MemberVote myVote,
+            List<String> voteItems, ClubMemberVote myVote,
             List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem, int itemCount
     ) {
         List<ClubNoticeResponseDTO.EachItemDTO> itemDTOs = new ArrayList<>();
@@ -287,7 +293,7 @@ public class ClubNoticeQueryFacade {
     /**
      * 특정 항목이 선택되었는지 확인
      */
-    private boolean isItemSelected(MemberVote myVote, int itemIndex) {
+    private boolean isItemSelected(ClubMemberVote myVote, int itemIndex) {
         if (myVote == null) {
             return false;
         }
