@@ -54,18 +54,6 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
     }
 
     @Override
-    public List<Notice> getNoticeListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId,
-                                               Pageable pageable) {
-        return noticeRepository.findAllByClubIdsAndCursorPaging(clubIds, onlyImportant, cursorId, pageable);
-    }
-
-    @Override
-    public List<Vote> getVoteListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId,
-                                           Pageable pageable) {
-        return voteRepository.findByClubIdsAndCursorPaging(clubIds, onlyImportant, cursorId, pageable);
-    }
-
-    @Override
     public Notice validateNotice(Long clubId, Long noticeId) throws GeneralException {
         return noticeRepository.findByIdAndClubId(noticeId, clubId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));

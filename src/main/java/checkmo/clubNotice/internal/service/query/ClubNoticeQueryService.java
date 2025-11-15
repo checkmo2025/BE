@@ -67,28 +67,6 @@ public interface ClubNoticeQueryService {
     List<Vote> getVoteList(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable);
 
     /**
-     * 여러 클럽의 공지사항 리스트 조회
-     *
-     * @param clubIds       클럽 ID 리스트
-     * @param onlyImportant 중요 공지만 조회 여부
-     * @param cursorId      커서 ID
-     * @param pageable      페이징 정보
-     * @return 공지사항 리스트
-     */
-    List<Notice> getNoticeListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId, Pageable pageable);
-
-    /**
-     * 여러 클럽의 투표 리스트 조회
-     *
-     * @param clubIds       클럽 ID 리스트
-     * @param onlyImportant 중요 투표만 조회 여부
-     * @param cursorId      커서 ID
-     * @param pageable      페이징 정보
-     * @return 투표 리스트
-     */
-    List<Vote> getVoteListByClubIds(List<Long> clubIds, boolean onlyImportant, Long cursorId, Pageable pageable);
-
-    /**
      * 공지사항을 검증합니다.
      *
      * @param clubId   공지사항이 게시된 독서 클럽 ID

@@ -23,21 +23,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
             @Param("cursorId") Long cursorId,
             Pageable pageable
     );
-
-    @Query("""
-            SELECT n FROM Notice n 
-            WHERE n.clubId IN :clubIds
-              AND (:onlyImportant = false OR n.important = true)
-              AND (:cursorId IS NULL OR n.id < :cursorId)
-            ORDER BY n.createdAt DESC
-            """)
-    List<Notice> findAllByClubIdsAndCursorPaging(
-            @Param("clubIds") List<Long> clubIds,
-            @Param("onlyImportant") boolean onlyImportant,
-            @Param("cursorId") Long cursorId,
-            Pageable pageable
-    );
-
+    
     Optional<Notice> findByIdAndClubId(Long id, Long clubId);
 
     Optional<Notice> findByMeetingId(Long meetingId);
