@@ -37,6 +37,11 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
+    public List<String> getClubMemberIds(Long clubId) {
+        return clubMemberQueryService.getClubMemberIds(clubId);
+    }
+
+    @Override
     public boolean isMemberInClub(String memberId, Long clubId) {
         return clubMemberQueryService.isMemberInClub(memberId, clubId);
     }
@@ -82,7 +87,9 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public List<String> getClubMemberIds(Long clubId) {
-        return clubMemberQueryService.getClubMemberIds(clubId);
+    public List<MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, int size) {
+        List<ClubMember> clubMembers
+                = clubMemberQueryService.getClubMemberListByStatus(clubId, "ACTIVE", cursorId, size);
+        return ClubManagementConverter.fromClubMemberToMembershipDTO(clubMembers);
     }
 }

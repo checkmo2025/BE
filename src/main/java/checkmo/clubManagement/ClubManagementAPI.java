@@ -25,6 +25,14 @@ public interface ClubManagementAPI {
     ClubManagementExternalDTO.MyClubList getMyClubListForShare(String memberId);
 
     /**
+     * 특정 클럽에 속한 회원 ID 목록을 조회합니다.
+     *
+     * @param clubId 클럽 ID
+     * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
+     */
+    List<String> getClubMemberIds(Long clubId);
+
+    /**
      * 특정 회원이 해당 클럽의 멤버인지 확인합니다.
      *
      * @param memberId 회원 ID
@@ -66,10 +74,12 @@ public interface ClubManagementAPI {
     Map<Long, MembershipDTO> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException;
 
     /**
-     * 특정 클럽에 속한 회원 ID 목록을 조회합니다.
+     * 특정 클럽에 속한 ACTIVE한 회원 목록을 커서 기반 조회합니다.
      *
-     * @param clubId 클럽 ID
-     * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
+     * @param clubId   클럽 ID
+     * @param cursorId 마지막으로 조회된 멤버십 ID (처음 조회 시 null)
+     * @param size     한 번에 조회할 멤버십 수
+     * @return 멤버십 목록
      */
-    List<String> getClubMemberIds(Long clubId);
+    List<ClubManagementExternalDTO.MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, int size);
 }

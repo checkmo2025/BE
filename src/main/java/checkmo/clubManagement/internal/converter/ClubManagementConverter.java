@@ -45,6 +45,16 @@ public class ClubManagementConverter {
     }
 
     /**
+     * ClubMember 엔티티 리스트 -> List<MembershipResponseDTO.MembershipDTO> 변환
+     */
+    public static List<ClubManagementExternalDTO.MembershipDTO> fromClubMemberToMembershipDTO(
+            List<ClubMember> clubMembers) {
+        return clubMembers.stream()
+                .map(ClubManagementConverter::fromClubMembertoMembershipDTO)
+                .toList();
+    }
+
+    /**
      * ClubResponseDTO.ClubDetailResponseDTO -> ClubResponseDTO.MyPageClubListDTO 변환
      */
     public static ClubResponseDTO.MyPageClubListDTO toMyPageClubListDTO(

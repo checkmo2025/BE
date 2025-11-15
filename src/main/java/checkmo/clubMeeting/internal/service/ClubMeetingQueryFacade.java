@@ -3,9 +3,8 @@ package checkmo.clubMeeting.internal.service;
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipDTO;
-import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -47,7 +46,6 @@ public class ClubMeetingQueryFacade {
     private final BookAPI bookAPI;
 
     private final ClubManagementAPI clubManagementAPI;
-    private final ClubMemberQueryService clubMemberQueryService;
 
     // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
@@ -354,16 +352,16 @@ public class ClubMeetingQueryFacade {
         }
 
         // 2. 클럽의 회원 조회 및 페이징 처리 (이때 PENDING이나 BLOCKED 상태는 제외하고 STAFF나 MEMBER만 조회)
-        List<ClubMember> clubMembers = clubMemberQueryService.getClubMemberListByStatus(meeting.getClubId(), "ACTIVE",
-                cursorId, size + 1);
-        boolean hasNext = clubMembers.size() > size;
+        List<MembershipDTO> clubMembershipDTO
+                = clubManagementAPI.getClubMembersByStatus(meeting.getClubId(), cursorId, size + 1);
+        boolean hasNext = clubMembershipDTO.size() > size;
         if (hasNext) {
-            clubMembers = clubMembers.subList(0, size);
+            clubMembershipDTO = clubMembershipDTO.subList(0, size);
         }
-        Long nextCursor = hasNext ? clubMembers.getLast().getId() : null;
+        Long nextCursor = hasNext ? clubMembershipDTO.getLast().getClubMemberId() : null;
 
         // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberExternalDTO.BasicInfoDTO 조회)
-        List<String> memberIds = extractMemberIdsFromClubMembers(clubMembers);
+        List<String> memberIds = extractMemberIdsFromClubMembers(clubMembershipDTO);
         Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(
                 memberIds);
 
@@ -378,7 +376,7 @@ public class ClubMeetingQueryFacade {
         // 6. 응답 DTO로 변환
         Map<String, Integer> memberIdToTeamNumberMap = mapMemberIdToTeamNumberMap(memberIdToTeamIdMap,
                 teamIdToTeamNumberMap);
-        List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList = clubMembers.stream()
+        List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList = clubMembershipDTO.stream()
                 .map(cm -> toMeetingMemberDTO(cm, memberBasicInfoMap, memberIdToTeamNumberMap))
                 .toList();
         return ClubMeetingConverter.fromMeetingMemberDTOListToMeetingMemberListDTO(meetingMemberDTOList, hasNext,
@@ -386,11 +384,11 @@ public class ClubMeetingQueryFacade {
     }
 
     private MeetingResponseDTO.MeetingMemberDTO toMeetingMemberDTO(
-            ClubMember clubMember,
+            MembershipDTO membership,
             Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
             Map<String, Integer> memberIdToTeamNumberMap
     ) {
-        String memberId = clubMember.getMemberId();
+        String memberId = membership.getMemberId();
         MemberExternalDTO.BasicInfo memberInfo = memberBasicInfoMap.get(memberId);
         Integer teamNumber = memberIdToTeamNumberMap.get(memberId);
         return ClubMeetingConverter.fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(memberInfo, teamNumber);
@@ -534,12 +532,13 @@ public class ClubMeetingQueryFacade {
                 .toList();
     }
 
-    private List<String> extractMemberIdsFromClubMembers(List<ClubMember> clubMembers) {
-        if (clubMembers == null) {
+    private List<String> extractMemberIdsFromClubMembers(
+            List<ClubManagementExternalDTO.MembershipDTO> clubMembershipDTO) {
+        if (clubMembershipDTO == null) {
             return List.of();
         }
-        return clubMembers.stream()
-                .map(ClubMember::getMemberId)
+        return clubMembershipDTO.stream()
+                .map(MembershipDTO::getMemberId)
                 .distinct()
                 .toList();
     }
