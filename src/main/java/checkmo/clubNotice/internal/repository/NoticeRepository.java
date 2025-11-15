@@ -12,7 +12,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @Query("""
             SELECT n FROM Notice n 
-            WHERE n.club.id = :clubId
+            WHERE n.clubId = :clubId
               AND (:onlyImportant = false OR n.important = true)
               AND (:cursorId IS NULL OR n.id < :cursorId)
             ORDER BY n.createdAt DESC
@@ -26,7 +26,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @Query("""
             SELECT n FROM Notice n 
-            WHERE n.club.id IN :clubIds
+            WHERE n.clubId IN :clubIds
               AND (:onlyImportant = false OR n.important = true)
               AND (:cursorId IS NULL OR n.id < :cursorId)
             ORDER BY n.createdAt DESC

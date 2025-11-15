@@ -38,47 +38,6 @@ public class ClubNoticeConverter {
     }
 
     /**
-     * ClubResponseDTO.NoticeItem -> ClubResponseDTO.ClubNoticeWithClubDTO
-     */
-    public static ClubNoticeResponseDTO.ClubNoticeWithClubDTO toClubNoticeWithClubDTO(Notice notice,
-                                                                                      ClubNoticeResponseDTO.NoticeItem noticeItemDTO) {
-        var club = notice.getClub();
-        if (club == null) {
-            // 클럽 정보가 아예 없을 경우 null 처리
-            return ClubNoticeResponseDTO.ClubNoticeWithClubDTO.builder()
-                    .clubId(null)
-                    .clubName(null)
-                    .notice(noticeItemDTO)
-                    .build();
-        }
-        return ClubNoticeResponseDTO.ClubNoticeWithClubDTO.builder()
-                .clubId(club.getId())
-                .clubName(club.getName())
-                .notice(noticeItemDTO)
-                .build();
-    }
-
-    /**
-     * ClubResponseDTO.MemberNoticeListDTO 변환
-     */
-    public static ClubNoticeResponseDTO.MemberNoticeListDTO toMemberNoticeListDTO(
-            List<ClubNoticeResponseDTO.ClubNoticeWithClubDTO> memberNoticeItems,
-            boolean hasNext,
-            Long nextCursor
-    ) {
-        List<ClubNoticeResponseDTO.ClubNoticeWithClubDTO> safeList =
-                (memberNoticeItems == null) ? List.of() : List.copyOf(memberNoticeItems);
-
-        return ClubNoticeResponseDTO.MemberNoticeListDTO.builder()
-                .noticeList(safeList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
-                .pageSize(safeList.size())
-                .build();
-
-    }
-
-    /**
      * Notice 엔티티 → PureNoticeDTO 변환
      */
     public static ClubNoticeResponseDTO.PureNoticeDTO toPureNoticeDTO(Notice notice) {

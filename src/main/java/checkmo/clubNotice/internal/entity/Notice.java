@@ -36,11 +36,7 @@ public class Notice extends BaseEntity {
     @Column(name = "meeting_id")
     private Long meetingId;
 
-    @Column(name = "club_id", insertable = false, updatable = false)
+    @Column(name = "club_id", nullable = false)
     private Long clubId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id")
-    private Club club;
 
 }
