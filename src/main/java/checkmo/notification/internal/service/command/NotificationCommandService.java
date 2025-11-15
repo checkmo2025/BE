@@ -1,6 +1,6 @@
 package checkmo.notification.internal.service.command;
 
-import checkmo.bookStory.LikeEvent;
+import checkmo.bookStory.BookStoryEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.member.MemberEvent;
 
@@ -16,7 +16,7 @@ public interface NotificationCommandService {
      *
      * @param event 좋아요 알림 정보 DTO
      */
-    void createNotification(LikeEvent event);
+    void createNotification(BookStoryEvent.BookStoryLiked event);
 
     /**
      * 팔로우(구독) 알림 생성
