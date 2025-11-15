@@ -448,7 +448,9 @@ public class ClubMeetingQueryFacade {
         List<MemberTeam> memberTeams = clubMeetingTeamQueryService.getMemberTeamsByTeam(team.getId());
 
         // 3. 클럽 멤버의 기본 정보 배치 조회
-        List<String> memberIds = extractMemberIdsFromMemberTeams(memberTeams);
+        Set<Long> clubMemberIds = extractClubMemberIdsFromMemberTeams(memberTeams);
+        Map<Long, MembershipDTO> clubMembership = clubManagementAPI.getClubMembershipInfos(clubMemberIds);
+        List<String> memberIds = extractMemberIdsFromClubMembers(clubMembership);
         Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(
                 memberIds);
 
@@ -457,14 +459,23 @@ public class ClubMeetingQueryFacade {
                 memberBasicInfoMap.values().stream().toList(), clubMembershipInfo);
     }
 
-    private List<String> extractMemberIdsFromMemberTeams(List<MemberTeam> memberTeams) {
-        if (memberTeams == null) {
+    private List<String> extractMemberIdsFromClubMembers(Map<Long, MembershipDTO> clubMembershipMap) {
+        if (clubMembershipMap == null) {
             return List.of();
         }
-        return memberTeams.stream()
-                .map(MemberTeam::getMemberId)
+        return clubMembershipMap.values().stream()
+                .map(MembershipDTO::getMemberId)
                 .distinct()
                 .toList();
+    }
+
+    private Set<Long> extractClubMemberIdsFromMemberTeams(List<MemberTeam> memberTeams) {
+        if (memberTeams == null) {
+            return Set.of();
+        }
+        return memberTeams.stream()
+                .map(MemberTeam::getClubMemberId)
+                .collect(Collectors.toSet());
     }
 
     private List<String> extractMemberIdsFromBookReviews(List<BookReview> bookReviews) {
