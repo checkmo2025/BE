@@ -224,49 +224,142 @@ public class ClubNoticeQueryFacade {
      * 투표 항목별 투표자 정보 수집
      */
     private List<List<MemberExternalDTO.BasicInfo>> collectVotedMembersByItem(
-            Vote vote, List<MemberVote> memberVotes, int itemCount
+            Vote vote, List<ClubMemberVote> clubMemberVotes, int itemCount
     ) {
         // 항목별 투표자 정보 리스트 초기화
-        List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem = new ArrayList<>();
-        for (int i = 0; i < itemCount; i++) {
-            votedMembersByItem.add(new ArrayList<>());
+        List<List<BasicInfo>> votedMembersByItem = initVotedMembersByItem(itemCount);
+
+        // 익명 투표인 경우
+        if (vote.isAnonymity()) {
+            MemberExternalDTO.BasicInfo anoymousInfo = createAnonymousMemberInfo();
+
+            for (ClubMemberVote mv : clubMemberVotes) {
+                addVoterToItems(votedMembersByItem, mv, itemCount, anoymousInfo);
+            }
+            return votedMembersByItem;
         }
 
-        // 각 MemberVote에 대해 항목별 투표 여부 확인 후 추가
-        for (MemberVote mv : memberVotes) {
-            MemberExternalDTO.BasicInfo memberInfo = getMemberInfoForVote(vote, mv);
+        // 익명 투표가 아닌 경우 회원 정보 조회 후 매핑
+        Map<Long, MemberExternalDTO.BasicInfo> clubMemberIdToBasicInfo = getVoterInfoByClubMemberIds(clubMemberVotes);
+        if (clubMemberIdToBasicInfo.isEmpty()) {
+            return votedMembersByItem;
+        }
 
-            if (mv.isItem1()) {
-                votedMembersByItem.get(0).add(memberInfo);
+        for (ClubMemberVote votePerMember : clubMemberVotes) {
+            MemberExternalDTO.BasicInfo memberInfo = clubMemberIdToBasicInfo.get(votePerMember.getClubMemberId());
+            if (memberInfo == null) {
+                continue;
             }
-            if (itemCount >= 2 && mv.isItem2()) {
-                votedMembersByItem.get(1).add(memberInfo);
-            }
-            if (itemCount >= 3 && mv.isItem3()) {
-                votedMembersByItem.get(2).add(memberInfo);
-            }
-            if (itemCount >= 4 && mv.isItem4()) {
-                votedMembersByItem.get(3).add(memberInfo);
-            }
-            if (itemCount >= 5 && mv.isItem5()) {
-                votedMembersByItem.get(4).add(memberInfo);
-            }
+            addVoterToItems(votedMembersByItem, votePerMember, itemCount, memberInfo);
         }
 
         return votedMembersByItem;
     }
 
     /**
-     * 투표자의 멤버 정보 조회 (익명 여부에 따라 다르게 처리)
+     * 항목별 투표자 정보 리스트 초기화
      */
-    private MemberExternalDTO.BasicInfo getMemberInfoForVote(Vote vote, MemberVote memberVote) {
-        if (vote.isAnonymity()) {
-            String voterName = "익명";
-            String profileImageUrl = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
-            return new MemberExternalDTO.BasicInfo(voterName, profileImageUrl);
-        } else {
-            return memberAPI.getMemberBasicInfoForShare(memberVote.getMemberId());
+    private List<List<BasicInfo>> initVotedMembersByItem(int itemCount) {
+        List<List<BasicInfo>> votedMembersByItem = new ArrayList<>();
+        for (int i = 0; i < itemCount; i++) {
+            votedMembersByItem.add(new ArrayList<>());
         }
+        return votedMembersByItem;
+    }
+
+    /**
+     * 익명 투표자 정보 생성
+     */
+    private MemberExternalDTO.BasicInfo createAnonymousMemberInfo() {
+        return MemberExternalDTO.BasicInfo.builder()
+                .nickname(ANONYMOUS_NAME)
+                .profileImageUrl(ANONYMOUS_PROFILE_URL)
+                .build();
+    }
+
+    /**
+     * 한 명의 투표자를, 체크된 항목들에 맞게 리스트에 추가
+     */
+    private void addVoterToItems(
+            List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem,
+            ClubMemberVote votePerMember,
+            int itemCount,
+            MemberExternalDTO.BasicInfo memberInfo
+    ) {
+        if (votePerMember.isItem1()) {
+            votedMembersByItem.get(0).add(memberInfo);
+        }
+        if (itemCount >= 2 && votePerMember.isItem2()) {
+            votedMembersByItem.get(1).add(memberInfo);
+        }
+        if (itemCount >= 3 && votePerMember.isItem3()) {
+            votedMembersByItem.get(2).add(memberInfo);
+        }
+        if (itemCount >= 4 && votePerMember.isItem4()) {
+            votedMembersByItem.get(3).add(memberInfo);
+        }
+        if (itemCount >= 5 && votePerMember.isItem5()) {
+            votedMembersByItem.get(4).add(memberInfo);
+        }
+    }
+
+    /**
+     * 실명 투표 시, clubMemberId → BasicInfo 배치 조회
+     */
+    private Map<Long, MemberExternalDTO.BasicInfo> getVoterInfoByClubMemberIds(
+            List<ClubMemberVote> clubMemberVotes
+    ) {
+        Set<Long> clubMemberIds = extractClubMemberIds(clubMemberVotes);
+        if (clubMemberIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // ClubManagementAPI에서 멤버십 정보 배치 조회
+        Map<Long, MembershipDTO> membershipMap = clubManagementAPI.getClubMembershipInfos(clubMemberIds);
+        if (membershipMap.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // memberId 리스트 추출
+        List<String> memberIds = extractMemberIds(membershipMap);
+        if (memberIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // MemberAPI에서 기본 정보 배치 조회
+        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+        if (memberInfoMap.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // clubMemberId → BasicInfo 맵으로 변환
+        return membershipMap.values().stream()
+                .collect(Collectors.toMap(
+                        MembershipDTO::getClubMemberId,
+                        membership -> memberInfoMap.get(membership.getMemberId()),
+                        (existing, ignored) -> existing // key 충돌 시 첫 번째 값 사용
+                ));
+    }
+
+    /**
+     * 투표 내역에서 clubMemberId 집합 추출
+     */
+    private Set<Long> extractClubMemberIds(List<ClubMemberVote> clubMemberVotes) {
+        return clubMemberVotes.stream()
+                .map(ClubMemberVote::getClubMemberId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * 멤버십 맵에서 memberId 리스트 추출
+     */
+    private List<String> extractMemberIds(Map<Long, MembershipDTO> membershipMap) {
+        return membershipMap.values().stream()
+                .map(MembershipDTO::getMemberId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
     }
 
     /**
