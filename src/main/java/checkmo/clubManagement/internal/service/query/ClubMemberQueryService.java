@@ -5,6 +5,7 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 독서클럽 회원에 대한 조회 서비스
@@ -107,5 +108,13 @@ public interface ClubMemberQueryService {
      * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
      */
     List<String> getClubMemberIds(Long clubId);
+
+    /**
+     * 클럽 멤버 ID 집합으로 ClubMember 엔티티 목록을 조회합니다.
+     *
+     * @param clubMemberIds 클럽 멤버 ID 집합
+     * @return ClubMember 엔티티 목록
+     */
+    List<ClubMember> getClubMembersByIds(Set<Long> clubMemberIds);
 
 }

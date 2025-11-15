@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -146,5 +147,13 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     @Override
     public List<String> getClubMemberIds(Long clubId) {
         return clubMemberRepository.getClubMemberIds(clubId);
+    }
+
+    @Override
+    public List<ClubMember> getClubMembersByIds(Set<Long> clubMemberIds) {
+        if (clubMemberIds == null) {
+            return List.of();
+        }
+        return clubMemberRepository.findAllById(clubMemberIds);
     }
 }

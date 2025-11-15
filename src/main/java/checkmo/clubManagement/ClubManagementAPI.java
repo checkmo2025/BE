@@ -1,7 +1,10 @@
 package checkmo.clubManagement;
 
+import checkmo.clubManagement.ClubManagementExternalDTO.MembershipDTO;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface ClubManagementAPI {
 
@@ -56,6 +59,11 @@ public interface ClubManagementAPI {
      * @return MembershipDTO
      */
     ClubManagementExternalDTO.MembershipDTO getClubMembershipInfo(Long clubId, String memberId) throws GeneralException;
+
+    /**
+     * 특정 모임의 멤버십 정보를 조회 (외부용)
+     */
+    Map<Long, MembershipDTO> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException;
 
     /**
      * 특정 클럽에 속한 회원 ID 목록을 조회합니다.

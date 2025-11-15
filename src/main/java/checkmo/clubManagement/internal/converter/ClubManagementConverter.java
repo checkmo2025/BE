@@ -10,6 +10,7 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailResponseDTO;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,17 @@ public class ClubManagementConverter {
     // =====================================================
     // Entity ↔ DTO 변환
     // =====================================================
+
+    public static Map<Long, ClubManagementExternalDTO.MembershipDTO> fromClubMembertoMembereshipDTO(
+            List<ClubMember> clubMembers) {
+        return clubMembers.stream()
+                .collect(
+                        java.util.stream.Collectors.toMap(
+                                ClubMember::getId,
+                                ClubManagementConverter::fromClubMembertoMembershipDTO
+                        )
+                );
+    }
 
     /**
      * ClubMember 엔티티 -> MembershipResponseDTO.MembershipDTO 변환

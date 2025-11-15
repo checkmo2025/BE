@@ -11,6 +11,8 @@ import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +67,18 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     public MembershipDTO getClubMembershipInfo(Long clubId, String memberId) throws GeneralException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return ClubManagementConverter.fromClubMembertoMembershipDTO(clubMember);
+    }
+
+    @Override
+    public Map<Long, MembershipDTO> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException {
+        if (clubMemberIds == null) {
+            return Map.of();
+        }
+        List<ClubMember> clubMembers = clubMemberQueryService.getClubMembersByIds(clubMemberIds);
+        if (clubMembers.size() != clubMemberIds.size()) {
+            throw new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND);
+        }
+        return ClubManagementConverter.fromClubMembertoMembereshipDTO(clubMembers);
     }
 
     @Override
