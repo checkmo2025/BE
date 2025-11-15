@@ -1,6 +1,6 @@
 package checkmo.notification.internal.service.command;
 
-import checkmo.bookStory.LikeEvent;
+import checkmo.bookStory.BookStoryEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
@@ -27,27 +27,27 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
     @Override
     @Transactional
-    @CacheEvict(value = "notifications", key = "#event.getReceiverId()")
-    public void createNotification(LikeEvent event) {
+    @CacheEvict(value = "notifications", key = "#event.receiverId()")
+    public void createNotification(BookStoryEvent.BookStoryLiked event) {
 
         // 리다이렉트 경로를 생성
         String redirectPath = NotificationConverter.getRedirectPath(Notification.NotificationType.LIKE,
-                event.getBookStoryId());
+                event.bookStoryId());
 
         // Notification 객체를 생성하고 저장 (targetName = null)
         Notification notification = NotificationConverter.fromEvent(
                 Notification.NotificationType.LIKE,
                 redirectPath,
                 null,
-                event.getSenderId(),  // 좋아요를 누른 사람
-                event.getReceiverId() // 좋아요를 받은 사람
+                event.senderId(),  // 좋아요를 누른 사람
+                event.receiverId() // 좋아요를 받은 사람
         );
         notificationRepository.save(notification);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "notifications", key = "#event.getFollowingId()")
+    @CacheEvict(value = "notifications", key = "#event.followingId()")
     public void createNotification(MemberEvent.Follow event) {
 
         // 팔로우 누른 사람의 닉네임을 가져옴
@@ -70,7 +70,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
 
     @Override
     @Transactional
-    @CacheEvict(value = "notifications", key = "#event.getMemberId()")
+    @CacheEvict(value = "notifications", key = "#event.memberId()")
     public void createNotification(JoinClubEvent event) {
 
         // 리다이렉트 경로를 생성

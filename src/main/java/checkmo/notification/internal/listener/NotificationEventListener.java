@@ -1,6 +1,6 @@
 package checkmo.notification.internal.listener;
 
-import checkmo.bookStory.LikeEvent;
+import checkmo.bookStory.BookStoryEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.member.MemberEvent;
 import checkmo.notification.internal.service.command.NotificationCommandService;
@@ -17,7 +17,7 @@ public class NotificationEventListener {
     private final NotificationCommandService notificationCommandService;
 
     @ApplicationModuleListener
-    public void handleNotificationEvent(LikeEvent event) {
+    public void handleNotificationEvent(BookStoryEvent.BookStoryLiked event) {
         try {
             notificationCommandService.createNotification(event);
         } catch (Exception e) {

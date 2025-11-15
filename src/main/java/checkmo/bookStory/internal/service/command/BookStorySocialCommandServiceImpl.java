@@ -1,6 +1,6 @@
 package checkmo.bookStory.internal.service.command;
 
-import checkmo.bookStory.LikeEvent;
+import checkmo.bookStory.BookStoryEvent;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.BookStoryLiked;
 import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
@@ -49,7 +49,12 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
                     if (created && !memberId.equals(bookStory.getMemberId())) {
                         // 실제로 생성되었고, 좋아요를 누른 사람이 책이야기를 작성한 사람과 다를 때만 이벤트 발행
                         eventPublisher.publishEvent(
-                                new LikeEvent(memberId, bookStory.getMemberId(), bookStory.getId()));
+                                BookStoryEvent.BookStoryLiked.builder()
+                                        .senderId(memberId)
+                                        .receiverId(bookStory.getMemberId())
+                                        .bookStoryId(bookStoryId)
+                                        .build()
+                        );
                     }
                     return true; // 생성되었거나 중복이거나, 최종적으로 좋아요 존재
                 });
