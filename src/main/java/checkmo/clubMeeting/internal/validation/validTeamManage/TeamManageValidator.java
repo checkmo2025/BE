@@ -1,14 +1,15 @@
 package checkmo.clubMeeting.internal.validation.validTeamManage;
 
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamManageDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamMemberDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TeamManageValidator implements ConstraintValidator<ValidTeamManage, MeetingRequestDTO.TeamManageDTO> {
+public class TeamManageValidator implements ConstraintValidator<ValidTeamManage, TeamManageDTO> {
     @Override
     public void initialize(ValidTeamManage constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
@@ -16,20 +17,26 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
 
     @Override
     public boolean isValid(MeetingRequestDTO.TeamManageDTO value, ConstraintValidatorContext context) {
-        if (value == null) return true; // @NotNull로 따로 처리
+        if (value == null) {
+            return true; // @NotNull로 따로 처리
+        }
 
-        List<MeetingRequestDTO.TeamMemberDTO> teamMemberDTOList = value.getTeamMemberDTOList();
-        if (teamMemberDTOList == null) return true; // @NotNull로 따로 처리
+        List<TeamMemberDTO> teamMemberDTOList = value.getTeamMemberDTOList();
+        if (teamMemberDTOList == null) {
+            return true; // @NotNull로 따로 처리
+        }
 
         boolean success = true;
         context.disableDefaultConstraintViolation();
 
         Set<Integer> seenTeamNumbers = new HashSet<>(); // 팀 번호 중복 체크용
-        Set<String> seenNicknames = new HashSet<>();
+        Set<Long> seenClubMemberIds = new HashSet<>();
 
         for (int i = 0; i < teamMemberDTOList.size(); i++) {
             MeetingRequestDTO.TeamMemberDTO dto = teamMemberDTOList.get(i);
-            if (dto == null) continue;
+            if (dto == null) {
+                continue;
+            }
 
             Integer teamNum = dto.getTeamNumber();
 
@@ -48,16 +55,16 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
                 */
             }
 
-            List<String> nicknameList = dto.getNicknameList();
-            if (nicknameList != null) {
-                for (int j = 0; j < nicknameList.size(); j++) {
-                    String nick = (nicknameList.get(j) == null) ? null : nicknameList.get(j).trim(); // 필드 레벨 @NotBlank/@Pattern로 1차 검증됨
-                    if (nick != null && !seenNicknames.add(nick)) {
+            List<Long> clubMemberIds = dto.getClubMemberIds();
+            if (clubMemberIds != null) {
+                for (int j = 0; j < clubMemberIds.size(); j++) {
+                    Long clubMemberId = clubMemberIds.get(j);
+                    if (clubMemberId != null && !seenClubMemberIds.add(clubMemberId)) {
                         success = false;
                         addViolation(
                                 context,
-                                String.format("닉네임 '%s'이 여러 개 포함되었습니다.", nick),
-                                "teamMemberDTOList[" + i + "].nicknameList[" + j + "]"
+                                String.format("클럽멤버 ID '%d'가 중복되었습니다.", clubMemberId),
+                                "teamMemberDTOList[" + i + "].clubMemberIds[" + j + "]"
                         );
                         /*
                         context.buildConstraintViolationWithTemplate(
@@ -79,4 +86,3 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
                 .addConstraintViolation();
     }
 }
-

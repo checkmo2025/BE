@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -86,13 +85,8 @@ public class MeetingRequestDTO {
     public static class TeamMemberDTO {
         @Min(value = 1, message = "팀 번호는 1 이상의 정수여야 합니다.")
         @NotNull(message = "팀 번호는 null이 될 수 없습니다.")
-        private Integer teamNumber; // 팀 번호
-        @NotNull(message = "닉네임 리스트는 null이 될 수 없습니다.")
-        private List<
-                @NotBlank(message = "닉네임은 필수입니다")
-                @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
-                        message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")
-                        // @Size(max = 6, message = "닉네임은 6자 이하여야 합니다.")
-                        String> nicknameList; // 팀원들의 닉네임 리스트, 닉네임에 대한 검증은 AdditionalInfoDTO에서 가져왔습니다
+        private Integer teamNumber;
+        @NotNull(message = "클럽멤버 식별자는 null이 될 수 없습니다.")
+        private List<Long> clubMemberIds;
     }
 }
