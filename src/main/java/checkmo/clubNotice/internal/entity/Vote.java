@@ -64,7 +64,7 @@ public class Vote extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL)
-    private List<MemberVote> memberVotes = new ArrayList<>();
+    private List<ClubMemberVote> clubMemberVotes = new ArrayList<>();
 
     public List<String> getItems() {
         List<String> items = new ArrayList<>();

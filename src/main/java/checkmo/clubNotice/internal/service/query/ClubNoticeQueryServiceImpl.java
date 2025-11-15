@@ -1,9 +1,9 @@
 package checkmo.clubNotice.internal.service.query;
 
-import checkmo.clubNotice.internal.entity.MemberVote;
+import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
-import checkmo.clubNotice.internal.repository.MemberVoteRepository;
+import checkmo.clubNotice.internal.repository.ClubMemberVoteRepository;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
 import checkmo.clubNotice.internal.repository.VoteRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
@@ -19,7 +19,7 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
 
     private final NoticeRepository noticeRepository;
     private final VoteRepository voteRepository;
-    private final MemberVoteRepository memberVoteRepository;
+    private final ClubMemberVoteRepository clubMemberVoteRepository;
 
     @Override
     public Notice getNotice(Long clubId, Long noticeId) {
@@ -34,13 +34,13 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
     }
 
     @Override
-    public List<MemberVote> getMemberVotesByVoteId(Long voteId) {
-        return memberVoteRepository.findAllByVoteId(voteId);
+    public List<ClubMemberVote> getMemberVotesByVoteId(Long voteId) {
+        return clubMemberVoteRepository.findAllByVoteId(voteId);
     }
 
     @Override
-    public MemberVote getMyVote(Long voteId, String memberId) {
-        return memberVoteRepository.findByVoteIdAndMemberId(voteId, memberId).orElse(null);
+    public ClubMemberVote getMyVote(Long voteId, Long clubMemberId) {
+        return clubMemberVoteRepository.findByVoteIdAndClubMemberId(voteId, clubMemberId).orElse(null);
     }
 
     @Override

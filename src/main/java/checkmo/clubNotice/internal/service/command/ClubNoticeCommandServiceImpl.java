@@ -1,14 +1,12 @@
 package checkmo.clubNotice.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
-import checkmo.clubNotice.internal.entity.MemberVote;
+import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
-import checkmo.clubNotice.internal.repository.MemberVoteRepository;
+import checkmo.clubNotice.internal.repository.ClubMemberVoteRepository;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
 import checkmo.clubNotice.internal.repository.VoteRepository;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
@@ -28,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
     private final ClubManagementAPI clubManagementAPI;
-    private final ClubMemberQueryService clubMemberQueryService;
 
     // 자신의 QueryService
     private final ClubNoticeQueryService clubNoticeQueryService;
@@ -36,7 +33,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     // 자신의 Repository
     private final VoteRepository voteRepository;
     private final NoticeRepository noticeRepository;
-    private final MemberVoteRepository memberVoteRepository;
+    private final ClubMemberVoteRepository clubMemberVoteRepository;
 
     @Override
     public Notice createPureNotice(Long clubId, String memberId, CreateClubNoticeDTO request) {
@@ -112,34 +109,28 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     public Long haveVote(Long clubId, Long voteId, String memberId, VoteResultDTO request) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.getClubInfo(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(clubId, memberId);
 
-        // 2. 투표 참여자 활성화 여부 확인
-        if (!clubMember.isActive()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
-
-        // 3. 투표 조회 및 존재 여부 확인
+        // 투표 조회 및 존재 여부 확인
         Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
 
-        // 4. 투표 가능 시간인지 검증
+        // 투표 가능 시간인지 검증
         validateVotingTime(vote);
 
-        // 5. 투표의 복수 선택이 불가능하다면 여러 항목 선택했는지 검증
+        // 투표의 복수 선택이 불가능하다면 여러 항목 선택했는지 검증
         if (!vote.isDuplication()) {
             if (request.countSelectedItems() > 1) {
                 throw new GeneralException(ErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
             }
         }
 
-        // 6. 기존 투표 내역 삭제
-        memberVoteRepository.deleteByVoteIdAndMemberId(voteId, clubMember.getMemberId());
+        // 기존 투표 내역 삭제
+        clubMemberVoteRepository.deleteByVoteIdAndClubMemberId(voteId, clubMemberId);
 
-        // 7. MemberVote 생성 및 저장
-        MemberVote memberVote = ClubNoticeConverter.fromVoteRequestToMemberVote(
-                vote, clubMember.getMemberId(), request
-        );
-        memberVoteRepository.save(memberVote);
+        // ClubMemberVote 생성 및 저장
+        ClubMemberVote clubMemberVote
+                = ClubNoticeConverter.fromVoteRequestToMemberVote(vote, clubMemberId, request);
+        clubMemberVoteRepository.save(clubMemberVote);
 
         return vote.getId();
     }

@@ -22,9 +22,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"member_id", "vote_id"})
+        @UniqueConstraint(columnNames = {"club_member_id", "vote_id"})
 })
-public class MemberVote {
+public class ClubMemberVote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,8 +36,8 @@ public class MemberVote {
     private boolean item4;
     private boolean item5;
 
-    @JoinColumn(name = "member_id", nullable = false)
-    private String memberId;
+    @Column(name = "club_member_id", nullable = false)
+    private Long clubMemberId;
 
     @Column(name = "vote_id", insertable = false, updatable = false)
     private Long voteId;

@@ -2,7 +2,7 @@ package checkmo.clubNotice.internal.converter;
 
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.ClubMeetingExternalDTO;
-import checkmo.clubNotice.internal.entity.MemberVote;
+import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
@@ -90,17 +90,17 @@ public class ClubNoticeConverter {
     }
 
     /**
-     * VoteResultDTO -> MemberVote 엔티티
+     * VoteResultDTO -> ClubMemberVote 엔티티
      */
-    public static MemberVote fromVoteRequestToMemberVote(
+    public static ClubMemberVote fromVoteRequestToMemberVote(
             Vote vote,
-            String memberId,
+            Long clubMemberId,
             ClubNoticeRequestDTO.VoteResultDTO request
     ) {
-        return MemberVote.builder()
+        return ClubMemberVote.builder()
                 .vote(vote)
                 .voteId(vote.getId())
-                .memberId(memberId)
+                .clubMemberId(clubMemberId)
                 .item1(request.isItem1())
                 .item2(request.isItem2())
                 .item3(request.isItem3())

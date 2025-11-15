@@ -1,6 +1,6 @@
 package checkmo.clubNotice.internal.service.query;
 
-import checkmo.clubNotice.internal.entity.MemberVote;
+import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.common.apiPayload.exception.GeneralException;
@@ -33,16 +33,16 @@ public interface ClubNoticeQueryService {
      * @param voteId 투표 ID
      * @return 투표 내역 리스트
      */
-    List<MemberVote> getMemberVotesByVoteId(Long voteId);
+    List<ClubMemberVote> getMemberVotesByVoteId(Long voteId);
 
     /**
      * 특정 회원의 투표 내역 조회
      *
-     * @param voteId   투표 ID
-     * @param memberId 회원 ID
+     * @param voteId       투표 ID
+     * @param clubMemberId 클럽 회원 ID
      * @return 회원의 투표 내역 (없으면 null)
      */
-    MemberVote getMyVote(Long voteId, String memberId);
+    ClubMemberVote getMyVote(Long voteId, Long clubMemberId);
 
     /**
      * 클럽의 공지사항 리스트 조회
