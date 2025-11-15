@@ -2,8 +2,6 @@ package checkmo.clubMeeting.internal.service.command;
 
 import checkmo.book.BookAPI;
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -15,7 +13,6 @@ import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingCreateRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingUpdateRequestDTO;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +30,6 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     private final BookAPI bookAPI;
 
     private final ClubManagementAPI clubManagementAPI;
-    private final ClubMemberQueryService clubMemberQueryService;
 
     // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
@@ -106,16 +102,13 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(meeting.getClubId(), memberId);
 
         // 요청 teamNumber와 nicknameList 검증 및 정리
-        Map<Integer, List<String>> requestTeamNumberToNicknameList =
+        Map<Integer, List<Long>> requestTeamNumberToClubMemberIds =
                 request.getTeamMemberDTOList().stream()
                         .collect(Collectors.toMap(
                                 MeetingRequestDTO.TeamMemberDTO::getTeamNumber,
-                                dto -> dto.getNicknameList().stream().distinct().toList()
+                                dto -> dto.getClubMemberIds().stream().distinct().toList()
                         ));
-        Set<Integer> requestTeamNumbers = requestTeamNumberToNicknameList.keySet();
-        Set<String> requestNicknames = requestTeamNumberToNicknameList.values().stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<Integer> requestTeamNumbers = requestTeamNumberToClubMemberIds.keySet();
 
         // 해당 미팅의 기존 팀들 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
         List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meeting.getId());
@@ -154,17 +147,12 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             // 이때 이 하나의 트랜잭션에서 clubMember.memberTeams를 사용하지 않습니다!!!
         }
 
-        // 닉네임 → memberId → ClubMember 일괄 매핑
-        Map<String, ClubMember> nicknameToClubMember = clubMemberQueryService.getNicknameToClubMember(
-                meeting.getClubId(), requestNicknames.stream().toList());
-
         // 요청대로 MemberTeam 배치 재생성
-        for (Map.Entry<Integer, List<String>> e : requestTeamNumberToNicknameList.entrySet()) {
+        for (Map.Entry<Integer, List<Long>> e : requestTeamNumberToClubMemberIds.entrySet()) {
             Team team = existingTeamNumberToTeam.get(e.getKey());
-            for (String nick : e.getValue()) {
-                ClubMember cm = nicknameToClubMember.get(nick);
+            for (Long cmId : e.getValue()) {
                 MemberTeam mt = MemberTeam.builder()
-                        .clubMemberId(clubMemberId)
+                        .clubMemberId(cmId)
                         .build();
                 mt.setTeam(team);
             }
