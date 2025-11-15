@@ -1,9 +1,9 @@
 package checkmo.clubMeeting.internal.service.query;
 
-import checkmo.clubMeeting.internal.entity.MemberTeam;
+import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
-import checkmo.clubMeeting.internal.repository.MemberTeamRepository;
+import checkmo.clubMeeting.internal.repository.ClubMemberTeamRepository;
 import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.repository.TeamTopicRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
@@ -24,7 +24,7 @@ public class ClubMeetingTeamQueryServiceImpl implements ClubMeetingTeamQueryServ
 
     private final TeamRepository teamRepository;
     private final TeamTopicRepository teamTopicRepository;
-    private final MemberTeamRepository memberTeamRepository;
+    private final ClubMemberTeamRepository clubMemberTeamRepository;
 
     @Override
     public List<Team> findTeamsByMeeting(Long meetingId) {
@@ -32,8 +32,8 @@ public class ClubMeetingTeamQueryServiceImpl implements ClubMeetingTeamQueryServ
     }
 
     @Override
-    public List<MemberTeam> getMemberTeamsByTeam(Long teamId) {
-        return memberTeamRepository.findAllByTeamIds(List.of(teamId));
+    public List<ClubMemberTeam> getMemberTeamsByTeam(Long teamId) {
+        return clubMemberTeamRepository.findAllByTeamIds(List.of(teamId));
     }
 
     @Override
@@ -41,11 +41,11 @@ public class ClubMeetingTeamQueryServiceImpl implements ClubMeetingTeamQueryServ
         if (teamIds == null || teamIds.isEmpty()) {
             return Map.of();
         }
-        List<MemberTeam> memberTeams = memberTeamRepository.findAllByTeamIds(teamIds);
-        return memberTeams.stream()
+        List<ClubMemberTeam> clubMemberTeams = clubMemberTeamRepository.findAllByTeamIds(teamIds);
+        return clubMemberTeams.stream()
                 .collect(Collectors.toMap(
-                        MemberTeam::getClubMemberId, // key: 클럽멤버 ID
-                        MemberTeam::getTeamId // value: 팀 id
+                        ClubMemberTeam::getClubMemberId, // key: 클럽멤버 ID
+                        ClubMemberTeam::getTeamId // value: 팀 id
                         // 하나의 멤버는 하나의 미팅의 여러 팀에 속할 수 없으므로 병합 조건 존재하지 않아도 됨
                 ));
     }

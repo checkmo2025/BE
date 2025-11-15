@@ -7,8 +7,8 @@ import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipDTO;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.entity.MemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
 import checkmo.clubMeeting.internal.entity.Topic;
@@ -445,10 +445,10 @@ public class ClubMeetingQueryFacade {
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
 
         // 2. 팀 멤버 조회
-        List<MemberTeam> memberTeams = clubMeetingTeamQueryService.getMemberTeamsByTeam(team.getId());
+        List<ClubMemberTeam> clubMemberTeams = clubMeetingTeamQueryService.getMemberTeamsByTeam(team.getId());
 
         // 3. 클럽 멤버의 기본 정보 배치 조회
-        Set<Long> clubMemberIds = extractClubMemberIdsFromMemberTeams(memberTeams);
+        Set<Long> clubMemberIds = extractClubMemberIdsFromMemberTeams(clubMemberTeams);
         Map<Long, MembershipDTO> clubMembership = clubManagementAPI.getClubMembershipInfos(clubMemberIds);
         List<String> memberIds = extractMemberIdsFromClubMembers(clubMembership);
         Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(
@@ -469,12 +469,12 @@ public class ClubMeetingQueryFacade {
                 .toList();
     }
 
-    private Set<Long> extractClubMemberIdsFromMemberTeams(List<MemberTeam> memberTeams) {
-        if (memberTeams == null) {
+    private Set<Long> extractClubMemberIdsFromMemberTeams(List<ClubMemberTeam> clubMemberTeams) {
+        if (clubMemberTeams == null) {
             return Set.of();
         }
-        return memberTeams.stream()
-                .map(MemberTeam::getClubMemberId)
+        return clubMemberTeams.stream()
+                .map(ClubMemberTeam::getClubMemberId)
                 .collect(Collectors.toSet());
     }
 

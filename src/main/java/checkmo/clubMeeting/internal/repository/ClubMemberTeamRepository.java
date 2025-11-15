@@ -1,14 +1,14 @@
 package checkmo.clubMeeting.internal.repository;
 
-import checkmo.clubMeeting.internal.entity.MemberTeam;
+import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface MemberTeamRepository extends JpaRepository<MemberTeam, Long> {
+public interface ClubMemberTeamRepository extends JpaRepository<ClubMemberTeam, Long> {
     @Query("SELECT mt " +
-            "FROM MemberTeam mt " +
+            "FROM ClubMemberTeam mt " +
             "WHERE mt.teamId IN :teamIds " +
             "ORDER BY mt.clubMemberId ASC")
-    List<MemberTeam> findAllByTeamIds(List<Long> teamIds);
+    List<ClubMemberTeam> findAllByTeamIds(List<Long> teamIds);
 }

@@ -1,6 +1,6 @@
 package checkmo.clubMeeting.internal.service.query;
 
-import checkmo.clubMeeting.internal.entity.MemberTeam;
+import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
 import checkmo.common.apiPayload.exception.GeneralException;
@@ -24,9 +24,9 @@ public interface ClubMeetingTeamQueryService {
      * 독서모임의 팀 멤버 정보를 조회합니다.
      *
      * @param teamId 팀 ID
-     * @return MemberTeam 리스트
+     * @return ClubMemberTeam 리스트
      */
-    List<MemberTeam> getMemberTeamsByTeam(Long teamId);
+    List<ClubMemberTeam> getMemberTeamsByTeam(Long teamId);
 
     /**
      * 독서모임의 클럽 멤버 id에 따라 해당 클럽 멤버가 소속하는 팀 id를 매핑한 맵을 조회합니다.

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class MemberTeam extends BaseEntity {
+public class ClubMemberTeam extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,8 +39,8 @@ public class MemberTeam extends BaseEntity {
     // == 연관관계 메서드 == //
     public void setTeam(Team team) {
         this.team = team;
-        if (!team.getMemberTeams().contains(this)) {
-            team.getMemberTeams().add(this);
+        if (!team.getClubMemberTeams().contains(this)) {
+            team.getClubMemberTeams().add(this);
         }
     }
 }

@@ -4,8 +4,8 @@ import checkmo.book.BookAPI;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
+import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.entity.MemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
 import checkmo.clubMeeting.internal.repository.TeamRepository;
@@ -139,7 +139,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 .map(Team::getTeamNumber)
                 .collect(Collectors.toSet()));
 
-        // 기존 MemberTeam orphanRemoval = true 삭제
+        // 기존 ClubMemberTeam orphanRemoval = true 삭제
         if (!existingTeams.isEmpty()) {
             existingTeams.forEach(Team::clearMemberTeams);
             // 기존 멤버 삭제 시 소유자만 끊고 orphanRemoval=true로 고아 삭제를 걸면 DB 행은 사라지고,
@@ -147,18 +147,18 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
             // 이때 이 하나의 트랜잭션에서 clubMember.memberTeams를 사용하지 않습니다!!!
         }
 
-        // 요청대로 MemberTeam 배치 재생성
+        // 요청대로 ClubMemberTeam 배치 재생성
         for (Map.Entry<Integer, List<Long>> e : requestTeamNumberToClubMemberIds.entrySet()) {
             Team team = existingTeamNumberToTeam.get(e.getKey());
             for (Long cmId : e.getValue()) {
-                MemberTeam mt = MemberTeam.builder()
+                ClubMemberTeam mt = ClubMemberTeam.builder()
                         .clubMemberId(cmId)
                         .build();
                 mt.setTeam(team);
             }
         }
 
-        // 10. 기존 팀과 새로 생성된 Team을 명시적으로 저장 (내부적으로 MemberTeam도 저장됨)
+        // 10. 기존 팀과 새로 생성된 Team을 명시적으로 저장 (내부적으로 ClubMemberTeam도 저장됨)
         meetingRepository.save(meeting);
         teamRepository.saveAll(existingTeams);
     }
