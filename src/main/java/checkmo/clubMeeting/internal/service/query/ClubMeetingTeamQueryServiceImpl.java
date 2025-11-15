@@ -33,18 +33,18 @@ public class ClubMeetingTeamQueryServiceImpl implements ClubMeetingTeamQueryServ
 
     @Override
     public List<MemberTeam> getMemberTeamsByTeam(Long teamId) {
-        return memberTeamRepository.findAllWithClubMemberByTeamIds(List.of(teamId));
+        return memberTeamRepository.findAllByTeamIds(List.of(teamId));
     }
 
     @Override
-    public Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds) {
+    public Map<Long, Long> getClubMemberIdToTeamIdMap(List<Long> teamIds) {
         if (teamIds == null || teamIds.isEmpty()) {
             return Map.of();
         }
-        List<MemberTeam> memberTeams = memberTeamRepository.findAllWithClubMemberByTeamIds(teamIds);
+        List<MemberTeam> memberTeams = memberTeamRepository.findAllByTeamIds(teamIds);
         return memberTeams.stream()
                 .collect(Collectors.toMap(
-                        MemberTeam::getMemberId, // key: 멤버 ID
+                        MemberTeam::getClubMemberId, // key: 클럽멤버 ID
                         MemberTeam::getTeamId // value: 팀 id
                         // 하나의 멤버는 하나의 미팅의 여러 팀에 속할 수 없으므로 병합 조건 존재하지 않아도 됨
                 ));

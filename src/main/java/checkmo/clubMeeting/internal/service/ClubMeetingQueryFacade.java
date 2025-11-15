@@ -26,6 +26,7 @@ import checkmo.member.MemberExternalDTO.BasicInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -352,35 +353,41 @@ public class ClubMeetingQueryFacade {
         }
 
         // 2. 클럽의 회원 조회 및 페이징 처리 (이때 PENDING이나 BLOCKED 상태는 제외하고 STAFF나 MEMBER만 조회)
-        List<MembershipDTO> clubMembershipDTO
-                = clubManagementAPI.getClubMembersByStatus(meeting.getClubId(), cursorId, size + 1);
-        boolean hasNext = clubMembershipDTO.size() > size;
+        List<MembershipDTO> clubMembership = clubManagementAPI.getClubMembersByStatus(meeting.getClubId(), cursorId,
+                size + 1);
+        boolean hasNext = clubMembership.size() > size;
         if (hasNext) {
-            clubMembershipDTO = clubMembershipDTO.subList(0, size);
+            clubMembership = clubMembership.subList(0, size);
         }
-        Long nextCursor = hasNext ? clubMembershipDTO.getLast().getClubMemberId() : null;
+        Long nextCursor = hasNext ? clubMembership.getLast().getClubMemberId() : null;
 
         // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberExternalDTO.BasicInfoDTO 조회)
-        List<String> memberIds = extractMemberIdsFromClubMembers(clubMembershipDTO);
-        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap = memberAPI.getMemberBasicInfoMapForShare(
-                memberIds);
+        List<String> memberIds = extractMemberIdsFromClubMembers(clubMembership);
+        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap
+                = memberAPI.getMemberBasicInfoMapForShare(memberIds);
 
         // 4. 미팅에 존재하는 모든 팀 조회
         List<Team> teams = clubMeetingTeamQueryService.findTeamsByMeeting(meetingId);
         List<Long> teamIds = extractTeamIds(teams);
         Map<Long, Integer> teamIdToTeamNumberMap = mapTeamIdToTeamNumberMap(teams);
 
-        // 5. Map<memberId, teamId> 형태로 모든 팀의 팀원 조회
-        Map<String, Long> memberIdToTeamIdMap = clubMeetingTeamQueryService.getMemberIdToTeamIdMap(teamIds);
+        // 5. Map<clubMemberId, teamId> 형태로 모든 팀의 팀원 조회
+        Map<Long, Long> memberIdToTeamIdMap = clubMeetingTeamQueryService.getClubMemberIdToTeamIdMap(teamIds);
 
-        // 6. 응답 DTO로 변환
-        Map<String, Integer> memberIdToTeamNumberMap = mapMemberIdToTeamNumberMap(memberIdToTeamIdMap,
-                teamIdToTeamNumberMap);
-        List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList = clubMembershipDTO.stream()
-                .map(cm -> toMeetingMemberDTO(cm, memberBasicInfoMap, memberIdToTeamNumberMap))
+        // 6. teamId -> teamNumber 맵 구성
+        Map<String, Integer> memberIdToTeamNumberMap
+                = mapMemberIdToTeamNumberMap(clubMembership, memberIdToTeamIdMap, teamIdToTeamNumberMap);
+        List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList = clubMembership.stream()
+                .map(membership -> toMeetingMemberDTO(membership, memberBasicInfoMap, memberIdToTeamNumberMap))
                 .toList();
-        return ClubMeetingConverter.fromMeetingMemberDTOListToMeetingMemberListDTO(meetingMemberDTOList, hasNext,
-                nextCursor, clubMembershipInfo);
+
+        // 6. 리스트 DTO로 래핑
+        return ClubMeetingConverter.fromMeetingMemberDTOListToMeetingMemberListDTO(
+                meetingMemberDTOList,
+                hasNext,
+                nextCursor,
+                clubMembershipInfo
+        );
     }
 
     private MeetingResponseDTO.MeetingMemberDTO toMeetingMemberDTO(
@@ -394,20 +401,29 @@ public class ClubMeetingQueryFacade {
         return ClubMeetingConverter.fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(memberInfo, teamNumber);
     }
 
-    private Map<String, Integer> mapMemberIdToTeamNumberMap(Map<String, Long> memberIdToTeamIdMap,
-                                                            Map<Long, Integer> teamIdToTeamNumberMap) {
-        if (memberIdToTeamIdMap == null || memberIdToTeamIdMap.isEmpty()) {
-            return Map.of();
+    private Map<String, Integer> mapMemberIdToTeamNumberMap(
+            List<ClubManagementExternalDTO.MembershipDTO> memberships,
+            Map<Long, Long> clubMemberIdToTeamIdMap,
+            Map<Long, Integer> teamIdToTeamNumberMap
+    ) {
+        Map<String, Integer> result = new HashMap<>();
+
+        for (ClubManagementExternalDTO.MembershipDTO membership : memberships) {
+            Long clubMemberId = membership.getClubMemberId();
+            String memberId = membership.getMemberId();
+
+            Long teamId = clubMemberIdToTeamIdMap.get(clubMemberId);
+            if (teamId == null) {
+                // 팀이 없는 멤버는 teamNumber = null
+                result.put(memberId, null);
+                continue;
+            }
+
+            Integer teamNumber = teamIdToTeamNumberMap.get(teamId);
+            result.put(memberId, teamNumber);
         }
-        if (teamIdToTeamNumberMap == null || teamIdToTeamNumberMap.isEmpty()) {
-            return Map.of();
-        }
-        Map<String, Integer> memberIdToTeamNumber = new HashMap<>();
-        memberIdToTeamIdMap.forEach((memberId, teamId) -> {
-            Integer teamNumber = (teamId == null) ? null : teamIdToTeamNumberMap.get(teamId);
-            memberIdToTeamNumber.put(memberId, teamNumber);
-        });
-        return memberIdToTeamNumber;
+
+        return result;
     }
 
     private Map<Long, Integer> mapTeamIdToTeamNumberMap(List<Team> teams) {

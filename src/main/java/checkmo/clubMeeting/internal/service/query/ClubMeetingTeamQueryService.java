@@ -29,11 +29,11 @@ public interface ClubMeetingTeamQueryService {
     List<MemberTeam> getMemberTeamsByTeam(Long teamId);
 
     /**
-     * 독서모임의 멤버 id에 따라 해당 클럽 멤버가 소속하는 팀 id를 매핑한 맵을 조회합니다.
+     * 독서모임의 클럽 멤버 id에 따라 해당 클럽 멤버가 소속하는 팀 id를 매핑한 맵을 조회합니다.
      *
      * @param teamIds 팀 ID 목록
      */
-    Map<String, Long> getMemberIdToTeamIdMap(List<Long> teamIds);
+    Map<Long, Long> getClubMemberIdToTeamIdMap(List<Long> teamIds);
 
     /**
      * 독서 모임 미팅의 팀별 발제 조회

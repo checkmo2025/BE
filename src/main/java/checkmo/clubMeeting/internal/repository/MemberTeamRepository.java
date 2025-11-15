@@ -9,6 +9,6 @@ public interface MemberTeamRepository extends JpaRepository<MemberTeam, Long> {
     @Query("SELECT mt " +
             "FROM MemberTeam mt " +
             "WHERE mt.teamId IN :teamIds " +
-            "ORDER BY mt.memberId ASC")
-    List<MemberTeam> findAllWithClubMemberByTeamIds(List<Long> teamIds);
+            "ORDER BY mt.clubMemberId ASC")
+    List<MemberTeam> findAllByTeamIds(List<Long> teamIds);
 }
