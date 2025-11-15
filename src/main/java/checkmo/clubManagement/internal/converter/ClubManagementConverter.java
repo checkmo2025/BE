@@ -25,6 +25,7 @@ public class ClubManagementConverter {
      */
     public static ClubManagementExternalDTO.MembershipDTO fromClubMembertoMembershipDTO(ClubMember clubMember) {
         return ClubManagementExternalDTO.MembershipDTO.builder()
+                .memberId(clubMember.getMemberId())
                 .clubMemberId(clubMember.getId())
                 .active(clubMember.isActive())
                 .staff(clubMember.isStaff())
