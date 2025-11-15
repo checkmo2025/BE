@@ -81,5 +81,5 @@ public interface ClubManagementAPI {
      * @param size     한 번에 조회할 멤버십 수
      * @return 멤버십 목록
      */
-    List<ClubManagementExternalDTO.MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, int size);
+    List<ClubManagementExternalDTO.MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, Integer size);
 }

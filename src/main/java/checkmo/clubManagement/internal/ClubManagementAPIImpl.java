@@ -87,7 +87,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public List<MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, int size) {
+    public List<MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, Integer size) {
         List<ClubMember> clubMembers
                 = clubMemberQueryService.getClubMemberListByStatus(clubId, "ACTIVE", cursorId, size);
         return ClubManagementConverter.fromClubMemberToMembershipDTO(clubMembers);
