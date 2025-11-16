@@ -19,3 +19,10 @@ logging:
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
     checkmo: INFO
+
+events:
+  retry:
+    enabled: true
+    initial-delay: 30000
+    fixed-delay: 60000
+    min-duration: 60000
