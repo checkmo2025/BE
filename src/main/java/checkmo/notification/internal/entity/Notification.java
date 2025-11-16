@@ -1,17 +1,16 @@
 package checkmo.notification.internal.entity;
 
 import checkmo.common.BaseEntity;
-import checkmo.member.internal.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +22,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"notification_type", "source_id"})
+})
 public class Notification extends BaseEntity {
 
     @Id
@@ -32,6 +34,9 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationType notificationType;
+
+    @Column(name = "source_id", nullable = false)
+    private Long sourceId; //FOLLOW.id, BOOK_STORY_LIKED.id, CLUB_MEMBER.id 등 알림의 출처가 되는 엔티티 ID
 
     @Builder.Default
     @Column(nullable = false)
