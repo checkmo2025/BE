@@ -8,7 +8,7 @@ import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.CurrentId;
+import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

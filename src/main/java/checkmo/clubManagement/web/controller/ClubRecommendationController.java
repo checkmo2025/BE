@@ -1,12 +1,11 @@
 package checkmo.clubManagement.web.controller;
 
-import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.internal.service.ClubManagementQueryFacade;
 import checkmo.clubManagement.internal.service.command.ClubBookRecommendCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.CurrentId;
+import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "모임 추천 책", description = "독서 모임 내 책 추천 및 관리 API")
 public class ClubRecommendationController {
 
-    private final ClubManagementAPI clubManagementAPI;
     private final ClubManagementQueryFacade clubManagementQueryFacade;
     private final ClubBookRecommendCommandService clubBookRecommendCommandService;
 

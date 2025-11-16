@@ -7,7 +7,7 @@ import checkmo.bookStory.internal.service.command.BookStoryCommentCommandService
 import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.CurrentId;
+import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -55,12 +55,13 @@ public class BookStoryController {
     @Parameters({
             @Parameter(
                     name = "scope",
-                    description = "조회 범위:\n" +
-                            "• ALL: 전체 책이야기\n" +
-                            "• FOLLOWING: 팔로우한 회원의 책이야기\n" +
-                            "• MY: 내 책이야기\n" +
-                            "• CLUB: 특정 클럽 책이야기 (clubId 필수)\n" +
-                            "• TARGET: 특정 회원의 책이야기 (targetMemberNickname 필수)",
+                    description = """
+                            조회 범위:
+                            • ALL: 전체 책이야기
+                            • FOLLOWING: 팔로우한 회원의 책이야기
+                            • MY: 내 책이야기
+                            • CLUB: 특정 클럽 책이야기 (clubId 필수)
+                            • TARGET: 특정 회원의 책이야기 (targetMemberNickname 필수)""",
                     required = true,
                     example = "ALL"
             ),

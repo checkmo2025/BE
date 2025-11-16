@@ -1,6 +1,5 @@
 package checkmo.clubManagement.web.controller;
 
-import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.ClubManagementQueryFacade;
 import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
@@ -8,7 +7,7 @@ import checkmo.clubManagement.internal.service.command.ClubMemberCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.CurrentId;
+import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "독서 모임", description = "독서 모임 생성, 검색, 가입, 기본 정보 관리 API")
 public class ClubController {
 
-    private final ClubManagementAPI clubManagementAPI;
     private final ClubManagementQueryFacade clubManagementQueryFacade;
     private final ClubMemberCommandService clubMemberCommandService;
     private final ClubManagementCommandService clubManagementCommandService;
