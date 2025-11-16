@@ -18,7 +18,7 @@ public interface ClubNoticeCommandService {
      * @param request  공지사항 작성 요청 DTO
      * @return 작성된 공지사항
      */
-    Notice createPureNotice(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubNoticeDTO request);
+    Notice createPureNotice(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubNotice request);
 
     /**
      * 독서 모임의 공지사항을 삭제합니다. (모임이랑 연결되지 않은 순수 공지사항)
@@ -44,7 +44,7 @@ public interface ClubNoticeCommandService {
      * @param request  투표 생성 요청 DTO
      * @return 생성된 투표
      */
-    Vote createVote(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubVoteDTO request);
+    Vote createVote(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubVote request);
 
     /**
      * 독서 모임에 투표를 삭제합니다.
@@ -64,5 +64,5 @@ public interface ClubNoticeCommandService {
      * @param request  투표 내역 DTO
      * @return 참여한 투표 ID
      */
-    Long haveVote(Long clubId, Long voteId, String memberId, ClubNoticeRequestDTO.VoteResultDTO request);
+    Long haveVote(Long clubId, Long voteId, String memberId, ClubNoticeRequestDTO.VoteResult request);
 }

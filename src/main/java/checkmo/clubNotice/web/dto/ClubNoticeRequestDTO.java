@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ClubNoticeRequestDTO {
     @Getter
     @NoArgsConstructor
-    public static class CreateClubNoticeDTO {
+    public static class CreateClubNotice {
         private String title;
         private String content;
         private boolean important;
@@ -18,7 +18,7 @@ public class ClubNoticeRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class CreateClubVoteDTO {
+    public static class CreateClubVote {
         @NotBlank                 // title은 필수
         private String title;
 
@@ -44,7 +44,7 @@ public class ClubNoticeRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class VoteResultDTO {
+    public static class VoteResult {
         private boolean item1;
         private boolean item2;
         private boolean item3;

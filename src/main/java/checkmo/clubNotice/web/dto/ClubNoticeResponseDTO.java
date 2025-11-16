@@ -25,7 +25,7 @@ public class ClubNoticeResponseDTO {
             @JsonSubTypes.Type(value = ClubNoticeExternalDTO.PureNoticePreview.class, name = "공지")
     })
     public sealed interface NoticeItem
-            permits PureNoticeDTO, MeetingNoticeDTO, VoteDTO {
+            permits PureNotice, MeetingNotice, VoteNotice {
 
         Long getId();
 
@@ -40,7 +40,7 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubNoticeListDTO {
+    public static class ClubNoticeList {
         List<NoticeItem> noticeList; // 꼭 PureNoticeDTO, MeetingNoticeDTO, VoteDTO만 담아야 합니다!!
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
@@ -52,28 +52,7 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MemberNoticeListDTO {
-        List<ClubNoticeWithClubDTO> noticeList;
-        private boolean hasNext;
-        private Long nextCursor;
-        private int pageSize;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class ClubNoticeWithClubDTO {
-        private Long clubId;
-        private String clubName;
-        private NoticeItem notice; // 기존 NoticeItem 유지
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static final class PureNoticeDTO implements NoticeItem {
+    public static final class PureNotice implements NoticeItem {
         private Long id; // 공지사항 ID
         private String title; // 공지사항 제목
         private String content; // 공지사항 내용
@@ -87,7 +66,7 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static final class MeetingNoticeDTO implements NoticeItem {
+    public static final class MeetingNotice implements NoticeItem {
         private Long id; // 공지사항 ID
         private String title; // 공지사항 제목
         private String content; // 공지사항 내용
@@ -102,7 +81,7 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static final class VoteDTO implements NoticeItem {
+    public static final class VoteNotice implements NoticeItem {
         private Long id; // 투표 ID
         private String title; // 공지사항 제목
         private String content; // 내용
@@ -115,14 +94,14 @@ public class ClubNoticeResponseDTO {
 
         @Builder.Default
         private String tag = "투표";
-        private List<EachItemDTO> items; // 투표 항목 목록
+        private List<EachItem> items; // 투표 항목 목록
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class EachItemDTO {
+    public static class EachItem {
         private String item;
         private boolean isSelected;
         private int voteCount; // 투표한 사람 수
@@ -133,7 +112,7 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubNoticeDetailDTO {
+    public static class ClubNoticeDetail {
         private boolean isStaff;
         private NoticeItem noticeItem; // 공지사항 아이템 (PureNoticeDTO, MeetingNoticeDTO, VoteDTO 중 하나)
     }

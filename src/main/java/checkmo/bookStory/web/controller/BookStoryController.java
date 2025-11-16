@@ -45,7 +45,7 @@ public class BookStoryController {
     @PostMapping
     public ApiResponse<Long> createBookStory(
             @CurrentId String memberId,
-            @Valid @RequestBody BookStoryRequestDTO.BookStoryCreateRequest request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryCreate request
     ) {
         Long bookStoryId = bookStoryCommandService.createBookStory(memberId, request);
         return ApiResponse.onSuccess(bookStoryId);
@@ -75,7 +75,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
     @GetMapping
-    public ApiResponse<BookStoryExternalDTO.BookStoryListResponse> getBookStories(
+    public ApiResponse<BookStoryExternalDTO.BookStoryList> getBookStories(
             @CurrentId String memberId,
             @RequestParam(required = false, defaultValue = "ALL") BookStoryRequestDTO.BookStoryScope scope,
             @RequestParam(required = false) Long clubId,
@@ -104,7 +104,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
-    public ApiResponse<BookStoryExternalDTO.BookStoryDetailResponse> getBookStory(
+    public ApiResponse<BookStoryExternalDTO.BookStoryDetailWithComment> getBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
@@ -147,7 +147,7 @@ public class BookStoryController {
     public ApiResponse<Long> updateBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId,
-            @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdateRequest request
+            @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdate request
     ) {
         Long updateBookStoryId = bookStoryCommandService.updateBookStory(memberId, bookStoryId, request);
         return ApiResponse.onSuccess(updateBookStoryId);
@@ -187,7 +187,7 @@ public class BookStoryController {
             @CurrentId String memberId,
             @PathVariable Long bookStoryId,
             @RequestParam(required = false) Long parentCommentId,
-            @Valid @RequestBody BookStoryRequestDTO.CommentCreateRequest request
+            @Valid @RequestBody BookStoryRequestDTO.CommentCreate request
     ) {
         Long resultBookStoryId = bookStoryCommentCommandService.createComment(memberId, bookStoryId, parentCommentId, request);
         return ApiResponse.onSuccess(resultBookStoryId);

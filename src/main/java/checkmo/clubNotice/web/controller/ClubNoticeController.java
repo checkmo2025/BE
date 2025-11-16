@@ -39,7 +39,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음")
     })
     @GetMapping("/api/clubs/{clubId}/notices")
-    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeListDTO> getNoticeList(
+    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeList> getNoticeList(
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId,
@@ -60,7 +60,7 @@ public class ClubNoticeController {
     public ApiResponse<String> createPureVote(
             @CurrentId String memberId,
             @PathVariable Long clubId,
-            @RequestBody @Valid ClubNoticeRequestDTO.CreateClubNoticeDTO request
+            @RequestBody @Valid ClubNoticeRequestDTO.CreateClubNotice request
     ) {
         Notice createdNotice = clubNoticeCommandService.createPureNotice(clubId, memberId, request);
         return ApiResponse.onSuccess("공지사항(id:" + createdNotice.getId() + "이 정상적으로 생성되었습니다.");
@@ -72,7 +72,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
     })
     @GetMapping("/api/clubs/{clubId}/notices/{noticeId}")
-    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetailDTO> getNoticeDetail(
+    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetail> getNoticeDetail(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
             @CurrentId String memberId
@@ -108,7 +108,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음"),
     })
     @GetMapping("/api/clubs/{clubId}/notices/meeting/{noticeId}")
-    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetailDTO> getMeetingDetail(
+    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetail> getMeetingDetail(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
             @CurrentId String memberId
@@ -126,7 +126,7 @@ public class ClubNoticeController {
     public ApiResponse<String> createVote(
             @CurrentId String memberId,
             @PathVariable Long clubId,
-            @RequestBody @Valid ClubNoticeRequestDTO.CreateClubVoteDTO request
+            @RequestBody @Valid ClubNoticeRequestDTO.CreateClubVote request
     ) {
         Vote createdVote = clubNoticeCommandService.createVote(clubId, memberId, request);
         return ApiResponse.onSuccess("투표(id:" + createdVote.getId() + "가 정상적으로 생성되었습니다.");
@@ -138,7 +138,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "투표를 찾을 수 없음")
     })
     @GetMapping("/api/clubs/{clubId}/notices/votes/{voteId}")
-    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetailDTO> getVoteDetail(
+    public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetail> getVoteDetail(
             @PathVariable Long clubId,
             @PathVariable Long voteId,
             @CurrentId String memberId
@@ -157,7 +157,7 @@ public class ClubNoticeController {
             @PathVariable Long clubId,
             @PathVariable Long voteId,
             @CurrentId String memberId,
-            @RequestBody @Valid ClubNoticeRequestDTO.VoteResultDTO request
+            @RequestBody @Valid ClubNoticeRequestDTO.VoteResult request
     ) {
         Long participatingVoteId = clubNoticeCommandService.haveVote(clubId, voteId, memberId, request);
         return ApiResponse.onSuccess("투표(id:" + participatingVoteId + ")에 투표했습니다.");

@@ -29,12 +29,12 @@ public class BookAPIImpl implements BookAPI {
     private final BookRepository bookRepository;
 
     @Override
-    public BookResponseDTO.BookInfoDetailResponse getBookDetailFromAladin(String bookId) {
+    public BookResponseDTO.BookInfoDetail getBookDetailFromAladin(String bookId) {
         return aladinApiService.getBookDetailInfoFromAladin(bookId);
     }
 
     @Override
-    public BookResponseDTO.BookListResponse searchBookFromAladin(String keyword, int page) {
+    public BookResponseDTO.BookList searchBookFromAladin(String keyword, int page) {
         return aladinApiService.searchBookFromAladin(keyword, page);
     }
 
@@ -71,7 +71,7 @@ public class BookAPIImpl implements BookAPI {
 
     @Override
     @Transactional
-    public String getOrCreateBook(BookExternalDTO.BookCreateRequest request) {
+    public String getOrCreateBook(BookExternalDTO.BookCreate request) {
 
         // 이미 존재하는지 확인
         if (bookRepository.existsById(request.getIsbn())) {

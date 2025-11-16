@@ -19,7 +19,7 @@ public interface ClubTopicCommandService {
      * @param request   발제 내용 DTO
      * @return 생성한 발제 ID
      */
-    Long createTopic(Long meetingId, String memberId, BookShelfRequestDTO.TopicDTO request);
+    Long createTopic(Long meetingId, String memberId, BookShelfRequestDTO.TopicCreate request);
 
     /**
      * 독서모임의 특정 팀이 발제를 수정합니다.
@@ -32,7 +32,7 @@ public interface ClubTopicCommandService {
      * @param request   수정된 발제 내용 DTO
      * @return 수정한 발제 ID
      */
-    Long updateTopic(Long meetingId, Long topicId, String memberId, BookShelfRequestDTO.TopicDTO request);
+    Long updateTopic(Long meetingId, Long topicId, String memberId, BookShelfRequestDTO.TopicCreate request);
 
     /**
      * 독서모임의 특정 팀이 발제를 삭제합니다.
@@ -55,6 +55,6 @@ public interface ClubTopicCommandService {
      * @param topicId   발제 ID
      * @param request   발제 선택 여부 (true: 선택, false: 해제)
      */
-    MeetingResponseDTO.TopicSelectionDTO selectOrCancelTopic(Long meetingId, Long topicId, String memberId,
-                                                             MeetingRequestDTO.TopicSelectionDTO request);
+    MeetingResponseDTO.TopicSelection selectOrCancelTopic(Long meetingId, Long topicId, String memberId,
+                                                          MeetingRequestDTO.TopicSelection request);
 }

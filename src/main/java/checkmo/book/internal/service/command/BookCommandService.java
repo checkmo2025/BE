@@ -12,7 +12,7 @@ public interface BookCommandService {
      *
      * @param request 알라딘 책 DTO
      */
-    void saveBook(BookExternalDTO.BookCreateRequest request);
+    void saveBook(BookExternalDTO.BookCreate request);
     // 책 고유번호는 ISBN 13자리로
 
     /**

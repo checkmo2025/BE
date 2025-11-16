@@ -22,11 +22,11 @@ public class BookStoryConverter {
      * BookStoryCreateRequestDTO → BookStory 변환
      */
     public static BookStory fromBookStoryRequestDTO(
-            BookStoryRequestDTO.BookStoryCreateRequest request,
+            BookStoryRequestDTO.BookStoryCreate request,
             String memberId,
             String bookId
     ) {
-        return BookStory.builder()
+        return checkmo.bookStory.internal.entity.BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .memberId(memberId)
@@ -41,18 +41,18 @@ public class BookStoryConverter {
     /**
      * BookStoryResponseDTO -> BookStoryListResponse 변환
      */
-    public static BookStoryExternalDTO.BookStoryListResponse fromBookStoryResponses(
-            List<BookStoryExternalDTO.BookStoryResponse> bookStoryResponses,
+    public static BookStoryExternalDTO.BookStoryList fromBookStoryResponses(
+            List<BookStoryExternalDTO.BookStoryDetail> bookStoryDetailList,
             boolean hasNext,
             Long nextCursor,
             int pageSize,
             BookStoryExternalDTO.ScopeInfo scopeInfo,
             ClubManagementExternalDTO.MyClubList myClubList
     ) {
-        return BookStoryExternalDTO.BookStoryListResponse.builder()
+        return BookStoryExternalDTO.BookStoryList.builder()
                 .scopeInfo(scopeInfo)
                 .memberClubList(myClubList)
-                .bookStoryResponses(bookStoryResponses)
+                .bookStoryDetailList(bookStoryDetailList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
                 .pageSize(pageSize)
@@ -75,7 +75,7 @@ public class BookStoryConverter {
     /**
      * BookStory -> BookStoryResponseDTO 변환
      */
-    public static BookStoryExternalDTO.BookStoryResponse fromBookStoryToResponse(
+    public static BookStoryExternalDTO.BookStoryDetail fromBookStoryToResponse(
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
@@ -83,7 +83,7 @@ public class BookStoryConverter {
             boolean isLiked,
             int commentCount
     ) {
-        return BookStoryExternalDTO.BookStoryResponse.builder()
+        return BookStoryExternalDTO.BookStoryDetail.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
@@ -100,15 +100,15 @@ public class BookStoryConverter {
     /**
      * BookStory -> BookStoryDetailResponse 변환
      */
-    public static BookStoryExternalDTO.BookStoryDetailResponse fromBookStoryToDetailResponse(
+    public static BookStoryExternalDTO.BookStoryDetailWithComment fromBookStoryToDetailResponse(
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
             MemberExternalDTO.WithFollowStatus authorInfo,
             boolean isLiked,
-            List<BookStoryExternalDTO.CommentResponse> commentList
+            List<BookStoryExternalDTO.CommentDetail> commentList
     ) {
-        return BookStoryExternalDTO.BookStoryDetailResponse.builder()
+        return BookStoryExternalDTO.BookStoryDetailWithComment.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
@@ -131,7 +131,7 @@ public class BookStoryConverter {
      * CommentCreateRequestDTO -> Comment 변환
      */
     public static Comment fromCommentCreateRequestDTO(
-            BookStoryRequestDTO.CommentCreateRequest request,
+            BookStoryRequestDTO.CommentCreate request,
             String memberId,
             BookStory bookStory,
             Comment parentComment
@@ -147,7 +147,7 @@ public class BookStoryConverter {
     /**
      * List<Comments> -> CommentResponse
      */
-    public static List<BookStoryExternalDTO.CommentResponse> fromCommentsToResponses(
+    public static List<BookStoryExternalDTO.CommentDetail> fromCommentsToResponses(
             List<Comment> comments,
             String currentMemberId,
             java.util.Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
@@ -155,7 +155,7 @@ public class BookStoryConverter {
         return comments.stream()
                 .map(comment -> {
                     // 대댓글들 변환
-                    List<BookStoryExternalDTO.CommentResponse> replies = comment.getChildrenComment().stream()
+                    List<BookStoryExternalDTO.CommentDetail> replies = comment.getChildrenComment().stream()
                             .map(reply -> fromCommentToResponse(
                                     reply,
                                     currentMemberId,
@@ -176,13 +176,13 @@ public class BookStoryConverter {
     /**
      * Comment -> CommentResponse
      */
-    private static BookStoryExternalDTO.CommentResponse fromCommentToResponse(
+    private static BookStoryExternalDTO.CommentDetail fromCommentToResponse(
             Comment comment,
             String currentMemberId,
             MemberExternalDTO.BasicInfo authorInfo,
-            List<BookStoryExternalDTO.CommentResponse> replies
+            List<BookStoryExternalDTO.CommentDetail> replies
     ) {
-        return BookStoryExternalDTO.CommentResponse.builder()
+        return BookStoryExternalDTO.CommentDetail.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .authorInfo(authorInfo)

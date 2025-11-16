@@ -39,7 +39,7 @@ public class ClubRecommendationController {
     public ApiResponse<String> createRecommendation(
             @PathVariable Long clubId,
             @CurrentId String memberId,
-            @RequestBody @Valid ClubRequestDTO.CreateBookRecommendDTO request
+            @RequestBody @Valid ClubRequestDTO.CreateBookRecommend request
     ) {
         Long bookRecommendId = clubBookRecommendCommandService.recommendBook(clubId, memberId, request);
         return ApiResponse.onSuccess(bookRecommendId + "가 정상적으로 추천되었습니다.");
@@ -51,7 +51,7 @@ public class ClubRecommendationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "클럽을 찾을 수 없음")
     })
     @GetMapping
-    public ApiResponse<ClubResponseDTO.BookRecommendListDTO> getAllRecommendations(
+    public ApiResponse<ClubResponseDTO.BookRecommendList> getAllRecommendations(
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
@@ -65,7 +65,7 @@ public class ClubRecommendationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "추천 책 또는 클럽을 찾을 수 없음")
     })
     @GetMapping("/{recommendId}")
-    public ApiResponse<ClubResponseDTO.BookRecommendDetailDTO> getRecommendationDetail(
+    public ApiResponse<ClubResponseDTO.BookRecommendDetail> getRecommendationDetail(
             @PathVariable Long clubId,
             @PathVariable Long recommendId,
             @CurrentId String memberId
@@ -84,7 +84,7 @@ public class ClubRecommendationController {
             @PathVariable Long clubId,
             @PathVariable Long recommendId,
             @CurrentId String memberId,
-            @RequestBody @Valid ClubRequestDTO.UpdateBookRecommendDTO request
+            @RequestBody @Valid ClubRequestDTO.UpdateBookRecommend request
     ) {
         Long updatedBookRecommend = clubBookRecommendCommandService.updateBookRecommend(clubId, memberId, recommendId,
                 request);

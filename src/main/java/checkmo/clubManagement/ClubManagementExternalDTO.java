@@ -38,7 +38,7 @@ public class ClubManagementExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MembershipDTO {
+    public static class Membership {
         private String memberId;
         private Long clubMemberId;
         private boolean active;

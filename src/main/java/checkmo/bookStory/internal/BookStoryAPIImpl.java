@@ -44,7 +44,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     private final BookStoryQueryService bookStoryQueryService;
 
     @Override
-    public BookStoryExternalDTO.BookStoryDetailResponse getBookStory(String memberId, Long bookStoryId) {
+    public BookStoryExternalDTO.BookStoryDetailWithComment getBookStory(String memberId, Long bookStoryId) {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
 
@@ -77,7 +77,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
                         memberAPI.getMemberBasicInfoMapForShare(new ArrayList<>(commentMemberIds));
 
         // 7. 댓글 DTO 변환
-        List<BookStoryExternalDTO.CommentResponse> commentDTOList =
+        List<BookStoryExternalDTO.CommentDetail> commentDTOList =
                 BookStoryConverter.fromCommentsToResponses(comments, memberId, commentMemberInfoMap);
 
         // 8. DTO 변환
@@ -92,7 +92,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     }
 
     @Override
-    public BookStoryExternalDTO.BookStoryListResponse getBookStoriesByScope(
+    public BookStoryExternalDTO.BookStoryList getBookStoriesByScope(
             String memberId,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId, String targetMemberNickname,
@@ -123,7 +123,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // 7. DTO 변환
-        List<BookStoryExternalDTO.BookStoryResponse> bookStoryResponses = convertToBookStoryResponses(memberId,
+        List<BookStoryExternalDTO.BookStoryDetail> bookStoryDetailList = convertToBookStoryResponses(memberId,
                 bookStories, isLikedMap, bookInfoMap, authorInfoMap);
 
         // 8. 클럽 정보 조회
@@ -132,7 +132,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
 
         // 9. 스코프 정보 변환 및 최종 응답 DTO 변환
         var scopeInfo = BookStoryConverter.fromScopeInfo(scope, myClubInfo);
-        return BookStoryConverter.fromBookStoryResponses(bookStoryResponses, hasNext, nextCursor, DEFAULT_PAGE_SIZE,
+        return BookStoryConverter.fromBookStoryResponses(bookStoryDetailList, hasNext, nextCursor, DEFAULT_PAGE_SIZE,
                 scopeInfo, myClubList);
     }
 
@@ -158,7 +158,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
      */
     private Map<String, BookExternalDTO.BasicInfo> fetchBookInfo(List<BookStory> bookStories) {
         List<String> bookIds = bookStories.stream()
-                .map(BookStory::getBookId)
+                .map(checkmo.bookStory.internal.entity.BookStory::getBookId)
                 .distinct()
                 .toList();
         return bookAPI.getBookBasicInfoMapForShare(bookIds);
@@ -172,7 +172,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
             List<BookStory> bookStories
     ) {
         List<String> targetMemberIds = bookStories.stream()
-                .map(BookStory::getMemberId)
+                .map(checkmo.bookStory.internal.entity.BookStory::getMemberId)
                 .distinct()
                 .toList();
         return memberAPI.getMemberWithFollowStatusMapForShare(targetMemberIds, memberId);
@@ -181,15 +181,15 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * BookStory 엔티티들을 Response DTO로 변환
      */
-    private List<BookStoryExternalDTO.BookStoryResponse> convertToBookStoryResponses(
+    private List<BookStoryExternalDTO.BookStoryDetail> convertToBookStoryResponses(
             String memberId,
-            List<BookStory> bookStories,
+            List<BookStory> bookStoryList,
             Map<Long, Boolean> isLikedMap,
             Map<String, BookExternalDTO.BasicInfo> bookInfoMap,
             Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap
     ) {
 
-        return bookStories.stream()
+        return bookStoryList.stream()
                 .map(bookStory -> BookStoryConverter.fromBookStoryToResponse(
                         bookStory,
                         memberId,

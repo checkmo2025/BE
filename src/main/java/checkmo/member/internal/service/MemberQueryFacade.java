@@ -31,7 +31,7 @@ public class MemberQueryFacade {
         return MemberConverter.toMemberProfileWithCategory(member);
     }
 
-    public MemberResponseDTO.otherProfileResponse getOtherProfile(String targetMemberNickname, String memberId) {
+    public MemberResponseDTO.otherProfile getOtherProfile(String targetMemberNickname, String memberId) {
         Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
 

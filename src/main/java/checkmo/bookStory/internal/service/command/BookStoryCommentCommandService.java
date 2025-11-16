@@ -13,5 +13,5 @@ public interface BookStoryCommentCommandService {
      * @param request 댓글 내용
      * @return 작성된 책이야기 ID
      */
-    Long createComment(String memberId, Long bookStoryId, Long parentCommentId, BookStoryRequestDTO.CommentCreateRequest request);
+    Long createComment(String memberId, Long bookStoryId, Long parentCommentId, BookStoryRequestDTO.CommentCreate request);
 }

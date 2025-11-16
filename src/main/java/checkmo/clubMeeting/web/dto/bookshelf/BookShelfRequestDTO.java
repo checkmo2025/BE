@@ -11,7 +11,7 @@ public class BookShelfRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class BookReviewDTO {
+    public static class BookReviewCreate {
         @NotBlank(message = "한줄평은 필수 입력입니다.")
         @Size(max = 40, message = "한줄평은 40자 이하로 입력해주세요.")
         private String description; // 책에 대한 한줄평 내용
@@ -23,7 +23,7 @@ public class BookShelfRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class TopicDTO {
+    public static class TopicCreate {
         @NotBlank(message = "발제는 필수 입력입니다.")
         @Size(max = 255, message = "발제는 255자 이하로 입력해주세요.")
         private String description; // 토픽 내용

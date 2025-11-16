@@ -7,7 +7,7 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
-import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberJoinDTO;
+import checkmo.clubManagement.web.dto.ClubRequestDTO.JoinClub;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
 
     @Override
     @Transactional
-    public ClubMember joinClub(Long clubId, String memberId, ClubMemberJoinDTO request) {
+    public ClubMember joinClub(Long clubId, String memberId, JoinClub request) {
         // 1. 유효성 검증(club)
         Club club = clubQueryService.validateClub(clubId);
 

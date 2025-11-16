@@ -62,11 +62,11 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.otherProfileResponse toOtherProfileResponse(
+    public static MemberResponseDTO.otherProfile toOtherProfileResponse(
             Member member,
             boolean isFollowing
     ) {
-        return MemberResponseDTO.otherProfileResponse.builder()
+        return MemberResponseDTO.otherProfile.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())

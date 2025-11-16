@@ -23,14 +23,14 @@ public class MemberCommandFacade {
 
     public MemberResponseDTO.MemberProfileWithCategory updateMemberProfile(
             String memberId,
-            MemberRequestDTO.MemberProfileUpdateRequest request
+            MemberRequestDTO.MemberProfileUpdate request
     ) {
         Member updatedMember = memberProfileCommandService.updateMemberProfile(memberId, request);
 
         return MemberConverter.toMemberProfileWithCategory(updatedMember);
     }
 
-    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdateRequest request) {
+    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdate request) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }
 

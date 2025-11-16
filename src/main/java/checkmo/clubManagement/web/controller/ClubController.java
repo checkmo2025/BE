@@ -62,7 +62,7 @@ public class ClubController {
     })
     @PostMapping("")
     public ApiResponse<String> createClub(
-            @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request,
+            @RequestBody @Valid ClubRequestDTO.ClubDetail request,
             @CurrentId String memberId
     ) {
         Long clubId = clubManagementCommandService.createClub(memberId, request);
@@ -76,11 +76,11 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "조회 권한 없음")
     })
     @GetMapping("/{clubId}")
-    public ApiResponse<ClubResponseDTO.ClubDetailDTO> getClubDetail(
+    public ApiResponse<ClubResponseDTO.ClubDetail> getClubDetail(
             @PathVariable Long clubId,
             @CurrentId String memberId
     ) {
-        ClubResponseDTO.ClubDetailDTO result = clubManagementQueryFacade.getClubInfo(clubId, memberId);
+        ClubResponseDTO.ClubDetail result = clubManagementQueryFacade.getClubInfo(clubId, memberId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -115,7 +115,7 @@ public class ClubController {
     public ApiResponse<String> updateClub(
             @PathVariable Long clubId,
             @CurrentId String memberId,
-            @RequestBody @Valid ClubRequestDTO.ClubDetailDTO request
+            @RequestBody @Valid ClubRequestDTO.ClubDetail request
     ) {
         Long updatedClubId = clubManagementCommandService.updateClub(clubId, memberId, request);
         return ApiResponse.onSuccess("독서모임(id:" + updatedClubId + ")이 정상적으로 수정되었습니다.");
@@ -127,10 +127,10 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
     })
     @GetMapping("/search")
-    public ApiResponse<ClubResponseDTO.ClubListDTO> searchClubs(
+    public ApiResponse<ClubResponseDTO.ClubList> searchClubs(
             @CurrentId String memberId,
             @ModelAttribute ClubRequestDTO.ClubSearchFilter filter,
-            @ModelAttribute ClubRequestDTO.CursorPageRequest pageRequest
+            @ModelAttribute ClubRequestDTO.CursorInfo pageRequest
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.getClubList(memberId, filter, pageRequest));
     }
@@ -141,7 +141,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
     })
     @GetMapping("/myClubs")
-    public ApiResponse<ClubResponseDTO.MyClubListDTO> getMyClubs(
+    public ApiResponse<ClubResponseDTO.MyClubList> getMyClubs(
             @CurrentId String memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.getMyClubList(memberId));
@@ -153,7 +153,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
     })
     @GetMapping("/myPage")
-    public ApiResponse<ClubResponseDTO.MyPageClubListDTO> getMyPageClubs(
+    public ApiResponse<ClubResponseDTO.MyPageClubList> getMyPageClubs(
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false) Integer size
@@ -171,7 +171,7 @@ public class ClubController {
     public ApiResponse<String> joinClub(
             @PathVariable Long clubId,
             @CurrentId String memberId,
-            @RequestBody @Valid ClubRequestDTO.ClubMemberJoinDTO request
+            @RequestBody @Valid ClubRequestDTO.JoinClub request
     ) {
         ClubMember joinedClubMember = clubMemberCommandService.joinClub(clubId, memberId, request);
         return ApiResponse.onSuccess("독서 모임 가입 신청이 완료되었습니다." + joinedClubMember.getId());
@@ -190,7 +190,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
     })
     @GetMapping("/{clubId}/members")
-    public ApiResponse<ClubResponseDTO.ClubMemberListDTO> getClubMembers(
+    public ApiResponse<ClubResponseDTO.ClubMemberList> getClubMembers(
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestParam(defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)

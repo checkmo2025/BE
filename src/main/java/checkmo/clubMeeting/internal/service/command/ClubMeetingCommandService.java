@@ -19,7 +19,7 @@ public interface ClubMeetingCommandService {
      * <p>
      * ‼️ 내부에서 공지사항 자동으로 연결해서 생성해주는 로직 반드시 필요
      */
-    Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreateRequestDTO request);
+    Long createMeeting(Long clubId, String memberId, MeetingRequestDTO.MeetingCreate request);
 
     /**
      * 독서모임의 미팅을 수정합니다.
@@ -33,7 +33,7 @@ public interface ClubMeetingCommandService {
      * <p>
      * ‼️ 내부에서 공지사항 자동으로 연결해서 기존 공지사항 삭제하고 재생성해주는 로직 반드시 필요
      */
-    Long updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdateRequestDTO request);
+    Long updateMeeting(Long meetingId, String memberId, MeetingRequestDTO.MeetingUpdate request);
 
     /**
      * 독서모임의 팀을 구성합니다.
@@ -44,6 +44,6 @@ public interface ClubMeetingCommandService {
      * @param memberId  요청자(운영진) 회원 ID
      * @param request   팀 구성 요청 DTO
      */
-    void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManageDTO request);
+    void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManage request);
 
 }

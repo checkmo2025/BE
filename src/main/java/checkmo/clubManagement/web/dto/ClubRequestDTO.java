@@ -40,27 +40,20 @@ public class ClubRequestDTO {
         }
     }
 
-    /**
-     * 커서 기반 페이징 요청
-     *
-     * @param cursorId 커서 ID (페이징을 위한 커서, 처음에는 null)
-     * @param size     페이지 크기
-     */
-    public record CursorPageRequest(
+    public record CursorInfo(
             Long cursorId,
             Integer size
-    ) {
-    }
+    ) {}
 
     @Getter
     @NoArgsConstructor
-    public static class ClubMemberJoinDTO {
+    public static class JoinClub {
         private String joinMessage;
     }
 
     @Getter
     @NoArgsConstructor
-    public static class ClubDetailDTO {
+    public static class ClubDetail {
         @NotBlank
         private String name;
         private String description;
@@ -75,9 +68,9 @@ public class ClubRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class CreateBookRecommendDTO {
+    public static class CreateBookRecommend {
         private String title;
-        private BookExternalDTO.BookCreateRequest bookDetail; // 책 정보
+        private BookExternalDTO.BookCreate bookDetail; // 책 정보
         private String content; // 추천 내용
         private double rate; // 평점
         private String tag; // 추천 태그
@@ -85,7 +78,7 @@ public class ClubRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class UpdateBookRecommendDTO {
+    public static class UpdateBookRecommend {
         private String title; // 추천 제목
         private String content; // 추천 내용
         private double rate; // 평점

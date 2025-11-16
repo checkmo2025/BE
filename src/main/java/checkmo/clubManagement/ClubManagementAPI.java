@@ -1,6 +1,6 @@
 package checkmo.clubManagement;
 
-import checkmo.clubManagement.ClubManagementExternalDTO.MembershipDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
@@ -66,12 +66,12 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return MembershipDTO
      */
-    ClubManagementExternalDTO.MembershipDTO getClubMembershipInfo(Long clubId, String memberId) throws GeneralException;
+    Membership getClubMembershipInfo(Long clubId, String memberId) throws GeneralException;
 
     /**
      * 특정 모임의 멤버십 정보를 조회 (외부용)
      */
-    Map<Long, MembershipDTO> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException;
+    Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException;
 
     /**
      * 특정 클럽에 속한 ACTIVE한 회원 목록을 커서 기반 조회합니다.
@@ -81,5 +81,5 @@ public interface ClubManagementAPI {
      * @param size     한 번에 조회할 멤버십 수
      * @return 멤버십 목록
      */
-    List<ClubManagementExternalDTO.MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, Integer size);
+    List<Membership> getClubMembersByStatus(Long clubId, Long cursorId, Integer size);
 }

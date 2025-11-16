@@ -34,7 +34,7 @@ public class S3Service {
     );
 
     // 파일 업로드를 위한 presigned URL 생성
-    public S3ResponseDTO.PresignedUrlResponse generatePresignedUploadUrl(String fileName, String contentType) {
+    public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType) {
 
         // Content-Type 검증
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {

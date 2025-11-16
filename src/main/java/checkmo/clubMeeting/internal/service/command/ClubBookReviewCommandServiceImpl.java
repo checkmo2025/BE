@@ -2,12 +2,11 @@ package checkmo.clubMeeting.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
-import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.repository.BookReviewRepository;
 import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
-import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookReviewDTO;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookReviewCreate;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +38,13 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
             maxAttempts = 5,
             backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
     )
-    public Long createBookReview(Long meetingId, String memberId, BookReviewDTO request) {
+    public Long createBookReview(Long meetingId, String memberId, BookReviewCreate request) {
         // 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 한줄평 생성
-        BookReview bookReview
+        checkmo.clubMeeting.internal.entity.BookReview bookReview
                 = ClubMeetingConverter.fromBookReviewDTOToBookReview(request, clubMemberId, memberId);
         bookReview.setMeeting(meeting);
 
@@ -61,13 +60,13 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
             maxAttempts = 5,
             backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
     )
-    public Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookReviewDTO request) {
+    public Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
         // 유효성 검증 (meeting, clubMember, bookReview)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 한줄평 조회 및 존재 여부 확인
-        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
+        checkmo.clubMeeting.internal.entity.BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
 
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
@@ -103,7 +102,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 한줄평 조회 및 존재 여부 확인
-        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
+        checkmo.clubMeeting.internal.entity.BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
 
         // 한줄평 작성자와 삭제자가 같은지 확인
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {

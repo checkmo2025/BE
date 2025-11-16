@@ -17,7 +17,7 @@ public class BookExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookCreateRequest {
+    public static class BookCreate {
         private String isbn;
         private String title;
         private String author;

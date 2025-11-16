@@ -12,7 +12,7 @@ public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class MemberProfileUpdateRequest {
+    public static class MemberProfileUpdate {
         @Size(max = 20, message = "소개는 20자 이하여야 합니다")
         private String description;
 
@@ -23,7 +23,7 @@ public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class PasswordUpdateRequest {
+    public static class PasswordUpdate {
         @NotBlank(message = "현재 비밀번호는 필수입니다")
         private String currentPassword;
 

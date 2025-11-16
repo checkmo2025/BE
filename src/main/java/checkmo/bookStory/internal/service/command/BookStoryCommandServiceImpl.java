@@ -26,7 +26,7 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
     @Override
     @Transactional
-    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreateRequest request) {
+    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreate request) {
 
         String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
@@ -38,7 +38,7 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
     @Override
     @Transactional
-    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdateRequest request) {
+    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdate request) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 

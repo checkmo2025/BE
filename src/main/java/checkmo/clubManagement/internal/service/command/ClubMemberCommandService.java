@@ -16,7 +16,7 @@ public interface ClubMemberCommandService {
      * @param request  가입 신청 메시지 DTO
      * @return 가입 신청 후의 ClubMember
      */
-    ClubMember joinClub(Long clubId, String memberId, ClubRequestDTO.ClubMemberJoinDTO request);
+    ClubMember joinClub(Long clubId, String memberId, ClubRequestDTO.JoinClub request);
 
     /**
      * 독서 모임 회원의 등급(상태/역할)을 수정합니다.

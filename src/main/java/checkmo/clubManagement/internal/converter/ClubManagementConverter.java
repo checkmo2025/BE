@@ -7,7 +7,7 @@ import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
-import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailResponseDTO;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetail;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +21,12 @@ public class ClubManagementConverter {
     // Entity ↔ DTO 변환
     // =====================================================
 
-    public static Map<Long, ClubManagementExternalDTO.MembershipDTO> fromClubMembertoMembereshipDTO(
+    public static Map<Long, ClubManagementExternalDTO.Membership> fromClubMembertoMembereshipDTO(
             List<ClubMember> clubMembers) {
         return clubMembers.stream()
                 .collect(
                         java.util.stream.Collectors.toMap(
-                                ClubMember::getId,
+                                checkmo.clubManagement.internal.entity.ClubMember::getId,
                                 ClubManagementConverter::fromClubMembertoMembershipDTO
                         )
                 );
@@ -35,8 +35,8 @@ public class ClubManagementConverter {
     /**
      * ClubMember 엔티티 -> MembershipResponseDTO.MembershipDTO 변환
      */
-    public static ClubManagementExternalDTO.MembershipDTO fromClubMembertoMembershipDTO(ClubMember clubMember) {
-        return ClubManagementExternalDTO.MembershipDTO.builder()
+    public static ClubManagementExternalDTO.Membership fromClubMembertoMembershipDTO(ClubMember clubMember) {
+        return ClubManagementExternalDTO.Membership.builder()
                 .memberId(clubMember.getMemberId())
                 .clubMemberId(clubMember.getId())
                 .active(clubMember.isActive())
@@ -47,7 +47,7 @@ public class ClubManagementConverter {
     /**
      * ClubMember 엔티티 리스트 -> List<MembershipResponseDTO.MembershipDTO> 변환
      */
-    public static List<ClubManagementExternalDTO.MembershipDTO> fromClubMemberToMembershipDTO(
+    public static List<ClubManagementExternalDTO.Membership> fromClubMemberToMembershipDTO(
             List<ClubMember> clubMembers) {
         return clubMembers.stream()
                 .map(ClubManagementConverter::fromClubMembertoMembershipDTO)
@@ -57,12 +57,12 @@ public class ClubManagementConverter {
     /**
      * ClubResponseDTO.ClubDetailResponseDTO -> ClubResponseDTO.MyPageClubListDTO 변환
      */
-    public static ClubResponseDTO.MyPageClubListDTO toMyPageClubListDTO(
-            List<ClubDetailResponseDTO> clubList,
+    public static ClubResponseDTO.MyPageClubList toMyPageClubListDTO(
+            List<ClubDetail> clubList,
             boolean hasNext,
             Long nextCursor
     ) {
-        return ClubResponseDTO.MyPageClubListDTO.builder()
+        return ClubResponseDTO.MyPageClubList.builder()
                 .clubList(clubList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
@@ -72,15 +72,15 @@ public class ClubManagementConverter {
     /**
      * Club 리스트 → ClubResponseDTO.ClubListDTO 변환
      */
-    public static ClubResponseDTO.ClubListDTO toClubListDTO(
-            List<ClubResponseDTO.ClubWithMyStatusDTO> clubList,
+    public static ClubResponseDTO.ClubList toClubListDTO(
+            List<ClubResponseDTO.ClubWithMyStatus> clubList,
             boolean hasNext,
             Long nextCursor) {
 
-        List<ClubResponseDTO.ClubWithMyStatusDTO> safeList =
+        List<ClubResponseDTO.ClubWithMyStatus> safeList =
                 (clubList == null) ? List.of() : List.copyOf(clubList);
 
-        return ClubResponseDTO.ClubListDTO.builder()
+        return ClubResponseDTO.ClubList.builder()
                 .clubList(safeList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
@@ -97,7 +97,7 @@ public class ClubManagementConverter {
             ClubMember.ClubMemberStatus status,
             String joinMessage
     ) {
-        return ClubMember.builder()
+        return checkmo.clubManagement.internal.entity.ClubMember.builder()
                 .clubMemberStatus(status)
                 .joinMessage(joinMessage)
                 .club(club)
@@ -108,9 +108,9 @@ public class ClubManagementConverter {
     /**
      * ClubManagementExternalDTO.MyClubInfo -> ClubResponseDTO.ClubInfoDTO
      */
-    public static ClubResponseDTO.ClubInfoDTO toClubInfoDTOFromMyClubInfo(
+    public static ClubResponseDTO.ClubInfo toClubInfoDTOFromMyClubInfo(
             ClubManagementExternalDTO.MyClubInfo myClubInfo) {
-        return ClubResponseDTO.ClubInfoDTO.builder()
+        return ClubResponseDTO.ClubInfo.builder()
                 .clubId(myClubInfo.getClubId())
                 .clubName(myClubInfo.getClubName())
                 .open(null)
@@ -121,9 +121,9 @@ public class ClubManagementConverter {
     /**
      * ClubMemberDTO 리스트 → ClubResponseDTO.ClubMemberListDTO 변환
      */
-    public static ClubResponseDTO.ClubMemberListDTO toClubMemberListDTO(List<ClubResponseDTO.ClubMemberDTO> dtoList,
-                                                                        boolean hasNext, Long lastId) {
-        return ClubResponseDTO.ClubMemberListDTO.builder()
+    public static ClubResponseDTO.ClubMemberList toClubMemberListDTO(List<ClubResponseDTO.ClubMember> dtoList,
+                                                                     boolean hasNext, Long lastId) {
+        return ClubResponseDTO.ClubMemberList.builder()
                 .clubMembers(dtoList)
                 .hasNext(hasNext)
                 .nextCursor(lastId)
@@ -135,9 +135,9 @@ public class ClubManagementConverter {
     /**
      * ClubMember 엔티티 + MemberExternalDTO.BasicInfoDTO -> ClubResponseDTO.ClubMemberDTO 변환
      */
-    public static ClubResponseDTO.ClubMemberDTO toClubMemberDTO(ClubMember targetMember,
-                                                                MemberExternalDTO.BasicInfo memberInfo) {
-        return ClubResponseDTO.ClubMemberDTO.builder()
+    public static ClubResponseDTO.ClubMember toClubMemberDTO(ClubMember targetMember,
+                                                             MemberExternalDTO.BasicInfo memberInfo) {
+        return ClubResponseDTO.ClubMember.builder()
                 .clubMemberId(targetMember.getId())
                 .basicInfo(memberInfo)
                 .joinMessage(targetMember.getJoinMessage())
@@ -149,7 +149,7 @@ public class ClubManagementConverter {
     /**
      * ClubRequestDTO.ClubDetailDTO -> Club 엔티티 변환
      */
-    public static Club fromClubDetailDTOToClub(ClubRequestDTO.ClubDetailDTO dto) {
+    public static Club fromClubDetailDTOToClub(ClubRequestDTO.ClubDetail dto) {
         return Club.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
@@ -165,8 +165,8 @@ public class ClubManagementConverter {
     /**
      * Club 엔티티 -> ClubRequestDTO.ClubDetailDTO 변환
      */
-    public static ClubResponseDTO.ClubDetailDTO fromClubToClubDetailDTO(Club club, boolean isStaff) {
-        return ClubResponseDTO.ClubDetailDTO.builder()
+    public static ClubResponseDTO.ClubDetail fromClubToClubDetailDTO(Club club, boolean isStaff) {
+        return ClubResponseDTO.ClubDetail.builder()
                 .clubId(club.getId())
                 .name(club.getName())
                 .description(club.getDescription())
@@ -184,11 +184,11 @@ public class ClubManagementConverter {
     /**
      * Club 엔티티 → ClubDetailResponseDTO 변환 (효율적 버전)
      */
-    public static ClubResponseDTO.ClubDetailResponseDTO fromClubToResponseDTOWithCategoryNames(
+    public static ClubDetail fromClubToResponseDTOWithCategoryNames(
             Club club,
             boolean isStaff
     ) {
-        return ClubResponseDTO.ClubDetailResponseDTO.builder()
+        return ClubDetail.builder()
                 .clubId(club.getId())
                 .name(club.getName())
                 .description(club.getDescription())
@@ -207,7 +207,7 @@ public class ClubManagementConverter {
      * CreateBookRecommendDTO -> BookRecommend 엔티티
      */
     public static BookRecommend fromCreateBookRecommendDTOToEntity(
-            ClubRequestDTO.CreateBookRecommendDTO request,
+            ClubRequestDTO.CreateBookRecommend request,
             String bookId,
             ClubMember clubMember
     ) {
@@ -224,14 +224,14 @@ public class ClubManagementConverter {
     /**
      * BookRecommend 엔티티 → BookRecommendDetailDTO
      */
-    public static ClubResponseDTO.BookRecommendDetailDTO toBookRecommendDetailDTO(
+    public static ClubResponseDTO.BookRecommendDetail toBookRecommendDetailDTO(
             BookRecommend bookRecommend,
             BookExternalDTO.BasicInfo bookInfo,
             MemberExternalDTO.BasicInfo authorInfo,
             String currentMemberNickname,
             boolean isStaff
     ) {
-        return ClubResponseDTO.BookRecommendDetailDTO.builder()
+        return ClubResponseDTO.BookRecommendDetail.builder()
                 .id(bookRecommend.getId())
                 .title(bookRecommend.getTitle())
                 .content(bookRecommend.getContent())
@@ -248,12 +248,12 @@ public class ClubManagementConverter {
     /**
      * BookRecommendDTO 리스트 → BookRecommendListDTO 변환
      */
-    public static ClubResponseDTO.BookRecommendListDTO toBookRecommendListDTO(
-            List<ClubResponseDTO.BookRecommendDetailDTO> dtoList,
+    public static ClubResponseDTO.BookRecommendList toBookRecommendListDTO(
+            List<ClubResponseDTO.BookRecommendDetail> dtoList,
             boolean hasNext,
             Long lastCursorId
     ) {
-        return ClubResponseDTO.BookRecommendListDTO.builder()
+        return ClubResponseDTO.BookRecommendList.builder()
                 .bookRecommendList(dtoList)
                 .hasNext(hasNext)
                 .nextCursor(lastCursorId)

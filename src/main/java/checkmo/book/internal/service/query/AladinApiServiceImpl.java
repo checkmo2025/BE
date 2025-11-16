@@ -26,7 +26,7 @@ public class AladinApiServiceImpl implements AladinApiService {
     private final AladinProperties aladinProperties;
 
     @Override
-    public BookResponseDTO.BookListResponse searchBookFromAladin(String keyword, int page) {
+    public BookResponseDTO.BookList searchBookFromAladin(String keyword, int page) {
         try {
 
             String url = buildHttpUrl(keyword, page);
@@ -35,7 +35,7 @@ public class AladinApiServiceImpl implements AladinApiService {
 
             var response = restTemplate.getForObject(
                     url,
-                    AladinApiResponseDTO.AladinApiResponse.class
+                    AladinApiResponseDTO.BookList.class
             );
 
             return BookConverter.fromAladinApiResponse(response, page);
@@ -47,7 +47,7 @@ public class AladinApiServiceImpl implements AladinApiService {
     }
 
     @Override
-    public BookResponseDTO.BookInfoDetailResponse getBookDetailInfoFromAladin(String isbn) {
+    public BookResponseDTO.BookInfoDetail getBookDetailInfoFromAladin(String isbn) {
         try {
             String url = buildHttpUrl(isbn);
 
@@ -55,7 +55,7 @@ public class AladinApiServiceImpl implements AladinApiService {
 
             var response = restTemplate.getForObject(
                     url,
-                    AladinApiResponseDTO.AladinApiResponse.class
+                    AladinApiResponseDTO.BookList.class
             );
 
             if (response == null || response.getItems() == null || response.getItems().isEmpty()) {

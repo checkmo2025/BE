@@ -48,7 +48,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class otherProfileResponse {
+    public static class otherProfile {
         private String nickname;
         private String description;
         private String profileImageUrl;

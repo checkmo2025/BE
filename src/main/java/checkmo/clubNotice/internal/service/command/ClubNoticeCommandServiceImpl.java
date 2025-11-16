@@ -10,9 +10,9 @@ import checkmo.clubNotice.internal.repository.ClubMemberVoteRepository;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
 import checkmo.clubNotice.internal.repository.VoteRepository;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
-import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubNoticeDTO;
-import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVoteDTO;
-import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResultDTO;
+import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubNotice;
+import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVote;
+import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResult;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.time.LocalDateTime;
@@ -36,7 +36,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     private final ClubMemberVoteRepository clubMemberVoteRepository;
 
     @Override
-    public Notice createPureNotice(Long clubId, String memberId, CreateClubNoticeDTO request) {
+    public Notice createPureNotice(Long clubId, String memberId, CreateClubNotice request) {
         // 1. 유효성 검증 (club, clubMember)
         clubManagementAPI.getClubInfo(clubId);
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
@@ -78,7 +78,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     }
 
     @Override
-    public Vote createVote(Long clubId, String memberId, CreateClubVoteDTO request) {
+    public Vote createVote(Long clubId, String memberId, CreateClubVote request) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.getClubInfo(clubId);
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
@@ -106,7 +106,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     }
 
     @Override
-    public Long haveVote(Long clubId, Long voteId, String memberId, VoteResultDTO request) {
+    public Long haveVote(Long clubId, Long voteId, String memberId, VoteResult request) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.getClubInfo(clubId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(clubId, memberId);

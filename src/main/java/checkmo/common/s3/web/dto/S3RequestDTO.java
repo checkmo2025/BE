@@ -9,7 +9,7 @@ public class S3RequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class ImageUploadRequest {
+    public static class ImageUpload {
         @NotBlank(message = "파일명은 필수입니다")
         @Schema(description = "업로드할 파일명", example = "profile.jpg")
         private String originalFileName;

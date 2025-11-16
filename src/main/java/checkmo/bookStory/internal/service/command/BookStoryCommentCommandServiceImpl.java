@@ -25,7 +25,7 @@ public class BookStoryCommentCommandServiceImpl implements BookStoryCommentComma
 
     @Override
     public Long createComment(String memberId, Long bookStoryId, Long parentCommentId,
-                              BookStoryRequestDTO.CommentCreateRequest request) {
+                              BookStoryRequestDTO.CommentCreate request) {
         // 1. 책이야기 존재 여부 확인
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
 

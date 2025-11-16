@@ -14,11 +14,11 @@ public class S3Converter {
     /**
      * String들 -> S3ResponseDTO.PresignedUrlResponse 변환
      */
-    public static S3ResponseDTO.PresignedUrlResponse toPresignedUrlDTO(
+    public static S3ResponseDTO.PresignedUrl toPresignedUrlDTO(
             String presignedUrl,
             String imageUrl
     ) {
-        return S3ResponseDTO.PresignedUrlResponse.builder()
+        return S3ResponseDTO.PresignedUrl.builder()
                 .presignedUrl(presignedUrl)
                 .imageUrl(imageUrl)
                 .build();

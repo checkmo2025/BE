@@ -17,7 +17,7 @@ public interface ClubBookReviewCommandService {
      * @param request   한줄평 내용 DTO (내용 + 평점)
      * @return 생성한 한줄평 ID
      */
-    Long createBookReview(Long meetingId, String memberId, BookShelfRequestDTO.BookReviewDTO request);
+    Long createBookReview(Long meetingId, String memberId, BookShelfRequestDTO.BookReviewCreate request);
 
     /**
      * 독서모임의 한줄평을 수정합니다.
@@ -29,7 +29,7 @@ public interface ClubBookReviewCommandService {
      * @param memberId  요청자 회원 ID
      * @param request   한줄평 내용 DTO (내용 + 평점)
      */
-    Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookShelfRequestDTO.BookReviewDTO request);
+    Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookShelfRequestDTO.BookReviewCreate request);
 
     /**
      * 독서모임의 한줄평을 삭제합니다.

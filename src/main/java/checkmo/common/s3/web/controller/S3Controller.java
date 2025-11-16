@@ -29,8 +29,8 @@ public class S3Controller {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
     @PostMapping("/image/upload-url")
-    public ApiResponse<S3ResponseDTO.PresignedUrlResponse> getProfileImageUploadUrl(
-            @Valid @RequestBody S3RequestDTO.ImageUploadRequest request
+    public ApiResponse<S3ResponseDTO.PresignedUrl> getProfileImageUploadUrl(
+            @Valid @RequestBody S3RequestDTO.ImageUpload request
     ) {
         return ApiResponse.onSuccess(s3Service.generatePresignedUploadUrl(request.getOriginalFileName(), request.getContentType()));
     }

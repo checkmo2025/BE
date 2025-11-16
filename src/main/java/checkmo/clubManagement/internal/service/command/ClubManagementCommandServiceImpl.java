@@ -6,7 +6,7 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
-import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubDetailDTO;
+import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubDetail;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
 
     @Override
     @Transactional
-    public Long createClub(String memberId, ClubDetailDTO request) {
+    public Long createClub(String memberId, ClubDetail request) {
         // 1. 운영진 멤버 엔티티 생성
         ClubMember clubMember = ClubManagementConverter
                 .toClubMemberEntity(null, memberId, ClubMember.ClubMemberStatus.STAFF, null);
@@ -59,7 +59,7 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
 
     @Override
     @Transactional
-    public Long updateClub(Long clubId, String memberId, ClubDetailDTO request) {
+    public Long updateClub(Long clubId, String memberId, ClubDetail request) {
         // 1. 유효성 검증(club, clubMember)
         Club club = clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);

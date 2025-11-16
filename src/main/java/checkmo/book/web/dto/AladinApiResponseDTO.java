@@ -13,11 +13,11 @@ public class AladinApiResponseDTO {
     @Getter
     @NoArgsConstructor
     @JacksonXmlRootElement(localName = "object")
-    public static class AladinApiResponse {
+    public static class BookList {
 
         @JacksonXmlProperty(localName = "item")
         @JacksonXmlElementWrapper(useWrapping = false)
-        private List<AladinBookItem> items;
+        private List<BookItem> items;
 
         @JacksonXmlProperty(localName = "totalResults")
         private int totalResults;
@@ -31,7 +31,7 @@ public class AladinApiResponseDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class AladinBookItem {
+    public static class BookItem {
 
         @JacksonXmlProperty(localName = "title")
         private String title;

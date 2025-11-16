@@ -2,7 +2,7 @@ package checkmo.clubManagement.internal;
 
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO;
-import checkmo.clubManagement.ClubManagementExternalDTO.MembershipDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -69,13 +69,13 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public MembershipDTO getClubMembershipInfo(Long clubId, String memberId) throws GeneralException {
+    public Membership getClubMembershipInfo(Long clubId, String memberId) throws GeneralException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return ClubManagementConverter.fromClubMembertoMembershipDTO(clubMember);
     }
 
     @Override
-    public Map<Long, MembershipDTO> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException {
+    public Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException {
         if (clubMemberIds == null) {
             return Map.of();
         }
@@ -87,7 +87,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public List<MembershipDTO> getClubMembersByStatus(Long clubId, Long cursorId, Integer size) {
+    public List<Membership> getClubMembersByStatus(Long clubId, Long cursorId, Integer size) {
         List<ClubMember> clubMembers
                 = clubMemberQueryService.getClubMemberListByStatus(clubId, "ACTIVE", cursorId, size);
         return ClubManagementConverter.fromClubMemberToMembershipDTO(clubMembers);

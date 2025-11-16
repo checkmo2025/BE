@@ -12,7 +12,7 @@ public interface ClubBookRecommendCommandService {
      * @param request  추천할 책 정보 DTO
      * @return 추천한 책의 ID
      */
-    Long recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommendDTO request);
+    Long recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommend request);
 
     /**
      * 독서모임에 추천 책을 수정합니다.
@@ -24,7 +24,7 @@ public interface ClubBookRecommendCommandService {
      * @return 수정한 추천 책의 ID
      */
     Long updateBookRecommend(Long clubId, String memberId, Long bookRecommendId,
-                             ClubRequestDTO.UpdateBookRecommendDTO request);
+                             ClubRequestDTO.UpdateBookRecommend request);
 
     /**
      * 독서모임에서 추천한 책을 삭제합니다.

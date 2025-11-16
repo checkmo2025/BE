@@ -20,20 +20,20 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MeetingDetailDTO {
-        private ClubManagementExternalDTO.MembershipDTO membership;
-        private MeetingInfoDTO meetingInfo;
-        private List<TopicDTO> topics; // 모임의 토픽 목록 -> 발제 등록순 4개 담기
-        private List<TeamTopicDTO> teams; // 모임의 팀 별 토픽 목록 -> 발제 등록순 4개 담기
+    public static class MeetingDetail {
+        private ClubManagementExternalDTO.Membership membership;
+        private MeetingInfo meetingInfo;
+        private List<Topic> topics; // 모임의 토픽 목록 -> 발제 등록순 4개 담기
+        private List<TeamTopic> teams; // 모임의 팀 별 토픽 목록 -> 발제 등록순 4개 담기
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MeetingListDTO {
-        private ClubManagementExternalDTO.MembershipDTO membership;
-        private List<MeetingInfoDTO> meetingInfoList; // 모임 정보 목록
+    public static class MeetingList {
+        private ClubManagementExternalDTO.Membership membership;
+        private List<MeetingInfo> meetingInfoList; // 모임 정보 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서
     }
@@ -46,7 +46,7 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MeetingInfoDTO {
+    public static class MeetingInfo {
         private Long meetingId; // 모임 ID
         private String title; // 모임 제목
         private LocalDateTime meetingTime; // 미팅 날짜, 시간
@@ -63,17 +63,17 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class CalendarMeetingDTO {
-        private List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoList;
-        private ClubManagementExternalDTO.MembershipDTO membership;
+    public static class CalendarMeeting {
+        private List<MeetingInfo> meetingInfoList;
+        private ClubManagementExternalDTO.Membership membership;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class TopicListDTO {
-        private List<TopicDTO> topics; // 토픽 목록
+    public static class TopicList {
+        private List<Topic> topics; // 토픽 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서
     }
@@ -82,7 +82,7 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class TopicDTO {
+    public static class Topic {
         private Long topicId; // 토픽 ID
         private String content; // 토픽 내용
         private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보
@@ -94,29 +94,29 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class TopicDTOList {
-        private List<MeetingResponseDTO.TopicDTO> topics;
-        private ClubManagementExternalDTO.MembershipDTO membership;
+    public static class TopicDTO {
+        private List<Topic> topics;
+        private ClubManagementExternalDTO.Membership membership;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class TeamTopicDTO {
+    public static class TeamTopic {
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private ClubManagementExternalDTO.MembershipDTO membership;
+        private ClubManagementExternalDTO.Membership membership;
         private Integer teamNumber; // 팀 번호
-        private List<TopicDTO> topics; // 해당 팀이 선택한 토픽 목록
+        private List<Topic> topics; // 해당 팀이 선택한 토픽 목록
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MeetingMemberListDTO {
-        private ClubManagementExternalDTO.MembershipDTO membership;
-        private List<MeetingMemberDTO> members; // 모임 참여자 목록
+    public static class MeetingMemberList {
+        private ClubManagementExternalDTO.Membership membership;
+        private List<MeetingMember> members; // 모임 참여자 목록
         private boolean hasNext; // 다음 페이지 존재 여부
         private Long nextCursor; // 다음 페이지 커서
     }
@@ -125,7 +125,7 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MeetingMemberDTO {
+    public static class MeetingMember {
         private MemberExternalDTO.BasicInfo memberInfo; // 참여자 정보
         private Integer teamNumber; // 배정된 팀 번호
     }
@@ -134,8 +134,8 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class TeamMemberDTO {
-        private ClubManagementExternalDTO.MembershipDTO membership;
+    public static class TeamMember {
+        private ClubManagementExternalDTO.Membership membership;
         private Integer teamNumber; // 팀 번호
         private List<MemberExternalDTO.BasicInfo> members; // 해당 팀의 참여자 목록
     }
@@ -144,7 +144,7 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class TopicSelectionDTO {
+    public static class TopicSelection {
         private Long topicId; // 토픽 ID
         private Integer teamNumber; // 요청을 보낸 팀 번호
         private Boolean isSelected; // 발제 선택 여부

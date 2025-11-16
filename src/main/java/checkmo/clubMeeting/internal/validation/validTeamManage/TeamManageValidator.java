@@ -1,28 +1,27 @@
 package checkmo.clubMeeting.internal.validation.validTeamManage;
 
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamManageDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamMemberDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamManage;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamMember;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TeamManageValidator implements ConstraintValidator<ValidTeamManage, TeamManageDTO> {
+public class TeamManageValidator implements ConstraintValidator<ValidTeamManage, TeamManage> {
     @Override
     public void initialize(ValidTeamManage constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
-    public boolean isValid(MeetingRequestDTO.TeamManageDTO value, ConstraintValidatorContext context) {
+    public boolean isValid(TeamManage value, ConstraintValidatorContext context) {
         if (value == null) {
             return true; // @NotNull로 따로 처리
         }
 
-        List<TeamMemberDTO> teamMemberDTOList = value.getTeamMemberDTOList();
-        if (teamMemberDTOList == null) {
+        List<TeamMember> teamMemberList = value.getTeamMemberList();
+        if (teamMemberList == null) {
             return true; // @NotNull로 따로 처리
         }
 
@@ -32,8 +31,8 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
         Set<Integer> seenTeamNumbers = new HashSet<>(); // 팀 번호 중복 체크용
         Set<Long> seenClubMemberIds = new HashSet<>();
 
-        for (int i = 0; i < teamMemberDTOList.size(); i++) {
-            MeetingRequestDTO.TeamMemberDTO dto = teamMemberDTOList.get(i);
+        for (int i = 0; i < teamMemberList.size(); i++) {
+            TeamMember dto = teamMemberList.get(i);
             if (dto == null) {
                 continue;
             }

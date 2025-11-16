@@ -49,14 +49,14 @@ public class ClubBookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 클럽을 찾을 수 없습니다."),
     })
     @GetMapping("/api/clubs/{clubId}/bookshelves")
-    public ApiResponse<BookShelfResponseDTO.BookShelfListDTO> getBookShelfList(
+    public ApiResponse<BookShelfResponseDTO.BookShelfList> getBookShelfList(
             @PathVariable Long clubId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
             @RequestParam(required = false, defaultValue = "9") @ValidSize Integer size,
             @RequestParam(required = false) Integer generation,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfListDTO bookShelfList
+        BookShelfResponseDTO.BookShelfList bookShelfList
                 = clubMeetingQueryFacade.getBookShelfList(clubId, cursorId, size, generation, memberId);
         return ApiResponse.onSuccess(bookShelfList);
     }
@@ -71,11 +71,11 @@ public class ClubBookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
     })
     @GetMapping("/api/bookshelves/{meetingId}")
-    public ApiResponse<BookShelfResponseDTO.BookShelfDetailDTO> getBookShelfDetail(
+    public ApiResponse<BookShelfResponseDTO.BookShelfDetail> getBookShelfDetail(
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfDetailDTO bookShelfDetail
+        BookShelfResponseDTO.BookShelfDetail bookShelfDetail
                 = clubMeetingQueryFacade.getBookShelfDetail(meetingId, memberId);
         return ApiResponse.onSuccess(bookShelfDetail);
     }
@@ -92,13 +92,13 @@ public class ClubBookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
     })
     @GetMapping("/api/meetings/{meetingId}/reviews")
-    public ApiResponse<BookShelfResponseDTO.BookReviewListDTO> getAllReviews(
+    public ApiResponse<BookShelfResponseDTO.BookReviewList> getAllReviews(
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
             @RequestParam @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookReviewListDTO bookReviewList
+        BookShelfResponseDTO.BookReviewList bookReviewList
                 = clubMeetingQueryFacade.getBookReviewList(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(bookReviewList);
     }
@@ -118,7 +118,7 @@ public class ClubBookshelfController {
     @PostMapping("/api/meetings/{meetingId}/reviews")
     public ApiResponse<Long> createReview(
             @PathVariable Long meetingId,
-            @RequestBody @Valid BookShelfRequestDTO.BookReviewDTO request,
+            @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
             @CurrentId String memberId
     ) {
         Long bookReviewId = clubBookReviewCommandService.createBookReview(meetingId, memberId, request);
@@ -144,7 +144,7 @@ public class ClubBookshelfController {
     public ApiResponse<Long> updateReview(
             @PathVariable Long meetingId,
             @PathVariable Long reviewId,
-            @RequestBody @Valid BookShelfRequestDTO.BookReviewDTO request,
+            @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
             @CurrentId String memberId
     ) {
         Long updatedReviewId = clubBookReviewCommandService.updateBookReview(meetingId, reviewId, memberId, request);
@@ -185,7 +185,7 @@ public class ClubBookshelfController {
     @PostMapping("/api/meetings/{meetingId}/topics")
     public ApiResponse<Long> createTopic(
             @PathVariable Long meetingId,
-            @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
+            @RequestBody @Valid BookShelfRequestDTO.TopicCreate request,
             @CurrentId String memberId
     ) {
         Long topicId = clubTopicCommandService.createTopic(meetingId, memberId, request);
@@ -208,7 +208,7 @@ public class ClubBookshelfController {
     public ApiResponse<Long> updateTopic(
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
-            @RequestBody @Valid BookShelfRequestDTO.TopicDTO request,
+            @RequestBody @Valid BookShelfRequestDTO.TopicCreate request,
             @CurrentId String memberId
     ) {
         Long updatedTopicId = clubTopicCommandService.updateTopic(meetingId, topicId, memberId, request);
@@ -249,13 +249,13 @@ public class ClubBookshelfController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
     })
     @GetMapping("/api/meetings/{meetingId}/topics")
-    public ApiResponse<BookShelfResponseDTO.TopicListDTO> getTopicList(
+    public ApiResponse<BookShelfResponseDTO.TopicList> getTopicList(
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
             @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.TopicListDTO topicList
+        BookShelfResponseDTO.TopicList topicList
                 = clubMeetingQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);
         return ApiResponse.onSuccess(topicList);
     }

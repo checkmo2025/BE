@@ -18,7 +18,7 @@ public class ClubNoticeConverter {
     /**
      * ClubResponseDTO.ClubNoticeListDTO 변환
      */
-    public static ClubNoticeResponseDTO.ClubNoticeListDTO toClubNoticeListDTO(
+    public static ClubNoticeResponseDTO.ClubNoticeList toClubNoticeListDTO(
             List<ClubNoticeResponseDTO.NoticeItem> noticeItems,
             boolean hasNext,
             Long nextCursor,
@@ -27,7 +27,7 @@ public class ClubNoticeConverter {
         List<ClubNoticeResponseDTO.NoticeItem> safeList =
                 (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
 
-        return ClubNoticeResponseDTO.ClubNoticeListDTO.builder()
+        return ClubNoticeResponseDTO.ClubNoticeList.builder()
                 .noticeList(safeList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
@@ -40,8 +40,8 @@ public class ClubNoticeConverter {
     /**
      * Notice 엔티티 → PureNoticeDTO 변환
      */
-    public static ClubNoticeResponseDTO.PureNoticeDTO toPureNoticeDTO(Notice notice) {
-        return ClubNoticeResponseDTO.PureNoticeDTO.builder()
+    public static ClubNoticeResponseDTO.PureNotice toPureNoticeDTO(Notice notice) {
+        return ClubNoticeResponseDTO.PureNotice.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
@@ -54,10 +54,10 @@ public class ClubNoticeConverter {
      * CreateClubVoteDTO + Club -> Vote 엔티티 변환
      */
     public static Vote fromCreateVoteDTOToVote(
-            ClubNoticeRequestDTO.CreateClubVoteDTO request,
+            ClubNoticeRequestDTO.CreateClubVote request,
             Long clubId
     ) {
-        return Vote.builder()
+        return checkmo.clubNotice.internal.entity.Vote.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .tag("투표")
@@ -78,9 +78,9 @@ public class ClubNoticeConverter {
     /**
      * 투표 항목 리스트 → EachItemDTO 리스트 변환 기본값: isSelected = false, voteCount = 0, votedMembers = 빈 리스트
      */
-    public static List<ClubNoticeResponseDTO.EachItemDTO> toEachItemDTOListFromItems(List<String> items) {
+    public static List<ClubNoticeResponseDTO.EachItem> toEachItemDTOListFromItems(List<String> items) {
         return items.stream()
-                .map(item -> ClubNoticeResponseDTO.EachItemDTO.builder()
+                .map(item -> ClubNoticeResponseDTO.EachItem.builder()
                         .item(item)
                         .isSelected(false)       // 기본값
                         .voteCount(0)            // 기본값
@@ -95,7 +95,7 @@ public class ClubNoticeConverter {
     public static ClubMemberVote fromVoteRequestToMemberVote(
             Vote vote,
             Long clubMemberId,
-            ClubNoticeRequestDTO.VoteResultDTO request
+            ClubNoticeRequestDTO.VoteResult request
     ) {
         return ClubMemberVote.builder()
                 .vote(vote)
@@ -113,7 +113,7 @@ public class ClubNoticeConverter {
      * CreateClubNoticeDTO -> Notice 엔티티 변환 (모임과 연결되지 않은 순수 공지사항)
      */
     public static Notice fromCreateNoticeDTOToNotice(
-            ClubNoticeRequestDTO.CreateClubNoticeDTO request,
+            ClubNoticeRequestDTO.CreateClubNotice request,
             Long clubId
     ) {
         return Notice.builder()
@@ -128,12 +128,12 @@ public class ClubNoticeConverter {
     /**
      * 투표 항목 → EachItemDTO 변환
      */
-    public static ClubNoticeResponseDTO.EachItemDTO toEachItemDTO(
+    public static ClubNoticeResponseDTO.EachItem toEachItemDTO(
             String item,
             boolean isSelected,
             List<MemberExternalDTO.BasicInfo> votedMembers
     ) {
-        return ClubNoticeResponseDTO.EachItemDTO.builder()
+        return ClubNoticeResponseDTO.EachItem.builder()
                 .item(item)
                 .isSelected(isSelected)
                 .voteCount(votedMembers.size())
@@ -144,8 +144,8 @@ public class ClubNoticeConverter {
     /**
      * Vote 엔티티 → VoteDTO 변환
      */
-    public static ClubNoticeResponseDTO.VoteDTO toVoteDTO(Vote vote, List<ClubNoticeResponseDTO.EachItemDTO> itemDTOs) {
-        return ClubNoticeResponseDTO.VoteDTO.builder()
+    public static ClubNoticeResponseDTO.VoteNotice toVoteDTO(Vote vote, List<ClubNoticeResponseDTO.EachItem> itemDTOs) {
+        return ClubNoticeResponseDTO.VoteNotice.builder()
                 .id(vote.getId())
                 .title(vote.getTitle())
                 .content(vote.getContent())
@@ -162,11 +162,11 @@ public class ClubNoticeConverter {
     /**
      * Notice 엔티티 + MeetingInfo -> ClubResponseDTO.MeetingNoticeDTO 변환
      */
-    public static ClubNoticeResponseDTO.MeetingNoticeDTO toMeetingNoticeDTO(
+    public static ClubNoticeResponseDTO.MeetingNotice toMeetingNoticeDTO(
             Notice notice,
             ClubMeetingExternalDTO.MeetingInfo meetingInfo
     ) {
-        return ClubNoticeResponseDTO.MeetingNoticeDTO.builder()
+        return ClubNoticeResponseDTO.MeetingNotice.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())

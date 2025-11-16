@@ -13,7 +13,7 @@ public class BookResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookInfoDetailResponse {
+    public static class BookInfoDetail {
         private String isbn; // ISBN 번호
         private String title; // 책 제목
         private String author; // 저자
@@ -26,8 +26,8 @@ public class BookResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookListResponse {
-        private List<BookInfoDetailResponse> bookInfoDetailResponseList; // 책 정보 목록
+    public static class BookList {
+        private List<BookInfoDetail> bookInfoDetailList; // 책 정보 목록
         private boolean hasNext;        // 다음 페이지 존재 여부
         private Integer currentPage;           // 현재 페이지 번호
     }

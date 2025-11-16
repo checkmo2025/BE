@@ -18,7 +18,7 @@ public interface MemberProfileCommandService {
      * @return 수정된 회원 프로필 정보 엔티티 - 이때는 관심 카테고리 정보 DTO에 포함 X , -> 반드시 CategoryQueryFacade를 통해 조회해야 함
      */
     Member updateMemberProfile(
-            String memberId, MemberRequestDTO.MemberProfileUpdateRequest request
+            String memberId, MemberRequestDTO.MemberProfileUpdate request
     );
 
     /**
@@ -28,7 +28,7 @@ public interface MemberProfileCommandService {
      * @param request  비밀번호 변경 정보 DTO (현재 비밀번호, 새 비밀번호, 새 비밀번호 확인)
      */
     void updatePassword(
-            String memberId, MemberRequestDTO.PasswordUpdateRequest request
+            String memberId, MemberRequestDTO.PasswordUpdate request
     );
 
     /**

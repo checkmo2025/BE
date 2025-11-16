@@ -11,7 +11,7 @@ public class S3ResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class PresignedUrlResponse {
+    public static class PresignedUrl {
         private String presignedUrl; //프론트가 사용할 URL
         private String imageUrl; //우리 백엔드에 저장할 URL
     }

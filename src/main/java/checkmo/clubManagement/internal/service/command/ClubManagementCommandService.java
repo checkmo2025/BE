@@ -16,7 +16,7 @@ public interface ClubManagementCommandService {
      * @param request  모임 생성 요청 DTO
      * @return 생성된 독서모임 ID
      */
-    Long createClub(String memberId, ClubRequestDTO.ClubDetailDTO request);
+    Long createClub(String memberId, ClubRequestDTO.ClubDetail request);
 
     /**
      * ClubManagementCommandService 기존 독서 모임 정보를 수정합니다.
@@ -25,7 +25,7 @@ public interface ClubManagementCommandService {
      * @param memberId 사용자 ID
      * @param request  모임 수정 요청 정보 DTO
      */
-    Long updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetailDTO request);
+    Long updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetail request);
 
     /**
      * 독서 모임을 삭제합니다.

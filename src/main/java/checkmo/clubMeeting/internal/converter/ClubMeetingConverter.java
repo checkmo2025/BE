@@ -3,12 +3,8 @@ package checkmo.clubMeeting.internal.converter;
 import checkmo.book.BookExternalDTO;
 import checkmo.book.BookExternalDTO.BasicInfo;
 import checkmo.clubManagement.ClubManagementExternalDTO;
-import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
-import checkmo.clubMeeting.internal.entity.BookReview;
-import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.entity.Team;
-import checkmo.clubMeeting.internal.entity.TeamTopic;
-import checkmo.clubMeeting.internal.entity.Topic;
+import checkmo.clubMeeting.ClubMeetingExternalDTO;
+import checkmo.clubMeeting.internal.entity.*;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
@@ -32,7 +28,7 @@ public class ClubMeetingConverter {
      * MeetingCreateRequestDTO -> Meeting 엔티티 변환
      */
     public static Meeting fromMeetingCreateRequestDTOToMeeting(
-            MeetingRequestDTO.MeetingCreateRequestDTO request,
+            MeetingRequestDTO.MeetingCreate request,
             Long clubId,
             String bookId
     ) {
@@ -51,9 +47,9 @@ public class ClubMeetingConverter {
     /**
      * BookReviewDTO <-> BookReview 엔티티 변환
      */
-    public static BookReview fromBookReviewDTOToBookReview(BookShelfRequestDTO.BookReviewDTO request,
+    public static BookReview fromBookReviewDTOToBookReview(BookShelfRequestDTO.BookReviewCreate request,
                                                            Long clubMemberId, String memberId) {
-        return BookReview.builder()
+        return checkmo.clubMeeting.internal.entity.BookReview.builder()
                 .description(request.getDescription())
                 .rate(request.getRate())
                 .build();
@@ -63,11 +59,11 @@ public class ClubMeetingConverter {
      * TopicDTO -> Topic 엔티티 변환
      */
     public static Topic fromTopicDTOToTopic(
-            BookShelfRequestDTO.TopicDTO topicDTO,
+            BookShelfRequestDTO.TopicCreate topicCreateDTO,
             Long clubMemberId
     ) {
-        return Topic.builder()
-                .description(topicDTO.getDescription())
+        return checkmo.clubMeeting.internal.entity.Topic.builder()
+                .description(topicCreateDTO.getDescription())
                 .clubMemberId(clubMemberId)
                 .build();
     }
@@ -75,7 +71,7 @@ public class ClubMeetingConverter {
     /**
      * Topic 리스트 + 작성자 정보 맵 + 회원 ID -> List<BookShelfResponseDTO.TopicDTO> 변환
      */
-    public static List<BookShelfResponseDTO.TopicDTO> fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
+    public static List<BookShelfResponseDTO.TopicDetail> fromTopicListAndAuthorInfoMapAndMemberIdToTopicDTOList(
             List<Topic> topics,
             Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
             String memberId
@@ -92,14 +88,14 @@ public class ClubMeetingConverter {
     /**
      * Meeting 엔티티 + BookExternalDTO.BasicInfoDTO -> BookShelfResponseDTO.BookShelfInfoDTO 변환
      */
-    public static BookShelfResponseDTO.BookShelfInfoDTO fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
+    public static BookShelfResponseDTO.BookShelfInfo fromMeetingAndBookSharedDTOToBookShelfInfoDTO(
             Meeting meeting,
             BookExternalDTO.BasicInfo bookSharedDTO
     ) {
-        BookShelfResponseDTO.MeetingInfoDTO meetingInfoDTO = fromMeetingToBookshelfMeetingInfoDTO(meeting);
+        BookShelfResponseDTO.MeetingInfo meetingInfo = fromMeetingToBookshelfMeetingInfoDTO(meeting);
 
-        return BookShelfResponseDTO.BookShelfInfoDTO.builder()
-                .meetingInfo(meetingInfoDTO)
+        return BookShelfResponseDTO.BookShelfInfo.builder()
+                .meetingInfo(meetingInfo)
                 .bookInfo(bookSharedDTO)
                 .build();
     }
@@ -107,8 +103,8 @@ public class ClubMeetingConverter {
     /**
      * Meeting 엔티티 -> BookShelfResponseDTO.MeetingInfoDTO 변환
      */
-    public static BookShelfResponseDTO.MeetingInfoDTO fromMeetingToBookshelfMeetingInfoDTO(Meeting meeting) {
-        return BookShelfResponseDTO.MeetingInfoDTO.builder()
+    public static BookShelfResponseDTO.MeetingInfo fromMeetingToBookshelfMeetingInfoDTO(Meeting meeting) {
+        return BookShelfResponseDTO.MeetingInfo.builder()
                 .meetingId(meeting.getId())
                 .generation(meeting.getGeneration())
                 .tag(meeting.getTag())
@@ -120,28 +116,28 @@ public class ClubMeetingConverter {
      * Meeting 엔티티 + BookExternalDTO.DetailInfoDTO + BookShelfResponseDTO.TopicListDTO ->
      * BookShelfResponseDTO.BookShelfDetailDTO 변환
      */
-    public static BookShelfResponseDTO.BookShelfDetailDTO fromBookShelfDTOToBookShelfDetailDTO(
+    public static BookShelfResponseDTO.BookShelfDetail fromBookShelfDTOToBookShelfDetailDTO(
             Meeting meeting,
             BookExternalDTO.DetailInfo bookSharedDTO,
-            BookShelfResponseDTO.TopicListDTO topicListDTO,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            BookShelfResponseDTO.TopicList topicList,
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return BookShelfResponseDTO.BookShelfDetailDTO.builder()
+        return BookShelfResponseDTO.BookShelfDetail.builder()
                 .meetingInfo(fromMeetingToBookshelfMeetingInfoDTO(meeting))
                 .bookDetailInfo(bookSharedDTO)
-                .topicList(topicListDTO)
-                .membership(membershipDTO)
+                .topicList(topicList)
+                .membership(membership)
                 .build();
     }
 
     /**
      * Meeting 엔티티 + BooksharedDTO -> MeetingInfoDTO 변환
      */
-    public static MeetingResponseDTO.MeetingInfoDTO fromMeetingAndBookSharedDTOToMeetingInfoDTO(
+    public static MeetingResponseDTO.MeetingInfo fromMeetingAndBookSharedDTOToMeetingInfoDTO(
             Meeting meeting,
             BookExternalDTO.BasicInfo bookInfo
     ) {
-        return MeetingResponseDTO.MeetingInfoDTO.builder()
+        return MeetingResponseDTO.MeetingInfo.builder()
                 .meetingId(meeting.getId())
                 .title(meeting.getTitle())
                 .meetingTime(meeting.getMeetingTime())
@@ -156,27 +152,27 @@ public class ClubMeetingConverter {
     /**
      * List<Meeting> -> List<MeetingResponseDTO.MeetingInfoDTO> 변환
      */
-    public static MeetingResponseDTO.CalendarMeetingDTO fromMeetingListToMCalendarMeetingDTO(
+    public static MeetingResponseDTO.CalendarMeeting fromMeetingListToMCalendarMeetingDTO(
             List<Meeting> meetings,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return MeetingResponseDTO.CalendarMeetingDTO.builder()
+        return MeetingResponseDTO.CalendarMeeting.builder()
                 .meetingInfoList(meetings.stream()
                         .map(meeting -> fromMeetingAndBookSharedDTOToMeetingInfoDTO(meeting, null))
                         .toList())
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
     /**
      * Topic 엔티티 + MemberExternalDTO.BasicInfoDTO + 팀 번호 리스트 -> MeetingResponseDTO.TopicDTO 변환
      */
-    public static MeetingResponseDTO.TopicDTO fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
+    public static MeetingResponseDTO.Topic fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
             Topic topic,
             MemberExternalDTO.BasicInfo authorSharedDTO,
             List<Integer> teamNumbers
     ) {
-        return MeetingResponseDTO.TopicDTO.builder()
+        return MeetingResponseDTO.Topic.builder()
                 .topicId(topic.getId())
                 .content(topic.getDescription())
                 .authorInfo(authorSharedDTO)
@@ -187,11 +183,11 @@ public class ClubMeetingConverter {
     /**
      * MemberExternalDTO.BasicInfoDTO + teamNumber -> MeetingResponseDTO.MeetingMemberDTO 변환
      */
-    public static MeetingResponseDTO.MeetingMemberDTO fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(
+    public static MeetingResponseDTO.MeetingMember fromMemberSharedDTOAndTeamNumberToMeetingMemberDTO(
             MemberExternalDTO.BasicInfo memberSharedDTO,
             Integer teamNumber
     ) {
-        return MeetingResponseDTO.MeetingMemberDTO.builder()
+        return MeetingResponseDTO.MeetingMember.builder()
                 .memberInfo(memberSharedDTO)
                 .teamNumber(teamNumber)
                 .build();
@@ -200,7 +196,7 @@ public class ClubMeetingConverter {
     /**
      * Meeting 엔티티 + BookExternalDTO.BasicInfoDTO + Topic 리스트 + 팀별 Topic 리스트 -> MeetingResponseDTO.MeetingDetailDTO 변환
      */
-    public static MeetingResponseDTO.MeetingDetailDTO fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
+    public static MeetingResponseDTO.MeetingDetail fromMeetingAndBookSharedDTOEtcToMeetingDetailDTO(
             Meeting meeting,
             BookExternalDTO.BasicInfo bookSharedDTO,
             List<Topic> topics,
@@ -208,21 +204,21 @@ public class ClubMeetingConverter {
             List<Team> teams,
             Map<Integer, List<TeamTopic>> teamTopicsGroupingByTeamNumber,
             Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO = ClubMeetingConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
+        MeetingResponseDTO.MeetingInfo meetingInfo = ClubMeetingConverter.fromMeetingAndBookSharedDTOToMeetingInfoDTO(
                 meeting, bookSharedDTO);
 
-        List<MeetingResponseDTO.TopicDTO> topicDTOList = fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
+        List<MeetingResponseDTO.Topic> topicList = fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
                 topics, authorInfoMap, topicIdToSelectTeamNumbers);
 
-        List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList = teams.stream()
+        List<MeetingResponseDTO.TeamTopic> teamTopicList = teams.stream()
                 .sorted(Comparator.comparing(Team::getTeamNumber)) // 팀 번호 기준 정렬
                 .map(team -> {
                     List<TeamTopic> teamTopics =
                             teamTopicsGroupingByTeamNumber.get(team.getTeamNumber());
 
-                    List<MeetingResponseDTO.TopicDTO> teamTopicDTOs = teamTopics.stream()
+                    List<MeetingResponseDTO.Topic> teamTopicDTOs = teamTopics.stream()
                             .map(tt -> ClubMeetingConverter.fromTopicAndMemberSharedDTOAndTeamNumberListToTopicDTO(
                                     tt.getTopic(),
                                     authorInfoMap.get(tt.getTopic().getMemberId()),
@@ -234,17 +230,17 @@ public class ClubMeetingConverter {
                 })
                 .toList();
         return fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
-                meetingInfoDTO,
-                topicDTOList,
-                teamTopicDTOList,
-                membershipDTO
+                meetingInfo,
+                topicList,
+                teamTopicList,
+                membership
         );
     }
 
     /**
      * Topic 리스트 + Topic별 팀 선택 정보 + 작성자 정보 맵 -> List<MeetingResponseDTO.TopicDTO> 변환
      */
-    public static List<MeetingResponseDTO.TopicDTO> fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
+    public static List<MeetingResponseDTO.Topic> fromTopicListAndTopicSelectionAndMemberSharedDTOToTopicDTOList(
             List<Topic> topics,
             Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
             Map<Long, List<Integer>> topicIdToSelectTeamNumbers
@@ -265,11 +261,11 @@ public class ClubMeetingConverter {
     /**
      * BookReview 엔티티 + MemberExternalDTO -> BookReviewDTO 변환
      */
-    public static BookShelfResponseDTO.BookReviewDTO fromBookReviewAndMemberSharedDTOToBookReviewDTO(
+    public static BookShelfResponseDTO.BookReviewDetail fromBookReviewAndMemberSharedDTOToBookReviewDTO(
             BookReview bookReview,
             MemberExternalDTO.BasicInfo memberSharedDTO
     ) {
-        return BookShelfResponseDTO.BookReviewDTO.builder()
+        return BookShelfResponseDTO.BookReviewDetail.builder()
                 .bookReviewId(bookReview.getId())
                 .description(bookReview.getDescription())
                 .rate(bookReview.getRate())
@@ -280,80 +276,80 @@ public class ClubMeetingConverter {
     /**
      * BookReviewDTO 리스트 -> BookReviewListDTO 변환
      */
-    public static BookShelfResponseDTO.BookReviewListDTO fromBookReviewDTOListToBookReviewListDTO(
-            List<BookShelfResponseDTO.BookReviewDTO> bookReviewList,
+    public static BookShelfResponseDTO.BookReviewList fromBookReviewDTOListToBookReviewListDTO(
+            List<BookShelfResponseDTO.BookReviewDetail> bookReviewDetailList,
             boolean hasNext,
             Long nextCursor,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return BookShelfResponseDTO.BookReviewListDTO.builder()
-                .bookReviewList(bookReviewList)
+        return BookShelfResponseDTO.BookReviewList.builder()
+                .bookReviewDetailList(bookReviewDetailList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
     /**
      * List<TopicDTO> -> BookShelfResponseDTO.TopicListDTO 변환
      */
-    public static BookShelfResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTOForBookshelf(
-            List<BookShelfResponseDTO.TopicDTO> topicListDTOs,
+    public static BookShelfResponseDTO.TopicList fromTopicDTOListToTopicListDTOForBookshelf(
+            List<BookShelfResponseDTO.TopicDetail> topicDetailList,
             boolean hasNext,
             Long nextCursor,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return BookShelfResponseDTO.TopicListDTO.builder()
-                .topics(topicListDTOs)
+        return BookShelfResponseDTO.TopicList.builder()
+                .topicDetailList(topicDetailList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
     /**
      * List<BookShelfInfoDTO> -> BookShelfListDTO 변환
      */
-    public static BookShelfResponseDTO.BookShelfListDTO fromBookShelfInfoDTOListToBookShelfListDTO(
-            List<BookShelfResponseDTO.BookShelfInfoDTO> bookShelfInfoDTOs,
+    public static BookShelfResponseDTO.BookShelfList fromBookShelfInfoDTOListToBookShelfListDTO(
+            List<BookShelfResponseDTO.BookShelfInfo> bookShelfInfos,
             boolean hasNext,
             Long nextCursor,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return BookShelfResponseDTO.BookShelfListDTO.builder()
-                .bookShelfInfoList(bookShelfInfoDTOs)
+        return BookShelfResponseDTO.BookShelfList.builder()
+                .bookShelfInfoList(bookShelfInfos)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
     /**
      * List<MeetingResponseDTO.MeetingInfoDTO> -> MeetingListDTO 변환
      */
-    public static MeetingResponseDTO.MeetingListDTO fromMeetingInfoDTOListToMeetingListDTO(
-            List<MeetingResponseDTO.MeetingInfoDTO> meetingInfoDTOList,
+    public static MeetingResponseDTO.MeetingList fromMeetingInfoDTOListToMeetingListDTO(
+            List<MeetingResponseDTO.MeetingInfo> meetingInfoList,
             boolean hasNext,
             Long nextCursor,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return MeetingResponseDTO.MeetingListDTO.builder()
-                .meetingInfoList(meetingInfoDTOList)
+        return MeetingResponseDTO.MeetingList.builder()
+                .meetingInfoList(meetingInfoList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
     /**
      * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TopicListDTO 변환
      */
-    public static MeetingResponseDTO.TopicListDTO fromTopicDTOListToTopicListDTOForMeeting(
-            List<MeetingResponseDTO.TopicDTO> topicList,
+    public static MeetingResponseDTO.TopicList fromTopicDTOListToTopicListDTOForMeeting(
+            List<MeetingResponseDTO.Topic> topicList,
             boolean hasNext,
             Long nextCursor
     ) {
-        return MeetingResponseDTO.TopicListDTO.builder()
+        return MeetingResponseDTO.TopicList.builder()
                 .topics(topicList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
@@ -363,15 +359,15 @@ public class ClubMeetingConverter {
     /**
      * List<MeetingResponseDTO.TopicDTO> -> MeetingResponseDTO.TeamTopicDTO 변환
      */
-    public static MeetingResponseDTO.TeamTopicDTO fromTopicDTOListToTeamTopicDTO(
+    public static MeetingResponseDTO.TeamTopic fromTopicDTOListToTeamTopicDTO(
             Integer teamNumber,
-            List<MeetingResponseDTO.TopicDTO> topicList,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            List<MeetingResponseDTO.Topic> topicList,
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return MeetingResponseDTO.TeamTopicDTO.builder()
+        return MeetingResponseDTO.TeamTopic.builder()
                 .teamNumber(teamNumber)
                 .topics(topicList)
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
@@ -379,65 +375,65 @@ public class ClubMeetingConverter {
      * MeetingResponseDTO.MeetingInfoDTO + List<TopicDTO> + List<TeamTopicDTO> -> MeetingResponseDTO.MeetingDetailDTO
      * 변환
      */
-    public static MeetingResponseDTO.MeetingDetailDTO fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
-            MeetingResponseDTO.MeetingInfoDTO meetingInfoDTO,
-            List<MeetingResponseDTO.TopicDTO> topicDTOList,
-            List<MeetingResponseDTO.TeamTopicDTO> teamTopicDTOList,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+    public static MeetingResponseDTO.MeetingDetail fromMeetingInfoDTOAndTopicDTOListAndTeamTopicDTOListToTopicDTO(
+            MeetingResponseDTO.MeetingInfo meetingInfo,
+            List<MeetingResponseDTO.Topic> topicList,
+            List<MeetingResponseDTO.TeamTopic> teamTopicList,
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return MeetingResponseDTO.MeetingDetailDTO.builder()
-                .meetingInfo(meetingInfoDTO)
-                .topics(topicDTOList)
-                .teams(teamTopicDTOList)
-                .membership(membershipDTO)
+        return MeetingResponseDTO.MeetingDetail.builder()
+                .meetingInfo(meetingInfo)
+                .topics(topicList)
+                .teams(teamTopicList)
+                .membership(membership)
                 .build();
     }
 
-    public static MeetingResponseDTO.TopicDTOList fromTopicDTOListAndMembershipDTOToTopicListDTO(
-            List<MeetingResponseDTO.TopicDTO> topicDTOs,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+    public static MeetingResponseDTO.TopicDTO fromTopicDTOListAndMembershipDTOToTopicListDTO(
+            List<MeetingResponseDTO.Topic> topics,
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return MeetingResponseDTO.TopicDTOList.builder()
-                .topics(topicDTOs)
-                .membership(membershipDTO)
+        return MeetingResponseDTO.TopicDTO.builder()
+                .topics(topics)
+                .membership(membership)
                 .build();
     }
 
     /**
      * 팀 번호 + List<MemberExternalDTO> -> MeetingResponseDTO.TeamMemberDTO 변환
      */
-    public static MeetingResponseDTO.TeamMemberDTO fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
+    public static MeetingResponseDTO.TeamMember fromTeamNumberAndMemberSharedDTOToTeamMemberDTO(
             Integer teamNumber,
             List<MemberExternalDTO.BasicInfo> memberSharedDTOs,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return MeetingResponseDTO.TeamMemberDTO.builder()
+        return MeetingResponseDTO.TeamMember.builder()
                 .teamNumber(teamNumber)
                 .members(memberSharedDTOs)
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
     /**
      * List<MeetingResponseDTO.MeetingMemberDTO> -> MeetingResponseDTO.MeetingMemberListDTO 변환
      */
-    public static MeetingResponseDTO.MeetingMemberListDTO fromMeetingMemberDTOListToMeetingMemberListDTO(
-            List<MeetingResponseDTO.MeetingMemberDTO> meetingMemberDTOList,
+    public static MeetingResponseDTO.MeetingMemberList fromMeetingMemberDTOListToMeetingMemberListDTO(
+            List<MeetingResponseDTO.MeetingMember> meetingMemberList,
             boolean hasNext, Long nextCursor,
-            ClubManagementExternalDTO.MembershipDTO membershipDTO
+            ClubManagementExternalDTO.Membership membership
     ) {
-        return MeetingResponseDTO.MeetingMemberListDTO.builder()
-                .members(meetingMemberDTOList)
+        return MeetingResponseDTO.MeetingMemberList.builder()
+                .members(meetingMemberList)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .membership(membershipDTO)
+                .membership(membership)
                 .build();
     }
 
     /**
      * Meeting 리스트 + BookBasicInfo 맵 -> MeetingInfo 리스트 변환
      */
-    public static Map<Long, MeetingInfo> fromMeetingListToMeetingInfoList(
+    public static Map<Long, ClubMeetingExternalDTO.MeetingInfo> fromMeetingListToMeetingInfoList(
             List<Meeting> meetings,
             Map<String, BasicInfo> bookBasicInfoMapForShare
     ) {
@@ -454,8 +450,8 @@ public class ClubMeetingConverter {
     /**
      * /** Meeting 엔티티 + BookBasicInfo -> MeetingInfo 변환
      */
-    public static MeetingInfo fromMeetingToMeetingInfo(Meeting meeting, BasicInfo bookBasicInfoForShare) {
-        return MeetingInfo.builder()
+    public static ClubMeetingExternalDTO.MeetingInfo fromMeetingToMeetingInfo(Meeting meeting, BasicInfo bookBasicInfoForShare) {
+        return ClubMeetingExternalDTO.MeetingInfo.builder()
                 .meetingId(meeting.getId())
                 .title(meeting.getTitle())
                 .meetingTime(meeting.getMeetingTime())
@@ -475,10 +471,10 @@ public class ClubMeetingConverter {
     /**
      * 파라미터 -> MeetingResponseDTO.TopicSelectionDTO 변환
      */
-    public static MeetingResponseDTO.TopicSelectionDTO fromParametersToTopicSelectionDTO(Long topicId,
-                                                                                         Integer teamNumber,
-                                                                                         Boolean isSelected) {
-        return MeetingResponseDTO.TopicSelectionDTO.builder()
+    public static MeetingResponseDTO.TopicSelection fromParametersToTopicSelectionDTO(Long topicId,
+                                                                                      Integer teamNumber,
+                                                                                      Boolean isSelected) {
+        return MeetingResponseDTO.TopicSelection.builder()
                 .topicId(topicId)
                 .teamNumber(teamNumber)
                 .isSelected(isSelected)
@@ -492,12 +488,12 @@ public class ClubMeetingConverter {
     /**
      * Topic 엔티티 -> BookShelfResponseDTO.TopicDTO 변환
      */
-    private static BookShelfResponseDTO.TopicDTO fromTopicAndMemberSharedDTOToTopicDTO(
+    private static BookShelfResponseDTO.TopicDetail fromTopicAndMemberSharedDTOToTopicDTO(
             Topic topic,
             MemberExternalDTO.BasicInfo authorSharedDTO,
             String memberId
     ) {
-        return BookShelfResponseDTO.TopicDTO.builder()
+        return BookShelfResponseDTO.TopicDetail.builder()
                 .topicId(topic.getId())
                 .content(topic.getDescription())
                 .authorInfo(authorSharedDTO)

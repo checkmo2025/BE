@@ -30,13 +30,13 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
     })
     @GetMapping("/search")
-    public ApiResponse<BookResponseDTO.BookListResponse> searchBook(
+    public ApiResponse<BookResponseDTO.BookList> searchBook(
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "1")
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
             int page
     ) {
-        BookResponseDTO.BookListResponse result = bookAPI.searchBookFromAladin(keyword, page);
+        BookResponseDTO.BookList result = bookAPI.searchBookFromAladin(keyword, page);
         return ApiResponse.onSuccess(result);
     }
 
@@ -47,9 +47,9 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
     })
     @GetMapping({"/{isbn}"})
-    public ApiResponse<BookResponseDTO.BookInfoDetailResponse> getBookDetail(@PathVariable String isbn) {
+    public ApiResponse<BookResponseDTO.BookInfoDetail> getBookDetail(@PathVariable String isbn) {
 
-        BookResponseDTO.BookInfoDetailResponse result = bookAPI.getBookDetailFromAladin(isbn);
+        BookResponseDTO.BookInfoDetail result = bookAPI.getBookDetailFromAladin(isbn);
         return ApiResponse.onSuccess(result);
     }
 }

@@ -11,8 +11,8 @@ import checkmo.clubMeeting.internal.repository.MeetingRepository;
 import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingCreateRequestDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingUpdateRequestDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingCreate;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingUpdate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +43,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     // TODO: 전체적으로 Meeting 존재 여부 검증을 Service에서 해야 함 -> 따라서 API endpoint를 club/{clubId}/meeting/{meetingId}/... 이런 식으로 바꿔야 함
 
     @Override
-    public Long createMeeting(Long clubId, String memberId, MeetingCreateRequestDTO request) {
+    public Long createMeeting(Long clubId, String memberId, MeetingCreate request) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.getClubInfo(clubId);
         Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
@@ -62,7 +62,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public Long updateMeeting(Long meetingId, String memberId, MeetingUpdateRequestDTO request) {
+    public Long updateMeeting(Long meetingId, String memberId, MeetingUpdate request) {
         // 1. 유효성 검증(meeting, club, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubManagementAPI.getClubInfo(meeting.getClubId());
@@ -96,16 +96,16 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     }
 
     @Override
-    public void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManageDTO request) {
+    public void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManage request) {
         // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(meeting.getClubId(), memberId);
 
         // 요청 teamNumber와 nicknameList 검증 및 정리
         Map<Integer, List<Long>> requestTeamNumberToClubMemberIds =
-                request.getTeamMemberDTOList().stream()
+                request.getTeamMemberList().stream()
                         .collect(Collectors.toMap(
-                                MeetingRequestDTO.TeamMemberDTO::getTeamNumber,
+                                MeetingRequestDTO.TeamMember::getTeamNumber,
                                 dto -> dto.getClubMemberIds().stream().distinct().toList()
                         ));
         Set<Integer> requestTeamNumbers = requestTeamNumberToClubMemberIds.keySet();
