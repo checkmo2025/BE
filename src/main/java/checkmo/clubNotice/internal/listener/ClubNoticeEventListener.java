@@ -1,4 +1,4 @@
-package checkmo.clubNotice.internal.handler;
+package checkmo.clubNotice.internal.listener;
 
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
@@ -13,7 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ClubNoticeEventHandler {
+public class ClubNoticeEventListener {
 
     private final ClubNoticeCommandService clubNoticeCommandService;
 
