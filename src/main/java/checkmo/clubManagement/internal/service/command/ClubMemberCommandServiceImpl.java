@@ -46,16 +46,17 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
                 ? ClubMember.ClubMemberStatus.MEMBER
                 : ClubMember.ClubMemberStatus.PENDING;
 
+        // ClubMember 생성 및 연관관계 설정
+        ClubMember clubMember
+                = ClubManagementConverter.toClubMemberEntity(club, memberId, status, request.getJoinMessage());
+        club.addClubMember(clubMember);
+        clubMemberRepository.save(clubMember);
+
         // 4. 공개 클럽이면 즉시 가입 완료 이벤트 발행
         if (club.isOpen()) {
-            JoinClubEvent joinClubEvent = new JoinClubEvent(memberId, club.getId(), club.getName());
+            JoinClubEvent joinClubEvent = new JoinClubEvent(clubMember.getId(), memberId, club.getId(), club.getName());
             eventPublisher.publishEvent(joinClubEvent);
         }
-
-        // 5. ClubMember 생성 및 연관관계 설정
-        ClubMember clubMember = ClubManagementConverter.toClubMemberEntity(club, memberId, status,
-                request.getJoinMessage());
-        club.addClubMember(clubMember);
 
         return clubMember;
     }
@@ -91,8 +92,8 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
 
         // 6. PENDING → MEMBER로 변경되면 가입 완료 이벤트 발행
         if (oldStatus == ClubMember.ClubMemberStatus.PENDING && newStatus == ClubMember.ClubMemberStatus.MEMBER) {
-            JoinClubEvent joinClubEvent = new JoinClubEvent(targetClubMember.getMemberId(), club.getId(),
-                    club.getName());
+            JoinClubEvent joinClubEvent = new JoinClubEvent(targetClubMember.getId(), targetClubMember.getMemberId(),
+                    club.getId(), club.getName());
             eventPublisher.publishEvent(joinClubEvent);
         }
 

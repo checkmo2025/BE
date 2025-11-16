@@ -9,5 +9,6 @@ import lombok.RequiredArgsConstructor;
 public class BookStoryEvent {
 
     @Builder
-    public record BookStoryLiked(String senderId, String receiverId, Long bookStoryId) {}
+    public record BookStoryLiked(Long eventId, String senderId, String receiverId, Long bookStoryId) {
+    }
 }
