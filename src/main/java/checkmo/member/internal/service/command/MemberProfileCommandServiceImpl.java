@@ -2,16 +2,15 @@ package checkmo.member.internal.service.command;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.common.s3.service.S3Service;
+import checkmo.member.MemberEvent;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +19,8 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     // 자신의 Repository
     private final MemberRepository memberRepository;
-
-    // 이미지 삭제를 위한 S3 서비스
-    private final S3Service s3Service;
+    
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Member updateMemberProfile(
@@ -39,20 +37,13 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
         // 새로 입력받은 request의 이미지 url 가져오기
         String newImageUrl = request.getImgUrl();
 
-        // 기존 이미지와 새로운 이미지가 다를 경우 S3에서 기존 이미지 삭제
+        // 기존 이미지와 새로운 이미지가 다를 경우 S3에서 기존 이미지 삭제 이벤트 발행
         // 새로운 이미지 url이 null이면 기존 이미지 삭제
         if (existingImageUrl != null && !existingImageUrl.equals(newImageUrl)) {
-            // 기존에 저장된 url에서 이미지 키 추출
-            final String imageKey = s3Service.extractKeyFromUrl(existingImageUrl);
-            if (imageKey != null) {
-                // 이 메소드의 트랜잭션이 커밋 되면 기존 이미지 삭제
-                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                    @Override
-                    public void afterCommit() {
-                        s3Service.deleteImage(imageKey);
-                    }
-                });
-            }
+            eventPublisher.publishEvent(
+                MemberEvent.DeleteProfileImage.builder()
+                    .imageUrl(existingImageUrl)
+                    .build());
         }
 
         // 프로필 정보 업데이트 (소개, 이미지)

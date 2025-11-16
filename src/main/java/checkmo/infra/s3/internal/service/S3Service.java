@@ -1,10 +1,9 @@
-package checkmo.common.s3.service;
+package checkmo.infra.s3.internal.service;
 
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.common.config.properties.S3Properties;
-import checkmo.common.s3.converter.S3Converter;
-import checkmo.common.s3.web.dto.S3ResponseDTO;
+import checkmo.infra.s3.internal.config.properties.S3Properties;
+import checkmo.infra.s3.web.dto.S3ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,7 +52,10 @@ public class S3Service {
                 s3Properties.getRegion().getName(),
                 key);
 
-        return S3Converter.toPresignedUrlDTO(presignedUrl, imageUrl);
+        return S3ResponseDTO.PresignedUrl.builder()
+                .presignedUrl(presignedUrl)
+                .imageUrl(imageUrl)
+                .build();
     }
 
     // 파일 삭제 - 이건 우리가 직접 수행

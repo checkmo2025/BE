@@ -1,9 +1,9 @@
-package checkmo.common.s3.web.controller;
+package checkmo.infra.s3.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.s3.service.S3Service;
-import checkmo.common.s3.web.dto.S3RequestDTO;
-import checkmo.common.s3.web.dto.S3ResponseDTO;
+import checkmo.infra.s3.internal.service.S3Service;
+import checkmo.infra.s3.web.dto.S3RequestDTO;
+import checkmo.infra.s3.web.dto.S3ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;

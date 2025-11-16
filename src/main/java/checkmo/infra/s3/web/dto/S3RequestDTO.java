@@ -1,4 +1,4 @@
-package checkmo.common.s3.web.dto;
+package checkmo.infra.s3.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

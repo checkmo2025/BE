@@ -1,4 +1,4 @@
-package checkmo.common.s3.web.dto;
+package checkmo.infra.s3.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,6 @@
-package checkmo.common.config;
+package checkmo.infra.s3.internal.config;
 
-import checkmo.common.config.properties.S3Properties;
+import checkmo.infra.s3.internal.config.properties.S3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
