@@ -22,6 +22,7 @@ public class NotificationEventListener {
             notificationCommandService.createNotification(event);
         } catch (Exception e) {
             log.error("책이야기 좋아요 알림 생성 실패, LikeEvent: {}", event, e);
+            throw e;
         }
     }
 
@@ -31,6 +32,7 @@ public class NotificationEventListener {
             notificationCommandService.createNotification(event);
         } catch (Exception e) {
             log.error("팔로우 알림 생성 실패, FollowEvent: {}", event, e);
+            throw e;
         }
     }
 
@@ -40,6 +42,7 @@ public class NotificationEventListener {
             notificationCommandService.createNotification(event);
         } catch (Exception e) {
             log.error("독서 클럽 가입 승인 알림 생성 실패, JoinClubEvent: {}", event, e);
+            throw e;
         }
     }
 }

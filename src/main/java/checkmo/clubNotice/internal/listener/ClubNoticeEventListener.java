@@ -19,8 +19,8 @@ public class ClubNoticeEventListener {
         try {
             clubNoticeCommandService.createMeetingNotice(event);
         } catch (Exception e) {
-            // TODO : 재시도 로직 추가
             log.error("독서 클럽 공지 생성 실패, ClubNoticeCreatedEvent: {}", event, e);
+            throw e;
         }
     }
 }
