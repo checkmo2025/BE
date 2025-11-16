@@ -8,8 +8,6 @@ import java.util.Map;
  */
 public interface MemberAPI {
 
-    void createInitialMember(String memberId, String email);
-
     /**
      * 닉네임으로 회원 ID 조회
      *

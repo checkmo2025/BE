@@ -1,5 +1,6 @@
 package checkmo.authentication.internal.service.command;
 
+import checkmo.authentication.AuthenticationEvent;
 import checkmo.authentication.internal.converter.AuthConverter;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.repository.AuthRepository;
@@ -8,6 +9,7 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,11 +22,11 @@ public class AuthUserCommandService {
 
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
 
-    private final MemberAPI memberAPI;
-
     private final RedisTemplate<String, Object> redisTemplate;
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuthUser signUp(AuthRequestDTO.SignUp request) {
 
@@ -47,7 +49,11 @@ public class AuthUserCommandService {
         AuthUser savedUser = authRepository.save(newUser);
         redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
 
-        memberAPI.createInitialMember(savedUser.getId(), savedUser.getEmail());
+        eventPublisher.publishEvent(
+                AuthenticationEvent.CreateMember.builder()
+                        .id(savedUser.getId())
+                        .email(savedUser.getEmail())
+                        .build());
 
         return newUser;
     }

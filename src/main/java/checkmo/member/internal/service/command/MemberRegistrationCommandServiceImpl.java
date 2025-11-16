@@ -1,17 +1,15 @@
 package checkmo.member.internal.service.command;
 
+import checkmo.authentication.AuthenticationAPI;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.MemberEvent;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
-import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberRegistrationCommandServiceImpl implements MemberRegistrationCommandService {
 
     private final MemberRepository memberRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final AuthenticationAPI authenticationAPI;
 
     @Override
     public void createMember(String memberId, String email) {
@@ -49,6 +47,6 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         member.updateInterestCategories(new HashSet<>(request.getCategories()));
 
         // 프로필 완료 상태로 변경 이벤트 발행
-        eventPublisher.publishEvent(new MemberEvent.MemberProfileCompleted(memberId));
+        authenticationAPI.completeProfile(memberId);
     }
 }

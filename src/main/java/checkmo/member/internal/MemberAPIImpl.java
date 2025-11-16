@@ -6,7 +6,6 @@ import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.MemberQueryFacade;
-import checkmo.member.internal.service.command.MemberRegistrationCommandService;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberResponseDTO;
@@ -25,15 +24,9 @@ public class MemberAPIImpl implements MemberAPI {
     // 자신의 QueryService
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
-    private final MemberRegistrationCommandService memberRegistrationCommandService;
 
     // 내부 Facade (배치 조회 로직 재사용)
     private final MemberQueryFacade memberQueryFacade;
-
-    @Override
-    public void createInitialMember(String memberId, String email) {
-        memberRegistrationCommandService.createMember(memberId, email);
-    }
 
     @Override
     public String getMemberIdByNickname(String nickname) {
