@@ -1,13 +1,15 @@
 package checkmo.authentication.internal.service.command;
 
-import checkmo.authentication.internal.infra.EmailSender;
+import checkmo.authentication.AuthenticationEvent;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class EmailVerificationCommandService {
 
     private static final String EMAIL_VERIFICATION_PREFIX = "verification:";
@@ -25,7 +28,7 @@ public class EmailVerificationCommandService {
 
     // 외부 서비스
     private final RedisTemplate<String, Object> redisTemplate;
-    private final EmailSender emailSender;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final AuthRepository authRepository;
 
@@ -53,8 +56,11 @@ public class EmailVerificationCommandService {
         redisTemplate.opsForHash().putAll(redisKey, verificationData);
         redisTemplate.expire(redisKey, EMAIL_VERIFICATION_TTL);
 
-        // 이메일 발송 메서드 호출
-        emailSender.sendEmail(email, verificationCode);
+        eventPublisher.publishEvent(
+                AuthenticationEvent.SendVerificationEmail.builder()
+                        .email(email)
+                        .verificationCode(verificationCode)
+                        .build());
     }
 
     public boolean verifyEmailCode(AuthRequestDTO.EmailVerification request) {

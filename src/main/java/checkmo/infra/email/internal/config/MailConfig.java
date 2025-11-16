@@ -1,6 +1,6 @@
-package checkmo.common.config;
+package checkmo.infra.email.internal.config;
 
-import checkmo.common.config.properties.MailProperties;
+import checkmo.infra.email.internal.config.properties.MailProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

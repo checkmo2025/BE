@@ -1,4 +1,4 @@
-package checkmo.common.config.properties;
+package checkmo.infra.email.internal.config.properties;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;

@@ -1,22 +1,20 @@
-package checkmo.authentication.internal.infra;
+package checkmo.infra.email.internal.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
+@Service
 public class EmailSender {
 
     private final JavaMailSender javaMailSender;
 
     // 이메일 발송 메서드
-    @Async
-    public void sendEmail(String email, String verificationCode) {
+    public void sendVerificationEmail(String email, String verificationCode) {
         try {
             // 이메일 메시지 생성
             SimpleMailMessage message = new SimpleMailMessage();

@@ -5,5 +5,10 @@ import lombok.Builder;
 public class AuthenticationEvent {
 
     @Builder
-    public record CreateMember(String id, String email) {}
+    public record CreateMember(String id, String email) {
+    }
+
+    @Builder
+    public record SendVerificationEmail(String email, String verificationCode) {
+    }
 }
