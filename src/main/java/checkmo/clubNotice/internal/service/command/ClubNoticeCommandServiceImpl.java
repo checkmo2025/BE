@@ -69,9 +69,17 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     public void createMeetingNotice(ClubMeetingCreatedEvent event) {
         clubManagementAPI.getClubInfo(event.clubId());
 
-        // 기존 미팅 공지가 존재하면 삭제
-        noticeRepository.findByMeetingId(event.meetingId())
-                .ifPresent(noticeRepository::delete);
+        Notice existingNotice = noticeRepository.findByMeetingId(event.meetingId()).orElse(null);
+
+        // 기존 공지가 있고, 그 공지가  같은 버전이거나 최신 버전이라면 이벤트 무시
+        if (existingNotice != null && existingNotice.isNotOlderThan(event.version())) {
+            return;
+        }
+
+        // 기존 공지사항이 존재하면 삭제하고 새로 생성 (비즈니스 요구사항)
+        if (existingNotice != null) {
+            noticeRepository.delete(existingNotice);
+        }
 
         Notice notice = ClubNoticeConverter.fromMeetingCreatedEventToNotice(event);
         noticeRepository.save(notice);

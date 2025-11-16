@@ -44,6 +44,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 공지사항
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_400", "공지사항을 찾을 수 없습니다."),
+    NOTICE_MEETING_VERSION_NOT_NULL(HttpStatus.BAD_REQUEST, "NOTICE_401",
+            "모임 공지사항의 경우 meetingVersion은 null이 아니어야 합니다."),
     NOTICE_MEETING_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_405", "모임 공지사항은 삭제할 수 없습니다."),
 
     // 투표

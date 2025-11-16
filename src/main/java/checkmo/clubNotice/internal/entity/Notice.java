@@ -1,6 +1,8 @@
 package checkmo.clubNotice.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.apiPayload.exception.GeneralException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,7 +38,17 @@ public class Notice extends BaseEntity {
     @Column(name = "meeting_id")
     private Long meetingId;
 
+    @Column(name = "meeting_version")
+    private Long meetingVersion;
+
     @Column(name = "club_id", nullable = false)
     private Long clubId;
 
+    public boolean isNotOlderThan(Long meetingVersion) {
+        if (meetingVersion == null) {
+            throw new GeneralException(ErrorStatus.NOTICE_MEETING_VERSION_NOT_NULL);
+        }
+
+        return this.meetingVersion >= meetingVersion;
+    }
 }

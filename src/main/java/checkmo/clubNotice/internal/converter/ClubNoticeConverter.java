@@ -180,6 +180,7 @@ public class ClubNoticeConverter {
         return Notice.builder()
                 .clubId(event.clubId())
                 .meetingId(event.meetingId())
+                .meetingVersion(event.version())
                 .title(event.title())
                 .content(event.content())
                 .tag("모임")

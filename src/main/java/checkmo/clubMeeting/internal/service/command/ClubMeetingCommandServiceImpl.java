@@ -54,11 +54,13 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         // 3. 저장할 미팅 생성
         Meeting meeting = ClubMeetingConverter.fromMeetingCreateRequestDTOToMeeting(request, clubId, bookId);
 
+        meetingRepository.saveAndFlush(meeting);
+
         // 미팅 기반 공지사항 생성 이벤트 발행
         publishMeetingCreatedEvent(meeting);
 
         // 미팅 명시적 저장
-        return meetingRepository.save(meeting).getId();
+        return meeting.getId();
     }
 
     @Override
@@ -78,6 +80,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
                 request.getTag()
         );
 
+        meetingRepository.saveAndFlush(meeting);
+
         // 새로운 공지사항 삭제 후 생성 이벤트 발행
         publishMeetingCreatedEvent(meeting);
 
@@ -88,6 +92,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         ClubMeetingCreatedEvent event = ClubMeetingCreatedEvent.builder()
                 .clubId(meeting.getId())
                 .meetingId(meeting.getId())
+                .version(meeting.getVersion())
                 .title(meeting.getTitle())
                 .content(meeting.getContent())
                 .build();
