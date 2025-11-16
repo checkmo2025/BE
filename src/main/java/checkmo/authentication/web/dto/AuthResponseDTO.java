@@ -15,12 +15,4 @@ public class AuthResponseDTO {
         private String email;
         private boolean isProfileCompleted;
     }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Login {
-        private String nickname;
-    }
 }

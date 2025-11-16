@@ -19,22 +19,16 @@ public class AuthConverter {
                 .build();
     }
 
-    public static AuthResponseDTO.Login fromNicknameToLogin(String nickname) {
-        return AuthResponseDTO.Login.builder()
-                .nickname(nickname)
-                .build();
-    }
-
     public static AuthUser fromOAuth2Attributes(OAuth2Attributes attributes, String registrationId) {
         String newMemberId = registrationId.toUpperCase() + "_" + attributes.getProviderId();
 
         return AuthUser.builder()
                 .id(newMemberId)
                 .email(attributes.getEmail())
-                .password("") // OAuth2 사용자는 비밀번호가 없음
-                .role(Role.USER) // 기본 역할 설정
+                .password("")
+                .role(Role.USER)
                 .deactivatedAt(null)
-                .profileCompleted(false) // 프로필 미완료 상태로 설정
+                .profileCompleted(false)
                 .build();
     }
 

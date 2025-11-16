@@ -77,11 +77,12 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호가 일치하지 않습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류입니다. 관리자에게 문의 바랍니다.")
     })
-    public ApiResponse<AuthResponseDTO.Login> login(
+    public ApiResponse<String> login(
             @Valid @RequestBody AuthRequestDTO.Login request,
             HttpServletResponse response
     ) {
-        return ApiResponse.onSuccess(authFacade.login(request, response));
+        authFacade.login(request, response);
+        return ApiResponse.onSuccess("로그인에 성공했습니다.");
     }
 
     @Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
