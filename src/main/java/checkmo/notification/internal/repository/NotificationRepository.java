@@ -1,6 +1,7 @@
 package checkmo.notification.internal.repository;
 
 import checkmo.notification.internal.entity.Notification;
+import checkmo.notification.internal.entity.Notification.NotificationType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
@@ -19,4 +20,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // 특정 알림을 읽음 처리할 때 해당 알림이 사용자의 것인지 확인
     Optional<Notification> findByIdAndReceiverId(Long notificationId, String receiverId);
+
+    boolean existsByNotificationTypeAndSourceId(NotificationType notificationType, Long sourceId);
 }

@@ -19,6 +19,7 @@ public class NotificationConverter {
      */
     public static Notification fromEvent(
             Notification.NotificationType notificationType,
+            Long sourceId,
             String redirectPath,
             String targetName,
             String senderId,
@@ -26,6 +27,7 @@ public class NotificationConverter {
     ) {
         return Notification.builder()
                 .notificationType(notificationType)
+                .sourceId(sourceId)
                 .redirectPath(redirectPath)
                 .targetName(targetName)
                 .senderId(senderId)
