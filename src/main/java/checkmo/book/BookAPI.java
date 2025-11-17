@@ -1,6 +1,5 @@
 package checkmo.book;
 
-import checkmo.book.web.dto.BookResponseDTO;
 import java.util.List;
 import java.util.Map;
 
@@ -8,23 +7,6 @@ import java.util.Map;
  * Book Domain Query Facade Book 도메인의 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade
  */
 public interface BookAPI {
-
-    /**
-     * 책의 상세 정보를 조회합니다. (내부용)
-     *
-     * @param bookId 책 ID (ISBN)
-     * @return 책 상세 정보 DTO
-     */
-    BookResponseDTO.BookInfoDetail getBookDetailFromAladin(String bookId); //
-
-    /**
-     * 알라딘 API를 통해 책 정보를 검색합니다. (내부용)
-     *
-     * @param keyword 검색 키워드 (책 제목, 저자 등)
-     * @param page    페이지 번호
-     * @return 검색된 책 정보 목록 DTO
-     */
-    BookResponseDTO.BookList searchBookFromAladin(String keyword, int page); //
 
     /**
      * 다른 도메인에서 사용할 기본적인 책 정보를 조회합니다. (외부용)

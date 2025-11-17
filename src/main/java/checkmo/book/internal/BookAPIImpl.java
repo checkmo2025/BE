@@ -5,9 +5,7 @@ import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.converter.BookConverter;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.repository.BookRepository;
-import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.service.query.BookQueryService;
-import checkmo.book.web.dto.BookResponseDTO;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -19,24 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookAPIImpl implements BookAPI {
 
-    // 외부 API 서비스
-    private final AladinApiService aladinApiService;
-
     // 자신의 QueryService
     private final BookQueryService bookQueryService;
 
     // 자신의 Repository
     private final BookRepository bookRepository;
-
-    @Override
-    public BookResponseDTO.BookInfoDetail getBookDetailFromAladin(String bookId) {
-        return aladinApiService.getBookDetailInfoFromAladin(bookId);
-    }
-
-    @Override
-    public BookResponseDTO.BookList searchBookFromAladin(String keyword, int page) {
-        return aladinApiService.searchBookFromAladin(keyword, page);
-    }
 
     @Override
     public BookExternalDTO.BasicInfo getBookBasicInfoForShare(String bookId) {
