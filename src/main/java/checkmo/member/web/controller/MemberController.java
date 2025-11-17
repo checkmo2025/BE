@@ -2,9 +2,9 @@ package checkmo.member.web.controller;
 
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.authentication.CurrentId;
-import checkmo.member.internal.service.MemberCommandFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
+import checkmo.member.internal.service.command.MemberProfileCommandService;
 import checkmo.member.internal.service.command.MemberRegistrationCommandService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
@@ -33,9 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "회원", description = "마이페이지, 프로필 관리, 팔로우, 모임 관리, 알림 설정 관련 API")
 public class MemberController {
 
-    private final MemberCommandFacade memberCommandFacade;
     private final MemberQueryFacade memberQueryFacade;
 
+    private final MemberProfileCommandService memberProfileCommandService;
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberRegistrationCommandService memberRegistrationCommandService;
 
@@ -171,7 +171,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestBody MemberRequestDTO.MemberProfileUpdate request
     ) {
-        return ApiResponse.onSuccess(memberCommandFacade.updateMemberProfile(memberId, request));
+        return ApiResponse.onSuccess(memberProfileCommandService.updateMemberProfile(memberId, request));
     }
 
     @Operation(summary = "내 프로필 조회 API", description = "내 프로필 정보(관심 카테고리 정보 포함)를 조회합니다.")

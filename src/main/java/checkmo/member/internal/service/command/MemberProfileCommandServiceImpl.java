@@ -3,10 +3,12 @@ package checkmo.member.internal.service.command;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberEvent;
+import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import java.util.HashSet;
+import checkmo.member.web.dto.MemberResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public Member updateMemberProfile(
+    public MemberResponseDTO.MemberProfileWithCategory updateMemberProfile(
             String memberId, MemberRequestDTO.MemberProfileUpdate request
     ) {
         // 회원 조회
@@ -54,7 +56,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
             member.updateInterestCategories(new HashSet<>(request.getCategories()));
         }
 
-        return member;
+        return MemberConverter.toMemberProfileWithCategory(member);
     }
 
     @Override
