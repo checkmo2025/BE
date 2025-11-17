@@ -1,4 +1,4 @@
-package checkmo.common.config.properties;
+package checkmo.book.internal.config.properties;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

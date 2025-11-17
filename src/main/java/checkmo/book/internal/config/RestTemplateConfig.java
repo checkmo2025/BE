@@ -1,6 +1,6 @@
-package checkmo.common.config;
+package checkmo.book.internal.config;
 
-import checkmo.common.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.AladinProperties;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
