@@ -7,7 +7,6 @@ import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.MemberAPI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -44,7 +43,7 @@ public class AuthUserCommandService {
 
         // 회원 정보 저장
         String encodedPassword = passwordEncoder.encode(request.getPassword());
-        AuthUser newUser = AuthConverter.fromSignUpToAuthUser(request, encodedPassword);
+        AuthUser newUser = AuthConverter.toLocalUser(request, encodedPassword);
 
         AuthUser savedUser = authRepository.save(newUser);
         redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제

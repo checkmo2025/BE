@@ -5,21 +5,21 @@ import checkmo.authentication.internal.entity.Role;
 import checkmo.authentication.internal.security.oauth2.OAuth2Attributes;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import checkmo.authentication.web.dto.AuthResponseDTO;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthConverter {
 
-    public static AuthResponseDTO.SignUp fromUserToSignUp(AuthUser user) {
+    public static AuthResponseDTO.SignUp toSignUpDTO(AuthUser user) {
         return AuthResponseDTO.SignUp.builder()
                 .email(user.getEmail())
                 .isProfileCompleted(user.isProfileCompleted())
                 .build();
     }
 
-    public static AuthUser fromOAuth2Attributes(OAuth2Attributes attributes, String registrationId) {
+    public static AuthUser toOAuth2User(OAuth2Attributes attributes, String registrationId) {
         String newMemberId = registrationId.toUpperCase() + "_" + attributes.getProviderId();
 
         return AuthUser.builder()
@@ -32,7 +32,7 @@ public class AuthConverter {
                 .build();
     }
 
-    public static AuthUser fromSignUpToAuthUser(
+    public static AuthUser toLocalUser(
             AuthRequestDTO.SignUp request,
             String encodedPassword
     ) {
