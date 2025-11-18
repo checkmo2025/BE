@@ -1,6 +1,5 @@
 package checkmo.bookStory.internal.service.command;
 
-import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.internal.repository.CommentRepository;
@@ -47,7 +46,12 @@ public class BookStoryCommentCommandServiceImpl implements BookStoryCommentComma
         }
 
         // 3. 댓글 생성
-        Comment comment = BookStoryConverter.fromCommentCreateRequestDTO(request, memberId, bookStory, parentComment);
+        Comment comment = Comment.builder()
+                .content(request.getContent())
+                .memberId(memberId)
+                .bookStory(bookStory)
+                .parentComment(parentComment)
+                .build();
 
         // 4. 부모 댓글의 자식 리스트에 추가 (대댓글인 경우)
         if (parentComment != null) {

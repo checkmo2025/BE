@@ -30,7 +30,7 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
 
         String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
-        BookStory bookStory = BookStoryConverter.fromBookStoryRequestDTO(request, memberId, bookId);
+        BookStory bookStory = BookStoryConverter.toBookStory(request, memberId, bookId);
         BookStory savedBookStory = bookStoryRepository.save(bookStory);
 
         return savedBookStory.getId();

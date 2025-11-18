@@ -5,7 +5,6 @@ import checkmo.bookStory.BookStoryExternalDTO;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
 import lombok.AccessLevel;
@@ -14,14 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookStoryConverter {
 
-    // =====================================================
-    // BookStoryRequestDTO → BookStory 변환
-    // =====================================================
-
-    /**
-     * BookStoryCreateRequestDTO → BookStory 변환
-     */
-    public static BookStory fromBookStoryRequestDTO(
+    public static BookStory toBookStory(
             BookStoryRequestDTO.BookStoryCreate request,
             String memberId,
             String bookId
@@ -34,48 +26,7 @@ public class BookStoryConverter {
                 .build();
     }
 
-    // =====================================================
-    // BookStory → BookStoryExternalDTO 변환
-    // =====================================================
-
-    /**
-     * BookStoryResponseDTO -> BookStoryListResponse 변환
-     */
-    public static BookStoryExternalDTO.BookStoryList fromBookStoryResponses(
-            List<BookStoryExternalDTO.BookStoryDetail> bookStoryDetailList,
-            boolean hasNext,
-            Long nextCursor,
-            int pageSize,
-            BookStoryExternalDTO.ScopeInfo scopeInfo,
-            ClubManagementExternalDTO.MyClubList myClubList
-    ) {
-        return BookStoryExternalDTO.BookStoryList.builder()
-                .scopeInfo(scopeInfo)
-                .memberClubList(myClubList)
-                .bookStoryDetailList(bookStoryDetailList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
-                .pageSize(pageSize)
-                .build();
-    }
-
-    /**
-     * BookStoryScope + MyClubInfoDTO -> ScopeInfo 변환
-     */
-    public static BookStoryExternalDTO.ScopeInfo fromScopeInfo(
-            BookStoryRequestDTO.BookStoryScope scope,
-            ClubManagementExternalDTO.MyClubInfo selectedClub
-    ) {
-        return BookStoryExternalDTO.ScopeInfo.builder()
-                .scope(scope)
-                .selectedClub(selectedClub)
-                .build();
-    }
-
-    /**
-     * BookStory -> BookStoryResponseDTO 변환
-     */
-    public static BookStoryExternalDTO.BookStoryDetail fromBookStoryToResponse(
+    public static BookStoryExternalDTO.BookStoryDetail toBookStoryDetailDTO(
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
@@ -97,10 +48,7 @@ public class BookStoryConverter {
                 .build();
     }
 
-    /**
-     * BookStory -> BookStoryDetailResponse 변환
-     */
-    public static BookStoryExternalDTO.BookStoryDetailWithComment fromBookStoryToDetailResponse(
+    public static BookStoryExternalDTO.BookStoryDetailWithComment toBookStoryDetailWithComment(
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
@@ -123,31 +71,7 @@ public class BookStoryConverter {
                 .build();
     }
 
-    // =====================================================
-    // CommentCreateRequestDTO → Comment 변환
-    // =====================================================
-
-    /**
-     * CommentCreateRequestDTO -> Comment 변환
-     */
-    public static Comment fromCommentCreateRequestDTO(
-            BookStoryRequestDTO.CommentCreate request,
-            String memberId,
-            BookStory bookStory,
-            Comment parentComment
-    ) {
-        return Comment.builder()
-                .content(request.getContent())
-                .memberId(memberId)
-                .bookStory(bookStory)
-                .parentComment(parentComment)
-                .build();
-    }
-
-    /**
-     * List<Comments> -> CommentResponse
-     */
-    public static List<BookStoryExternalDTO.CommentDetail> fromCommentsToResponses(
+    public static List<BookStoryExternalDTO.CommentDetail> toCommentDetailList(
             List<Comment> comments,
             String currentMemberId,
             java.util.Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
@@ -173,9 +97,6 @@ public class BookStoryConverter {
                 }).toList();
     }
 
-    /**
-     * Comment -> CommentResponse
-     */
     private static BookStoryExternalDTO.CommentDetail fromCommentToResponse(
             Comment comment,
             String currentMemberId,

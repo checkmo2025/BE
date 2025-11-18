@@ -78,10 +78,10 @@ public class BookStoryAPIImpl implements BookStoryAPI {
 
         // 7. 댓글 DTO 변환
         List<BookStoryExternalDTO.CommentDetail> commentDTOList =
-                BookStoryConverter.fromCommentsToResponses(comments, memberId, commentMemberInfoMap);
+                BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap);
 
         // 8. DTO 변환
-        return BookStoryConverter.fromBookStoryToDetailResponse(
+        return BookStoryConverter.toBookStoryDetailWithComment(
                 bookStory,
                 memberId,
                 bookInfo,
@@ -131,9 +131,19 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         ClubManagementExternalDTO.MyClubInfo myClubInfo = findClubInfoForScope(scope, clubId, myClubList);
 
         // 9. 스코프 정보 변환 및 최종 응답 DTO 변환
-        var scopeInfo = BookStoryConverter.fromScopeInfo(scope, myClubInfo);
-        return BookStoryConverter.fromBookStoryResponses(bookStoryDetailList, hasNext, nextCursor, DEFAULT_PAGE_SIZE,
-                scopeInfo, myClubList);
+        var scopeInfo = BookStoryExternalDTO.ScopeInfo.builder()
+                .scope(scope)
+                .selectedClub(myClubInfo)
+                .build();
+
+        return BookStoryExternalDTO.BookStoryList.builder()
+                .scopeInfo(scopeInfo)
+                .memberClubList(myClubList)
+                .bookStoryDetailList(bookStoryDetailList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(DEFAULT_PAGE_SIZE)
+                .build();
     }
 
     /**
@@ -190,7 +200,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     ) {
 
         return bookStoryList.stream()
-                .map(bookStory -> BookStoryConverter.fromBookStoryToResponse(
+                .map(bookStory -> BookStoryConverter.toBookStoryDetailDTO(
                         bookStory,
                         memberId,
                         bookInfoMap.get(bookStory.getBookId()),
