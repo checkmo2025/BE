@@ -39,8 +39,7 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         String bookId = bookAPI.getOrCreateBook(request.getBookDetail());
 
         // 3. 책 추천 엔티티 생성
-        BookRecommend bookRecommend = ClubManagementConverter.fromCreateBookRecommendDTOToEntity(request, bookId,
-                clubMember);
+        BookRecommend bookRecommend = ClubManagementConverter.toBookRecommend(request, bookId, clubMember);
 
         // 4. 저장
         BookRecommend savedRecommend = bookRecommendRepository.save(bookRecommend);

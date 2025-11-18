@@ -15,8 +15,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 @RequiredArgsConstructor
+@Transactional
+@Service
 public class ClubManagementCommandServiceImpl implements ClubManagementCommandService {
 
     // 자신의 QueryService
@@ -30,25 +31,26 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    @Transactional
     public Long createClub(String memberId, ClubDetail request) {
-        // 1. 운영진 멤버 엔티티 생성
-        ClubMember clubMember = ClubManagementConverter
-                .toClubMemberEntity(null, memberId, ClubMember.ClubMemberStatus.STAFF, null);
-
-        // 2. 클럽 이름 중복 검사
+        // 1. 클럽 이름 중복 검사
         if (clubQueryService.isDuplicateClubName(request.getName())) {
             throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
         }
 
-        // 3. 클럽 엔티티 생성
-        Club club = ClubManagementConverter.fromClubDetailDTOToClub(request);
+        // 2. 클럽 엔티티 생성
+        Club club = ClubManagementConverter.toClub(request);
 
-        // 4. 클럽과 클럽 멤버 연관관계 설정
-        club.addClubMember(clubMember);
-
-        // 5. 카테고리 연관관계 설정
+        // 3. 카테고리 연관관계 설정
         club.updateInterestCategories(new HashSet<>(request.getCategory()));
+
+        // 4. 운영진 멤버 생성
+        ClubMember clubMember = ClubMember.builder()
+                .memberId(memberId)
+                .clubMemberStatus(ClubMember.ClubMemberStatus.STAFF)
+                .build();
+
+        // 5. 양방향 연관관계 설정
+        club.addClubMember(clubMember);
 
         // 6. 클럽 저장
         clubRepository.save(club);
@@ -58,7 +60,6 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
     }
 
     @Override
-    @Transactional
     public Long updateClub(Long clubId, String memberId, ClubDetail request) {
         // 1. 유효성 검증(club, clubMember)
         Club club = clubQueryService.validateClub(clubId);
@@ -91,7 +92,6 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
     }
 
     @Override
-    @Transactional
     // TODO: 클럽이 삭제될 때, 이벤트 발행
     public void deleteClub(Long clubId, String memberId) {
         // Club을 삭제함으로써 Cascade.REMOVE가 동작되어 ClubManagement 모듈 내 모든 엔티티(클럽 멤버, 책 추천, 클럽 카테고리) 제거

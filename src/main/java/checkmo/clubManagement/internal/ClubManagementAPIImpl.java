@@ -71,7 +71,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     @Override
     public Membership getClubMembershipInfo(Long clubId, String memberId) throws GeneralException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        return ClubManagementConverter.fromClubMembertoMembershipDTO(clubMember);
+        return ClubManagementConverter.toMembershipDTO(clubMember);
     }
 
     @Override
@@ -83,13 +83,13 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
         if (clubMembers.size() != clubMemberIds.size()) {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND);
         }
-        return ClubManagementConverter.fromClubMembertoMembereshipDTO(clubMembers);
+        return ClubManagementConverter.toMembereshipDTOMap(clubMembers);
     }
 
     @Override
     public List<Membership> getClubMembersByStatus(Long clubId, Long cursorId, Integer size) {
         List<ClubMember> clubMembers
                 = clubMemberQueryService.getClubMemberListByStatus(clubId, "ACTIVE", cursorId, size);
-        return ClubManagementConverter.fromClubMemberToMembershipDTO(clubMembers);
+        return ClubManagementConverter.toMembershipDTOList(clubMembers);
     }
 }

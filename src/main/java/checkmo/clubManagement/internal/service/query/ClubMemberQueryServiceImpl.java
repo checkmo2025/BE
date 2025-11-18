@@ -1,7 +1,6 @@
 package checkmo.clubManagement.internal.service.query;
 
 import checkmo.clubManagement.ClubManagementExternalDTO;
-import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
@@ -46,7 +45,9 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 .map(row -> new ClubManagementExternalDTO.MyClubInfo((Long) row[0], (String) row[1]))
                 .toList();
 
-        return ClubManagementConverter.fromClubInfoListToMyClubList(myClubInfoList);
+        return ClubManagementExternalDTO.MyClubList.builder()
+                .clubList(myClubInfoList)
+                .build();
     }
 
     @Override

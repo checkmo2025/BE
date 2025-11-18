@@ -1,7 +1,6 @@
 package checkmo.clubManagement.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
-import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
@@ -46,13 +45,18 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
                 ? ClubMember.ClubMemberStatus.MEMBER
                 : ClubMember.ClubMemberStatus.PENDING;
 
-        // ClubMember 생성 및 연관관계 설정
-        ClubMember clubMember
-                = ClubManagementConverter.toClubMemberEntity(club, memberId, status, request.getJoinMessage());
+        // 4. ClubMember 생성
+        ClubMember clubMember = ClubMember.builder()
+                .clubMemberStatus(status)
+                .joinMessage(request.getJoinMessage())
+                .memberId(memberId)
+                .build();
+
+        // 5. 양방향 연관관계 설정 및 저장
         club.addClubMember(clubMember);
         clubMemberRepository.save(clubMember);
 
-        // 4. 공개 클럽이면 즉시 가입 완료 이벤트 발행
+        // 6. 공개 클럽이면 즉시 가입 완료 이벤트 발행
         if (club.isOpen()) {
             JoinClubEvent joinClubEvent = new JoinClubEvent(clubMember.getId(), memberId, club.getId(), club.getName());
             eventPublisher.publishEvent(joinClubEvent);

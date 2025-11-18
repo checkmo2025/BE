@@ -65,12 +65,14 @@ public class ClubManagementQueryFacade {
         boolean hasNext = !clubs.isEmpty() && clubs.size() == pageSize;
 
         // 8. 최종 DTO 변환
-        return ClubManagementConverter.toClubListDTO(clubList, hasNext, lastId);
+        return ClubResponseDTO.ClubList.builder()
+                .clubList(clubList)
+                .hasNext(hasNext)
+                .nextCursor(lastId)
+                .pageSize(clubList.size())
+                .build();
     }
 
-    /**
-     * Club 엔티티를 ClubWithMyStatusDTO로 변환합니다.
-     */
     private ClubResponseDTO.ClubWithMyStatus toClubWithMyStatusDTO(
             Club club,
             Map<Long, ClubMember.ClubMemberStatus> statusMap
@@ -79,7 +81,7 @@ public class ClubManagementQueryFacade {
         boolean isStaff = status == checkmo.clubManagement.internal.entity.ClubMember.ClubMemberStatus.STAFF;
         boolean isMember = status != null;
 
-        ClubResponseDTO.ClubDetail clubDetail = ClubManagementConverter.fromClubToClubDetailDTO(club, isStaff);
+        ClubResponseDTO.ClubDetail clubDetail = ClubManagementConverter.toClubDetailDTO(club, isStaff);
 
         return ClubResponseDTO.ClubWithMyStatus.builder()
                 .club(clubDetail)
@@ -95,7 +97,7 @@ public class ClubManagementQueryFacade {
 
         // 2. 모임 정보 DTO로 변환
         List<ClubResponseDTO.ClubInfo> clubInfoList = myClubs.stream()
-                .map(ClubManagementConverter::toClubInfoDTOFromMyClubInfo)
+                .map(ClubManagementConverter::toClubInfoDTO)
                 .toList();
 
         // 3. 최종 DTO 반환
@@ -121,21 +123,20 @@ public class ClubManagementQueryFacade {
         }
         Long nextCursor = hasNext ? clubMembers.getLast().getId() : null;
 
-        // 4. 클럽 ID 수집
-        List<Long> clubIds = clubMembers.stream()
-                .map(cm -> cm.getClub().getId())
-                .toList();
-
-        // 5. DTO 변환
-        List<ClubResponseDTO.ClubDetail> dtoList = clubMembers.stream()
-                .map(cm -> ClubManagementConverter.fromClubToResponseDTOWithCategoryNames(
+        // 4. DTO 변환
+        List<ClubResponseDTO.ClubDetail> clubList = clubMembers.stream()
+                .map(cm -> ClubManagementConverter.toClubDetailDTO(
                         cm.getClub(),
                         cm.isStaff()
                 ))
                 .toList();
 
-        // 7. DTO 감싸서 반환
-        return ClubManagementConverter.toMyPageClubListDTO(dtoList, hasNext, nextCursor);
+        // 5. DTO 감싸서 반환
+        return ClubResponseDTO.MyPageClubList.builder()
+                .clubList(clubList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
     }
 
     public ClubResponseDTO.ClubDetail getClubInfo(Long clubId, String memberId) {
@@ -151,7 +152,7 @@ public class ClubManagementQueryFacade {
         }
 
         // 3. DTO 변환 후 반환
-        return ClubManagementConverter.fromClubToClubDetailDTO(club, isStaff);
+        return ClubManagementConverter.toClubDetailDTO(club, isStaff);
     }
 
     public ClubResponseDTO.ClubMemberList getClubMemberListByStatus(Long clubId, String memberId,
@@ -192,7 +193,13 @@ public class ClubManagementQueryFacade {
                 })
                 .toList();
 
-        return ClubManagementConverter.toClubMemberListDTO(dtoList, hasNext, nextCursor);
+        return ClubResponseDTO.ClubMemberList.builder()
+                .clubMembers(dtoList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(dtoList.size())
+                .isStaff(true) // 항상 true
+                .build();
     }
 
     private List<String> extractMemberIds(List<ClubMember> members) {
@@ -235,10 +242,15 @@ public class ClubManagementQueryFacade {
                 }).toList();
 
         // 6. 페이징 처리 (Facade에서)
-        Long lastId = bookRecommends.isEmpty() ? null : bookRecommends.getLast().getId();
-        boolean hasNext = clubBookRecommendQueryService.hasNextPage(clubId, lastId);
+        Long nextCursor = bookRecommends.isEmpty() ? null : bookRecommends.getLast().getId();
+        boolean hasNext = clubBookRecommendQueryService.hasNextPage(clubId, nextCursor);
 
-        return ClubManagementConverter.toBookRecommendListDTO(dtoList, hasNext, lastId);
+        return ClubResponseDTO.BookRecommendList.builder()
+                .bookRecommendList(dtoList)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(dtoList.size())
+                .build();
     }
 
     public ClubResponseDTO.BookRecommendDetail getRecommendedBookDetail(Long clubId, Long bookRecommendId,
