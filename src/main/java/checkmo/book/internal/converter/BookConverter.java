@@ -14,14 +14,7 @@ import org.springframework.web.util.HtmlUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookConverter {
 
-    // =====================================================
-    // Book Entity → BookExternalDTO 변환
-    // =====================================================
-
-    /**
-     * Book → BasicInfoDTO
-     */
-    public static BookExternalDTO.BasicInfo fromBookToBasicInfoDTO(Book book) {
+    public static BookExternalDTO.BasicInfo toBasicInfoDTO(Book book) {
         return BookExternalDTO.BasicInfo.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
@@ -30,10 +23,7 @@ public class BookConverter {
                 .build();
     }
 
-    /**
-     * Book → DetailInfoDTO
-     */
-    public static BookExternalDTO.DetailInfo fromBookToDetailInfoDTO(Book book) {
+    public static BookExternalDTO.DetailInfo toDetailInfoDTO(Book book) {
         return BookExternalDTO.DetailInfo.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
@@ -44,25 +34,15 @@ public class BookConverter {
                 .build();
     }
 
-    /**
-     * Book Map → BasicInfoDTO Map
-     */
-    public static Map<String, BookExternalDTO.BasicInfo> fromBooksMapToBasicInfoDTOMap(Map<String, Book> booksMap) {
+    public static Map<String, BookExternalDTO.BasicInfo> toBasicInfoDTOMap(Map<String, Book> booksMap) {
         return booksMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> fromBookToBasicInfoDTO(entry.getValue())
+                        entry -> toBasicInfoDTO(entry.getValue())
                 ));
     }
 
-    // =====================================================
-    // Entity ↔ DTO 변환
-    // =====================================================
-
-    /**
-     * BookCreateRequest → Book 엔티티 변환
-     */
-    public static Book fromBookCreateRequest(
+    public static Book toBook(
             BookExternalDTO.BookCreate request
     ) {
         return Book.builder()
@@ -75,23 +55,59 @@ public class BookConverter {
                 .build();
     }
 
-    // =====================================================
-    // 알라딘 API 응답 변환
-    // =====================================================
+    public static BookResponseDTO.BookList toBookList(
+            AladinApiResponseDTO.BookList bookList,
+            int page
+    ) {
+        if (isInvalidResponse(bookList)) {
+            return createEmptyBookListResponse();
+        }
 
-    /**
-     * 알라딘 API 책 아이템 → BookResponseDTO 변환
-     */
-    public static BookResponseDTO.BookInfoDetail fromAladinBookItem(
+        var books = convertItemsToBookList(bookList.getItems());
+        boolean hasNext = calculateHasNext(bookList);
+
+        return BookResponseDTO.BookList.builder()
+                .bookInfoDetailList(books)
+                .hasNext(hasNext)
+                .currentPage(page)
+                .build();
+    }
+
+    public static BookResponseDTO.BookInfoDetail toBookInfoDetail(
+            AladinApiResponseDTO.BookList bookList
+    ) {
+        var book = convertItemToDetail(bookList.getItems().getFirst());
+
+        return BookResponseDTO.BookInfoDetail.builder()
+                .isbn(book.getIsbn())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .imgUrl(book.getImgUrl())
+                .publisher(book.getPublisher())
+                .description(book.getDescription())
+                .build();
+    }
+
+    private static boolean isInvalidResponse(AladinApiResponseDTO.BookList bookList) {
+        return bookList == null || bookList.getItems() == null;
+    }
+
+    private static BookResponseDTO.BookList createEmptyBookListResponse() {
+        return BookResponseDTO.BookList.builder()
+                .bookInfoDetailList(List.of())
+                .hasNext(false)
+                .currentPage(null)
+                .build();
+    }
+
+    private static BookResponseDTO.BookInfoDetail convertItemToDetail(
             AladinApiResponseDTO.BookItem item
     ) {
-        // description이 null인 경우를 대비한 방어 코드
         String description = (item.getDescription() != null) ? item.getDescription() : "";
 
-        // HTML 이스케이프 문자를 변환하고, 개행 문자를 공백으로 치환한 뒤, 양 끝 공백을 제거합니다.
         String cleanedDescription = HtmlUtils.htmlUnescape(description)
-                .replace("\\n", " ") // 이스케이프된 개행 문자 처리
-                .replace("\n", " ")  // 실제 개행 문자 처리
+                .replace("\\n", " ")
+                .replace("\n", " ")
                 .trim();
 
         String replaceImgUrl = item.getCover().replace("coversum", "cover500");
@@ -106,82 +122,15 @@ public class BookConverter {
                 .build();
     }
 
-    /**
-     * 알라딘 API 응답 → BookListResponseDTO 변환
-     */
-    public static BookResponseDTO.BookList fromAladinApiResponse(
-            AladinApiResponseDTO.BookList bookList,
-            int page
-    ) {
-        if (isInvalidResponse(bookList)) {
-            return createEmptyBookListResponse();
-        }
-
-        var books = convertToBookList(bookList.getItems());
-        boolean hasNext = calculateHasNext(bookList);
-
-        return BookResponseDTO.BookList.builder()
-                .bookInfoDetailList(books)
-                .hasNext(hasNext)
-                .currentPage(page)
-                .build();
-    }
-
-    /**
-     * 알라딘 API 응답 → BookInfoDetailResponseDTO 변환
-     */
-    public static BookResponseDTO.BookInfoDetail fromAladinApiResponse(
-            AladinApiResponseDTO.BookList bookList
-    ) {
-        var book = fromAladinBookItem(bookList.getItems().getFirst());
-
-        return BookResponseDTO.BookInfoDetail.builder()
-                .isbn(book.getIsbn())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .imgUrl(book.getImgUrl())
-                .publisher(book.getPublisher())
-                .description(book.getDescription())
-                .build();
-    }
-
-    // =====================================================
-    // Private Methods
-    // =====================================================
-
-    /**
-     * 알라딘 API 응답 유효성 검사
-     */
-    private static boolean isInvalidResponse(AladinApiResponseDTO.BookList bookList) {
-        return bookList == null || bookList.getItems() == null;
-    }
-
-    /**
-     * 빈 BookListResponseDTO 생성
-     */
-    private static BookResponseDTO.BookList createEmptyBookListResponse() {
-        return BookResponseDTO.BookList.builder()
-                .bookInfoDetailList(List.of())
-                .hasNext(false)
-                .currentPage(null)
-                .build();
-    }
-
-    /**
-     * 알라딘 API 아이템 리스트 → BookResponseDTO 리스트 변환
-     */
-    private static List<BookResponseDTO.BookInfoDetail> convertToBookList(
+    private static List<BookResponseDTO.BookInfoDetail> convertItemsToBookList(
             List<AladinApiResponseDTO.BookItem> items
     ) {
         return items.stream()
                 .filter(item -> item.getIsbn13() != null && !item.getIsbn13().trim().isEmpty())
-                .map(BookConverter::fromAladinBookItem)
+                .map(BookConverter::convertItemToDetail)
                 .toList();
     }
 
-    /**
-     * 다음 페이지 존재 여부 계산
-     */
     private static boolean calculateHasNext(AladinApiResponseDTO.BookList bookList) {
         int totalResults = bookList.getTotalResults();
         int startIndex = bookList.getStartIndex();

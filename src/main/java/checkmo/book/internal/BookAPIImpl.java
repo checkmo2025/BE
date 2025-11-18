@@ -28,7 +28,7 @@ public class BookAPIImpl implements BookAPI {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
 
-        return BookConverter.fromBookToBasicInfoDTO(book);
+        return BookConverter.toBasicInfoDTO(book);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class BookAPIImpl implements BookAPI {
         // Service에서 엔티티 받아서 직접 변환
         Book book = bookQueryService.findBook(bookId);
 
-        return BookConverter.fromBookToDetailInfoDTO(book);
+        return BookConverter.toDetailInfoDTO(book);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class BookAPIImpl implements BookAPI {
         Map<String, Book> booksMap = bookQueryService.findBooksMap(distinctBookIds);
 
         // 엔티티 → SharedDTO 직접 변환
-        return BookConverter.fromBooksMapToBasicInfoDTOMap(booksMap);
+        return BookConverter.toBasicInfoDTOMap(booksMap);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class BookAPIImpl implements BookAPI {
             return request.getIsbn();
         }
 
-        Book book = BookConverter.fromBookCreateRequest(request);
+        Book book = BookConverter.toBook(request);
 
         // 없으면 저장 후 ID 반환
         return bookRepository.save(book).getId();

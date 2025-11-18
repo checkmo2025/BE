@@ -47,7 +47,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private AuthUser registerNewMember(OAuth2Attributes attributes, String registrationId) {
-        AuthUser newUser = AuthConverter.fromOAuth2Attributes(attributes, registrationId);
+        AuthUser newUser = AuthConverter.toOAuth2User(attributes, registrationId);
         return authRepository.save(newUser);
     }
 }
