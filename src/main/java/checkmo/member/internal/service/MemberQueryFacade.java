@@ -7,13 +7,13 @@ import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberResponseDTO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class MemberQueryFacade {
         Member targetMember = memberQueryService.getOtherProfile(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
 
-        return MemberConverter.toOtherProfileResponse(targetMember, isFollowing);
+        return MemberConverter.toOtherProfile(targetMember, isFollowing);
     }
 
     public MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId) {
@@ -60,7 +60,11 @@ public class MemberQueryFacade {
         List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followerIdList, memberId);
 
         // 5. 응답 DTO 변환
-        return MemberConverter.toFollowList(profiles, hasNext, nextCursor);
+        return MemberResponseDTO.FollowList.builder()
+                .followList(profiles)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
     }
 
     public MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId) {
@@ -86,12 +90,15 @@ public class MemberQueryFacade {
         List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followingIdList, memberId);
 
         // 5. 응답 DTO 변환
-        return MemberConverter.toFollowList(profiles, hasNext, nextCursor);
+        return MemberResponseDTO.FollowList.builder()
+                .followList(profiles)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .build();
     }
 
     /**
-     * 회원 ID 목록에 대한 프로필 + 팔로우 상태를 배치 조회 (내부용)
-     * MemberQueryFacade 내부에서 사용하며, MemberAPI에서도 재사용 가능
+     * 회원 ID 목록에 대한 프로필 + 팔로우 상태를 배치 조회 (내부용) MemberQueryFacade 내부에서 사용하며, MemberAPI에서도 재사용 가능
      *
      * @param targetMemberIds 조회할 회원 ID 목록
      * @param currentMemberId 현재 회원 ID (팔로우 상태 확인용)
@@ -106,7 +113,8 @@ public class MemberQueryFacade {
         }
 
         // 1. 회원 기본 정보 배치 조회
-        List<MemberBasicInfoProjection> memberInfoList = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(targetMemberIds);
+        List<MemberBasicInfoProjection> memberInfoList = memberQueryService.getMemberNicknamesAndProfileImagesByMemberIds(
+                targetMemberIds);
 
         // 2. 팔로우 상태 배치 조회
         Map<String, Boolean> followStatusMap = memberFollowQueryService
@@ -119,7 +127,11 @@ public class MemberQueryFacade {
                         projection -> {
                             String memberId = projection.getId();
                             boolean isFollowing = followStatusMap.getOrDefault(memberId, false);
-                            return MemberConverter.toMemberProfile(projection.getNickName(), projection.getImgUrl(), isFollowing);
+                            return MemberResponseDTO.MemberProfileWithFollow.builder()
+                                    .nickname(projection.getNickName())
+                                    .profileImageUrl(projection.getImgUrl())
+                                    .isFollowing(isFollowing)
+                                    .build();
                         }
                 ));
 

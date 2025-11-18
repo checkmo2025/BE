@@ -3,7 +3,6 @@ package checkmo.member.internal.service.command;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberEvent;
-import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.FollowRepository;
@@ -49,7 +48,10 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로잉 관계 생성
-        Follow follow = MemberConverter.toFollow(follower, following);
+        Follow follow = Follow.builder()
+                .follower(follower)
+                .following(following)
+                .build();
         followRepository.save(follow);
 
         // 팔로잉 이벤트 발행

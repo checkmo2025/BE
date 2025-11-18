@@ -58,9 +58,13 @@ public class MemberAPIImpl implements MemberAPI {
     @Override
     public MemberExternalDTO.BasicInfo getMemberBasicInfoForShare(String memberId) {
         Member member = memberQueryService.getMemberBasicInfo(memberId);
-        MemberResponseDTO.MemberProfileWithProfileImage profileDTO = MemberConverter.toMemberProfileWithProfileImage(member);
+        MemberResponseDTO.MemberProfileWithProfileImage profileDTO = MemberConverter.toMemberProfileWithProfileImage(
+                member);
 
-        return MemberConverter.toBasicInfo(profileDTO);
+        return MemberExternalDTO.BasicInfo.builder()
+                .nickname(profileDTO.getNickname())
+                .profileImageUrl(profileDTO.getProfileImageUrl())
+                .build();
     }
 
     @Override
@@ -91,7 +95,12 @@ public class MemberAPIImpl implements MemberAPI {
         boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
         var basicInfoDTO = getMemberBasicInfoForShare(targetMemberId);
-        return MemberConverter.toWithFollowStatus(basicInfoDTO, isFollowing);
+
+        return MemberExternalDTO.WithFollowStatus.builder()
+                .nickname(basicInfoDTO.getNickname())
+                .profileImageUrl(basicInfoDTO.getProfileImageUrl())
+                .following(isFollowing)
+                .build();
     }
 
     @Override
@@ -111,7 +120,7 @@ public class MemberAPIImpl implements MemberAPI {
         for (int i = 0; i < targetMemberIds.size() && i < profiles.size(); i++) {
             String memberId = targetMemberIds.get(i);
             MemberResponseDTO.MemberProfileWithFollow profile = profiles.get(i);
-            result.put(memberId, MemberConverter.toMemberExternalDTOWithFollowStatus(profile));
+            result.put(memberId, MemberConverter.toMemberProfileWithFollowStatus(profile));
         }
 
         return result;

@@ -3,7 +3,6 @@ package checkmo.member.internal.service.command;
 import checkmo.authentication.AuthenticationAPI;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
-import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
@@ -25,7 +24,13 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     @Override
     public void createMember(String memberId, String email) {
 
-        Member member = MemberConverter.toMember(memberId, email);
+        Member member = Member.builder()
+                .id(memberId)
+                .email(email)
+                .nickName("")
+                .description("")
+                .imgUrl(null)
+                .build();
 
         memberRepository.save(member);
     }
