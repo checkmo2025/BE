@@ -10,34 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NotificationConverter {
 
-    // =====================================================
-    // Event → Notification 변환
-    // =====================================================
-
-    /**
-     * Event -> Notification 변환
-     */
-    public static Notification fromEvent(
-            Notification.NotificationType notificationType,
-            Long sourceId,
-            String redirectPath,
-            String targetName,
-            String senderId,
-            String receiverId
-    ) {
-        return Notification.builder()
-                .notificationType(notificationType)
-                .sourceId(sourceId)
-                .redirectPath(redirectPath)
-                .targetName(targetName)
-                .senderId(senderId)
-                .receiverId(receiverId)
-                .build();
-    }
-
-    /**
-     * 리다이렉트 경로 반환
-     */
     public static String getRedirectPath(Notification.NotificationType notificationType, Long bookStoryId) {
         if (Notification.NotificationType.LIKE == notificationType) {
             return "/bookstory/" + bookStoryId + "/detail"; // 프론트엔드 경로
@@ -59,13 +31,6 @@ public class NotificationConverter {
         return null;
     }
 
-    // =====================================================
-    // Notification → NotificationExternalDTO 변환
-    // =====================================================
-
-    /**
-     * NotificationPreviewDTO -> NotificationPreviewListDTO
-     */
     public static NotificationResponseDTO.NotificationPreviewList convertToPreviewListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap
@@ -83,9 +48,6 @@ public class NotificationConverter {
                 .build();
     }
 
-    /**
-     * Notification → NotificationExternalDTO 변환
-     */
     public static NotificationResponseDTO.NotificationPreview convertToPreviewDTO(Notification notification,
                                                                                   String senderNickname) {
         return NotificationResponseDTO.NotificationPreview.builder()
@@ -99,13 +61,6 @@ public class NotificationConverter {
                 .build();
     }
 
-    // =====================================================
-    // Notification → NotificationResponseDTO 변환 (커서 기반 페이징용)
-    // =====================================================
-
-    /**
-     * Notification -> NotificationListResponseDTO 변환
-     */
     public static NotificationResponseDTO.NotificationList convertToNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,

@@ -41,14 +41,14 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         String redirectPath = NotificationConverter.getRedirectPath(type, event.bookStoryId());
 
         // Notification 객체를 생성하고 저장 (targetName = null)
-        Notification notification = NotificationConverter.fromEvent(
-                type,
-                sourceId,
-                redirectPath,
-                null,
-                event.senderId(),  // 좋아요를 누른 사람
-                event.receiverId() // 좋아요를 받은 사람
-        );
+        Notification notification = Notification.builder()
+                .notificationType(type)
+                .sourceId(sourceId)
+                .redirectPath(redirectPath)
+                .targetName(null)
+                .senderId(event.senderId())
+                .receiverId(event.receiverId())
+                .build();
         try {
             notificationRepository.save(notification);
         } catch (DataIntegrityViolationException e) {
@@ -73,14 +73,14 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         String redirectPath = NotificationConverter.getRedirectPath(type, FollowerNickname);
 
         // Notification 객체를 생성하고 저장 (targetName = followerNickname)
-        Notification notification = NotificationConverter.fromEvent(
-                type,
-                sourceId,
-                redirectPath,
-                FollowerNickname,
-                event.followerId(), // 팔로우 누른 사람
-                event.followingId() // 팔로우 당하는 사람
-        );
+        Notification notification = Notification.builder()
+                .notificationType(type)
+                .sourceId(sourceId)
+                .redirectPath(redirectPath)
+                .targetName(FollowerNickname)
+                .senderId(event.followerId())
+                .receiverId(event.followingId())
+                .build();
         try {
             notificationRepository.save(notification);
         } catch (DataIntegrityViolationException e) {
@@ -103,14 +103,14 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
                 event.clubId());
 
         // Notification 객체를 생성하고 저장 (sender 없이, targetName 포함)
-        Notification notification = NotificationConverter.fromEvent(
-                Notification.NotificationType.JOIN_CLUB,
-                event.eventId(),
-                redirectPath,
-                event.clubName(),
-                null, // 시스템 알림이므로 sender는 null
-                event.memberId() // 독서 클럽 가입 승인 이벤트에서 멤버의 ID를 가져옴 (새로 가입 된 사람)
-        );
+        Notification notification = Notification.builder()
+                .notificationType(type)
+                .sourceId(sourceId)
+                .redirectPath(redirectPath)
+                .targetName(event.clubName())
+                .senderId(null)
+                .receiverId(event.memberId())
+                .build();
         try {
             notificationRepository.save(notification);
         } catch (DataIntegrityViolationException e) {
