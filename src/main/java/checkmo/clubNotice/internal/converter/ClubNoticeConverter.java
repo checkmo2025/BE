@@ -15,31 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubNoticeConverter {
 
-    /**
-     * ClubResponseDTO.ClubNoticeListDTO 변환
-     */
-    public static ClubNoticeResponseDTO.ClubNoticeList toClubNoticeListDTO(
-            List<ClubNoticeResponseDTO.NoticeItem> noticeItems,
-            boolean hasNext,
-            Long nextCursor,
-            boolean isStaff
-    ) {
-        List<ClubNoticeResponseDTO.NoticeItem> safeList =
-                (noticeItems == null) ? List.of() : List.copyOf(noticeItems);
-
-        return ClubNoticeResponseDTO.ClubNoticeList.builder()
-                .noticeList(safeList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
-                .pageSize(safeList.size())
-                .isStaff(isStaff)
-                .build();
-
-    }
-
-    /**
-     * Notice 엔티티 → PureNoticeDTO 변환
-     */
     public static ClubNoticeResponseDTO.PureNotice toPureNoticeDTO(Notice notice) {
         return ClubNoticeResponseDTO.PureNotice.builder()
                 .id(notice.getId())
@@ -50,10 +25,7 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    /**
-     * CreateClubVoteDTO + Club -> Vote 엔티티 변환
-     */
-    public static Vote fromCreateVoteDTOToVote(
+    public static Vote toVote(
             ClubNoticeRequestDTO.CreateClubVote request,
             Long clubId
     ) {
@@ -75,10 +47,7 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    /**
-     * 투표 항목 리스트 → EachItemDTO 리스트 변환 기본값: isSelected = false, voteCount = 0, votedMembers = 빈 리스트
-     */
-    public static List<ClubNoticeResponseDTO.EachItem> toEachItemDTOListFromItems(List<String> items) {
+    public static List<ClubNoticeResponseDTO.EachItem> toEachItemDTOList(List<String> items) {
         return items.stream()
                 .map(item -> ClubNoticeResponseDTO.EachItem.builder()
                         .item(item)
@@ -89,10 +58,7 @@ public class ClubNoticeConverter {
                 .toList();
     }
 
-    /**
-     * VoteResultDTO -> ClubMemberVote 엔티티
-     */
-    public static ClubMemberVote fromVoteRequestToMemberVote(
+    public static ClubMemberVote toClubMemberVote(
             Vote vote,
             Long clubMemberId,
             ClubNoticeRequestDTO.VoteResult request
@@ -109,10 +75,7 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    /**
-     * CreateClubNoticeDTO -> Notice 엔티티 변환 (모임과 연결되지 않은 순수 공지사항)
-     */
-    public static Notice fromCreateNoticeDTOToNotice(
+    public static Notice toNotice(
             ClubNoticeRequestDTO.CreateClubNotice request,
             Long clubId
     ) {
@@ -125,9 +88,6 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    /**
-     * 투표 항목 → EachItemDTO 변환
-     */
     public static ClubNoticeResponseDTO.EachItem toEachItemDTO(
             String item,
             boolean isSelected,
@@ -141,10 +101,8 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    /**
-     * Vote 엔티티 → VoteDTO 변환
-     */
-    public static ClubNoticeResponseDTO.VoteNotice toVoteDTO(Vote vote, List<ClubNoticeResponseDTO.EachItem> itemDTOs) {
+    public static ClubNoticeResponseDTO.VoteNotice toVoteNoticeDTO(Vote vote,
+                                                                   List<ClubNoticeResponseDTO.EachItem> itemDTOs) {
         return ClubNoticeResponseDTO.VoteNotice.builder()
                 .id(vote.getId())
                 .title(vote.getTitle())
@@ -159,9 +117,6 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    /**
-     * Notice 엔티티 + MeetingInfo -> ClubResponseDTO.MeetingNoticeDTO 변환
-     */
     public static ClubNoticeResponseDTO.MeetingNotice toMeetingNoticeDTO(
             Notice notice,
             ClubMeetingExternalDTO.MeetingInfo meetingInfo
@@ -176,7 +131,7 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    public static Notice fromMeetingCreatedEventToNotice(ClubMeetingCreatedEvent event) {
+    public static Notice toNotice(ClubMeetingCreatedEvent event) {
         return Notice.builder()
                 .clubId(event.clubId())
                 .meetingId(event.meetingId())

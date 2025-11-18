@@ -87,7 +87,13 @@ public class ClubNoticeQueryFacade {
                 ? noticeItems.get(pageSize - 1).getId()
                 : null;
 
-        return ClubNoticeConverter.toClubNoticeListDTO(noticeItems, hasNext, nextCursor, clubMembershipInfo.isStaff());
+        return ClubNoticeResponseDTO.ClubNoticeList.builder()
+                .noticeList(noticeItems)
+                .hasNext(hasNext)
+                .nextCursor(nextCursor)
+                .pageSize(noticeItems.size())
+                .isStaff(clubMembershipInfo.isStaff())
+                .build();
     }
 
     /**
@@ -115,9 +121,9 @@ public class ClubNoticeQueryFacade {
                 resultList.add(dto);
             } else if (j < m) {
                 Vote vote = votes.get(j++);
-                List<ClubNoticeResponseDTO.EachItem> itemDTOs = ClubNoticeConverter.toEachItemDTOListFromItems(
+                List<ClubNoticeResponseDTO.EachItem> itemDTOs = ClubNoticeConverter.toEachItemDTOList(
                         vote.getItems());
-                ClubNoticeResponseDTO.VoteNotice voteNoticeDTO = ClubNoticeConverter.toVoteDTO(vote, itemDTOs);
+                ClubNoticeResponseDTO.VoteNotice voteNoticeDTO = ClubNoticeConverter.toVoteNoticeDTO(vote, itemDTOs);
                 resultList.add(voteNoticeDTO);
             }
         }
@@ -212,7 +218,7 @@ public class ClubNoticeQueryFacade {
         List<ClubNoticeResponseDTO.EachItem> itemDTOs = createVoteItemDTOs(voteItems, myVote, votedMembersByItem,
                 itemCount);
 
-        ClubNoticeResponseDTO.VoteNotice voteNoticeDTO = ClubNoticeConverter.toVoteDTO(vote, itemDTOs);
+        ClubNoticeResponseDTO.VoteNotice voteNoticeDTO = ClubNoticeConverter.toVoteNoticeDTO(vote, itemDTOs);
 
         return ClubNoticeResponseDTO.ClubNoticeDetail.builder()
                 .isStaff(clubMembershipInfo.isStaff())

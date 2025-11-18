@@ -42,7 +42,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
         // 공지사항 생성 및 저장
-        Notice notice = ClubNoticeConverter.fromCreateNoticeDTOToNotice(request, clubId);
+        Notice notice = ClubNoticeConverter.toNotice(request, clubId);
         noticeRepository.save(notice);
 
         // 공지사항 ID 반환
@@ -81,7 +81,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
             noticeRepository.delete(existingNotice);
         }
 
-        Notice notice = ClubNoticeConverter.fromMeetingCreatedEventToNotice(event);
+        Notice notice = ClubNoticeConverter.toNotice(event);
         noticeRepository.save(notice);
     }
 
@@ -92,7 +92,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
         // 투표 생성 및 저장
-        Vote vote = ClubNoticeConverter.fromCreateVoteDTOToVote(request, clubId);
+        Vote vote = ClubNoticeConverter.toVote(request, clubId);
         //TODO: 데드라인이 현재 시간보다 이전인지, 시작시간이 데드라인보다 이전인지, 시작시간이 현재시간보다 이전인지 검증이 필요하지 않나
         voteRepository.save(vote);
 
@@ -137,7 +137,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
         // ClubMemberVote 생성 및 저장
         ClubMemberVote clubMemberVote
-                = ClubNoticeConverter.fromVoteRequestToMemberVote(vote, clubMemberId, request);
+                = ClubNoticeConverter.toClubMemberVote(vote, clubMemberId, request);
         clubMemberVoteRepository.save(clubMemberVote);
 
         return vote.getId();
