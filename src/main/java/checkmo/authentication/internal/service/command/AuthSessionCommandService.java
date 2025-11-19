@@ -30,7 +30,6 @@ public class AuthSessionCommandService {
     private final JwtCookieUtil jwtCookieUtil;
 
     public Authentication login(AuthRequestDTO.Login request) {
-
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
@@ -56,7 +55,6 @@ public class AuthSessionCommandService {
     }
 
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-
         // 1. 쿠키에서 jwt 토큰 가져오기
         String accessToken = jwtCookieUtil.resolveToken(request, "accessToken");
         String refreshToken = jwtCookieUtil.resolveToken(request, "refreshToken");
@@ -76,7 +74,7 @@ public class AuthSessionCommandService {
 
         // 4. redis에 저장된 Refresh Token을 redis에서 삭제
         if (StringUtils.hasText(refreshToken)) {
-            try{
+            try {
                 String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
                 tokenCacheService.deleteRefreshToken(memberId);
             } catch (Exception e) {

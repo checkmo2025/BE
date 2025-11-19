@@ -34,7 +34,6 @@ public class BookCommandServiceImpl implements BookCommandService {
     @Override
     @Transactional
     public void deleteBook(String bookId) {
-
         Book book = bookRepository.findById(bookId).orElseThrow(
                 () -> new GeneralException(ErrorStatus.BOOK_NOT_FOUND)
         );

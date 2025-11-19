@@ -22,7 +22,6 @@ public class AuthFacade {
     private final JwtLoginProcessor jwtLoginProcessor;
 
     public AuthResponseDTO.SignUp signUp(AuthRequestDTO.SignUp request, HttpServletResponse response) {
-
         AuthUser user = authUserCommandService.signUp(request);
 
         Authentication authentication = authSessionCommandService
@@ -35,7 +34,6 @@ public class AuthFacade {
     }
 
     public void login(AuthRequestDTO.Login request, HttpServletResponse response) {
-
         Authentication authentication = authSessionCommandService.login(request);
 
         // JWT 토큰 생성 및 쿠키 설정

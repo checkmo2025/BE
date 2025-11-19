@@ -31,8 +31,7 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http)
-        throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화
@@ -61,12 +60,12 @@ public class SecurityConfig {
 
         // OAuth2 로그인 설정
         http
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
-                )
-                .successHandler(oAuth2AuthenticationSuccessHandler) // 로그인 성공 핸들러 설정
-                .failureHandler(oAuth2AuthenticationFailureHandler) // 로그인 실패 핸들러 설정
-            );
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2AuthenticationSuccessHandler) // 로그인 성공 핸들러 설정
+                        .failureHandler(oAuth2AuthenticationFailureHandler) // 로그인 실패 핸들러 설정
+                );
 
         return http.build();
     }
@@ -78,7 +77,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-        AuthenticationConfiguration authenticationConfiguration) throws Exception {
+            AuthenticationConfiguration authenticationConfiguration
+    ) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

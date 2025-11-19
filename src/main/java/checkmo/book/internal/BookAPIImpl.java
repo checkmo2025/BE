@@ -57,7 +57,6 @@ public class BookAPIImpl implements BookAPI {
     @Override
     @Transactional
     public String getOrCreateBook(BookExternalDTO.BookCreate request) {
-
         // 이미 존재하는지 확인
         if (bookRepository.existsById(request.getIsbn())) {
             return request.getIsbn();

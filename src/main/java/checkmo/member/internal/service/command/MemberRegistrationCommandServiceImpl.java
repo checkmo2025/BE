@@ -23,7 +23,6 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     public void createMember(String memberId, String email) {
-
         Member member = Member.builder()
                 .id(memberId)
                 .email(email)
@@ -37,7 +36,6 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
 
     @Override
     public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
-
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 

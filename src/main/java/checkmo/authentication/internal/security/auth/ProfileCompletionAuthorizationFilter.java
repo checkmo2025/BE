@@ -36,25 +36,25 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
         return excludedPaths.stream()
-                            .anyMatch(path -> pathMatcher.match(path, request.getRequestURI()));
+                .anyMatch(path -> pathMatcher.match(path, request.getRequestURI()));
     }
 
     @Override
-    protected void doFilterInternal(@Nonnull HttpServletRequest request,
-                                    @Nonnull HttpServletResponse response,
-                                    @Nonnull FilterChain filterChain)
-        throws ServletException, IOException {
-
+    protected void doFilterInternal(
+            @Nonnull HttpServletRequest request,
+            @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain
+    ) throws ServletException, IOException {
         // 현재 인증 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()
-            && authentication.getPrincipal() instanceof PrincipalDetails principalDetails) {
+                && authentication.getPrincipal() instanceof PrincipalDetails principalDetails) {
 
             //  프로필이 완료되지 않은 회원은 에러
             if (!principalDetails.getUser().isProfileCompleted()) {
                 log.warn("프로필 미완료 회원 접근 차단: {}, 요청 URI: {}",
-                    principalDetails.getUser().getId(), request.getRequestURI());
+                        principalDetails.getUser().getId(), request.getRequestURI());
                 sendErrorResponse(response);
                 return;
             }
@@ -69,9 +69,9 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
 
         ApiResponse<Object> errorResponse = ApiResponse.onFailure(
-            ErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getCode(),
-            ErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getMessage(),
-            null
+                ErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getCode(),
+                ErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getMessage(),
+                null
         );
 
         ObjectMapper objectMapper = new ObjectMapper();

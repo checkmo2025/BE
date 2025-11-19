@@ -1,7 +1,7 @@
 package checkmo.authentication.internal.security.jwt;
 
-import checkmo.common.config.properties.JwtProperties;
 import checkmo.authentication.internal.security.auth.CustomUserDetailsService;
+import checkmo.common.config.properties.JwtProperties;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -40,11 +40,10 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
     @Override
     public JwtToken generateToken(Authentication authentication) {
-
         // 권한 가져오기
         String authorities = authentication.getAuthorities().stream()
-                                           .map(GrantedAuthority::getAuthority)
-                                           .collect(Collectors.joining(","));
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
         // 현재 시간
         long now = (new Date()).getTime();
@@ -55,23 +54,23 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         // 액세스 토큰 생성
         String accessToken = Jwts.builder()
-                                 .subject(authentication.getName())
-                                 .claim("role", authorities)
-                                 .expiration(new Date(now + accessTokenValidity))
-                                 .signWith(key)
-                                 .compact();
+                .subject(authentication.getName())
+                .claim("role", authorities)
+                .expiration(new Date(now + accessTokenValidity))
+                .signWith(key)
+                .compact();
 
         // 리프레시 토큰 생성
         String refreshToken = Jwts.builder()
-                                  .subject(authentication.getName())
-                                  .expiration(new Date(now + refreshTokenValidity))
-                                  .signWith(key)
-                                  .compact();
+                .subject(authentication.getName())
+                .expiration(new Date(now + refreshTokenValidity))
+                .signWith(key)
+                .compact();
 
         return JwtToken.builder()
-                       .accessToken(accessToken)
-                       .refreshToken(refreshToken)
-                       .build();
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     @Override
@@ -80,12 +79,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         UserDetails userDetails = customUserDetailsService.loadUserById(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, "",
-            userDetails.getAuthorities());
+                userDetails.getAuthorities());
     }
 
     @Override
     public boolean validateToken(String token) {
-
         if (!StringUtils.hasText(token)) {
             log.warn("JWT 토큰이 null 입니다.");
             return false;
@@ -93,14 +91,13 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         try {
             Jwts.parser()
-                .verifyWith((SecretKey) key)
-                .build()
-                .parseSignedClaims(token);
+                    .verifyWith((SecretKey) key)
+                    .build()
+                    .parseSignedClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
             throw e; // 토큰이 만료된 경우 재발급하도록 던지기
-        }
-        catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.warn("잘못된 JWT 서명입니다.", e);
         } catch (UnsupportedJwtException e) {
             log.warn("지원하지 않는 JWT 토큰입니다", e);
@@ -114,9 +111,9 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     public boolean isRefreshTokenValid(String refreshToken) {
         try {
             Jwts.parser()
-                .verifyWith((SecretKey) key)
-                .build()
-                .parseSignedClaims(refreshToken);
+                    .verifyWith((SecretKey) key)
+                    .build()
+                    .parseSignedClaims(refreshToken);
             return true;
         } catch (Exception e) {
             log.warn("유효하지 않은 Refresh Token 입니다: {}", e.getMessage());
@@ -128,11 +125,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     public String getUserIdFromToken(String token) {
         try {
             return Jwts.parser()
-                       .verifyWith((SecretKey) key)
-                       .build()
-                       .parseSignedClaims(token)
-                       .getPayload()
-                       .getSubject();
+                    .verifyWith((SecretKey) key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
         } catch (ExpiredJwtException e) {
             return e.getClaims().getSubject();
         }
@@ -143,7 +140,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         UserDetails userDetails = customUserDetailsService.loadUserById(memberId);
 
         return new UsernamePasswordAuthenticationToken(
-            userDetails, null, userDetails.getAuthorities()
+                userDetails, null, userDetails.getAuthorities()
         );
     }
 

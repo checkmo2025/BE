@@ -52,8 +52,13 @@ public class ClubNoticeQueryFacade {
     // 자신의 Query Service
     private final ClubNoticeQueryService clubNoticeQueryService;
 
-    public ClubNoticeResponseDTO.ClubNoticeList getLatestNotices(Long clubId, String memberId, Long cursorId,
-                                                                 boolean onlyImportant, Integer size) {
+    public ClubNoticeResponseDTO.ClubNoticeList getLatestNotices(
+            Long clubId,
+            String memberId,
+            Long cursorId,
+            boolean onlyImportant,
+            Integer size
+    ) {
 
         // 1. 검증 -> 소식은 클럽에 속한 사람만 조회할 수 있음
         clubManagementAPI.getClubInfo(clubId);
@@ -100,7 +105,10 @@ public class ClubNoticeQueryFacade {
      * 공지사항과 투표를 생성 시간 순서대로 병합하는 로직
      */
     private List<ClubNoticeResponseDTO.NoticeItem> mergeNoticesAndVotes(
-            List<Notice> notices, Map<Long, MeetingInfo> meetingInfos, List<Vote> votes, int pageSize
+            List<Notice> notices,
+            Map<Long, MeetingInfo> meetingInfos,
+            List<Vote> votes,
+            int pageSize
     ) {
         List<ClubNoticeResponseDTO.NoticeItem> resultList = new ArrayList<>();
         int n = notices.size();
@@ -144,8 +152,12 @@ public class ClubNoticeQueryFacade {
                 .collect(Collectors.toSet());
     }
 
-    public ClubNoticeResponseDTO.ClubNoticeDetail getNoticeDetail(Long clubId, Long noticeId, String tag,
-                                                                  String memberId) {
+    public ClubNoticeResponseDTO.ClubNoticeDetail getNoticeDetail(
+            Long clubId,
+            Long noticeId,
+            String tag,
+            String memberId
+    ) {
         // 1. 검증
         clubManagementAPI.getClubInfo(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
@@ -161,8 +173,10 @@ public class ClubNoticeQueryFacade {
     /**
      * 순수 공지사항 상세 조회
      */
-    private ClubNoticeResponseDTO.ClubNoticeDetail getPureNoticeDetail(Long clubId, Long itemId,
-                                                                       Membership clubMembershipInfo
+    private ClubNoticeResponseDTO.ClubNoticeDetail getPureNoticeDetail(
+            Long clubId,
+            Long itemId,
+            Membership clubMembershipInfo
     ) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
 
@@ -179,8 +193,11 @@ public class ClubNoticeQueryFacade {
     /**
      * 모임 공지사항 상세 조회
      */
-    private ClubNoticeResponseDTO.ClubNoticeDetail getMeetingNoticeDetail(Long clubId, Long itemId,
-                                                                          Membership clubMembershipInfo) {
+    private ClubNoticeResponseDTO.ClubNoticeDetail getMeetingNoticeDetail(
+            Long clubId,
+            Long itemId,
+            Membership clubMembershipInfo
+    ) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
 
         if (TAG_NOTICE.equals(notice.getTag())) {
@@ -198,8 +215,12 @@ public class ClubNoticeQueryFacade {
     /**
      * 투표 상세 조회
      */
-    private ClubNoticeResponseDTO.ClubNoticeDetail getVoteDetail(Long clubId, Long itemId, String memberId,
-                                                                 Membership clubMembershipInfo) {
+    private ClubNoticeResponseDTO.ClubNoticeDetail getVoteDetail(
+            Long clubId,
+            Long itemId,
+            String memberId,
+            Membership clubMembershipInfo
+    ) {
         Vote vote = clubNoticeQueryService.getVote(clubId, itemId);
         List<String> voteItems = vote.getItems();
         int itemCount = voteItems.size();
@@ -230,7 +251,9 @@ public class ClubNoticeQueryFacade {
      * 투표 항목별 투표자 정보 수집
      */
     private List<List<MemberExternalDTO.BasicInfo>> collectVotedMembersByItem(
-            Vote vote, List<ClubMemberVote> clubMemberVotes, int itemCount
+            Vote vote,
+            List<ClubMemberVote> clubMemberVotes,
+            int itemCount
     ) {
         // 항목별 투표자 정보 리스트 초기화
         List<List<BasicInfo>> votedMembersByItem = initVotedMembersByItem(itemCount);
@@ -372,8 +395,10 @@ public class ClubNoticeQueryFacade {
      * 투표 항목 DTO 리스트 생성
      */
     private List<ClubNoticeResponseDTO.EachItem> createVoteItemDTOs(
-            List<String> voteItems, ClubMemberVote myVote,
-            List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem, int itemCount
+            List<String> voteItems,
+            ClubMemberVote myVote,
+            List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem,
+            int itemCount
     ) {
         List<ClubNoticeResponseDTO.EachItem> itemDTOs = new ArrayList<>();
         for (int i = 0; i < itemCount; i++) {

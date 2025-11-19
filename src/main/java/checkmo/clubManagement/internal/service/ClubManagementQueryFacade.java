@@ -34,8 +34,11 @@ public class ClubManagementQueryFacade {
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
 
-    public ClubResponseDTO.ClubList getClubList(String memberId, ClubRequestDTO.ClubSearchFilter filter,
-                                                ClubRequestDTO.CursorInfo pageRequest) {
+    public ClubResponseDTO.ClubList getClubList(
+            String memberId,
+            ClubRequestDTO.ClubSearchFilter filter,
+            ClubRequestDTO.CursorInfo pageRequest
+    ) {
 
         // 1. 커서 초기화
         Long cursorId = (pageRequest.cursorId() == null || pageRequest.cursorId() == 0L) ? Long.MAX_VALUE
@@ -90,7 +93,6 @@ public class ClubManagementQueryFacade {
     }
 
     public ClubResponseDTO.MyClubList getMyClubList(String memberId) {
-
         // 1. 회원이 가입한 모임 목록 조회
         List<MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId)
                 .getClubList();
@@ -107,7 +109,6 @@ public class ClubManagementQueryFacade {
     }
 
     public ClubResponseDTO.MyPageClubList getMyPageClubList(String memberId, Long cursorId, Integer size) {
-
         // 1. 기본 사이즈 처리
         if (size == null) {
             size = DEFAULT_PAGE_SIZE;
@@ -140,7 +141,6 @@ public class ClubManagementQueryFacade {
     }
 
     public ClubResponseDTO.ClubDetail getClubInfo(Long clubId, String memberId) {
-
         // 1. Service에서 순수 엔티티 조회
         Club club = clubQueryService.getClubInfo(clubId);
 
@@ -155,9 +155,13 @@ public class ClubManagementQueryFacade {
         return ClubManagementConverter.toClubDetailDTO(club, isStaff);
     }
 
-    public ClubResponseDTO.ClubMemberList getClubMemberListByStatus(Long clubId, String memberId,
-                                                                    String clubMemberStatus, Long cursorId,
-                                                                    Integer size) {
+    public ClubResponseDTO.ClubMemberList getClubMemberListByStatus(
+            Long clubId,
+            String memberId,
+            String clubMemberStatus,
+            Long cursorId,
+            Integer size
+    ) {
         // 1. 클럽 멤버 리스트 조회
         clubQueryService.validateClub(clubId);
         ClubMember requester = clubMemberQueryService.validateClubMember(clubId, memberId);
@@ -217,7 +221,6 @@ public class ClubManagementQueryFacade {
     }
 
     public ClubResponseDTO.BookRecommendList getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
-
         // 1. 클럽 검증
         clubQueryService.validateClub(clubId);
 
@@ -253,8 +256,11 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public ClubResponseDTO.BookRecommendDetail getRecommendedBookDetail(Long clubId, Long bookRecommendId,
-                                                                        String memberId) {
+    public ClubResponseDTO.BookRecommendDetail getRecommendedBookDetail(
+            Long clubId,
+            Long bookRecommendId,
+            String memberId
+    ) {
         // 1. Service에서 순수 엔티티 조회
         BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommendEntity(clubId, bookRecommendId,
                 memberId);

@@ -3,10 +3,9 @@ package checkmo.book.web.dto;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 public class AladinApiResponseDTO {
 
@@ -14,7 +13,6 @@ public class AladinApiResponseDTO {
     @NoArgsConstructor
     @JacksonXmlRootElement(localName = "object")
     public static class BookList {
-
         @JacksonXmlProperty(localName = "item")
         @JacksonXmlElementWrapper(useWrapping = false)
         private List<BookItem> items;
@@ -32,7 +30,6 @@ public class AladinApiResponseDTO {
     @Getter
     @NoArgsConstructor
     public static class BookItem {
-
         @JacksonXmlProperty(localName = "title")
         private String title;
 

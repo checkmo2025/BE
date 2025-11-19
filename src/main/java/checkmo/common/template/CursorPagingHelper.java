@@ -1,19 +1,20 @@
 package checkmo.common.template;
 
-import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.function.Function;
+import org.springframework.stereotype.Component;
 
 @Component
 public class CursorPagingHelper {
 
     /**
      * 커서 기반 페이징 로직을 처리하는 제네릭 메소드
+     *
      * @param dataFetcher pageSize + 1 만큼 데이터를 조회하는 함수
      * @param idExtractor 데이터 객체에서 ID(커서)를 추출하는 함수
-     * @param pageSize 페이지 당 데이터 수
+     * @param pageSize    페이지 당 데이터 수
+     * @param <T>         페이징할 엔티티 타입 (예: Recipe, RecipeComment)
      * @return 페이징 처리 결과가 담긴 CursorResult 객체
-     * @param <T> 페이징할 엔티티 타입 (예: Recipe, RecipeComment)
      */
     public <T> CursorResult<T> getPage(
             Function<Integer, List<T>> dataFetcher,

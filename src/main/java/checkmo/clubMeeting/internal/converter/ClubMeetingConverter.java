@@ -4,7 +4,11 @@ import checkmo.book.BookExternalDTO;
 import checkmo.book.BookExternalDTO.BasicInfo;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubMeeting.ClubMeetingExternalDTO;
-import checkmo.clubMeeting.internal.entity.*;
+import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.entity.Team;
+import checkmo.clubMeeting.internal.entity.TeamTopic;
+import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
@@ -47,8 +51,11 @@ public class ClubMeetingConverter {
     /**
      * BookReviewDTO <-> BookReview 엔티티 변환
      */
-    public static BookReview fromBookReviewDTOToBookReview(BookShelfRequestDTO.BookReviewCreate request,
-                                                           Long clubMemberId, String memberId) {
+    public static BookReview fromBookReviewDTOToBookReview(
+            BookShelfRequestDTO.BookReviewCreate request,
+            Long clubMemberId,
+            String memberId
+    ) {
         return checkmo.clubMeeting.internal.entity.BookReview.builder()
                 .description(request.getDescription())
                 .rate(request.getRate())
@@ -419,7 +426,8 @@ public class ClubMeetingConverter {
      */
     public static MeetingResponseDTO.MeetingMemberList fromMeetingMemberDTOListToMeetingMemberListDTO(
             List<MeetingResponseDTO.MeetingMember> meetingMemberList,
-            boolean hasNext, Long nextCursor,
+            boolean hasNext,
+            Long nextCursor,
             ClubManagementExternalDTO.Membership membership
     ) {
         return MeetingResponseDTO.MeetingMemberList.builder()
@@ -450,7 +458,10 @@ public class ClubMeetingConverter {
     /**
      * /** Meeting 엔티티 + BookBasicInfo -> MeetingInfo 변환
      */
-    public static ClubMeetingExternalDTO.MeetingInfo fromMeetingToMeetingInfo(Meeting meeting, BasicInfo bookBasicInfoForShare) {
+    public static ClubMeetingExternalDTO.MeetingInfo fromMeetingToMeetingInfo(
+            Meeting meeting,
+            BasicInfo bookBasicInfoForShare
+    ) {
         return ClubMeetingExternalDTO.MeetingInfo.builder()
                 .meetingId(meeting.getId())
                 .title(meeting.getTitle())
@@ -471,9 +482,11 @@ public class ClubMeetingConverter {
     /**
      * 파라미터 -> MeetingResponseDTO.TopicSelectionDTO 변환
      */
-    public static MeetingResponseDTO.TopicSelection fromParametersToTopicSelectionDTO(Long topicId,
-                                                                                      Integer teamNumber,
-                                                                                      Boolean isSelected) {
+    public static MeetingResponseDTO.TopicSelection fromParametersToTopicSelectionDTO(
+            Long topicId,
+            Integer teamNumber,
+            Boolean isSelected
+    ) {
         return MeetingResponseDTO.TopicSelection.builder()
                 .topicId(topicId)
                 .teamNumber(teamNumber)

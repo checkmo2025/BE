@@ -27,7 +27,6 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     @Override
     @Transactional
     public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreate request) {
-
         String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
         BookStory bookStory = BookStoryConverter.toBookStory(request, memberId, bookId);

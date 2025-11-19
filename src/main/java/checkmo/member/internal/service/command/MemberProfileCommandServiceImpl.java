@@ -7,8 +7,8 @@ import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
-import java.util.HashSet;
 import checkmo.member.web.dto.MemberResponseDTO;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -21,12 +21,13 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
 
     // 자신의 Repository
     private final MemberRepository memberRepository;
-    
+
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public MemberResponseDTO.MemberProfileWithCategory updateMemberProfile(
-            String memberId, MemberRequestDTO.MemberProfileUpdate request
+            String memberId,
+            MemberRequestDTO.MemberProfileUpdate request
     ) {
         // 회원 조회
         Member member = memberRepository.findById(memberId)
@@ -43,9 +44,9 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
         // 새로운 이미지 url이 null이면 기존 이미지 삭제
         if (existingImageUrl != null && !existingImageUrl.equals(newImageUrl)) {
             eventPublisher.publishEvent(
-                MemberEvent.DeleteProfileImage.builder()
-                    .imageUrl(existingImageUrl)
-                    .build());
+                    MemberEvent.DeleteProfileImage.builder()
+                            .imageUrl(existingImageUrl)
+                            .build());
         }
 
         // 프로필 정보 업데이트 (소개, 이미지)
@@ -60,9 +61,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
     }
 
     @Override
-    public void updatePassword(
-            String memberId, MemberRequestDTO.PasswordUpdate request
-    ) {
+    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdate request) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }
 

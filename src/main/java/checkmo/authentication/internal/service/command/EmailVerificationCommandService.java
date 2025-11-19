@@ -5,15 +5,15 @@ import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.security.SecureRandom;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -33,7 +33,6 @@ public class EmailVerificationCommandService {
     private final AuthRepository authRepository;
 
     public void sendEmailVerification(String email) {
-
         // 이미 인증번호가 Redis에 존재하면 예외 처리
         String redisKey = EMAIL_VERIFICATION_PREFIX + email;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
@@ -64,7 +63,6 @@ public class EmailVerificationCommandService {
     }
 
     public boolean verifyEmailCode(AuthRequestDTO.EmailVerification request) {
-
         String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
 
         // redis에서 인증 정보 조회

@@ -16,7 +16,6 @@ public class JwtLoginProcessor {
 
     // 로그인 성공 시 JWT 토큰 생성 및 쿠키 설정
     public void processLogin(HttpServletResponse response, Authentication authentication) {
-
         // JWT 토큰 생성
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 

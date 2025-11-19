@@ -8,6 +8,7 @@ import checkmo.authentication.web.dto.AuthResponseDTO;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthConverter {
@@ -32,11 +33,7 @@ public class AuthConverter {
                 .build();
     }
 
-    public static AuthUser toLocalUser(
-            AuthRequestDTO.SignUp request,
-            String encodedPassword
-    ) {
-
+    public static AuthUser toLocalUser(AuthRequestDTO.SignUp request, String encodedPassword) {
         String uuid = UUID.randomUUID().toString().substring(0, 8);
         String newUserId = "LOCAL_" + uuid;
 

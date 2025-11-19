@@ -20,7 +20,6 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
     // 검색을 위한 메서드
     @Override
     public List<Club> searchClubs(ClubRequestDTO.ClubSearchFilter filter, Long cursorId, Integer size) {
-
         // 검색 조건 빌더 생성
         BooleanBuilder builder = buildSearchCondition(filter);
 
@@ -40,7 +39,6 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
     // 검색 조건 빌더
     private BooleanBuilder buildSearchCondition(ClubRequestDTO.ClubSearchFilter filter) {
-
         BooleanBuilder builder = new BooleanBuilder();
 
         String keyword = filter.keyword();

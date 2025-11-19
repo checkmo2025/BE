@@ -28,7 +28,6 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
 
     @Override
     public void followingMember(String memberId, String followingNickname) {
-
         // 닉네임으로 팔로잉 대상 조회
         Member following = memberRepository.findByNickName(followingNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
@@ -60,7 +59,6 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
 
     @Override
     public void unfollowingMember(String memberId, String followingNickname) {
-
         // 닉네임으로 팔로잉 대상의 Id 조회
         String followingId = memberRepository.findIdByNickName(followingNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
@@ -76,7 +74,6 @@ public class MemberFollowCommandServiceImpl implements MemberFollowCommandServic
 
     @Override
     public void deleteFollower(String memberId, String followerNickname) {
-
         // 닉네임으로 팔로워의 Id 조회
         String followerId = memberRepository.findIdByNickName(followerNickname)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));

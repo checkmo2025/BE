@@ -28,7 +28,6 @@ public class AuthUserCommandService {
     private final ApplicationEventPublisher eventPublisher;
 
     public AuthUser signUp(AuthRequestDTO.SignUp request) {
-
         // 이메일 중복 확인
         if (authRepository.existsByEmail(request.getEmail())) {
             throw new GeneralException(ErrorStatus.MEMBER_ALREADY_EXISTS);

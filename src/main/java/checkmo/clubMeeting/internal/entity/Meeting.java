@@ -90,8 +90,14 @@ public class Meeting extends BaseEntity {
         }
     }
 
-    public void updateMeeting(String title, LocalDateTime meetingTime,
-                              String location, String content, int generation, String tag) {
+    public void updateMeeting(
+            String title,
+            LocalDateTime meetingTime,
+            String location,
+            String content,
+            int generation,
+            String tag
+    ) {
         this.title = title;
         this.meetingTime = meetingTime;
         this.location = location;

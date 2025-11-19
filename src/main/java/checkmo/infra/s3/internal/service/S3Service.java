@@ -4,6 +4,8 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.infra.s3.internal.config.properties.S3Properties;
 import checkmo.infra.s3.web.dto.S3ResponseDTO;
+import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,27 +16,23 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
-import java.util.Set;
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Service {
 
-    private final S3Presigner s3Presigner;
-    private final S3Client s3Client;
-    private final S3Properties s3Properties;
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
     );
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
             ".jpg", ".jpeg", ".png", ".webp", ".gif"
     );
+    private final S3Presigner s3Presigner;
+    private final S3Client s3Client;
+    private final S3Properties s3Properties;
 
     // 파일 업로드를 위한 presigned URL 생성
     public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType) {
-
         // Content-Type 검증
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
             throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);

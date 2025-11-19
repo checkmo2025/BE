@@ -26,7 +26,6 @@ public class AladinProperties {
     @Getter
     @Setter
     public static class Url {
-
         @NotBlank(message = "Aladin API 기본 URL은 필수입니다")
         private String base;
 
@@ -40,7 +39,6 @@ public class AladinProperties {
     @Getter
     @Setter
     public static class Auth {
-
         @NotBlank(message = "TTB Key는 필수입니다")
         private String ttbKey;
 
@@ -51,7 +49,6 @@ public class AladinProperties {
     @Getter
     @Setter
     public static class Search {
-
         @NotBlank(message = "검색 타입은 필수입니다")
         private String queryType;
 

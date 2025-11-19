@@ -26,8 +26,11 @@ public interface BookStoryAPI {
      * @param cursorId             페이지 번호 (1부터 시작)
      * @return scope에 따른 책 이야기 목록 DTO
      */
-    BookStoryExternalDTO.BookStoryList getBookStoriesByScope(String memberId,
-                                                             BookStoryRequestDTO.BookStoryScope scope,
-                                                             Long clubId, String targetMemberNickname,
-                                                             Long cursorId);
+    BookStoryExternalDTO.BookStoryList getBookStoriesByScope(
+            String memberId,
+            BookStoryRequestDTO.BookStoryScope scope,
+            Long clubId,
+            String targetMemberNickname,
+            Long cursorId
+    );
 }

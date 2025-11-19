@@ -3,6 +3,8 @@ package checkmo.common.apiPayload.exception.handler;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.common.apiPayload.code.ErrorReasonDTO;
 import checkmo.common.apiPayload.exception.GeneralException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +14,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Slf4j
 @ControllerAdvice
 public class GeneralExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
+            MethodArgumentNotValidException ex
+    ) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
@@ -30,7 +31,9 @@ public class GeneralExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex
+    ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.onFailure("400", "Invalid request body or format", null));
     }

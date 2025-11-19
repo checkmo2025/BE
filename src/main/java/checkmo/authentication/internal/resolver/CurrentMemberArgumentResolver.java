@@ -18,7 +18,6 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-
         // @CurrentId String 타입 지원
         boolean isCurrentIdAnnotation = parameter.getParameterAnnotation(CurrentId.class) != null;
         boolean isStringClass = String.class.equals(parameter.getParameterType());
@@ -27,9 +26,12 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-
+    public Object resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory
+    ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {

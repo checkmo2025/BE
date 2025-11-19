@@ -50,8 +50,10 @@ public class ClubManagementConverter {
                 .build();
     }
 
-    public static ClubResponseDTO.ClubMember toClubMemberDTO(ClubMember targetMember,
-                                                             MemberExternalDTO.BasicInfo memberInfo) {
+    public static ClubResponseDTO.ClubMember toClubMemberDTO(
+            ClubMember targetMember,
+            MemberExternalDTO.BasicInfo memberInfo
+    ) {
         return ClubResponseDTO.ClubMember.builder()
                 .clubMemberId(targetMember.getId())
                 .basicInfo(memberInfo)

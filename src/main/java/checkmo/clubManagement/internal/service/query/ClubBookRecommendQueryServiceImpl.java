@@ -21,7 +21,6 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
 
     @Override
     public List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
-
         // 1. 클럽 존재 여부 검증
         clubQueryService.validateClub(clubId);
 

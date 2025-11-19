@@ -19,10 +19,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * JWT 토큰 기반 인증 필터
- *
- * 모든 HTTP 요청에 대해 쿠키에서 JWT 토큰을 추출하고 토큰 검증 액세스 토큰 만료시 리프레시 토큰으로 자동 갱신 토큰 검증 성공시 SecurityContext에 인증
- * 정보 설정 JwtTokenProvider 사용해서 토큰 검증 로직 처리 -> JwtAuthenticationFilter에서는 토큰을 직접 검증하지 않음.
- * JwtTokenProvider에서 토큰 검증 로직 구현
+ * <p>
+ * 모든 HTTP 요청에 대해 쿠키에서 JWT 토큰을 추출하고 토큰 검증 액세스 토큰 만료시 리프레시 토큰으로 자동 갱신 토큰 검증 성공시 SecurityContext에 인증 정보 설정
+ * JwtTokenProvider 사용해서 토큰 검증 로직 처리 -> JwtAuthenticationFilter에서는 토큰을 직접 검증하지 않음. JwtTokenProvider에서 토큰 검증 로직 구현
  */
 
 @Slf4j
@@ -45,19 +44,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
         return excludedPaths.stream()
-                            .anyMatch(path -> pathMatcher.match(path, request.getRequestURI()));
+                .anyMatch(path -> pathMatcher.match(path, request.getRequestURI()));
     }
 
     @Override
-    protected void doFilterInternal(@Nonnull HttpServletRequest request,
-                                    @Nonnull HttpServletResponse response,
-                                    @Nonnull FilterChain filterChain)
-        throws ServletException, IOException {
-
+    protected void doFilterInternal(
+            @Nonnull HttpServletRequest request,
+            @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain
+    ) throws ServletException, IOException {
         // 쿠키에서 Access Token 추출
         String accessToken = jwtCookieUtil.resolveToken(request, "accessToken");
         log.info("[JWT 필터] 요청 URI: {}, Access Token 존재 여부 확인: {}", request.getRequestURI(),
-            accessToken != null);
+                accessToken != null);
 
         if (StringUtils.hasText(accessToken)) { // Access Token이 존재하는 경우
             try {
@@ -88,7 +87,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Access Token이 만료된 경우, Refresh Token을 사용해 재발급
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
-
         // 쿠키에서 Refresh Token 추출
         String refreshToken = jwtCookieUtil.resolveToken(request, "refreshToken");
         log.info("[재발급] Refresh Token 존재 여부 확인: {}", refreshToken != null);
@@ -129,7 +127,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
         jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken,
-            accessTokenMaxAge); // 2시간 유효
+                accessTokenMaxAge); // 2시간 유효
 
         // SecurityContext에 새로운 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);

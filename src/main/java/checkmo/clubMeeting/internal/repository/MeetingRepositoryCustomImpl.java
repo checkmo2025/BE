@@ -32,8 +32,12 @@ public class MeetingRepositoryCustomImpl implements MeetingRepositoryCustom {
     }
 
     @Override
-    public List<Meeting> findAllByClubIdAndGenerationAndCursorDesc(Long clubId, Integer generation, Long cursorId,
-                                                                   Integer size) {
+    public List<Meeting> findAllByClubIdAndGenerationAndCursorDesc(
+            Long clubId,
+            Integer generation,
+            Long cursorId,
+            Integer size
+    ) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(meeting.clubId.eq(clubId));
 

@@ -27,6 +27,8 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long>, C
     @Query("SELECT cm FROM ClubMember cm JOIN FETCH cm.club c " +
             "WHERE cm.memberId = :memberId " + "AND (:cursorId IS NULL OR cm.id > :cursorId) " +
             "ORDER BY cm.id ASC")
-    List<ClubMember> findClubMembersByMemberIdOrderByIdAsc(@Param("memberId") String memberId,
-                                                           @Param("cursorId") Long cursorId, Pageable pageable);
+    List<ClubMember> findClubMembersByMemberIdOrderByIdAsc(
+            @Param("memberId") String memberId,
+            @Param("cursorId") Long cursorId, Pageable pageable
+    );
 }

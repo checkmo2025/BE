@@ -41,5 +41,5 @@ public interface ClubBookReviewCommandService {
      * @param memberId  요청자 회원 ID
      */
     void deleteBookReview(Long meetingId, Long reviewId, String memberId);
-    
+
 }

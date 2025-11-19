@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 public class ClubRequestDTO {
 
+    //TODO: 파라미터
+
     /**
      * 클럽 검색 필터
      *
@@ -18,12 +20,7 @@ public class ClubRequestDTO {
      * @param region       지역 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
      * @param participants 대상 필터링 여부 (0: 선택 안함, 1: 선택해서 검색)
      */
-    public record ClubSearchFilter(
-            String keyword,
-            Integer name,
-            Integer region,
-            Integer participants
-    ) {
+    public record ClubSearchFilter(String keyword, Integer name, Integer region, Integer participants) {
         public ClubSearchFilter {
             if (keyword == null) {
                 keyword = "";
@@ -40,10 +37,8 @@ public class ClubRequestDTO {
         }
     }
 
-    public record CursorInfo(
-            Long cursorId,
-            Integer size
-    ) {}
+    public record CursorInfo(Long cursorId, Integer size) {
+    }
 
     @Getter
     @NoArgsConstructor

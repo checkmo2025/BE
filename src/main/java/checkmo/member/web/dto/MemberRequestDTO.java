@@ -2,11 +2,13 @@ package checkmo.member.web.dto;
 
 import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 public class MemberRequestDTO {
 
@@ -36,7 +38,6 @@ public class MemberRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class AdditionalInfo {
-
         @NotBlank(message = "닉네임은 필수입니다")
         @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
                 message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")

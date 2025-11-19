@@ -22,8 +22,14 @@ public interface BookStoryQueryService {
      * @param pageSize       페이지 크기
      * @return 조회된 책 이야기 엔티티 목록
      */
-    List<BookStory> findBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId,
-                                    String targetMemberId, Long cursorId, int pageSize);
+    List<BookStory> findBookStories(
+            String memberId,
+            BookStoryRequestDTO.BookStoryScope scope,
+            Long clubId,
+            String targetMemberId,
+            Long cursorId,
+            int pageSize
+    );
 
     /**
      * 조회된 책 이야기 목록에 대한 '좋아요' 여부를 확인

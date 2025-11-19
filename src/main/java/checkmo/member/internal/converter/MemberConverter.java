@@ -26,10 +26,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.otherProfile toOtherProfile(
-            Member member,
-            boolean isFollowing
-    ) {
+    public static MemberResponseDTO.otherProfile toOtherProfile(Member member, boolean isFollowing) {
         return MemberResponseDTO.otherProfile.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
@@ -40,7 +37,8 @@ public class MemberConverter {
     }
 
     public static MemberExternalDTO.WithFollowStatus toMemberProfileWithFollowStatus(
-            MemberResponseDTO.MemberProfileWithFollow profile) {
+            MemberResponseDTO.MemberProfileWithFollow profile
+    ) {
         return MemberExternalDTO.WithFollowStatus.builder()
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())

@@ -89,8 +89,10 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public MemberExternalDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId,
-                                                                                String currentMemberId) {
+    public MemberExternalDTO.WithFollowStatus getMemberWithFollowStatusForShare(
+            String targetMemberId,
+            String currentMemberId
+    ) {
         // 팔로우 상태를 조회
         boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
@@ -105,7 +107,9 @@ public class MemberAPIImpl implements MemberAPI {
 
     @Override
     public Map<String, MemberExternalDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(
-            List<String> targetMemberIds, String currentMemberId) {
+            List<String> targetMemberIds,
+            String currentMemberId
+    ) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Map.of();
         }

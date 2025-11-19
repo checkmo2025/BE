@@ -18,8 +18,10 @@ public interface BookStoryLikedRepository extends JpaRepository<BookStoryLiked, 
      * 특정 사용자가 좋아요한 BookStory Id 목록을 조회
      */
     @Query("SELECT bsl.bookStoryId FROM BookStoryLiked bsl WHERE bsl.memberId = :memberId AND bsl.bookStoryId IN :bookStoryIds")
-    List<Long> findLikedBookStoryIdsByMemberIdAndBookStoryIds(@Param("memberId") String memberId,
-                                                              @Param("bookStoryIds") List<Long> bookStoryIds);
+    List<Long> findLikedBookStoryIdsByMemberIdAndBookStoryIds(
+            @Param("memberId") String memberId,
+            @Param("bookStoryIds") List<Long> bookStoryIds
+    );
 
     Optional<BookStoryLiked> findBookStoryLikedByBookStoryIdAndMemberId(Long bookStoryId, String memberId);
 }

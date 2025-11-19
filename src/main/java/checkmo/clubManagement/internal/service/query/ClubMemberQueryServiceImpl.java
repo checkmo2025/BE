@@ -36,7 +36,6 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     @Override
     public ClubManagementExternalDTO.MyClubList getMyClubList(String memberId) {
-
         // 회원ID를 통해 JPQL로 클럽 ID와 이름을 조회하고 DTO로 변환
         var clubIdAndNameByMemberId = clubMemberRepository.findClubIdAndNameByMemberId(memberId);
 
@@ -69,7 +68,6 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
 
     @Override
     public Map<Long, ClubMember.ClubMemberStatus> getMemberStatuses(String memberId, List<Long> clubIds) {
-
         // clubMemberRepository에서 clubId IN :clubIds AND memberId = :memberId 조건으로 여러 상태를 한 번에 조회
         List<ClubMember> members = clubMemberRepository.findAllByMemberIdAndClubIdIn(memberId, clubIds);
 

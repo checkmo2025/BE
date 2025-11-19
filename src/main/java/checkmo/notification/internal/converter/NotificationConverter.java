@@ -48,8 +48,10 @@ public class NotificationConverter {
                 .build();
     }
 
-    public static NotificationResponseDTO.NotificationPreview convertToPreviewDTO(Notification notification,
-                                                                                  String senderNickname) {
+    public static NotificationResponseDTO.NotificationPreview convertToPreviewDTO(
+            Notification notification,
+            String senderNickname
+    ) {
         return NotificationResponseDTO.NotificationPreview.builder()
                 .notificationId(notification.getId())
                 .notificationType(notification.getNotificationType())

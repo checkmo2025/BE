@@ -21,8 +21,14 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     private final MemberAPI memberAPI;
 
     @Override
-    public List<BookStory> searchBookStories(String memberId, BookStoryRequestDTO.BookStoryScope scope, Long clubId,
-                                             String targetMemberId, Long cursorId, int pageSize) {
+    public List<BookStory> searchBookStories(
+            String memberId,
+            BookStoryRequestDTO.BookStoryScope scope,
+            Long clubId,
+            String targetMemberId,
+            Long cursorId,
+            int pageSize
+    ) {
         return switch (scope) {
             case ALL -> findAllBookStories(cursorId, pageSize);
             case MY -> findMyBookStories(memberId, cursorId, pageSize);
@@ -33,7 +39,6 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private List<BookStory> findAllBookStories(Long cursorId, int pageSize) {
-
         return queryFactory
                 .selectFrom(bookStory)
                 .where(createCursorExp(cursorId))

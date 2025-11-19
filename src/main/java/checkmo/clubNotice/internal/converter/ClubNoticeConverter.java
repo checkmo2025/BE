@@ -25,10 +25,7 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    public static Vote toVote(
-            ClubNoticeRequestDTO.CreateClubVote request,
-            Long clubId
-    ) {
+    public static Vote toVote(ClubNoticeRequestDTO.CreateClubVote request, Long clubId) {
         return checkmo.clubNotice.internal.entity.Vote.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -75,10 +72,7 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    public static Notice toNotice(
-            ClubNoticeRequestDTO.CreateClubNotice request,
-            Long clubId
-    ) {
+    public static Notice toNotice(ClubNoticeRequestDTO.CreateClubNotice request, Long clubId) {
         return Notice.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -101,8 +95,10 @@ public class ClubNoticeConverter {
                 .build();
     }
 
-    public static ClubNoticeResponseDTO.VoteNotice toVoteNoticeDTO(Vote vote,
-                                                                   List<ClubNoticeResponseDTO.EachItem> itemDTOs) {
+    public static ClubNoticeResponseDTO.VoteNotice toVoteNoticeDTO(
+            Vote vote,
+            List<ClubNoticeResponseDTO.EachItem> itemDTOs
+    ) {
         return ClubNoticeResponseDTO.VoteNotice.builder()
                 .id(vote.getId())
                 .title(vote.getTitle())

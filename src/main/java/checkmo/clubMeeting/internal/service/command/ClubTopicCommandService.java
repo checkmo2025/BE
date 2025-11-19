@@ -55,6 +55,10 @@ public interface ClubTopicCommandService {
      * @param topicId   발제 ID
      * @param request   발제 선택 여부 (true: 선택, false: 해제)
      */
-    MeetingResponseDTO.TopicSelection selectOrCancelTopic(Long meetingId, Long topicId, String memberId,
-                                                          MeetingRequestDTO.TopicSelection request);
+    MeetingResponseDTO.TopicSelection selectOrCancelTopic(
+            Long meetingId,
+            Long topicId,
+            String memberId,
+            MeetingRequestDTO.TopicSelection request
+    );
 }

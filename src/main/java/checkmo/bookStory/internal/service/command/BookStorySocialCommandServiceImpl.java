@@ -29,7 +29,6 @@ public class BookStorySocialCommandServiceImpl implements BookStorySocialCommand
     @Override
     @Transactional
     public boolean toggleLikeOnBookStory(String memberId, Long bookStoryId) {
-
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
 

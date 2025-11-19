@@ -45,7 +45,8 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 2. 발제 생성
-        checkmo.clubMeeting.internal.entity.Topic topic = ClubMeetingConverter.fromTopicDTOToTopic(request, clubMemberId);
+        checkmo.clubMeeting.internal.entity.Topic topic = ClubMeetingConverter.fromTopicDTOToTopic(request,
+                clubMemberId);
         topic.setMeeting(meeting);
 
         // 3. 발제 저장
@@ -93,8 +94,12 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     }
 
     @Override
-    public MeetingResponseDTO.TopicSelection selectOrCancelTopic(Long meetingId, Long topicId, String memberId,
-                                                                 MeetingRequestDTO.TopicSelection request) {
+    public MeetingResponseDTO.TopicSelection selectOrCancelTopic(
+            Long meetingId,
+            Long topicId,
+            String memberId,
+            MeetingRequestDTO.TopicSelection request
+    ) {
         // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);

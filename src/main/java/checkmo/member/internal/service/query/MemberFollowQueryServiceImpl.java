@@ -19,7 +19,6 @@ public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
 
     @Override
     public List<Follow> getFollowerList(String memberId, Long cursorId, int pageSize) {
-
         // cursorId가 null인 경우, 가장 최근 팔로워부터 조회, 여기서 memberId = 팔로잉 당하는 사람의 ID
         if (cursorId == null) {
             return followRepository.findByFollowingIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));
@@ -32,7 +31,6 @@ public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
 
     @Override
     public List<Follow> getFollowingList(String memberId, Long cursorId, int pageSize) {
-
         // cursorId가 null인 경우, 가장 최근 팔로잉부터 조회, 여기서 memberId = 팔로우 하는 사람의 ID
         if (cursorId == null) {
             return followRepository.findByFollowerIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));

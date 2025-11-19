@@ -50,8 +50,12 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
 
     @Override
     @Transactional
-    public Long updateBookRecommend(Long clubId, String memberId, Long bookRecommendId,
-                                    ClubRequestDTO.UpdateBookRecommend request) {
+    public Long updateBookRecommend(
+            Long clubId,
+            String memberId,
+            Long bookRecommendId,
+            ClubRequestDTO.UpdateBookRecommend request
+    ) {
         // 1. 클럽 및 클럽 멤버 유효성 검증
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);

@@ -42,9 +42,7 @@ public class BookConverter {
                 ));
     }
 
-    public static Book toBook(
-            BookExternalDTO.BookCreate request
-    ) {
+    public static Book toBook(BookExternalDTO.BookCreate request) {
         return Book.builder()
                 .id(request.getIsbn())
                 .title(request.getTitle())
@@ -55,10 +53,7 @@ public class BookConverter {
                 .build();
     }
 
-    public static BookResponseDTO.BookList toBookList(
-            AladinApiResponseDTO.BookList bookList,
-            int page
-    ) {
+    public static BookResponseDTO.BookList toBookList(AladinApiResponseDTO.BookList bookList, int page) {
         if (isInvalidResponse(bookList)) {
             return createEmptyBookListResponse();
         }
@@ -100,9 +95,7 @@ public class BookConverter {
                 .build();
     }
 
-    private static BookResponseDTO.BookInfoDetail convertItemToDetail(
-            AladinApiResponseDTO.BookItem item
-    ) {
+    private static BookResponseDTO.BookInfoDetail convertItemToDetail(AladinApiResponseDTO.BookItem item) {
         String description = (item.getDescription() != null) ? item.getDescription() : "";
 
         String cleanedDescription = HtmlUtils.htmlUnescape(description)

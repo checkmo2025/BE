@@ -23,8 +23,12 @@ public class BookStoryCommentCommandServiceImpl implements BookStoryCommentComma
     private final CommentRepository commentRepository;
 
     @Override
-    public Long createComment(String memberId, Long bookStoryId, Long parentCommentId,
-                              BookStoryRequestDTO.CommentCreate request) {
+    public Long createComment(
+            String memberId,
+            Long bookStoryId,
+            Long parentCommentId,
+            BookStoryRequestDTO.CommentCreate request
+    ) {
         // 1. 책이야기 존재 여부 확인
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
 
