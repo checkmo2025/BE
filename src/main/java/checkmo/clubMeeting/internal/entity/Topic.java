@@ -53,6 +53,10 @@ public class Topic extends BaseEntity {
     @OneToMany(mappedBy = "topic", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
+    public boolean isOwnedBy(String anotherMemberId) {
+        return this.memberId.equals(anotherMemberId);
+    }
+
     public boolean isOwnedBy(Long anotherClubMemberId) {
         return this.clubMemberId.equals(anotherClubMemberId);
     }
