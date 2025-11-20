@@ -9,12 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Service
 public class BookQueryServiceImpl implements BookQueryService {
 
-    // 자신의 Repository
     private final BookRepository bookRepository;
 
     @Override
@@ -30,7 +29,6 @@ public class BookQueryServiceImpl implements BookQueryService {
             return Map.of();
         }
 
-        // 배치로 책 엔티티 조회하여 Map으로 변환
         List<Book> books = bookRepository.findAllById(bookIds);
 
         return books.stream()

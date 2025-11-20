@@ -1,24 +1,27 @@
 package checkmo.book.internal.service.command;
 
 import checkmo.book.BookExternalDTO;
+import checkmo.book.internal.converter.BookConverter;
+import checkmo.book.internal.entity.Book;
+import checkmo.book.internal.repository.BookRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 알라딘 API에서 책 정보를 가져와 저장 관리자가 책 정보를 수정하거나 삭제하는 작업
- */
-public interface BookCommandService {
+@RequiredArgsConstructor
+@Transactional
+@Service
+public class BookCommandService {
 
-    /**
-     * 책 정보를 알라딘 API에서 가져와 저장 이 메소드의 파라미터는 BookStory, BookRecommed, Meeting 등 책을 검색하고 해당 객체 생성할 때 전달된다.
-     *
-     * @param request 알라딘 책 DTO
-     */
-    void saveBook(BookExternalDTO.BookCreate request);
-    // 책 고유번호는 ISBN 13자리로
+    private final BookRepository bookRepository;
 
-    /**
-     * 책 정보를 삭제
-     *
-     * @param bookId 삭제할 책의 ID
-     */
-    void deleteBook(String bookId);
+    public String saveBook(BookExternalDTO.BookCreate request) {
+        if (bookRepository.existsById(request.getIsbn())) {
+            return request.getIsbn();
+        }
+
+        Book book = BookConverter.toBook(request);
+
+        return bookRepository.save(book).getId();
+    }
 }
