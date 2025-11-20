@@ -35,8 +35,8 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public List<String> getClubMemberIds(Long clubId) {
-        return clubMemberQueryService.getClubMemberIds(clubId);
+    public List<String> getActiveMemberIds(Long clubId) {
+        return clubMemberQueryService.getActiveMemberIds(clubId);
     }
 
     @Override

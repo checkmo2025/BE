@@ -58,7 +58,7 @@ public class ClubMemberRepositoryCustomImpl implements ClubMemberRepositoryCusto
     }
 
     @Override
-    public List<String> getClubMemberIds(Long clubId) {
+    public List<String> findActiveMemberIdsByClubId(Long clubId) {
         return queryFactory
                 .select(clubMember.memberId)
                 .from(clubMember)

@@ -107,7 +107,7 @@ public interface ClubMemberQueryService {
      * @param clubId 클럽 ID
      * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
      */
-    List<String> getClubMemberIds(Long clubId);
+    List<String> getActiveMemberIds(Long clubId);
 
     /**
      * 클럽 멤버 ID 집합으로 ClubMember 엔티티 목록을 조회합니다.

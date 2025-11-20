@@ -29,7 +29,7 @@ public interface ClubManagementAPI {
      * @param clubId 클럽 ID
      * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
      */
-    List<String> getClubMemberIds(Long clubId);
+    List<String> getActiveMemberIds(Long clubId);
 
     /**
      * 특정 회원이 해당 클럽의 멤버인지 확인합니다.

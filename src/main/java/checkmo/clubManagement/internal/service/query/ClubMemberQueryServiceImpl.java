@@ -144,8 +144,8 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     }
 
     @Override
-    public List<String> getClubMemberIds(Long clubId) {
-        return clubMemberRepository.getClubMemberIds(clubId);
+    public List<String> getActiveMemberIds(Long clubId) {
+        return clubMemberRepository.findActiveMemberIdsByClubId(clubId);
     }
 
     @Override
