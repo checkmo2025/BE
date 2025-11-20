@@ -4,7 +4,6 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
-import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
@@ -26,9 +25,8 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     private final ClubMemberQueryService clubMemberQueryService;
 
     @Override
-    public Long getClubInfo(Long clubId) throws GeneralException {
-        Club club = clubQueryService.validateClub(clubId);
-        return club.getId();
+    public void validateClub(Long clubId) throws GeneralException {
+        clubQueryService.validateClub(clubId);
     }
 
     @Override

@@ -12,9 +12,8 @@ public interface ClubManagementAPI {
      * 특정 모임이 존재하는지 검증. (외부용)
      *
      * @param clubId 모임 ID
-     * @return clubId
      */
-    Long getClubInfo(Long clubId) throws GeneralException;
+    void validateClub(Long clubId) throws GeneralException;
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. (외부용) 마이페이지 등 다른 서비스에서 사용됩니다.

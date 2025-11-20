@@ -45,7 +45,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     @Override
     public Long createMeeting(Long clubId, String memberId, MeetingCreate request) {
         // 1. 유효성 검증(club, clubMember)
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
         // 2. 책 저장 후 프록시 객체 가져오기
@@ -67,7 +67,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     public Long updateMeeting(Long meetingId, String memberId, MeetingUpdate request) {
         // 1. 유효성 검증(meeting, club, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        clubManagementAPI.getClubInfo(meeting.getClubId());
+        clubManagementAPI.validateClub(meeting.getClubId());
         Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(meeting.getClubId(), memberId);
 
         // 미팅 정보 수정

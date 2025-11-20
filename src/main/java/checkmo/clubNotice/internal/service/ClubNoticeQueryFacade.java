@@ -61,7 +61,7 @@ public class ClubNoticeQueryFacade {
     ) {
 
         // 1. 검증 -> 소식은 클럽에 속한 사람만 조회할 수 있음
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
         // 2. 커서 초기화
@@ -159,7 +159,7 @@ public class ClubNoticeQueryFacade {
             String memberId
     ) {
         // 1. 검증
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
         return switch (tag) {

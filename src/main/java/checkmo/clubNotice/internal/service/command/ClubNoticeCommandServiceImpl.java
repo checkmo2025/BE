@@ -38,7 +38,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public Notice createPureNotice(Long clubId, String memberId, CreateClubNotice request) {
         // 1. 유효성 검증 (club, clubMember)
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
         // 공지사항 생성 및 저장
@@ -52,7 +52,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public void deletePureNotice(Long clubId, Long noticeId, String memberId) {
         // 1. 유효성 검증(club, clubMember)
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
         // 공지사항 존재 여부 및 "순수" 공지사항 여부 확인
@@ -67,7 +67,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
     @Override
     public void createMeetingNotice(ClubMeetingCreatedEvent event) {
-        clubManagementAPI.getClubInfo(event.clubId());
+        clubManagementAPI.validateClub(event.clubId());
 
         Notice existingNotice = noticeRepository.findByMeetingId(event.meetingId()).orElse(null);
 
@@ -88,7 +88,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public Vote createVote(Long clubId, String memberId, CreateClubVote request) {
         // 1. 유효성 검증(club, clubMember)
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
         // 투표 생성 및 저장
@@ -103,7 +103,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public void deleteVote(Long clubId, Long voteId, String memberId) {
         // 1. 유효성 검증(club, clubMember)
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
 
         // 투표 조회 및 존재 여부 확인
@@ -116,7 +116,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public Long haveVote(Long clubId, Long voteId, String memberId, VoteResult request) {
         // 1. 유효성 검증(club, clubMember)
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(clubId, memberId);
 
         // 투표 조회 및 존재 여부 확인

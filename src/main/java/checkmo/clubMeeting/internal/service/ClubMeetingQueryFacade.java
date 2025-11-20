@@ -64,7 +64,7 @@ public class ClubMeetingQueryFacade {
             Integer generation,
             String memberId
     ) {
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
         // 2. [책장] 미팅 리스트 조회
@@ -197,7 +197,7 @@ public class ClubMeetingQueryFacade {
             Integer size,
             String memberId
     ) {
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
         // 2. 미팅 리스트 조회
@@ -332,7 +332,7 @@ public class ClubMeetingQueryFacade {
             String memberId
     ) {
         // 1. 유효성 검증(club, clubMember)
-        clubManagementAPI.getClubInfo(clubId);
+        clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
         // 2. 해당 연월의 미팅 리스트 조회
