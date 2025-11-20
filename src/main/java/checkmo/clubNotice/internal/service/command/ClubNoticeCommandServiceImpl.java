@@ -39,7 +39,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     public Notice createPureNotice(Long clubId, String memberId, CreateClubNotice request) {
         // 1. 유효성 검증 (club, clubMember)
         clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         // 공지사항 생성 및 저장
         Notice notice = ClubNoticeConverter.toNotice(request, clubId);
@@ -53,7 +53,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     public void deletePureNotice(Long clubId, Long noticeId, String memberId) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         // 공지사항 존재 여부 및 "순수" 공지사항 여부 확인
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
@@ -89,7 +89,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     public Vote createVote(Long clubId, String memberId, CreateClubVote request) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         // 투표 생성 및 저장
         Vote vote = ClubNoticeConverter.toVote(request, clubId);
@@ -104,7 +104,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     public void deleteVote(Long clubId, Long voteId, String memberId) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         // 투표 조회 및 존재 여부 확인
         Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);

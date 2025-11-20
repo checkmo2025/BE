@@ -45,9 +45,8 @@ public interface ClubManagementAPI {
      *
      * @param clubId   모임 ID
      * @param memberId 회원 ID
-     * @return ClubMemberId
      */
-    Long getStaffClubMemberInfo(Long clubId, String memberId) throws GeneralException;
+    void validateStaffClubMember(Long clubId, String memberId) throws GeneralException;
 
     /**
      * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증 (외부용)

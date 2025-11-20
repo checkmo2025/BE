@@ -45,14 +45,12 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public Long getStaffClubMemberInfo(Long clubId, String memberId) throws GeneralException {
+    public void validateStaffClubMember(Long clubId, String memberId) throws GeneralException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
-
-        return clubMember.getId();
     }
 
     @Override

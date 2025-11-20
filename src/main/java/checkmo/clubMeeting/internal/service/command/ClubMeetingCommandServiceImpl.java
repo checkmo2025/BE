@@ -46,7 +46,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     public Long createMeeting(Long clubId, String memberId, MeetingCreate request) {
         // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(clubId, memberId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         // 2. 책 저장 후 프록시 객체 가져오기
         String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
@@ -68,7 +68,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         // 1. 유효성 검증(meeting, club, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubManagementAPI.validateClub(meeting.getClubId());
-        Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(meeting.getClubId(), memberId);
+        clubManagementAPI.validateStaffClubMember(meeting.getClubId(), memberId);
 
         // 미팅 정보 수정
         meeting.updateMeeting(
@@ -104,7 +104,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
     public void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManage request) {
         // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.getStaffClubMemberInfo(meeting.getClubId(), memberId);
+        clubManagementAPI.validateStaffClubMember(meeting.getClubId(), memberId);
 
         // 요청 teamNumber와 nicknameList 검증 및 정리
         Map<Integer, List<Long>> requestTeamNumberToClubMemberIds =
