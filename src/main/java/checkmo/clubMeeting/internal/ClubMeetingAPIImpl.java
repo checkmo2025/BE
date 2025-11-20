@@ -13,6 +13,7 @@ import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     public MeetingInfo getMeeting(Long meetingId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         BookExternalDTO.BasicInfo bookBasicInfoForShare = bookAPI.getBookBasicInfoForShare(meeting.getBookId());
-        return ClubMeetingConverter.fromMeetingToMeetingInfo(meeting, bookBasicInfoForShare);
+        return ClubMeetingConverter.toMeetingInfoExternalDTO(meeting, bookBasicInfoForShare);
     }
 
     @Override
@@ -47,7 +48,18 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
 
         Map<String, BasicInfo> bookBasicInfo = bookAPI.getBookBasicInfoMapForShare(bookIds);
 
-        return ClubMeetingConverter.fromMeetingListToMeetingInfoList(meetings, bookBasicInfo);
+        return toMeetingInfoMap(meetings, bookBasicInfo);
+    }
+
+    private Map<Long, MeetingInfo> toMeetingInfoMap(List<Meeting> meetings, Map<String, BasicInfo> bookBasicInfo) {
+        return meetings.stream()
+                .collect(Collectors.toMap(
+                        Meeting::getId,
+                        meeting -> ClubMeetingConverter.toMeetingInfoExternalDTO(
+                                meeting,
+                                bookBasicInfo.get(meeting.getBookId())
+                        )
+                ));
     }
 
     private List<String> extractBookIds(List<Meeting> meetings) {

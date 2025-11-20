@@ -52,7 +52,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
         // 3. 저장할 미팅 생성
-        Meeting meeting = ClubMeetingConverter.fromMeetingCreateRequestDTOToMeeting(request, clubId, bookId);
+        Meeting meeting = ClubMeetingConverter.toMeeting(request, clubId, bookId);
 
         meetingRepository.saveAndFlush(meeting);
 

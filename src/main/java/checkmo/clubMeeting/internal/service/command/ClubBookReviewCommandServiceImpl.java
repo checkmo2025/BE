@@ -2,6 +2,7 @@ package checkmo.clubMeeting.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
+import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.repository.BookReviewRepository;
 import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
@@ -44,8 +45,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 한줄평 생성
-        checkmo.clubMeeting.internal.entity.BookReview bookReview
-                = ClubMeetingConverter.fromBookReviewDTOToBookReview(request, clubMemberId, memberId);
+        BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);
         bookReview.setMeeting(meeting);
 
         // 미팅의 별점 합산
@@ -66,7 +66,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 한줄평 조회 및 존재 여부 확인
-        checkmo.clubMeeting.internal.entity.BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
+        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
 
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
@@ -102,7 +102,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 한줄평 조회 및 존재 여부 확인
-        checkmo.clubMeeting.internal.entity.BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
+        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
 
         // 한줄평 작성자와 삭제자가 같은지 확인
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
