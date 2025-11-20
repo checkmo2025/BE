@@ -40,11 +40,6 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public boolean isMemberInClub(String memberId, Long clubId) {
-        return clubMemberQueryService.isMemberInClub(memberId, clubId);
-    }
-
-    @Override
     public void validateStaffClubMember(Long clubId, String memberId) throws GeneralException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 

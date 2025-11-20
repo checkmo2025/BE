@@ -139,11 +139,6 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     }
 
     @Override
-    public boolean isMemberInClub(String memberId, Long clubId) {
-        return clubMemberRepository.isMemberInClub(memberId, clubId);
-    }
-
-    @Override
     public List<String> getActiveMemberIds(Long clubId) {
         return clubMemberRepository.findActiveMemberIdsByClubId(clubId);
     }

@@ -82,9 +82,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             throw new IllegalArgumentException("scope가 club인 경우 clubId는 필수입니다.");
         }
 
-        if (!isMemberInClub(memberId, clubId)) {
-            throw new IllegalArgumentException("해당 클럽의 멤버가 아닙니다.");
-        }
+        validateClubMember(memberId, clubId);
 
         List<String> clubMemberIds = getClubMemberIds(clubId);
         if (clubMemberIds.isEmpty()) {
@@ -122,8 +120,8 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return cursorId != null ? bookStory.id.lt(cursorId) : null;
     }
 
-    private boolean isMemberInClub(String memberId, Long clubId) {
-        return clubManagementAPI.isMemberInClub(memberId, clubId);
+    private void validateClubMember(String memberId, Long clubId) {
+        clubManagementAPI.getActiveClubMemberInfo(clubId, memberId);
     }
 
     private List<String> getFollowingMemberIds(String memberId) {

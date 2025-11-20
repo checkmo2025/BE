@@ -45,19 +45,6 @@ public class ClubMemberRepositoryCustomImpl implements ClubMemberRepositoryCusto
     }
 
     @Override
-    public boolean isMemberInClub(String memberId, Long clubId) {
-        return queryFactory
-                .selectFrom(clubMember)
-                .where(clubMember.clubId.eq(clubId)
-                        .and(clubMember.memberId.eq(memberId))
-                        .and(clubMember.clubMemberStatus.in(
-                                ClubMember.ClubMemberStatus.MEMBER,
-                                ClubMember.ClubMemberStatus.STAFF
-                        )))
-                .fetchFirst() != null;
-    }
-
-    @Override
     public List<String> findActiveMemberIdsByClubId(Long clubId) {
         return queryFactory
                 .select(clubMember.memberId)

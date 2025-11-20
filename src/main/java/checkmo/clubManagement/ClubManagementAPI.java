@@ -32,15 +32,6 @@ public interface ClubManagementAPI {
     List<String> getActiveMemberIds(Long clubId);
 
     /**
-     * 특정 회원이 해당 클럽의 멤버인지 확인합니다.
-     *
-     * @param memberId 회원 ID
-     * @param clubId   클럽 ID
-     * @return 클럽 멤버 여부 (MEMBER 또는 STAFF 상태인 경우 true)
-     */
-    boolean isMemberInClub(String memberId, Long clubId);
-
-    /**
      * 특정 모임의 특정 회원이 STAFF 상태인지 검증 (외부용)
      *
      * @param clubId   모임 ID

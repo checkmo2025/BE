@@ -102,7 +102,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     ) {
         // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
+        clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
         // 팀, 발제 존재 여부 및 일치 여부 확인
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, request.getTeamNumber());

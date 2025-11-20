@@ -11,7 +11,5 @@ public interface ClubMemberRepositoryCustom {
             Integer size
     );
 
-    boolean isMemberInClub(String memberId, Long clubId);
-
     List<String> findActiveMemberIdsByClubId(Long clubId);
 }
