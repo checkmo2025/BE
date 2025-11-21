@@ -155,10 +155,9 @@ public class ClubController {
     @GetMapping("/myPage")
     public ApiResponse<ClubResponseDTO.MyPageClubList> getMyPageClubs(
             @CurrentId String memberId,
-            @RequestParam(required = false) Long cursorId,
-            @RequestParam(required = false) Integer size
+            @RequestParam(required = false) Long cursorId
     ) {
-        return ApiResponse.onSuccess(clubManagementQueryFacade.getMyPageClubList(memberId, cursorId, size));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.getMyPageClubList(memberId, cursorId));
     }
 
     @Operation(summary = "독서 모임 가입 신청 API", description = "독서 모임에 가입 신청을 합니다.")
@@ -194,11 +193,10 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestParam(defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
-            @RequestParam(required = false) Long cursorId,
-            @RequestParam(required = false) Integer size
+            @RequestParam(required = false) Long cursorId
     ) {
         return ApiResponse.onSuccess(
-                clubManagementQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId, size));
+                clubManagementQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId));
     }
 
     @Operation(summary = "독서 모임 회원 등급 수정 API", description = "독서 모임 회원의 등급을 수정합니다.")

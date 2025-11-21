@@ -1,5 +1,7 @@
 package checkmo.notification.internal.service;
 
+import checkmo.common.template.CursorPagingHelper;
+import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
@@ -37,14 +39,12 @@ public class NotificationQueryFacade {
     }
 
     public NotificationResponseDTO.NotificationList getNotifications(String memberId, Long cursorId) {
-        List<Notification> notifications
-                = notificationQueryService.findNotifications(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
-        boolean hasNext = notifications.size() > DEFAULT_PAGE_SIZE;
-        Long nextCursor = null;
-        if (hasNext) {
-            notifications.removeLast();
-            nextCursor = notifications.getLast().getId();
-        }
+        CursorResult<Notification> notificationCursorResult = CursorPagingHelper.getPage(
+                size -> notificationQueryService.findNotifications(memberId, cursorId, size),
+                Notification::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<Notification> notifications = notificationCursorResult.content();
 
         List<String> senderIds = extractSenderIds(notifications);
 
@@ -54,8 +54,7 @@ public class NotificationQueryFacade {
         return NotificationConverter.convertToNotificationListDTO(
                 notifications,
                 senderNicknameMap,
-                hasNext,
-                nextCursor,
+                notificationCursorResult,
                 DEFAULT_PAGE_SIZE
         );
     }

@@ -23,8 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,19 +53,14 @@ public class ClubNoticeQueryFacade {
             Long clubId,
             String memberId,
             Long cursorId,
-            boolean onlyImportant,
-            Integer size
+            boolean onlyImportant
     ) {
         clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
-        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
-        int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
-        Pageable pageable = PageRequest.of(0, pageSize + 1);
-
         // 공지사항과 투표 각각 조회
-        List<Notice> notices = clubNoticeQueryService.getNoticeList(clubId, onlyImportant, cursor, pageable);
-        List<Vote> votes = clubNoticeQueryService.getVoteList(clubId, onlyImportant, cursor, pageable);
+        List<Notice> notices = clubNoticeQueryService.getNoticeList(clubId, onlyImportant, cursorId, DEFAULT_PAGE_SIZE);
+        List<Vote> votes = clubNoticeQueryService.getVoteList(clubId, onlyImportant, cursorId, DEFAULT_PAGE_SIZE);
 
         // 공지사항에 모임 정보 미리 조회
         Set<Long> meetingIds = extractMeetingIdsFromNotices(notices);
@@ -75,15 +68,14 @@ public class ClubNoticeQueryFacade {
 
         // 생성시간 순으로 병합 및 DTO 변환
         List<ClubNoticeResponseDTO.NoticeItem> noticeItems
-                = mergeNoticesAndVotes(notices, meetingInfos, votes, pageSize);
+                = mergeNoticesAndVotes(notices, meetingInfos, votes, DEFAULT_PAGE_SIZE);
 
-        boolean hasNext = noticeItems.size() > pageSize;
+        boolean hasNext = noticeItems.size() > DEFAULT_PAGE_SIZE;
         if (hasNext) {
-            noticeItems = noticeItems.subList(0, pageSize);
+            noticeItems = noticeItems.subList(0, DEFAULT_PAGE_SIZE);
         }
-        Long nextCursor = hasNext && noticeItems.size() >= pageSize
-                ? noticeItems.get(pageSize - 1).getId()
-                : null;
+        Long nextCursor = hasNext && noticeItems.size() >= DEFAULT_PAGE_SIZE ?
+                noticeItems.getLast().getId() : null;
 
         return ClubNoticeResponseDTO.ClubNoticeList.builder()
                 .noticeList(noticeItems)

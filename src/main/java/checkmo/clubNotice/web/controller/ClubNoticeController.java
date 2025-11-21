@@ -1,5 +1,6 @@
 package checkmo.clubNotice.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.internal.service.ClubNoticeQueryFacade;
@@ -7,7 +8,6 @@ import checkmo.clubNotice.internal.service.command.ClubNoticeCommandService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -43,11 +43,10 @@ public class ClubNoticeController {
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId,
-            @RequestParam(required = false, defaultValue = "false") boolean onlyImportant,
-            @RequestParam(required = false) Integer size // 페이지 사이즈
+            @RequestParam(required = false, defaultValue = "false") boolean onlyImportant
     ) {
         return ApiResponse.onSuccess(
-                clubNoticeQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant, size));
+                clubNoticeQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant));
     }
 
     @Operation(summary = "순수 공지사항 작성", description = "특정 모임에 순수 공지사항을 작성합니다. (운영진만 작성 가능)")

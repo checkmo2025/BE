@@ -1,5 +1,7 @@
 package checkmo.member.internal.service;
 
+import checkmo.common.template.CursorPagingHelper;
+import checkmo.common.template.CursorResult;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
@@ -39,15 +41,12 @@ public class MemberQueryFacade {
     }
 
     public MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId) {
-        // 팔로워 목록 조회
-        List<Follow> followerList = memberFollowQueryService.getFollowerList(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
-        boolean hasNext = followerList.size() > DEFAULT_PAGE_SIZE;
-        Long nextCursor = null;
-        if (hasNext) {
-            followerList.removeLast();
-            nextCursor = followerList.getLast().getId();
-        }
-
+        CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
+                size -> memberFollowQueryService.getFollowerList(memberId, cursorId, size),
+                Follow::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<Follow> followerList = followCursorResult.content();
         List<String> followerIdList = extractFollowerMemberIds(followerList);
 
         // 배치 조회 (내부 DTO)
@@ -55,21 +54,18 @@ public class MemberQueryFacade {
 
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(followCursorResult.hasNext())
+                .nextCursor(followCursorResult.nextCursor())
                 .build();
     }
 
     public MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId) {
-        // 팔로잉 목록 조회
-        List<Follow> followingList = memberFollowQueryService.getFollowingList(memberId, cursorId,
-                DEFAULT_PAGE_SIZE + 1);
-        boolean hasNext = followingList.size() > DEFAULT_PAGE_SIZE;
-        Long nextCursor = null;
-        if (hasNext) {
-            followingList.removeLast();
-            nextCursor = followingList.getLast().getId();
-        }
+        CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
+                size -> memberFollowQueryService.getFollowingList(memberId, cursorId, size),
+                Follow::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<Follow> followingList = followCursorResult.content();
 
         List<String> followingIdList = extractFollowingMemberIds(followingList);
 
@@ -78,8 +74,8 @@ public class MemberQueryFacade {
 
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(followCursorResult.hasNext())
+                .nextCursor(followCursorResult.nextCursor())
                 .build();
     }
 

@@ -15,7 +15,6 @@ public class BookReviewRepositoryCustomImpl implements BookReviewRepositoryCusto
 
     private final JPAQueryFactory queryFactory;
 
-
     @Override
     public List<BookReview> findBookReviewsByCusor(Long meetingId, Long lastReviewId, int size) {
         BooleanBuilder predicate = new BooleanBuilder();

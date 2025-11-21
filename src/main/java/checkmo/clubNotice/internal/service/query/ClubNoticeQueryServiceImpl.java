@@ -10,7 +10,6 @@ import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,13 +43,13 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
     }
 
     @Override
-    public List<Notice> getNoticeList(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable) {
-        return noticeRepository.findAllByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, pageable);
+    public List<Notice> getNoticeList(Long clubId, boolean onlyImportant, Long cursorId, Integer size) {
+        return noticeRepository.findAllByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, size);
     }
 
     @Override
-    public List<Vote> getVoteList(Long clubId, boolean onlyImportant, Long cursorId, Pageable pageable) {
-        return voteRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, pageable);
+    public List<Vote> getVoteList(Long clubId, boolean onlyImportant, Long cursorId, Integer size) {
+        return voteRepository.findByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, size);
     }
 
     @Override

@@ -7,14 +7,18 @@ import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.entity.ClubMember.ClubMemberStatus;
 import checkmo.clubManagement.internal.service.query.ClubBookRecommendQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.BookRecommendDetail;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetail;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.common.template.CursorPagingHelper;
+import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
@@ -41,39 +45,27 @@ public class ClubManagementQueryFacade {
             ClubRequestDTO.ClubSearchFilter filter,
             ClubRequestDTO.CursorInfo pageRequest
     ) {
+        CursorResult<Club> clubCursorResult = CursorPagingHelper.getPage(
+                pageSize -> clubQueryService.getClubList(filter, pageRequest.cursorId(), pageSize),
+                Club::getId,
+                DEFAULT_PAGE_SIZE
+        );
 
-        // 1. 커서 초기화
-        Long cursorId = (pageRequest.cursorId() == null || pageRequest.cursorId() == 0L) ? Long.MAX_VALUE
-                : pageRequest.cursorId();
+        List<Club> clubs = clubCursorResult.content();
+        List<Long> clubIds = extractClubIds(clubs);
 
-        // 2. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
-        int pageSize = (pageRequest.size() == null || pageRequest.size() <= 0) ? DEFAULT_PAGE_SIZE : pageRequest.size();
-
-        // 3. Service에서 순수 엔티티 조회
-        List<Club> clubs = clubQueryService.getClubList(filter, cursorId, pageSize);
-
-        // 4. 클럽 ID 리스트 추출
-        List<Long> clubIds = clubs.stream()
-                .map(Club::getId)
-                .toList();
-
-        // 5. 클럽별 멤버 상태 배치 조회
+        // 클럽별 멤버 상태 배치 조회
         Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
 
-        // 6. DTO 변환
         List<ClubResponseDTO.ClubWithMyStatus> clubList = clubs.stream()
                 .map(club -> toClubWithMyStatusDTO(club, statusMap))
                 .toList();
 
-        // 7. 페이징 처리 (마지막 ID를 기반으로 다음 페이지 존재 여부 확인)
-        Long lastId = clubs.isEmpty() ? null : clubs.getLast().getId();
-        boolean hasNext = !clubs.isEmpty() && clubs.size() == pageSize;
-
         // 8. 최종 DTO 변환
         return ClubResponseDTO.ClubList.builder()
                 .clubList(clubList)
-                .hasNext(hasNext)
-                .nextCursor(lastId)
+                .hasNext(clubCursorResult.hasNext())
+                .nextCursor(clubCursorResult.nextCursor())
                 .pageSize(clubList.size())
                 .build();
     }
@@ -83,8 +75,8 @@ public class ClubManagementQueryFacade {
             Map<Long, ClubMember.ClubMemberStatus> statusMap
     ) {
         ClubMember.ClubMemberStatus status = statusMap.get(club.getId());
-        boolean isStaff = status == checkmo.clubManagement.internal.entity.ClubMember.ClubMemberStatus.STAFF;
-        boolean isMember = status != null;
+        boolean isStaff = (status == ClubMemberStatus.STAFF);
+        boolean isMember = (status != null);
 
         ClubResponseDTO.ClubDetail clubDetail = ClubManagementConverter.toClubDetailDTO(club, isStaff);
 
@@ -92,6 +84,12 @@ public class ClubManagementQueryFacade {
                 .club(clubDetail)
                 .isMember(isMember)
                 .build();
+    }
+
+    private List<Long> extractClubIds(List<Club> clubs) {
+        return clubs.stream()
+                .map(Club::getId)
+                .toList();
     }
 
     public ClubResponseDTO.MyClubList getMyClubList(String memberId) {
@@ -110,36 +108,29 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public ClubResponseDTO.MyPageClubList getMyPageClubList(String memberId, Long cursorId, Integer size) {
-        // 1. 기본 사이즈 처리
-        if (size == null) {
-            size = DEFAULT_PAGE_SIZE;
-        }
+    public ClubResponseDTO.MyPageClubList getMyPageClubList(String memberId, Long cursorId) {
+        CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
+                pageSize -> clubMemberQueryService.getMyPageClubList(memberId, cursorId, pageSize),
+                ClubMember::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<ClubMember> clubMembers = clubMemberCursorResult.content();
 
-        // 2. 서비스 호출 (size+1로 조회 → hasNext 판단)
-        List<ClubMember> clubMembers = clubMemberQueryService.getMyPageClubList(memberId, cursorId, size + 1);
+        List<ClubResponseDTO.ClubDetail> clubList = convertToClubResponseDTO(clubMembers);
+        return ClubResponseDTO.MyPageClubList.builder()
+                .clubList(clubList)
+                .hasNext(clubMemberCursorResult.hasNext())
+                .nextCursor(clubMemberCursorResult.nextCursor())
+                .build();
+    }
 
-        // 3. 페이징 처리
-        boolean hasNext = clubMembers.size() > size;
-        if (hasNext) {
-            clubMembers = clubMembers.subList(0, size);
-        }
-        Long nextCursor = hasNext ? clubMembers.getLast().getId() : null;
-
-        // 4. DTO 변환
-        List<ClubResponseDTO.ClubDetail> clubList = clubMembers.stream()
+    private List<ClubDetail> convertToClubResponseDTO(List<ClubMember> clubMembers) {
+        return clubMembers.stream()
                 .map(cm -> ClubManagementConverter.toClubDetailDTO(
                         cm.getClub(),
                         cm.isStaff()
                 ))
                 .toList();
-
-        // 5. DTO 감싸서 반환
-        return ClubResponseDTO.MyPageClubList.builder()
-                .clubList(clubList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
-                .build();
     }
 
     public ClubResponseDTO.ClubDetail getClubInfo(Long clubId, String memberId) {
@@ -161,8 +152,7 @@ public class ClubManagementQueryFacade {
             Long clubId,
             String memberId,
             String clubMemberStatus,
-            Long cursorId,
-            Integer size
+            Long cursorId
     ) {
         clubQueryService.validateClub(clubId);
         ClubMember requester = clubMemberQueryService.validateClubMember(clubId, memberId);
@@ -170,22 +160,17 @@ public class ClubManagementQueryFacade {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        if (size == null) {
-            size = DEFAULT_PAGE_SIZE;
-        }
-        List<ClubMember> members
-                = clubMemberQueryService.getClubMemberListByStatus(clubId, clubMemberStatus, cursorId, size + 1);
-        boolean hasNext = members.size() > size;
-        if (hasNext) {
-            members = members.subList(0, size);
-        }
-        Long nextCursor = hasNext ? members.getLast().getId() : null;
+        CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
+                size -> clubMemberQueryService.getClubMemberListByStatus(clubId, clubMemberStatus, cursorId, size),
+                ClubMember::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<ClubMember> clubMembers = clubMemberCursorResult.content();
+        List<String> memberIds = extractMemberIds(clubMembers);
 
-        List<String> memberIds = extractMemberIds(members);
         Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
 
-        // DTO 변환
-        List<ClubResponseDTO.ClubMember> dtoList = members.stream()
+        List<ClubResponseDTO.ClubMember> dtoList = clubMembers.stream()
                 .map(cm -> {
                     MemberExternalDTO.BasicInfo memberInfo = memberInfoMap.get(cm.getMemberId());
                     return ClubManagementConverter.toClubMemberDTO(cm, memberInfo);
@@ -194,18 +179,18 @@ public class ClubManagementQueryFacade {
 
         return ClubResponseDTO.ClubMemberList.builder()
                 .clubMembers(dtoList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(clubMemberCursorResult.hasNext())
+                .nextCursor(clubMemberCursorResult.nextCursor())
                 .pageSize(dtoList.size())
                 .isStaff(true) // 항상 true
                 .build();
     }
 
-    private List<String> extractMemberIds(List<ClubMember> members) {
-        if (members == null) {
+    private List<String> extractMemberIds(List<ClubMember> clubMembers) {
+        if (clubMembers == null) {
             return List.of();
         }
-        return members.stream()
+        return clubMembers.stream()
                 .map(checkmo.clubManagement.internal.entity.ClubMember::getMemberId)
                 .distinct()
                 .toList();
@@ -220,12 +205,12 @@ public class ClubManagementQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         String nickname = memberAPI.getMemberBasicInfoForShare(memberId).getNickname();
 
-        // 추천 도서 조회 및 페이징 처리
-        Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
-        List<BookRecommend> bookRecommends
-                = clubBookRecommendQueryService.getRecommendedBooks(clubId, cursor, memberId);
-        Long nextCursor = bookRecommends.isEmpty() ? null : bookRecommends.getLast().getId();
-        boolean hasNext = clubBookRecommendQueryService.hasNextPage(clubId, nextCursor);
+        CursorResult<BookRecommend> bookRecommendCursorResult = CursorPagingHelper.getPage(
+                pageSize -> clubBookRecommendQueryService.getRecommendedBooks(clubId, cursorId, pageSize),
+                BookRecommend::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<BookRecommend> bookRecommends = bookRecommendCursorResult.content();
 
         List<BookRecommendDetail> bookRecommendDetails = bookRecommends.stream()
                 .map(bookRecommend -> {
@@ -234,11 +219,11 @@ public class ClubManagementQueryFacade {
                     return ClubManagementConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo,
                             nickname, clubMember.isStaff());
                 }).toList();
-
+        
         return ClubResponseDTO.BookRecommendList.builder()
                 .bookRecommendList(bookRecommendDetails)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(bookRecommendCursorResult.hasNext())
+                .nextCursor(bookRecommendCursorResult.nextCursor())
                 .pageSize(bookRecommendDetails.size())
                 .build();
     }

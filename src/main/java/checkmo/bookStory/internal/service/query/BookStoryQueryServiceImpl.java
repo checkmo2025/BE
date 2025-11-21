@@ -37,7 +37,7 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
             Long cursorId,
             int pageSize
     ) {
-        return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize + 1);
+        return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize);
     }
 
     @Override

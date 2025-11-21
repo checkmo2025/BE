@@ -5,7 +5,6 @@ import checkmo.clubMeeting.internal.service.ClubMeetingQueryFacade;
 import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
-import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
@@ -95,11 +94,10 @@ public class ClubMeetingController {
     public ApiResponse<MeetingResponseDTO.MeetingList> getMeetings(
             @PathVariable Long clubId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam(required = false, defaultValue = "5") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.MeetingList meetings
-                = clubMeetingQueryFacade.getMeetingsByClub(clubId, cursorId, size, memberId);
+                = clubMeetingQueryFacade.getMeetingsByClub(clubId, cursorId, memberId);
         return ApiResponse.onSuccess(meetings);
     }
 
@@ -160,11 +158,10 @@ public class ClubMeetingController {
     public ApiResponse<MeetingResponseDTO.MeetingMemberList> getMeetingMembers(
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.MeetingMemberList members
-                = clubMeetingQueryFacade.findMeetingMembersByMeeting(meetingId, cursorId, size, memberId);
+                = clubMeetingQueryFacade.findMeetingMembersByMeeting(meetingId, cursorId, memberId);
         return ApiResponse.onSuccess(members);
     }
 

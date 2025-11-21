@@ -19,11 +19,10 @@ public interface ClubBookRecommendQueryService {
      * 순수하게 BookRecommend 엔티티들만 조회
      *
      * @param clubId   독서모임 ID
-     * @param cursorId 커서 ID (페이징용, 처음 조회 시 null 또는 0)
-     * @param memberId 회원 ID
+     * @param cursorId 커서 ID (페이징용, 처음 조회 시 null 또는 0) *
+     * @param size     조회할 추천 책 개수
      * @return 추천 책 목록 리스트
      */
-    List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, String memberId);
+    List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, Integer size);
 
-    boolean hasNextPage(Long clubId, Long lastId);
 }

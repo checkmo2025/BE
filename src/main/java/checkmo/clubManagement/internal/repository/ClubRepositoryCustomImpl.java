@@ -30,7 +30,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
                 .selectFrom(club)
                 .where(builder)
                 .orderBy(club.id.desc())
-                .limit(size + 1)
+                .limit(size)
                 .fetch();
     }
 

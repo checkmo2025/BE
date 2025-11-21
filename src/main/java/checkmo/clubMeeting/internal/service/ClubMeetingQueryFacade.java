@@ -22,6 +22,8 @@ import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.common.template.CursorPagingHelper;
+import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfo;
@@ -40,6 +42,7 @@ import org.springframework.stereotype.Service;
 public class ClubMeetingQueryFacade {
 
     // 페이징 기본 크기 상수
+    private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF = 3;
     private static final int TOPIC_PREVIEW_SIZE_FOR_MEETING = 4;
 
@@ -59,20 +62,18 @@ public class ClubMeetingQueryFacade {
     public BookShelfResponseDTO.BookShelfList getBookShelfList(
             Long clubId,
             Long cursorId,
-            Integer size,
             Integer generation,
             String memberId
     ) {
         clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
-        // [책장] 미팅 리스트 조회
-        List<Meeting> meetings = clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, size + 1);
-        boolean hasNext = meetings.size() > size;
-        if (hasNext) {
-            meetings = meetings.subList(0, size);
-        }
-        Long nextCursor = hasNext ? meetings.getLast().getId() : null;
+        CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
+                pageSize -> clubMeetingQueryService.getBookShelfList(clubId, generation, cursorId, pageSize),
+                Meeting::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<Meeting> meetings = meetingCursorResult.content();
 
         // 미팅의 책 정보 배치 조회
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
@@ -80,8 +81,8 @@ public class ClubMeetingQueryFacade {
 
         return BookShelfResponseDTO.BookShelfList.builder()
                 .bookShelfInfoList(mapMeetingsToBookshelfInfo(meetings, bookInfoMap))
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(meetingCursorResult.hasNext())
+                .nextCursor(meetingCursorResult.nextCursor())
                 .membership(clubMembershipInfo)
                 .build();
     }
@@ -92,13 +93,12 @@ public class ClubMeetingQueryFacade {
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(meeting.getClubId(), memberId);
 
         // [발제 미리보기] 발제 리스트 조회
-        List<Topic> topics
-                = clubTopicQueryService.findTopicsByMeeting(meetingId, null, TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF + 1);
-        boolean hasNext = topics.size() > TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF;
-        if (hasNext) {
-            topics = topics.subList(0, TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF);
-        }
-        Long nextCursor = hasNext ? topics.getLast().getId() : null;
+        CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
+                size -> clubTopicQueryService.findTopicsByMeeting(meetingId, null, size),
+                Topic::getId,
+                TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF
+        );
+        List<Topic> topics = topicCursorResult.content();
 
         // 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
@@ -107,12 +107,12 @@ public class ClubMeetingQueryFacade {
         // 미팅의 책 정보 조회
         DetailInfo bookInfo = bookAPI.getBookDetailInfoForShare(meeting.getBookId());
 
-        List<BookShelfResponseDTO.TopicDetail> topicDetailList = mapTopicsToTopicDetail(topics, authorInfoMap,
-                memberId);
+        List<BookShelfResponseDTO.TopicDetail> topicDetailList
+                = mapTopicsToTopicDetail(topics, authorInfoMap, memberId);
         BookShelfResponseDTO.TopicList topicListDTO = BookShelfResponseDTO.TopicList.builder()
                 .topicDetailList(topicDetailList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(topicCursorResult.hasNext())
+                .nextCursor(topicCursorResult.nextCursor())
                 .membership(null)
                 .build();
         return BookShelfDetail.builder()
@@ -123,21 +123,16 @@ public class ClubMeetingQueryFacade {
                 .build();
     }
 
-    public BookShelfResponseDTO.TopicList findTopicsByMeeting(
-            Long meetingId,
-            Long cursorId,
-            Integer size,
-            String memberId
-    ) {
+    public BookShelfResponseDTO.TopicList findTopicsByMeeting(Long meetingId, Long cursorId, String memberId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(meeting.getClubId(), memberId);
 
-        List<Topic> topics = clubTopicQueryService.findTopicsByMeeting(meetingId, cursorId, size + 1);
-        boolean hasNext = topics.size() > size;
-        if (hasNext) {
-            topics = topics.subList(0, size);
-        }
-        Long nextCursor = hasNext ? topics.getLast().getId() : null;
+        CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
+                size -> clubTopicQueryService.findTopicsByMeeting(meetingId, cursorId, size),
+                Topic::getId,
+                TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF
+        );
+        List<Topic> topics = topicCursorResult.content();
 
         // 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
@@ -147,28 +142,22 @@ public class ClubMeetingQueryFacade {
                 = mapTopicsToTopicDetail(topics, authorInfoMap, memberId);
         return BookShelfResponseDTO.TopicList.builder()
                 .topicDetailList(topicDetailList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(topicCursorResult.hasNext())
+                .nextCursor(topicCursorResult.nextCursor())
                 .membership(clubMembershipInfo)
                 .build();
     }
 
-    public BookShelfResponseDTO.BookReviewList getBookReviewList(
-            Long meetingId,
-            Long lastReviewId,
-            int size,
-            String memberId
-    ) {
+    public BookShelfResponseDTO.BookReviewList getBookReviewList(Long meetingId, Long lastReviewId, String memberId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(meeting.getClubId(), memberId);
 
-        List<BookReview> bookReviews =
-                clubBookReviewQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size + 1);
-        boolean hasNext = bookReviews.size() > size;
-        if (hasNext) {
-            bookReviews = bookReviews.subList(0, size);
-        }
-        Long nextCursor = hasNext ? bookReviews.get(bookReviews.size() - 1).getId() : null;
+        CursorResult<BookReview> bookReviewCursorResult = CursorPagingHelper.getPage(
+                size -> clubBookReviewQueryService.findBookReviewsByMeeting(meetingId, lastReviewId, size),
+                BookReview::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<BookReview> bookReviews = bookReviewCursorResult.content();
 
         // 한줄평 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromBookReviews(bookReviews);
@@ -178,8 +167,8 @@ public class ClubMeetingQueryFacade {
                 = mapReviewsToReviewDetail(bookReviews, authorInfoMap);
         return BookShelfResponseDTO.BookReviewList.builder()
                 .bookReviewDetailList(bookReviewDetailList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(bookReviewCursorResult.hasNext())
+                .nextCursor(bookReviewCursorResult.nextCursor())
                 .membership(clubMembershipInfo)
                 .build();
     }
@@ -187,18 +176,17 @@ public class ClubMeetingQueryFacade {
     public MeetingResponseDTO.MeetingList getMeetingsByClub(
             Long clubId,
             Long cursorId,
-            Integer size,
             String memberId
     ) {
         clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
-        List<Meeting> meetings = clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size + 1);
-        boolean hasNext = meetings.size() > size;
-        if (hasNext) {
-            meetings = meetings.subList(0, size);
-        }
-        Long nextCursor = hasNext ? meetings.getLast().getId() : null;
+        CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
+                size -> clubMeetingQueryService.findMeetingsByClubAndCursor(clubId, cursorId, size),
+                Meeting::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<Meeting> meetings = meetingCursorResult.content();
 
         // 미팅의 모든 도서 배치 조회
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
@@ -207,8 +195,8 @@ public class ClubMeetingQueryFacade {
         List<MeetingResponseDTO.MeetingInfo> meetingInfoList = mapMeetingsToMeetingInfo(meetings, bookInfoMap);
         return MeetingResponseDTO.MeetingList.builder()
                 .meetingInfoList(meetingInfoList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(meetingCursorResult.hasNext())
+                .nextCursor(meetingCursorResult.nextCursor())
                 .membership(clubMembershipInfo)
                 .build();
     }
@@ -332,7 +320,6 @@ public class ClubMeetingQueryFacade {
     public MeetingResponseDTO.MeetingMemberList findMeetingMembersByMeeting(
             Long meetingId,
             Long cursorId,
-            Integer size,
             String memberId
     ) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
@@ -342,13 +329,12 @@ public class ClubMeetingQueryFacade {
         }
 
         // 2. 클럽의 회원 조회 및 페이징 처리 (이때 PENDING이나 BLOCKED 상태는 제외하고 STAFF나 MEMBER만 조회)
-        List<Membership> clubMembership
-                = clubManagementAPI.getClubMembersByStatus(meeting.getClubId(), cursorId, size + 1);
-        boolean hasNext = clubMembership.size() > size;
-        if (hasNext) {
-            clubMembership = clubMembership.subList(0, size);
-        }
-        Long nextCursor = hasNext ? clubMembership.getLast().getClubMemberId() : null;
+        CursorResult<Membership> membershipCursorResult = CursorPagingHelper.getPage(
+                size -> clubManagementAPI.getClubMembersByStatus(meeting.getClubId(), cursorId, size),
+                Membership::getClubMemberId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<Membership> clubMembership = membershipCursorResult.content();
 
         // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberExternalDTO.BasicInfoDTO 조회)
         List<String> memberIds = extractMemberIdsFromClubMembers(clubMembership);
@@ -372,8 +358,8 @@ public class ClubMeetingQueryFacade {
 
         return MeetingResponseDTO.MeetingMemberList.builder()
                 .members(meetingMemberList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(membershipCursorResult.hasNext())
+                .nextCursor(membershipCursorResult.nextCursor())
                 .membership(clubMembershipInfo)
                 .build();
     }

@@ -13,6 +13,8 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.common.template.CursorPagingHelper;
+import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import java.util.ArrayList;
@@ -101,35 +103,44 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         String targetMemberId = resolveTargetMemberId(scope, targetMemberNickname);
 
         // 2. BookStory 리스트 조회
+        CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
+                (pageSize) -> bookStoryQueryService.findBookStories(
+                        memberId, scope, clubId, targetMemberId, cursorId, pageSize
+                ),
+                BookStory::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<BookStory> bookStories = bookStoryCursorResult.content();
+
+        /*
         List<BookStory> bookStories = bookStoryQueryService.findBookStories(memberId, scope, clubId, targetMemberId,
                 cursorId, DEFAULT_PAGE_SIZE);
-
-        // 3. 페이징 처리
         boolean hasNext = bookStories.size() > DEFAULT_PAGE_SIZE;
         Long nextCursor = null;
         if (hasNext) {
             bookStories.removeLast();
             nextCursor = bookStories.getLast().getId();
         }
+        */
 
-        // 4. 좋아요 여부 조회
+        // 좋아요 여부 조회
         Map<Long, Boolean> isLikedMap = fetchLikedInfo(memberId, bookStories);
 
-        // 5.책 정보 조회
+        // 책 정보 조회
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
 
-        // 6. 작성자 정보 조회
+        // 작성자 정보 조회
         Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
-        // 7. DTO 변환
+        // DTO 변환
         List<BookStoryExternalDTO.BookStoryDetail> bookStoryDetailList = convertToBookStoryResponses(memberId,
                 bookStories, isLikedMap, bookInfoMap, authorInfoMap);
 
-        // 8. 클럽 정보 조회
+        // 클럽 정보 조회
         ClubManagementExternalDTO.MyClubList myClubList = clubManagementAPI.getMyClubListForShare(memberId);
         ClubManagementExternalDTO.MyClubInfo myClubInfo = findClubInfoForScope(scope, clubId, myClubList);
 
-        // 9. 스코프 정보 변환 및 최종 응답 DTO 변환
+        // 스코프 정보 변환 및 최종 응답 DTO 변환
         var scopeInfo = BookStoryExternalDTO.ScopeInfo.builder()
                 .scope(scope)
                 .selectedClub(myClubInfo)
@@ -139,8 +150,8 @@ public class BookStoryAPIImpl implements BookStoryAPI {
                 .scopeInfo(scopeInfo)
                 .memberClubList(myClubList)
                 .bookStoryDetailList(bookStoryDetailList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(bookStoryCursorResult.hasNext())
+                .nextCursor(bookStoryCursorResult.nextCursor())
                 .pageSize(DEFAULT_PAGE_SIZE)
                 .build();
     }

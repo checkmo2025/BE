@@ -37,7 +37,7 @@ public class ClubRequestDTO {
         }
     }
 
-    public record CursorInfo(Long cursorId, Integer size) {
+    public record CursorInfo(Long cursorId) {
     }
 
     @Getter

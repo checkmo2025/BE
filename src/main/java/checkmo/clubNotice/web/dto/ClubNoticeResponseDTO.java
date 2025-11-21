@@ -42,10 +42,10 @@ public class ClubNoticeResponseDTO {
     @Builder
     public static class ClubNoticeList {
         List<NoticeItem> noticeList; // 꼭 PureNoticeDTO, MeetingNoticeDTO, VoteDTO만 담아야 합니다!!
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
-        private int pageSize; // 현재 페이지 크기
-        private boolean isStaff; // 본인이 모임의 스탭인지 여부 (true: 스탭, false: 일반 회원)
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
+        private boolean isStaff;
     }
 
     @Getter
@@ -53,10 +53,10 @@ public class ClubNoticeResponseDTO {
     @AllArgsConstructor
     @Builder
     public static final class PureNotice implements NoticeItem {
-        private Long id; // 공지사항 ID
-        private String title; // 공지사항 제목
-        private String content; // 공지사항 내용
-        private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+        private Long id;
+        private String title;
+        private String content;
+        private boolean important;
 
         @Builder.Default
         private String tag = "공지";
@@ -67,13 +67,13 @@ public class ClubNoticeResponseDTO {
     @AllArgsConstructor
     @Builder
     public static final class MeetingNotice implements NoticeItem {
-        private Long id; // 공지사항 ID
-        private String title; // 공지사항 제목
-        private String content; // 공지사항 내용
-        private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
+        private Long id;
+        private String title;
+        private String content;
+        private boolean important;
 
         @Builder.Default
-        private String tag = "모임"; // 공지사항 태그 (예: "공지", "이벤트")
+        private String tag = "모임";
         private ClubMeetingExternalDTO.MeetingInfo meetingInfoDTO; // 모임 정보 DTO
     }
 
@@ -82,15 +82,15 @@ public class ClubNoticeResponseDTO {
     @AllArgsConstructor
     @Builder
     public static final class VoteNotice implements NoticeItem {
-        private Long id; // 투표 ID
-        private String title; // 공지사항 제목
-        private String content; // 내용
-        private boolean important; // 중요 공지 여부 (true: 중요, false: 일반)
-        private boolean anonymity; // 익명 여부
-        private boolean duplication; // 중복 여부
+        private Long id;
+        private String title;
+        private String content;
+        private boolean important;
+        private boolean anonymity;
+        private boolean duplication;
 
-        private LocalDateTime startTime; // 시작 시간
-        private LocalDateTime deadline; // 종료 시간
+        private LocalDateTime startTime;
+        private LocalDateTime deadline;
 
         @Builder.Default
         private String tag = "투표";

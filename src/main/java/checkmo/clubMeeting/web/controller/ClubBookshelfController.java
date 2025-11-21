@@ -1,14 +1,13 @@
 package checkmo.clubMeeting.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.clubMeeting.internal.service.ClubMeetingQueryFacade;
 import checkmo.clubMeeting.internal.service.command.ClubBookReviewCommandService;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
-import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -52,12 +51,11 @@ public class ClubBookshelfController {
     public ApiResponse<BookShelfResponseDTO.BookShelfList> getBookShelfList(
             @PathVariable Long clubId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam(required = false, defaultValue = "9") @ValidSize Integer size,
             @RequestParam(required = false) Integer generation,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookShelfList bookShelfList
-                = clubMeetingQueryFacade.getBookShelfList(clubId, cursorId, size, generation, memberId);
+                = clubMeetingQueryFacade.getBookShelfList(clubId, cursorId, generation, memberId);
         return ApiResponse.onSuccess(bookShelfList);
     }
 
@@ -95,11 +93,10 @@ public class ClubBookshelfController {
     public ApiResponse<BookShelfResponseDTO.BookReviewList> getAllReviews(
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookReviewList bookReviewList
-                = clubMeetingQueryFacade.getBookReviewList(meetingId, cursorId, size, memberId);
+                = clubMeetingQueryFacade.getBookReviewList(meetingId, cursorId, memberId);
         return ApiResponse.onSuccess(bookReviewList);
     }
 
@@ -252,11 +249,10 @@ public class ClubBookshelfController {
     public ApiResponse<BookShelfResponseDTO.TopicList> getTopicList(
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam(required = false, defaultValue = "15") @ValidSize Integer size,
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.TopicList topicList
-                = clubMeetingQueryFacade.findTopicsByMeeting(meetingId, cursorId, size, memberId);
+                = clubMeetingQueryFacade.findTopicsByMeeting(meetingId, cursorId, memberId);
         return ApiResponse.onSuccess(topicList);
     }
 }

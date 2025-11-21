@@ -27,19 +27,8 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
     }
 
     @Override
-    public List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
-        clubQueryService.validateClub(clubId);
-        clubMemberQueryService.validateClubMember(clubId, memberId);
-
-        return bookRecommendRepository.findTop10ByClubMember_Club_IdAndIdLessThanOrderByIdDesc(clubId, cursorId);
-    }
-
-    @Override
-    public boolean hasNextPage(Long clubId, Long lastId) {
-        if (lastId == null) {
-            return false;
-        }
-        return bookRecommendRepository.existsByClubMember_Club_IdAndIdLessThan(clubId, lastId);
+    public List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, Integer size) {
+        return bookRecommendRepository.getBookRecommendsAndClubMemberByClubIdAndCursor(clubId, cursorId, size);
     }
 
 }

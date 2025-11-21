@@ -1,5 +1,6 @@
 package checkmo.notification.internal.converter;
 
+import checkmo.common.template.CursorResult;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.web.dto.NotificationResponseDTO;
 import java.util.List;
@@ -66,8 +67,7 @@ public class NotificationConverter {
     public static NotificationResponseDTO.NotificationList convertToNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
-            boolean hasNext,
-            Long nextCursor,
+            CursorResult<Notification> cursorResult,
             int pageSize
     ) {
 
@@ -80,8 +80,8 @@ public class NotificationConverter {
 
         return NotificationResponseDTO.NotificationList.builder()
                 .notifications(notificationList)
-                .hasNext(hasNext)
-                .nextCursor(nextCursor)
+                .hasNext(cursorResult.hasNext())
+                .nextCursor(cursorResult.nextCursor())
                 .pageSize(pageSize)
                 .build();
     }
