@@ -1,7 +1,7 @@
 package checkmo.clubManagement;
 
 import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
-import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +13,7 @@ public interface ClubManagementAPI {
      *
      * @param clubId 모임 ID
      */
-    void validateClub(Long clubId) throws GeneralException;
+    void validateClub(Long clubId) throws ClubManagementException;
 
     /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다.
@@ -37,7 +37,7 @@ public interface ClubManagementAPI {
      * @param clubId   모임 ID
      * @param memberId 회원 ID
      */
-    void validateStaffClubMember(Long clubId, String memberId) throws GeneralException;
+    void validateStaffClubMember(Long clubId, String memberId) throws ClubManagementException;
 
     /**
      * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증
@@ -46,7 +46,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return ClubMemberId
      */
-    Long getActiveClubMemberInfo(Long clubId, String memberId) throws GeneralException;
+    Long getActiveClubMemberInfo(Long clubId, String memberId) throws ClubManagementException;
 
     /**
      * 특정 모임의 특정 회원의 멤버십 정보를 조회
@@ -55,7 +55,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return MembershipDTO
      */
-    Membership getClubMembershipInfo(Long clubId, String memberId) throws GeneralException;
+    Membership getClubMembershipInfo(Long clubId, String memberId) throws ClubManagementException;
 
     /**
      * 특정 모임의 멤버십 정보를 배치 조회
@@ -63,7 +63,7 @@ public interface ClubManagementAPI {
      * @param clubMemberIds 모임 멤버십 ID 집합 (중복 X)
      * @return 멤버십 ID를 키로 하는 멤버십 정보
      */
-    Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException;
+    Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws ClubManagementException;
 
     /**
      * 특정 클럽에 속한 ACTIVE한 회원 목록을 커서 기반 조회합니다.

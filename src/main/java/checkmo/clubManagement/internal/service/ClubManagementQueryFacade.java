@@ -8,6 +8,8 @@ import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.entity.ClubMember.ClubMemberStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.service.query.ClubBookRecommendQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
@@ -15,8 +17,6 @@ import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.BookRecommendDetail;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetail;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -141,7 +141,7 @@ public class ClubManagementQueryFacade {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         boolean isStaff = clubMember.isStaff();
         if (!isStaff) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
         // 3. DTO 변환 후 반환
@@ -157,7 +157,7 @@ public class ClubManagementQueryFacade {
         clubQueryService.validateClub(clubId);
         ClubMember requester = clubMemberQueryService.validateClubMember(clubId, memberId);
         if (!requester.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
         CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
@@ -219,7 +219,7 @@ public class ClubManagementQueryFacade {
                     return ClubManagementConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo,
                             nickname, clubMember.isStaff());
                 }).toList();
-        
+
         return ClubResponseDTO.BookRecommendList.builder()
                 .bookRecommendList(bookRecommendDetails)
                 .hasNext(bookRecommendCursorResult.hasNext())

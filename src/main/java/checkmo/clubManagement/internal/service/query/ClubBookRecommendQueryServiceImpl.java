@@ -1,9 +1,9 @@
 package checkmo.clubManagement.internal.service.query;
 
 import checkmo.clubManagement.internal.entity.BookRecommend;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.BookRecommendRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,8 @@ public class ClubBookRecommendQueryServiceImpl implements ClubBookRecommendQuery
         clubMemberQueryService.validateClubMember(clubId, memberId);
 
         return bookRecommendRepository.findById(bookRecommendId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+                .orElseThrow(
+                        () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
     }
 
     @Override

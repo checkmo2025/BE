@@ -3,7 +3,7 @@ package checkmo.clubMeeting.internal.service.query;
 import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
-import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +59,6 @@ public interface ClubMeetingTeamQueryService {
      * @param teamNumber 팀 번호 (1, 2, 3, 4... 팀)
      * @return Team 존재하는 팀 객체
      */
-    Team validateTeam(Long meetingId, Integer teamNumber) throws GeneralException;
+    Team validateTeam(Long meetingId, Integer teamNumber) throws ClubMeetingException;
 
 }

@@ -3,12 +3,12 @@ package checkmo.clubManagement.internal.service.command;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubDetail;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -31,7 +31,7 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
     public Long createClub(String memberId, ClubDetail request) {
         // 1. 클럽 이름 중복 검사
         if (clubQueryService.isDuplicateClubName(request.getName())) {
-            throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
         }
 
         // 2. 클럽 엔티티 생성
@@ -59,13 +59,13 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
         Club club = clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
         // 3. 클럽 이름 중복 검사 (단, 기존 이름과 다를 때만)
         if (!club.getName().equals(request.getName()) &&
                 clubQueryService.isDuplicateClubName(request.getName())) {
-            throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
         }
 
         club.updateField(request.getName(),

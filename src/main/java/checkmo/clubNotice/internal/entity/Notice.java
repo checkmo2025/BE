@@ -1,8 +1,8 @@
 package checkmo.clubNotice.internal.entity;
 
+import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
+import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.common.BaseEntity;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,7 +46,7 @@ public class Notice extends BaseEntity {
 
     public boolean isNotOlderThan(Long meetingVersion) {
         if (meetingVersion == null) {
-            throw new GeneralException(ErrorStatus.NOTICE_MEETING_VERSION_NOT_NULL);
+            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_VERSION_NOT_NULL);
         }
 
         return this.meetingVersion >= meetingVersion;

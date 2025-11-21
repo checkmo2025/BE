@@ -1,9 +1,9 @@
 package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.Topic;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.TopicRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,9 +22,9 @@ public class ClubTopicQueryServiceImpl implements ClubTopicQueryService {
     }
 
     @Override
-    public Topic validateTopic(Long topicId, Long meetingId) throws GeneralException {
+    public Topic validateTopic(Long topicId, Long meetingId) throws ClubMeetingException {
         return topicRepository.findByIdAndMeetingId(topicId, meetingId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.TOPIC_NOT_FOUND));
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_NOT_FOUND));
     }
 
 }

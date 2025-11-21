@@ -3,11 +3,11 @@ package checkmo.clubNotice.internal.service.query;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
+import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
+import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.repository.ClubMemberVoteRepository;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
 import checkmo.clubNotice.internal.repository.VoteRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,13 +23,13 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
     @Override
     public Notice getNotice(Long clubId, Long noticeId) {
         return noticeRepository.findByIdAndClubId(noticeId, clubId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND));
     }
 
     @Override
     public Vote getVote(Long clubId, Long voteId) {
         return voteRepository.findByIdAndClubId(voteId, clubId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.VOTE_NOT_FOUND));
     }
 
     @Override
@@ -53,14 +53,14 @@ public class ClubNoticeQueryServiceImpl implements ClubNoticeQueryService {
     }
 
     @Override
-    public Notice validateNotice(Long clubId, Long noticeId) throws GeneralException {
+    public Notice validateNotice(Long clubId, Long noticeId) throws ClubNoticeException {
         return noticeRepository.findByIdAndClubId(noticeId, clubId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTICE_NOT_FOUND));
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND));
     }
 
     @Override
-    public Vote validateVote(Long clubId, Long voteId) throws GeneralException {
+    public Vote validateVote(Long clubId, Long voteId) throws ClubNoticeException {
         return voteRepository.findByIdAndClubId(voteId, clubId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.VOTE_NOT_FOUND));
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.VOTE_NOT_FOUND));
     }
 }

@@ -4,12 +4,12 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.BookReviewRepository;
 import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookReviewCreate;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
@@ -61,7 +61,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
-            throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
         double oldRate = bookReview.getRate();
@@ -93,7 +93,7 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
-            throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
         meeting.subtractSumRate(bookReview.getRate());

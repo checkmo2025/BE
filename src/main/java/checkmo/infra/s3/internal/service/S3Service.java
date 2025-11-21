@@ -1,8 +1,8 @@
 package checkmo.infra.s3.internal.service;
 
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.infra.s3.internal.config.properties.S3Properties;
+import checkmo.infra.s3.internal.exception.S3ErrorStatus;
+import checkmo.infra.s3.internal.exception.S3InfraException;
 import checkmo.infra.s3.web.dto.S3ResponseDTO;
 import java.util.Set;
 import java.util.UUID;
@@ -34,7 +34,7 @@ public class S3Service {
     public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType) {
         // Content-Type 검증
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
-            throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+            throw new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE);
         }
 
         // S3에 저장될 파일의 고유 경로(key) 생성
@@ -59,7 +59,7 @@ public class S3Service {
     public void deleteImage(String key) {
         // key가 null이거나 비어있으면 예외 발생 -> 프론트에서 잘못 전달한 상황
         if (key == null || key.trim().isEmpty()) {
-            throw new GeneralException(ErrorStatus.S3_FILE_DELETE_FAILED);
+            throw new S3InfraException(S3ErrorStatus.S3_FILE_DELETE_FAILED);
         }
 
         try {
@@ -73,7 +73,7 @@ public class S3Service {
             s3Client.deleteObject(deleteRequest);
         } catch (Exception e) {
             log.error("S3 파일 삭제 실패: {}", key, e);
-            throw new GeneralException(ErrorStatus.S3_FILE_DELETE_FAILED, e.getMessage());
+            throw new S3InfraException(S3ErrorStatus.S3_FILE_DELETE_FAILED, e.getMessage());
         }
     }
 
@@ -126,7 +126,7 @@ public class S3Service {
             return presignedUrl;
         } catch (Exception e) {
             log.error("key를 통한 presigned url 생성 실패: {}", key, e);
-            throw new GeneralException(ErrorStatus.S3_PRESIGNED_URL_GENERATION_FAILED, e.getMessage());
+            throw new S3InfraException(S3ErrorStatus.S3_PRESIGNED_URL_GENERATION_FAILED, e.getMessage());
         }
     }
 
@@ -150,7 +150,7 @@ public class S3Service {
 
         // 허용된 확장자만 통과
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
+            throw new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE);
         }
 
         return extension;

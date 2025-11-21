@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import java.util.List;
 import java.util.Set;
 
@@ -55,7 +55,7 @@ public interface ClubMeetingQueryService {
      *
      * @param meetingId 미팅 ID
      * @return Meeting 존재하는 미팅 객체
-     * @throws GeneralException 미팅이 존재하지 않을 경우
+     * @throws ClubMeetingException 미팅이 존재하지 않을 경우
      */
-    Meeting validateMeeting(Long meetingId) throws GeneralException;
+    Meeting validateMeeting(Long meetingId) throws ClubMeetingException;
 }

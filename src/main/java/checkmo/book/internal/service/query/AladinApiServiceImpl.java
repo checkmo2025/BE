@@ -2,10 +2,10 @@ package checkmo.book.internal.service.query;
 
 import checkmo.book.internal.config.properties.AladinProperties;
 import checkmo.book.internal.converter.BookConverter;
+import checkmo.book.internal.exception.BookErrorStatus;
+import checkmo.book.internal.exception.BookException;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -59,14 +59,14 @@ public class AladinApiServiceImpl implements AladinApiService {
             );
 
             if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
-                throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
+                throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);
             }
 
             return BookConverter.toBookInfoDetail(response);
 
-        } catch (GeneralException e) {
+        } catch (BookException e) {
             log.error("알라딘 API 호출 중 오류 발생: {}", e.getMessage());
-            throw new GeneralException(ErrorStatus.BOOK_NOT_FOUND);
+            throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);
         } catch (Exception e) {
             log.error("알라딘 API 호출 중 오류 발생: {}", e.getMessage());
             throw new RuntimeException("알라딘 API 호출 실패", e);

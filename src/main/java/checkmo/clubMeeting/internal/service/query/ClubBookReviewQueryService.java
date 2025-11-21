@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.BookReview;
-import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import java.util.List;
 
 public interface ClubBookReviewQueryService {
@@ -23,5 +23,5 @@ public interface ClubBookReviewQueryService {
      * @param meetingId 미팅 ID
      * @return BookReview 존재하는 한줄평 객체
      */
-    BookReview validateBookReview(Long reviewId, Long meetingId) throws GeneralException;
+    BookReview validateBookReview(Long reviewId, Long meetingId) throws ClubMeetingException;
 }

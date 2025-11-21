@@ -3,7 +3,7 @@ package checkmo.clubNotice.internal.service.query;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
-import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import java.util.List;
 
 public interface ClubNoticeQueryService {
@@ -72,7 +72,7 @@ public interface ClubNoticeQueryService {
      * @param noticeId 검증할 공지사항 ID
      * @return 공지사항 객체
      */
-    Notice validateNotice(Long clubId, Long noticeId) throws GeneralException;
+    Notice validateNotice(Long clubId, Long noticeId) throws ClubNoticeException;
 
     /**
      * 투표를 검증합니다.
@@ -81,5 +81,5 @@ public interface ClubNoticeQueryService {
      * @param voteId 검증할 투표 ID
      * @return 투표 객체
      */
-    Vote validateVote(Long clubId, Long voteId) throws GeneralException;
+    Vote validateVote(Long clubId, Long voteId) throws ClubNoticeException;
 }

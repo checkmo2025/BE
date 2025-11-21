@@ -2,13 +2,13 @@ package checkmo.notification.internal.service.command;
 
 import checkmo.bookStory.BookStoryEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberEvent;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.entity.Notification.NotificationType;
+import checkmo.notification.internal.exception.NotificationErrorStatus;
+import checkmo.notification.internal.exception.NotificationException;
 import checkmo.notification.internal.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -119,11 +119,11 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     @CacheEvict(value = "notifications", key = "#memberId")
     public void markNotificationAsRead(Long notificationId, String memberId) {
         Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.NOTIFICATION_NOT_FOUND));
+                .orElseThrow(() -> new NotificationException(NotificationErrorStatus.NOTIFICATION_NOT_FOUND));
 
         // 알림이 이미 읽음 상태인지 확인
         if (notification.isRead()) {
-            throw new GeneralException(ErrorStatus.NOTIFICATION_ALREADY_READ);
+            throw new NotificationException(NotificationErrorStatus.NOTIFICATION_ALREADY_READ);
         }
 
         // 알림을 읽음 상태로 변경

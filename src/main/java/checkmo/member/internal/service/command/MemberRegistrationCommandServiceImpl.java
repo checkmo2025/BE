@@ -1,9 +1,9 @@
 package checkmo.member.internal.service.command;
 
 import checkmo.authentication.AuthenticationAPI;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.exception.MemberErrorStatus;
+import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
     @Override
     public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         member.updateAdditionalInfo(
                 request.getNickname(),

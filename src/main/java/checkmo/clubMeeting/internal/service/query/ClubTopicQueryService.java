@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.Topic;
-import checkmo.common.apiPayload.exception.GeneralException;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import java.util.List;
 
 /**
@@ -25,6 +25,6 @@ public interface ClubTopicQueryService {
      * @param meetingId 미팅 ID
      * @return Topic 존재하는 발제 객체
      */
-    Topic validateTopic(Long topicId, Long meetingId) throws GeneralException;
+    Topic validateTopic(Long topicId, Long meetingId) throws ClubMeetingException;
 
 }

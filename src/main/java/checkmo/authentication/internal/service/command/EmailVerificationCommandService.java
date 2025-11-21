@@ -1,10 +1,10 @@
 package checkmo.authentication.internal.service.command;
 
 import checkmo.authentication.AuthenticationEvent;
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.web.dto.AuthRequestDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HashMap;
@@ -36,12 +36,12 @@ public class EmailVerificationCommandService {
         // 이미 인증번호가 Redis에 존재하면 예외 처리
         String redisKey = EMAIL_VERIFICATION_PREFIX + email;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
-            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_SENT);
+            throw new AuthException(AuthErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_SENT);
         }
 
         // 이미 회원가입이 완료된 이메일인지 확인하는 로직
         if (authRepository.existsByEmail(email)) {
-            throw new GeneralException(ErrorStatus.MEMBER_ALREADY_EXISTS);
+            throw new AuthException(AuthErrorStatus.MEMBER_ALREADY_EXISTS);
         }
 
         // 6자리 랜덤 인증번호 생성
@@ -71,17 +71,17 @@ public class EmailVerificationCommandService {
 
         // 인증번호가 만료된 경우
         if (storedCode == null) {
-            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_EXPIRED);
+            throw new AuthException(AuthErrorStatus.EMAIL_VERIFICATION_CODE_EXPIRED);
         }
 
         // 인증번호가 일치하지 않는 경우
         if (!request.getVerificationCode().equals(storedCode)) {
-            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_INVALID);
+            throw new AuthException(AuthErrorStatus.EMAIL_VERIFICATION_CODE_INVALID);
         }
 
         // 이미 인증된 경우
         if (Boolean.TRUE.equals(isVerified)) {
-            throw new GeneralException(ErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED);
+            throw new AuthException(AuthErrorStatus.EMAIL_VERIFICATION_CODE_ALREADY_VERIFIED);
         }
 
         // 인증 성공 시 verified 상태 업데이트

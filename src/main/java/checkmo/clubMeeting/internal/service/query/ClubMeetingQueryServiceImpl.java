@@ -1,9 +1,9 @@
 package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -41,9 +41,9 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     }
 
     @Override
-    public Meeting validateMeeting(Long meetingId) throws GeneralException {
+    public Meeting validateMeeting(Long meetingId) throws ClubMeetingException {
         return meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.MEETING_NOT_FOUND));
     }
 
 }

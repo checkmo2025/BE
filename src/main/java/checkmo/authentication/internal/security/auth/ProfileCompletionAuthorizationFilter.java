@@ -1,7 +1,7 @@
 package checkmo.authentication.internal.security.auth;
 
+import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
@@ -69,8 +69,8 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
 
         ApiResponse<Object> errorResponse = ApiResponse.onFailure(
-                ErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getCode(),
-                ErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getMessage(),
+                AuthErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getCode(),
+                AuthErrorStatus.MEMBER_PROFILE_NOT_COMPLETED.getMessage(),
                 null
         );
 

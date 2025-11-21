@@ -5,6 +5,8 @@ import checkmo.book.BookExternalDTO;
 import checkmo.book.BookExternalDTO.DetailInfo;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
@@ -20,8 +22,6 @@ import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.BookShelfDetail;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -325,7 +325,7 @@ public class ClubMeetingQueryFacade {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(meeting.getClubId(), memberId);
         if (!clubMembershipInfo.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
         // 2. 클럽의 회원 조회 및 페이징 처리 (이때 PENDING이나 BLOCKED 상태는 제외하고 STAFF나 MEMBER만 조회)

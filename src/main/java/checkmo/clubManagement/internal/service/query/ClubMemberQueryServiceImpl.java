@@ -2,9 +2,9 @@ package checkmo.clubManagement.internal.service.query;
 
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +26,9 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     private final ClubMemberRepository clubMemberRepository;
 
     @Override
-    public ClubMember validateClubMember(Long clubId, String memberId) throws GeneralException {
+    public ClubMember validateClubMember(Long clubId, String memberId) throws ClubManagementException {
         return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_ONLY));
+                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_ONLY));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
             try {
                 clubMemberStatus = List.of(ClubMember.ClubMemberStatus.valueOf(status.toUpperCase()));
             } catch (IllegalArgumentException e) {
-                throw new GeneralException(ErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+                throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
             }
         }
 

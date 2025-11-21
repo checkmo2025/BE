@@ -8,6 +8,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import java.security.Key;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -97,7 +98,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
             return true;
         } catch (ExpiredJwtException e) {
             throw e; // 토큰이 만료된 경우 재발급하도록 던지기
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+        } catch (SecurityException | MalformedJwtException e) {
             log.warn("잘못된 JWT 서명입니다.", e);
         } catch (UnsupportedJwtException e) {
             log.warn("지원하지 않는 JWT 토큰입니다", e);

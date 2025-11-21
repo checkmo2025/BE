@@ -3,12 +3,12 @@ package checkmo.clubManagement.internal.service.command;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.JoinClub;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
         // 2. 이미 신청 또는 가입되어 있는 경우
         clubMemberRepository.findByClubIdAndMemberId(club.getId(), memberId)
                 .ifPresent(cm -> {
-                    throw new GeneralException(ErrorStatus.CLUB_MEMBER_ALREADY_EXISTS);
+                    throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_ALREADY_EXISTS);
                 });
 
         // 3. 클럽 오픈 여부에 따른 사용자 상태 설정
@@ -66,12 +66,12 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
         Club club = clubQueryService.validateClub(clubId);
         ClubMember actor = clubMemberQueryService.validateClubMember(clubId, actorId);
         if (!actor.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
         // 수정 대상 회원 존재 여부 확인
         ClubMember targetClubMember = clubMemberRepository.findByClubIdAndId(club.getId(), targetClubMemberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND));
 
         // 상태 문자열 → Enum 변환
         // TODO: 해당 변환은 DTO 레이어에서 처리하는 것이 더 적절할 수 있음
@@ -79,7 +79,7 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
         try {
             newStatus = ClubMember.ClubMemberStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
 
         ClubMember.ClubMemberStatus oldStatus = targetClubMember.getClubMemberStatus();
@@ -103,7 +103,7 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
 
         // 2. 운영진(STAFF)은 탈퇴 불가
         if (clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_CANNOT_LEAVE);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_CANNOT_LEAVE);
         }
 
         // 3. 탈퇴 처리

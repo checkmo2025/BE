@@ -1,8 +1,8 @@
 package checkmo.clubManagement.internal.service.query;
 
 import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 
 /**
@@ -43,7 +43,7 @@ public interface ClubQueryService {
      *
      * @param clubId 독서 클럽 ID
      * @return Club 검증된 독서 클럽 객체
-     * @throws GeneralException 클럽이 존재하지 않는 경우
+     * @throws ClubManagementException 클럽이 존재하지 않는 경우
      */
-    Club validateClub(Long clubId) throws GeneralException;
+    Club validateClub(Long clubId) throws ClubManagementException;
 }

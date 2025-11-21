@@ -1,9 +1,9 @@
 package checkmo.authentication.internal.security.auth;
 
 import checkmo.authentication.internal.entity.AuthUser;
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -34,8 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     public UserDetails loadUserById(String id) {
         AuthUser user = authRepository.findById(id)
-                .orElseThrow(() -> new GeneralException(
-                        ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 
         validateMemberStatus(user);
         return new PrincipalDetails(user);
@@ -43,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private void validateMemberStatus(AuthUser user) {
         if (user.getDeactivatedAt() != null) {
-            throw new GeneralException(ErrorStatus.MEMBER_INACTIVE);
+            throw new AuthException(AuthErrorStatus.MEMBER_INACTIVE);
         }
     }
 }

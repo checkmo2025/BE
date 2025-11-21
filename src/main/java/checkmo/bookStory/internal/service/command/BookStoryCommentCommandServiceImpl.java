@@ -2,11 +2,11 @@ package checkmo.bookStory.internal.service.command;
 
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
+import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +33,16 @@ public class BookStoryCommentCommandServiceImpl implements BookStoryCommentComma
         Comment parentComment = null;
         if (parentCommentId != null) {
             parentComment = commentRepository.findById(parentCommentId)
-                    .orElseThrow(() -> new GeneralException(ErrorStatus.COMMENT_NOT_FOUND));
+                    .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.COMMENT_NOT_FOUND));
 
             // 부모 댓글이 같은 책이야기에 속하는지 확인
             if (!parentComment.getBookStoryId().equals(bookStoryId)) {
-                throw new GeneralException(ErrorStatus.INVALID_PARENT_COMMENT);
+                throw new BookStoryException(BookStoryErrorStatus.INVALID_PARENT_COMMENT);
             }
 
             // 대댓글의 대댓글은 금지! (2단계까지만 허용)
             if (parentComment.getParentCommentId() != null) {
-                throw new GeneralException(ErrorStatus.COMMENT_DEPTH_LIMIT_EXCEEDED);
+                throw new BookStoryException(BookStoryErrorStatus.COMMENT_DEPTH_LIMIT_EXCEEDED);
             }
         }
 

@@ -6,6 +6,8 @@ import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
+import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
+import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.repository.ClubMemberVoteRepository;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
 import checkmo.clubNotice.internal.repository.VoteRepository;
@@ -13,8 +15,6 @@ import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubNotice;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResult;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -51,7 +51,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         if ("모임".equals(notice.getTag())) {
-            throw new GeneralException(ErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
+            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
         }
 
         noticeRepository.delete(notice);
@@ -110,7 +110,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
         // 투표의 복수 선택이 불가능하다면 여러 항목 선택했는지 검증
         if (!vote.isDuplication()) {
             if (request.countSelectedItems() > 1) {
-                throw new GeneralException(ErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
+                throw new ClubNoticeException(ClubNoticeErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
             }
         }
 
@@ -129,7 +129,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
         LocalDateTime now = LocalDateTime.now();
         if ((vote.getStartTime() != null && now.isBefore(vote.getStartTime())) ||
                 (vote.getDeadline() != null && now.isAfter(vote.getDeadline()))) {
-            throw new GeneralException(ErrorStatus.VOTE_TIME_EXPIRED);
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_TIME_EXPIRED);
         }
     }
 }

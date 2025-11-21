@@ -1,11 +1,11 @@
 package checkmo.authentication.internal.service.command;
 
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.security.jwt.JwtCookieUtil;
 import checkmo.authentication.internal.security.jwt.JwtTokenProvider;
 import checkmo.authentication.internal.security.jwt.TokenCacheService;
 import checkmo.authentication.web.dto.AuthRequestDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +44,10 @@ public class AuthSessionCommandService {
 
         } catch (AuthenticationException authEx) {
             // 인증 실패 시 예외 처리
-            throw new GeneralException(ErrorStatus.INVALID_CREDENTIALS, "이메일 또는 비밀번호가 일치하지 않습니다");
+            throw new AuthException(AuthErrorStatus.INVALID_CREDENTIALS, "이메일 또는 비밀번호가 일치하지 않습니다");
         } catch (Exception e) {
             // 기타 예외 처리
-            throw new GeneralException(ErrorStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류: 로그인 처리 중 오류가 발생했습니다");
+            throw new AuthException(AuthErrorStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류: 로그인 처리 중 오류가 발생했습니다");
         }
 
         // 인증 성공 후 Authentication 객체 반환

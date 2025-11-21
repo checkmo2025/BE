@@ -8,10 +8,10 @@ import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
+import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
+import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfo;
@@ -99,7 +99,7 @@ public class ClubNoticeQueryFacade {
             case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMembershipInfo);
             case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMembershipInfo);
             case TAG_VOTE -> getVoteDetail(clubId, noticeId, clubMembershipInfo);
-            default -> throw new GeneralException(ErrorStatus.CLUB_INVALID_TAG_TYPE);
+            default -> throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_INVALID_TAG_TYPE);
         };
     }
 
@@ -158,7 +158,7 @@ public class ClubNoticeQueryFacade {
     ) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
         if (TAG_MEETING.equals(notice.getTag())) {
-            throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND);
         }
 
         return ClubNoticeResponseDTO.ClubNoticeDetail.builder()
@@ -174,7 +174,7 @@ public class ClubNoticeQueryFacade {
     ) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
         if (TAG_NOTICE.equals(notice.getTag())) {
-            throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
+            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND);
         }
 
         MeetingInfo meetingInfo = clubMeetingAPI.getMeeting(notice.getMeetingId());

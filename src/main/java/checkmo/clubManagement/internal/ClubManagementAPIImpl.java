@@ -5,10 +5,10 @@ import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +25,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     private final ClubMemberQueryService clubMemberQueryService;
 
     @Override
-    public void validateClub(Long clubId) throws GeneralException {
+    public void validateClub(Long clubId) throws ClubManagementException {
         clubQueryService.validateClub(clubId);
     }
 
@@ -40,39 +40,39 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public void validateStaffClubMember(Long clubId, String memberId) throws GeneralException {
+    public void validateStaffClubMember(Long clubId, String memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         if (!clubMember.isStaff()) {
-            throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
     }
 
     @Override
-    public Long getActiveClubMemberInfo(Long clubId, String memberId) throws GeneralException {
+    public Long getActiveClubMemberInfo(Long clubId, String memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         if (!clubMember.isActive()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
         }
 
         return clubMember.getId();
     }
 
     @Override
-    public Membership getClubMembershipInfo(Long clubId, String memberId) throws GeneralException {
+    public Membership getClubMembershipInfo(Long clubId, String memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return ClubManagementConverter.toMembershipDTO(clubMember);
     }
 
     @Override
-    public Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException {
+    public Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws ClubManagementException {
         if (clubMemberIds == null) {
             return Map.of();
         }
         List<ClubMember> clubMembers = clubMemberQueryService.getClubMembersByIds(clubMemberIds);
         if (clubMembers.size() != clubMemberIds.size()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
         }
         return ClubManagementConverter.toMembereshipDTOMap(clubMembers);
     }

@@ -7,9 +7,9 @@ import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +41,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
 
         List<Meeting> meetings = clubMeetingQueryService.getMeetingsByIds(meetingIds);
         if (meetings.size() != meetingIds.size()) {
-            throw new GeneralException(ErrorStatus.MEETING_NOT_FOUND);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.MEETING_NOT_FOUND);
         }
 
         List<String> bookIds = extractBookIds(meetings);

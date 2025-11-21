@@ -3,11 +3,11 @@ package checkmo.clubMeeting.internal.service.query;
 import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.ClubMemberTeamRepository;
 import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.repository.TeamTopicRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,8 +72,8 @@ public class ClubMeetingTeamQueryServiceImpl implements ClubMeetingTeamQueryServ
     }
 
     @Override
-    public Team validateTeam(Long meetingId, Integer teamNumber) throws GeneralException {
+    public Team validateTeam(Long meetingId, Integer teamNumber) throws ClubMeetingException {
         return teamRepository.findByMeetingIdAndTeamNumber(meetingId, teamNumber)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.TEAM_NOT_FOUND));
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TEAM_NOT_FOUND));
     }
 }

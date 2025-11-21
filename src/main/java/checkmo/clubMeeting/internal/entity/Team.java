@@ -1,8 +1,8 @@
 package checkmo.clubMeeting.internal.entity;
 
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.common.BaseEntity;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,7 +62,7 @@ public class Team extends BaseEntity {
     // == 연관관계 메서드 == //
     public void setMeeting(Meeting meeting) {
         if (meeting == null) {
-            throw new GeneralException(ErrorStatus.TEAM_MEETING_REQUIRED);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.TEAM_MEETING_REQUIRED);
         }
         if (this.meeting == meeting) {
             return;

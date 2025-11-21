@@ -1,9 +1,9 @@
 package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.BookReviewRepository;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,8 +22,8 @@ public class ClubBookReviewQueryServiceImpl implements ClubBookReviewQueryServic
     }
 
     @Override
-    public BookReview validateBookReview(Long reviewId, Long meetingId) throws GeneralException {
+    public BookReview validateBookReview(Long reviewId, Long meetingId) throws ClubMeetingException {
         return bookReviewRepository.findByIdAndMeetingId(reviewId, meetingId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_REVIEW_NOT_FOUND));
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_NOT_FOUND));
     }
 }

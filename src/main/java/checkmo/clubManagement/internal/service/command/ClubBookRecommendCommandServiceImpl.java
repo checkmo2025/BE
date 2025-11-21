@@ -4,12 +4,12 @@ import checkmo.book.BookAPI;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.BookRecommendRepository;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,9 +54,10 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
 
         // 2. 추천 책 조회 및 존재 여부 검증
         BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+                .orElseThrow(
+                        () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
         if (!bookRecommend.getClubMember().equals(clubMember)) {
-            throw new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
         }
 
         bookRecommend.updateRecommendInfo(request.getTitle(), request.getContent(), request.getRate(),
@@ -71,9 +72,10 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+                .orElseThrow(
+                        () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
         if (!bookRecommend.getClubMember().equals(clubMember)) {
-            throw new GeneralException(ErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
         }
 
         bookRecommendRepository.delete(bookRecommend);

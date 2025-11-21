@@ -6,6 +6,8 @@ import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
 import checkmo.clubMeeting.internal.entity.Topic;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.TeamTopicRepository;
 import checkmo.clubMeeting.internal.repository.TopicRepository;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
@@ -14,8 +16,6 @@ import checkmo.clubMeeting.internal.service.query.ClubTopicQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.TopicCreate;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -55,7 +55,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
-            throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_FORBIDDEN);
         }
 
         topic.updateTopic(
@@ -72,7 +72,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
-            throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_FORBIDDEN);
         }
 
         // 발제 삭제(Meeting의 orphanRemoval로 처리)

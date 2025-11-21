@@ -3,10 +3,10 @@ package checkmo.bookStory.internal.service.command;
 import checkmo.book.BookAPI;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
+import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,10 +38,10 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     @Transactional
     public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdate request) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
         if (!bookStory.getMemberId().equals(memberId)) {
-            throw new GeneralException(ErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
         return bookStory.updateDescription(request.getDescription());
@@ -51,10 +51,10 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     @Transactional
     public void deleteBookStory(String memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
         if (!bookStory.getMemberId().equals(memberId)) {
-            throw new GeneralException(ErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
         bookStoryRepository.delete(bookStory);

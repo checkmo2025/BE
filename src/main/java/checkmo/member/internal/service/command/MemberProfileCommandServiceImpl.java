@@ -1,10 +1,10 @@
 package checkmo.member.internal.service.command;
 
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberEvent;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.exception.MemberErrorStatus;
+import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
@@ -30,8 +30,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
     ) {
         // 회원 조회
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(
-                        ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         String existingImageUrl = member.getImgUrl();
         String newImageUrl = request.getImgUrl();

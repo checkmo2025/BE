@@ -1,8 +1,8 @@
 package checkmo.member.internal.service.query;
 
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.exception.MemberErrorStatus;
+import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjection;
@@ -28,13 +28,13 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public Member getMemberBasicInfo(String memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
     @Override
     public Member getMemberProfile(String memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
     @Override
@@ -45,13 +45,13 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public Member getOtherProfile(String targetMemberNickname) {
         return memberRepository.findByNickName(targetMemberNickname)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
     @Override
     public String getMemberIdByNickname(String nickname) {
         return memberRepository.findIdByNickName(nickname)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public String getMemberNicknameById(String memberId) {
         return memberRepository.findNicknameById(memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
     @Override

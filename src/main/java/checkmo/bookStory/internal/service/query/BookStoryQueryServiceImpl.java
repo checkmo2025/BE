@@ -2,12 +2,12 @@ package checkmo.bookStory.internal.service.query;
 
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
+import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.common.apiPayload.code.status.ErrorStatus;
-import checkmo.common.apiPayload.exception.GeneralException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +68,7 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
     @Override
     public BookStory findBookStoryById(Long bookStoryId) {
         return bookStoryRepository.findById(bookStoryId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.BOOK_STORY_NOT_FOUND));
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
     }
 
     @Override
