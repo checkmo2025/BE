@@ -27,41 +27,33 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
     private final ClubManagementAPI clubManagementAPI;
 
-    // 자신의 QueryService
     private final ClubNoticeQueryService clubNoticeQueryService;
 
-    // 자신의 Repository
     private final VoteRepository voteRepository;
     private final NoticeRepository noticeRepository;
     private final ClubMemberVoteRepository clubMemberVoteRepository;
 
     @Override
     public Notice createPureNotice(Long clubId, String memberId, CreateClubNotice request) {
-        // 1. 유효성 검증 (club, clubMember)
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-        // 공지사항 생성 및 저장
         Notice notice = ClubNoticeConverter.toNotice(request, clubId);
         noticeRepository.save(notice);
 
-        // 공지사항 ID 반환
         return notice;
     }
 
     @Override
     public void deletePureNotice(Long clubId, Long noticeId, String memberId) {
-        // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-        // 공지사항 존재 여부 및 "순수" 공지사항 여부 확인
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         if ("모임".equals(notice.getTag())) {
             throw new GeneralException(ErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
         }
 
-        // 공지사항 삭제
         noticeRepository.delete(notice);
     }
 
@@ -87,42 +79,32 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
 
     @Override
     public Vote createVote(Long clubId, String memberId, CreateClubVote request) {
-        // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-        // 투표 생성 및 저장
         Vote vote = ClubNoticeConverter.toVote(request, clubId);
         //TODO: 데드라인이 현재 시간보다 이전인지, 시작시간이 데드라인보다 이전인지, 시작시간이 현재시간보다 이전인지 검증이 필요하지 않나
         voteRepository.save(vote);
 
-        // 투표 ID 반환
         return vote;
     }
 
     @Override
     public void deleteVote(Long clubId, Long voteId, String memberId) {
-        // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-        // 투표 조회 및 존재 여부 확인
         Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
 
-        // 삭제
         voteRepository.delete(vote);
     }
 
     @Override
     public Long haveVote(Long clubId, Long voteId, String memberId, VoteResult request) {
-        // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(clubId, memberId);
 
-        // 투표 조회 및 존재 여부 확인
         Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
-
-        // 투표 가능 시간인지 검증
         validateVotingTime(vote);
 
         // 투표의 복수 선택이 불가능하다면 여러 항목 선택했는지 검증

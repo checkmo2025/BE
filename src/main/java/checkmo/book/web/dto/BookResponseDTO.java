@@ -1,11 +1,10 @@
 package checkmo.book.web.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 public class BookResponseDTO {
 
@@ -14,12 +13,12 @@ public class BookResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookInfoDetail {
-        private String isbn; // ISBN 번호
-        private String title; // 책 제목
-        private String author; // 저자
-        private String imgUrl; // 책 이미지 URL
-        private String publisher; // 출판사
-        private String description; // 책 설명
+        private String isbn;
+        private String title;
+        private String author;
+        private String imgUrl;
+        private String publisher;
+        private String description;
     }
 
     @Getter
@@ -27,8 +26,8 @@ public class BookResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookList {
-        private List<BookInfoDetail> bookInfoDetailList; // 책 정보 목록
-        private boolean hasNext;        // 다음 페이지 존재 여부
-        private Integer currentPage;           // 현재 페이지 번호
+        private List<BookInfoDetail> bookInfoDetailList;
+        private boolean hasNext;
+        private Integer currentPage;
     }
 }

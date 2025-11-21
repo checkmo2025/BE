@@ -1,6 +1,7 @@
 package checkmo.clubManagement.internal.service;
 
 import checkmo.book.BookAPI;
+import checkmo.book.BookExternalDTO.BasicInfo;
 import checkmo.clubManagement.ClubManagementExternalDTO.MyClubInfo;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
@@ -11,6 +12,7 @@ import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.BookRecommendDetail;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
@@ -162,34 +164,27 @@ public class ClubManagementQueryFacade {
             Long cursorId,
             Integer size
     ) {
-        // 1. 클럽 멤버 리스트 조회
         clubQueryService.validateClub(clubId);
         ClubMember requester = clubMemberQueryService.validateClubMember(clubId, memberId);
         if (!requester.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        // 2. 만약 size가 null이면 기본값 사용 후 size+1만큼 조회
         if (size == null) {
             size = DEFAULT_PAGE_SIZE;
         }
-        List<ClubMember> members = clubMemberQueryService.getClubMemberListByStatus(clubId, clubMemberStatus, cursorId,
-                size + 1);
-
-        // 3. 페이징 처리
+        List<ClubMember> members
+                = clubMemberQueryService.getClubMemberListByStatus(clubId, clubMemberStatus, cursorId, size + 1);
         boolean hasNext = members.size() > size;
         if (hasNext) {
             members = members.subList(0, size);
         }
         Long nextCursor = hasNext ? members.getLast().getId() : null;
 
-        // 4. memberId 추출
         List<String> memberIds = extractMemberIds(members);
-
-        // 5. 기본 정보 배치 조회
         Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
 
-        // 6. DTO 변환
+        // DTO 변환
         List<ClubResponseDTO.ClubMember> dtoList = members.stream()
                 .map(cm -> {
                     MemberExternalDTO.BasicInfo memberInfo = memberInfoMap.get(cm.getMemberId());
@@ -221,38 +216,30 @@ public class ClubManagementQueryFacade {
     }
 
     public ClubResponseDTO.BookRecommendList getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
-        // 1. 클럽 검증
         clubQueryService.validateClub(clubId);
-
-        // 2. 클럽 멤버 검증
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        String nickname = memberAPI.getMemberBasicInfoForShare(memberId).getNickname();
 
-        // 3. 커서 초기화 (페이징 로직)
+        // 추천 도서 조회 및 페이징 처리
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
+        List<BookRecommend> bookRecommends
+                = clubBookRecommendQueryService.getRecommendedBooks(clubId, cursor, memberId);
+        Long nextCursor = bookRecommends.isEmpty() ? null : bookRecommends.getLast().getId();
+        boolean hasNext = clubBookRecommendQueryService.hasNextPage(clubId, nextCursor);
 
-        // 4. ServiceImpl에서 순수 엔티티 조회
-        var bookRecommends = clubBookRecommendQueryService.getRecommendedBooks(clubId, cursor, memberId);
-
-        // 5. 외부 도메인 정보 조합 (Facade에서 처리)
-        var currentMemberNickname = memberAPI.getMemberBasicInfoForShare(memberId).getNickname();
-
-        var dtoList = bookRecommends.stream()
+        List<BookRecommendDetail> bookRecommendDetails = bookRecommends.stream()
                 .map(bookRecommend -> {
                     var bookInfo = bookAPI.getBookBasicInfoForShare(bookRecommend.getBookId());
                     var authorInfo = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
                     return ClubManagementConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo,
-                            currentMemberNickname, clubMember.isStaff());
+                            nickname, clubMember.isStaff());
                 }).toList();
 
-        // 6. 페이징 처리 (Facade에서)
-        Long nextCursor = bookRecommends.isEmpty() ? null : bookRecommends.getLast().getId();
-        boolean hasNext = clubBookRecommendQueryService.hasNextPage(clubId, nextCursor);
-
         return ClubResponseDTO.BookRecommendList.builder()
-                .bookRecommendList(dtoList)
+                .bookRecommendList(bookRecommendDetails)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
-                .pageSize(dtoList.size())
+                .pageSize(bookRecommendDetails.size())
                 .build();
     }
 
@@ -261,17 +248,15 @@ public class ClubManagementQueryFacade {
             Long bookRecommendId,
             String memberId
     ) {
-        // 1. Service에서 순수 엔티티 조회
-        BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommendEntity(clubId, bookRecommendId,
-                memberId);
-
-        // 2. ClubMember 조회 (isStaff 확인용)
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        // 3. 외부 도메인 정보 조회 (Facade에서 처리)
-        var bookInfo = bookAPI.getBookBasicInfoForShare(bookRecommend.getBookId());
-        var authorInfo = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
-        var currentMemberInfo = memberAPI.getMemberBasicInfoForShare(memberId);
+        BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommend(clubId, bookRecommendId, memberId);
+
+        // 외부 도메인 정보 조회 (Facade에서 처리)
+        BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(bookRecommend.getBookId());
+        MemberExternalDTO.BasicInfo authorInfo
+                = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
+        MemberExternalDTO.BasicInfo currentMemberInfo = memberAPI.getMemberBasicInfoForShare(memberId);
 
         // 4. DTO 변환 후 반환
         return ClubManagementConverter.toBookRecommendDetailDTO(

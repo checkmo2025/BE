@@ -3,14 +3,12 @@ package checkmo.clubManagement.internal.service.command;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 
 /**
- * 독서 모임 자체의 생성 모임 자체의 관리를 담당
+ * 독서 모임 자체의 관리를 담당
  */
 public interface ClubManagementCommandService {
 
     /**
      * 독서모임을 생성합니다.
-     * <p>
-     * 피그마 참고 페이지 : #독서모임 - 모임 생성하기 첫화면 첫스크롤
      *
      * @param memberId 사용자 ID
      * @param request  모임 생성 요청 DTO

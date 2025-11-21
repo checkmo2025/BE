@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberAPIImpl implements MemberAPI {
 
-    // 자신의 QueryService
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
 
@@ -77,7 +76,6 @@ public class MemberAPIImpl implements MemberAPI {
         List<MemberBasicInfoProjection> results = memberQueryService.getMemberBasicInfoMapForShare(memberIds);
 
         // 2. 조회된 Projection 리스트를 Map으로 변환
-        // memberId를 key로, BasicInfoDTO를 value로 사용
         return results.stream()
                 .collect(Collectors.toMap(
                         MemberBasicInfoProjection::getId,
@@ -115,8 +113,8 @@ public class MemberAPIImpl implements MemberAPI {
         }
 
         // 1. Facade에서 내부 DTO로 배치 조회
-        List<MemberResponseDTO.MemberProfileWithFollow> profiles = memberQueryFacade.getMemberProfiles(targetMemberIds,
-                currentMemberId);
+        List<MemberResponseDTO.MemberProfileWithFollow> profiles
+                = memberQueryFacade.getMemberProfiles(targetMemberIds, currentMemberId);
 
         // 2. 내부 DTO → 외부 DTO 변환 후 Map으로 변환
         // targetMemberIds와 profiles는 순서가 일치하므로 zip 형태로 매핑

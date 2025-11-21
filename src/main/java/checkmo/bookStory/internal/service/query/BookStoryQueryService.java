@@ -40,7 +40,6 @@ public interface BookStoryQueryService {
      */
     Map<Long, Boolean> checkLikesForBookStories(String memberId, List<BookStory> bookStories);
 
-
     /**
      * 책 이야기 엔티티 조회
      *

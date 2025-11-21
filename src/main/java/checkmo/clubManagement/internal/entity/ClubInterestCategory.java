@@ -19,6 +19,6 @@ public enum ClubInterestCategory {
     SCIENCE,
     FOREIGN_LANGUAGE,
     ART_POP_CULTURE,
-    CHILDRENS_BOOK
+    CHILDREN_BOOK
 
 }

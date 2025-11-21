@@ -39,14 +39,12 @@ public class MemberRegistrationCommandServiceImpl implements MemberRegistrationC
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
-        // 멤버 엔티티 업데이트
         member.updateAdditionalInfo(
                 request.getNickname(),
                 request.getDescription(),
                 request.getImgUrl()
         );
 
-        // 관심 카테고리 저장
         member.updateInterestCategories(new HashSet<>(request.getCategories()));
 
         // 프로필 완료 상태로 변경 이벤트 발행

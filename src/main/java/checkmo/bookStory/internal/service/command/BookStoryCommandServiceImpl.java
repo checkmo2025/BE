@@ -21,7 +21,6 @@ public class BookStoryCommandServiceImpl implements BookStoryCommandService {
     // Domain level 1
     private final BookAPI bookAPI;
 
-    // 자신의 Repository
     private final BookStoryRepository bookStoryRepository;
 
     @Override

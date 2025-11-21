@@ -31,7 +31,6 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Properties s3Properties;
 
-    // 파일 업로드를 위한 presigned URL 생성
     public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType) {
         // Content-Type 검증
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
@@ -48,7 +47,8 @@ public class S3Service {
         String imageUrl = String.format("https://%s.s3.%s.amazonaws.com/%s",
                 s3Properties.getS3().getBucket(),
                 s3Properties.getRegion().getName(),
-                key);
+                key
+        );
 
         return S3ResponseDTO.PresignedUrl.builder()
                 .presignedUrl(presignedUrl)
@@ -56,7 +56,6 @@ public class S3Service {
                 .build();
     }
 
-    // 파일 삭제 - 이건 우리가 직접 수행
     public void deleteImage(String key) {
         // key가 null이거나 비어있으면 예외 발생 -> 프론트에서 잘못 전달한 상황
         if (key == null || key.trim().isEmpty()) {
@@ -132,13 +131,11 @@ public class S3Service {
     }
 
     private String generateUniqueKey(String originalFileName) {
-        // 파일의 확장자 가져오기
         String extension = getFileExtension(originalFileName);
 
-        // 해당 파일의 이름을  UUID로 생성
         String uniqueId = UUID.randomUUID().toString();
 
-        // S3 버킷에 저장될 경로와 파일명을 생성 -> 이게 Key가 됨
+        // S3 버킷에 저장될 경로와 UUID 파일명.확장자 -> 이게 Key가 됨
         return String.format("images/%s%s", uniqueId, extension);
     }
 
@@ -156,7 +153,6 @@ public class S3Service {
             throw new GeneralException(ErrorStatus.INVALID_FILE_TYPE);
         }
 
-        // 파일의 확장자 반환
         return extension;
     }
 }

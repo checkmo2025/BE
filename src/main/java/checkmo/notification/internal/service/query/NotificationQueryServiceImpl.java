@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NotificationQueryServiceImpl implements NotificationQueryService {
 
-    // 자신의 Repository
     private final NotificationRepository notificationRepository;
 
     @Override
@@ -31,7 +30,6 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
 
     @Override
     public List<Notification> findUnreadNotifications(String receiverId, int size) {
-        // 순수 엔티티만 반환
         return notificationRepository
                 .findByReceiverIdAndIsReadFalseOrderByCreatedAtDesc(receiverId, PageRequest.of(0, size));
     }

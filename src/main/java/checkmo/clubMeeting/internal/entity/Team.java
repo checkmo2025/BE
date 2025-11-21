@@ -38,7 +38,7 @@ public class Team extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Integer teamNumber; // 팀 번호
+    private Integer teamNumber;
 
     @Column(name = "meeting_id", insertable = false, updatable = false)
     private Long meetingId;

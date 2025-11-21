@@ -22,9 +22,9 @@ public class BookStoryExternalDTO {
         private ScopeInfo scopeInfo;    // 현재 선택된 범위 정보
         private ClubManagementExternalDTO.MyClubList memberClubList; // 사용자가 속한 클럽 목록
         private List<BookStoryDetail> bookStoryDetailList;
-        private boolean hasNext;        // 다음 페이지 존재 여부
-        private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
-        private int pageSize;           // 현재 페이지 크기
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
     }
 
     @Getter
@@ -42,8 +42,8 @@ public class BookStoryExternalDTO {
     @Builder
     public static class BookStoryDetail {
         private Long bookStoryId;
-        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberExternalDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo;
+        private MemberExternalDTO.WithFollowStatus authorInfo;
         private String bookStoryTitle;
         private String description;
         private int likes;
@@ -54,7 +54,7 @@ public class BookStoryExternalDTO {
         private LocalDateTime createdAt;
 
         private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
-        private int commentCount; // 댓글 개수
+        private int commentCount;
     }
 
     @Getter
@@ -63,8 +63,8 @@ public class BookStoryExternalDTO {
     @Builder
     public static class BookStoryDetailWithComment {
         private Long bookStoryId;
-        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberExternalDTO.WithFollowStatus authorInfo; // 작성자 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo;
+        private MemberExternalDTO.WithFollowStatus authorInfo;
         private String bookStoryTitle;
         private String description;
         private int likes;
@@ -77,7 +77,7 @@ public class BookStoryExternalDTO {
         private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
         private int commentCount; // 댓글 전체 개수 (대댓글 포함)
 
-        private List<CommentDetail> comments; // 댓글 목록
+        private List<CommentDetail> comments;
     }
 
     @Getter
@@ -87,7 +87,7 @@ public class BookStoryExternalDTO {
     public static class CommentDetail {
         private Long commentId;
         private String content;
-        private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보
+        private MemberExternalDTO.BasicInfo authorInfo;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;

@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberProfileCommandServiceImpl implements MemberProfileCommandService {
 
-    // 자신의 Repository
     private final MemberRepository memberRepository;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -34,10 +33,7 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
                 .orElseThrow(() -> new GeneralException(
                         ErrorStatus.MEMBER_NOT_FOUND));
 
-        // 기존에 저장된 이미지 url 가져오기
         String existingImageUrl = member.getImgUrl();
-
-        // 새로 입력받은 request의 이미지 url 가져오기
         String newImageUrl = request.getImgUrl();
 
         // 기존 이미지와 새로운 이미지가 다를 경우 S3에서 기존 이미지 삭제 이벤트 발행
@@ -49,10 +45,8 @@ public class MemberProfileCommandServiceImpl implements MemberProfileCommandServ
                             .build());
         }
 
-        // 프로필 정보 업데이트 (소개, 이미지)
         member.updateProfile(request.getDescription(), newImageUrl);
 
-        // 관심 카테고리 수정
         if (request.getCategories() != null) {
             member.updateInterestCategories(new HashSet<>(request.getCategories()));
         }

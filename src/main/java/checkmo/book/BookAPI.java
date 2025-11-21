@@ -9,7 +9,7 @@ import java.util.Map;
 public interface BookAPI {
 
     /**
-     * 다른 도메인에서 사용할 기본적인 책 정보를 조회합니다. (외부용)
+     * 다른 도메인에서 사용할 기본적인 책 정보를 조회합니다.
      *
      * @param bookId 책 ID (ISBN)
      * @return 공유용 기본 책 정보 DTO
@@ -17,7 +17,7 @@ public interface BookAPI {
     BookExternalDTO.BasicInfo getBookBasicInfoForShare(String bookId);
 
     /**
-     * 다른 도메인에서 사용할 상세 책 정보를 조회합니다. (외부용)
+     * 다른 도메인에서 사용할 상세 책 정보를 조회합니다.
      *
      * @param bookId 책 ID (ISBN)
      * @return 공유용 상세 책 정보 DTO
@@ -25,7 +25,7 @@ public interface BookAPI {
     BookExternalDTO.DetailInfo getBookDetailInfoForShare(String bookId);
 
     /**
-     * 책 ID 목록으로 공유용 기본 책 정보를 조회합니다. (외부용)
+     * 책 ID 목록으로 공유용 기본 책 정보를 조회합니다.
      *
      * @param bookIds 조회할 책 ID 목록
      * @return 책 ID와 기본 정보 매핑 정보
@@ -33,7 +33,7 @@ public interface BookAPI {
     Map<String, BookExternalDTO.BasicInfo> getBookBasicInfoMapForShare(List<String> bookIds);
 
     /**
-     * 책을 조회하거나, 존재하지 않으면 생성합니다. (외부용)
+     * 책을 조회하거나, 존재하지 않으면 생성합니다.
      *
      * @param request 생성할 책 정보 DTO
      * @return 조회되거나 생성된 책의 ID (ISBN)

@@ -1,9 +1,9 @@
 package checkmo.notification.web.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import checkmo.notification.internal.entity.Notification;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,9 +17,9 @@ public class NotificationResponseDTO {
     @Builder
     public static class NotificationList {
         private List<NotificationPreview> notifications;
-        private boolean hasNext;        // 다음 페이지 존재 여부
-        private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
-        private int pageSize;           // 현재 페이지 크기
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
     }
 
     /**
@@ -42,13 +42,13 @@ public class NotificationResponseDTO {
     @Builder
     public static class NotificationPreview {
         private Long notificationId;
-        private Notification.NotificationType notificationType; // 알림 타입
+        private Notification.NotificationType notificationType;
         private String senderNickname;
         private String targetName; // 대상 이름 (클럽명, 사용자명 등)
         private boolean read;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
-        private String redirectPath; // 알림 클릭 시 이동할 URL
+        private String redirectPath;
     }
 }

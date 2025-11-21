@@ -49,7 +49,6 @@ public class ClubNoticeQueryFacade {
     private final ClubManagementAPI clubManagementAPI;
     private final ClubMeetingAPI clubMeetingAPI;
 
-    // 자신의 Query Service
     private final ClubNoticeQueryService clubNoticeQueryService;
 
     public ClubNoticeResponseDTO.ClubNoticeList getLatestNotices(
@@ -59,34 +58,28 @@ public class ClubNoticeQueryFacade {
             boolean onlyImportant,
             Integer size
     ) {
-
-        // 1. 검증 -> 소식은 클럽에 속한 사람만 조회할 수 있음
         clubManagementAPI.validateClub(clubId);
         Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
 
-        // 2. 커서 초기화
         Long cursor = (cursorId == null || cursorId == 0L) ? Long.MAX_VALUE : cursorId;
-
-        // 3. 페이지 크기 결정 (size가 null 또는 0 이하이면 기본값 사용)
         int pageSize = (size == null || size <= 0) ? DEFAULT_PAGE_SIZE : size;
         Pageable pageable = PageRequest.of(0, pageSize + 1);
 
-        // 4. 공지사항과 투표 각각 조회
+        // 공지사항과 투표 각각 조회
         List<Notice> notices = clubNoticeQueryService.getNoticeList(clubId, onlyImportant, cursor, pageable);
         List<Vote> votes = clubNoticeQueryService.getVoteList(clubId, onlyImportant, cursor, pageable);
 
-        // 5. 공지사항에 모임 정보 미리 조회
-        Set<Long> meetingIds = extractNoticeMeetingIds(notices);
+        // 공지사항에 모임 정보 미리 조회
+        Set<Long> meetingIds = extractMeetingIdsFromNotices(notices);
         Map<Long, MeetingInfo> meetingInfos = clubMeetingAPI.getMeetings(meetingIds);
 
-        // 6. 생성시간 순으로 병합 및 DTO 변환
+        // 생성시간 순으로 병합 및 DTO 변환
         List<ClubNoticeResponseDTO.NoticeItem> noticeItems
                 = mergeNoticesAndVotes(notices, meetingInfos, votes, pageSize);
 
-        // 7. 페이징
         boolean hasNext = noticeItems.size() > pageSize;
         if (hasNext) {
-            noticeItems = noticeItems.subList(0, pageSize);  // pageSize 만큼만 남기기
+            noticeItems = noticeItems.subList(0, pageSize);
         }
         Long nextCursor = hasNext && noticeItems.size() >= pageSize
                 ? noticeItems.get(pageSize - 1).getId()
@@ -99,6 +92,23 @@ public class ClubNoticeQueryFacade {
                 .pageSize(noticeItems.size())
                 .isStaff(clubMembershipInfo.isStaff())
                 .build();
+    }
+
+    public ClubNoticeResponseDTO.ClubNoticeDetail getNoticeDetail(
+            Long clubId,
+            Long noticeId,
+            String tag,
+            String memberId
+    ) {
+        clubManagementAPI.validateClub(clubId);
+        Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
+
+        return switch (tag) {
+            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMembershipInfo);
+            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMembershipInfo);
+            case TAG_VOTE -> getVoteDetail(clubId, noticeId, clubMembershipInfo);
+            default -> throw new GeneralException(ErrorStatus.CLUB_INVALID_TAG_TYPE);
+        };
     }
 
     /**
@@ -120,7 +130,7 @@ public class ClubNoticeQueryFacade {
                 Notice notice = notices.get(i++);
                 ClubNoticeResponseDTO.NoticeItem dto;
 
-                if (notice.getMeetingId() != null) { // 모임 공지사항인 경우
+                if (notice.getMeetingId() != null) {
                     dto = ClubNoticeConverter.toMeetingNoticeDTO(notice, meetingInfos.get(notice.getMeetingId()));
                 } else {
                     dto = ClubNoticeConverter.toPureNoticeDTO(notice);
@@ -139,10 +149,7 @@ public class ClubNoticeQueryFacade {
         return resultList;
     }
 
-    /**
-     * 공지사항 리스트에서 모임 공지사항인 경우 meetingId 추출
-     */
-    private Set<Long> extractNoticeMeetingIds(List<Notice> notices) {
+    private Set<Long> extractMeetingIdsFromNotices(List<Notice> notices) {
         if (notices == null) {
             return Set.of();
         }
@@ -152,34 +159,12 @@ public class ClubNoticeQueryFacade {
                 .collect(Collectors.toSet());
     }
 
-    public ClubNoticeResponseDTO.ClubNoticeDetail getNoticeDetail(
-            Long clubId,
-            Long noticeId,
-            String tag,
-            String memberId
-    ) {
-        // 1. 검증
-        clubManagementAPI.validateClub(clubId);
-        Membership clubMembershipInfo = clubManagementAPI.getClubMembershipInfo(clubId, memberId);
-
-        return switch (tag) {
-            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMembershipInfo);
-            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMembershipInfo);
-            case TAG_VOTE -> getVoteDetail(clubId, noticeId, memberId, clubMembershipInfo);
-            default -> throw new GeneralException(ErrorStatus.CLUB_INVALID_TAG_TYPE);
-        };
-    }
-
-    /**
-     * 순수 공지사항 상세 조회
-     */
     private ClubNoticeResponseDTO.ClubNoticeDetail getPureNoticeDetail(
             Long clubId,
             Long itemId,
             Membership clubMembershipInfo
     ) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
-
         if (TAG_MEETING.equals(notice.getTag())) {
             throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
         }
@@ -190,16 +175,12 @@ public class ClubNoticeQueryFacade {
                 .build();
     }
 
-    /**
-     * 모임 공지사항 상세 조회
-     */
     private ClubNoticeResponseDTO.ClubNoticeDetail getMeetingNoticeDetail(
             Long clubId,
             Long itemId,
             Membership clubMembershipInfo
     ) {
         Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
-
         if (TAG_NOTICE.equals(notice.getTag())) {
             throw new GeneralException(ErrorStatus.NOTICE_NOT_FOUND);
         }
@@ -212,13 +193,9 @@ public class ClubNoticeQueryFacade {
                 .build();
     }
 
-    /**
-     * 투표 상세 조회
-     */
     private ClubNoticeResponseDTO.ClubNoticeDetail getVoteDetail(
             Long clubId,
             Long itemId,
-            String memberId,
             Membership clubMembershipInfo
     ) {
         Vote vote = clubNoticeQueryService.getVote(clubId, itemId);
@@ -228,16 +205,15 @@ public class ClubNoticeQueryFacade {
         // 전체 투표 결과
         List<ClubMemberVote> clubMemberVotes = clubNoticeQueryService.getMemberVotesByVoteId(vote.getId());
 
-        // 항목별 투표자 정보 수집
-        List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem = collectVotedMembersByItem(vote, clubMemberVotes,
-                itemCount);
+        List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem
+                = collectVotedMembersByItem(vote, clubMemberVotes, itemCount);
 
         // 본인 투표 정보
         ClubMemberVote myVote = clubNoticeQueryService.getMyVote(vote.getId(), clubMembershipInfo.getClubMemberId());
 
         // 투표 항목 DTO 생성
-        List<ClubNoticeResponseDTO.EachItem> itemDTOs = createVoteItemDTOs(voteItems, myVote, votedMembersByItem,
-                itemCount);
+        List<ClubNoticeResponseDTO.EachItem> itemDTOs
+                = createVoteItemDTOs(voteItems, myVote, votedMembersByItem, itemCount);
 
         ClubNoticeResponseDTO.VoteNotice voteNoticeDTO = ClubNoticeConverter.toVoteNoticeDTO(vote, itemDTOs);
 
@@ -260,10 +236,9 @@ public class ClubNoticeQueryFacade {
 
         // 익명 투표인 경우
         if (vote.isAnonymity()) {
-            MemberExternalDTO.BasicInfo anoymousInfo = createAnonymousMemberInfo();
-
+            MemberExternalDTO.BasicInfo anonymousMemberInfo = createAnonymousMemberInfo();
             for (ClubMemberVote mv : clubMemberVotes) {
-                addVoterToItems(votedMembersByItem, mv, itemCount, anoymousInfo);
+                addVoterToItems(votedMembersByItem, mv, itemCount, anonymousMemberInfo);
             }
             return votedMembersByItem;
         }
@@ -335,9 +310,7 @@ public class ClubNoticeQueryFacade {
     /**
      * 실명 투표 시, clubMemberId → BasicInfo 배치 조회
      */
-    private Map<Long, MemberExternalDTO.BasicInfo> getVoterInfoByClubMemberIds(
-            List<ClubMemberVote> clubMemberVotes
-    ) {
+    private Map<Long, MemberExternalDTO.BasicInfo> getVoterInfoByClubMemberIds(List<ClubMemberVote> clubMemberVotes) {
         Set<Long> clubMemberIds = extractClubMemberIds(clubMemberVotes);
         if (clubMemberIds.isEmpty()) {
             return Collections.emptyMap();
@@ -349,13 +322,12 @@ public class ClubNoticeQueryFacade {
             return Collections.emptyMap();
         }
 
-        // memberId 리스트 추출
+        // MemberAPI에서 기본 정보 배치 조회
         List<String> memberIds = extractMemberIds(membershipMap);
         if (memberIds.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        // MemberAPI에서 기본 정보 배치 조회
         Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
         if (memberInfoMap.isEmpty()) {
             return Collections.emptyMap();
@@ -370,9 +342,6 @@ public class ClubNoticeQueryFacade {
                 ));
     }
 
-    /**
-     * 투표 내역에서 clubMemberId 집합 추출
-     */
     private Set<Long> extractClubMemberIds(List<ClubMemberVote> clubMemberVotes) {
         return clubMemberVotes.stream()
                 .map(ClubMemberVote::getClubMemberId)
@@ -380,9 +349,6 @@ public class ClubNoticeQueryFacade {
                 .collect(Collectors.toSet());
     }
 
-    /**
-     * 멤버십 맵에서 memberId 리스트 추출
-     */
     private List<String> extractMemberIds(Map<Long, Membership> membershipMap) {
         return membershipMap.values().stream()
                 .map(Membership::getMemberId)

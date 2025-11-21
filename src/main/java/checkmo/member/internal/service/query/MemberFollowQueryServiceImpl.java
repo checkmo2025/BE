@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberFollowQueryServiceImpl implements MemberFollowQueryService {
 
-    // 자신의 Repository
     private final FollowRepository followRepository;
 
     @Override

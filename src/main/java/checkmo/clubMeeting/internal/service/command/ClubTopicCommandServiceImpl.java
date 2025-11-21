@@ -30,44 +30,34 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
 
     private final ClubManagementAPI clubManagementAPI;
 
-    // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
     private final ClubTopicQueryService clubTopicQueryService;
     private final ClubMeetingTeamQueryService clubMeetingTeamQueryService;
 
-    // 자신의 Repository
     private final TopicRepository topicRepository;
     private final TeamTopicRepository teamTopicRepository;
 
     @Override
     public Long createTopic(Long meetingId, String memberId, TopicCreate request) {
-        // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 2. 발제 생성
         Topic topic = ClubMeetingConverter.toTopic(request, memberId, clubMemberId);
         topic.setMeeting(meeting);
 
-        // 3. 발제 저장
         return topicRepository.save(topic).getId();
     }
 
     @Override
     public Long updateTopic(Long meetingId, Long topicId, String memberId, TopicCreate request) {
-        // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 발제 조회 및 존재 여부 확인
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
-
-        // 발제 작성자와 수정자가 같은지 확인
         if (!topic.isOwnedBy(clubMemberId)) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
 
-        // 발제 수정
         topic.updateTopic(
                 request.getDescription()
         );
@@ -77,14 +67,10 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
 
     @Override
     public void deleteTopic(Long meetingId, Long topicId, String memberId) {
-        // 1. 유효성 검증 (meeting clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 발제 조회 및 존재 여부 확인
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
-
-        // 발제 작성자와 삭제자가 같은지 확인
         if (!topic.isOwnedBy(clubMemberId)) {
             throw new GeneralException(ErrorStatus.TOPIC_FORBIDDEN);
         }
@@ -100,7 +86,6 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
             String memberId,
             MeetingRequestDTO.TopicSelection request
     ) {
-        // 1. 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 

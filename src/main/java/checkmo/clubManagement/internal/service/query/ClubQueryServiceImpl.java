@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ClubQueryServiceImpl implements ClubQueryService {
 
-    // 자신의 Repository
     private final ClubRepository clubRepository;
 
     @Override

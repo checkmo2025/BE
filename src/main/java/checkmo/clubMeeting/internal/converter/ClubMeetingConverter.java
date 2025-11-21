@@ -120,7 +120,6 @@ public class ClubMeetingConverter {
                 .location(meeting.getLocation())
                 .generation(meeting.getGeneration())
                 .tag(meeting.getTag())
-                .content(meeting.getContent())
                 .bookInfo(bookInfo)
                 .build();
     }

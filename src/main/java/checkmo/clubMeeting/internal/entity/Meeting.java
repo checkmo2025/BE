@@ -55,7 +55,7 @@ public class Meeting extends BaseEntity {
     private Long clubId;
 
     @Column(name = "book_id", insertable = false, updatable = false)
-    private String bookId; // null 허용
+    private String bookId;
 
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)

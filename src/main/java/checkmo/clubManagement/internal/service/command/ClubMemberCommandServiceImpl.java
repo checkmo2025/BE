@@ -18,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
 
-    // 자신의 Service
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
 
-    // 자신의 Repository
     private final ClubMemberRepository clubMemberRepository;
 
     // 이벤트 발행을 위한 ApplicationEventPublisher
@@ -31,7 +29,6 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
     @Override
     @Transactional
     public ClubMember joinClub(Long clubId, String memberId, JoinClub request) {
-        // 1. 유효성 검증(club)
         Club club = clubQueryService.validateClub(clubId);
 
         // 2. 이미 신청 또는 가입되어 있는 경우
@@ -51,12 +48,10 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
                 .joinMessage(request.getJoinMessage())
                 .memberId(memberId)
                 .build();
-
-        // 5. 양방향 연관관계 설정 및 저장
         club.addClubMember(clubMember);
         clubMemberRepository.save(clubMember);
 
-        // 6. 공개 클럽이면 즉시 가입 완료 이벤트 발행
+        // 공개 클럽이면 즉시 가입 완료 이벤트 발행
         if (club.isOpen()) {
             JoinClubEvent joinClubEvent = new JoinClubEvent(clubMember.getId(), memberId, club.getId(), club.getName());
             eventPublisher.publishEvent(joinClubEvent);
@@ -68,20 +63,17 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
     @Override
     @Transactional
     public ClubMember updateClubMemberStatus(Long clubId, String actorId, Long targetClubMemberId, String status) {
-        // 1. 유효성 검증(club, clubMember)
         Club club = clubQueryService.validateClub(clubId);
         ClubMember actor = clubMemberQueryService.validateClubMember(clubId, actorId);
-
-        // 2. 요청자 운영진 여부 확인
         if (!actor.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        // 3. 수정 대상 회원 존재 여부 확인
+        // 수정 대상 회원 존재 여부 확인
         ClubMember targetClubMember = clubMemberRepository.findByClubIdAndId(club.getId(), targetClubMemberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND));
 
-        // 4. 상태 문자열 → Enum 변환
+        // 상태 문자열 → Enum 변환
         // TODO: 해당 변환은 DTO 레이어에서 처리하는 것이 더 적절할 수 있음
         ClubMember.ClubMemberStatus newStatus;
         try {
@@ -90,11 +82,10 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
             throw new GeneralException(ErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
 
-        // 5. 상태 변경
         ClubMember.ClubMemberStatus oldStatus = targetClubMember.getClubMemberStatus();
         targetClubMember.updateStatus(newStatus);
 
-        // 6. PENDING → MEMBER로 변경되면 가입 완료 이벤트 발행
+        // PENDING → MEMBER로 변경되면 가입 완료 이벤트 발행
         if (oldStatus == ClubMember.ClubMemberStatus.PENDING && newStatus == ClubMember.ClubMemberStatus.MEMBER) {
             JoinClubEvent joinClubEvent = new JoinClubEvent(targetClubMember.getId(), targetClubMember.getMemberId(),
                     club.getId(), club.getName());
@@ -107,8 +98,7 @@ public class ClubMemberCommandServiceImpl implements ClubMemberCommandService {
     @Override
     @Transactional
     public void leaveClub(Long clubId, String memberId) {
-        // 1. 유효성 검증(club, clubMember)
-        Club club = clubQueryService.validateClub(clubId);
+        clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         // 2. 운영진(STAFF)은 탈퇴 불가

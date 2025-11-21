@@ -17,10 +17,10 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class ClubList {
-        private List<ClubWithMyStatus> clubList; // 모임 목록
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
-        private int pageSize; // 현재 페이지 크기
+        private List<ClubWithMyStatus> clubList;
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
     }
 
     @Getter
@@ -37,7 +37,7 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MyClubList {
-        private List<ClubInfo> clubList; // 모임 목록
+        private List<ClubInfo> clubList;
     }
 
     @Getter
@@ -45,7 +45,7 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MyPageClubList {
-        private List<ClubDetail> clubList; // 모임 목록
+        private List<ClubDetail> clubList;
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -73,9 +73,9 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class ClubInfo {
-        private Long clubId;         // 모임 ID
-        private String clubName;     // 모임 이름, joinClub의 반환값에서 사용될 때는 null
-        private Boolean open;      // 모임 공개 여부 (true: 공개, false: 비공개), MyClubListDTO-ClubInfoDTO에서 사용될 때는 null
+        private Long clubId;
+        private String clubName;
+        private Boolean open;      // 모임 공개 여부 (true: 공개, false: 비공개), MyClubList-ClubInfoDTO에서 사용될 때는 null
     }
 
     @Getter
@@ -84,10 +84,10 @@ public class ClubResponseDTO {
     @Builder
     public static class ClubMemberList {
         private List<ClubMember> clubMembers; // 모임 회원 목록
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
-        private int pageSize; // 현재 페이지 크기
-        private boolean isStaff; // 본인이 모임의 스탭인지 여부
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
+        private boolean isStaff;
     }
 
     @Getter
@@ -95,10 +95,10 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class ClubMember {
-        private Long clubMemberId; // 클럽 회원 ID
-        private MemberExternalDTO.BasicInfo basicInfo; // 닉네임과 프로필 url
+        private Long clubMemberId;
+        private MemberExternalDTO.BasicInfo basicInfo;
         private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
-        private String clubMemberStatus; // 회원의 상태 (예: "MEMBER", "STAFF", "PENDING", "BLOCKED")
+        private String clubMemberStatus;
     }
 
     @Getter
@@ -106,10 +106,10 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookRecommendList {
-        private List<BookRecommendDetail> bookRecommendList; // 추천 책 목록
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
-        private int pageSize; // 현재 페이지 크기
+        private List<BookRecommendDetail> bookRecommendList;
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
     }
 
     @Getter
@@ -117,14 +117,14 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookRecommendDetail {
-        private Long id; // 추천 책 ID
-        private String title; // 책 제목
-        private String content; // 추천 내용
-        private double rate; // 평점
+        private Long id;
+        private String title;
+        private String content;
+        private double rate;
         private String tag; // 추천 태그
-        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
-        private MemberExternalDTO.BasicInfo authorInfo; // 추천책 작성한 회원 정보 - 공용 DTO 사용
-        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
-        private boolean isStaff; // 본인이 모임의 스탭인지 여부
+        private BookExternalDTO.BasicInfo bookInfo;
+        private MemberExternalDTO.BasicInfo authorInfo;
+        private boolean isAuthor;
+        private boolean isStaff;
     }
 }

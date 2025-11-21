@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookStorySocialCommandServiceImpl implements BookStorySocialCommandService {
 
-    // 자신의 Repository
     private final BookStoryRepository bookStoryRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
 

@@ -10,8 +10,6 @@ import java.util.List;
 public interface ClubTopicQueryService {
     /**
      * 특정 미팅의 토픽을 커서 기반 조회합니다.
-     * <p>
-     * 피그마 참고 페이지 : #독서모임(사용자) - 책장 [특정 책]에서 [발제] 클릭시
      *
      * @param meetingId 미팅 ID
      * @param cursorId  커서 ID (페이징을 위한 커서, 처음에는 null)

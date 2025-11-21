@@ -4,6 +4,9 @@ import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 미팅에 대한 정보를 다른 모듈에 제공하는 Public한 API
+ */
 public interface ClubMeetingAPI {
 
     /**

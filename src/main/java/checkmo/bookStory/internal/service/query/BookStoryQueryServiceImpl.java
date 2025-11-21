@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookStoryQueryServiceImpl implements BookStoryQueryService {
 
-    // 자신의 Repository
     private final BookStoryRepository bookStoryRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
     private final CommentRepository commentRepository;
@@ -38,7 +37,6 @@ public class BookStoryQueryServiceImpl implements BookStoryQueryService {
             Long cursorId,
             int pageSize
     ) {
-        // TODO: 현재 내부에서 외부 도메인의 Q클래스를 호출해서 QueryDSL 사용하고 있는데, 이 부분도 리팩토링 필요
         return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize + 1);
     }
 

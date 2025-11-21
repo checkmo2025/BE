@@ -18,8 +18,8 @@ public class MemberExternalDTO {
     @AllArgsConstructor
     @Builder
     public static class BasicInfo {
-        private String nickname;        // 회원 닉네임
-        private String profileImageUrl; // 프로필 이미지 URL
+        private String nickname;
+        private String profileImageUrl;
     }
 
     /**

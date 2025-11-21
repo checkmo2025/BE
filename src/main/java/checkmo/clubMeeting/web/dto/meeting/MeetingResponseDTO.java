@@ -13,9 +13,6 @@ import lombok.NoArgsConstructor;
 
 public class MeetingResponseDTO {
 
-    /**
-     * 모임 상세 보기 페이지에서 사용할 DTO
-     */
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -33,30 +30,24 @@ public class MeetingResponseDTO {
     @Builder
     public static class MeetingList {
         private ClubManagementExternalDTO.Membership membership;
-        private List<MeetingInfo> meetingInfoList; // 모임 정보 목록
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서
+        private List<MeetingInfo> meetingInfoList;
+        private boolean hasNext;
+        private Long nextCursor;
     }
 
-    /**
-     * 모임 목록 페이지에서 사용할 DTO -> MeetingListDTO로 커서 기반 페이지네이션 캘린더 조회 페이지에서 사용할 DTO - BookExternalDTO.BasicInfoDTO, content
-     * 필드 제외
-     */
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class MeetingInfo {
-        private Long meetingId; // 모임 ID
-        private String title; // 모임 제목
-        private LocalDateTime meetingTime; // 미팅 날짜, 시간
-        private String location; // 모임 장소
-        private int generation; // 기수
+        private Long meetingId;
+        private String title;
+        private LocalDateTime meetingTime;
+        private String location;
+        private int generation;
         private String tag;
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private String content; // 모임 내용, ClubNoticeDetailDTO-MeetingNoticeDTO-MeetingInfoDTO 에서만 이 필드에 값 넣고 나머지에선 다 NULL
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo; // CalendarMeeting - List<MeetingInfo> 캘린더 조회할 때 NULL
     }
 
     @Getter
@@ -72,22 +63,12 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class TopicList {
-        private List<Topic> topics; // 토픽 목록
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     public static class Topic {
-        private Long topicId; // 토픽 ID
-        private String content; // 토픽 내용
-        private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보
+        private Long topicId;
+        private String content;
+        private MemberExternalDTO.BasicInfo authorInfo;
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TeamTopicDTO-TopicDTO에서는 이 필드 NULL
+        private List<Integer> teamNumbers; // 해당 토픽에 참여한 팀 번호 목록 | TeamTopic-topics 이 필드 NULL
     }
 
     @Getter
@@ -117,8 +98,8 @@ public class MeetingResponseDTO {
     public static class MeetingMemberList {
         private ClubManagementExternalDTO.Membership membership;
         private List<MeetingMember> members; // 모임 참여자 목록
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서
+        private boolean hasNext;
+        private Long nextCursor;
     }
 
     @Getter
@@ -145,7 +126,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TopicSelection {
-        private Long topicId; // 토픽 ID
+        private Long topicId;
         private Integer teamNumber; // 요청을 보낸 팀 번호
         private Boolean isSelected; // 발제 선택 여부
     }

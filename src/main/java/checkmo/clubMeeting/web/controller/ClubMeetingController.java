@@ -1,5 +1,6 @@
 package checkmo.clubMeeting.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.clubMeeting.internal.service.ClubMeetingQueryFacade;
 import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
@@ -8,7 +9,6 @@ import checkmo.clubMeeting.internal.validation.validSize.ValidSize;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -143,7 +143,6 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.getClubMeetingCalendar(clubId, year, month, memberId));
     }
 
-    // 토론조 관리
     @Operation(summary = "독서 동아리 회원 중 참여 인원 페이지네이션 조회 API",
             description = "[모임] 페이지 - 독서클럽의 모든 회원 정보(STAFF, MEMBER)와 함께, 해당 미팅에 배정된 팀 번호까지 페이지네이션 조회합니다. " +
                     "만약 팀 번호가 null이면 아직 아무 팀에도 배정되지 않은 것입니다.")
@@ -188,9 +187,7 @@ public class ClubMeetingController {
         clubMeetingCommandService.manageTeam(meetingId, memberId, request);
         return ApiResponse.onSuccess(null);
     }
-    // GET api/meetings/{meetingId}?teamNumber=1 - Team에 속한 인원 전체보기
 
-    // POST /api/meetings/{meetingId}/teams - 토론조 생성
     @Operation(summary = "미팅 팀별 참여 인원 전체 조회 API", description = "[모임] 페이지 - 독서모임의 팀별 참여 인원을 전체 조회합니다.")
     @Parameters({
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),

@@ -30,7 +30,7 @@ public class ClubMeetingQueryServiceImpl implements ClubMeetingQueryService {
     @Override
     public List<Meeting> getClubMeetingByYearAndMonth(Long clubId, int year, int month, String memberId) {
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
-        LocalDateTime endDateTime = startDateTime.plusMonths(1); //12월의 경우 다음 해 1월로 넘어감
+        LocalDateTime endDateTime = startDateTime.plusMonths(1);
 
         return meetingRepository.findAllByClubIdBetweenMeetingTimeAsc(clubId, startDateTime, endDateTime);
     }

@@ -10,17 +10,14 @@ import lombok.NoArgsConstructor;
 
 public class MemberResponseDTO {
 
-    /**
-     * 팔로잉 목록 조회 응답 DTO
-     */
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class FollowList {
         private List<MemberProfileWithFollow> followList; // 팔로워/팔로잉 목록
-        private boolean hasNext;        // 다음 페이지 존재 여부
-        private Long nextCursor;        // 다음 페이지 커서 (마지막 항목의 ID)
+        private boolean hasNext;
+        private Long nextCursor;
     }
 
     @Getter

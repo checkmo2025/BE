@@ -31,10 +31,8 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     private final ClubManagementAPI clubManagementAPI;
 
-    // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
 
-    // 자신의 Repository
     private final MeetingRepository meetingRepository;
     private final TeamRepository teamRepository;
 
@@ -44,33 +42,26 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     @Override
     public Long createMeeting(Long clubId, String memberId, MeetingCreate request) {
-        // 1. 유효성 검증(club, clubMember)
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-        // 2. 책 저장 후 프록시 객체 가져오기
         String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
 
-        // 3. 저장할 미팅 생성
         Meeting meeting = ClubMeetingConverter.toMeeting(request, clubId, bookId);
-
         meetingRepository.saveAndFlush(meeting);
 
         // 미팅 기반 공지사항 생성 이벤트 발행
         publishMeetingCreatedEvent(meeting);
 
-        // 미팅 명시적 저장
         return meeting.getId();
     }
 
     @Override
     public Long updateMeeting(Long meetingId, String memberId, MeetingUpdate request) {
-        // 1. 유효성 검증(meeting, club, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubManagementAPI.validateClub(meeting.getClubId());
         clubManagementAPI.validateStaffClubMember(meeting.getClubId(), memberId);
 
-        // 미팅 정보 수정
         meeting.updateMeeting(
                 request.getTitle(),
                 request.getMeetingTime(),
@@ -102,7 +93,6 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
 
     @Override
     public void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManage request) {
-        // 1. 유효성 검증(meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         clubManagementAPI.validateStaffClubMember(meeting.getClubId(), memberId);
 

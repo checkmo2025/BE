@@ -49,8 +49,10 @@ public class ClubNoticeExternalDTO {
         private final String bookImageUrl;
 
         @Builder
-        public MeetingNoticePreview(Long id, Long clubId, String clubName, String title, LocalDateTime nextMeetingDate,
-                                    String nextBookTitle, String bookImageUrl) {
+        public MeetingNoticePreview(
+                Long id, Long clubId, String clubName, String title, LocalDateTime nextMeetingDate,
+                String nextBookTitle, String bookImageUrl
+        ) {
             this.id = id;
             this.clubId = clubId;
             this.clubName = clubName;
@@ -63,8 +65,8 @@ public class ClubNoticeExternalDTO {
 
     @Getter
     public static final class VotePreview implements ClubUpdatePreview {
-        private final Long id; // 해당 클럽의 공지사항 ID
-        private final Long clubId; // 해당 클럽의 ID
+        private final Long id;
+        private final Long clubId;
         private final String clubName;
         private final String title;
         private final String tag = "투표";
@@ -76,8 +78,10 @@ public class ClubNoticeExternalDTO {
         private final List<String> voteItems;
 
         @Builder
-        public VotePreview(Long id, Long clubId, String clubName, String title, LocalDateTime meetingDate,
-                           String location, String details, List<String> voteItems) {
+        public VotePreview(
+                Long id, Long clubId, String clubName, String title, LocalDateTime meetingDate,
+                String location, String details, List<String> voteItems
+        ) {
             this.id = id;
             this.clubId = clubId;
             this.clubName = clubName;

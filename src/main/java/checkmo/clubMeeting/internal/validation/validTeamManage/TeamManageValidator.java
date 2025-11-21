@@ -17,7 +17,7 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
     @Override
     public boolean isValid(TeamManage value, ConstraintValidatorContext context) {
         if (value == null) {
-            return true; // @NotNull로 따로 처리
+            return true;
         }
 
         List<TeamMember> teamMemberList = value.getTeamMemberList();
@@ -28,7 +28,7 @@ public class TeamManageValidator implements ConstraintValidator<ValidTeamManage,
         boolean success = true;
         context.disableDefaultConstraintViolation();
 
-        Set<Integer> seenTeamNumbers = new HashSet<>(); // 팀 번호 중복 체크용
+        Set<Integer> seenTeamNumbers = new HashSet<>();
         Set<Long> seenClubMemberIds = new HashSet<>();
 
         for (int i = 0; i < teamMemberList.size(); i++) {

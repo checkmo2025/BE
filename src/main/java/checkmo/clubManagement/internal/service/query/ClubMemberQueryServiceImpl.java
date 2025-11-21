@@ -6,8 +6,6 @@ import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.member.MemberAPI;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +23,6 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     // Domain level 2
     private final MemberAPI memberAPI;
 
-    // 자신의 Repository
     private final ClubMemberRepository clubMemberRepository;
 
     @Override
@@ -50,20 +47,8 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     }
 
     @Override
-    public List<Long> getMyClubListIds(String memberId) {
-        return clubMemberRepository.findClubIdsByMemberId(memberId);
-    }
-
-    @Override
     public List<ClubMember> getMyPageClubList(String memberId, Long cursorId, Integer size) {
         return clubMemberRepository.findClubMembersByMemberIdOrderByIdAsc(memberId, cursorId, Pageable.ofSize(size));
-    }
-
-    @Override
-    public ClubMember.ClubMemberStatus getMemberStatusInClub(String memberId, Long clubId) {
-        return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
-                .map(ClubMember::getClubMemberStatus)
-                .orElse(null); // 존재하지 않으면 null 반환
     }
 
     @Override
@@ -80,8 +65,8 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     public List<ClubMember> getClubMemberListByStatus(Long clubId, String status, Long cursorId, Integer size) {
         List<ClubMember.ClubMemberStatus> clubMemberStatus;
         if ("ALL".equalsIgnoreCase(status)) {
-            clubMemberStatus = null; // ALL
-        } else if ("ACTIVE".equalsIgnoreCase(status)) { // ACTIVE는 내부적으로 사용할 예정
+            clubMemberStatus = null;
+        } else if ("ACTIVE".equalsIgnoreCase(status)) {
             clubMemberStatus = List.of(ClubMember.ClubMemberStatus.MEMBER, ClubMember.ClubMemberStatus.STAFF);
         } else {
             try {
@@ -97,45 +82,6 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
                 cursorId,
                 size
         );
-    }
-
-    @Override
-    public Map<String, ClubMember> getNicknameToClubMember(Long clubId, List<String> nicknames)
-            throws GeneralException {
-        if (nicknames == null || nicknames.isEmpty()) {
-            return Map.of();
-        }
-
-        Map<String, String> nicknameToMemberId = memberAPI.getMemberIdsByNicknames(nicknames);
-        Map<String, ClubMember> memberIdToClubMember = getMemberIdToClubMember(clubId,
-                nicknameToMemberId.values().stream().toList());
-        Map<String, ClubMember> nicknameToClubMember = new HashMap<>(nicknameToMemberId.size());
-        List<String> missing = new ArrayList<>();
-        for (String nickname : nicknames) {
-            String memberId = nicknameToMemberId.get(nickname);
-            ClubMember clubMember = (memberId == null) ? null : memberIdToClubMember.get(memberId);
-            if (clubMember == null) {
-                missing.add(nickname);
-            } else {
-                nicknameToClubMember.put(nickname, clubMember);
-            }
-        }
-        if (!missing.isEmpty()) {
-            throw new GeneralException(ErrorStatus.CLUB_MEMBER_NOT_FOUND, missing.toString()); // TODO: 잘못에러 메시지 확인
-        }
-        return nicknameToClubMember;
-    }
-
-    private Map<String, ClubMember> getMemberIdToClubMember(Long clubId, List<String> memberIds) {
-        if (memberIds == null || memberIds.isEmpty()) {
-            return Map.of();
-        }
-        List<ClubMember> results = clubMemberRepository.findClubMembersByClubIdAndMemberIdIn(clubId, memberIds);
-        return results.stream()
-                .collect(Collectors.toMap(
-                        ClubMember::getMemberId,
-                        cm -> cm)
-                );
     }
 
     @Override

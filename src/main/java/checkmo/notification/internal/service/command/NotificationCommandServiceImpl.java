@@ -24,7 +24,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     // Domain level 2
     private final MemberAPI memberAPI;
 
-    // 자신의 Repository
     private final NotificationRepository notificationRepository;
 
     @Override
@@ -37,7 +36,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
             return;
         }
 
-        // 리다이렉트 경로를 생성
         String redirectPath = NotificationConverter.getRedirectPath(type, event.bookStoryId());
 
         // Notification 객체를 생성하고 저장 (targetName = null)
@@ -69,7 +67,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         // 팔로우 누른 사람의 닉네임을 가져옴
         String FollowerNickname = memberAPI.getMemberNicknameById(event.followerId());
 
-        // 리다이렉트 경로를 생성
         String redirectPath = NotificationConverter.getRedirectPath(type, FollowerNickname);
 
         // Notification 객체를 생성하고 저장 (targetName = followerNickname)
@@ -98,9 +95,8 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
             return;
         }
 
-        // 리다이렉트 경로를 생성
-        String redirectPath = NotificationConverter.getRedirectPathForClub(Notification.NotificationType.JOIN_CLUB,
-                event.clubId());
+        String redirectPath
+                = NotificationConverter.getRedirectPathForClub(Notification.NotificationType.JOIN_CLUB, event.clubId());
 
         // Notification 객체를 생성하고 저장 (sender 없이, targetName 포함)
         Notification notification = Notification.builder()
@@ -122,7 +118,6 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
     @Transactional
     @CacheEvict(value = "notifications", key = "#memberId")
     public void markNotificationAsRead(Long notificationId, String memberId) {
-        // 멤버 ID와 알림 ID로 알림을 조회
         Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, memberId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.NOTIFICATION_NOT_FOUND));
 

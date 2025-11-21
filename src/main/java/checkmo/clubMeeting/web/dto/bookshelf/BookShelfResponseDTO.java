@@ -19,8 +19,8 @@ public class BookShelfResponseDTO {
     public static class BookShelfList {
         private List<BookShelfInfo> bookShelfInfoList;
         private ClubManagementExternalDTO.Membership membership;
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
+        private boolean hasNext;
+        private Long nextCursor;
     }
 
     @Getter
@@ -29,7 +29,7 @@ public class BookShelfResponseDTO {
     @Builder
     public static class BookShelfInfo {
         private MeetingInfo meetingInfo;
-        private BookExternalDTO.BasicInfo bookInfo; // 책 정보 - 공용 DTO 사용
+        private BookExternalDTO.BasicInfo bookInfo;
     }
 
     @Getter
@@ -37,10 +37,10 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingInfo {
-        private Long meetingId; // 모임 ID
-        private int generation; // 기수
-        private String tag; // 모임 태그
-        private double averageRate; // Meeting의 calculateAverageRate 메소드 호출해서 값 가져오기
+        private Long meetingId;
+        private int generation;
+        private String tag;
+        private double averageRate;
     }
 
     @Getter
@@ -49,9 +49,9 @@ public class BookShelfResponseDTO {
     @Builder
     public static class BookShelfDetail {
         private ClubManagementExternalDTO.Membership membership;
-        private MeetingInfo meetingInfo; // Meeting 기본 정보
-        private BookExternalDTO.DetailInfo bookDetailInfo; // 책 상세 정보 - 공용 DTO 사용
-        private TopicList topicList; // 발제 리스트(등록순 3개 미리보기)
+        private MeetingInfo meetingInfo;
+        private BookExternalDTO.DetailInfo bookDetailInfo;
+        private TopicList topicList;
     }
 
     @Getter
@@ -59,10 +59,10 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookReviewList {
-        private List<BookReviewDetail> bookReviewDetailList; // 한줄평 리스트
+        private List<BookReviewDetail> bookReviewDetailList;
         private ClubManagementExternalDTO.Membership membership;
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서 (마지막 항목의 ID)
+        private boolean hasNext;
+        private Long nextCursor;
     }
 
     @Getter
@@ -70,10 +70,10 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookReviewDetail {
-        private Long bookReviewId; // BookReview ID
-        private String description; // 한줄평 내용
-        private double rate; // 평점
-        private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보 (globalDTO 사용)
+        private Long bookReviewId;
+        private String description;
+        private double rate;
+        private MemberExternalDTO.BasicInfo authorInfo;
     }
 
     @Getter
@@ -83,9 +83,9 @@ public class BookShelfResponseDTO {
     public static class TopicList {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private ClubManagementExternalDTO.Membership membership;
-        private List<TopicDetail> topicDetailList; // 토픽 목록
-        private boolean hasNext; // 다음 페이지 존재 여부
-        private Long nextCursor; // 다음 페이지 커서
+        private List<TopicDetail> topicDetailList;
+        private boolean hasNext;
+        private Long nextCursor;
     }
 
     @Getter
@@ -93,10 +93,10 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TopicDetail {
-        private Long topicId; // 토픽 ID
-        private String content; // 토픽 내용
-        private MemberExternalDTO.BasicInfo authorInfo; // 작성자 정보
-        private boolean isAuthor; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+        private Long topicId;
+        private String content;
+        private MemberExternalDTO.BasicInfo authorInfo;
+        private boolean isAuthor;
     }
 
 }

@@ -1,5 +1,6 @@
 package checkmo.clubManagement.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.ClubManagementQueryFacade;
 import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
@@ -7,7 +8,6 @@ import checkmo.clubManagement.internal.service.command.ClubMemberCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -194,8 +194,8 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId,
             @RequestParam(defaultValue = "ALL") String status, // 상태별 필터링 (MEMBER, STAFF, PENDING, BLOCKED, ALL 중 선택)
-            @RequestParam(required = false) Long cursorId, // 페이징을 위한 커서 ID
-            @RequestParam(required = false) Integer size // 페이지 사이즈
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false) Integer size
     ) {
         return ApiResponse.onSuccess(
                 clubManagementQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId, size));

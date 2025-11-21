@@ -8,7 +8,7 @@ import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 public interface BookStoryAPI {
 
     /**
-     * 특정 책 이야기의 상세 정보를 조회합니다. (내부용)
+     * 특정 책 이야기의 상세 정보를 조회합니다.
      *
      * @param memberId    조회하는 회원의 ID
      * @param bookStoryId 조회할 책 이야기 ID
@@ -17,7 +17,7 @@ public interface BookStoryAPI {
     BookStoryExternalDTO.BookStoryDetailWithComment getBookStory(String memberId, Long bookStoryId);
 
     /**
-     * scope에 따라 책 이야기 목록을 조회합니다. (내부용) 비즈니스 로직을 Facade에서 처리하여 컨트롤러는 단순히 호출만 담당
+     * scope에 따라 책 이야기 목록을 조회합니다. 비즈니스 로직을 Facade에서 처리하여 컨트롤러는 단순히 호출만 담당
      *
      * @param memberId             조회하는 회원의 ID
      * @param scope                조회 범위 ("ALL", "MY", "FOLLOWING", "CLUB", "TARGET")

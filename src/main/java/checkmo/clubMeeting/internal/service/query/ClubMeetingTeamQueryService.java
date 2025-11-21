@@ -15,8 +15,8 @@ public interface ClubMeetingTeamQueryService {
     /**
      * 독서 모임 특정 미팅에 존재하는 모든 팀 정보를 조회합니다.
      *
+     * @param meetingId 미팅 ID
      * @return 조회한 팀 리스트
-     * @Param meetingId 미팅 ID
      */
     List<Team> findTeamsByMeeting(Long meetingId);
 
@@ -45,13 +45,12 @@ public interface ClubMeetingTeamQueryService {
     List<TeamTopic> findTeamTopicsWithTopicByTeamId(Long teamId, Integer size);
 
     /**
-     * 특정 토픽 ID 목록에 해당하는 팀 토픽과 팀 정보를 조회한 후, 토픽 ID를 기준으로 해당 토픽을 선택한 팀 번호 리스트를 반환합니다.
+     * 토픽 ID를 기준으로 해당 토픽을 선택한 팀 번호 리스트를 반환합니다.
      *
      * @param topicIds 조회할 토픽 ID 목록
      * @return 토픽 id를 기준으로 선택한 팀 번호 리스트 Map
      */
     Map<Long, List<Integer>> findTeamTopicsWithTeamByTopicIds(List<Long> topicIds);
-
 
     /**
      * 독서모임의 팀이 존재하는지 확인합니다.

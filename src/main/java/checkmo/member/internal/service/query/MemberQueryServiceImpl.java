@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberQueryServiceImpl implements MemberQueryService {
 
-    // 자신의 Repository
     private final MemberRepository memberRepository;
 
     @Override
@@ -26,12 +25,6 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         return memberRepository.existsByNickName(nickname);
     }
 
-    /**
-     * 회원 기본 정보 조회
-     *
-     * @param memberId 회원 ID
-     * @return 회원 기본 정보 DTO
-     */
     @Override
     public Member getMemberBasicInfo(String memberId) {
         return memberRepository.findById(memberId)
@@ -82,8 +75,8 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         List<MemberIdAndNicknameProjection> results = memberRepository.findIdAndNicknameByIdIn(memberIds);
         return results.stream()
                 .collect(Collectors.toMap(
-                        MemberIdAndNicknameProjection::getId,       // memberId
-                        MemberIdAndNicknameProjection::getNickName  // nickname
+                        MemberIdAndNicknameProjection::getId,       // key: memberId
+                        MemberIdAndNicknameProjection::getNickName  // value: nickname
                 ));
     }
 

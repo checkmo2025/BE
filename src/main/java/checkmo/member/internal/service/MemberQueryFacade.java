@@ -39,10 +39,8 @@ public class MemberQueryFacade {
     }
 
     public MemberResponseDTO.FollowList getFollowerList(String memberId, Long cursorId) {
-        // 1. 팔로워 목록 조회
+        // 팔로워 목록 조회
         List<Follow> followerList = memberFollowQueryService.getFollowerList(memberId, cursorId, DEFAULT_PAGE_SIZE + 1);
-
-        // 2. 커서 기반 페이징 처리
         boolean hasNext = followerList.size() > DEFAULT_PAGE_SIZE;
         Long nextCursor = null;
         if (hasNext) {
@@ -50,16 +48,11 @@ public class MemberQueryFacade {
             nextCursor = followerList.getLast().getId();
         }
 
-        // 3. 팔로워 목록의 회원 ID 추출
-        List<String> followerIdList = followerList.stream()
-                .map(Follow::getFollowerId)
-                .distinct()
-                .toList();
+        List<String> followerIdList = extractFollowerMemberIds(followerList);
 
-        // 4. 배치 조회 (내부 DTO)
+        // 배치 조회 (내부 DTO)
         List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followerIdList, memberId);
 
-        // 5. 응답 DTO 변환
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
                 .hasNext(hasNext)
@@ -68,11 +61,9 @@ public class MemberQueryFacade {
     }
 
     public MemberResponseDTO.FollowList getFollowingList(String memberId, Long cursorId) {
-        // 1. 팔로잉 목록 조회
+        // 팔로잉 목록 조회
         List<Follow> followingList = memberFollowQueryService.getFollowingList(memberId, cursorId,
                 DEFAULT_PAGE_SIZE + 1);
-
-        // 2. 커서 기반 페이징 처리
         boolean hasNext = followingList.size() > DEFAULT_PAGE_SIZE;
         Long nextCursor = null;
         if (hasNext) {
@@ -80,21 +71,30 @@ public class MemberQueryFacade {
             nextCursor = followingList.getLast().getId();
         }
 
-        // 3. 팔로잉 목록의 회원 ID 추출
-        List<String> followingIdList = followingList.stream()
-                .map(Follow::getFollowingId)
-                .distinct()
-                .toList();
+        List<String> followingIdList = extractFollowingMemberIds(followingList);
 
-        // 4. 배치 조회 (내부 DTO)
+        // 배치 조회 (내부 DTO)
         List<MemberResponseDTO.MemberProfileWithFollow> profiles = getMemberProfiles(followingIdList, memberId);
 
-        // 5. 응답 DTO 변환
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
                 .build();
+    }
+
+    private List<String> extractFollowingMemberIds(List<Follow> followingList) {
+        return followingList.stream()
+                .map(Follow::getFollowingId)
+                .distinct()
+                .toList();
+    }
+
+    private List<String> extractFollowerMemberIds(List<Follow> followerList) {
+        return followerList.stream()
+                .map(Follow::getFollowerId)
+                .distinct()
+                .toList();
     }
 
     /**
@@ -106,7 +106,8 @@ public class MemberQueryFacade {
      */
     public List<MemberResponseDTO.MemberProfileWithFollow> getMemberProfiles(
             List<String> targetMemberIds,
-            String currentMemberId) {
+            String currentMemberId
+    ) {
 
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Collections.emptyList();

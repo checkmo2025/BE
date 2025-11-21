@@ -65,18 +65,18 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class CreateBookRecommend {
         private String title;
-        private BookExternalDTO.BookCreate bookDetail; // 책 정보
-        private String content; // 추천 내용
-        private double rate; // 평점
-        private String tag; // 추천 태그
+        private BookExternalDTO.BookCreate bookDetail;
+        private String content;
+        private double rate;
+        private String tag;
     }
 
     @Getter
     @NoArgsConstructor
     public static class UpdateBookRecommend {
-        private String title; // 추천 제목
-        private String content; // 추천 내용
-        private double rate; // 평점
-        private String tag; // 추천 태그
+        private String title;
+        private String content;
+        private double rate;
+        private String tag;
     }
 }

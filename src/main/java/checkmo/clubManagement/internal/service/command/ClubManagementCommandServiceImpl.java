@@ -20,14 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ClubManagementCommandServiceImpl implements ClubManagementCommandService {
 
-    // 자신의 QueryService
     private final ClubQueryService clubQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
 
-    // 자신의 Repository
     private final ClubRepository clubRepository;
 
-    // Event Publisher
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -48,24 +45,19 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
                 .memberId(memberId)
                 .clubMemberStatus(ClubMember.ClubMemberStatus.STAFF)
                 .build();
-
-        // 5. 양방향 연관관계 설정
         club.addClubMember(clubMember);
 
-        // 6. 클럽 저장
+        // 클럽 저장
         clubRepository.save(club);
 
-        // 7. 생성된 클럽의 ID 반환
+        // 생성된 클럽의 ID 반환
         return club.getId();
     }
 
     @Override
     public Long updateClub(Long clubId, String memberId, ClubDetail request) {
-        // 1. 유효성 검증(club, clubMember)
         Club club = clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-
-        // 2. 운영진 여부 검증
         if (!clubMember.isStaff()) {
             throw new GeneralException(ErrorStatus.CLUB_STAFF_ONLY);
         }
@@ -76,7 +68,6 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
             throw new GeneralException(ErrorStatus.CLUB_DUPLICATED_NAME);
         }
 
-        // 4. 엔티티 필드 수정
         club.updateField(request.getName(),
                 request.getDescription(),
                 request.getProfileImageUrl(),
@@ -85,7 +76,6 @@ public class ClubManagementCommandServiceImpl implements ClubManagementCommandSe
                 request.getInsta(),
                 request.getKakao());
 
-        // 5. 카테고리 수정
         club.updateInterestCategories(new HashSet<>(request.getCategory()));
 
         return club.getId();

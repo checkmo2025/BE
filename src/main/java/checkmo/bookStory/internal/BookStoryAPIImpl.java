@@ -40,7 +40,6 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     // Domain level 1
     private final BookAPI bookAPI;
 
-    // 자신의 QueryService
     private final BookStoryQueryService bookStoryQueryService;
 
     @Override

@@ -43,7 +43,7 @@ public class Notification extends BaseEntity {
     private boolean isRead = false;
 
     @Column(nullable = false)
-    private String redirectPath; // 알림 클릭 시 이동할 페이지의 경로
+    private String redirectPath;
 
     @Column
     private String targetName; // 대상 엔티티의 이름 (클럽명, 사용자명 등)

@@ -16,10 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class BookStoryCommentCommandServiceImpl implements BookStoryCommentCommandService {
 
-    // 자신의 QueryService
     private final BookStoryQueryService bookStoryQueryService;
-
-    // 자신의 Repository
     private final CommentRepository commentRepository;
 
     @Override

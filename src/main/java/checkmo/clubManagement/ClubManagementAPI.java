@@ -9,14 +9,14 @@ import java.util.Set;
 public interface ClubManagementAPI {
 
     /**
-     * 특정 모임이 존재하는지 검증. (외부용)
+     * 특정 모임이 존재하는지 검증.
      *
      * @param clubId 모임 ID
      */
     void validateClub(Long clubId) throws GeneralException;
 
     /**
-     * 특정 회원이 가입한 모임 목록을 조회합니다. (외부용) 마이페이지 등 다른 서비스에서 사용됩니다.
+     * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다.
      *
      * @param memberId 회원 ID
      * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
@@ -24,7 +24,7 @@ public interface ClubManagementAPI {
     ClubManagementExternalDTO.MyClubList getMyClubListForShare(String memberId);
 
     /**
-     * 특정 클럽에 속한 회원 ID 목록을 조회합니다.
+     * 특정 클럽에 속한 ACTIVE한 회원 ID 목록을 조회합니다.
      *
      * @param clubId 클럽 ID
      * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
@@ -32,7 +32,7 @@ public interface ClubManagementAPI {
     List<String> getActiveMemberIds(Long clubId);
 
     /**
-     * 특정 모임의 특정 회원이 STAFF 상태인지 검증 (외부용)
+     * 특정 모임의 특정 회원이 STAFF 상태인지 검증
      *
      * @param clubId   모임 ID
      * @param memberId 회원 ID
@@ -40,7 +40,7 @@ public interface ClubManagementAPI {
     void validateStaffClubMember(Long clubId, String memberId) throws GeneralException;
 
     /**
-     * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증 (외부용)
+     * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증
      *
      * @param clubId   모임 ID
      * @param memberId 회원 ID
@@ -49,7 +49,7 @@ public interface ClubManagementAPI {
     Long getActiveClubMemberInfo(Long clubId, String memberId) throws GeneralException;
 
     /**
-     * 특정 모임의 특정 회원의 멤버십 정보를 조회 (외부용)
+     * 특정 모임의 특정 회원의 멤버십 정보를 조회
      *
      * @param clubId   모임 ID
      * @param memberId 회원 ID
@@ -58,7 +58,10 @@ public interface ClubManagementAPI {
     Membership getClubMembershipInfo(Long clubId, String memberId) throws GeneralException;
 
     /**
-     * 특정 모임의 멤버십 정보를 조회 (외부용)
+     * 특정 모임의 멤버십 정보를 배치 조회
+     *
+     * @param clubMemberIds 모임 멤버십 ID 집합 (중복 X)
+     * @return 멤버십 ID를 키로 하는 멤버십 정보
      */
     Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws GeneralException;
 

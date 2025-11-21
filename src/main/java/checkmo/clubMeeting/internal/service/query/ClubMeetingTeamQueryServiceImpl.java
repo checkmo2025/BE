@@ -65,7 +65,7 @@ public class ClubMeetingTeamQueryServiceImpl implements ClubMeetingTeamQueryServ
         List<TeamTopic> teamTopics = teamTopicRepository.findAllWithTeamByTopicIds(topicIds);
         return teamTopics.stream()
                 .collect(Collectors.groupingBy(
-                        TeamTopic::getTopicId, //key: 토픽 ID(토픽 ID로 그룹화)
+                        TeamTopic::getTopicId, //key: 토픽 ID
                         Collectors.mapping(tt -> tt.getTeam().getTeamNumber(), Collectors.toList())
                         //value: 해당 토픽을 선택한 팀 번호 리스트(같은 그룹에 속하는 TeamTopic의 팀 번호 List 생성)
                 ));

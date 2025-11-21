@@ -52,7 +52,6 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
     private List<Follow> followings = new ArrayList<>();
 
-    // 회원 관심 카테고리 (ENUM으로 관리)
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
@@ -63,20 +62,17 @@ public class Member extends BaseEntity {
     @Column(name = "category")
     private Set<MemberInterestCategory> interestCategories = new HashSet<>();
 
-    // 프로필 추가 정보 업데이트
     public void updateAdditionalInfo(String nickName, String description, String imgUrl) {
         this.nickName = nickName != null ? nickName : "";
         this.description = description != null ? description : "";
         this.imgUrl = imgUrl != null ? imgUrl : "";
     }
 
-    // 프로필 수정
     public void updateProfile(String description, String imgUrl) {
         this.description = description != null ? description : "";
         this.imgUrl = imgUrl != null ? imgUrl : "";
     }
 
-    // 관심 카테고리 업데이트
     public void updateInterestCategories(Set<MemberInterestCategory> newCategories) {
         this.interestCategories.clear();
         if (newCategories != null) {

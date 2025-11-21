@@ -24,55 +24,46 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
 
     private final ClubManagementAPI clubManagementAPI;
 
-    // 자신의 QueryService
     private final ClubMeetingQueryService clubMeetingQueryService;
     private final ClubBookReviewQueryService clubBookReviewQueryService;
 
-    // 자신의 Repository
     private final BookReviewRepository bookReviewRepository;
 
     // TODO: Aspect 로그
     // TODO: Test DB 설정 후, 낙관적 락 동작 테스트
     @Override
-    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+    @Retryable(
             retryFor = OptimisticLockingFailureException.class,
             maxAttempts = 5,
-            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+            backoff = @Backoff(delay = 300)
     )
     public Long createBookReview(Long meetingId, String memberId, BookReviewCreate request) {
-        // 유효성 검증 (meeting, clubMember)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 한줄평 생성
         BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);
         bookReview.setMeeting(meeting);
 
-        // 미팅의 별점 합산
         meeting.addSumRate(bookReview.getRate());
 
         return bookReviewRepository.save(bookReview).getId();
     }
 
     @Override
-    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+    @Retryable(
             retryFor = OptimisticLockingFailureException.class,
             maxAttempts = 5,
-            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+            backoff = @Backoff(delay = 300)
     )
     public Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
-        // 유효성 검증 (meeting, clubMember, bookReview)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 한줄평 조회 및 존재 여부 확인
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
-
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
-        // 한줄평 수정
         double oldRate = bookReview.getRate();
         double newRate = request.getRate();
 
@@ -91,28 +82,22 @@ public class ClubBookReviewCommandServiceImpl implements ClubBookReviewCommandSe
     }
 
     @Override
-    @Retryable( // OptimisticLockingFailureException 발생 시 재시도
+    @Retryable(
             retryFor = OptimisticLockingFailureException.class,
             maxAttempts = 5,
-            backoff = @Backoff(delay = 300) // 300ms 간격으로 재시도
+            backoff = @Backoff(delay = 300)
     )
     public void deleteBookReview(Long meetingId, Long reviewId, String memberId) {
-        // 유효성 검증 (meeting, clubMember, bookReview)
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
 
-        // 한줄평 조회 및 존재 여부 확인
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
-
-        // 한줄평 작성자와 삭제자가 같은지 확인
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
             throw new GeneralException(ErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
-        // 미팅의 별점 합산에서 제외
         meeting.subtractSumRate(bookReview.getRate());
 
-        // 한줄평 삭제
         bookReview.removeMeeting();
     }
 }
