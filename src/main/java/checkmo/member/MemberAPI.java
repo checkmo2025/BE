@@ -1,5 +1,6 @@
 package checkmo.member;
 
+import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import java.util.List;
 import java.util.Map;
 
@@ -14,29 +15,21 @@ public interface MemberAPI {
      * @param nickname 닉네임
      * @return 회원 ID
      */
-    String getMemberIdByNickname(String nickname);
-
-    /**
-     * 닉네임 목록으로 회원 ID 조회
-     *
-     * @param nicknames 닉네임 목록
-     * @return 닉네임과 회원 ID 매핑 정보
-     */
-    Map<String, String> getMemberIdsByNicknames(List<String> nicknames);
+    String fetchMemberId(String nickname);
 
     /**
      * 회원 ID로 회원의 닉네임을 조회합니다.
      *
      * @return 회원의 닉네임
      */
-    String getMemberNicknameById(String memberId);
+    String fetchNickname(String memberId);
 
     /**
      * 회원 ID 목록으로 회원의 닉네임을 조회합니다.
      *
      * @return 회원 ID와 닉네임의 매핑 정보
      */
-    Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds);
+    Map<String, String> fetchNicknameByMemberIds(List<String> memberIds);
 
     /**
      * 공유용 기본 회원 정보 조회
@@ -44,7 +37,7 @@ public interface MemberAPI {
      * @param memberId 조회할 회원 ID
      * @return MemberExternalDTO.BasicInfo
      */
-    MemberExternalDTO.BasicInfo getMemberBasicInfoForShare(String memberId);
+    MemberExternalDTO.BasicInfo fetchMemberBasicInfo(String memberId);
 
     /**
      * 회원 ID 목록으로 공유용 기본 회원 정보 조회
@@ -52,7 +45,7 @@ public interface MemberAPI {
      * @param memberIds 조회할 회원 ID 목록
      * @return 회원 ID와 기본 정보 매핑 리스트
      */
-    Map<String, MemberExternalDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds);
+    Map<String, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<String> memberIds);
 
     /**
      * 팔로우 상태를 포함한 공유용 회원 정보 조회
@@ -61,7 +54,7 @@ public interface MemberAPI {
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return MemberExternalDTO.WithFollowStatus
      */
-    MemberExternalDTO.WithFollowStatus getMemberWithFollowStatusForShare(String targetMemberId, String currentMemberId);
+    BasicInfoWithFollow fetchMemberBasicInfoWithFollow(String targetMemberId, String currentMemberId);
 
     /**
      * 회원 ID 목록으로 팔로우 상태를 포함한 공유용 회원 정보를 조회합니다.
@@ -70,7 +63,7 @@ public interface MemberAPI {
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return 회원 ID와 팔로우 상태 포함 정보 매핑
      */
-    Map<String, MemberExternalDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(
+    Map<String, BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
             List<String> targetMemberIds,
             String currentMemberId
     );
@@ -81,5 +74,5 @@ public interface MemberAPI {
      * @param memberId 회원 ID
      * @return 팔로우하는 회원 ID 목록
      */
-    List<String> getFollowingMemberIds(String memberId);
+    List<String> fetchFollowingMemberIds(String memberId);
 }

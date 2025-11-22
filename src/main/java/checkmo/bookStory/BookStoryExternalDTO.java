@@ -6,6 +6,7 @@ import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +46,7 @@ public class BookStoryExternalDTO {
     public static class BasicInfo {
         private Long bookStoryId;
         private BookExternalDTO.BasicInfo bookInfo;
-        private MemberExternalDTO.WithFollowStatus authorInfo;
+        private BasicInfoWithFollow authorInfo;
         private String bookStoryTitle;
         private String description;
         private int likes;
@@ -66,7 +67,7 @@ public class BookStoryExternalDTO {
     public static class DetailInfo {
         private Long bookStoryId;
         private BookExternalDTO.BasicInfo bookInfo;
-        private MemberExternalDTO.WithFollowStatus authorInfo;
+        private BasicInfoWithFollow authorInfo;
         private String bookStoryTitle;
         private String description;
         private int likes;

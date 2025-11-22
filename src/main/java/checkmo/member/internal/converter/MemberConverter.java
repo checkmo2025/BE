@@ -1,6 +1,6 @@
 package checkmo.member.internal.converter;
 
-import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.web.dto.MemberResponseDTO;
 import lombok.AccessLevel;
@@ -36,10 +36,10 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberExternalDTO.WithFollowStatus toMemberProfileWithFollowStatus(
+    public static BasicInfoWithFollow toMemberProfileWithFollowStatus(
             MemberResponseDTO.MemberProfileWithFollow profile
     ) {
-        return MemberExternalDTO.WithFollowStatus.builder()
+        return BasicInfoWithFollow.builder()
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())
                 .following(profile.isFollowing())

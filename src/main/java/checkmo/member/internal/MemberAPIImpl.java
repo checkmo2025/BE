@@ -2,6 +2,7 @@ package checkmo.member.internal;
 
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
@@ -24,29 +25,20 @@ public class MemberAPIImpl implements MemberAPI {
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
 
-    // 내부 Facade (배치 조회 로직 재사용)
     private final MemberQueryFacade memberQueryFacade;
 
     @Override
-    public String getMemberIdByNickname(String nickname) {
+    public String fetchMemberId(String nickname) {
         return memberQueryService.getMemberIdByNickname(nickname);
     }
 
     @Override
-    public Map<String, String> getMemberIdsByNicknames(List<String> nicknames) {
-        if (nicknames == null || nicknames.isEmpty()) {
-            return Map.of();
-        }
-        return memberQueryService.getMemberIdsByNicknames(nicknames);
-    }
-
-    @Override
-    public String getMemberNicknameById(String memberId) {
+    public String fetchNickname(String memberId) {
         return memberQueryService.getMemberNicknameById(memberId);
     }
 
     @Override
-    public Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds) {
+    public Map<String, String> fetchNicknameByMemberIds(List<String> memberIds) {
         if (memberIds == null || memberIds.isEmpty()) {
             return Map.of();
         }
@@ -55,7 +47,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public MemberExternalDTO.BasicInfo getMemberBasicInfoForShare(String memberId) {
+    public MemberExternalDTO.BasicInfo fetchMemberBasicInfo(String memberId) {
         Member member = memberQueryService.getMemberBasicInfo(memberId);
         MemberResponseDTO.MemberProfileWithProfileImage profileDTO = MemberConverter.toMemberProfileWithProfileImage(
                 member);
@@ -67,7 +59,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberExternalDTO.BasicInfo> getMemberBasicInfoMapForShare(List<String> memberIds) {
+    public Map<String, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<String> memberIds) {
         if (memberIds == null || memberIds.isEmpty()) {
             return Map.of();
         }
@@ -87,16 +79,16 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public MemberExternalDTO.WithFollowStatus getMemberWithFollowStatusForShare(
+    public BasicInfoWithFollow fetchMemberBasicInfoWithFollow(
             String targetMemberId,
             String currentMemberId
     ) {
         // 팔로우 상태를 조회
         boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
-        var basicInfoDTO = getMemberBasicInfoForShare(targetMemberId);
+        var basicInfoDTO = fetchMemberBasicInfo(targetMemberId);
 
-        return MemberExternalDTO.WithFollowStatus.builder()
+        return BasicInfoWithFollow.builder()
                 .nickname(basicInfoDTO.getNickname())
                 .profileImageUrl(basicInfoDTO.getProfileImageUrl())
                 .following(isFollowing)
@@ -104,7 +96,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberExternalDTO.WithFollowStatus> getMemberWithFollowStatusMapForShare(
+    public Map<String, BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
             List<String> targetMemberIds,
             String currentMemberId
     ) {
@@ -118,7 +110,7 @@ public class MemberAPIImpl implements MemberAPI {
 
         // 2. 내부 DTO → 외부 DTO 변환 후 Map으로 변환
         // targetMemberIds와 profiles는 순서가 일치하므로 zip 형태로 매핑
-        Map<String, MemberExternalDTO.WithFollowStatus> result = new java.util.HashMap<>();
+        Map<String, BasicInfoWithFollow> result = new java.util.HashMap<>();
         for (int i = 0; i < targetMemberIds.size() && i < profiles.size(); i++) {
             String memberId = targetMemberIds.get(i);
             MemberResponseDTO.MemberProfileWithFollow profile = profiles.get(i);
@@ -129,7 +121,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public List<String> getFollowingMemberIds(String memberId) {
+    public List<String> fetchFollowingMemberIds(String memberId) {
         return memberFollowQueryService.getFollowingMemberIds(memberId);
     }
 

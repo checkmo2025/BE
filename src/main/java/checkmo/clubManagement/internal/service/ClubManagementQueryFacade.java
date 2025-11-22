@@ -169,7 +169,7 @@ public class ClubManagementQueryFacade {
         List<ClubMember> clubMembers = clubMemberCursorResult.content();
         List<String> memberIds = extractMemberIds(clubMembers);
 
-        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
 
         List<ClubResponseDTO.ClubMember> dtoList = clubMembers.stream()
                 .map(cm -> {
@@ -204,7 +204,7 @@ public class ClubManagementQueryFacade {
     public ClubResponseDTO.BookRecommendList getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        String nickname = memberAPI.getMemberBasicInfoForShare(memberId).getNickname();
+        String nickname = memberAPI.fetchMemberBasicInfo(memberId).getNickname();
 
         CursorResult<BookRecommend> bookRecommendCursorResult = CursorPagingHelper.getPage(
                 pageSize -> clubBookRecommendQueryService.getRecommendedBooks(clubId, cursorId, pageSize),
@@ -216,7 +216,7 @@ public class ClubManagementQueryFacade {
         List<BookRecommendDetail> bookRecommendDetails = bookRecommends.stream()
                 .map(bookRecommend -> {
                     var bookInfo = bookAPI.fetchBookBasicInfo(bookRecommend.getBookId());
-                    var authorInfo = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
+                    var authorInfo = memberAPI.fetchMemberBasicInfo(bookRecommend.getClubMember().getMemberId());
                     return ClubManagementConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo,
                             nickname, clubMember.isStaff());
                 }).toList();
@@ -241,8 +241,8 @@ public class ClubManagementQueryFacade {
         // 외부 도메인 정보 조회 (Facade에서 처리)
         BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookRecommend.getBookId());
         MemberExternalDTO.BasicInfo authorInfo
-                = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
-        MemberExternalDTO.BasicInfo currentMemberInfo = memberAPI.getMemberBasicInfoForShare(memberId);
+                = memberAPI.fetchMemberBasicInfo(bookRecommend.getClubMember().getMemberId());
+        MemberExternalDTO.BasicInfo currentMemberInfo = memberAPI.fetchMemberBasicInfo(memberId);
 
         // 4. DTO 변환 후 반환
         return ClubManagementConverter.toBookRecommendDetailDTO(

@@ -65,7 +65,7 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         }
 
         // 팔로우 누른 사람의 닉네임을 가져옴
-        String FollowerNickname = memberAPI.getMemberNicknameById(event.followerId());
+        String FollowerNickname = memberAPI.fetchNickname(event.followerId());
 
         String redirectPath = NotificationConverter.getRedirectPath(type, FollowerNickname);
 

@@ -6,6 +6,7 @@ import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -30,7 +31,7 @@ public class BookStoryConverter {
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
-            MemberExternalDTO.WithFollowStatus authorInfo,
+            BasicInfoWithFollow authorInfo,
             boolean isLiked,
             int commentCount
     ) {
@@ -52,7 +53,7 @@ public class BookStoryConverter {
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
-            MemberExternalDTO.WithFollowStatus authorInfo,
+            BasicInfoWithFollow authorInfo,
             boolean isLiked,
             List<BookStoryExternalDTO.CommentInfo> commentList
     ) {

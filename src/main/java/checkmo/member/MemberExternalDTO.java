@@ -30,7 +30,7 @@ public class MemberExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class WithFollowStatus {
+    public static class BasicInfoWithFollow {
         private String nickname;
         private String profileImageUrl;
         private boolean following;    // 조회하는 사람 기준으로 팔로우 여부

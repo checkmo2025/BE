@@ -102,7 +102,7 @@ public class ClubMeetingQueryFacade {
 
         // 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         // 미팅의 책 정보 조회
         DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
@@ -136,7 +136,7 @@ public class ClubMeetingQueryFacade {
 
         // 발제의 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         List<BookShelfResponseDTO.TopicDetail> topicDetailList
                 = mapTopicsToTopicDetail(topics, authorInfoMap, memberId);
@@ -161,7 +161,7 @@ public class ClubMeetingQueryFacade {
 
         // 한줄평 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromBookReviews(bookReviews);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         List<BookShelfResponseDTO.BookReviewDetail> bookReviewDetailList
                 = mapReviewsToReviewDetail(bookReviews, authorInfoMap);
@@ -233,7 +233,7 @@ public class ClubMeetingQueryFacade {
                 .toList();
 
         // 발제의 작성자 정보 배치 조회
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         // 미팅의 책 정보 조회
         BookExternalDTO.BasicInfo bookSharedDTO = bookAPI.fetchBookBasicInfo(meeting.getBookId());
@@ -265,7 +265,7 @@ public class ClubMeetingQueryFacade {
 
         // 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTopics(topics);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         List<MeetingResponseDTO.Topic> topicList
                 = mapTopicsToTopicDetail(topics, authorInfoMap, topicIdToSelectTeamNumbers);
@@ -285,7 +285,7 @@ public class ClubMeetingQueryFacade {
 
         // 토픽 작성자 정보 배치 조회
         List<String> authorIds = extractMemberIdsFromTeamTopics(teamTopics);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         List<MeetingResponseDTO.Topic> topicList = mapTopicsToTopicDetail(
                 extractTopicFromTeamTopics(teamTopics),
@@ -339,7 +339,7 @@ public class ClubMeetingQueryFacade {
         // 3. 클럽 멤버에 대한 정보 배치 조회 (ClubMember의 memberId로 MemberExternalDTO.BasicInfoDTO 조회)
         List<String> memberIds = extractMemberIdsFromClubMembers(clubMembership);
         Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
-                = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+                = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
 
         // 4. 미팅에 존재하는 모든 팀 조회
         List<Team> teams = clubMeetingTeamQueryService.findTeamsByMeeting(meetingId);
@@ -381,7 +381,7 @@ public class ClubMeetingQueryFacade {
         Map<Long, MembershipInfo> clubMembership = clubManagementAPI.fetchMembershipInfoByClubMemberIds(clubMemberIds);
         List<String> memberIds = extractMemberIds(clubMembership);
         Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap
-                = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+                = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
         List<BasicInfo> memberInfo = memberBasicInfoMap.values().stream().toList();
 
         return MeetingResponseDTO.TeamMember.builder()

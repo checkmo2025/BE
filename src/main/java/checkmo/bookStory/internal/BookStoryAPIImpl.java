@@ -21,6 +21,7 @@ import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookStory.getBookId());
 
         // 3. 작성자 정보 조회
-        MemberExternalDTO.WithFollowStatus authorInfo = memberAPI.getMemberWithFollowStatusForShare(
+        BasicInfoWithFollow authorInfo = memberAPI.fetchMemberBasicInfoWithFollow(
                 bookStory.getMemberId(), memberId);
 
         // 4. 좋아요 여부 조회
@@ -79,7 +80,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         // 6-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
         Map<String, MemberExternalDTO.BasicInfo> commentMemberInfoMap =
                 commentMemberIds.isEmpty() ? Map.of() :
-                        memberAPI.getMemberBasicInfoMapForShare(new ArrayList<>(commentMemberIds));
+                        memberAPI.fetchMemberBasicInfoByMemberIds(new ArrayList<>(commentMemberIds));
 
         // 7. 댓글 DTO 변환
         List<CommentInfo> commentDTOList =
@@ -134,7 +135,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
 
         // 작성자 정보 조회
-        Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
+        Map<String, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // DTO 변환
         List<BookStoryExternalDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
@@ -165,7 +166,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
      */
     private String resolveTargetMemberId(BookStoryRequestDTO.BookStoryScope scope, String targetMemberNickname) {
         if (scope == BookStoryRequestDTO.BookStoryScope.TARGET) {
-            return memberAPI.getMemberIdByNickname(targetMemberNickname);
+            return memberAPI.fetchMemberId(targetMemberNickname);
         }
         return null;
     }
@@ -191,7 +192,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 작성자 정보 배치 조회
      */
-    private Map<String, MemberExternalDTO.WithFollowStatus> fetchAuthorInfo(
+    private Map<String, BasicInfoWithFollow> fetchAuthorInfo(
             String memberId,
             List<BookStory> bookStories
     ) {
@@ -199,7 +200,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
                 .map(checkmo.bookStory.internal.entity.BookStory::getMemberId)
                 .distinct()
                 .toList();
-        return memberAPI.getMemberWithFollowStatusMapForShare(targetMemberIds, memberId);
+        return memberAPI.fetchMemberBasicInfoWithFollowByMemberId(targetMemberIds, memberId);
     }
 
     /**
@@ -210,7 +211,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
             List<BookStory> bookStoryList,
             Map<Long, Boolean> isLikedMap,
             Map<String, BookExternalDTO.BasicInfo> bookInfoMap,
-            Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap
+            Map<String, BasicInfoWithFollow> authorInfoMap
     ) {
 
         return bookStoryList.stream()

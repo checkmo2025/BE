@@ -321,7 +321,7 @@ public class ClubNoticeQueryFacade {
             return Collections.emptyMap();
         }
 
-        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.getMemberBasicInfoMapForShare(memberIds);
+        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
         if (memberInfoMap.isEmpty()) {
             return Collections.emptyMap();
         }

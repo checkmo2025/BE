@@ -33,7 +33,7 @@ public class NotificationQueryFacade {
         List<String> senderIds = extractSenderIds(notifications);
 
         // 발신자 닉네임 배치 조회로 처리
-        Map<String, String> senderNicknameMap = memberAPI.getMemberNicknamesByMemberIds(senderIds);
+        Map<String, String> senderNicknameMap = memberAPI.fetchNicknameByMemberIds(senderIds);
 
         return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap);
     }
@@ -49,7 +49,7 @@ public class NotificationQueryFacade {
         List<String> senderIds = extractSenderIds(notifications);
 
         // 알림 보낸 사람 닉네임 배치 조회
-        Map<String, String> senderNicknameMap = memberAPI.getMemberNicknamesByMemberIds(senderIds);
+        Map<String, String> senderNicknameMap = memberAPI.fetchNicknameByMemberIds(senderIds);
 
         return NotificationConverter.convertToNotificationListDTO(
                 notifications,
