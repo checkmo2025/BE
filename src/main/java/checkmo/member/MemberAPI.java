@@ -4,9 +4,6 @@ import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Member Domain Query Facade Member 도메인의 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade
- */
 public interface MemberAPI {
 
     /**

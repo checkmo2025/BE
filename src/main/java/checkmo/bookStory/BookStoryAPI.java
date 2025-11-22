@@ -2,9 +2,6 @@ package checkmo.bookStory;
 
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 
-/**
- * BookStory Domain Query Facade BookStory 도메인의 Query(조회) 관련 서비스들을 통합적으로 제공하는 Facade 입니다.
- */
 public interface BookStoryAPI {
 
     /**
