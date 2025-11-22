@@ -121,7 +121,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private void validateClubMember(String memberId, Long clubId) {
-        clubManagementAPI.getActiveClubMemberInfo(clubId, memberId);
+        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
     }
 
     private List<String> getFollowingMemberIds(String memberId) {

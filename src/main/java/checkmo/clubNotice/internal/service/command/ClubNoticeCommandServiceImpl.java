@@ -102,7 +102,7 @@ public class ClubNoticeCommandServiceImpl implements ClubNoticeCommandService {
     @Override
     public Long haveVote(Long clubId, Long voteId, String memberId, VoteResult request) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
 
         Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
         validateVotingTime(vote);

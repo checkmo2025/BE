@@ -1,7 +1,9 @@
 package checkmo.clubManagement.internal.converter;
 
+import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
+
 import checkmo.book.BookExternalDTO;
-import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -17,8 +19,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubManagementConverter {
 
-    public static ClubManagementExternalDTO.Membership toMembershipDTO(ClubMember clubMember) {
-        return ClubManagementExternalDTO.Membership.builder()
+    public static MembershipInfo toMembershipDTO(ClubMember clubMember) {
+        return MembershipInfo.builder()
                 .memberId(clubMember.getMemberId())
                 .clubMemberId(clubMember.getId())
                 .active(clubMember.isActive())
@@ -26,7 +28,8 @@ public class ClubManagementConverter {
                 .build();
     }
 
-    public static Map<Long, ClubManagementExternalDTO.Membership> toMembereshipDTOMap(List<ClubMember> clubMembers) {
+    public static Map<Long, MembershipInfo> toMembereshipDTOMap(
+            List<ClubMember> clubMembers) {
         return clubMembers.stream()
                 .collect(
                         Collectors.toMap(
@@ -36,16 +39,16 @@ public class ClubManagementConverter {
                 );
     }
 
-    public static List<ClubManagementExternalDTO.Membership> toMembershipDTOList(List<ClubMember> clubMembers) {
+    public static List<MembershipInfo> toMembershipDTOList(List<ClubMember> clubMembers) {
         return clubMembers.stream()
                 .map(ClubManagementConverter::toMembershipDTO)
                 .toList();
     }
 
-    public static ClubResponseDTO.ClubInfo toClubInfoDTO(ClubManagementExternalDTO.MyClubInfo myClubInfo) {
+    public static ClubResponseDTO.ClubInfo toClubInfoDTO(BasicInfo basicInfo) {
         return ClubResponseDTO.ClubInfo.builder()
-                .clubId(myClubInfo.getClubId())
-                .clubName(myClubInfo.getClubName())
+                .clubId(basicInfo.getClubId())
+                .clubName(basicInfo.getClubName())
                 .open(null)
                 .build();
     }

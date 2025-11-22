@@ -1,7 +1,8 @@
 package checkmo.clubMeeting.web.dto.bookshelf;
 
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
+
 import checkmo.book.BookExternalDTO;
-import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
@@ -18,7 +19,7 @@ public class BookShelfResponseDTO {
     @Builder
     public static class BookShelfList {
         private List<BookShelfInfo> bookShelfInfoList;
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -48,7 +49,7 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfDetail {
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private MeetingInfo meetingInfo;
         private BookExternalDTO.DetailInfo bookDetailInfo;
         private TopicList topicList;
@@ -60,7 +61,7 @@ public class BookShelfResponseDTO {
     @Builder
     public static class BookReviewList {
         private List<BookReviewDetail> bookReviewDetailList;
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -82,7 +83,7 @@ public class BookShelfResponseDTO {
     @Builder
     public static class TopicList {
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private List<TopicDetail> topicDetailList;
         private boolean hasNext;
         private Long nextCursor;

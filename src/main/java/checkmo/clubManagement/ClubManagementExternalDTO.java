@@ -15,15 +15,15 @@ public class ClubManagementExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MyClubList {
-        private List<MyClubInfo> clubList;
+    public static class ClubList {
+        private List<BasicInfo> clubList;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MyClubInfo {
+    public static class BasicInfo {
         private Long clubId;
         private String clubName;
     }
@@ -32,7 +32,7 @@ public class ClubManagementExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class Membership {
+    public static class MembershipInfo {
         private String memberId;
         private Long clubMemberId;
         private boolean active;

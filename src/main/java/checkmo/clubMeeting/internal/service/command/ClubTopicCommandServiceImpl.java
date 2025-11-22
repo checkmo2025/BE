@@ -40,7 +40,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     @Override
     public Long createTopic(Long meetingId, String memberId, TopicCreate request) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         Topic topic = ClubMeetingConverter.toTopic(request, memberId, clubMemberId);
         topic.setMeeting(meeting);
@@ -51,7 +51,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     @Override
     public Long updateTopic(Long meetingId, Long topicId, String memberId, TopicCreate request) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
@@ -68,7 +68,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
     @Override
     public void deleteTopic(Long meetingId, Long topicId, String memberId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
@@ -87,7 +87,7 @@ public class ClubTopicCommandServiceImpl implements ClubTopicCommandService {
             MeetingRequestDTO.TopicSelection request
     ) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        clubManagementAPI.getActiveClubMemberInfo(meeting.getClubId(), memberId);
+        clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         // 팀, 발제 존재 여부 및 일치 여부 확인
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, request.getTeamNumber());

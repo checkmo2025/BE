@@ -1,10 +1,12 @@
 package checkmo.bookStory.internal;
 
+import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
+import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
+
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.BookStoryAPI;
 import checkmo.bookStory.BookStoryExternalDTO;
-import checkmo.bookStory.BookStoryExternalDTO.BasicInfo;
 import checkmo.bookStory.BookStoryExternalDTO.CommentInfo;
 import checkmo.bookStory.BookStoryExternalDTO.DetailInfo;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
@@ -15,7 +17,6 @@ import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -136,22 +137,22 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         Map<String, MemberExternalDTO.WithFollowStatus> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // DTO 변환
-        List<BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
+        List<BookStoryExternalDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
                 bookStories, isLikedMap, bookInfoMap, authorInfoMap);
 
         // 클럽 정보 조회
-        ClubManagementExternalDTO.MyClubList myClubList = clubManagementAPI.fetchMyClubs(memberId);
-        ClubManagementExternalDTO.MyClubInfo myClubInfo = findClubInfoForScope(scope, clubId, myClubList);
+        ClubList clubList = clubManagementAPI.fetchMyClubs(memberId);
+        BasicInfo basicInfo = findClubInfoForScope(scope, clubId, clubList);
 
         // 스코프 정보 변환 및 최종 응답 DTO 변환
         var scopeInfo = BookStoryExternalDTO.ScopeInfo.builder()
                 .scope(scope)
-                .selectedClub(myClubInfo)
+                .selectedClub(basicInfo)
                 .build();
 
         return BookStoryExternalDTO.BookStoryList.builder()
                 .scopeInfo(scopeInfo)
-                .memberClubList(myClubList)
+                .memberClubList(clubList)
                 .basicInfoList(basicInfoList)
                 .hasNext(bookStoryCursorResult.hasNext())
                 .nextCursor(bookStoryCursorResult.nextCursor())
@@ -204,7 +205,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * BookStory 엔티티들을 Response DTO로 변환
      */
-    private List<BasicInfo> convertToBookStoryResponses(
+    private List<BookStoryExternalDTO.BasicInfo> convertToBookStoryResponses(
             String memberId,
             List<BookStory> bookStoryList,
             Map<Long, Boolean> isLikedMap,
@@ -226,13 +227,13 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * 스코프에 해당하는 클럽 정보 조회
      */
-    private ClubManagementExternalDTO.MyClubInfo findClubInfoForScope(
+    private BasicInfo findClubInfoForScope(
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId,
-            ClubManagementExternalDTO.MyClubList myClubList
+            ClubList clubList
     ) {
         if (scope == BookStoryRequestDTO.BookStoryScope.CLUB) {
-            return myClubList.getClubList().stream()
+            return clubList.getClubList().stream()
                     .filter(club -> club.getClubId().equals(clubId))
                     .findFirst()
                     .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.CLUB_ACCESS_DENIED));

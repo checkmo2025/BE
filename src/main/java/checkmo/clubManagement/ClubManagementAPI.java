@@ -1,6 +1,8 @@
 package checkmo.clubManagement;
 
-import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
+import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
+
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
      */
-    ClubManagementExternalDTO.MyClubList fetchMyClubs(String memberId);
+    ClubList fetchMyClubs(String memberId);
 
     /**
      * 특정 클럽에 속한 ACTIVE한 회원 ID 목록을 조회합니다.
@@ -46,7 +48,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return ClubMemberId
      */
-    Long getActiveClubMemberInfo(Long clubId, String memberId) throws ClubManagementException;
+    Long fetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException;
 
     /**
      * 특정 모임의 특정 회원의 멤버십 정보를 조회
@@ -55,7 +57,8 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return MembershipDTO
      */
-    Membership getClubMembershipInfo(Long clubId, String memberId) throws ClubManagementException;
+    MembershipInfo fetchMembershipInfo(Long clubId, String memberId)
+            throws ClubManagementException;
 
     /**
      * 특정 모임의 멤버십 정보를 배치 조회
@@ -63,7 +66,8 @@ public interface ClubManagementAPI {
      * @param clubMemberIds 모임 멤버십 ID 집합 (중복 X)
      * @return 멤버십 ID를 키로 하는 멤버십 정보
      */
-    Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws ClubManagementException;
+    Map<Long, MembershipInfo> fetchMembershipInfoByClubMemberIds(Set<Long> clubMemberIds)
+            throws ClubManagementException;
 
     /**
      * 특정 클럽에 속한 ACTIVE한 회원 목록을 커서 기반 조회합니다.
@@ -73,5 +77,5 @@ public interface ClubManagementAPI {
      * @param size     한 번에 조회할 멤버십 수
      * @return 멤버십 목록
      */
-    List<Membership> getClubMembersByStatus(Long clubId, Long cursorId, Integer size);
+    List<MembershipInfo> fetchActiveMembershipInfo(Long clubId, Long cursorId, Integer size);
 }

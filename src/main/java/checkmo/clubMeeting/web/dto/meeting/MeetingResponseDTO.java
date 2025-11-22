@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.web.dto.meeting;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.clubManagement.ClubManagementExternalDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
@@ -18,7 +18,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingDetail {
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private MeetingInfo meetingInfo;
         private List<Topic> topics; // 모임의 토픽 목록 -> 발제 등록순 4개 담기
         private List<TeamTopic> teams; // 모임의 팀 별 토픽 목록 -> 발제 등록순 4개 담기
@@ -29,7 +29,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingList {
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private List<MeetingInfo> meetingInfoList;
         private boolean hasNext;
         private Long nextCursor;
@@ -56,7 +56,7 @@ public class MeetingResponseDTO {
     @Builder
     public static class CalendarMeeting {
         private List<MeetingInfo> meetingInfoList;
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
     }
 
     @Getter
@@ -77,7 +77,7 @@ public class MeetingResponseDTO {
     @Builder
     public static class TopicDTO {
         private List<Topic> topics;
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
     }
 
     @Getter
@@ -86,7 +86,7 @@ public class MeetingResponseDTO {
     @Builder
     public static class TeamTopic {
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private Integer teamNumber; // 팀 번호
         private List<Topic> topics; // 해당 팀이 선택한 토픽 목록
     }
@@ -96,7 +96,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMemberList {
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private List<MeetingMember> members; // 모임 참여자 목록
         private boolean hasNext;
         private Long nextCursor;
@@ -116,7 +116,7 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TeamMember {
-        private ClubManagementExternalDTO.Membership membership;
+        private MembershipInfo membershipInfo;
         private Integer teamNumber; // 팀 번호
         private List<MemberExternalDTO.BasicInfo> members; // 해당 팀의 참여자 목록
     }

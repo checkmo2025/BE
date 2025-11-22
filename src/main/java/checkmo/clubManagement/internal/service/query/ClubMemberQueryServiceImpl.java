@@ -1,6 +1,8 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.ClubManagementExternalDTO;
+import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
+import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
+
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
@@ -32,16 +34,16 @@ public class ClubMemberQueryServiceImpl implements ClubMemberQueryService {
     }
 
     @Override
-    public ClubManagementExternalDTO.MyClubList getMyClubList(String memberId) {
+    public ClubList getMyClubList(String memberId) {
         // 회원ID를 통해 JPQL로 클럽 ID와 이름을 조회하고 DTO로 변환
         var clubIdAndNameByMemberId = clubMemberRepository.findClubIdAndNameByMemberId(memberId);
 
         // Object[] -> ClubNoticeExternalDTO.MyClubInfo 변환
         var myClubInfoList = clubIdAndNameByMemberId.stream()
-                .map(row -> new ClubManagementExternalDTO.MyClubInfo((Long) row[0], (String) row[1]))
+                .map(row -> new BasicInfo((Long) row[0], (String) row[1]))
                 .toList();
 
-        return ClubManagementExternalDTO.MyClubList.builder()
+        return ClubList.builder()
                 .clubList(myClubInfoList)
                 .build();
     }

@@ -1,8 +1,9 @@
 package checkmo.clubManagement.internal.service;
 
+import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
+
 import checkmo.book.BookAPI;
-import checkmo.book.BookExternalDTO.BasicInfo;
-import checkmo.clubManagement.ClubManagementExternalDTO.MyClubInfo;
+import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
@@ -94,7 +95,7 @@ public class ClubManagementQueryFacade {
 
     public ClubResponseDTO.MyClubList getMyClubList(String memberId) {
         // 1. 회원이 가입한 모임 목록 조회
-        List<MyClubInfo> myClubs = clubMemberQueryService.getMyClubList(memberId)
+        List<BasicInfo> myClubs = clubMemberQueryService.getMyClubList(memberId)
                 .getClubList();
 
         // 2. 모임 정보 DTO로 변환
@@ -238,7 +239,7 @@ public class ClubManagementQueryFacade {
         BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommend(clubId, bookRecommendId, memberId);
 
         // 외부 도메인 정보 조회 (Facade에서 처리)
-        BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookRecommend.getBookId());
+        BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookRecommend.getBookId());
         MemberExternalDTO.BasicInfo authorInfo
                 = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
         MemberExternalDTO.BasicInfo currentMemberInfo = memberAPI.getMemberBasicInfoForShare(memberId);

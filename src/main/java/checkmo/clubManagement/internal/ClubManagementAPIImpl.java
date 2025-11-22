@@ -1,8 +1,9 @@
 package checkmo.clubManagement.internal;
 
+import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
+
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubManagement.ClubManagementExternalDTO;
-import checkmo.clubManagement.ClubManagementExternalDTO.Membership;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
@@ -30,7 +31,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public ClubManagementExternalDTO.MyClubList fetchMyClubs(String memberId) {
+    public ClubList fetchMyClubs(String memberId) {
         return clubMemberQueryService.getMyClubList(memberId);
     }
 
@@ -49,7 +50,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public Long getActiveClubMemberInfo(Long clubId, String memberId) throws ClubManagementException {
+    public Long fetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         if (!clubMember.isActive()) {
@@ -60,13 +61,15 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public Membership getClubMembershipInfo(Long clubId, String memberId) throws ClubManagementException {
+    public MembershipInfo fetchMembershipInfo(Long clubId, String memberId)
+            throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return ClubManagementConverter.toMembershipDTO(clubMember);
     }
 
     @Override
-    public Map<Long, Membership> getClubMembershipInfos(Set<Long> clubMemberIds) throws ClubManagementException {
+    public Map<Long, MembershipInfo> fetchMembershipInfoByClubMemberIds(
+            Set<Long> clubMemberIds) throws ClubManagementException {
         if (clubMemberIds == null) {
             return Map.of();
         }
@@ -78,7 +81,8 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public List<Membership> getClubMembersByStatus(Long clubId, Long cursorId, Integer size) {
+    public List<MembershipInfo> fetchActiveMembershipInfo(Long clubId, Long cursorId,
+                                                          Integer size) {
         List<ClubMember> clubMembers
                 = clubMemberQueryService.getClubMemberListByStatus(clubId, "ACTIVE", cursorId, size);
         return ClubManagementConverter.toMembershipDTOList(clubMembers);
