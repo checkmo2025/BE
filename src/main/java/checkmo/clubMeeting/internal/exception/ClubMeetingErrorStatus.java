@@ -30,6 +30,8 @@ public enum ClubMeetingErrorStatus implements BaseErrorCode {
 
     // 페이지네이션 파라미터
     CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_401", "커서 값은 양수여야 합니다."),
+
+    CLUB_STAFF_ONLY(HttpStatus.FORBIDDEN, "CLUB_MEETING_403", "독서클럽 운영진만 접근할 수 있습니다."),
     ;
 
     private final HttpStatus httpStatus;
