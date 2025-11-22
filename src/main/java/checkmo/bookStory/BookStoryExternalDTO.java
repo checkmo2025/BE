@@ -4,6 +4,7 @@ import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 
 import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
@@ -34,7 +35,7 @@ public class BookStoryExternalDTO {
     @Builder
     public static class ScopeInfo {
         private BookStoryRequestDTO.BookStoryScope scope; // 현재 범위 (ALL, MY, CLUB)
-        private BasicInfo selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
+        private ClubManagementExternalDTO.BasicInfo selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
     }
 
     @Getter
