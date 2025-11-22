@@ -30,12 +30,12 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public ClubManagementExternalDTO.MyClubList getMyClubListForShare(String memberId) {
+    public ClubManagementExternalDTO.MyClubList fetchMyClubs(String memberId) {
         return clubMemberQueryService.getMyClubList(memberId);
     }
 
     @Override
-    public List<String> getActiveMemberIds(Long clubId) {
+    public List<String> fetchActiveMemberIds(Long clubId) {
         return clubMemberQueryService.getActiveMemberIds(clubId);
     }
 

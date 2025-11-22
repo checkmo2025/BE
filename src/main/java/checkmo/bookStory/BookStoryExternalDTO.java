@@ -21,7 +21,7 @@ public class BookStoryExternalDTO {
     public static class BookStoryList {
         private ScopeInfo scopeInfo;    // 현재 선택된 범위 정보
         private ClubManagementExternalDTO.MyClubList memberClubList; // 사용자가 속한 클럽 목록
-        private List<BookStoryDetail> bookStoryDetailList;
+        private List<BasicInfo> basicInfoList;
         private boolean hasNext;
         private Long nextCursor;
         private int pageSize;
@@ -40,7 +40,7 @@ public class BookStoryExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookStoryDetail {
+    public static class BasicInfo {
         private Long bookStoryId;
         private BookExternalDTO.BasicInfo bookInfo;
         private MemberExternalDTO.WithFollowStatus authorInfo;
@@ -61,7 +61,7 @@ public class BookStoryExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class DetailWithComment {
+    public static class DetailInfo {
         private Long bookStoryId;
         private BookExternalDTO.BasicInfo bookInfo;
         private MemberExternalDTO.WithFollowStatus authorInfo;
@@ -77,14 +77,14 @@ public class BookStoryExternalDTO {
         private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
         private int commentCount; // 댓글 전체 개수 (대댓글 포함)
 
-        private List<CommentDetail> comments;
+        private List<CommentInfo> comments;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class CommentDetail {
+    public static class CommentInfo {
         private Long commentId;
         private String content;
         private MemberExternalDTO.BasicInfo authorInfo;
@@ -93,6 +93,6 @@ public class BookStoryExternalDTO {
         private LocalDateTime createdAt;
 
         private boolean writtenByMe; // 작성자가 본인인지 여부
-        private List<CommentDetail> replies; // 대댓글 목록
+        private List<CommentInfo> replies; // 대댓글 목록
     }
 }

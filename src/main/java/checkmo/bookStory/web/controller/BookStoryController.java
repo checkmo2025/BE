@@ -3,7 +3,7 @@ package checkmo.bookStory.web.controller;
 import checkmo.authentication.CurrentId;
 import checkmo.bookStory.BookStoryAPI;
 import checkmo.bookStory.BookStoryExternalDTO;
-import checkmo.bookStory.BookStoryExternalDTO.DetailWithComment;
+import checkmo.bookStory.BookStoryExternalDTO.DetailInfo;
 import checkmo.bookStory.internal.service.command.BookStoryCommandService;
 import checkmo.bookStory.internal.service.command.BookStoryCommentCommandService;
 import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
@@ -105,7 +105,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
-    public ApiResponse<DetailWithComment> getBookStory(
+    public ApiResponse<DetailInfo> getBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {

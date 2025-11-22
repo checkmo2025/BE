@@ -129,6 +129,6 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private List<String> getClubMemberIds(Long clubId) {
-        return clubManagementAPI.getActiveMemberIds(clubId);
+        return clubManagementAPI.fetchActiveMemberIds(clubId);
     }
 }
