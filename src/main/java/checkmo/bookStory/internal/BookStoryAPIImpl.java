@@ -45,12 +45,12 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     private final BookStoryQueryService bookStoryQueryService;
 
     @Override
-    public BookStoryExternalDTO.BookStoryDetailWithComment getBookStory(String memberId, Long bookStoryId) {
+    public BookStoryExternalDTO.DetailWithComment fetchBookStoryDetailInfo(String memberId, Long bookStoryId) {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
 
         // 2. 책 정보 조회
-        BookExternalDTO.BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(bookStory.getBookId());
+        BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookStory.getBookId());
 
         // 3. 작성자 정보 조회
         MemberExternalDTO.WithFollowStatus authorInfo = memberAPI.getMemberWithFollowStatusForShare(
@@ -93,7 +93,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     }
 
     @Override
-    public BookStoryExternalDTO.BookStoryList getBookStoriesByScope(
+    public BookStoryExternalDTO.BookStoryList retrieveBookStories(
             String memberId,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId, String targetMemberNickname,
@@ -181,7 +181,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
                 .map(checkmo.bookStory.internal.entity.BookStory::getBookId)
                 .distinct()
                 .toList();
-        return bookAPI.getBookBasicInfoMapForShare(bookIds);
+        return bookAPI.fetchBookBasicInfoByBookIds(bookIds);
     }
 
     /**

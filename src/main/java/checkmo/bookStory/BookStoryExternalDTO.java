@@ -61,7 +61,7 @@ public class BookStoryExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookStoryDetailWithComment {
+    public static class DetailWithComment {
         private Long bookStoryId;
         private BookExternalDTO.BasicInfo bookInfo;
         private MemberExternalDTO.WithFollowStatus authorInfo;

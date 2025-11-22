@@ -48,7 +48,7 @@ public class BookStoryConverter {
                 .build();
     }
 
-    public static BookStoryExternalDTO.BookStoryDetailWithComment toBookStoryDetailWithComment(
+    public static BookStoryExternalDTO.DetailWithComment toBookStoryDetailWithComment(
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
@@ -56,7 +56,7 @@ public class BookStoryConverter {
             boolean isLiked,
             List<BookStoryExternalDTO.CommentDetail> commentList
     ) {
-        return BookStoryExternalDTO.BookStoryDetailWithComment.builder()
+        return BookStoryExternalDTO.DetailWithComment.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)

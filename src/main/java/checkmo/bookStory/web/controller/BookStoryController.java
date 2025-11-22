@@ -1,13 +1,14 @@
 package checkmo.bookStory.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.bookStory.BookStoryAPI;
 import checkmo.bookStory.BookStoryExternalDTO;
+import checkmo.bookStory.BookStoryExternalDTO.DetailWithComment;
 import checkmo.bookStory.internal.service.command.BookStoryCommandService;
 import checkmo.bookStory.internal.service.command.BookStoryCommentCommandService;
 import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -90,7 +91,7 @@ public class BookStoryController {
             throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
         }
 
-        var bookStoriesByScope = bookStoryAPI.getBookStoriesByScope(memberId, scope, clubId, targetMemberNickname,
+        var bookStoriesByScope = bookStoryAPI.retrieveBookStories(memberId, scope, clubId, targetMemberNickname,
                 cursorId);
         return ApiResponse.onSuccess(bookStoriesByScope);
     }
@@ -104,11 +105,11 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
-    public ApiResponse<BookStoryExternalDTO.BookStoryDetailWithComment> getBookStory(
+    public ApiResponse<DetailWithComment> getBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
-        var bookStory = bookStoryAPI.getBookStory(memberId, bookStoryId);
+        var bookStory = bookStoryAPI.fetchBookStoryDetailInfo(memberId, bookStoryId);
         return ApiResponse.onSuccess(bookStory);
     }
 
@@ -189,7 +190,8 @@ public class BookStoryController {
             @RequestParam(required = false) Long parentCommentId,
             @Valid @RequestBody BookStoryRequestDTO.CommentCreate request
     ) {
-        Long resultBookStoryId = bookStoryCommentCommandService.createComment(memberId, bookStoryId, parentCommentId, request);
+        Long resultBookStoryId = bookStoryCommentCommandService.createComment(memberId, bookStoryId, parentCommentId,
+                request);
         return ApiResponse.onSuccess(resultBookStoryId);
     }
 }
