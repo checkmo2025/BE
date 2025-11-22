@@ -45,22 +45,21 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
             @Nonnull HttpServletResponse response,
             @Nonnull FilterChain filterChain
     ) throws ServletException, IOException {
-        // 현재 인증 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated()
-                && authentication.getPrincipal() instanceof PrincipalDetails principalDetails) {
-
-            //  프로필이 완료되지 않은 회원은 에러
-            if (!principalDetails.getUser().isProfileCompleted()) {
-                log.warn("프로필 미완료 회원 접근 차단: {}, 요청 URI: {}",
-                        principalDetails.getUser().getId(), request.getRequestURI());
-                sendErrorResponse(response);
-                return;
-            }
+        if (isProfileIncomplete(authentication)) {
+            sendErrorResponse(response);
+            return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isProfileIncomplete(Authentication authentication) {
+        return authentication != null
+                && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof PrincipalDetails principal
+                && !principal.getUser().isProfileCompleted();
     }
 
     private void sendErrorResponse(HttpServletResponse response) throws IOException {

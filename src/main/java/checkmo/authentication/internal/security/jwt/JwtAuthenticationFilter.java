@@ -58,31 +58,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("[JWT 필터] 요청 URI: {}, Access Token 존재 여부 확인: {}", request.getRequestURI(),
                 accessToken != null);
 
-        if (StringUtils.hasText(accessToken)) { // Access Token이 존재하는 경우
-            try {
-                if (jwtTokenProvider.validateToken(accessToken)) { // Access Token 유효성 검사
-
-                    if (tokenCacheService.isAccessTokenBlacklisted(accessToken)) {
-                        log.warn("[JWT 필터] 블랙리스트에 등록된 Access Token 입니다. 요청 거부.");
-                        filterChain.doFilter(request, response); // 인증 없이 계속 진행
-                        return;
-                    }
-
-                    // Access Token이 유효한 경우, 인증 정보 설정
-                    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.info("[JWT 필터] Access Token 유효성 검사 통과");
-                }
-            } catch (ExpiredJwtException e) { // Access Token이 존재하지만 만료된 경우
-                log.warn("[JWT 필터] Access Token 만료됨: {}", e.getMessage());
-                reissueAccessToken(request, response); // Refresh Token을 사용해 Access Token 재발급 시도
-            }
-        } else { // Access Token이 존재하지 않는 경우
+        if (!StringUtils.hasText(accessToken)) {
             log.warn("[JWT 필터] Access Token이 존재하지 않음");
-            reissueAccessToken(request, response); // Refresh Token을 사용해 Access Token 재발급 시도
+            reissueAccessToken(request, response); // Refresh Token을 사용해 재발급 시도
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        filterChain.doFilter(request, response); // 다음 필터로 요청 전달
+        // Access Token이 존재하는 경우
+        try {
+            if (jwtTokenProvider.validateToken(accessToken)) { // Access Token 유효성 검사
+
+                if (tokenCacheService.isAccessTokenBlacklisted(accessToken)) {
+                    log.warn("[JWT 필터] 블랙리스트에 등록된 Access Token 입니다. 요청 거부.");
+                    filterChain.doFilter(request, response); // 인증 없이 계속 진행
+                    return;
+                }
+
+                // Access Token이 유효한 경우, 인증 정보 설정
+                Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("[JWT 필터] Access Token 유효성 검사 통과");
+            }
+        } catch (ExpiredJwtException e) { // Access Token이 존재하지만 만료된 경우
+            log.warn("[JWT 필터] Access Token 만료됨: {}", e.getMessage());
+            reissueAccessToken(request, response); // Refresh Token을 사용해 재발급 시도
+        }
+
+        filterChain.doFilter(request, response);
     }
 
     // Access Token이 만료된 경우, Refresh Token을 사용해 재발급
