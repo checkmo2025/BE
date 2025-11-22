@@ -32,7 +32,7 @@ public class ClubBookRecommendCommandServiceImpl implements ClubBookRecommendCom
         clubQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        String bookId = bookAPI.getOrCreateBook(request.getBookDetail());
+        String bookId = bookAPI.fetchOrCreateBook(request.getBookDetail());
 
         BookRecommend bookRecommend = ClubManagementConverter.toBookRecommend(request, bookId, clubMember);
 

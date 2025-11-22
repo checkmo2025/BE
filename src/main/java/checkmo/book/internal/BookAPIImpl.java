@@ -19,21 +19,21 @@ public class BookAPIImpl implements BookAPI {
     private final BookQueryService bookQueryService;
 
     @Override
-    public BookExternalDTO.BasicInfo getBookBasicInfoForShare(String bookId) {
+    public BookExternalDTO.BasicInfo fetchBookBasicInfo(String bookId) {
         Book book = bookQueryService.findBook(bookId);
 
         return BookConverter.toBasicInfoDTO(book);
     }
 
     @Override
-    public BookExternalDTO.DetailInfo getBookDetailInfoForShare(String bookId) {
+    public BookExternalDTO.DetailInfo fetchBookDetailInfo(String bookId) {
         Book book = bookQueryService.findBook(bookId);
 
         return BookConverter.toDetailInfoDTO(book);
     }
 
     @Override
-    public Map<String, BookExternalDTO.BasicInfo> getBookBasicInfoMapForShare(List<String> bookIds) {
+    public Map<String, BookExternalDTO.BasicInfo> fetchBookBasicInfoByBookIds(List<String> bookIds) {
         if (bookIds == null || bookIds.isEmpty()) {
             return Map.of();
         }
@@ -46,7 +46,7 @@ public class BookAPIImpl implements BookAPI {
     }
 
     @Override
-    public String getOrCreateBook(BookExternalDTO.BookCreate request) {
+    public String fetchOrCreateBook(BookExternalDTO.BookCreate request) {
         return bookCommandService.saveBook(request);
     }
 }

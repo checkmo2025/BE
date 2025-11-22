@@ -45,7 +45,7 @@ public class ClubMeetingCommandServiceImpl implements ClubMeetingCommandService 
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-        String bookId = bookAPI.getOrCreateBook(request.getBookInfo());
+        String bookId = bookAPI.fetchOrCreateBook(request.getBookInfo());
 
         Meeting meeting = ClubMeetingConverter.toMeeting(request, clubId, bookId);
         meetingRepository.saveAndFlush(meeting);

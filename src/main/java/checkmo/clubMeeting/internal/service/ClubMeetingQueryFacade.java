@@ -77,7 +77,7 @@ public class ClubMeetingQueryFacade {
 
         // 미팅의 책 정보 배치 조회
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
-        Map<String, BookExternalDTO.BasicInfo> bookInfoMap = bookAPI.getBookBasicInfoMapForShare(bookIds);
+        Map<String, BookExternalDTO.BasicInfo> bookInfoMap = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
         return BookShelfResponseDTO.BookShelfList.builder()
                 .bookShelfInfoList(mapMeetingsToBookshelfInfo(meetings, bookInfoMap))
@@ -105,7 +105,7 @@ public class ClubMeetingQueryFacade {
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 미팅의 책 정보 조회
-        DetailInfo bookInfo = bookAPI.getBookDetailInfoForShare(meeting.getBookId());
+        DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
 
         List<BookShelfResponseDTO.TopicDetail> topicDetailList
                 = mapTopicsToTopicDetail(topics, authorInfoMap, memberId);
@@ -190,7 +190,7 @@ public class ClubMeetingQueryFacade {
 
         // 미팅의 모든 도서 배치 조회
         List<String> bookIds = extractBookIdsFromMeetings(meetings);
-        Map<String, BookExternalDTO.BasicInfo> bookInfoMap = bookAPI.getBookBasicInfoMapForShare(bookIds);
+        Map<String, BookExternalDTO.BasicInfo> bookInfoMap = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
         List<MeetingResponseDTO.MeetingInfo> meetingInfoList = mapMeetingsToMeetingInfo(meetings, bookInfoMap);
         return MeetingResponseDTO.MeetingList.builder()
@@ -236,7 +236,7 @@ public class ClubMeetingQueryFacade {
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.getMemberBasicInfoMapForShare(authorIds);
 
         // 미팅의 책 정보 조회
-        BookExternalDTO.BasicInfo bookSharedDTO = bookAPI.getBookBasicInfoForShare(meeting.getBookId());
+        BookExternalDTO.BasicInfo bookSharedDTO = bookAPI.fetchBookBasicInfo(meeting.getBookId());
 
         // DTO 변환
         MeetingResponseDTO.MeetingInfo meetingInfo = ClubMeetingConverter.toMeetingInfoDTO(meeting, bookSharedDTO);

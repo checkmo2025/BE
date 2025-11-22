@@ -214,7 +214,7 @@ public class ClubManagementQueryFacade {
 
         List<BookRecommendDetail> bookRecommendDetails = bookRecommends.stream()
                 .map(bookRecommend -> {
-                    var bookInfo = bookAPI.getBookBasicInfoForShare(bookRecommend.getBookId());
+                    var bookInfo = bookAPI.fetchBookBasicInfo(bookRecommend.getBookId());
                     var authorInfo = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
                     return ClubManagementConverter.toBookRecommendDetailDTO(bookRecommend, bookInfo, authorInfo,
                             nickname, clubMember.isStaff());
@@ -238,7 +238,7 @@ public class ClubManagementQueryFacade {
         BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommend(clubId, bookRecommendId, memberId);
 
         // 외부 도메인 정보 조회 (Facade에서 처리)
-        BasicInfo bookInfo = bookAPI.getBookBasicInfoForShare(bookRecommend.getBookId());
+        BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookRecommend.getBookId());
         MemberExternalDTO.BasicInfo authorInfo
                 = memberAPI.getMemberBasicInfoForShare(bookRecommend.getClubMember().getMemberId());
         MemberExternalDTO.BasicInfo currentMemberInfo = memberAPI.getMemberBasicInfoForShare(memberId);

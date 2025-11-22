@@ -29,7 +29,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     @Override
     public MeetingInfo getMeeting(Long meetingId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        BookExternalDTO.BasicInfo bookBasicInfoForShare = bookAPI.getBookBasicInfoForShare(meeting.getBookId());
+        BookExternalDTO.BasicInfo bookBasicInfoForShare = bookAPI.fetchBookBasicInfo(meeting.getBookId());
         return ClubMeetingConverter.toMeetingInfoExternalDTO(meeting, bookBasicInfoForShare);
     }
 
@@ -46,7 +46,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
 
         List<String> bookIds = extractBookIds(meetings);
 
-        Map<String, BasicInfo> bookBasicInfo = bookAPI.getBookBasicInfoMapForShare(bookIds);
+        Map<String, BasicInfo> bookBasicInfo = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
         return toMeetingInfoMap(meetings, bookBasicInfo);
     }
