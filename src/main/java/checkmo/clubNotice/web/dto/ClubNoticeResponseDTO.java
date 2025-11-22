@@ -1,7 +1,6 @@
 package checkmo.clubNotice.web.dto;
 
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
-import checkmo.clubNotice.ClubNoticeExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -20,9 +19,9 @@ public class ClubNoticeResponseDTO {
             property = "tag",
             visible = true)
     @JsonSubTypes({
-            @JsonSubTypes.Type(value = ClubNoticeExternalDTO.MeetingNoticePreview.class, name = "모임"),
-            @JsonSubTypes.Type(value = ClubNoticeExternalDTO.VotePreview.class, name = "투표"),
-            @JsonSubTypes.Type(value = ClubNoticeExternalDTO.PureNoticePreview.class, name = "공지")
+            @JsonSubTypes.Type(value = MeetingNotice.class, name = "모임"),
+            @JsonSubTypes.Type(value = VoteNotice.class, name = "투표"),
+            @JsonSubTypes.Type(value = PureNotice.class, name = "공지")
     })
     public sealed interface NoticeItem
             permits PureNotice, MeetingNotice, VoteNotice {
