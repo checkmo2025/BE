@@ -7,12 +7,12 @@ import checkmo.bookStory.BookStoryExternalDTO;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
+import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO;
-import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
-import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -232,7 +232,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
             return myClubList.getClubList().stream()
                     .filter(club -> club.getClubId().equals(clubId))
                     .findFirst()
-                    .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_NOT_FOUND));
+                    .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.CLUB_ACCESS_DENIED));
         }
         return null;
     }
