@@ -1,9 +1,8 @@
-package checkmo.bookStory;
+package checkmo.bookStory.web.dto;
 
 import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
@@ -15,7 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class BookStoryExternalDTO {
+public class BookStoryResponseDTO {
 
     @Getter
     @NoArgsConstructor

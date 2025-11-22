@@ -1,12 +1,12 @@
 package checkmo.bookStory.web.controller;
 
 import checkmo.authentication.CurrentId;
-import checkmo.bookStory.BookStoryAPI;
-import checkmo.bookStory.BookStoryExternalDTO;
+import checkmo.bookStory.internal.service.BookStoryQueryFacade;
 import checkmo.bookStory.internal.service.command.BookStoryCommandService;
 import checkmo.bookStory.internal.service.command.BookStoryCommentCommandService;
 import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,7 +34,7 @@ public class BookStoryController {
     private final BookStoryCommentCommandService bookStoryCommentCommandService;
     private final BookStoryCommandService bookStoryCommandService;
     private final BookStorySocialCommandService bookStorySocialCommandService;
-    private final BookStoryAPI bookStoryAPI;
+    private final BookStoryQueryFacade bookStoryQueryFacade;
 
     @Operation(summary = "책 이야기 업로드 API", description = "새로운 책 이야기를 작성합니다.")
     @ApiResponses({
@@ -75,7 +75,7 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
     @GetMapping
-    public ApiResponse<BookStoryExternalDTO.BookStoryList> getBookStories(
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getBookStories(
             @CurrentId String memberId,
             @RequestParam(required = false, defaultValue = "ALL") BookStoryRequestDTO.BookStoryScope scope,
             @RequestParam(required = false) Long clubId,
@@ -90,7 +90,7 @@ public class BookStoryController {
             throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
         }
 
-        var bookStoriesByScope = bookStoryAPI.retrieveBookStories(memberId, scope, clubId, targetMemberNickname,
+        var bookStoriesByScope = bookStoryQueryFacade.retrieveBookStories(memberId, scope, clubId, targetMemberNickname,
                 cursorId);
         return ApiResponse.onSuccess(bookStoriesByScope);
     }
@@ -104,11 +104,11 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기를 찾을 수 없음")
     })
     @GetMapping("/{bookStoryId}")
-    public ApiResponse<BookStoryExternalDTO.DetailInfo> getBookStory(
+    public ApiResponse<BookStoryResponseDTO.DetailInfo> getBookStory(
             @CurrentId String memberId,
             @PathVariable Long bookStoryId
     ) {
-        var bookStory = bookStoryAPI.fetchBookStoryDetailInfo(memberId, bookStoryId);
+        var bookStory = bookStoryQueryFacade.fetchBookStoryDetailInfo(memberId, bookStoryId);
         return ApiResponse.onSuccess(bookStory);
     }
 

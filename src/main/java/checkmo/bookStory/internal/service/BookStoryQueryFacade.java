@@ -1,14 +1,10 @@
-package checkmo.bookStory.internal;
+package checkmo.bookStory.internal.service;
 
 import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
 import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
-import checkmo.bookStory.BookStoryAPI;
-import checkmo.bookStory.BookStoryExternalDTO;
-import checkmo.bookStory.BookStoryExternalDTO.CommentInfo;
-import checkmo.bookStory.BookStoryExternalDTO.DetailInfo;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
@@ -16,6 +12,9 @@ import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.bookStory.web.dto.BookStoryResponseDTO;
+import checkmo.bookStory.web.dto.BookStoryResponseDTO.CommentInfo;
+import checkmo.bookStory.web.dto.BookStoryResponseDTO.DetailInfo;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
@@ -35,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class BookStoryAPIImpl implements BookStoryAPI {
+public class BookStoryQueryFacade {
 
     // 페이징 기본 크기 상수
     public static final int DEFAULT_PAGE_SIZE = 10;
@@ -49,7 +48,13 @@ public class BookStoryAPIImpl implements BookStoryAPI {
 
     private final BookStoryQueryService bookStoryQueryService;
 
-    @Override
+    /**
+     * 특정 책 이야기의 상세 정보를 조회합니다.
+     *
+     * @param memberId    조회하는 회원의 ID
+     * @param bookStoryId 조회할 책 이야기 ID
+     * @return 조회된 책 이야기 상세 정보 DTO
+     */
     public DetailInfo fetchBookStoryDetailInfo(String memberId, Long bookStoryId) {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
@@ -97,8 +102,17 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         );
     }
 
-    @Override
-    public BookStoryExternalDTO.BookStoryList retrieveBookStories(
+    /**
+     * scope에 따라 책 이야기 목록을 조회합니다. 비즈니스 로직을 Facade에서 처리하여 컨트롤러는 단순히 호출만 담당
+     *
+     * @param memberId             조회하는 회원의 ID
+     * @param scope                조회 범위 ("ALL", "MY", "FOLLOWING", "CLUB", "TARGET")
+     * @param clubId               클럽 ID (scope가 "CLUB"일 때 필수)
+     * @param targetMemberNickname 대상 회원 닉네임 (scope가 "TARGET"일 때 필수)
+     * @param cursorId             페이지 번호 (1부터 시작)
+     * @return scope에 따른 책 이야기 목록 DTO
+     */
+    public BookStoryResponseDTO.BookStoryList retrieveBookStories(
             String memberId,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId, String targetMemberNickname,
@@ -138,7 +152,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         Map<String, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // DTO 변환
-        List<BookStoryExternalDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
+        List<BookStoryResponseDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
                 bookStories, isLikedMap, bookInfoMap, authorInfoMap);
 
         // 클럽 정보 조회
@@ -146,12 +160,12 @@ public class BookStoryAPIImpl implements BookStoryAPI {
         BasicInfo basicInfo = findClubInfoForScope(scope, clubId, clubList);
 
         // 스코프 정보 변환 및 최종 응답 DTO 변환
-        var scopeInfo = BookStoryExternalDTO.ScopeInfo.builder()
+        var scopeInfo = BookStoryResponseDTO.ScopeInfo.builder()
                 .scope(scope)
                 .selectedClub(basicInfo)
                 .build();
 
-        return BookStoryExternalDTO.BookStoryList.builder()
+        return BookStoryResponseDTO.BookStoryList.builder()
                 .scopeInfo(scopeInfo)
                 .memberClubList(clubList)
                 .basicInfoList(basicInfoList)
@@ -206,7 +220,7 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     /**
      * BookStory 엔티티들을 Response DTO로 변환
      */
-    private List<BookStoryExternalDTO.BasicInfo> convertToBookStoryResponses(
+    private List<BookStoryResponseDTO.BasicInfo> convertToBookStoryResponses(
             String memberId,
             List<BookStory> bookStoryList,
             Map<Long, Boolean> isLikedMap,
