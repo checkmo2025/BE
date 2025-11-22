@@ -1,6 +1,5 @@
 package checkmo.bookStory;
 
-import checkmo.bookStory.BookStoryExternalDTO.DetailInfo;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 
 /**
@@ -15,7 +14,7 @@ public interface BookStoryAPI {
      * @param bookStoryId 조회할 책 이야기 ID
      * @return 조회된 책 이야기 상세 정보 DTO
      */
-    DetailInfo fetchBookStoryDetailInfo(String memberId, Long bookStoryId);
+    BookStoryExternalDTO.DetailInfo fetchBookStoryDetailInfo(String memberId, Long bookStoryId);
 
     /**
      * scope에 따라 책 이야기 목록을 조회합니다. 비즈니스 로직을 Facade에서 처리하여 컨트롤러는 단순히 호출만 담당

@@ -1,9 +1,7 @@
 package checkmo.bookStory.internal.converter;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.bookStory.BookStoryExternalDTO.BasicInfo;
-import checkmo.bookStory.BookStoryExternalDTO.CommentInfo;
-import checkmo.bookStory.BookStoryExternalDTO.DetailInfo;
+import checkmo.bookStory.BookStoryExternalDTO;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
@@ -28,7 +26,7 @@ public class BookStoryConverter {
                 .build();
     }
 
-    public static BasicInfo toBookStoryDetailDTO(
+    public static BookStoryExternalDTO.BasicInfo toBookStoryDetailDTO(
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
@@ -36,7 +34,7 @@ public class BookStoryConverter {
             boolean isLiked,
             int commentCount
     ) {
-        return BasicInfo.builder()
+        return BookStoryExternalDTO.BasicInfo.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
@@ -50,15 +48,15 @@ public class BookStoryConverter {
                 .build();
     }
 
-    public static DetailInfo toBookStoryDetailWithComment(
+    public static BookStoryExternalDTO.DetailInfo toBookStoryDetailWithComment(
             BookStory bookStory,
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
             MemberExternalDTO.WithFollowStatus authorInfo,
             boolean isLiked,
-            List<CommentInfo> commentList
+            List<BookStoryExternalDTO.CommentInfo> commentList
     ) {
-        return DetailInfo.builder()
+        return BookStoryExternalDTO.DetailInfo.builder()
                 .bookStoryId(bookStory.getId())
                 .bookInfo(bookInfo)
                 .authorInfo(authorInfo)
@@ -73,7 +71,7 @@ public class BookStoryConverter {
                 .build();
     }
 
-    public static List<CommentInfo> toCommentDetailList(
+    public static List<BookStoryExternalDTO.CommentInfo> toCommentDetailList(
             List<Comment> comments,
             String currentMemberId,
             java.util.Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
@@ -81,7 +79,7 @@ public class BookStoryConverter {
         return comments.stream()
                 .map(comment -> {
                     // 대댓글들 변환
-                    List<CommentInfo> replies = comment.getChildrenComment().stream()
+                    List<BookStoryExternalDTO.CommentInfo> replies = comment.getChildrenComment().stream()
                             .map(reply -> fromCommentToResponse(
                                     reply,
                                     currentMemberId,
@@ -99,13 +97,13 @@ public class BookStoryConverter {
                 }).toList();
     }
 
-    private static CommentInfo fromCommentToResponse(
+    private static BookStoryExternalDTO.CommentInfo fromCommentToResponse(
             Comment comment,
             String currentMemberId,
             MemberExternalDTO.BasicInfo authorInfo,
-            List<CommentInfo> replies
+            List<BookStoryExternalDTO.CommentInfo> replies
     ) {
-        return CommentInfo.builder()
+        return BookStoryExternalDTO.CommentInfo.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .authorInfo(authorInfo)
