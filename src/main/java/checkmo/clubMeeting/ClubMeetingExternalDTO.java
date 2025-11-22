@@ -16,7 +16,7 @@ public class ClubMeetingExternalDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MeetingInfo {
+    public static class DetailInfo {
         private Long meetingId;
         private String title;
         private LocalDateTime meetingTime;

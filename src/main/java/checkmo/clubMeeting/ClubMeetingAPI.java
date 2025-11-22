@@ -1,6 +1,6 @@
 package checkmo.clubMeeting;
 
-import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +15,7 @@ public interface ClubMeetingAPI {
      * @param meetingId 조회할 모임 ID
      * @return 조회된 모임 상세 정보 DTO
      */
-    ClubMeetingExternalDTO.MeetingInfo getMeeting(Long meetingId);
+    DetailInfo fetchMeetingDetailInfo(Long meetingId);
 
     /**
      * 특정 모임들의 상세 정보를 조회합니다.
@@ -23,5 +23,5 @@ public interface ClubMeetingAPI {
      * @param meetingIds 조회할 모임 IDs
      * @return 조회된 모임 ID와 상세 정보 DTO의 맵
      */
-    Map<Long, MeetingInfo> getMeetings(Set<Long> meetingIds);
+    Map<Long, DetailInfo> fetchMeetingDetailInfoByMeetingIds(Set<Long> meetingIds);
 }

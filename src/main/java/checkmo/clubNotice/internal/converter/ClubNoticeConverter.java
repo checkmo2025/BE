@@ -1,7 +1,7 @@
 package checkmo.clubNotice.internal.converter;
 
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
-import checkmo.clubMeeting.ClubMeetingExternalDTO;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
@@ -115,7 +115,7 @@ public class ClubNoticeConverter {
 
     public static ClubNoticeResponseDTO.MeetingNotice toMeetingNoticeDTO(
             Notice notice,
-            ClubMeetingExternalDTO.MeetingInfo meetingInfo
+            DetailInfo detailInfo
     ) {
         return ClubNoticeResponseDTO.MeetingNotice.builder()
                 .id(notice.getId())
@@ -123,7 +123,7 @@ public class ClubNoticeConverter {
                 .content(notice.getContent())
                 .important(notice.isImportant())
                 .tag(notice.getTag())
-                .meetingInfoDTO(meetingInfo)
+                .detailInfoDTO(detailInfo)
                 .build();
     }
 

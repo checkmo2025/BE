@@ -3,7 +3,7 @@ package checkmo.clubNotice.internal.service;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.ClubMeetingAPI;
-import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -64,7 +64,7 @@ public class ClubNoticeQueryFacade {
 
         // 공지사항에 모임 정보 미리 조회
         Set<Long> meetingIds = extractMeetingIdsFromNotices(notices);
-        Map<Long, MeetingInfo> meetingInfos = clubMeetingAPI.getMeetings(meetingIds);
+        Map<Long, DetailInfo> meetingInfos = clubMeetingAPI.fetchMeetingDetailInfoByMeetingIds(meetingIds);
 
         // 생성시간 순으로 병합 및 DTO 변환
         List<ClubNoticeResponseDTO.NoticeItem> noticeItems
@@ -108,7 +108,7 @@ public class ClubNoticeQueryFacade {
      */
     private List<ClubNoticeResponseDTO.NoticeItem> mergeNoticesAndVotes(
             List<Notice> notices,
-            Map<Long, MeetingInfo> meetingInfos,
+            Map<Long, DetailInfo> meetingInfos,
             List<Vote> votes,
             int pageSize
     ) {
@@ -177,11 +177,11 @@ public class ClubNoticeQueryFacade {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND);
         }
 
-        MeetingInfo meetingInfo = clubMeetingAPI.getMeeting(notice.getMeetingId());
+        DetailInfo detailInfo = clubMeetingAPI.fetchMeetingDetailInfo(notice.getMeetingId());
 
         return ClubNoticeResponseDTO.ClubNoticeDetail.builder()
                 .isStaff(clubMembershipInfoInfo.isStaff())
-                .noticeItem(ClubNoticeConverter.toMeetingNoticeDTO(notice, meetingInfo))
+                .noticeItem(ClubNoticeConverter.toMeetingNoticeDTO(notice, detailInfo))
                 .build();
     }
 

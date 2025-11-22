@@ -4,7 +4,7 @@ import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
 import checkmo.book.BookExternalDTO.BasicInfo;
 import checkmo.clubMeeting.ClubMeetingAPI;
-import checkmo.clubMeeting.ClubMeetingExternalDTO.MeetingInfo;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
@@ -27,14 +27,14 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     private final ClubMeetingQueryService clubMeetingQueryService;
 
     @Override
-    public MeetingInfo getMeeting(Long meetingId) {
+    public DetailInfo fetchMeetingDetailInfo(Long meetingId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         BookExternalDTO.BasicInfo bookBasicInfoForShare = bookAPI.fetchBookBasicInfo(meeting.getBookId());
         return ClubMeetingConverter.toMeetingInfoExternalDTO(meeting, bookBasicInfoForShare);
     }
 
     @Override
-    public Map<Long, MeetingInfo> getMeetings(Set<Long> meetingIds) {
+    public Map<Long, DetailInfo> fetchMeetingDetailInfoByMeetingIds(Set<Long> meetingIds) {
         if (meetingIds == null) {
             return Map.of();
         }
@@ -51,7 +51,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         return toMeetingInfoMap(meetings, bookBasicInfo);
     }
 
-    private Map<Long, MeetingInfo> toMeetingInfoMap(List<Meeting> meetings, Map<String, BasicInfo> bookBasicInfo) {
+    private Map<Long, DetailInfo> toMeetingInfoMap(List<Meeting> meetings, Map<String, BasicInfo> bookBasicInfo) {
         return meetings.stream()
                 .collect(Collectors.toMap(
                         Meeting::getId,

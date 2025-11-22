@@ -1,6 +1,6 @@
 package checkmo.clubNotice.web.dto;
 
-import checkmo.clubMeeting.ClubMeetingExternalDTO;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.ClubNoticeExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -74,7 +74,7 @@ public class ClubNoticeResponseDTO {
 
         @Builder.Default
         private String tag = "모임";
-        private ClubMeetingExternalDTO.MeetingInfo meetingInfoDTO; // 모임 정보 DTO
+        private DetailInfo detailInfoDTO; // 모임 정보 DTO
     }
 
     @Getter

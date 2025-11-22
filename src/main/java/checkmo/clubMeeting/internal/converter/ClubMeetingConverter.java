@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.internal.converter;
 
 import checkmo.book.BookExternalDTO;
-import checkmo.clubMeeting.ClubMeetingExternalDTO;
+import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Topic;
@@ -141,11 +141,11 @@ public class ClubMeetingConverter {
     // ?? -> ClubMeetingExternalDTO 변환
     // =====================================================
 
-    public static ClubMeetingExternalDTO.MeetingInfo toMeetingInfoExternalDTO(
+    public static DetailInfo toMeetingInfoExternalDTO(
             Meeting meeting,
             BookExternalDTO.BasicInfo bookInfo
     ) {
-        return ClubMeetingExternalDTO.MeetingInfo.builder()
+        return DetailInfo.builder()
                 .meetingId(meeting.getId())
                 .title(meeting.getTitle())
                 .meetingTime(meeting.getMeetingTime())
