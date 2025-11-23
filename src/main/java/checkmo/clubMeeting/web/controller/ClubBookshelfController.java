@@ -55,7 +55,7 @@ public class ClubBookshelfController {
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookShelfList bookShelfList
-                = clubMeetingQueryFacade.getBookShelfList(clubId, cursorId, generation, memberId);
+                = clubMeetingQueryFacade.retrieveBookShelfList(clubId, cursorId, generation, memberId);
         return ApiResponse.onSuccess(bookShelfList);
     }
 
@@ -74,7 +74,7 @@ public class ClubBookshelfController {
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookShelfDetail bookShelfDetail
-                = clubMeetingQueryFacade.getBookShelfDetail(meetingId, memberId);
+                = clubMeetingQueryFacade.retrieveBookShelfDetail(meetingId, memberId);
         return ApiResponse.onSuccess(bookShelfDetail);
     }
 
@@ -96,7 +96,7 @@ public class ClubBookshelfController {
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.BookReviewList bookReviewList
-                = clubMeetingQueryFacade.getBookReviewList(meetingId, cursorId, memberId);
+                = clubMeetingQueryFacade.retrieveBookReviewList(meetingId, cursorId, memberId);
         return ApiResponse.onSuccess(bookReviewList);
     }
 
@@ -252,7 +252,7 @@ public class ClubBookshelfController {
             @CurrentId String memberId
     ) {
         BookShelfResponseDTO.TopicList topicList
-                = clubMeetingQueryFacade.findTopicsByMeeting(meetingId, cursorId, memberId);
+                = clubMeetingQueryFacade.retrieveTopicList(meetingId, cursorId, memberId);
         return ApiResponse.onSuccess(topicList);
     }
 }

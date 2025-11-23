@@ -1,36 +1,102 @@
 package checkmo.clubMeeting.internal.service.command;
 
-import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
+import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
+import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
+import checkmo.clubMeeting.internal.repository.BookReviewRepository;
+import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
+import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookReviewCreate;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface ClubBookReviewCommandService {
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ClubBookReviewCommandService {
 
-    /**
-     * 독서모임의 한줄평을 작성합니다.
-     *
-     * @param meetingId 미팅 ID
-     * @param memberId  작성자 회원 ID
-     * @param request   한줄평 내용 DTO (내용 + 평점)
-     * @return 생성한 한줄평 ID
-     */
-    Long createBookReview(Long meetingId, String memberId, BookShelfRequestDTO.BookReviewCreate request);
 
-    /**
-     * 독서모임의 한줄평을 수정합니다.
-     *
-     * @param meetingId 미팅 ID
-     * @param reviewId  한줄평 ID
-     * @param memberId  요청자 회원 ID
-     * @param request   한줄평 내용 DTO (내용 + 평점)
-     */
-    Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookShelfRequestDTO.BookReviewCreate request);
+    private final ClubManagementAPI clubManagementAPI;
 
-    /**
-     * 독서모임의 한줄평을 삭제합니다.
-     *
-     * @param meetingId 미팅 ID
-     * @param reviewId  한줄평
-     * @param memberId  요청자 회원 ID
-     */
-    void deleteBookReview(Long meetingId, Long reviewId, String memberId);
+    private final ClubMeetingQueryService clubMeetingQueryService;
+    private final ClubBookReviewQueryService clubBookReviewQueryService;
+
+    private final BookReviewRepository bookReviewRepository;
+
+    // TODO: Aspect 로그
+    // TODO: Test DB 설정 후, 낙관적 락 동작 테스트
+    @Retryable(
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300)
+    )
+    public Long createBookReview(Long meetingId, String memberId, BookReviewCreate request) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
+
+        BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);
+        bookReview.setMeeting(meeting);
+
+        meeting.addSumRate(bookReview.getRate());
+
+        return bookReviewRepository.save(bookReview).getId();
+    }
+
+    @Retryable(
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300)
+    )
+    public Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
+
+        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
+        if (!bookReview.getClubMemberId().equals(clubMemberId)) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
+        }
+
+        double oldRate = bookReview.getRate();
+        double newRate = request.getRate();
+
+        bookReview.updateBookReview(
+                request.getDescription(),
+                request.getRate()
+        );
+
+        // 별점이 변경된 경우에만 미팅의 별점 합산
+        if (oldRate != newRate) {
+            meeting.subtractSumRate(oldRate);
+            meeting.addSumRate(newRate);
+        }
+
+        return bookReview.getId();
+    }
+
+    @Retryable(
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 300)
+    )
+    public void deleteBookReview(Long meetingId, Long reviewId, String memberId) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
+
+        BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
+        if (!bookReview.getClubMemberId().equals(clubMemberId)) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
+        }
+
+        meeting.subtractSumRate(bookReview.getRate());
+
+        bookReview.removeMeeting();
+    }
 
 }

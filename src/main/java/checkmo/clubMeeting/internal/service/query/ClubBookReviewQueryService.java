@@ -1,27 +1,27 @@
 package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
+import checkmo.clubMeeting.internal.repository.BookReviewRepository;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface ClubBookReviewQueryService {
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ClubBookReviewQueryService {
 
-    /**
-     * 독서 모임의 책장(한줄평) 리스트를 조회합니다.
-     *
-     * @param meetingId 미팅 ID
-     * @param cursorId  마지막으로 조회한 한줄평 ID (무한 스크롤용, 처음에는 null)
-     * @param size      조회할 한줄평 개수
-     * @return 조회한 한줄평 리스트
-     */
-    List<BookReview> findBookReviewsByMeeting(Long meetingId, Long cursorId, Integer size);
+    private final BookReviewRepository bookReviewRepository;
 
-    /**
-     * 독서모임의 한줄평이 존재하는지 확인합니다.
-     *
-     * @param reviewId  한줄평 ID
-     * @param meetingId 미팅 ID
-     * @return BookReview 존재하는 한줄평 객체
-     */
-    BookReview validateBookReview(Long reviewId, Long meetingId) throws ClubMeetingException;
+    public List<BookReview> retrieveBookReviews(Long meetingId, Long cursorId, Integer size) {
+        return bookReviewRepository.findBookReviewsByCusor(meetingId, cursorId, size); // int로 암묵적 언박싱
+    }
+
+    public BookReview validateBookReview(Long reviewId, Long meetingId) throws ClubMeetingException {
+        return bookReviewRepository.findByIdAndMeetingId(reviewId, meetingId)
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_NOT_FOUND));
+    }
 }

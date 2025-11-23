@@ -97,7 +97,7 @@ public class ClubMeetingController {
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.MeetingList meetings
-                = clubMeetingQueryFacade.getMeetingsByClub(clubId, cursorId, memberId);
+                = clubMeetingQueryFacade.retrieveMeetingList(clubId, cursorId, memberId);
         return ApiResponse.onSuccess(meetings);
     }
 
@@ -116,7 +116,7 @@ public class ClubMeetingController {
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.MeetingDetail meetingDetail
-                = clubMeetingQueryFacade.findMeetingDetailById(meetingId, memberId);
+                = clubMeetingQueryFacade.retrieveMeetingDetail(meetingId, memberId);
         return ApiResponse.onSuccess(meetingDetail);
     }
 
@@ -138,7 +138,7 @@ public class ClubMeetingController {
             @RequestParam @Min(1) @Max(12) int month,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubMeetingQueryFacade.getClubMeetingCalendar(clubId, year, month, memberId));
+        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveCalendarMeeting(clubId, year, month, memberId));
     }
 
     @Operation(summary = "독서 동아리 회원 중 참여 인원 페이지네이션 조회 API",
@@ -161,7 +161,7 @@ public class ClubMeetingController {
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.MeetingMemberList members
-                = clubMeetingQueryFacade.findMeetingMembersByMeeting(meetingId, cursorId, memberId);
+                = clubMeetingQueryFacade.retrieveMeetingMemberList(meetingId, cursorId, memberId);
         return ApiResponse.onSuccess(members);
     }
 
@@ -203,7 +203,7 @@ public class ClubMeetingController {
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TeamMember teamMembers
-                = clubMeetingQueryFacade.findTeamMembersByMeeting(meetingId, teamNumber, memberId);
+                = clubMeetingQueryFacade.retrieveTeamMember(meetingId, teamNumber, memberId);
         return ApiResponse.onSuccess(teamMembers);
     }
 
@@ -221,7 +221,7 @@ public class ClubMeetingController {
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        MeetingResponseDTO.TopicDTO topics = clubMeetingQueryFacade.findMeetingTopicsWithTeam(meetingId, memberId);
+        MeetingResponseDTO.TopicDTO topics = clubMeetingQueryFacade.retrieveTopicDTO(meetingId, memberId);
         return ApiResponse.onSuccess(topics);
     }
 
@@ -243,7 +243,7 @@ public class ClubMeetingController {
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TeamTopic teamTopic
-                = clubMeetingQueryFacade.findMeetingTopicsByTeam(meetingId, teamNumber, memberId);
+                = clubMeetingQueryFacade.retrieveTeamTopic(meetingId, teamNumber, memberId);
         return ApiResponse.onSuccess(teamTopic);
     }
 
@@ -267,7 +267,7 @@ public class ClubMeetingController {
             @CurrentId String memberId
     ) {
         MeetingResponseDTO.TopicSelection result
-                = clubTopicCommandService.selectOrCancelTopic(meetingId, topicId, memberId, request);
+                = clubTopicCommandService.toggleTopic(meetingId, topicId, memberId, request);
         return ApiResponse.onSuccess(result);
     }
 }

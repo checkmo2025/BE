@@ -39,7 +39,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
             return Map.of();
         }
 
-        List<Meeting> meetings = clubMeetingQueryService.getMeetingsByIds(meetingIds);
+        List<Meeting> meetings = clubMeetingQueryService.retrieveMeetings(meetingIds);
         if (meetings.size() != meetingIds.size()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.MEETING_NOT_FOUND);
         }
