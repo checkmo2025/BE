@@ -2,20 +2,10 @@ package checkmo.notification.internal.repository;
 
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.entity.Notification.NotificationType;
-import java.util.List;
 import java.util.Optional;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
-
-    // 특정 사용자의 읽지 않은 알림을 최신순으로 조회
-    List<Notification> findByReceiverIdAndIsReadFalseOrderByCreatedAtDesc(String receiverId, Pageable pageable);
-
-    List<Notification> findByReceiverIdOrderByIdDesc(String receiverId, Pageable pageable);
-
-    // 특정 사용자의 모든 알림을 커서보다 작은 ID로 조회 (커서 기반 페이징용)
-    List<Notification> findByReceiverIdAndIdLessThanOrderByIdDesc(String receiverId, Long cursorId, Pageable pageable);
+public interface NotificationRepository extends JpaRepository<Notification, Long>, NotificationRepositoryCustom {
 
     Optional<Notification> findByIdAndReceiverId(Long notificationId, String receiverId);
 
