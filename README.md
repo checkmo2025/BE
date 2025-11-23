@@ -1,10 +1,3 @@
-# 💻 Backend Members
-
-| [**모두까기** / **임경표**](https://github.com/MODUGGAGI) |  [**채이** / **이채은**](https://github.com/chaechaen)  | [**송글송글** / **신지윤**](https://github.com/Yoon0221) | [**지니** / **정효정**](https://github.com/zjhj0814) |
-|:----------------------:|:----------------------:|:----------------------:|:--------------------:|
-|       팀장 🧑🏻‍💻       |       팀원 👩🏻‍💻       |       팀원 👩🏻‍💻       |      팀원 👩🏻‍💻      |
-
----
 ## 🏛️ Architecture
 
 이 프로젝트는 **Spring Modulith**를 활용하여 모놀리식 환경에서 도메인 모듈 분리를 구현했습니다.
@@ -20,7 +13,9 @@
 * **[🏛️ Spring Modulith 아키텍처 (현재)](./docs/02_spring_modulith.md)**
 
 ---
+
 ## 🖥️ Server Architecture
+
 <div align="center">
     <a href="./docs/images/Checkmo_Server_Architecture.png">
     <img src="./docs/images/Checkmo_Server_Architecture.png" alt="서버 아키텍처" width="800"/>
@@ -28,7 +23,9 @@
 </div>
 
 ---
+
 ## 🚀 Deployment Architecture
+
 <div align="center">
     <a href="./docs/images/Checkmo_AWS_Deploy_Architecture.png">
     <img src="./docs/images/Checkmo_AWS_Deploy_Architecture.png" alt="서버 아키텍처" width="800"/>
@@ -36,6 +33,7 @@
 </div>
 
 ---
+
 ## 🛠️ Tech Stacks
 
 <div align="center">
