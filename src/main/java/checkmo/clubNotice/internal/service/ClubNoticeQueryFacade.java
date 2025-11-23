@@ -119,7 +119,7 @@ public class ClubNoticeQueryFacade {
 
         int i = 0, j = 0;
         while (resultList.size() < pageSize + 1 && (i < n || j < m)) {
-            if (i < n && (j >= m || notices.get(i).getCreatedAt().isAfter(votes.get(j).getCreatedAt()))) {
+            if (i < n && (j >= m || notices.get(i).isCreatedAfter(votes.get(j).getCreatedAt()))) {
                 Notice notice = notices.get(i++);
                 ClubNoticeResponseDTO.NoticeItem dto;
 

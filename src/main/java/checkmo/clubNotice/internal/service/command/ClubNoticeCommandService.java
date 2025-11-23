@@ -122,8 +122,7 @@ public class ClubNoticeCommandService {
 
     private void validateVotingTime(Vote vote) {
         LocalDateTime now = LocalDateTime.now();
-        if ((vote.getStartTime() != null && now.isBefore(vote.getStartTime())) ||
-                (vote.getDeadline() != null && now.isAfter(vote.getDeadline()))) {
+        if (!vote.isWithinVotingPeriod(now)) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_TIME_EXPIRED);
         }
     }

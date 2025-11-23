@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,5 +51,9 @@ public class Notice extends BaseEntity {
         }
 
         return this.meetingVersion >= meetingVersion;
+    }
+
+    public boolean isCreatedAfter(LocalDateTime anotherCreatedAt) {
+        return this.getCreatedAt().isAfter(anotherCreatedAt);
     }
 }

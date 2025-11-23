@@ -62,8 +62,7 @@ public class ClubManagementCommandService {
         }
 
         // 3. 클럽 이름 중복 검사 (단, 기존 이름과 다를 때만)
-        if (!club.getName().equals(request.getName()) &&
-                clubManagementQueryService.isDuplicateClubName(request.getName())) {
+        if (club.isDifferent(request.getName()) && clubManagementQueryService.isDuplicateClubName(request.getName())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
         }
 

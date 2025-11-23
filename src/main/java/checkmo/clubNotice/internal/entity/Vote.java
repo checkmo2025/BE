@@ -82,4 +82,13 @@ public class Vote extends BaseEntity {
         return items;
     }
 
+    public boolean isWithinVotingPeriod(LocalDateTime localDateTime) {
+        if (startTime != null && localDateTime.isBefore(startTime)) {
+            return false;
+        }
+        if (deadline != null && localDateTime.isAfter(deadline)) {
+            return false;
+        }
+        return true;
+    }
 }

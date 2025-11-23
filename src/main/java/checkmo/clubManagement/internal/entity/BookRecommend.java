@@ -52,4 +52,8 @@ public class BookRecommend extends BaseEntity {
         this.tag = tag;
     }
 
+    public boolean isWriter(Long clubMemberId) {
+        return this.clubMemberId.equals(clubMemberId);
+    }
+
 }

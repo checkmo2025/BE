@@ -121,6 +121,10 @@ public class Club extends BaseEntity {
         this.interestCategories.addAll(categories);
     }
 
+    public boolean isDifferent(String clubName) {
+        return !this.name.equals(clubName);
+    }
+
     public enum ParticipantType {
         STUDENT("대학생"),
         WORKER("직장인"),

@@ -54,7 +54,7 @@ public class ClubBookRecommendCommandService {
         BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
                 .orElseThrow(
                         () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
-        if (!bookRecommend.getClubMember().equals(clubMember)) {
+        if (!bookRecommend.isWriter(clubMember.getId())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
         }
 
@@ -72,7 +72,7 @@ public class ClubBookRecommendCommandService {
         BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
                 .orElseThrow(
                         () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
-        if (!bookRecommend.getClubMember().equals(clubMember)) {
+        if (!bookRecommend.isWriter(clubMember.getId())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
         }
 
