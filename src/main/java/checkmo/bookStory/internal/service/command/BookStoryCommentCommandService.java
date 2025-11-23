@@ -44,14 +44,10 @@ public class BookStoryCommentCommandService {
                     .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.COMMENT_NOT_FOUND));
 
             // 부모 댓글이 같은 책이야기에 속하는지 확인
-            if (!parentComment.getBookStoryId().equals(bookStoryId)) {
-                throw new BookStoryException(BookStoryErrorStatus.INVALID_PARENT_COMMENT);
-            }
+            parentComment.verifyBookStory(bookStoryId);
 
             // 대댓글의 대댓글은 금지! (2단계까지만 허용)
-            if (parentComment.getParentCommentId() != null) {
-                throw new BookStoryException(BookStoryErrorStatus.COMMENT_DEPTH_LIMIT_EXCEEDED);
-            }
+            parentComment.verifyNotChildComment();
         }
 
         // 3. 댓글 생성

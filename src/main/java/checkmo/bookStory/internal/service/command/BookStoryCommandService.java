@@ -48,7 +48,7 @@ public class BookStoryCommandService {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
-        if (!bookStory.getMemberId().equals(memberId)) {
+        if (!bookStory.verifyOwner(memberId)) {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
@@ -64,7 +64,7 @@ public class BookStoryCommandService {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
-        if (!bookStory.getMemberId().equals(memberId)) {
+        if (!bookStory.verifyOwner(memberId)) {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 

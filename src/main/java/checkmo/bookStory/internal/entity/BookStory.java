@@ -83,4 +83,8 @@ public class BookStory extends BaseEntity {
             this.likes--;
         }
     }
+
+    public boolean verifyOwner(String memberId) {
+        return this.memberId.equals(memberId);
+    }
 }

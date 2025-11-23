@@ -1,7 +1,8 @@
 package checkmo.bookStory.internal.entity;
 
+import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
+import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.common.BaseEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,15 +36,9 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private String memberId;
 
-    @Column(name = "book_story_id", insertable = false, updatable = false)
-    private Long bookStoryId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_story_id")
     private BookStory bookStory;
-
-    @Column(name = "parent_comment_id", insertable = false, updatable = false)
-    private Long parentCommentId; // 부모 댓글 ID (대댓글의 경우)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
@@ -56,5 +51,17 @@ public class Comment extends BaseEntity {
 
     public void addChildComment(Comment childComment) {
         childrenComment.add(childComment);
+    }
+
+    public void verifyBookStory(Long bookStoryId) {
+        if (!this.bookStory.getId().equals(bookStoryId)) {
+            throw new BookStoryException(BookStoryErrorStatus.INVALID_PARENT_COMMENT);
+        }
+    }
+
+    public void verifyNotChildComment() {
+        if (this.parentComment != null) {
+            throw new BookStoryException(BookStoryErrorStatus.COMMENT_DEPTH_LIMIT_EXCEEDED);
+        }
     }
 }
