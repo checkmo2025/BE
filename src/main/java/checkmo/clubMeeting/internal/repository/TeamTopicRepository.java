@@ -10,14 +10,14 @@ import org.springframework.data.jpa.repository.Query;
 public interface TeamTopicRepository extends JpaRepository<TeamTopic, Long> {
     @Query("SELECT tt FROM TeamTopic tt " +
             "JOIN FETCH tt.team t " +
-            "WHERE tt.topicId IN :topicIds " +
+            "WHERE tt.topic.id IN :topicIds " +
             "ORDER BY t.teamNumber ASC")
     List<TeamTopic> findAllWithTeamByTopicIds(List<Long> topicIds);
 
     @Query("SELECT tt " +
             "FROM TeamTopic tt " +
             "JOIN FETCH tt.topic t " +
-            "WHERE tt.teamId = :teamId " +
+            "WHERE tt.team.id = :teamId " +
             "ORDER BY t.id DESC ")
     List<TeamTopic> findAllWithTopicByTeamIdOrderByDesc(Long teamId, Pageable pageable);
 

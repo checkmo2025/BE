@@ -39,9 +39,6 @@ public class ClubMemberVote {
     @Column(name = "club_member_id", nullable = false)
     private Long clubMemberId;
 
-    @Column(name = "vote_id", insertable = false, updatable = false)
-    private Long voteId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
     private Vote vote;

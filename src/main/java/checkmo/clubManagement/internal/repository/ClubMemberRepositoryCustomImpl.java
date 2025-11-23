@@ -23,7 +23,7 @@ public class ClubMemberRepositoryCustomImpl implements ClubMemberRepositoryCusto
             Integer size
     ) {
         BooleanBuilder predicate = new BooleanBuilder();
-        predicate.and(clubMember.clubId.eq(clubId));
+        predicate.and(clubMember.club.id.eq(clubId));
 
         if (statuses != null && !statuses.isEmpty()) {
             predicate.and(clubMember.clubMemberStatus.in(statuses));
@@ -49,7 +49,7 @@ public class ClubMemberRepositoryCustomImpl implements ClubMemberRepositoryCusto
         return queryFactory
                 .select(clubMember.memberId)
                 .from(clubMember)
-                .where(clubMember.clubId.eq(clubId)
+                .where(clubMember.club.id.eq(clubId)
                         .and(clubMember.clubMemberStatus.in(
                                 ClubMember.ClubMemberStatus.MEMBER,
                                 ClubMember.ClubMemberStatus.STAFF

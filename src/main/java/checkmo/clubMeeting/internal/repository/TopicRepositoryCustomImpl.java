@@ -18,7 +18,7 @@ public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
     @Override
     public List<Topic> findAllByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
-        predicate.and(topic.meetingId.eq(meetingId));
+        predicate.and(topic.meeting.id.eq(meetingId));
 
         if (cursorId != null) {
             predicate.and(topic.id.lt(cursorId));

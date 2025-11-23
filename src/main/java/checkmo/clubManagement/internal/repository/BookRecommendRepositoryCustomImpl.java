@@ -22,7 +22,7 @@ public class BookRecommendRepositoryCustomImpl implements BookRecommendRepositor
             Integer size
     ) {
         BooleanBuilder predicate = new BooleanBuilder();
-        predicate.and(bookRecommend.clubMember.clubId.eq(clubId));
+        predicate.and(bookRecommend.clubMember.club.id.eq(clubId));
 
         if (cursorId != null) {
             predicate.and(bookRecommend.id.lt(cursorId));

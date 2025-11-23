@@ -29,9 +29,6 @@ public class ClubMemberTeam extends BaseEntity {
     @Column(name = "club_member_id", nullable = false)
     private Long clubMemberId;
 
-    @Column(name = "team_id", insertable = false, updatable = false)
-    private Long teamId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;

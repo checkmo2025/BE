@@ -62,7 +62,6 @@ public class ClubNoticeConverter {
     ) {
         return ClubMemberVote.builder()
                 .vote(vote)
-                .voteId(vote.getId())
                 .clubMemberId(clubMemberId)
                 .item1(request.isItem1())
                 .item2(request.isItem2())

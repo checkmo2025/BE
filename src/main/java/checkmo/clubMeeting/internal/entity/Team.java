@@ -40,9 +40,6 @@ public class Team extends BaseEntity {
     @Column(nullable = false)
     private Integer teamNumber;
 
-    @Column(name = "meeting_id", insertable = false, updatable = false)
-    private Long meetingId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;

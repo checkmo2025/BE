@@ -52,7 +52,7 @@ public class ClubMemberQueryService {
 
         // Map<clubId, ClubMemberStatus> 형태로 변환 후 반환
         return members.stream()
-                .collect(Collectors.toMap(ClubMember::getClubId, ClubMember::getClubMemberStatus));
+                .collect(Collectors.toMap(clubMember -> clubMember.getClub().getId(), ClubMember::getClubMemberStatus));
     }
 
     public List<ClubMember> retrieveClubMembers(Long clubId, String status, Long cursorId, Integer size) {
