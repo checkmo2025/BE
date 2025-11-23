@@ -6,7 +6,8 @@ import checkmo.member.MemberAPI;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.service.query.NotificationQueryService;
-import checkmo.notification.web.dto.NotificationResponseDTO;
+import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;
+import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class NotificationQueryFacade {
     private final NotificationQueryService notificationQueryService;
 
     @Cacheable(value = "notifications", key = "#memberId")
-    public NotificationResponseDTO.NotificationPreviewList getNotificationPreviewList(String memberId, int size) {
-        List<Notification> notifications = notificationQueryService.findUnreadNotifications(memberId, size);
+    public BasicInfoPreviewList retrieveNotificationPreviews(String memberId, int size) {
+        List<Notification> notifications = notificationQueryService.retrieveUnreadNotifications(memberId, size);
 
         List<String> senderIds = extractSenderIds(notifications);
 
@@ -38,9 +39,9 @@ public class NotificationQueryFacade {
         return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap);
     }
 
-    public NotificationResponseDTO.NotificationList getNotifications(String memberId, Long cursorId) {
+    public BasicInfoList retrieveNotifications(String memberId, Long cursorId) {
         CursorResult<Notification> notificationCursorResult = CursorPagingHelper.getPage(
-                size -> notificationQueryService.findNotifications(memberId, cursorId, size),
+                size -> notificationQueryService.retrieveNotifications(memberId, cursorId, size),
                 Notification::getId,
                 DEFAULT_PAGE_SIZE
         );

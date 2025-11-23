@@ -15,8 +15,8 @@ public class NotificationResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NotificationList {
-        private List<NotificationPreview> notifications;
+    public static class BasicInfoList {
+        private List<BasicInfo> notifications;
         private boolean hasNext;
         private Long nextCursor;
         private int pageSize;
@@ -29,8 +29,8 @@ public class NotificationResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NotificationPreviewList {
-        private List<NotificationPreview> notifications;
+    public static class BasicInfoPreviewList {
+        private List<BasicInfo> notifications;
     }
 
     /**
@@ -40,7 +40,7 @@ public class NotificationResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class NotificationPreview {
+    public static class BasicInfo {
         private Long notificationId;
         private Notification.NotificationType notificationType;
         private String senderNickname;

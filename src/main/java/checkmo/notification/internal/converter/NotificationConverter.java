@@ -2,7 +2,9 @@ package checkmo.notification.internal.converter;
 
 import checkmo.common.template.CursorResult;
 import checkmo.notification.internal.entity.Notification;
-import checkmo.notification.web.dto.NotificationResponseDTO;
+import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfo;
+import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;
+import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -32,28 +34,28 @@ public class NotificationConverter {
         return null;
     }
 
-    public static NotificationResponseDTO.NotificationPreviewList convertToPreviewListDTO(
+    public static BasicInfoPreviewList convertToPreviewListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap
     ) {
 
-        List<NotificationResponseDTO.NotificationPreview> previewList = notifications.stream()
+        List<BasicInfo> previewList = notifications.stream()
                 .map(notification -> convertToPreviewDTO(
                         notification,
                         notification.getSenderId() != null ? senderNicknameMap.get(notification.getSenderId()) : null
                 ))
                 .toList();
 
-        return NotificationResponseDTO.NotificationPreviewList.builder()
+        return BasicInfoPreviewList.builder()
                 .notifications(previewList)
                 .build();
     }
 
-    public static NotificationResponseDTO.NotificationPreview convertToPreviewDTO(
+    public static BasicInfo convertToPreviewDTO(
             Notification notification,
             String senderNickname
     ) {
-        return NotificationResponseDTO.NotificationPreview.builder()
+        return BasicInfo.builder()
                 .notificationId(notification.getId())
                 .notificationType(notification.getNotificationType())
                 .senderNickname(senderNickname)
@@ -64,7 +66,7 @@ public class NotificationConverter {
                 .build();
     }
 
-    public static NotificationResponseDTO.NotificationList convertToNotificationListDTO(
+    public static BasicInfoList convertToNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
             CursorResult<Notification> cursorResult,
@@ -78,7 +80,7 @@ public class NotificationConverter {
                 ))
                 .toList();
 
-        return NotificationResponseDTO.NotificationList.builder()
+        return BasicInfoList.builder()
                 .notifications(notificationList)
                 .hasNext(cursorResult.hasNext())
                 .nextCursor(cursorResult.nextCursor())

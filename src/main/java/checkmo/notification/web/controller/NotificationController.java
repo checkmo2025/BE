@@ -1,10 +1,11 @@
 package checkmo.notification.web.controller;
 
-import checkmo.common.apiPayload.ApiResponse;
 import checkmo.authentication.CurrentId;
+import checkmo.common.apiPayload.ApiResponse;
 import checkmo.notification.internal.service.NotificationQueryFacade;
 import checkmo.notification.internal.service.command.NotificationCommandService;
-import checkmo.notification.web.dto.NotificationResponseDTO;
+import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;
+import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -35,11 +36,11 @@ public class NotificationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
     })
     @GetMapping()
-    public ApiResponse<NotificationResponseDTO.NotificationList> getNotifications(
+    public ApiResponse<BasicInfoList> getNotifications(
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var notifications = notificationQueryFacade.getNotifications(memberId, cursorId);
+        var notifications = notificationQueryFacade.retrieveNotifications(memberId, cursorId);
         return ApiResponse.onSuccess(notifications);
     }
 
@@ -52,12 +53,12 @@ public class NotificationController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
     })
     @GetMapping("/preview")
-    public ApiResponse<NotificationResponseDTO.NotificationPreviewList> getUnreadNotifications(
+    public ApiResponse<BasicInfoPreviewList> getUnreadNotifications(
             @CurrentId String memberId,
             @RequestParam(required = false, defaultValue = "5") int size
     ) {
         // Facade를 통해 QueryService의 캐시된 메서드 호출
-        var notifications = notificationQueryFacade.getNotificationPreviewList(memberId, size);
+        var notifications = notificationQueryFacade.retrieveNotificationPreviews(memberId, size);
         return ApiResponse.onSuccess(notifications);
     }
 
