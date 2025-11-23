@@ -42,4 +42,15 @@ public class ClubMemberVote {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
     private Vote vote;
+
+    public boolean isItemSelected(int itemIndex) {
+        return switch (itemIndex) {
+            case 0 -> this.item1;
+            case 1 -> this.item2;
+            case 2 -> this.item3;
+            case 3 -> this.item4;
+            case 4 -> this.item5;
+            default -> false;
+        };
+    }
 }

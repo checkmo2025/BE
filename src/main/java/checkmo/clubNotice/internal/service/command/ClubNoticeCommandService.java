@@ -49,9 +49,7 @@ public class ClubNoticeCommandService {
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
-        if ("모임".equals(notice.getTag())) {
-            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
-        }
+        notice.validateDeletable();
 
         noticeRepository.delete(notice);
     }
@@ -103,11 +101,7 @@ public class ClubNoticeCommandService {
         validateVotingTime(vote);
 
         // 투표의 복수 선택이 불가능하다면 여러 항목 선택했는지 검증
-        if (!vote.isDuplication()) {
-            if (request.countSelectedItems() > 1) {
-                throw new ClubNoticeException(ClubNoticeErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
-            }
-        }
+        vote.validateVoteRequest(request.countSelectedItems());
 
         // 기존 투표 내역 삭제
         clubMemberVoteRepository.deleteByVoteIdAndClubMemberId(voteId, clubMemberId);

@@ -4,6 +4,7 @@ import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.NoticeTag;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
@@ -21,15 +22,14 @@ public class ClubNoticeConverter {
                 .title(notice.getTitle())
                 .content(notice.getContent())
                 .important(notice.isImportant())
-                .tag(notice.getTag())  // "공지"
+                .tag(notice.getTag().getDisplayName())
                 .build();
     }
 
     public static Vote toVote(ClubNoticeRequestDTO.CreateClubVote request, Long clubId) {
-        return checkmo.clubNotice.internal.entity.Vote.builder()
+        return Vote.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
-                .tag("투표")
                 .important(request.isImportant())
                 .item1(request.getItem1())
                 .item2(request.getItem2())
@@ -76,7 +76,7 @@ public class ClubNoticeConverter {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .important(request.isImportant())
-                .tag("공지")
+                .tag(NoticeTag.NOTICE)
                 .clubId(clubId)
                 .build();
     }
@@ -107,7 +107,7 @@ public class ClubNoticeConverter {
                 .duplication(vote.isDuplication())
                 .startTime(vote.getStartTime())
                 .deadline(vote.getDeadline())
-                .tag("투표")
+                .tag(vote.getTag().getDisplayName())
                 .items(itemDTOs)
                 .build();
     }
@@ -121,7 +121,7 @@ public class ClubNoticeConverter {
                 .title(notice.getTitle())
                 .content(notice.getContent())
                 .important(notice.isImportant())
-                .tag(notice.getTag())
+                .tag(notice.getTag().getDisplayName())
                 .detailInfoDTO(detailInfo)
                 .build();
     }
@@ -133,7 +133,7 @@ public class ClubNoticeConverter {
                 .meetingVersion(event.version())
                 .title(event.title())
                 .content(event.content())
-                .tag("모임")
+                .tag(NoticeTag.MEETING)
                 .important(true)
                 .build();
     }

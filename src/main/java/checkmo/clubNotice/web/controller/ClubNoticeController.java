@@ -2,6 +2,7 @@ package checkmo.clubNotice.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.NoticeTag;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.internal.service.ClubNoticeQueryFacade;
 import checkmo.clubNotice.internal.service.command.ClubNoticeCommandService;
@@ -76,7 +77,7 @@ public class ClubNoticeController {
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, noticeId, "공지", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, noticeId, NoticeTag.NOTICE, memberId));
     }
 
     @Operation(summary = "순수 공지사항 삭제", description = "순수 공지사항을 삭제합니다. (운영진만 삭제 가능)")
@@ -112,7 +113,7 @@ public class ClubNoticeController {
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, noticeId, "모임", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, noticeId, NoticeTag.MEETING, memberId));
     }
 
     @Operation(summary = "투표 생성", description = "특정 모임에 투표를 생성합니다. (운영진만 생성 가능)")
@@ -142,7 +143,7 @@ public class ClubNoticeController {
             @PathVariable Long voteId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, voteId, "투표", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, voteId, NoticeTag.VOTE, memberId));
     }
 
     @Operation(summary = "투표하기", description = "특정 투표에 참여합니다.")

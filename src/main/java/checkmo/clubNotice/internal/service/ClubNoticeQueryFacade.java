@@ -7,9 +7,8 @@ import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.NoticeTag;
 import checkmo.clubNotice.internal.entity.Vote;
-import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
-import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.member.MemberAPI;
@@ -31,11 +30,6 @@ public class ClubNoticeQueryFacade {
 
     // 페이징 기본 크기 상수 정의
     private static final int DEFAULT_PAGE_SIZE = 10;
-
-    // 태그 상수 정의
-    private static final String TAG_NOTICE = "공지";
-    private static final String TAG_MEETING = "모임";
-    private static final String TAG_VOTE = "투표";
 
     // 익명 상수 정의
     private static final String ANONYMOUS_NAME = "익명";
@@ -90,17 +84,16 @@ public class ClubNoticeQueryFacade {
     public ClubNoticeResponseDTO.ClubNoticeDetail retrieveClubNoticeDetail(
             Long clubId,
             Long noticeId,
-            String tag,
+            NoticeTag tag,
             String memberId
     ) {
         clubManagementAPI.validateClub(clubId);
         MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
         return switch (tag) {
-            case TAG_NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMembershipInfoInfo);
-            case TAG_MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMembershipInfoInfo);
-            case TAG_VOTE -> getVoteDetail(clubId, noticeId, clubMembershipInfoInfo);
-            default -> throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_INVALID_TAG_TYPE);
+            case NOTICE -> getPureNoticeDetail(clubId, noticeId, clubMembershipInfoInfo);
+            case MEETING -> getMeetingNoticeDetail(clubId, noticeId, clubMembershipInfoInfo);
+            case VOTE -> getVoteDetail(clubId, noticeId, clubMembershipInfoInfo);
         };
     }
 
@@ -158,9 +151,6 @@ public class ClubNoticeQueryFacade {
             MembershipInfo clubMembershipInfoInfo
     ) {
         Notice notice = clubNoticeQueryService.retrieveNotice(clubId, itemId);
-        if (TAG_MEETING.equals(notice.getTag())) {
-            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND);
-        }
 
         return ClubNoticeResponseDTO.ClubNoticeDetail.builder()
                 .isStaff(clubMembershipInfoInfo.isStaff())
@@ -174,9 +164,6 @@ public class ClubNoticeQueryFacade {
             MembershipInfo clubMembershipInfoInfo
     ) {
         Notice notice = clubNoticeQueryService.retrieveNotice(clubId, itemId);
-        if (TAG_NOTICE.equals(notice.getTag())) {
-            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND);
-        }
 
         DetailInfo detailInfo = clubMeetingAPI.fetchMeetingDetailInfo(notice.getMeetingId());
 
@@ -381,13 +368,6 @@ public class ClubNoticeQueryFacade {
         if (myVote == null) {
             return false;
         }
-        return switch (itemIndex) {
-            case 0 -> myVote.isItem1();
-            case 1 -> myVote.isItem2();
-            case 2 -> myVote.isItem3();
-            case 3 -> myVote.isItem4();
-            case 4 -> myVote.isItem5();
-            default -> false;
-        };
+        return myVote.isItemSelected(itemIndex);
     }
 }

@@ -1,9 +1,13 @@
 package checkmo.clubNotice.internal.entity;
 
+import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
+import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +37,8 @@ public class Vote extends BaseEntity {
     private String content;
 
     @Builder.Default
-    private String tag = "투표";
+    @Enumerated(EnumType.STRING)
+    private NoticeTag tag = NoticeTag.VOTE;
 
     private boolean important;
 
@@ -91,4 +96,11 @@ public class Vote extends BaseEntity {
         }
         return true;
     }
+
+    public void validateVoteRequest(int selectedItems) {
+        if (!this.duplication && selectedItems > 1) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
+        }
+    }
+
 }

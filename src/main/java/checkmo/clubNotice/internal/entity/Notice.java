@@ -5,6 +5,8 @@ import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,8 +35,9 @@ public class Notice extends BaseEntity {
 
     private boolean important;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String tag;
+    private NoticeTag tag;
 
     @Column(name = "meeting_id")
     private Long meetingId;
@@ -56,4 +59,11 @@ public class Notice extends BaseEntity {
     public boolean isCreatedAfter(LocalDateTime anotherCreatedAt) {
         return this.getCreatedAt().isAfter(anotherCreatedAt);
     }
+
+    public void validateDeletable() {
+        if (this.tag.isMeeting()) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
+        }
+    }
+
 }
