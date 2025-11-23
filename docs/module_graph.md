@@ -27,7 +27,7 @@
 ### 1. Module: Common
 
 <div align="center">
-  <img src="./docs/images/common1.png" alt="Common Module Architecture">
+  <img src="./images/common1.png" alt="Common Module Architecture">
 </div>
 
 ---
@@ -35,7 +35,7 @@
 ### 2. Module: Authentication
 
 <div align="center">
-  <img src="./docs/images/authentication.png" alt="Authentication Module Architecture">
+  <img src="./images/authentication.png" alt="Authentication Module Architecture">
 </div>
 
 ---
@@ -43,7 +43,7 @@
 ### 3. Module: Book
 
 <div align="center">
-  <img src="./docs/images/book.png" alt="Book Module Architecture">
+  <img src="./images/book.png" alt="Book Module Architecture">
 </div>
 
 ---
@@ -51,7 +51,7 @@
 ### 4. Module: Book Story
 
 <div align="center">
-  <img src="./docs/images/bookstory.png" alt="Book Story Module Architecture">
+  <img src="./images/bookstory.png" alt="Book Story Module Architecture">
 </div>
 
 ---
@@ -59,7 +59,7 @@
 ### 5. Module: Club Management
 
 <div align="center">
-  <img src="./docs/images/clubManagement.png" alt="Club Management Module Architecture">
+  <img src="./images/clubManagement.png" alt="Club Management Module Architecture">
 </div>
 
 ---
@@ -67,7 +67,7 @@
 ### 6. Module: Club Meeting
 
 <div align="center">
-  <img src="./docs/images/clubMeeting.png" alt="Club Meeting Module Architecture">
+  <img src="./images/clubMeeting.png" alt="Club Meeting Module Architecture">
 </div>
 
 ---
@@ -75,7 +75,7 @@
 ### 7. Module: Club Notice
 
 <div align="center">
-  <img src="./docs/images/clubNotice.png" alt="Club Notice Module Architecture">
+  <img src="./images/clubNotice.png" alt="Club Notice Module Architecture">
 </div>
 
 ---
@@ -83,7 +83,7 @@
 ### 8. Module: Infra
 
 <div align="center">
-  <img src="./docs/images/infra.png" alt="Infra Module Architecture">
+  <img src="./images/infra.png" alt="Infra Module Architecture">
 </div>
 
 ---
@@ -91,7 +91,7 @@
 ### 9. Module: Member
 
 <div align="center">
-  <img src="./docs/images/member.png" alt="Member Module Architecture">
+  <img src="./images/member.png" alt="Member Module Architecture">
 </div>
 
 ---
@@ -99,5 +99,5 @@
 ### 10. Module: Notification
 
 <div align="center">
-  <img src="./docs/images/notification.png" alt="Notification Module Architecture">
+  <img src="./images/notification.png" alt="Notification Module Architecture">
 </div>
