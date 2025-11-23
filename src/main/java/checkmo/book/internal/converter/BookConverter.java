@@ -4,6 +4,7 @@ import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
+import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,18 +63,18 @@ public class BookConverter {
         boolean hasNext = calculateHasNext(bookList);
 
         return BookResponseDTO.BookList.builder()
-                .bookInfoDetailList(books)
+                .detailInfoList(books)
                 .hasNext(hasNext)
                 .currentPage(page)
                 .build();
     }
 
-    public static BookResponseDTO.BookInfoDetail toBookInfoDetail(
+    public static DetailInfo toBookInfoDetail(
             AladinApiResponseDTO.BookList bookList
     ) {
         var book = convertItemToDetail(bookList.getItems().getFirst());
 
-        return BookResponseDTO.BookInfoDetail.builder()
+        return DetailInfo.builder()
                 .isbn(book.getIsbn())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -89,13 +90,13 @@ public class BookConverter {
 
     private static BookResponseDTO.BookList createEmptyBookListResponse() {
         return BookResponseDTO.BookList.builder()
-                .bookInfoDetailList(List.of())
+                .detailInfoList(List.of())
                 .hasNext(false)
                 .currentPage(null)
                 .build();
     }
 
-    private static BookResponseDTO.BookInfoDetail convertItemToDetail(AladinApiResponseDTO.BookItem item) {
+    private static DetailInfo convertItemToDetail(AladinApiResponseDTO.BookItem item) {
         String description = (item.getDescription() != null) ? item.getDescription() : "";
 
         String cleanedDescription = HtmlUtils.htmlUnescape(description)
@@ -105,7 +106,7 @@ public class BookConverter {
 
         String replaceImgUrl = item.getCover().replace("coversum", "cover500");
 
-        return BookResponseDTO.BookInfoDetail.builder()
+        return DetailInfo.builder()
                 .isbn(item.getIsbn13())
                 .title(item.getTitle())
                 .author(item.getAuthor())
@@ -115,7 +116,7 @@ public class BookConverter {
                 .build();
     }
 
-    private static List<BookResponseDTO.BookInfoDetail> convertItemsToBookList(
+    private static List<DetailInfo> convertItemsToBookList(
             List<AladinApiResponseDTO.BookItem> items
     ) {
         return items.stream()

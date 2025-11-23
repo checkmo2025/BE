@@ -2,6 +2,7 @@ package checkmo.book.web.controller;
 
 import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.web.dto.BookResponseDTO;
+import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.common.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,8 +52,8 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
     })
     @GetMapping({"/{isbn}"})
-    public ApiResponse<BookResponseDTO.BookInfoDetail> getBookDetail(@PathVariable String isbn) {
-        BookResponseDTO.BookInfoDetail result = aladinApiService.getBookDetailInfoFromAladin(isbn);
+    public ApiResponse<DetailInfo> getBookDetail(@PathVariable String isbn) {
+        DetailInfo result = aladinApiService.getBookDetailInfoFromAladin(isbn);
         return ApiResponse.onSuccess(result);
     }
 }

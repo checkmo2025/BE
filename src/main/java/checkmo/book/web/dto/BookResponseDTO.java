@@ -12,7 +12,7 @@ public class BookResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BookInfoDetail {
+    public static class DetailInfo {
         private String isbn;
         private String title;
         private String author;
@@ -26,7 +26,7 @@ public class BookResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookList {
-        private List<BookInfoDetail> bookInfoDetailList;
+        private List<DetailInfo> detailInfoList;
         private boolean hasNext;
         private Integer currentPage;
     }

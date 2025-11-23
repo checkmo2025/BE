@@ -1,26 +1,40 @@
 package checkmo.book.internal.service.query;
 
 import checkmo.book.internal.entity.Book;
+import checkmo.book.internal.exception.BookErrorStatus;
+import checkmo.book.internal.exception.BookException;
+import checkmo.book.internal.repository.BookRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 책 관련 모든 조회 기능
- */
-public interface BookQueryService {
-    /**
-     * 책 단건 조회 (순수 엔티티)
-     *
-     * @param bookId 책 ID
-     * @return 책 엔티티
-     */
-    Book findBook(String bookId);
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Service
+public class BookQueryService {
 
-    /**
-     * 책 ID 목록으로 배치 조회 (배치 처리용)
-     *
-     * @param bookIds 조회할 책 ID 목록
-     * @return 책 ID와 책 엔티티 매핑
-     */
-    Map<String, Book> findBooksMap(List<String> bookIds);
+    private final BookRepository bookRepository;
+
+    public Book findBook(String bookId) {
+        return bookRepository.findById(bookId).orElseThrow(
+                () -> new BookException(BookErrorStatus.BOOK_NOT_FOUND)
+        );
+    }
+
+    public Map<String, Book> findBooksMap(List<String> bookIds) {
+        if (bookIds == null || bookIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Book> books = bookRepository.findAllById(bookIds);
+
+        return books.stream()
+                .collect(Collectors.toMap(
+                        Book::getId,
+                        book -> book
+                ));
+    }
 }
