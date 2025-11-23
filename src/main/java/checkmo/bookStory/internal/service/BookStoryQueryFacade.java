@@ -36,14 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookStoryQueryFacade {
 
-    // 페이징 기본 크기 상수
     public static final int DEFAULT_PAGE_SIZE = 10;
 
-    // Domain level 3
     private final ClubManagementAPI clubManagementAPI;
-    // Domain level 2
     private final MemberAPI memberAPI;
-    // Domain level 1
     private final BookAPI bookAPI;
 
     private final BookStoryQueryService bookStoryQueryService;
@@ -57,7 +53,7 @@ public class BookStoryQueryFacade {
      */
     public DetailInfo fetchBookStoryDetailInfo(String memberId, Long bookStoryId) {
         // 1. Service에서 BookStory 엔티티 조회
-        BookStory bookStory = bookStoryQueryService.findBookStoryById(bookStoryId);
+        BookStory bookStory = bookStoryQueryService.retrieveBookStory(bookStoryId);
 
         // 2. 책 정보 조회
         BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookStory.getBookId());
@@ -67,11 +63,11 @@ public class BookStoryQueryFacade {
                 bookStory.getMemberId(), memberId);
 
         // 4. 좋아요 여부 조회
-        Boolean isLiked = bookStoryQueryService.checkLikesForBookStories(memberId, List.of(bookStory))
+        Boolean isLiked = bookStoryQueryService.checkBookStoryLikeByMemberId(memberId, List.of(bookStory))
                 .getOrDefault(bookStory.getId(), false);
 
         // 5. 댓글 조회 (부모 댓글만, 대댓글은 컨버터에서 DTO 변환 시 자동 포함)
-        List<Comment> comments = bookStoryQueryService.findCommentsByBookStoryId(bookStoryId);
+        List<Comment> comments = bookStoryQueryService.retrieveBookStoryComments(bookStoryId);
 
         // 6. 댓글 작성자들 정보 조회
         // 6-1. 댓글 작성자들 Id 목록 조회 (Set으로 중복 제거)
@@ -123,24 +119,13 @@ public class BookStoryQueryFacade {
 
         // 2. BookStory 리스트 조회
         CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
-                (pageSize) -> bookStoryQueryService.findBookStories(
+                (pageSize) -> bookStoryQueryService.retrieveBookStories(
                         memberId, scope, clubId, targetMemberId, cursorId, pageSize
                 ),
                 BookStory::getId,
                 DEFAULT_PAGE_SIZE
         );
         List<BookStory> bookStories = bookStoryCursorResult.content();
-
-        /*
-        List<BookStory> bookStories = bookStoryQueryService.findBookStories(memberId, scope, clubId, targetMemberId,
-                cursorId, DEFAULT_PAGE_SIZE);
-        boolean hasNext = bookStories.size() > DEFAULT_PAGE_SIZE;
-        Long nextCursor = null;
-        if (hasNext) {
-            bookStories.removeLast();
-            nextCursor = bookStories.getLast().getId();
-        }
-        */
 
         // 좋아요 여부 조회
         Map<Long, Boolean> isLikedMap = fetchLikedInfo(memberId, bookStories);
@@ -189,7 +174,7 @@ public class BookStoryQueryFacade {
      * 좋아요 정보 배치 조회
      */
     private Map<Long, Boolean> fetchLikedInfo(String memberId, List<BookStory> bookStories) {
-        return bookStoryQueryService.checkLikesForBookStories(memberId, bookStories);
+        return bookStoryQueryService.checkBookStoryLikeByMemberId(memberId, bookStories);
     }
 
     /**
