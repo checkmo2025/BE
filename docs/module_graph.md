@@ -26,78 +26,58 @@
 
 ### 1. Module: Common
 
-<div align="center">
-  <img src="./images/common1.png" alt="Common Module Architecture">
-</div>
+<img src="./images/common1.png" alt="Common Module Architecture">
 
 ---
 
 ### 2. Module: Authentication
 
-<div align="center">
-  <img src="./images/authentication.png" alt="Authentication Module Architecture">
-</div>
+<img src="./images/authentication.png" alt="Authentication Module Architecture">
 
 ---
 
 ### 3. Module: Book
 
-<div align="center">
-  <img src="./images/book.png" alt="Book Module Architecture">
-</div>
+<img src="./images/book.png" alt="Book Module Architecture">
 
 ---
 
 ### 4. Module: Book Story
 
-<div align="center">
-  <img src="./images/bookstory.png" alt="Book Story Module Architecture">
-</div>
+<img src="./images/bookstory.png" alt="Book Story Module Architecture">
 
 ---
 
 ### 5. Module: Club Management
 
-<div align="center">
-  <img src="./images/clubManagement.png" alt="Club Management Module Architecture">
-</div>
+<img src="./images/clubManagement.png" alt="Club Management Module Architecture">
 
 ---
 
 ### 6. Module: Club Meeting
 
-<div align="center">
-  <img src="./images/clubMeeting.png" alt="Club Meeting Module Architecture">
-</div>
+<img src="./images/clubMeeting.png" alt="Club Meeting Module Architecture">
 
 ---
 
 ### 7. Module: Club Notice
 
-<div align="center">
-  <img src="./images/clubNotice.png" alt="Club Notice Module Architecture">
-</div>
+<img src="./images/clubNotice.png" alt="Club Notice Module Architecture">
 
 ---
 
 ### 8. Module: Infra
 
-<div align="center">
-  <img src="./images/infra.png" alt="Infra Module Architecture">
-</div>
+<img src="./images/infra.png" alt="Infra Module Architecture">
 
 ---
 
 ### 9. Module: Member
 
-<div align="center">
-  <img src="./images/member.png" alt="Member Module Architecture">
-</div>
+<img src="./images/member.png" alt="Member Module Architecture">
 
 ---
 
 ### 10. Module: Notification
 
-<div align="center">
-  <img src="./images/notification.png" alt="Notification Module Architecture">
-</div>
+<img src="./images/notification.png" alt="Notification Module Architecture">
