@@ -46,7 +46,7 @@ public class ClubNoticeController {
             @RequestParam(required = false, defaultValue = "false") boolean onlyImportant
     ) {
         return ApiResponse.onSuccess(
-                clubNoticeQueryFacade.getLatestNotices(clubId, memberId, cursorId, onlyImportant));
+                clubNoticeQueryFacade.retrieveClubNoticeList(clubId, memberId, cursorId, onlyImportant));
     }
 
     @Operation(summary = "순수 공지사항 작성", description = "특정 모임에 순수 공지사항을 작성합니다. (운영진만 작성 가능)")
@@ -76,7 +76,7 @@ public class ClubNoticeController {
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeQueryFacade.getNoticeDetail(clubId, noticeId, "공지", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, noticeId, "공지", memberId));
     }
 
     @Operation(summary = "순수 공지사항 삭제", description = "순수 공지사항을 삭제합니다. (운영진만 삭제 가능)")
@@ -112,7 +112,7 @@ public class ClubNoticeController {
             @PathVariable Long noticeId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeQueryFacade.getNoticeDetail(clubId, noticeId, "모임", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, noticeId, "모임", memberId));
     }
 
     @Operation(summary = "투표 생성", description = "특정 모임에 투표를 생성합니다. (운영진만 생성 가능)")
@@ -142,7 +142,7 @@ public class ClubNoticeController {
             @PathVariable Long voteId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubNoticeQueryFacade.getNoticeDetail(clubId, voteId, "투표", memberId));
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, voteId, "투표", memberId));
     }
 
     @Operation(summary = "투표하기", description = "특정 투표에 참여합니다.")

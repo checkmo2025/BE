@@ -1,68 +1,130 @@
 package checkmo.clubNotice.internal.service.command;
 
+import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
+import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
+import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
-import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
+import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
+import checkmo.clubNotice.internal.exception.ClubNoticeException;
+import checkmo.clubNotice.internal.repository.ClubMemberVoteRepository;
+import checkmo.clubNotice.internal.repository.NoticeRepository;
+import checkmo.clubNotice.internal.repository.VoteRepository;
+import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
+import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubNotice;
+import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVote;
+import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResult;
+import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 독서 모임의 커뮤니케이션 관련 기능을 처리 예를 들어, 공지사항과 투표 생성, 투표 참여 등 모임 내 소통 기능을 담당
- */
-public interface ClubNoticeCommandService {
 
-    /**
-     * 독서 모임에 공지사항을 작성합니다. (모임이랑 연결되지 않은 순수 공지사항)
-     *
-     * @param clubId   독서모임 ID
-     * @param memberId 작성자(운영진) 회원 ID
-     * @param request  공지사항 작성 요청 DTO
-     * @return 작성된 공지사항
-     */
-    Notice createPureNotice(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubNotice request);
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class ClubNoticeCommandService {
 
-    /**
-     * 독서 모임의 공지사항을 삭제합니다. (모임이랑 연결되지 않은 순수 공지사항)
-     *
-     * @param clubId   독서 모임 ID
-     * @param noticeId 삭제할 공지사항
-     * @param memberId 요청자(운영진) 회원 ID
-     */
-    void deletePureNotice(Long clubId, Long noticeId, String memberId);
+    private final ClubManagementAPI clubManagementAPI;
 
-    /**
-     * 독서 모임의 모임 생성 시 공지사항을 작성합니다.
-     *
-     * @param event 모임 생성 이벤트
-     */
-    void createMeetingNotice(ClubMeetingCreatedEvent event);
+    private final ClubNoticeQueryService clubNoticeQueryService;
 
-    /**
-     * 독서 모임에 투표를 생성합니다.
-     *
-     * @param clubId   독서모임 ID
-     * @param memberId 작성자(운영진) 회원 ID
-     * @param request  투표 생성 요청 DTO
-     * @return 생성된 투표
-     */
-    Vote createVote(Long clubId, String memberId, ClubNoticeRequestDTO.CreateClubVote request);
+    private final VoteRepository voteRepository;
+    private final NoticeRepository noticeRepository;
+    private final ClubMemberVoteRepository clubMemberVoteRepository;
 
-    /**
-     * 독서 모임에 투표를 삭제합니다.
-     *
-     * @param clubId   독서 모임 ID
-     * @param voteId   삭제할 투표 ID
-     * @param memberId 요청자(운영진) 회원 ID
-     */
-    void deleteVote(Long clubId, Long voteId, String memberId);
+    public Notice createPureNotice(Long clubId, String memberId, CreateClubNotice request) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-    /**
-     * 독서 모임의 투표에 참여합니다.
-     *
-     * @param clubId   독서 모임 ID
-     * @param voteId   투표 ID
-     * @param memberId 참여자 회원 ID
-     * @param request  투표 내역 DTO
-     * @return 참여한 투표 ID
-     */
-    Long haveVote(Long clubId, Long voteId, String memberId, ClubNoticeRequestDTO.VoteResult request);
+        Notice notice = ClubNoticeConverter.toNotice(request, clubId);
+        noticeRepository.save(notice);
+
+        return notice;
+    }
+
+    public void deletePureNotice(Long clubId, Long noticeId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
+
+        Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
+        if ("모임".equals(notice.getTag())) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
+        }
+
+        noticeRepository.delete(notice);
+    }
+
+    public void createMeetingNotice(ClubMeetingCreatedEvent event) {
+        clubManagementAPI.validateClub(event.clubId());
+
+        Notice existingNotice = noticeRepository.findByMeetingId(event.meetingId()).orElse(null);
+
+        // 기존 공지가 있고, 그 공지가  같은 버전이거나 최신 버전이라면 이벤트 무시
+        if (existingNotice != null && existingNotice.isNotOlderThan(event.version())) {
+            return;
+        }
+
+        // 기존 공지사항이 존재하면 삭제하고 새로 생성 (비즈니스 요구사항)
+        if (existingNotice != null) {
+            noticeRepository.delete(existingNotice);
+        }
+
+        Notice notice = ClubNoticeConverter.toNotice(event);
+        noticeRepository.save(notice);
+    }
+
+    public Vote createVote(Long clubId, String memberId, CreateClubVote request) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
+
+        Vote vote = ClubNoticeConverter.toVote(request, clubId);
+        //TODO: 데드라인이 현재 시간보다 이전인지, 시작시간이 데드라인보다 이전인지, 시작시간이 현재시간보다 이전인지 검증이 필요하지 않나
+        voteRepository.save(vote);
+
+        return vote;
+    }
+
+    public void deleteVote(Long clubId, Long voteId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
+
+        Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
+
+        voteRepository.delete(vote);
+    }
+
+    public Long haveVote(Long clubId, Long voteId, String memberId, VoteResult request) {
+        clubManagementAPI.validateClub(clubId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+
+        Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
+        validateVotingTime(vote);
+
+        // 투표의 복수 선택이 불가능하다면 여러 항목 선택했는지 검증
+        if (!vote.isDuplication()) {
+            if (request.countSelectedItems() > 1) {
+                throw new ClubNoticeException(ClubNoticeErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
+            }
+        }
+
+        // 기존 투표 내역 삭제
+        clubMemberVoteRepository.deleteByVoteIdAndClubMemberId(voteId, clubMemberId);
+
+        // ClubMemberVote 생성 및 저장
+        ClubMemberVote clubMemberVote
+                = ClubNoticeConverter.toClubMemberVote(vote, clubMemberId, request);
+        clubMemberVoteRepository.save(clubMemberVote);
+
+        return vote.getId();
+    }
+
+    private void validateVotingTime(Vote vote) {
+        LocalDateTime now = LocalDateTime.now();
+        if ((vote.getStartTime() != null && now.isBefore(vote.getStartTime())) ||
+                (vote.getDeadline() != null && now.isAfter(vote.getDeadline()))) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_TIME_EXPIRED);
+        }
+    }
 }

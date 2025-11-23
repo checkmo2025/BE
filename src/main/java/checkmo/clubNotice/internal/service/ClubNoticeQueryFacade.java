@@ -49,7 +49,7 @@ public class ClubNoticeQueryFacade {
 
     private final ClubNoticeQueryService clubNoticeQueryService;
 
-    public ClubNoticeResponseDTO.ClubNoticeList getLatestNotices(
+    public ClubNoticeResponseDTO.ClubNoticeList retrieveClubNoticeList(
             Long clubId,
             String memberId,
             Long cursorId,
@@ -59,8 +59,9 @@ public class ClubNoticeQueryFacade {
         MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
         // 공지사항과 투표 각각 조회
-        List<Notice> notices = clubNoticeQueryService.getNoticeList(clubId, onlyImportant, cursorId, DEFAULT_PAGE_SIZE);
-        List<Vote> votes = clubNoticeQueryService.getVoteList(clubId, onlyImportant, cursorId, DEFAULT_PAGE_SIZE);
+        List<Notice> notices = clubNoticeQueryService.retrieveNotices(clubId, onlyImportant, cursorId,
+                DEFAULT_PAGE_SIZE);
+        List<Vote> votes = clubNoticeQueryService.retrieveVotes(clubId, onlyImportant, cursorId, DEFAULT_PAGE_SIZE);
 
         // 공지사항에 모임 정보 미리 조회
         Set<Long> meetingIds = extractMeetingIdsFromNotices(notices);
@@ -86,7 +87,7 @@ public class ClubNoticeQueryFacade {
                 .build();
     }
 
-    public ClubNoticeResponseDTO.ClubNoticeDetail getNoticeDetail(
+    public ClubNoticeResponseDTO.ClubNoticeDetail retrieveClubNoticeDetail(
             Long clubId,
             Long noticeId,
             String tag,
@@ -156,7 +157,7 @@ public class ClubNoticeQueryFacade {
             Long itemId,
             MembershipInfo clubMembershipInfoInfo
     ) {
-        Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
+        Notice notice = clubNoticeQueryService.retrieveNotice(clubId, itemId);
         if (TAG_MEETING.equals(notice.getTag())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND);
         }
@@ -172,7 +173,7 @@ public class ClubNoticeQueryFacade {
             Long itemId,
             MembershipInfo clubMembershipInfoInfo
     ) {
-        Notice notice = clubNoticeQueryService.getNotice(clubId, itemId);
+        Notice notice = clubNoticeQueryService.retrieveNotice(clubId, itemId);
         if (TAG_NOTICE.equals(notice.getTag())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND);
         }
@@ -190,18 +191,18 @@ public class ClubNoticeQueryFacade {
             Long itemId,
             MembershipInfo clubMembershipInfoInfo
     ) {
-        Vote vote = clubNoticeQueryService.getVote(clubId, itemId);
+        Vote vote = clubNoticeQueryService.retrieveVote(clubId, itemId);
         List<String> voteItems = vote.getItems();
         int itemCount = voteItems.size();
 
         // 전체 투표 결과
-        List<ClubMemberVote> clubMemberVotes = clubNoticeQueryService.getMemberVotesByVoteId(vote.getId());
+        List<ClubMemberVote> clubMemberVotes = clubNoticeQueryService.retrieveClubMemberVotes(vote.getId());
 
         List<List<MemberExternalDTO.BasicInfo>> votedMembersByItem
                 = collectVotedMembersByItem(vote, clubMemberVotes, itemCount);
 
         // 본인 투표 정보
-        ClubMemberVote myVote = clubNoticeQueryService.getMyVote(vote.getId(),
+        ClubMemberVote myVote = clubNoticeQueryService.retrieveClubMemberVote(vote.getId(),
                 clubMembershipInfoInfo.getClubMemberId());
 
         // 투표 항목 DTO 생성
