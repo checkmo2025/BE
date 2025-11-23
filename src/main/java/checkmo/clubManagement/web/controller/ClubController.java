@@ -5,6 +5,7 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.service.ClubManagementQueryFacade;
 import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
 import checkmo.clubManagement.internal.service.command.ClubMemberCommandService;
+import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClubController {
 
     private final ClubManagementQueryFacade clubManagementQueryFacade;
+    private final ClubManagementQueryService clubManagementQueryService;
     private final ClubMemberCommandService clubMemberCommandService;
     private final ClubManagementCommandService clubManagementCommandService;
 
@@ -50,7 +52,7 @@ public class ClubController {
     public ApiResponse<Boolean> checkClubNameDuplicate(
             @RequestParam String clubName
     ) {
-        boolean isDuplicate = clubManagementQueryFacade.isDuplicateClubName(clubName);
+        boolean isDuplicate = clubManagementQueryService.isDuplicateClubName(clubName);
         return ApiResponse.onSuccess(isDuplicate);
     }
 
@@ -80,7 +82,7 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId
     ) {
-        ClubResponseDTO.ClubDetail result = clubManagementQueryFacade.getClubInfo(clubId, memberId);
+        ClubResponseDTO.ClubDetail result = clubManagementQueryFacade.retrieveClubDetail(clubId, memberId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -132,7 +134,7 @@ public class ClubController {
             @ModelAttribute ClubRequestDTO.ClubSearchFilter filter,
             @ModelAttribute ClubRequestDTO.CursorInfo pageRequest
     ) {
-        return ApiResponse.onSuccess(clubManagementQueryFacade.getClubList(memberId, filter, pageRequest));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubList(memberId, filter, pageRequest));
     }
 
     @Operation(summary = "사이드바 - 내가 가입한 클럽 목록 API", description = "내가 가입한 클럽 목록을 반환합니다.")
@@ -144,7 +146,7 @@ public class ClubController {
     public ApiResponse<ClubResponseDTO.MyClubList> getMyClubs(
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubManagementQueryFacade.getMyClubList(memberId));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveMyClubList(memberId));
     }
 
     @Operation(summary = "마이 페이지 - 내가 가입한 클럽 조회 API", description = "내가 가입한 클럽 목록을 반환합니다.")
@@ -157,7 +159,7 @@ public class ClubController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        return ApiResponse.onSuccess(clubManagementQueryFacade.getMyPageClubList(memberId, cursorId));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveMyPageClubList(memberId, cursorId));
     }
 
     @Operation(summary = "독서 모임 가입 신청 API", description = "독서 모임에 가입 신청을 합니다.")
@@ -196,7 +198,7 @@ public class ClubController {
             @RequestParam(required = false) Long cursorId
     ) {
         return ApiResponse.onSuccess(
-                clubManagementQueryFacade.getClubMemberListByStatus(clubId, memberId, status, cursorId));
+                clubManagementQueryFacade.retrieveClubMemberList(clubId, memberId, status, cursorId));
     }
 
     @Operation(summary = "독서 모임 회원 등급 수정 API", description = "독서 모임 회원의 등급을 수정합니다.")
@@ -253,7 +255,7 @@ public class ClubController {
             @PathVariable Long clubId,
             @CurrentId String memberId
     ) {
-        Boolean isStaff = clubManagementQueryFacade.checkStaffStatus(clubId, memberId);
+        Boolean isStaff = clubManagementQueryFacade.isClubMemberStaff(clubId, memberId);
         return ApiResponse.onSuccess(isStaff);
     }
 }

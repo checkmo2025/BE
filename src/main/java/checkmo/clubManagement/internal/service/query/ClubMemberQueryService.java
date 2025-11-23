@@ -1,79 +1,90 @@
 package checkmo.clubManagement.internal.service.query;
 
+import checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
 import checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 독서클럽 회원에 대한 조회 서비스, 독서클럽 회원의 권한 확인 및 회원 존재 확인 기능을 담당합니다.
- */
-public interface ClubMemberQueryService {
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ClubMemberQueryService {
 
-    /**
-     * 독서클럽 회원인지 확인합니다.
-     *
-     * @param clubId   독서동아리 id
-     * @param memberId 회원 id
-     * @return ClubMember 엔티티
-     * @throws ClubManagementException 클럽 회원이 존재하지 않을 경우
-     */
-    ClubMember validateClubMember(Long clubId, String memberId) throws ClubManagementException;
+    private final ClubMemberRepository clubMemberRepository;
 
-    /**
-     * 특정 회원이 가입한 독서 클럽 목록을 조회합니다.
-     *
-     * @param memberId 회원 ID
-     * @return 회원이 가입한 독서 클럽의 간략한 정보 목록 DTO
-     */
-    ClubList getMyClubList(String memberId);
+    public ClubMember validateClubMember(Long clubId, String memberId) throws ClubManagementException {
+        return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
+                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_ONLY));
+    }
 
-    /**
-     * 특정 회원이 가입한 모임 목록을 조회합니다.
-     *
-     * @param memberId 회원 ID -> 로그인한 회원의 ID를 사용
-     * @param cursorId 페이징 커서 ID
-     * @param size     조회할 개수
-     * @return 내가 가입한 독서 클럽 목록 DTO
-     */
-    List<ClubMember> getMyPageClubList(String memberId, Long cursorId, Integer size);
+    public ClubList retrieveClubList(String memberId) {
+        // 회원ID를 통해 JPQL로 클럽 ID와 이름을 조회하고 DTO로 변환
+        var clubIdAndNameByMemberId = clubMemberRepository.findClubIdAndNameByMemberId(memberId);
 
-    /**
-     * 특정 회원이 여러 클럽에서의 상태를 한꺼번에 조회합니다.
-     *
-     * @param memberId 회원 ID
-     * @param clubIds  클럽 ID 리스트
-     * @return 클럽 ID별 회원 상태 맵
-     */
-    Map<Long, ClubMember.ClubMemberStatus> getMemberStatuses(String memberId, List<Long> clubIds);
+        // Object[] -> BasicInfo 변환
+        var myClubInfoList = clubIdAndNameByMemberId.stream()
+                .map(row -> new BasicInfo((Long) row[0], (String) row[1]))
+                .toList();
 
-    /**
-     * 특정 상태의 모임 회원 목록을 조회합니다.
-     *
-     * @param clubId   모임 ID
-     * @param status   조회할 상태 ("MEMBER", "STAFF", "PENDING", "BLOCKED", "ALL", "ACTIVE" 중 하나)
-     * @param cursorId 페이징 커서 ID (null이면 처음부터 조회)
-     * @param size     조회할 개수 (null이면 전체 조회)
-     * @return ClubMember 엔티티 리스트
-     */
-    List<ClubMember> getClubMemberListByStatus(Long clubId, String status, Long cursorId, Integer size);
+        return ClubList.builder()
+                .clubList(myClubInfoList)
+                .build();
+    }
 
-    /**
-     * 특정 클럽에 속한 회원 ID 목록을 조회합니다.
-     *
-     * @param clubId 클럽 ID
-     * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
-     */
-    List<String> getActiveMemberIds(Long clubId);
+    public List<ClubMember> retrieveClubMembers(String memberId, Long cursorId, Integer size) {
+        return clubMemberRepository.findClubMembersByMemberIdOrderByIdAsc(memberId, cursorId, Pageable.ofSize(size));
+    }
 
-    /**
-     * 클럽 멤버 ID 집합으로 ClubMember 엔티티 목록을 조회합니다.
-     *
-     * @param clubMemberIds 클럽 멤버 ID 집합
-     * @return ClubMember 엔티티 목록
-     */
-    List<ClubMember> getClubMembersByIds(Set<Long> clubMemberIds);
+    public Map<Long, ClubMember.ClubMemberStatus> retrieveClubMemberStatusByClubIds(
+            String memberId, List<Long> clubIds) {
+        // clubMemberRepository에서 clubId IN :clubIds AND memberId = :memberId 조건으로 여러 상태를 한 번에 조회
+        List<ClubMember> members = clubMemberRepository.findAllByMemberIdAndClubIdIn(memberId, clubIds);
 
+        // Map<clubId, ClubMemberStatus> 형태로 변환 후 반환
+        return members.stream()
+                .collect(Collectors.toMap(ClubMember::getClubId, ClubMember::getClubMemberStatus));
+    }
+
+    public List<ClubMember> retrieveClubMembers(Long clubId, String status, Long cursorId, Integer size) {
+        List<ClubMember.ClubMemberStatus> clubMemberStatus;
+        if ("ALL".equalsIgnoreCase(status)) {
+            clubMemberStatus = null;
+        } else if ("ACTIVE".equalsIgnoreCase(status)) {
+            clubMemberStatus = List.of(ClubMember.ClubMemberStatus.MEMBER, ClubMember.ClubMemberStatus.STAFF);
+        } else {
+            try {
+                clubMemberStatus = List.of(ClubMember.ClubMemberStatus.valueOf(status.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+            }
+        }
+
+        return clubMemberRepository.findClubMembersByClubIdInClubMemberStatusOrderByIdDesc(
+                clubId,
+                clubMemberStatus,
+                cursorId,
+                size
+        );
+    }
+
+    public List<String> retrieveActiveMemberIds(Long clubId) {
+        return clubMemberRepository.findActiveMemberIdsByClubId(clubId);
+    }
+
+    public List<ClubMember> retrieveClubMembers(Set<Long> clubMemberIds) {
+        if (clubMemberIds == null) {
+            return List.of();
+        }
+        return clubMemberRepository.findAllById(clubMemberIds);
+    }
 }

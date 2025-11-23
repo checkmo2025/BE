@@ -1,41 +1,82 @@
 package checkmo.clubManagement.internal.service.command;
 
+import checkmo.book.BookAPI;
+import checkmo.clubManagement.internal.converter.ClubManagementConverter;
+import checkmo.clubManagement.internal.entity.BookRecommend;
+import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import checkmo.clubManagement.internal.repository.BookRecommendRepository;
+import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
+import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-public interface ClubBookRecommendCommandService {
+@Service
+@RequiredArgsConstructor
+public class ClubBookRecommendCommandService {
 
-    /**
-     * 독서모임에 책을 추천합니다.
-     *
-     * @param clubId   독서모임 ID
-     * @param memberId 추천하는 회원 ID
-     * @param request  추천할 책 정보 DTO
-     * @return 추천한 책의 ID
-     */
-    Long recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommend request);
+    // Domain level 1
+    private final BookAPI bookAPI;
 
-    /**
-     * 독서모임에 추천 책을 수정합니다.
-     *
-     * @param clubId          독서모임 ID
-     * @param memberId        추천하는 회원 ID
-     * @param bookRecommendId 수정할 추천 책의 ID
-     * @param request         수정할 추천책의 정보 DTO
-     * @return 수정한 추천 책의 ID
-     */
-    Long updateBookRecommend(
+    private final ClubManagementQueryService clubManagementQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
+
+    private final BookRecommendRepository bookRecommendRepository;
+
+    @Transactional
+    public Long recommendBook(Long clubId, String memberId, ClubRequestDTO.CreateBookRecommend request) {
+        clubManagementQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        String bookId = bookAPI.fetchOrCreateBook(request.getBookDetail());
+
+        BookRecommend bookRecommend = ClubManagementConverter.toBookRecommend(request, bookId, clubMember);
+
+        BookRecommend savedRecommend = bookRecommendRepository.save(bookRecommend);
+
+        return savedRecommend.getId();
+    }
+
+    @Transactional
+    public Long updateBookRecommend(
             Long clubId,
             String memberId,
             Long bookRecommendId,
             ClubRequestDTO.UpdateBookRecommend request
-    );
+    ) {
+        clubManagementQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-    /**
-     * 독서모임에서 추천한 책을 삭제합니다.
-     *
-     * @param clubId          독서모임 ID
-     * @param memberId        삭제하는 회원 ID
-     * @param bookRecommendId 삭제할 추천 책의 ID
-     */
-    void deleteRecommendedBook(Long clubId, String memberId, Long bookRecommendId);
+        // 2. 추천 책 조회 및 존재 여부 검증
+        BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
+                .orElseThrow(
+                        () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+        if (!bookRecommend.getClubMember().equals(clubMember)) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
+        }
+
+        bookRecommend.updateRecommendInfo(request.getTitle(), request.getContent(), request.getRate(),
+                request.getTag());
+
+        return bookRecommend.getId();
+    }
+
+    @Transactional
+    public void deleteBookRecommend(Long clubId, String memberId, Long bookRecommendId) {
+        clubManagementQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        BookRecommend bookRecommend = bookRecommendRepository.findById(bookRecommendId)
+                .orElseThrow(
+                        () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+        if (!bookRecommend.getClubMember().equals(clubMember)) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_FORBIDDEN);
+        }
+
+        bookRecommendRepository.delete(bookRecommend);
+    }
+
 }

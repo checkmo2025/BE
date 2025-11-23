@@ -1,11 +1,11 @@
 package checkmo.clubManagement.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.clubManagement.internal.service.ClubManagementQueryFacade;
 import checkmo.clubManagement.internal.service.command.ClubBookRecommendCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.authentication.CurrentId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,7 +56,7 @@ public class ClubRecommendationController {
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubManagementQueryFacade.getRecommendedBooks(clubId, cursorId, memberId));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveBookRecommedList(clubId, cursorId, memberId));
     }
 
     @Operation(summary = "추천 책 상세 조회", description = "추천 책 ID를 기반으로 상세 정보를 조회합니다.")
@@ -70,7 +70,8 @@ public class ClubRecommendationController {
             @PathVariable Long recommendId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubManagementQueryFacade.getRecommendedBookDetail(clubId, recommendId, memberId));
+        return ApiResponse.onSuccess(
+                clubManagementQueryFacade.retrieveBookRecommendDetail(clubId, recommendId, memberId));
     }
 
     @Operation(summary = "추천 책 수정", description = "추천 책의 소개 이유, 별점, 태그를 수정합니다. 책 자체는 변경할 수 없습니다.")
@@ -103,7 +104,7 @@ public class ClubRecommendationController {
             @PathVariable Long recommendId,
             @CurrentId String memberId
     ) {
-        clubBookRecommendCommandService.deleteRecommendedBook(clubId, memberId, recommendId);
+        clubBookRecommendCommandService.deleteBookRecommend(clubId, memberId, recommendId);
         return ApiResponse.onSuccess("책 추천이 정상적으로 삭제되었습니다.");
     }
 

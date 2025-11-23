@@ -13,26 +13,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ClubQueryServiceImpl implements ClubQueryService {
+public class ClubManagementQueryService {
 
     private final ClubRepository clubRepository;
 
-    @Override
-    public List<Club> getClubList(ClubRequestDTO.ClubSearchFilter filter, Long cursorId, int pageSize) {
+    public List<Club> retrieveClubs(ClubRequestDTO.ClubSearchFilter filter, Long cursorId, int pageSize) {
         return clubRepository.searchClubs(filter, cursorId, pageSize);
     }
 
-    @Override
-    public Club getClubInfo(Long clubId) {
+    public Club retrieveClub(Long clubId) {
         return validateClub(clubId);
     }
 
-    @Override
     public boolean isDuplicateClubName(String clubName) {
         return clubRepository.existsByName(clubName);
     }
 
-    @Override
     public Club validateClub(Long clubId) throws ClubManagementException {
         return clubRepository.findById(clubId)
                 .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_NOT_FOUND));

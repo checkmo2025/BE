@@ -1,28 +1,34 @@
 package checkmo.clubManagement.internal.service.query;
 
 import checkmo.clubManagement.internal.entity.BookRecommend;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import checkmo.clubManagement.internal.repository.BookRecommendRepository;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface ClubBookRecommendQueryService {
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ClubBookRecommendQueryService {
 
-    /**
-     * 독서모임의 추천 책 엔티티를 조회합니다.
-     *
-     * @param clubId          독서모임 ID
-     * @param bookRecommendId 추천 책 ID
-     * @param memberId        요청한 회원 ID
-     * @return BookRecommend
-     */
-    BookRecommend getBookRecommend(Long clubId, Long bookRecommendId, String memberId);
+    private final ClubManagementQueryService clubManagementQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
 
-    /**
-     * 순수하게 BookRecommend 엔티티들만 조회
-     *
-     * @param clubId   독서모임 ID
-     * @param cursorId 커서 ID (페이징용, 처음 조회 시 null 또는 0) *
-     * @param size     조회할 추천 책 개수
-     * @return 추천 책 목록 리스트
-     */
-    List<BookRecommend> getRecommendedBooks(Long clubId, Long cursorId, Integer size);
+    private final BookRecommendRepository bookRecommendRepository;
 
+    public BookRecommend retrieveBookRecommend(Long clubId, Long bookRecommendId, String memberId) {
+        clubManagementQueryService.validateClub(clubId);
+        clubMemberQueryService.validateClubMember(clubId, memberId);
+
+        return bookRecommendRepository.findById(bookRecommendId)
+                .orElseThrow(
+                        () -> new ClubManagementException(ClubManagementErrorStatus.CLUB_BOOK_RECOMMEND_NOT_FOUND));
+    }
+
+    public List<BookRecommend> retrieveBookRecommends(Long clubId, Long cursorId, Integer size) {
+        return bookRecommendRepository.getBookRecommendsAndClubMemberByClubIdAndCursor(clubId, cursorId, size);
+    }
 }

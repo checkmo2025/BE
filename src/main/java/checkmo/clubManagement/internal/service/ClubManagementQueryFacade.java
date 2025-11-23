@@ -12,8 +12,8 @@ import checkmo.clubManagement.internal.entity.ClubMember.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.service.query.ClubBookRecommendQueryService;
+import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
-import checkmo.clubManagement.internal.service.query.ClubQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.BookRecommendDetail;
@@ -37,17 +37,17 @@ public class ClubManagementQueryFacade {
     private final MemberAPI memberAPI;
     private final BookAPI bookAPI;
 
-    private final ClubQueryService clubQueryService;
+    private final ClubManagementQueryService clubManagementQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
     private final ClubBookRecommendQueryService clubBookRecommendQueryService;
 
-    public ClubResponseDTO.ClubList getClubList(
+    public ClubResponseDTO.ClubList retrieveClubList(
             String memberId,
             ClubRequestDTO.ClubSearchFilter filter,
             ClubRequestDTO.CursorInfo pageRequest
     ) {
         CursorResult<Club> clubCursorResult = CursorPagingHelper.getPage(
-                pageSize -> clubQueryService.getClubList(filter, pageRequest.cursorId(), pageSize),
+                pageSize -> clubManagementQueryService.retrieveClubs(filter, pageRequest.cursorId(), pageSize),
                 Club::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -56,7 +56,8 @@ public class ClubManagementQueryFacade {
         List<Long> clubIds = extractClubIds(clubs);
 
         // 클럽별 멤버 상태 배치 조회
-        Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.getMemberStatuses(memberId, clubIds);
+        Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.retrieveClubMemberStatusByClubIds(
+                memberId, clubIds);
 
         List<ClubResponseDTO.ClubWithMyStatus> clubList = clubs.stream()
                 .map(club -> toClubWithMyStatusDTO(club, statusMap))
@@ -93,9 +94,9 @@ public class ClubManagementQueryFacade {
                 .toList();
     }
 
-    public ClubResponseDTO.MyClubList getMyClubList(String memberId) {
+    public ClubResponseDTO.MyClubList retrieveMyClubList(String memberId) {
         // 1. 회원이 가입한 모임 목록 조회
-        List<BasicInfo> myClubs = clubMemberQueryService.getMyClubList(memberId)
+        List<BasicInfo> myClubs = clubMemberQueryService.retrieveClubList(memberId)
                 .getClubList();
 
         // 2. 모임 정보 DTO로 변환
@@ -109,9 +110,9 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public ClubResponseDTO.MyPageClubList getMyPageClubList(String memberId, Long cursorId) {
+    public ClubResponseDTO.MyPageClubList retrieveMyPageClubList(String memberId, Long cursorId) {
         CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
-                pageSize -> clubMemberQueryService.getMyPageClubList(memberId, cursorId, pageSize),
+                pageSize -> clubMemberQueryService.retrieveClubMembers(memberId, cursorId, pageSize),
                 ClubMember::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -134,9 +135,9 @@ public class ClubManagementQueryFacade {
                 .toList();
     }
 
-    public ClubResponseDTO.ClubDetail getClubInfo(Long clubId, String memberId) {
+    public ClubResponseDTO.ClubDetail retrieveClubDetail(Long clubId, String memberId) {
         // 1. Service에서 순수 엔티티 조회
-        Club club = clubQueryService.getClubInfo(clubId);
+        Club club = clubManagementQueryService.retrieveClub(clubId);
 
         // 2. 운영진 권한 확인
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
@@ -149,20 +150,20 @@ public class ClubManagementQueryFacade {
         return ClubManagementConverter.toClubDetailDTO(club, isStaff);
     }
 
-    public ClubResponseDTO.ClubMemberList getClubMemberListByStatus(
+    public ClubResponseDTO.ClubMemberList retrieveClubMemberList(
             Long clubId,
             String memberId,
             String clubMemberStatus,
             Long cursorId
     ) {
-        clubQueryService.validateClub(clubId);
+        clubManagementQueryService.validateClub(clubId);
         ClubMember requester = clubMemberQueryService.validateClubMember(clubId, memberId);
         if (!requester.isStaff()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
         CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
-                size -> clubMemberQueryService.getClubMemberListByStatus(clubId, clubMemberStatus, cursorId, size),
+                size -> clubMemberQueryService.retrieveClubMembers(clubId, clubMemberStatus, cursorId, size),
                 ClubMember::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -197,17 +198,13 @@ public class ClubManagementQueryFacade {
                 .toList();
     }
 
-    public boolean isDuplicateClubName(String clubName) {
-        return clubQueryService.isDuplicateClubName(clubName);
-    }
-
-    public ClubResponseDTO.BookRecommendList getRecommendedBooks(Long clubId, Long cursorId, String memberId) {
-        clubQueryService.validateClub(clubId);
+    public ClubResponseDTO.BookRecommendList retrieveBookRecommedList(Long clubId, Long cursorId, String memberId) {
+        clubManagementQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         String nickname = memberAPI.fetchMemberBasicInfo(memberId).getNickname();
 
         CursorResult<BookRecommend> bookRecommendCursorResult = CursorPagingHelper.getPage(
-                pageSize -> clubBookRecommendQueryService.getRecommendedBooks(clubId, cursorId, pageSize),
+                pageSize -> clubBookRecommendQueryService.retrieveBookRecommends(clubId, cursorId, pageSize),
                 BookRecommend::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -229,14 +226,15 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public ClubResponseDTO.BookRecommendDetail getRecommendedBookDetail(
+    public ClubResponseDTO.BookRecommendDetail retrieveBookRecommendDetail(
             Long clubId,
             Long bookRecommendId,
             String memberId
     ) {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
-        BookRecommend bookRecommend = clubBookRecommendQueryService.getBookRecommend(clubId, bookRecommendId, memberId);
+        BookRecommend bookRecommend = clubBookRecommendQueryService.retrieveBookRecommend(clubId, bookRecommendId,
+                memberId);
 
         // 외부 도메인 정보 조회 (Facade에서 처리)
         BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookRecommend.getBookId());
@@ -254,8 +252,8 @@ public class ClubManagementQueryFacade {
         );
     }
 
-    public Boolean checkStaffStatus(Long clubId, String memberId) {
-        clubQueryService.validateClub(clubId);
+    public Boolean isClubMemberStaff(Long clubId, String memberId) {
+        clubManagementQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return clubMember.isStaff();
     }

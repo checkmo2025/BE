@@ -1,35 +1,90 @@
 package checkmo.clubManagement.internal.service.command;
 
-import checkmo.clubManagement.web.dto.ClubRequestDTO;
+import checkmo.clubManagement.internal.converter.ClubManagementConverter;
+import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import checkmo.clubManagement.internal.repository.ClubRepository;
+import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
+import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
+import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubDetail;
+import java.util.HashSet;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 독서 모임 자체의 관리를 담당
- */
-public interface ClubManagementCommandService {
+@Service
+@RequiredArgsConstructor
+public class ClubManagementCommandService {
 
-    /**
-     * 독서모임을 생성합니다.
-     *
-     * @param memberId 사용자 ID
-     * @param request  모임 생성 요청 DTO
-     * @return 생성된 독서모임 ID
-     */
-    Long createClub(String memberId, ClubRequestDTO.ClubDetail request);
+    private final ClubManagementQueryService clubManagementQueryService;
+    private final ClubMemberQueryService clubMemberQueryService;
 
-    /**
-     * ClubManagementCommandService 기존 독서 모임 정보를 수정합니다.
-     *
-     * @param clubId   수정할 모임
-     * @param memberId 사용자 ID
-     * @param request  모임 수정 요청 정보 DTO
-     */
-    Long updateClub(Long clubId, String memberId, ClubRequestDTO.ClubDetail request);
+    private final ClubRepository clubRepository;
 
-    /**
-     * 독서 모임을 삭제합니다.
-     *
-     * @param clubId   삭제할 모임
-     * @param memberId 사용자 ID
-     */
-    void deleteClub(Long clubId, String memberId);
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    @Transactional
+    public Long createClub(String memberId, ClubDetail request) {
+        // 1. 클럽 이름 중복 검사
+        if (clubManagementQueryService.isDuplicateClubName(request.getName())) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
+        }
+
+        // 2. 클럽 엔티티 생성
+        Club club = ClubManagementConverter.toClub(request);
+
+        // 3. 카테고리 연관관계 설정
+        club.updateInterestCategories(new HashSet<>(request.getCategory()));
+
+        // 4. 운영진 멤버 생성
+        ClubMember clubMember = ClubMember.builder()
+                .memberId(memberId)
+                .clubMemberStatus(ClubMember.ClubMemberStatus.STAFF)
+                .build();
+        club.addClubMember(clubMember);
+
+        // 클럽 저장
+        clubRepository.save(club);
+
+        // 생성된 클럽의 ID 반환
+        return club.getId();
+    }
+
+    @Transactional
+    public Long updateClub(Long clubId, String memberId, ClubDetail request) {
+        Club club = clubManagementQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        if (!clubMember.isStaff()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        // 3. 클럽 이름 중복 검사 (단, 기존 이름과 다를 때만)
+        if (!club.getName().equals(request.getName()) &&
+                clubManagementQueryService.isDuplicateClubName(request.getName())) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
+        }
+
+        club.updateField(request.getName(),
+                request.getDescription(),
+                request.getProfileImageUrl(),
+                request.getParticipantTypes(),
+                request.getRegion(),
+                request.getInsta(),
+                request.getKakao());
+
+        club.updateInterestCategories(new HashSet<>(request.getCategory()));
+
+        return club.getId();
+    }
+
+    @Transactional
+    // TODO: 클럽이 삭제될 때, 이벤트 발행
+    public void deleteClub(Long clubId, String memberId) {
+        // Club을 삭제함으로써 Cascade.REMOVE가 동작되어 ClubManagement 모듈 내 모든 엔티티(클럽 멤버, 책 추천, 클럽 카테고리) 제거
+        // Meeting을 삭제함으로써 Cascade.REMOVE가 동작되어 ClubMeeting 모듈 내 모든 엔티티(토픽, 팀, 팀 토픽, 멤터 팀, 한줄평) 제거
+        // Notice를 삭제함으로써 Cascade.REMOVE가 동작되어 ClubNotice 모듈 내 모든 엔티티(투표, 회원 투표) 제거 (단, 비즈니스 요구사항 변경에 따라 Notice와 Vote는 연관관계 수정되어야 함 -2025.11.12 기준-)
+    }
 }
