@@ -247,6 +247,7 @@ public class BookStoryCommandService {
 Spring Modulith의 철학에 맞춰, 타 모듈의 엔티티를 직접 참조하는 대신 ID(Primary Key) 값만 보관하는 방식으로 변경했습니다.
 
 ![Checkmo_Erd.png](images/Checkmo_Erd.png)
+<sub><a href="https://www.erdcloud.com/d/8nc3FgoQSeFYS3wtd">ERD 링크 참조</a></sub>
 > 점선은 물리적 제약(FK)이 없는 논리적 연결을 의미합니다.
 
 - 물리적 제약 제거: 다른 모듈 테이블 간의 FK 제약 조건을 제거하여 DB 수준의 결합도 해소
