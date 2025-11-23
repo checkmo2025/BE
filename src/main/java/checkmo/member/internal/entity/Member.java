@@ -1,6 +1,8 @@
 package checkmo.member.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.member.internal.exception.MemberErrorStatus;
+import checkmo.member.internal.exception.MemberException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -77,6 +79,16 @@ public class Member extends BaseEntity {
         this.interestCategories.clear();
         if (newCategories != null) {
             this.interestCategories.addAll(newCategories);
+        }
+    }
+
+    public static boolean isSameMember(String memberId1, String memberId2) {
+        return memberId1.equals(memberId2);
+    }
+
+    public void verifyNotSelf(String memberId) {
+        if (this.id.equals(memberId)) {
+            throw new MemberException(MemberErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
         }
     }
 }

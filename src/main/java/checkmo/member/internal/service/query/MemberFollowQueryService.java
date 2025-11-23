@@ -1,13 +1,13 @@
 package checkmo.member.internal.service.query;
 
 import checkmo.member.internal.entity.Follow;
+import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.FollowRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,46 +19,34 @@ public class MemberFollowQueryService {
     private final FollowRepository followRepository;
 
     /**
-     * 특정 회원의 팔로우 목록 전체 조회
+     * 특정 회원의 팔로워 목록 조회
      *
      * @param memberId 조회할 회원의 ID
-     * @param cursorId 커서 ID => 커서로 사용되는 ID는 Follow 엔티티 자체의 ID 값
+     * @param cursorId 커서 ID
+     * @param pageSize 페이지 크기
      * @return 팔로워 목록
      */
     public List<Follow> retrieveFollowers(String memberId, Long cursorId, int pageSize) {
-        // cursorId가 null인 경우, 가장 최근 팔로워부터 조회, 여기서 memberId = 팔로잉 당하는 사람의 ID
-        if (cursorId == null) {
-            return followRepository.findByFollowingIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));
-        } else {
-            // cursorId보다 작은 ID의 팔로워를 조회
-            return followRepository.findByFollowingIdAndIdLessThanOrderByIdDesc(memberId, cursorId,
-                    PageRequest.of(0, pageSize));
-        }
+        return followRepository.findFollowers(memberId, cursorId, pageSize);
     }
 
     /**
-     * 특정 회원의 팔로잉 목록 전체 조회
+     * 특정 회원의 팔로잉 목록 조회
      *
      * @param memberId 조회할 회원의 ID
-     * @param cursorId 커서 ID => 커서로 사용되는 ID는 Follow 엔티티 자체의 ID 값
+     * @param cursorId 커서 ID
+     * @param pageSize 페이지 크기
      * @return 팔로잉 목록
      */
     public List<Follow> retrieveFollowingIds(String memberId, Long cursorId, int pageSize) {
-        // cursorId가 null인 경우, 가장 최근 팔로잉부터 조회, 여기서 memberId = 팔로우 하는 사람의 ID
-        if (cursorId == null) {
-            return followRepository.findByFollowerIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));
-        } else {
-            // cursorId보다 작은 ID의 팔로잉을 조회
-            return followRepository.findByFollowerIdAndIdLessThanOrderByIdDesc(memberId, cursorId,
-                    PageRequest.of(0, pageSize));
-        }
+        return followRepository.findFollowings(memberId, cursorId, pageSize);
     }
 
     /**
      * 특정 회원의 팔로우 여부 확인
      */
     public boolean isFollowing(String memberId, String targetMemberId) {
-        if (memberId.equals(targetMemberId)) {
+        if (Member.isSameMember(memberId, targetMemberId)) {
             return true; // 자기 자신을 팔로우하는 것은 항상 true
         }
 
@@ -86,7 +74,7 @@ public class MemberFollowQueryService {
                 .distinct()
                 .collect(Collectors.toMap(
                         targetId -> targetId,
-                        targetId -> currentMemberId.equals(targetId) || followingIds.contains(targetId)
+                        targetId -> Member.isSameMember(currentMemberId, targetId) || followingIds.contains(targetId)
                 ));
     }
 

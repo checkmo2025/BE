@@ -36,9 +36,7 @@ public class MemberFollowCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 자기 자신을 팔로우할 수 없음
-        if (memberId.equals(following.getId())) {
-            throw new MemberException(MemberErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
-        }
+        following.verifyNotSelf(memberId);
 
         // 이미 팔로잉 중인지 확인
         if (followRepository.existsByFollowerIdAndFollowingId(memberId, following.getId())) {
