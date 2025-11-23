@@ -22,7 +22,7 @@ public class AladinApiService {
 
     private final AladinProperties aladinProperties;
 
-    public BookResponseDTO.BookList searchBookFromAladin(String keyword, int page) {
+    public BookResponseDTO.BookList searchBooks(String keyword, int page) {
         try {
 
             String url = buildHttpUrl(keyword, page);
@@ -39,7 +39,7 @@ public class AladinApiService {
         }
     }
 
-    public DetailInfo getBookDetailInfoFromAladin(String isbn) {
+    public DetailInfo retrieveBookDetailInfo(String isbn) {
         try {
             String url = buildHttpUrl(isbn);
 

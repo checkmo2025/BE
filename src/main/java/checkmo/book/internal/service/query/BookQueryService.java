@@ -18,13 +18,13 @@ public class BookQueryService {
 
     private final BookRepository bookRepository;
 
-    public Book findBook(String bookId) {
+    public Book retrieveBook(String bookId) {
         return bookRepository.findById(bookId).orElseThrow(
                 () -> new BookException(BookErrorStatus.BOOK_NOT_FOUND)
         );
     }
 
-    public Map<String, Book> findBooksMap(List<String> bookIds) {
+    public Map<String, Book> retrieveBookByBookIds(List<String> bookIds) {
         if (bookIds == null || bookIds.isEmpty()) {
             return Map.of();
         }

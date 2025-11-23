@@ -20,14 +20,14 @@ public class BookAPIImpl implements BookAPI {
 
     @Override
     public BookExternalDTO.BasicInfo fetchBookBasicInfo(String bookId) {
-        Book book = bookQueryService.findBook(bookId);
+        Book book = bookQueryService.retrieveBook(bookId);
 
         return BookConverter.toBasicInfoDTO(book);
     }
 
     @Override
     public BookExternalDTO.DetailInfo fetchBookDetailInfo(String bookId) {
-        Book book = bookQueryService.findBook(bookId);
+        Book book = bookQueryService.retrieveBook(bookId);
 
         return BookConverter.toDetailInfoDTO(book);
     }
@@ -40,7 +40,7 @@ public class BookAPIImpl implements BookAPI {
 
         List<String> distinctBookIds = bookIds.stream().distinct().toList();
 
-        Map<String, Book> booksMap = bookQueryService.findBooksMap(distinctBookIds);
+        Map<String, Book> booksMap = bookQueryService.retrieveBookByBookIds(distinctBookIds);
 
         return BookConverter.toBasicInfoDTOMap(booksMap);
     }

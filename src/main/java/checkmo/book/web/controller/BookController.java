@@ -41,7 +41,7 @@ public class BookController {
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
             int page
     ) {
-        BookResponseDTO.BookList result = aladinApiService.searchBookFromAladin(keyword, page);
+        BookResponseDTO.BookList result = aladinApiService.searchBooks(keyword, page);
         return ApiResponse.onSuccess(result);
     }
 
@@ -53,7 +53,7 @@ public class BookController {
     })
     @GetMapping({"/{isbn}"})
     public ApiResponse<DetailInfo> getBookDetail(@PathVariable String isbn) {
-        DetailInfo result = aladinApiService.getBookDetailInfoFromAladin(isbn);
+        DetailInfo result = aladinApiService.retrieveBookDetailInfo(isbn);
         return ApiResponse.onSuccess(result);
     }
 }
