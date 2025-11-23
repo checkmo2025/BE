@@ -14,6 +14,14 @@
 
 ---
 
+## 📈 Module Dependency Graph
+
+아래의 각 모듈간의 의존성 UML은 Spring Modulith의 [Documenting Application Modules](https://docs.spring.io/spring-modulith/reference/documentation.html)를 참고하여 문서화한 결과입니다.
+
+* [각 모듈들의 의존성 확인하기](./docs/module_graph.md)
+
+---
+
 ## 🖥️ Server Architecture
 
 <div align="center">
