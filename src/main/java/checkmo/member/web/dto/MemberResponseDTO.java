@@ -15,7 +15,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FollowList {
-        private List<MemberProfileWithFollow> followList; // 팔로워/팔로잉 목록
+        private List<BasicInfoWithFollow> followList; // 팔로워/팔로잉 목록
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -24,7 +24,17 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MemberProfileWithProfileImage {
+    public static class BasicInfoWithFollow {
+        private String nickname;
+        private String profileImageUrl;
+        private boolean isFollowing;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BasicInfoWithDescription {
         private String nickname;
         private String description;
         private String profileImageUrl;
@@ -34,7 +44,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MemberProfileWithCategory {
+    public static class DetailInfo {
         private String nickname;
         private String description;
         private String profileImageUrl;
@@ -45,21 +55,11 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class otherProfile {
+    public static class othersDetailInfo {
         private String nickname;
         private String description;
         private String profileImageUrl;
         private boolean following;
         private Set<MemberInterestCategory> categories;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MemberProfileWithFollow {
-        private String nickname;
-        private String profileImageUrl;
-        private boolean isFollowing;
     }
 }

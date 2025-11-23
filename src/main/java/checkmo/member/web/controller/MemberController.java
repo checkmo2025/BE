@@ -1,14 +1,15 @@
 package checkmo.member.web.controller;
 
-import checkmo.common.apiPayload.ApiResponse;
 import checkmo.authentication.CurrentId;
+import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.internal.service.MemberQueryFacade;
+import checkmo.member.internal.service.command.MemberCommandService;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
-import checkmo.member.internal.service.command.MemberProfileCommandService;
-import checkmo.member.internal.service.command.MemberRegistrationCommandService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
+import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -35,9 +36,8 @@ public class MemberController {
 
     private final MemberQueryFacade memberQueryFacade;
 
-    private final MemberProfileCommandService memberProfileCommandService;
     private final MemberFollowCommandService memberFollowCommandService;
-    private final MemberRegistrationCommandService memberRegistrationCommandService;
+    private final MemberCommandService memberCommandService;
 
     private final MemberQueryService memberQueryService;
 
@@ -53,7 +53,7 @@ public class MemberController {
             @CurrentId String memberId,
             @Valid @RequestBody MemberRequestDTO.AdditionalInfo request
     ) {
-        memberRegistrationCommandService.addAdditionalInfo(memberId, request);
+        memberCommandService.addAdditionalInfo(memberId, request);
         return ApiResponse.onSuccess(null);
     }
 
@@ -84,7 +84,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberFollowCommandService.followingMember(memberId, memberNickname);
+        memberFollowCommandService.following(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님 팔로잉에 성공했습니다.");
     }
 
@@ -103,7 +103,7 @@ public class MemberController {
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        memberFollowCommandService.unfollowingMember(memberId, memberNickname);
+        memberFollowCommandService.unfollowing(memberId, memberNickname);
         return ApiResponse.onSuccess(memberNickname + "님을 언팔로잉 하였습니다.");
     }
 
@@ -138,7 +138,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followingList = memberQueryFacade.getFollowingList(memberId, cursorId);
+        var followingList = memberQueryFacade.retrieveFollowings(memberId, cursorId);
         return ApiResponse.onSuccess(followingList);
     }
 
@@ -154,7 +154,7 @@ public class MemberController {
             @CurrentId String memberId,
             @RequestParam(required = false) Long cursorId
     ) {
-        var followerList = memberQueryFacade.getFollowerList(memberId, cursorId);
+        var followerList = memberQueryFacade.retrieveFollowers(memberId, cursorId);
         return ApiResponse.onSuccess(followerList);
     }
 
@@ -167,11 +167,11 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
-    public ApiResponse<MemberResponseDTO.MemberProfileWithCategory> updateMemberProfile(
+    public ApiResponse<DetailInfo> updateMemberProfile(
             @CurrentId String memberId,
             @RequestBody MemberRequestDTO.MemberProfileUpdate request
     ) {
-        return ApiResponse.onSuccess(memberProfileCommandService.updateMemberProfile(memberId, request));
+        return ApiResponse.onSuccess(memberCommandService.updateProfile(memberId, request));
     }
 
     @Operation(summary = "내 프로필 조회 API", description = "내 프로필 정보(관심 카테고리 정보 포함)를 조회합니다.")
@@ -182,20 +182,20 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
-    public ApiResponse<MemberResponseDTO.MemberProfileWithCategory> getMemberProfile(
+    public ApiResponse<DetailInfo> getMemberProfile(
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(memberQueryFacade.getMemberProfile(memberId));
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberDetailInfo(memberId));
     }
 
     @Operation(summary = "다른 사람 프로필 조회 API", description =
             "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태를 포함합니다.\n" +
                     "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
-    public ApiResponse<MemberResponseDTO.otherProfile> getOtherProfile(
+    public ApiResponse<othersDetailInfo> getOtherProfile(
             @CurrentId String memberId,
             @PathVariable String memberNickname
     ) {
-        return ApiResponse.onSuccess(memberQueryFacade.getOtherProfile(memberNickname, memberId));
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveOthersDetailInfo(memberNickname, memberId));
     }
 }

@@ -1,7 +1,7 @@
 package checkmo.member.internal.listener;
 
 import checkmo.authentication.AuthenticationEvent;
-import checkmo.member.internal.service.command.MemberRegistrationCommandService;
+import checkmo.member.internal.service.command.MemberCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -12,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class MemberEventListener {
 
-    private final MemberRegistrationCommandService memberRegistrationCommandService;
+    private final MemberCommandService memberCommandService;
 
     @EventListener
     @Transactional(propagation = Propagation.MANDATORY)
     public void createMember(AuthenticationEvent.CreateMember event) {
-        memberRegistrationCommandService.createMember(event.id(), event.email());
+        memberCommandService.createMember(event.id(), event.email());
     }
 }

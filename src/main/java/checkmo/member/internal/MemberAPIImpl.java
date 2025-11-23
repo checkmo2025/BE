@@ -2,14 +2,14 @@ package checkmo.member.internal;
 
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
-import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
-import checkmo.member.web.dto.MemberResponseDTO;
+import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
+import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,12 +29,12 @@ public class MemberAPIImpl implements MemberAPI {
 
     @Override
     public String fetchMemberId(String nickname) {
-        return memberQueryService.getMemberIdByNickname(nickname);
+        return memberQueryService.retrieveMemberId(nickname);
     }
 
     @Override
     public String fetchNickname(String memberId) {
-        return memberQueryService.getMemberNicknameById(memberId);
+        return memberQueryService.retrieveMemberNickname(memberId);
     }
 
     @Override
@@ -43,13 +43,13 @@ public class MemberAPIImpl implements MemberAPI {
             return Map.of();
         }
 
-        return memberQueryService.getMemberNicknamesByMemberIds(memberIds);
+        return memberQueryService.retrieveMemberNicknameByMemberIds(memberIds);
     }
 
     @Override
     public MemberExternalDTO.BasicInfo fetchMemberBasicInfo(String memberId) {
-        Member member = memberQueryService.getMemberBasicInfo(memberId);
-        MemberResponseDTO.MemberProfileWithProfileImage profileDTO = MemberConverter.toMemberProfileWithProfileImage(
+        Member member = memberQueryService.retrieveMember(memberId);
+        BasicInfoWithDescription profileDTO = MemberConverter.toMemberProfileWithProfileImage(
                 member);
 
         return MemberExternalDTO.BasicInfo.builder()
@@ -65,7 +65,7 @@ public class MemberAPIImpl implements MemberAPI {
         }
 
         // 1. Repository를 통해 IN 쿼리로 모든 회원 정보 조회 (Projection 사용)
-        List<MemberBasicInfoProjection> results = memberQueryService.getMemberBasicInfoMapForShare(memberIds);
+        List<MemberBasicInfoProjection> results = memberQueryService.retrieveMemberBasicInfos(memberIds);
 
         // 2. 조회된 Projection 리스트를 Map으로 변환
         return results.stream()
@@ -79,7 +79,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public BasicInfoWithFollow fetchMemberBasicInfoWithFollow(
+    public MemberExternalDTO.BasicInfoWithFollow fetchMemberBasicInfoWithFollow(
             String targetMemberId,
             String currentMemberId
     ) {
@@ -88,7 +88,7 @@ public class MemberAPIImpl implements MemberAPI {
 
         var basicInfoDTO = fetchMemberBasicInfo(targetMemberId);
 
-        return BasicInfoWithFollow.builder()
+        return MemberExternalDTO.BasicInfoWithFollow.builder()
                 .nickname(basicInfoDTO.getNickname())
                 .profileImageUrl(basicInfoDTO.getProfileImageUrl())
                 .following(isFollowing)
@@ -96,7 +96,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
+    public Map<String, MemberExternalDTO.BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
             List<String> targetMemberIds,
             String currentMemberId
     ) {
@@ -105,15 +105,15 @@ public class MemberAPIImpl implements MemberAPI {
         }
 
         // 1. Facade에서 내부 DTO로 배치 조회
-        List<MemberResponseDTO.MemberProfileWithFollow> profiles
-                = memberQueryFacade.getMemberProfiles(targetMemberIds, currentMemberId);
+        List<BasicInfoWithFollow> profiles
+                = memberQueryFacade.retrieveMemberBasicInfoWithFollows(targetMemberIds, currentMemberId);
 
         // 2. 내부 DTO → 외부 DTO 변환 후 Map으로 변환
         // targetMemberIds와 profiles는 순서가 일치하므로 zip 형태로 매핑
-        Map<String, BasicInfoWithFollow> result = new java.util.HashMap<>();
+        Map<String, MemberExternalDTO.BasicInfoWithFollow> result = new java.util.HashMap<>();
         for (int i = 0; i < targetMemberIds.size() && i < profiles.size(); i++) {
             String memberId = targetMemberIds.get(i);
-            MemberResponseDTO.MemberProfileWithFollow profile = profiles.get(i);
+            BasicInfoWithFollow profile = profiles.get(i);
             result.put(memberId, MemberConverter.toMemberProfileWithFollowStatus(profile));
         }
 
@@ -121,8 +121,8 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public List<String> fetchFollowingMemberIds(String memberId) {
-        return memberFollowQueryService.getFollowingMemberIds(memberId);
+    public List<String> fetchFollowingIds(String memberId) {
+        return memberFollowQueryService.retrieveFollowingIds(memberId);
     }
 
 }

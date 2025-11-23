@@ -125,7 +125,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private List<String> getFollowingMemberIds(String memberId) {
-        return memberAPI.fetchFollowingMemberIds(memberId);
+        return memberAPI.fetchFollowingIds(memberId);
     }
 
     private List<String> getClubMemberIds(Long clubId) {

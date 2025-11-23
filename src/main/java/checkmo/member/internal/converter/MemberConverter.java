@@ -1,24 +1,27 @@
 package checkmo.member.internal.converter;
 
-import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
+import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
-import checkmo.member.web.dto.MemberResponseDTO;
+import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
+import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
+import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberConverter {
 
-    public static MemberResponseDTO.MemberProfileWithProfileImage toMemberProfileWithProfileImage(Member member) {
-        return MemberResponseDTO.MemberProfileWithProfileImage.builder()
+    public static BasicInfoWithDescription toMemberProfileWithProfileImage(Member member) {
+        return BasicInfoWithDescription.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
                 .build();
     }
 
-    public static MemberResponseDTO.MemberProfileWithCategory toMemberProfileWithCategory(Member member) {
-        return MemberResponseDTO.MemberProfileWithCategory.builder()
+    public static DetailInfo toMemberProfileWithCategory(Member member) {
+        return DetailInfo.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
@@ -26,8 +29,8 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.otherProfile toOtherProfile(Member member, boolean isFollowing) {
-        return MemberResponseDTO.otherProfile.builder()
+    public static othersDetailInfo toOtherProfile(Member member, boolean isFollowing) {
+        return othersDetailInfo.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
@@ -36,10 +39,10 @@ public class MemberConverter {
                 .build();
     }
 
-    public static BasicInfoWithFollow toMemberProfileWithFollowStatus(
-            MemberResponseDTO.MemberProfileWithFollow profile
+    public static MemberExternalDTO.BasicInfoWithFollow toMemberProfileWithFollowStatus(
+            BasicInfoWithFollow profile
     ) {
-        return BasicInfoWithFollow.builder()
+        return MemberExternalDTO.BasicInfoWithFollow.builder()
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())
                 .following(profile.isFollowing())

@@ -11,10 +11,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, String> {
 
-    Optional<Member> findByEmail(String email);
-
-    boolean existsByEmail(String email);
-
     boolean existsByNickName(String nickName);
 
     Optional<Member> findByNickName(String nickName);
@@ -24,9 +20,6 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
     @Query("select m.nickName from Member m where m.id = :memberId")
     Optional<String> findNicknameById(@Param("memberId") String memberId);
-
-    @Query("select m.id as id, m.nickName as nickName from Member m where m.nickName in :nicknames")
-    List<MemberIdAndNicknameProjection> findNicknameAndIdByNicknameIn(List<String> nicknames);
 
     @Query("select m.id as id, m.nickName as nickName from Member m where m.id in :memberIds")
     List<MemberIdAndNicknameProjection> findIdAndNicknameByIdIn(@Param("memberIds") List<String> memberIds);

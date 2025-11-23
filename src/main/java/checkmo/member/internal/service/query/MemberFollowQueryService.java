@@ -1,63 +1,94 @@
 package checkmo.member.internal.service.query;
 
 import checkmo.member.internal.entity.Follow;
+import checkmo.member.internal.repository.FollowRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 팔로우/팔로잉 조회 서비스
- * <p>
- * 팔로워/팔로잉 목록 조회
- */
-public interface MemberFollowQueryService {
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class MemberFollowQueryService {
+
+    private final FollowRepository followRepository;
 
     /**
      * 특정 회원의 팔로우 목록 전체 조회
      *
      * @param memberId 조회할 회원의 ID
-     * @param cursorId 커서 ID (페이징을 위한) => 커서로 사용되는 ID는 Follow 엔티티 자체의 ID 값으로 사용하기!!
+     * @param cursorId 커서 ID => 커서로 사용되는 ID는 Follow 엔티티 자체의 ID 값
      * @return 팔로워 목록
      */
-    List<Follow> getFollowerList(String memberId, Long cursorId, int pageSize);
+    public List<Follow> retrieveFollowers(String memberId, Long cursorId, int pageSize) {
+        // cursorId가 null인 경우, 가장 최근 팔로워부터 조회, 여기서 memberId = 팔로잉 당하는 사람의 ID
+        if (cursorId == null) {
+            return followRepository.findByFollowingIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));
+        } else {
+            // cursorId보다 작은 ID의 팔로워를 조회
+            return followRepository.findByFollowingIdAndIdLessThanOrderByIdDesc(memberId, cursorId,
+                    PageRequest.of(0, pageSize));
+        }
+    }
 
     /**
      * 특정 회원의 팔로잉 목록 전체 조회
      *
      * @param memberId 조회할 회원의 ID
-     * @param cursorId 커서 ID (페이징을 위한) => 커서로 사용되는 ID는 Follow 엔티티 자체의 ID 값으로 사용하기!!
+     * @param cursorId 커서 ID => 커서로 사용되는 ID는 Follow 엔티티 자체의 ID 값
      * @return 팔로잉 목록
      */
-    List<Follow> getFollowingList(String memberId, Long cursorId, int pageSize);
-
-    /**
-     * 특정 회원의 팔로우 목록 size 개수만큼 조회
-     *
-     * @param memberId 조회할 회원의 ID
-     * @return 팔로워 목록
-     */
-    List<Follow> getFollowers(String memberId, int size);
-
-    /**
-     * 특정 회원의 팔로잉 목록 size 개수만큼 조회
-     *
-     * @param memberId 조회할 회원의 ID
-     * @return 팔로잉 목록
-     */
-    List<Follow> getFollowings(String memberId, int size);
+    public List<Follow> retrieveFollowingIds(String memberId, Long cursorId, int pageSize) {
+        // cursorId가 null인 경우, 가장 최근 팔로잉부터 조회, 여기서 memberId = 팔로우 하는 사람의 ID
+        if (cursorId == null) {
+            return followRepository.findByFollowerIdOrderByIdDesc(memberId, PageRequest.of(0, pageSize));
+        } else {
+            // cursorId보다 작은 ID의 팔로잉을 조회
+            return followRepository.findByFollowerIdAndIdLessThanOrderByIdDesc(memberId, cursorId,
+                    PageRequest.of(0, pageSize));
+        }
+    }
 
     /**
      * 특정 회원의 팔로우 여부 확인
      */
-    boolean isFollowing(String memberId, String targetMemberId);
+    public boolean isFollowing(String memberId, String targetMemberId) {
+        if (memberId.equals(targetMemberId)) {
+            return true; // 자기 자신을 팔로우하는 것은 항상 true
+        }
+
+        // 팔로우 관계가 존재하는지 확인
+        return followRepository.existsByFollowerIdAndFollowingId(memberId, targetMemberId);
+    }
 
     /**
-     * 특정 회원이 여러 회원들을 팔로우하는지 배치로 확인 (배치 처리용)
+     * 특정 회원이 여러 회원들을 팔로우하는지 배치 조회
      *
      * @param currentMemberId 현재 회원 ID
      * @param targetMemberIds 확인할 대상 회원 ID 목록
      * @return 대상 회원 ID별 팔로우 여부 매핑
      */
-    Map<String, Boolean> getFollowStatusMapForMembers(String currentMemberId, List<String> targetMemberIds);
+    public Map<String, Boolean> checkFollowStatusByMemberId(String currentMemberId, List<String> targetMemberIds) {
+        if (targetMemberIds == null || targetMemberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        // 실제로 팔로우하고 있는 대상들을 배치로 조회
+        Set<String> followingIds = followRepository.findFollowingIdsByFollowerId(currentMemberId, targetMemberIds);
+
+        // 모든 대상에 대해 팔로우 상태를 설정 (자기 자신은 항상 true)
+        return targetMemberIds.stream()
+                .distinct()
+                .collect(Collectors.toMap(
+                        targetId -> targetId,
+                        targetId -> currentMemberId.equals(targetId) || followingIds.contains(targetId)
+                ));
+    }
 
     /**
      * 특정 회원이 팔로우하는 회원 ID 목록을 조회합니다.
@@ -65,5 +96,7 @@ public interface MemberFollowQueryService {
      * @param memberId 회원 ID
      * @return 팔로우하는 회원 ID 목록
      */
-    List<String> getFollowingMemberIds(String memberId);
+    public List<String> retrieveFollowingIds(String memberId) {
+        return followRepository.getFollowingMemberIds(memberId);
+    }
 }

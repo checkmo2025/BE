@@ -1,16 +1,24 @@
 package checkmo.member.internal.service.query;
 
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.exception.MemberErrorStatus;
+import checkmo.member.internal.exception.MemberException;
+import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
+import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 회원 기본 정보 조회 서비스
- * <p>
- * 회원과 관련된 모든 조회 서비스 여기서 처리
- */
-public interface MemberQueryService {
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class MemberQueryService {
+
+    private final MemberRepository memberRepository;
 
     /**
      * 닉네임 중복 확인
@@ -18,7 +26,9 @@ public interface MemberQueryService {
      * @param nickname 확인할 닉네임
      * @return 중복 여부 (true: 중복됨, false: 사용 가능)
      */
-    boolean isNicknameDuplicated(String nickname);
+    public boolean isNicknameDuplicated(String nickname) {
+        return memberRepository.existsByNickName(nickname);
+    }
 
     /**
      * 회원 기본 정보 조회
@@ -26,15 +36,21 @@ public interface MemberQueryService {
      * @param memberId 회원 ID
      * @return 회원 기본 정보 DTO
      */
-    Member getMemberBasicInfo(String memberId);
+    public Member retrieveMember(String memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+    }
 
     /**
-     * 회원 프로필 정보 (카테고리 포함) 조회
+     * 회원 기본 정보 조회
      *
-     * @param memberId 회원 ID
-     * @return 회원 프로필 정보 DTO
+     * @param targetMemberNickname 조회 대상 회원 닉네임
+     * @return targetMember의 프로필 정보 DTO - 이때는 관심 카테고리 정보 DTO에 포함 X
      */
-    Member getMemberProfile(String memberId);
+    public Member retrieveMemberByNickname(String targetMemberNickname) {
+        return memberRepository.findByNickName(targetMemberNickname)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+    }
 
     /**
      * 회원 ID 목록으로 회원 기본 정보 배치 조회
@@ -42,15 +58,9 @@ public interface MemberQueryService {
      * @param memberIds 회원 ID 목록
      * @return 회원 ID와 기본 정보 DTO의 매핑
      */
-    List<MemberBasicInfoProjection> getMemberBasicInfoMapForShare(List<String> memberIds);
-
-    /**
-     * 다른 사람 프로필 조회
-     *
-     * @param targetMemberNickname 조회 대상 회원 닉네임
-     * @return targetMember의 프로필 정보 DTO - 이때는 관심 카테고리 정보 DTO에 포함 X , -> 반드시 CategoryQueryFacade를 통해 조회해야 함
-     */
-    Member getOtherProfile(String targetMemberNickname);
+    public List<MemberBasicInfoProjection> retrieveMemberBasicInfos(List<String> memberIds) {
+        return memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
+    }
 
     /**
      * 닉네임으로 회원 ID 조회
@@ -58,15 +68,10 @@ public interface MemberQueryService {
      * @param nickname 닉네임
      * @return 회원 ID
      */
-    String getMemberIdByNickname(String nickname);
-
-    /**
-     * 닉네임 목록으로 회원 ID 배치 조회
-     *
-     * @param nicknames 닉네임 목록
-     * @return 닉네임과 회원 ID의 매핑 정보
-     */
-    Map<String, String> getMemberIdsByNicknames(List<String> nicknames);
+    public String retrieveMemberId(String nickname) {
+        return memberRepository.findIdByNickName(nickname)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+    }
 
     /**
      * 회원ID로 회원 닉네임 조회
@@ -74,7 +79,10 @@ public interface MemberQueryService {
      * @param memberId 회원 ID
      * @return 회원 닉네임
      */
-    String getMemberNicknameById(String memberId);
+    public String retrieveMemberNickname(String memberId) {
+        return memberRepository.findNicknameById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+    }
 
     /**
      * 회원 ID 목록으로 회원 닉네임 배치 조회
@@ -82,13 +90,12 @@ public interface MemberQueryService {
      * @param memberIds 회원 ID 목록
      * @return 회원 ID와 닉네임의 매핑 정보
      */
-    Map<String, String> getMemberNicknamesByMemberIds(List<String> memberIds);
-
-    /**
-     * 회원 ID 목록으로 회원 닉네임과 프로필 이미지 배치 조회
-     *
-     * @param memberIds 회원 ID 목록
-     * @return 회원 ID와 닉네임, 프로필 이미지 정보
-     */
-    List<MemberBasicInfoProjection> getMemberNicknamesAndProfileImagesByMemberIds(List<String> memberIds);
+    public Map<String, String> retrieveMemberNicknameByMemberIds(List<String> memberIds) {
+        List<MemberIdAndNicknameProjection> results = memberRepository.findIdAndNicknameByIdIn(memberIds);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        MemberIdAndNicknameProjection::getId,       // key: memberId
+                        MemberIdAndNicknameProjection::getNickName  // value: nickname
+                ));
+    }
 }

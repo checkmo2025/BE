@@ -71,5 +71,5 @@ public interface MemberAPI {
      * @param memberId 회원 ID
      * @return 팔로우하는 회원 ID 목록
      */
-    List<String> fetchFollowingMemberIds(String memberId);
+    List<String> fetchFollowingIds(String memberId);
 }
