@@ -8,19 +8,19 @@
 
 ### Facade 패턴의 한계
 
-| 문제점 | 설명 |
-|-------|------|
-| 강제 불가 | 팀 약속에 불과, 실수로 규칙 위반 가능 |
+| 문제점    | 설명                        |
+|--------|---------------------------|
+| 강제 불가  | 팀 약속에 불과, 실수로 규칙 위반 가능    |
 | 엔티티 참조 | 관계 설정 시 프록시 객체 반환으로 원칙 위반 |
-| 검증 부재 | 모듈 경계 위반을 자동으로 검증할 방법 없음 |
+| 검증 부재  | 모듈 경계 위반을 자동으로 검증할 방법 없음  |
 
 ### Spring Modulith의 해결책
 
-| 해결 방법 | 설명                                             |
-|----------|------------------------------------------------|
-| **패키지 구조로 강제** | `internal` 및 `web` 패키지는 외부 모듈에서 접근 불가 (IDE 에러) |
-| **자동 검증** | 테스트 코드로 모듈 경계 위반 자동 검증                         |
-| **이벤트 기반 통신** | 엔티티 참조 없이 이벤트로 모듈 간 통신                         |
+| 해결 방법             | 설명                                             |
+|-------------------|------------------------------------------------|
+| **패키지 구조로 강제**    | `internal` 및 `web` 패키지는 외부 모듈에서 접근 불가 (IDE 에러) |
+| **자동 검증**         | 테스트 코드로 모듈 경계 위반 자동 검증                         |
+| **이벤트 기반 통신**     | 엔티티 참조 없이 이벤트로 모듈 간 통신                         |
 | **Public API 명시** | 외부 노출 API를 명확히 정의                              |
 
 ---
@@ -83,12 +83,12 @@ class MemberAPIImpl implements MemberAPI {
     @Override
     public MemberExternalDTO.BasicInfo getMemberBasicInfo(String memberId) {
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberNotFoundException(memberId));
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         return MemberExternalDTO.BasicInfo.builder()
-            .nickname(member.getNickname())
-            .profileImageUrl(member.getProfileImageUrl())
-            .build();
+                .nickname(member.getNickname())
+                .profileImageUrl(member.getProfileImageUrl())
+                .build();
     }
 }
 ```
@@ -107,12 +107,12 @@ public class BookStoryQueryService {
 
         // Member 모듈의 Public API 호출
         MemberExternalDTO.BasicInfo memberInfo =
-            memberAPI.getMemberBasicInfo(bookStory.getMemberId());
+                memberAPI.getMemberBasicInfo(bookStory.getMemberId());
 
         return BookStoryDetail.builder()
-            .authorNickname(memberInfo.getNickname())
-            .authorProfileImage(memberInfo.getProfileImageUrl())
-            .build();
+                .authorNickname(memberInfo.getNickname())
+                .authorProfileImage(memberInfo.getProfileImageUrl())
+                .build();
     }
 }
 ```
@@ -145,10 +145,11 @@ public class MemberEvent {
 
     @Builder
     public record Follow(
-        Long eventId,
-        String followerId,
-        String followingId
-    ) {}
+            Long eventId,
+            String followerId,
+            String followingId
+    ) {
+    }
 }
 ```
 
@@ -165,9 +166,9 @@ public class MemberFollowCommandService {
 
     public void follow(String followerId, String followingId) {
         Follow follow = Follow.builder()
-            .followerId(followerId)
-            .followingId(followingId)
-            .build();
+                .followerId(followerId)
+                .followingId(followingId)
+                .build();
         followRepository.save(follow);
 
         // 이벤트 발행
@@ -199,13 +200,34 @@ public class NotificationEventListener {
 
 ---
 
-## 4. 엔티티 관계 문제의 해결
+## 4. 엔티티 결합도 문제의 해결
 
 ### Facade 시절의 문제
 
-- 연관관계 설정을 위해 어쩔 수 없이 예외로 두고 외부의 엔티티 타입을 알아야만 했습니다.
+기존 구조에서는 서로 다른 도메인(예: `BookStory`와 `Member`)이 JPA 객체 참조(`@ManyToOne`)로 강하게 묶여 있었습니다.
+
+이로 인해 단순한 생성 로직을 위해 `Facade` 계층을 통해 `Proxy` 객체를 가져와야 했습니다.
 
 ```java
+
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+public class BookStory extends BaseEntity {
+
+    // ...
+
+    @Column(name = "member_id", insertable = false, updatable = false)
+    private String memberId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+}
+
 @Service
 public class BookStoryCommandService {
     private final MemberQueryFacade memberQueryFacade;
@@ -213,18 +235,25 @@ public class BookStoryCommandService {
     public Long createBookStory(String memberId, CreateDTO dto) {
         Member memberProxy = memberQueryFacade.findMemberReferenceById(memberId);  // ❌
         BookStory bookStory = BookStory.builder()
-            .member(memberProxy)  // Member 엔티티 타입을 알아야 함
-            .build();
+                .member(memberProxy)  // Member 엔티티 타입을 알아야 함
+                .build();
         // ...
     }
 }
 ```
 
-### Spring Modulith 해결책: ID 참조
+### Spring Modulith 해결책: ID 참조를 통한 느슨한 결합
 
-연관관계를 제거하고 ID값을 필드로 저장하는 방식으로 변경했습니다.
+Spring Modulith의 철학에 맞춰, 타 모듈의 엔티티를 직접 참조하는 대신 ID(Primary Key) 값만 보관하는 방식으로 변경했습니다.
+
+![Checkmo_Erd.png](images/Checkmo_Erd.png)
+> 점선은 물리적 제약(FK)이 없는 논리적 연결을 의미합니다.
+
+- 물리적 제약 제거: 다른 모듈 테이블 간의 FK 제약 조건을 제거하여 DB 수준의 결합도 해소
+- 객체 참조 제거: 엔티티 클래스에서 타 엔티티 타입 필드 제거 (Member member → String memberId)
 
 ```java
+
 @Entity
 public class BookStory extends BaseEntity {
     @Id
@@ -239,15 +268,19 @@ public class BookStory extends BaseEntity {
     private String description;
     // ...
 }
+```
 
+조회 시 필요한 데이터는 별도의 Public API(Service)를 호출하여 애플리케이션 계층에서 해결합니다.
+
+```java
 // 생성 시
 @Service
 public class BookStoryCommandService {
     public Long createBookStory(String memberId, CreateDTO dto) {
         BookStory bookStory = BookStory.builder()
-            .memberId(memberId)  // ✅ ID만 저장, Member 엔티티 불필요
-            .title(dto.getTitle())
-            .build();
+                .memberId(memberId)  // ✅ ID만 저장, Member 엔티티 불필요
+                .title(dto.getTitle())
+                .build();
 
         return bookStoryRepository.save(bookStory).getId();
     }
@@ -263,24 +296,25 @@ public class BookStoryQueryService {
 
         // 필요하면 Public API로 Member 정보 조회
         MemberExternalDTO.BasicInfo memberInfo =
-            memberAPI.getMemberBasicInfo(bookStory.getMemberId());
+                memberAPI.getMemberBasicInfo(bookStory.getMemberId());
 
         return BookStoryDetail.builder()
-            .id(bookStory.getId())
-            .title(bookStory.getTitle())
-            .authorNickname(memberInfo.getNickname())
-            .build();
+                .id(bookStory.getId())
+                .title(bookStory.getTitle())
+                .authorNickname(memberInfo.getNickname())
+                .build();
     }
 }
 ```
 
-- 이 방식을 통해 외부 엔티티에 대해 알지 못해도 해당 엔티티의 정보를 조회하는 것이 가능해졌습니다.
+이 방식을 통해 외부 엔티티에 대해 알지 못해도 해당 엔티티의 정보를 조회하는 것이 가능해졌습니다.
 
 ---
 
 ## 5. Spring Modulith 자동 검증
 
 ### 모듈 경계 검증 테스트
+
 - Spring Modulith에서 제공하는 검증 테스트를 통해 외부 도메인 모듈에 public으로 공개되지 않은 패키지 참조 시 테스트 실패
 
 ```java
@@ -297,6 +331,7 @@ class CheckmoApplicationTests {
     }
 }
 ```
+
 - `internal` 및 `web` 패키지를 외부 모듈에서 참조하면 테스트 실패
 - 모듈 간 순환 참조 검증
 - 명명 규칙 준수 여부 검증
@@ -333,7 +368,7 @@ public class MemberFollowService {
     public void follow(String followerId, String followingId) {
         // ...
         eventPublisher.publishEvent(
-            new MemberEvent.Follow(followId, followerId, followingId)
+                new MemberEvent.Follow(followId, followerId, followingId)
         );
         // Notification 모듈이 있든 없든 상관없음
     }
@@ -381,6 +416,7 @@ spring:
 ```
 
 **자동 생성되는 event_publication 테이블:**
+
 - `id`: 이벤트 고유 ID
 - `event_type`: 이벤트 클래스 타입
 - `listener_id`: 이벤트를 처리할 리스너 정보
@@ -389,6 +425,7 @@ spring:
 - `serialized_event`: 이벤트 데이터 (JSON)
 
 **동작 방식:**
+
 1. 이벤트가 발행되면 Spring Modulith가 자동으로 DB에 저장
 2. 리스너가 이벤트 처리를 완료하면 `completion_date` 업데이트
 3. `completion-mode: DELETE` 설정으로 완료된 이벤트는 자동 삭제
@@ -420,8 +457,8 @@ public class IncompleteEventRetryScheduler {
     private final IncompleteEventPublications incompleteEventPublications;
 
     @Scheduled(
-        initialDelayString = "${events.retry.initial-delay}",
-        fixedDelayString = "${events.retry.fixed-delay}"
+            initialDelayString = "${events.retry.initial-delay}",
+            fixedDelayString = "${events.retry.fixed-delay}"
     )
     public void retryIncompleteEvents() {
         Duration minDuration = Duration.ofMillis(eventRetryProperties.getMinDuration());
@@ -433,6 +470,7 @@ public class IncompleteEventRetryScheduler {
 ```
 
 **재시도 로직 동작 방식:**
+
 1. 스케줄러가 1분마다 자동 실행
 2. `completion_date`가 NULL인 이벤트 중 30초 이상 지난 것들을 조회
 3. 해당 이벤트들을 다시 발행하여 재처리 시도
@@ -450,18 +488,29 @@ public class IncompleteEventRetryScheduler {
 public class MemberEvent {
     @Builder
     public record Follow(
-        Long eventId,      // 이벤트 고유 ID (Follow 엔티티의 ID)
-        String followerId,
-        String followingId
-    ) {}
+            Long eventId,      // 이벤트 고유 ID (Follow 엔티티의 ID)
+            String followerId,
+            String followingId
+    ) {
+    }
 }
 
 // 이벤트 발행 시
-eventPublisher.publishEvent(MemberEvent.Follow.builder()
-    .eventId(follow.getId())      // DB에 저장된 Follow의 ID
-    .followerId(followerId)
-    .followingId(followingId)
-    .build());
+eventPublisher.
+
+publishEvent(MemberEvent.Follow.builder()
+    .
+
+eventId(follow.getId())      // DB에 저장된 Follow의 ID
+        .
+
+followerId(followerId)
+    .
+
+followingId(followingId)
+    .
+
+build());
 ```
 
 **리스너에서 중복 체크**
@@ -481,9 +530,9 @@ public void createNotification(MemberEvent.Follow event) {
 
     // 알림 생성
     Notification notification = NotificationConverter.fromEvent(
-        type,
-        sourceId,  // sourceId로 저장
-        // ...
+            type,
+            sourceId,  // sourceId로 저장
+            // ...
     );
 
     try {
@@ -495,12 +544,14 @@ public void createNotification(MemberEvent.Follow event) {
 ```
 
 **멱등성 보장 방식:**
+
 1. **이벤트에 고유 ID 포함**: `eventId`로 이벤트 출처 엔티티 ID 전달
 2. **DB 조회로 중복 체크**: `existsByNotificationTypeAndSourceId`로 확인
 3. **이미 처리된 경우 스킵**: 중복 이벤트는 처리하지 않고 return
 4. **동시성 예외 처리**: `DataIntegrityViolationException` catch로 안전하게 처리
 
 **이렇게 구현한 이유:**
+
 - 네트워크 일시 장애나 재시도로 인한 중복 처리 방지
 - 동일한 Follow, Like 등에 대해 알림이 여러 개 생성되는 것을 방지
 - 사용자 경험 개선 (중복 알림 X)
@@ -511,23 +562,23 @@ public void createNotification(MemberEvent.Follow event) {
 
 ### Spring Modulith로 구현해낼 수 있었던 것
 
-| 항목 | 설명 |
-|------|------|
-| **강제된 모듈 경계** | `internal` 패키지로 컴파일 타임에 강제 |
-| **자동 검증** | 테스트로 모듈 경계 위반 자동 검출 |
-| **명확한 API** | Public API만 외부 노출, 내부 구현 은닉 |
-| **이벤트 기반** | 느슨한 결합, 확장 용이 |
-| **모놀리식의 장점 유지** | 단일 배포, 트랜잭션 관리, 성능 |
+| 항목              | 설명                          |
+|-----------------|-----------------------------|
+| **강제된 모듈 경계**   | `internal` 패키지로 컴파일 타임에 강제  |
+| **자동 검증**       | 테스트로 모듈 경계 위반 자동 검출         |
+| **명확한 API**     | Public API만 외부 노출, 내부 구현 은닉 |
+| **이벤트 기반**      | 느슨한 결합, 확장 용이               |
+| **모놀리식의 장점 유지** | 단일 배포, 트랜잭션 관리, 성능          |
 
 ### Facade 대비 개선점
 
-| Facade 패턴 | Spring Modulith |
-|------------|-----------------|
-| 팀 약속 (강제 불가) | 패키지 구조로 강제 |
-| 수동 검증 | 자동 검증 테스트 |
-| 프록시 객체 참조 | ID 참조 + Public API |
-| Facade 중복 계층 | Public API 명확 |
-| 직접 호출 | 이벤트 기반 통신 |
+| Facade 패턴    | Spring Modulith    |
+|--------------|--------------------|
+| 팀 약속 (강제 불가) | 패키지 구조로 강제         |
+| 수동 검증        | 자동 검증 테스트          |
+| 프록시 객체 참조    | ID 참조 + Public API |
+| Facade 중복 계층 | Public API 명확      |
+| 직접 호출        | 이벤트 기반 통신          |
 
 ---
 
