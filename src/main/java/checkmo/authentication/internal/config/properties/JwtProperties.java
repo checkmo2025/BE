@@ -1,4 +1,4 @@
-package checkmo.common.config.properties;
+package checkmo.authentication.internal.config.properties;
 
 import lombok.Getter;
 import lombok.Setter;

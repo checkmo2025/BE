@@ -1,7 +1,7 @@
 package checkmo.authentication.internal.security.jwt;
 
+import checkmo.authentication.internal.config.properties.JwtProperties;
 import checkmo.authentication.internal.security.auth.CustomUserDetailsService;
-import checkmo.common.config.properties.JwtProperties;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
