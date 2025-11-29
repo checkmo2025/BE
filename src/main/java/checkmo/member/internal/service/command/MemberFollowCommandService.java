@@ -39,7 +39,7 @@ public class MemberFollowCommandService {
         following.verifyNotSelf(memberId);
 
         // 이미 팔로잉 중인지 확인
-        if (followRepository.existsByFollowerIdAndFollowingId(memberId, following.getId())) {
+        if (followRepository.existsByFollow(memberId, following.getId())) {
             throw new MemberException(MemberErrorStatus.MEMBER_ALREADY_FOLLOWING);
         }
 
@@ -70,12 +70,12 @@ public class MemberFollowCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로잉 하고 있는지 여부 확인
-        if (!followRepository.existsByFollowerIdAndFollowingId(memberId, followingId)) {
+        if (!followRepository.existsByFollow(memberId, followingId)) {
             throw new MemberException(MemberErrorStatus.MEMBER_NOT_FOLLOWING);
         }
 
         // 팔로잉 관계 삭제
-        followRepository.deleteByFollowerIdAndFollowingId(memberId, followingId);
+        followRepository.deleteByFollow(memberId, followingId);
     }
 
     /**
@@ -90,11 +90,11 @@ public class MemberFollowCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로워가 존재하는지 확인
-        if (!followRepository.existsByFollowerIdAndFollowingId(followerId, memberId)) {
+        if (!followRepository.existsByFollow(followerId, memberId)) {
             throw new MemberException(MemberErrorStatus.MEMBER_NOT_FOLLOWER);
         }
 
         // 팔로워 관계 삭제
-        followRepository.deleteByFollowerIdAndFollowingId(followerId, memberId);
+        followRepository.deleteByFollow(followerId, memberId);
     }
 }

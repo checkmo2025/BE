@@ -84,14 +84,14 @@ public class MemberQueryFacade {
 
     private List<String> extractFollowingIds(List<Follow> followingList) {
         return followingList.stream()
-                .map(Follow::getFollowingId)
+                .map(follow -> follow.getFollowing().getId())
                 .distinct()
                 .toList();
     }
 
     private List<String> extractFollowerIds(List<Follow> followerList) {
         return followerList.stream()
-                .map(Follow::getFollowerId)
+                .map(follow -> follow.getFollower().getId())
                 .distinct()
                 .toList();
     }

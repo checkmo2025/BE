@@ -51,7 +51,7 @@ public class MemberFollowQueryService {
         }
 
         // 팔로우 관계가 존재하는지 확인
-        return followRepository.existsByFollowerIdAndFollowingId(memberId, targetMemberId);
+        return followRepository.existsByFollow(memberId, targetMemberId);
     }
 
     /**

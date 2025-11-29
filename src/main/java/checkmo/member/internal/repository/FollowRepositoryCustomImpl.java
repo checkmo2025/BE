@@ -19,6 +19,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     public List<Follow> findFollowers(String followingId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(follow)
+                .join(follow.follower).fetchJoin()
                 .where(
                         follow.following.id.eq(followingId),
                         cursorCondition(cursorId)
@@ -32,6 +33,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     public List<Follow> findFollowings(String followerId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(follow)
+                .join(follow.following).fetchJoin()
                 .where(
                         follow.follower.id.eq(followerId),
                         cursorCondition(cursorId)
