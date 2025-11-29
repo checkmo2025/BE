@@ -112,7 +112,7 @@ public class NotificationCommandService {
                 .sourceId(sourceId)
                 .redirectPath(redirectPath)
                 .targetName(event.clubName())
-                .senderId(null)
+                .senderId("SYSTEM")
                 .receiverId(event.memberId())
                 .build();
         try {
