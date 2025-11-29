@@ -5,7 +5,7 @@ WORKDIR /usr/src
 RUN chmod +x ./gradlew
 RUN ./gradlew clean build -x test
 
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
