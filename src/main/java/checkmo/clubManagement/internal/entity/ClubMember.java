@@ -44,7 +44,7 @@ public class ClubMember extends BaseEntity {
     @Setter
     private Club club;
 
-    @JoinColumn(name = "member_id", nullable = false)
+    @Column(name = "member_id", nullable = false)
     private String memberId;
 
     @Builder.Default

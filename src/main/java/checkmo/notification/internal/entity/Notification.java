@@ -48,7 +48,7 @@ public class Notification extends BaseEntity {
     @Column
     private String targetName; // 대상 엔티티의 이름 (클럽명, 사용자명 등)
 
-    @JoinColumn(name = "receiver_id", nullable = false)
+    @Column(name = "receiver_id", nullable = false)
     private String receiverId;
 
     @Column(name = "sender_id", nullable = false)
