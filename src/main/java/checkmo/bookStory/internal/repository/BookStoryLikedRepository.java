@@ -9,19 +9,16 @@ import org.springframework.data.repository.query.Param;
 
 public interface BookStoryLikedRepository extends JpaRepository<BookStoryLiked, Long> {
 
-    /**
-     * 특정 사용자가 BookStory를 좋아요했는지 여부 확인
-     */
-    boolean existsByMemberIdAndBookStoryId(String memberId, Long bookStoryId);
+    @Query("SELECT COUNT(bsl) > 0 FROM BookStoryLiked bsl WHERE bsl.memberId = :memberId AND bsl.bookStory.id = :bookStoryId")
+    boolean existsByMemberIdAndBookStoryId(@Param("memberId") String memberId, @Param("bookStoryId") Long bookStoryId);
 
-    /**
-     * 특정 사용자가 좋아요한 BookStory Id 목록을 조회
-     */
-    @Query("SELECT bsl.bookStoryId FROM BookStoryLiked bsl WHERE bsl.memberId = :memberId AND bsl.bookStoryId IN :bookStoryIds")
-    List<Long> findLikedBookStoryIdsByMemberIdAndBookStoryIds(
+    @Query("SELECT bsl.bookStory.id FROM BookStoryLiked bsl WHERE bsl.memberId = :memberId AND bsl.bookStory.id IN :bookStoryIds")
+    List<Long> findLikedBookStoryIds(
             @Param("memberId") String memberId,
             @Param("bookStoryIds") List<Long> bookStoryIds
     );
 
-    Optional<BookStoryLiked> findBookStoryLikedByBookStoryIdAndMemberId(Long bookStoryId, String memberId);
+    @Query("SELECT bsl FROM BookStoryLiked bsl WHERE bsl.bookStory.id = :bookStoryId AND bsl.memberId = :memberId")
+    Optional<BookStoryLiked> findByBookStoryAndMember(@Param("bookStoryId") Long bookStoryId,
+                                                      @Param("memberId") String memberId);
 }

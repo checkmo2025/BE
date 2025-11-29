@@ -89,7 +89,7 @@ public class BookStoryQueryService {
                 .toList();
 
         // 배치로 좋아요한 BookStory ID 목록 조회
-        List<Long> likedBookStoryIds = bookStoryLikedRepository.findLikedBookStoryIdsByMemberIdAndBookStoryIds(memberId,
+        List<Long> likedBookStoryIds = bookStoryLikedRepository.findLikedBookStoryIds(memberId,
                 bookStoryIds);
         Set<Long> likedIdSet = new HashSet<>(likedBookStoryIds);
 
