@@ -1,0 +1,31 @@
+package checkmo.clubMeeting.web.dto.bookshelf;
+
+import checkmo.clubMeeting.internal.validation.validRate.ValidRate;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+public class BookShelfRequestDTO {
+
+    @Getter
+    @NoArgsConstructor
+    public static class BookReviewCreate {
+        @NotBlank(message = "한줄평은 필수 입력입니다.")
+        @Size(max = 40, message = "한줄평은 40자 이하로 입력해주세요.")
+        private String description;
+
+        @NotNull(message = "평점은 null이 될 수 없습니다.")
+        @ValidRate
+        private Double rate;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class TopicCreate {
+        @NotBlank(message = "발제는 필수 입력입니다.")
+        @Size(max = 255, message = "발제는 255자 이하로 입력해주세요.")
+        private String description;
+    }
+}

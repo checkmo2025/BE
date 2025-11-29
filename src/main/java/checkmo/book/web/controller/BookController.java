@@ -1,0 +1,59 @@
+package checkmo.book.web.controller;
+
+import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.web.dto.BookResponseDTO;
+import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import checkmo.common.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/books")
+@RequiredArgsConstructor
+@Tag(name = "책 검색", description = "알라딘 API를 이용한 책 검색 API")
+public class BookController {
+
+    private final AladinApiService aladinApiService;
+
+    @Operation(summary = "책 검색 API", description = "키워드를 이용해 알라딘에서 책 목록을 검색합니다.")
+    @Parameters({
+            @Parameter(name = "keyword", description = "검색할 키워드 (책 제목, 저자)", required = true, example = "자바"),
+            @Parameter(name = "page", description = "페이지 번호 (값 넣지 않으면 1부터 시작 그 다음 요청은 반드시 2!!)", example = "1")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
+    })
+    @GetMapping("/search")
+    public ApiResponse<BookResponseDTO.BookList> searchBook(
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "1")
+            @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
+            int page
+    ) {
+        BookResponseDTO.BookList result = aladinApiService.searchBooks(keyword, page);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(summary = "책 상세 정보 조회 API", description = "ISBN 코드를 이용해 책의 상세 정보를 조회합니다.")
+    @Parameter(name = "isbn", description = "책의 13자리 ISBN", required = true, example = "9791169213882")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
+    })
+    @GetMapping({"/{isbn}"})
+    public ApiResponse<DetailInfo> getBookDetail(@PathVariable String isbn) {
+        DetailInfo result = aladinApiService.retrieveBookDetailInfo(isbn);
+        return ApiResponse.onSuccess(result);
+    }
+}

@@ -1,0 +1,158 @@
+package checkmo.infra.s3.internal.service;
+
+import checkmo.infra.s3.internal.config.properties.S3Properties;
+import checkmo.infra.s3.internal.exception.S3ErrorStatus;
+import checkmo.infra.s3.internal.exception.S3InfraException;
+import checkmo.infra.s3.web.dto.S3ResponseDTO;
+import java.util.Set;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class S3Service {
+
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
+    );
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+            ".jpg", ".jpeg", ".png", ".webp", ".gif"
+    );
+    private final S3Presigner s3Presigner;
+    private final S3Client s3Client;
+    private final S3Properties s3Properties;
+
+    public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType) {
+        // Content-Type 검증
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE);
+        }
+
+        // S3에 저장될 파일의 고유 경로(key) 생성
+        String key = generateUniqueKey(fileName);
+
+        // 생성된 key를 기반으로 presigned url 생성
+        String presignedUrl = generatePresignedUrl(key, contentType);
+
+        // S3에 저장될 image url 생성
+        String imageUrl = String.format("https://%s.s3.%s.amazonaws.com/%s",
+                s3Properties.getS3().getBucket(),
+                s3Properties.getRegion().getName(),
+                key
+        );
+
+        return S3ResponseDTO.PresignedUrl.builder()
+                .presignedUrl(presignedUrl)
+                .imageUrl(imageUrl)
+                .build();
+    }
+
+    public void deleteImage(String key) {
+        // key가 null이거나 비어있으면 예외 발생 -> 프론트에서 잘못 전달한 상황
+        if (key == null || key.trim().isEmpty()) {
+            throw new S3InfraException(S3ErrorStatus.S3_FILE_DELETE_FAILED);
+        }
+
+        try {
+            // S3에 파일 삭제 요청 객체 생성
+            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                    .bucket(s3Properties.getS3().getBucket())
+                    .key(key)
+                    .build();
+
+            // S3에 파일 삭제 요청
+            s3Client.deleteObject(deleteRequest);
+        } catch (Exception e) {
+            log.error("S3 파일 삭제 실패: {}", key, e);
+            throw new S3InfraException(S3ErrorStatus.S3_FILE_DELETE_FAILED, e.getMessage());
+        }
+    }
+
+    // url에서 key 추출
+    public String extractKeyFromUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return null;
+        }
+
+        // S3에 저장된 것이 맞는지 확읺
+        if (!url.contains("amazonaws.com/") || !url.startsWith("https://")) {
+            return null;
+        }
+
+        // amazonaws.com/ 기준으로 분할 -> 이 바로 다음 부분이 key
+        String[] parts = url.split("amazonaws.com/");
+        if (parts.length <= 1) {
+            return null;
+        }
+
+        String key = parts[1];
+
+        // 만약 key 뒤에 쿼리 스트링이 있을 경우 제거
+        int queryIndex = key.indexOf('?');
+        return queryIndex > 0 ? key.substring(0, queryIndex) : key;
+    }
+
+    private String generatePresignedUrl(String key, String contentType) {
+        try {
+            // S3에 파일을 업로드하기 위한 PutObject 요청 객체 생성 - 저장할 때는 Put 방식으로 저장하기 때문
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(s3Properties.getS3().getBucket())
+                    .key(key)
+                    .contentType(contentType)
+                    .build();
+
+            // Presigned URL 생성을 위한 요청 객체 생성
+            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(s3Properties.getS3().getPresignedUrlExpiration())
+                    .putObjectRequest(putObjectRequest)
+                    .build();
+
+            // S3 Presigner를 통해 실제 presigned URL 생성
+            PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+
+            // presigned URL을 문자열로 변환
+            String presignedUrl = presignedRequest.url().toString();
+
+            log.info("새로운 key로 presigned url 생성: {}", key);
+            return presignedUrl;
+        } catch (Exception e) {
+            log.error("key를 통한 presigned url 생성 실패: {}", key, e);
+            throw new S3InfraException(S3ErrorStatus.S3_PRESIGNED_URL_GENERATION_FAILED, e.getMessage());
+        }
+    }
+
+    private String generateUniqueKey(String originalFileName) {
+        String extension = getFileExtension(originalFileName);
+
+        String uniqueId = UUID.randomUUID().toString();
+
+        // S3 버킷에 저장될 경로와 UUID 파일명.확장자 -> 이게 Key가 됨
+        return String.format("images/%s%s", uniqueId, extension);
+    }
+
+    private String getFileExtension(String fileName) {
+        // 파일의 확장자가 제대로 명시되지 않은 경우
+        if (fileName == null || !fileName.contains(".")) {
+            return "";
+        }
+
+        // 파일 확장자 추출
+        String extension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+
+        // 허용된 확장자만 통과
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE);
+        }
+
+        return extension;
+    }
+}

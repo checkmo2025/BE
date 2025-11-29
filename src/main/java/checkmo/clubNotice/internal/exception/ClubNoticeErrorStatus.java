@@ -1,0 +1,47 @@
+package checkmo.clubNotice.internal.exception;
+
+import checkmo.common.apiPayload.code.BaseErrorCode;
+import checkmo.common.apiPayload.code.ErrorReasonDTO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@AllArgsConstructor
+public enum ClubNoticeErrorStatus implements BaseErrorCode {
+    // 공지사항
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_400", "공지사항을 찾을 수 없습니다."),
+    NOTICE_MEETING_VERSION_NOT_NULL(HttpStatus.BAD_REQUEST, "NOTICE_401",
+            "모임 공지사항의 경우 meetingVersion은 null이 아니어야 합니다."),
+    NOTICE_INVALID_TAG_TYPE(HttpStatus.BAD_REQUEST, "NOTICE_402", "유효하지 않은 공지 유형입니다. (공지, 모임, 투표 중 하나)"),
+    NOTICE_MEETING_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_403", "모임 공지사항은 삭제할 수 없습니다."),
+
+    // 투표
+    MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_401", "하나의 항목에만 투표 가능합니다."),
+    VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_403", "투표 가능 시간이 아닙니다."),
+    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다."),
+    ;
+
+    private final HttpStatus httpStatus;
+    private final String code;
+    private final String message;
+
+    @Override
+    public ErrorReasonDTO getReason() {
+        return ErrorReasonDTO.builder()
+                .code(code)
+                .message(message)
+                .isSuccess(false)
+                .build();
+    }
+
+    @Override
+    public ErrorReasonDTO getReasonHttpStatus() {
+        return ErrorReasonDTO.builder()
+                .httpStatus(httpStatus)
+                .code(code)
+                .message(message)
+                .isSuccess(false)
+                .build();
+    }
+}

@@ -50,7 +50,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // ============= 환경 변수 관리 =============
-    //implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
     // ============= JWT 인증 =============
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
@@ -76,6 +76,22 @@ dependencies {
     // ============ AWS 클라우드 서비스 =============
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
     implementation "io.awspring.cloud:spring-cloud-aws-starter-s3"
+
+    // ============ Spring Modulith =============
+    implementation 'org.springframework.modulith:spring-modulith-starter-core'
+    implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
+    implementation 'org.springframework.modulith:spring-modulith-events-api'
+    testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
+
+    // ============ flyway =============
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.modulith:spring-modulith-bom:1.4.4"
+    }
 }
 
 tasks.named('test') {

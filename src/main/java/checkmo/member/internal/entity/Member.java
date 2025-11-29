@@ -1,0 +1,94 @@
+package checkmo.member.internal.entity;
+
+import checkmo.common.BaseEntity;
+import checkmo.member.internal.exception.MemberErrorStatus;
+import checkmo.member.internal.exception.MemberException;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+public class Member extends BaseEntity {
+
+    @Id
+    @Column(nullable = false, unique = true)
+    private String id;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String nickName;
+
+    @Column(length = 20, nullable = false)
+    private String description;
+
+    private String imgUrl;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
+    private List<Follow> followers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
+    private List<Follow> followings = new ArrayList<>();
+
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "member_interest_categories",
+            joinColumns = @JoinColumn(name = "member_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private Set<MemberInterestCategory> interestCategories = new HashSet<>();
+
+    public void updateAdditionalInfo(String nickName, String description, String imgUrl) {
+        this.nickName = nickName != null ? nickName : "";
+        this.description = description != null ? description : "";
+        this.imgUrl = imgUrl != null ? imgUrl : "";
+    }
+
+    public void updateProfile(String description, String imgUrl) {
+        this.description = description != null ? description : "";
+        this.imgUrl = imgUrl != null ? imgUrl : "";
+    }
+
+    public void updateInterestCategories(Set<MemberInterestCategory> newCategories) {
+        this.interestCategories.clear();
+        if (newCategories != null) {
+            this.interestCategories.addAll(newCategories);
+        }
+    }
+
+    public static boolean isSameMember(String memberId1, String memberId2) {
+        return memberId1.equals(memberId2);
+    }
+
+    public void verifyNotSelf(String memberId) {
+        if (this.id.equals(memberId)) {
+            throw new MemberException(MemberErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
+        }
+    }
+}
