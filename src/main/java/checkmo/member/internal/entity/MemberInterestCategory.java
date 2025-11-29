@@ -1,18 +1,19 @@
 package checkmo.member.internal.entity;
 
-/**
- * 회원의 관심 도서 카테고리
- */
 public enum MemberInterestCategory {
-
-    NOVEL,
+    DOMESTIC,
+    FICTION_POETRY_DRAMA,
     ESSAY,
-    POEM,
+    ECONOMY_MANAGEMENT,
     SELF_DEVELOPMENT,
     HUMANITIES,
-    HISTORY,
+    TRAVEL,
+    HISTORY_CULTURE,
+    SOCIAL_SCIENCE,
+    POLITICS_DIPLOMACY_DEFENSE,
+    COMPUTER_IT,
     SCIENCE,
-    ECONOMICS,
-    SOCIETY,
-    ART
+    FOREIGN_LANGUAGE,
+    ART_POP_CULTURE,
+    CHILDREN
 }

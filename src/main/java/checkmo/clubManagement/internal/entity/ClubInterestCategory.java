@@ -1,11 +1,7 @@
 package checkmo.clubManagement.internal.entity;
 
-/**
- * 모임의 관심 도서 카테고리
- */
 public enum ClubInterestCategory {
-
-    DOMESTIC_BOOKS,
+    DOMESTIC,
     FICTION_POETRY_DRAMA,
     ESSAY,
     ECONOMY_MANAGEMENT,
@@ -19,6 +15,5 @@ public enum ClubInterestCategory {
     SCIENCE,
     FOREIGN_LANGUAGE,
     ART_POP_CULTURE,
-    CHILDREN_BOOK
-
+    CHILDREN
 }
