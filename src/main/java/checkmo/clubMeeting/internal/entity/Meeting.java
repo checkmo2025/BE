@@ -54,7 +54,7 @@ public class Meeting extends BaseEntity {
     @Column(name = "club_id", nullable = false)
     private Long clubId;
 
-    @Column(name = "book_id", insertable = false, updatable = false)
+    @Column(name = "book_id", nullable = false)
     private String bookId;
 
     @Builder.Default
