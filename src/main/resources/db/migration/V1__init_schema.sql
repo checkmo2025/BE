@@ -1,4 +1,3 @@
--- AuthUser
 CREATE TABLE IF NOT EXISTS auth_user (
     id VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
@@ -8,11 +7,9 @@ CREATE TABLE IF NOT EXISTS auth_user (
     deactivated_at DATETIME(6),
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (email)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Member
 CREATE TABLE IF NOT EXISTS member (
     id VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
@@ -21,18 +18,14 @@ CREATE TABLE IF NOT EXISTS member (
     img_url VARCHAR(255),
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (email),
-    UNIQUE (nick_name)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Member Interest Categories
 CREATE TABLE IF NOT EXISTS member_interest_categories (
     member_id VARCHAR(255) NOT NULL,
     category VARCHAR(50)
 ) ENGINE=InnoDB;
 
--- Book
 CREATE TABLE IF NOT EXISTS book (
     id VARCHAR(255) NOT NULL,
     title VARCHAR(255),
@@ -45,7 +38,6 @@ CREATE TABLE IF NOT EXISTS book (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Book Recommend
 CREATE TABLE IF NOT EXISTS book_recommend (
     id BIGINT NOT NULL AUTO_INCREMENT,
     book_id VARCHAR(255) NOT NULL,
@@ -59,7 +51,6 @@ CREATE TABLE IF NOT EXISTS book_recommend (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Book Review
 CREATE TABLE IF NOT EXISTS book_review (
     id BIGINT NOT NULL AUTO_INCREMENT,
     meeting_id BIGINT,
@@ -72,7 +63,6 @@ CREATE TABLE IF NOT EXISTS book_review (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Book Story
 CREATE TABLE IF NOT EXISTS book_story (
     id BIGINT NOT NULL AUTO_INCREMENT,
     member_id VARCHAR(255),
@@ -86,18 +76,15 @@ CREATE TABLE IF NOT EXISTS book_story (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Book Story Liked
 CREATE TABLE IF NOT EXISTS book_story_liked (
     id BIGINT NOT NULL AUTO_INCREMENT,
     book_story_id BIGINT,
     member_id VARCHAR(255) NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (book_story_id, member_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Club
 CREATE TABLE IF NOT EXISTS club (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
@@ -109,23 +96,19 @@ CREATE TABLE IF NOT EXISTS club (
     open BIT NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (name)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Club Interest Categories
 CREATE TABLE IF NOT EXISTS club_interest_categories (
     club_id BIGINT NOT NULL,
     category VARCHAR(50)
 ) ENGINE=InnoDB;
 
--- Club Participants
 CREATE TABLE IF NOT EXISTS club_participants (
     club_id BIGINT NOT NULL,
     participant_type VARCHAR(50)
 ) ENGINE=InnoDB;
 
--- Club Member
 CREATE TABLE IF NOT EXISTS club_member (
     id BIGINT NOT NULL AUTO_INCREMENT,
     club_id BIGINT,
@@ -137,7 +120,6 @@ CREATE TABLE IF NOT EXISTS club_member (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Club Member Team
 CREATE TABLE IF NOT EXISTS club_member_team (
     id BIGINT NOT NULL AUTO_INCREMENT,
     team_id BIGINT,
@@ -147,7 +129,6 @@ CREATE TABLE IF NOT EXISTS club_member_team (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Club Member Vote
 CREATE TABLE IF NOT EXISTS club_member_vote (
     id BIGINT NOT NULL AUTO_INCREMENT,
     vote_id BIGINT,
@@ -157,11 +138,9 @@ CREATE TABLE IF NOT EXISTS club_member_vote (
     item3 BIT NOT NULL,
     item4 BIT NOT NULL,
     item5 BIT NOT NULL,
-    PRIMARY KEY (id),
-    UNIQUE (vote_id, club_member_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Comment
 CREATE TABLE IF NOT EXISTS comment (
     id BIGINT NOT NULL AUTO_INCREMENT,
     book_story_id BIGINT,
@@ -173,18 +152,15 @@ CREATE TABLE IF NOT EXISTS comment (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Follow
 CREATE TABLE IF NOT EXISTS follow (
     id BIGINT NOT NULL AUTO_INCREMENT,
     follower_id VARCHAR(255),
     following_id VARCHAR(255),
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (follower_id, following_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Meeting
 CREATE TABLE IF NOT EXISTS meeting (
     id BIGINT NOT NULL AUTO_INCREMENT,
     club_id BIGINT NOT NULL,
@@ -202,7 +178,6 @@ CREATE TABLE IF NOT EXISTS meeting (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Notice
 CREATE TABLE IF NOT EXISTS notice (
     id BIGINT NOT NULL AUTO_INCREMENT,
     club_id BIGINT NOT NULL,
@@ -217,7 +192,6 @@ CREATE TABLE IF NOT EXISTS notice (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Notification
 CREATE TABLE IF NOT EXISTS notification (
     id BIGINT NOT NULL AUTO_INCREMENT,
     receiver_id VARCHAR(255) NOT NULL,
@@ -229,22 +203,18 @@ CREATE TABLE IF NOT EXISTS notification (
     is_read BIT NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (notification_type, source_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Team
 CREATE TABLE IF NOT EXISTS team (
     id BIGINT NOT NULL AUTO_INCREMENT,
     meeting_id BIGINT NOT NULL,
     team_number INTEGER NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (meeting_id, team_number)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Team Topic
 CREATE TABLE IF NOT EXISTS team_topic (
     id BIGINT NOT NULL AUTO_INCREMENT,
     team_id BIGINT,
@@ -252,11 +222,9 @@ CREATE TABLE IF NOT EXISTS team_topic (
     version BIGINT,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (team_id, topic_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Topic
 CREATE TABLE IF NOT EXISTS topic (
     id BIGINT NOT NULL AUTO_INCREMENT,
     meeting_id BIGINT NOT NULL,
@@ -268,7 +236,6 @@ CREATE TABLE IF NOT EXISTS topic (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Vote
 CREATE TABLE IF NOT EXISTS vote (
     id BIGINT NOT NULL AUTO_INCREMENT,
     club_id BIGINT NOT NULL,
@@ -290,7 +257,6 @@ CREATE TABLE IF NOT EXISTS vote (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
--- Spring Modulith 이벤트 테이블
 CREATE TABLE IF NOT EXISTS event_publication (
     id BINARY(16) NOT NULL,
     listener_id VARCHAR(255),
