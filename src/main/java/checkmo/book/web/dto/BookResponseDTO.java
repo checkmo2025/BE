@@ -19,6 +19,7 @@ public class BookResponseDTO {
         private String imgUrl;
         private String publisher;
         private String description;
+        private String link;
     }
 
     @Getter

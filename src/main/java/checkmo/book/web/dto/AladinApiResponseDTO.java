@@ -47,6 +47,9 @@ public class AladinApiResponseDTO {
         @JacksonXmlProperty(localName = "description")
         private String description;
 
+        @JacksonXmlProperty(localName = "link")
+        private String link;
+
         @JacksonXmlProperty(localName = "author")
         public void setAuthor(String rawAuthor) {
             if (rawAuthor == null || rawAuthor.trim().isEmpty()) {
