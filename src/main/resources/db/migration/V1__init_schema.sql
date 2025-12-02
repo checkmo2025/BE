@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS auth_user (
     deactivated_at DATETIME(6),
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (email)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS member (
@@ -19,9 +18,7 @@ CREATE TABLE IF NOT EXISTS member (
     img_url VARCHAR(255),
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (email),
-    UNIQUE (nick_name)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS member_interest_categories (
@@ -85,8 +82,7 @@ CREATE TABLE IF NOT EXISTS book_story_liked (
     member_id VARCHAR(255) NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (book_story_id, member_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS club (
@@ -100,8 +96,7 @@ CREATE TABLE IF NOT EXISTS club (
     open BIT NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (name)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS club_interest_categories (
@@ -143,8 +138,7 @@ CREATE TABLE IF NOT EXISTS club_member_vote (
     item3 BIT NOT NULL,
     item4 BIT NOT NULL,
     item5 BIT NOT NULL,
-    PRIMARY KEY (id),
-    UNIQUE (vote_id, club_member_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS comment (
@@ -164,8 +158,7 @@ CREATE TABLE IF NOT EXISTS follow (
     following_id VARCHAR(255),
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (follower_id, following_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS meeting (
@@ -210,8 +203,7 @@ CREATE TABLE IF NOT EXISTS notification (
     is_read BIT NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (notification_type, source_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS team (
@@ -220,8 +212,7 @@ CREATE TABLE IF NOT EXISTS team (
     team_number INTEGER NOT NULL,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (meeting_id, team_number)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS team_topic (
@@ -231,8 +222,7 @@ CREATE TABLE IF NOT EXISTS team_topic (
     version BIGINT,
     created_at DATETIME(6),
     updated_at DATETIME(6),
-    PRIMARY KEY (id),
-    UNIQUE (team_id, topic_id)
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS topic (

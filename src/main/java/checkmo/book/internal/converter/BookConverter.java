@@ -81,6 +81,7 @@ public class BookConverter {
                 .imgUrl(book.getImgUrl())
                 .publisher(book.getPublisher())
                 .description(book.getDescription())
+                .link(book.getLink())
                 .build();
     }
 
@@ -113,6 +114,7 @@ public class BookConverter {
                 .imgUrl(replaceImgUrl)
                 .publisher(item.getPublisher())
                 .description(cleanedDescription)
+                .link(item.getLink())
                 .build();
     }
 

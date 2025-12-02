@@ -11,8 +11,6 @@ spring:
       - flyway
   modulith:
     events:
-      jdbc-schema-initialization:
-        enabled: true
       completion-mode: DELETE
 
 server:

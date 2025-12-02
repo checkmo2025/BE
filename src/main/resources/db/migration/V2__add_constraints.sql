@@ -3,6 +3,12 @@
 ALTER TABLE auth_user
     ADD CONSTRAINT UK_auth_user_email UNIQUE (email);
 
+ALTER TABLE member
+    ADD CONSTRAINT UK_member_email UNIQUE (email);
+
+ALTER TABLE member
+    ADD CONSTRAINT UK_member_nickname UNIQUE (nick_name);
+
 ALTER TABLE club
     ADD CONSTRAINT UK_club_name UNIQUE (name);
 
