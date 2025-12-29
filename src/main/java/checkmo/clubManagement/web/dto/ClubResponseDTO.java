@@ -1,14 +1,14 @@
 package checkmo.clubManagement.web.dto;
 
-import checkmo.book.BookExternalDTO;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.member.MemberExternalDTO;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 public class ClubResponseDTO {
 
@@ -99,32 +99,5 @@ public class ClubResponseDTO {
         private MemberExternalDTO.BasicInfo basicInfo;
         private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
         private String clubMemberStatus;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class BookRecommendList {
-        private List<BookRecommendDetail> bookRecommendList;
-        private boolean hasNext;
-        private Long nextCursor;
-        private int pageSize;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class BookRecommendDetail {
-        private Long id;
-        private String title;
-        private String content;
-        private double rate;
-        private String tag; // 추천 태그
-        private BookExternalDTO.BasicInfo bookInfo;
-        private MemberExternalDTO.BasicInfo authorInfo;
-        private boolean isAuthor;
-        private boolean isStaff;
     }
 }
