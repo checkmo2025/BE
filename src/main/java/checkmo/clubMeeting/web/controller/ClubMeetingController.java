@@ -14,19 +14,10 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping()
@@ -118,27 +109,6 @@ public class ClubMeetingController {
         MeetingResponseDTO.MeetingDetail meetingDetail
                 = clubMeetingQueryFacade.retrieveMeetingDetail(meetingId, memberId);
         return ApiResponse.onSuccess(meetingDetail);
-    }
-
-    @Operation(summary = "독서모임 캘린더 조회 API", description = "독서모임의 모임 캘린더를 조회합니다.")
-    @Parameters({
-            @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
-            @Parameter(name = "year", description = "조회하고자 하는 연도", required = true, example = "2023"),
-            @Parameter(name = "month", description = "조회하고자 하는 달", required = true, example = "10")
-    })
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
-    })
-    @GetMapping("/api/clubs/{clubId}/calendar")
-    public ApiResponse<MeetingResponseDTO.CalendarMeeting> getClubCalendar(
-            @PathVariable Long clubId,
-            @RequestParam @Min(2000) @Max(2050) int year,
-            @RequestParam @Min(1) @Max(12) int month,
-            @CurrentId String memberId
-    ) {
-        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveCalendarMeeting(clubId, year, month, memberId));
     }
 
     @Operation(summary = "독서 동아리 회원 중 참여 인원 페이지네이션 조회 API",
