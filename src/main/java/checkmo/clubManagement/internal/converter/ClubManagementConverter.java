@@ -1,20 +1,19 @@
 package checkmo.clubManagement.internal.converter;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
-import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
-
-import checkmo.book.BookExternalDTO;
-import checkmo.clubManagement.internal.entity.BookRecommend;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.member.MemberExternalDTO;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+
+import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubManagementConverter {
@@ -94,38 +93,4 @@ public class ClubManagementConverter {
                 .build();
     }
 
-    public static BookRecommend toBookRecommend(
-            ClubRequestDTO.CreateBookRecommend request,
-            String bookId,
-            ClubMember clubMember
-    ) {
-        return BookRecommend.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .rate(request.getRate())
-                .tag(request.getTag())
-                .clubMember(clubMember)
-                .bookId(bookId)
-                .build();
-    }
-
-    public static ClubResponseDTO.BookRecommendDetail toBookRecommendDetailDTO(
-            BookRecommend bookRecommend,
-            BookExternalDTO.BasicInfo bookInfo,
-            MemberExternalDTO.BasicInfo authorInfo,
-            String currentMemberNickname,
-            boolean isStaff
-    ) {
-        return ClubResponseDTO.BookRecommendDetail.builder()
-                .id(bookRecommend.getId())
-                .title(bookRecommend.getTitle())
-                .content(bookRecommend.getContent())
-                .rate(bookRecommend.getRate())
-                .tag(bookRecommend.getTag())
-                .bookInfo(bookInfo)
-                .authorInfo(authorInfo)
-                .isAuthor(authorInfo.getNickname().equals(currentMemberNickname))
-                .isStaff(isStaff)
-                .build();
-    }
 }

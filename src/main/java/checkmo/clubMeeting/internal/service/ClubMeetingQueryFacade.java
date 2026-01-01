@@ -6,12 +6,7 @@ import checkmo.book.BookExternalDTO.DetailInfo;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
-import checkmo.clubMeeting.internal.entity.BookReview;
-import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
-import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.entity.Team;
-import checkmo.clubMeeting.internal.entity.TeamTopic;
-import checkmo.clubMeeting.internal.entity.Topic;
+import checkmo.clubMeeting.internal.entity.*;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
@@ -21,37 +16,28 @@ import checkmo.clubMeeting.internal.service.query.ClubTopicQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.BookShelfDetail;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfo;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class ClubMeetingQueryFacade {
 
-    // 페이징 기본 크기 상수
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF = 3;
     private static final int TOPIC_PREVIEW_SIZE_FOR_MEETING = 4;
 
-    // Domain level 2
-    private final MemberAPI memberAPI;
-
-    // Domain level 1
     private final BookAPI bookAPI;
-
+    private final MemberAPI memberAPI;
     private final ClubManagementAPI clubManagementAPI;
 
     private final ClubMeetingQueryService clubMeetingQueryService;
@@ -296,24 +282,6 @@ public class ClubMeetingQueryFacade {
         return MeetingResponseDTO.TeamTopic.builder()
                 .teamNumber(teamNumber)
                 .topics(topicList)
-                .membershipInfo(clubMembershipInfoInfo)
-                .build();
-    }
-
-    public MeetingResponseDTO.CalendarMeeting retrieveCalendarMeeting(
-            Long clubId,
-            int year,
-            int month,
-            String memberId
-    ) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
-
-        List<Meeting> meetings = clubMeetingQueryService.retrieveMeetings(clubId, year, month, memberId);
-
-        List<MeetingInfo> meetingInfoDTOList = toMeetingInfoDTOList(meetings);
-        return MeetingResponseDTO.CalendarMeeting.builder()
-                .meetingInfoList(meetingInfoDTOList)
                 .membershipInfo(clubMembershipInfoInfo)
                 .build();
     }

@@ -1,26 +1,8 @@
 package checkmo.clubManagement.internal.entity;
 
 import checkmo.common.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Getter
 @Builder
@@ -46,10 +28,6 @@ public class ClubMember extends BaseEntity {
 
     @Column(name = "member_id", nullable = false)
     private String memberId;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "clubMember", cascade = CascadeType.ALL)
-    private List<BookRecommend> bookRecommends = new ArrayList<>();
 
     public boolean isStaff() {
         return this.clubMemberStatus == ClubMemberStatus.STAFF;

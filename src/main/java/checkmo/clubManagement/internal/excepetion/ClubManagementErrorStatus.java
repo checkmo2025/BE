@@ -22,9 +22,6 @@ public enum ClubManagementErrorStatus implements BaseErrorCode {
     CLUB_STAFF_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "CLUB_MEMBER_405", "운영진은 클럽을 탈퇴할 수 없습니다."),
     CLUB_MEMBER_IS_NOT_ACTIVE(HttpStatus.FORBIDDEN, "CLUB_MEMBER_406", "해당 클럽 회원은 활성화 상태(STAFF, MEMBER)가 아닙니다."),
 
-    // 책 추천,
-    CLUB_BOOK_RECOMMEND_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_RECOMMEND_400", "추천 책을 찾을 수 없습니다."),
-    CLUB_BOOK_RECOMMEND_FORBIDDEN(HttpStatus.FORBIDDEN, "BOOK_RECOMMEND_401", "해당 추천 책에 대한 권한이 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
