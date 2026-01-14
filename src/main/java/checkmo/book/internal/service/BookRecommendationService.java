@@ -27,7 +27,7 @@ public class BookRecommendationService {
         try {
             Object cachedData = redisTemplate.opsForValue().get(REDIS_KEY);
 
-            if (cachedData instanceof BookResponseDTO.BookList recommendedBooks) {
+            if (cachedData instanceof BookResponseDTO.BookList recommendedBooks && !isRecommendedBooksStale()) {
                 return recommendedBooks;
             }
 
