@@ -4,6 +4,7 @@ import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class BookRecommendationService {
 
     private static final String REDIS_KEY = "book:recommendations:daily";
+    private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:daily:updated_at";
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final AladinApiService aladinApiService;
@@ -85,6 +87,7 @@ public class BookRecommendationService {
                     .build();
 
             redisTemplate.opsForValue().set(REDIS_KEY, bookList);
+            redisTemplate.opsForValue().set(REDIS_UPDATED_AT_KEY, LocalDate.now().toString());
         } catch (Exception e) {
             log.error("Redis에 추천 책 저장 중 오류 발생", e);
         }
@@ -96,6 +99,22 @@ public class BookRecommendationService {
         } catch (Exception e) {
             log.error("Redis 키 확인 중 오류 발생", e);
             return false;
+        }
+    }
+
+    public boolean isRecommendedBooksStale() {
+        try {
+            Object updatedAt = redisTemplate.opsForValue().get(REDIS_UPDATED_AT_KEY);
+
+            if (updatedAt == null) {
+                return true;
+            }
+
+            LocalDate cachedDate = LocalDate.parse(updatedAt.toString());
+            return cachedDate.isBefore(LocalDate.now());
+        } catch (Exception e) {
+            log.error("캐시 staleness 확인 중 오류 발생", e);
+            return true;
         }
     }
 

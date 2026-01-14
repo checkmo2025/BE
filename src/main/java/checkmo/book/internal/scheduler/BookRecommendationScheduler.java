@@ -23,12 +23,13 @@ public class BookRecommendationScheduler {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initializeRecommendedBooks() {
-        if (!recommendationService.hasRecommendedBooks()) {
-            log.info("서버 시작 시 Redis에 추천 책 데이터가 없음. 알라딘에 요청 시작");
+        if (!recommendationService.hasRecommendedBooks() || recommendationService.isRecommendedBooksStale()) {
+            log.info("서버 시작 시 Redis에 추천 책 데이터가 없거나 오래됨. 알라딘에 요청 시작");
             retrieveAndSaveRecommendedBooks();
-        } else {
-            log.info("서버 시작 시 Redis에 추천 책 데이터가 존재");
+            return;
         }
+
+        log.info("서버 시작 시 Redis에 최신 추천 책 데이터가 존재");
     }
 
     private void retrieveAndSaveRecommendedBooks() {
