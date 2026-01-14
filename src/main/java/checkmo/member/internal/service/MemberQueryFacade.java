@@ -2,6 +2,7 @@ package checkmo.member.internal.service;
 
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
+import checkmo.common.template.ExtractHelper;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
@@ -12,13 +13,14 @@ import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +52,7 @@ public class MemberQueryFacade {
                 DEFAULT_PAGE_SIZE
         );
         List<Follow> followerList = followCursorResult.content();
-        List<String> followerIdList = extractFollowerIds(followerList);
+        List<String> followerIdList = ExtractHelper.extractDistinctList(followerList, follow -> follow.getFollower().getId());
 
         // 배치 조회 (내부 DTO)
         List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followerIdList, memberId);
@@ -70,7 +72,7 @@ public class MemberQueryFacade {
         );
         List<Follow> followingList = followCursorResult.content();
 
-        List<String> followingIdList = extractFollowingIds(followingList);
+        List<String> followingIdList = ExtractHelper.extractDistinctList(followingList, follow -> follow.getFollowing().getId());
 
         // 배치 조회 (내부 DTO)
         List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followingIdList, memberId);
@@ -80,20 +82,6 @@ public class MemberQueryFacade {
                 .hasNext(followCursorResult.hasNext())
                 .nextCursor(followCursorResult.nextCursor())
                 .build();
-    }
-
-    private List<String> extractFollowingIds(List<Follow> followingList) {
-        return followingList.stream()
-                .map(follow -> follow.getFollowing().getId())
-                .distinct()
-                .toList();
-    }
-
-    private List<String> extractFollowerIds(List<Follow> followerList) {
-        return followerList.stream()
-                .map(follow -> follow.getFollower().getId())
-                .distinct()
-                .toList();
     }
 
     /**

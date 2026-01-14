@@ -11,18 +11,15 @@ import checkmo.clubNotice.internal.entity.NoticeTag;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
+import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfo;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +55,7 @@ public class ClubNoticeQueryFacade {
         List<Vote> votes = clubNoticeQueryService.retrieveVotes(clubId, onlyImportant, cursorId, DEFAULT_PAGE_SIZE);
 
         // 공지사항에 모임 정보 미리 조회
-        Set<Long> meetingIds = extractMeetingIdsFromNotices(notices);
+        Set<Long> meetingIds = ExtractHelper.extractSet(notices, Notice::getMeetingId);
         Map<Long, DetailInfo> meetingInfos = clubMeetingAPI.fetchMeetingDetailInfoByMeetingIds(meetingIds);
 
         // 생성시간 순으로 병합 및 DTO 변환
@@ -133,16 +130,6 @@ public class ClubNoticeQueryFacade {
         }
 
         return resultList;
-    }
-
-    private Set<Long> extractMeetingIdsFromNotices(List<Notice> notices) {
-        if (notices == null) {
-            return Set.of();
-        }
-        return notices.stream()
-                .map(Notice::getMeetingId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
     }
 
     private ClubNoticeResponseDTO.ClubNoticeDetail getPureNoticeDetail(
@@ -292,7 +279,7 @@ public class ClubNoticeQueryFacade {
      * 실명 투표 시, clubMemberId → BasicInfo 배치 조회
      */
     private Map<Long, MemberExternalDTO.BasicInfo> getVoterInfoByClubMemberIds(List<ClubMemberVote> clubMemberVotes) {
-        Set<Long> clubMemberIds = extractClubMemberIds(clubMemberVotes);
+        Set<Long> clubMemberIds = ExtractHelper.extractSet(clubMemberVotes, ClubMemberVote::getClubMemberId);
         if (clubMemberIds.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -321,13 +308,6 @@ public class ClubNoticeQueryFacade {
                         membership -> memberInfoMap.get(membership.getMemberId()),
                         (existing, ignored) -> existing // key 충돌 시 첫 번째 값 사용
                 ));
-    }
-
-    private Set<Long> extractClubMemberIds(List<ClubMemberVote> clubMemberVotes) {
-        return clubMemberVotes.stream()
-                .map(ClubMemberVote::getClubMemberId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
     }
 
     private List<String> extractMemberIds(Map<Long, MembershipInfo> membershipMap) {

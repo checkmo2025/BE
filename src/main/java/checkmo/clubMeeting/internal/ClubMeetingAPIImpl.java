@@ -10,13 +10,15 @@ import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
+import checkmo.common.template.ExtractHelper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +45,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         if (meetings.size() != meetingIds.size()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.MEETING_NOT_FOUND);
         }
-
-        List<String> bookIds = extractBookIds(meetings);
+        List<String> bookIds = ExtractHelper.extractDistinctList(meetings, Meeting::getBookId);
 
         Map<String, BasicInfo> bookBasicInfo = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
@@ -62,10 +63,4 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 ));
     }
 
-    private List<String> extractBookIds(List<Meeting> meetings) {
-        return meetings.stream()
-                .map(Meeting::getBookId)
-                .distinct()
-                .toList();
-    }
 }
