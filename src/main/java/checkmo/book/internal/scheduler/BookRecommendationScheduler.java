@@ -15,7 +15,7 @@ public class BookRecommendationScheduler {
 
     private final BookRecommendationService recommendationService;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?", zone = "Asia/Seoul")
     public void updateDailyRecommendedBooks() {
         log.info("일일 추천 책 갱신 시작");
         retrieveAndSaveRecommendedBooks();
