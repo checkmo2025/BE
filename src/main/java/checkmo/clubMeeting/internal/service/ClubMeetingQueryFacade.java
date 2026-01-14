@@ -6,7 +6,12 @@ import checkmo.book.BookExternalDTO.DetailInfo;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
-import checkmo.clubMeeting.internal.entity.*;
+import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
+import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.entity.Team;
+import checkmo.clubMeeting.internal.entity.TeamTopic;
+import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
@@ -22,12 +27,15 @@ import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfo;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -94,18 +102,17 @@ public class ClubMeetingQueryFacade {
         // 미팅의 책 정보 조회
         DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
 
-        List<BookShelfResponseDTO.TopicDetail> topicDetailList
-                = mapTopicsToTopicDetail(topics, authorInfoMap, memberId);
-        BookShelfResponseDTO.TopicList topicListDTO = BookShelfResponseDTO.TopicList.builder()
-                .topicDetailList(topicDetailList)
-                .hasNext(topicCursorResult.hasNext())
-                .nextCursor(topicCursorResult.nextCursor())
-                .membershipInfo(null)
-                .build();
         return BookShelfDetail.builder()
                 .meetingInfo(ClubMeetingConverter.toMeetingInfoDTO(meeting))
                 .bookDetailInfo(bookInfo)
-                .topicList(topicListDTO)
+                .topicList(
+                        BookShelfResponseDTO.TopicList.builder()
+                                .topicDetailList(mapTopicsToTopicDetail(topics, authorInfoMap, memberId))
+                                .hasNext(topicCursorResult.hasNext())
+                                .nextCursor(topicCursorResult.nextCursor())
+                                .membershipInfo(null)
+                                .build()
+                )
                 .membershipInfo(clubMembershipInfoInfo)
                 .build();
     }
@@ -125,10 +132,8 @@ public class ClubMeetingQueryFacade {
         List<String> authorIds = ExtractHelper.extractDistinctList(topics, Topic::getMemberId);
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
-        List<BookShelfResponseDTO.TopicDetail> topicDetailList
-                = mapTopicsToTopicDetail(topics, authorInfoMap, memberId);
         return BookShelfResponseDTO.TopicList.builder()
-                .topicDetailList(topicDetailList)
+                .topicDetailList(mapTopicsToTopicDetail(topics, authorInfoMap, memberId))
                 .hasNext(topicCursorResult.hasNext())
                 .nextCursor(topicCursorResult.nextCursor())
                 .membershipInfo(clubMembershipInfoInfo)
@@ -151,10 +156,8 @@ public class ClubMeetingQueryFacade {
         List<String> authorIds = ExtractHelper.extractDistinctList(bookReviews, BookReview::getMemberId);
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
-        List<BookShelfResponseDTO.BookReviewDetail> bookReviewDetailList
-                = mapReviewsToReviewDetail(bookReviews, authorInfoMap);
         return BookShelfResponseDTO.BookReviewList.builder()
-                .bookReviewDetailList(bookReviewDetailList)
+                .bookReviewDetailList(mapReviewsToReviewDetail(bookReviews, authorInfoMap))
                 .hasNext(bookReviewCursorResult.hasNext())
                 .nextCursor(bookReviewCursorResult.nextCursor())
                 .membershipInfo(clubMembershipInfoInfo)
@@ -180,9 +183,8 @@ public class ClubMeetingQueryFacade {
         List<String> bookIds = ExtractHelper.extractDistinctList(meetings, Meeting::getBookId);
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
-        List<MeetingResponseDTO.MeetingInfo> meetingInfoList = mapMeetingsToMeetingInfo(meetings, bookInfoMap);
         return MeetingResponseDTO.MeetingList.builder()
-                .meetingInfoList(meetingInfoList)
+                .meetingInfoList(mapMeetingsToMeetingInfo(meetings, bookInfoMap))
                 .hasNext(meetingCursorResult.hasNext())
                 .nextCursor(meetingCursorResult.nextCursor())
                 .membershipInfo(clubMembershipInfoInfo)
@@ -227,14 +229,10 @@ public class ClubMeetingQueryFacade {
         BookExternalDTO.BasicInfo bookSharedDTO = bookAPI.fetchBookBasicInfo(meeting.getBookId());
 
         // DTO 변환
-        MeetingResponseDTO.MeetingInfo meetingInfo = ClubMeetingConverter.toMeetingInfoDTO(meeting, bookSharedDTO);
-        List<MeetingResponseDTO.Topic> topicList = mapTopicsToTopicDetail(topics, authorInfoMap,
-                topicIdToSelectTeamNumbers);
-        List<MeetingResponseDTO.TeamTopic> teamTopicList = assemble(teams, teamNumberToTeamTopics, authorInfoMap);
         return MeetingResponseDTO.MeetingDetail.builder()
-                .meetingInfo(meetingInfo)
-                .topics(topicList)
-                .teams(teamTopicList)
+                .meetingInfo(ClubMeetingConverter.toMeetingInfoDTO(meeting, bookSharedDTO))
+                .topics(mapTopicsToTopicDetail(topics, authorInfoMap, topicIdToSelectTeamNumbers))
+                .teams(assemble(teams, teamNumberToTeamTopics, authorInfoMap))
                 .membershipInfo(clubMembershipInfoInfo)
                 .build();
     }
@@ -255,10 +253,8 @@ public class ClubMeetingQueryFacade {
         List<String> authorIds = ExtractHelper.extractDistinctList(topics, Topic::getMemberId);
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
-        List<MeetingResponseDTO.Topic> topicList
-                = mapTopicsToTopicDetail(topics, authorInfoMap, topicIdToSelectTeamNumbers);
         return MeetingResponseDTO.TopicDTO.builder()
-                .topics(topicList)
+                .topics(mapTopicsToTopicDetail(topics, authorInfoMap, topicIdToSelectTeamNumbers))
                 .membershipInfo(clubMembershipInfoInfo)
                 .build();
     }
@@ -352,11 +348,10 @@ public class ClubMeetingQueryFacade {
         List<String> memberIds = extractMemberIds(clubMembership);
         Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap
                 = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
-        List<BasicInfo> memberInfo = memberBasicInfoMap.values().stream().toList();
 
         return MeetingResponseDTO.TeamMember.builder()
                 .teamNumber(teamNumber)
-                .members(memberInfo)
+                .members(memberBasicInfoMap.values().stream().toList())
                 .membershipInfo(clubMembershipInfoInfo)
                 .build();
     }
