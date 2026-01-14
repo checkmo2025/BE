@@ -8,7 +8,6 @@ spring:
       - jwt
       - oauth2
       - s3
-      - flyway
   modulith:
     events:
       completion-mode: DELETE

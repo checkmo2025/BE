@@ -14,6 +14,14 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations:
+      - classpath:db/migration
+      - classpath:db/seed/local
+
   docker:
     compose:
       enabled: false
