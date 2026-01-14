@@ -1,5 +1,6 @@
 package checkmo.book.web.controller;
 
+import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
 
     private final AladinApiService aladinApiService;
+    private final BookRecommendationService bookRecommendationService;
 
     @Operation(summary = "책 검색 API", description = "키워드를 이용해 알라딘에서 책 목록을 검색합니다.")
     @Parameters({
@@ -54,6 +56,17 @@ public class BookController {
     @GetMapping({"/{isbn}"})
     public ApiResponse<DetailInfo> getBookDetail(@PathVariable String isbn) {
         DetailInfo result = aladinApiService.retrieveBookDetailInfo(isbn);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(summary = "책 추천 API", description = "블로그 베스트 추천 책 목록을 가져옵니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
+    })
+    @GetMapping("/recommend")
+    public ApiResponse<BookResponseDTO.BookList> recommendBooks() {
+        BookResponseDTO.BookList result = bookRecommendationService.retrieveRecommendedBooks();
         return ApiResponse.onSuccess(result);
     }
 }
