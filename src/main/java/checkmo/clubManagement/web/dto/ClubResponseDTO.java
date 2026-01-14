@@ -16,6 +16,22 @@ public class ClubResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class ClubCategoryItem {
+        private String code;
+        private String description;
+
+        public static ClubCategoryItem from(ClubInterestCategory clubInterestCategory) {
+            return ClubCategoryItem.builder()
+                    .code(clubInterestCategory.name())
+                    .description(clubInterestCategory.getDescription())
+                    .build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class ClubList {
         private List<ClubWithMyStatus> clubList;
         private boolean hasNext;
@@ -60,7 +76,7 @@ public class ClubResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean open;
-        private List<ClubInterestCategory> category;
+        private List<ClubCategoryItem> category;
         private String region;
         private List<Club.ParticipantType> participantTypes;
         private String insta;

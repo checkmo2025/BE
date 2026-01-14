@@ -1,6 +1,7 @@
 package checkmo.clubManagement.internal.converter;
 
 import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
@@ -77,6 +79,12 @@ public class ClubManagementConverter {
                 .build();
     }
 
+    private static List<ClubResponseDTO.ClubCategoryItem> toClubCategoryItems(Set<ClubInterestCategory> categories) {
+        return categories.stream()
+                .map(ClubResponseDTO.ClubCategoryItem::from)
+                .toList();
+    }
+
     public static ClubResponseDTO.ClubDetail toClubDetailDTO(Club club, boolean isStaff) {
         return ClubResponseDTO.ClubDetail.builder()
                 .clubId(club.getId())
@@ -84,7 +92,7 @@ public class ClubManagementConverter {
                 .description(club.getDescription())
                 .profileImageUrl(club.getProfileImgUrl())
                 .open(club.isOpen())
-                .category(club.getInterestCategories().stream().toList())
+                .category(toClubCategoryItems(club.getInterestCategories()))
                 .region(club.getRegion())
                 .participantTypes(club.getParticipantTypes())
                 .insta(club.getInsta())
