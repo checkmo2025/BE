@@ -5,6 +5,8 @@ import java.time.LocalDate;
 
 public class DayOfWeekUtils {
 
+    private DayOfWeekUtils() {}
+
     private static final int BOOKS_PER_DAY = 4;
 
     /**
