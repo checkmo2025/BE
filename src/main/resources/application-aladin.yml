@@ -4,11 +4,14 @@ aladin:
       base: http://www.aladin.co.kr/ttb/api
       item-search: /ItemSearch.aspx
       item-lookup: /ItemLookUp.aspx
+      item-list: /ItemList.aspx
     auth:
       ttb-key: ${ALADIN_TTB_KEY}
       version: 20131101
     search:
-      query-type: Keyword
+      search-query-type: Keyword
+      recommend-query-type: BlogBest
+      search-target: Book
       output: xml
       max-results: 10
       item-id-type: ISBN13

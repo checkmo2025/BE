@@ -34,6 +34,9 @@ public class AladinProperties {
 
         @NotBlank(message = "Item Lookup URL은 필수입니다")
         private String itemLookup;
+
+        @NotBlank(message = "Item List URL은 필수입니다")
+        private String itemList;
     }
 
     @Getter
@@ -50,7 +53,13 @@ public class AladinProperties {
     @Setter
     public static class Search {
         @NotBlank(message = "검색 타입은 필수입니다")
-        private String queryType;
+        private String searchQueryType;
+
+        @NotBlank(message = "검색 타입은 필수입니다")
+        private String recommendQueryType;
+
+        @NotBlank(message = "검색 대상은 필수입니다")
+        private String searchTarget;
 
         @NotBlank(message = "출력 형식은 필수입니다")
         private String output;
