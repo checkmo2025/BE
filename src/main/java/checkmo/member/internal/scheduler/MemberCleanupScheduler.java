@@ -35,14 +35,15 @@ public class MemberCleanupScheduler {
         if (!ghostMembers.isEmpty()) {
             log.info("유령 회원 삭제 시작: {}명", ghostMembers.size());
 
-            for (Member ghost : ghostMembers) {
-                // 인증 데이터 삭제 (Authentication 모듈 API 호출)
-                authenticationAPI.deleteAuthData(ghost.getId());
+            List<String> ghostMemberIds = ghostMembers.stream()
+                                                      .map(Member::getId)
+                                                      .toList();
 
-                // 회원 삭제
-                memberRepository.deleteById(ghost.getId());
+            for (String id : ghostMemberIds) {
+                authenticationAPI.deleteAuthData(id);
             }
-            memberRepository.flush();
+
+            memberRepository.deleteAllByIdInBatch(ghostMemberIds);
 
             log.info("유령 회원 삭제 완료");
         }

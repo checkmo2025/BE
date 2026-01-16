@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
     private final AuthRepository authRepository;
+    private final ObjectMapper objectMapper;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -160,7 +161,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
 
         response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
+        response.setStatus(status.getHttpStatus().value());; // 401 Unauthorized
         response.setContentType("application/json");
 
         ApiResponse<Object> errorResponse = ApiResponse.onFailure(
@@ -169,6 +170,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             null
         );
 
-        response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

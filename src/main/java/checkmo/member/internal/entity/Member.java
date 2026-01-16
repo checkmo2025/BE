@@ -78,7 +78,7 @@ public class Member extends BaseEntity {
         this.nickName = nickName != null ? nickName : "";
         this.name = name != null ? name : "";
         this.phoneNumber = phoneNumber != null ? phoneNumber : "";
-        this.description = description != null ? description : "";
+        this.description = description;
     }
 
     public void updateProfile(String description, String imgUrl) {
