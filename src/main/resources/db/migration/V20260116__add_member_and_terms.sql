@@ -2,7 +2,7 @@
 ALTER TABLE member
     ADD COLUMN name VARCHAR(10) NOT NULL,
     ADD COLUMN phone_number VARCHAR(255) NOT NULL,
-    MODIFY COLUMN nick_name VARCHAR(20) NOT NULL,
+    MODIFY COLUMN nick_name VARCHAR(12) NOT NULL,
     MODIFY COLUMN description VARCHAR(40);
 
 -- 2. terms (약관 마스터) 테이블 생성
