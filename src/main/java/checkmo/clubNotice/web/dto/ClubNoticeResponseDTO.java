@@ -1,9 +1,9 @@
 package checkmo.clubNotice.web.dto;
 
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
+import checkmo.clubNotice.internal.entity.NoticeTag;
 import checkmo.member.MemberExternalDTO;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -13,37 +13,14 @@ import lombok.NoArgsConstructor;
 
 public class ClubNoticeResponseDTO {
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "tag",
-            visible = true)
-    @JsonSubTypes({
-            @JsonSubTypes.Type(value = MeetingNotice.class, name = "모임"),
-            @JsonSubTypes.Type(value = VoteNotice.class, name = "투표"),
-            @JsonSubTypes.Type(value = PureNotice.class, name = "공지")
-    })
-    public sealed interface NoticeItem
-            permits PureNotice, MeetingNotice, VoteNotice {
-
-        Long getId();
-
-        String getTitle();
-
-        boolean isImportant();
-
-        String getTag();
-    }
-
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubNoticeList {
-        List<NoticeItem> noticeList; // 꼭 PureNoticeDTO, MeetingNoticeDTO, VoteDTO만 담아야 합니다!!
+    public static class ClubNoticePreviewList {
+        List<ClubNoticePreview> noticeList;
         private boolean hasNext;
         private Long nextCursor;
-        private int pageSize;
         private boolean isStaff;
     }
 
@@ -51,49 +28,60 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static final class PureNotice implements NoticeItem {
+    public static final class ClubNoticePreview {
         private Long id;
         private String title;
-        private String content;
         private boolean important;
-
-        @Builder.Default
-        private String tag = "공지";
+        private ClubNoticeTagItem tagItem;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static final class MeetingNotice implements NoticeItem {
-        private Long id;
-        private String title;
-        private String content;
-        private boolean important;
+    public static class ClubNoticeTagItem {
+        private String code;
+        private String description;
 
-        @Builder.Default
-        private String tag = "모임";
-        private DetailInfo detailInfoDTO; // 모임 정보 DTO
+        public static ClubNoticeTagItem from(NoticeTag noticeTag) {
+            return ClubNoticeTagItem.builder()
+                    .code(noticeTag.name())
+                    .description(noticeTag.getDescription())
+                    .build();
+        }
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static final class VoteNotice implements NoticeItem {
+    public static final class ClubNoticeDetail {
         private Long id;
         private String title;
         private String content;
         private boolean important;
+        private ClubNoticeTagItem tag;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private DetailInfo meetingDetail; // 모임 공지인 경우에만 포함
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        private VoteDetail voteDetail; // 투표 공지인 경우에만 포함
+
+        private boolean isStaff;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class VoteDetail {
+        private Long id;
+        private String title;
+        private String content;
         private boolean anonymity;
         private boolean duplication;
-
         private LocalDateTime startTime;
         private LocalDateTime deadline;
-
-        @Builder.Default
-        private String tag = "투표";
-        private List<EachItem> items; // 투표 항목 목록
+        private List<EachItem> items; // 투표 항목 리스트
     }
 
     @Getter
@@ -101,18 +89,10 @@ public class ClubNoticeResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class EachItem {
+        private int itemNumber; // 항목 번호 (1~5)
         private String item;
-        private boolean isSelected;
-        private int voteCount; // 투표한 사람 수
+        private boolean isSelected; // 현재 로그인한 멤버가 해당 항목에 투표했는지 여부
+        private int voteCount;
         private List<MemberExternalDTO.BasicInfo> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class ClubNoticeDetail {
-        private boolean isStaff;
-        private NoticeItem noticeItem; // 공지사항 아이템 (PureNoticeDTO, MeetingNoticeDTO, VoteDTO 중 하나)
     }
 }

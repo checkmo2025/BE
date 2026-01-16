@@ -1,5 +1,6 @@
 package checkmo.clubNotice.internal.converter;
 
+import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
@@ -8,6 +9,9 @@ import checkmo.clubNotice.internal.entity.NoticeTag;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticePreview;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticeTagItem;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.EachItem;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
 import lombok.AccessLevel;
@@ -16,21 +20,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubNoticeConverter {
 
-    public static ClubNoticeResponseDTO.PureNotice toPureNoticeDTO(Notice notice) {
-        return ClubNoticeResponseDTO.PureNotice.builder()
-                .id(notice.getId())
-                .title(notice.getTitle())
-                .content(notice.getContent())
-                .important(notice.isImportant())
-                .tag(notice.getTag().getDisplayName())
-                .build();
-    }
-
-    public static Vote toVote(ClubNoticeRequestDTO.CreateClubVote request, Long clubId) {
-        return Vote.builder()
+    // ========== Entity 변환 ==========
+    public static Notice toNotice(ClubNoticeRequestDTO.CreateClubNotice request, Long clubId) {
+        return Notice.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .important(request.isImportant())
+                .tag(NoticeTag.decideTag(request.getVote() != null, request.getMeetingId() != null))
+                .meetingId(request.getMeetingId())
+                .meetingVersion(request.getMeetingVersion())
+                .vote(toVote(request.getVote()))
+                .clubId(clubId)
+                .build();
+    }
+
+    public static Vote toVote(ClubNoticeRequestDTO.CreateClubVote request) {
+        if (request == null) {
+            return null;
+        }
+        return Vote.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
                 .item1(request.getItem1())
                 .item2(request.getItem2())
                 .item3(request.getItem3())
@@ -40,19 +50,20 @@ public class ClubNoticeConverter {
                 .duplication(request.isDuplication())
                 .startTime(request.getStartTime())
                 .deadline(request.getDeadline())
-                .clubId(clubId)
                 .build();
     }
 
-    public static List<ClubNoticeResponseDTO.EachItem> toEachItemDTOList(List<String> items) {
-        return items.stream()
-                .map(item -> ClubNoticeResponseDTO.EachItem.builder()
-                        .item(item)
-                        .isSelected(false)       // 기본값
-                        .voteCount(0)            // 기본값
-                        .votedMembers(List.of()) // 빈 리스트
-                        .build())
-                .toList();
+    public static Notice toNotice(ClubMeetingCreatedEvent event) {
+        return Notice.builder()
+                .title(event.title())
+                .content(event.content())
+                .important(true)
+                .tag(NoticeTag.MEETING)
+                .meetingId(event.meetingId())
+                .meetingVersion(event.version())
+                .clubId(event.clubId())
+                .vote(null)
+                .build();
     }
 
     public static ClubMemberVote toClubMemberVote(
@@ -60,81 +71,71 @@ public class ClubNoticeConverter {
             Long clubMemberId,
             ClubNoticeRequestDTO.VoteResult request
     ) {
+        List<Integer> selected = request.getSelectedItemNumbers();
         return ClubMemberVote.builder()
                 .vote(vote)
                 .clubMemberId(clubMemberId)
-                .item1(request.isItem1())
-                .item2(request.isItem2())
-                .item3(request.isItem3())
-                .item4(request.isItem4())
-                .item5(request.isItem5())
+                .item1(selected.contains(1))
+                .item2(selected.contains(2))
+                .item3(selected.contains(3))
+                .item4(selected.contains(4))
+                .item5(selected.contains(5))
                 .build();
     }
 
-    public static Notice toNotice(ClubNoticeRequestDTO.CreateClubNotice request, Long clubId) {
-        return Notice.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .important(request.isImportant())
-                .tag(NoticeTag.NOTICE)
-                .clubId(clubId)
+    // ========== DTO 변환 ==========
+    public static ClubNoticeResponseDTO.ClubNoticePreview toClubNoticePreview(Notice notice) {
+        return ClubNoticePreview.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .important(notice.isImportant())
+                .tagItem(ClubNoticeTagItem.from(notice.getTag()))
                 .build();
     }
 
-    public static ClubNoticeResponseDTO.EachItem toEachItemDTO(
-            String item,
-            boolean isSelected,
-            List<MemberExternalDTO.BasicInfo> votedMembers
-    ) {
-        return ClubNoticeResponseDTO.EachItem.builder()
-                .item(item)
-                .isSelected(isSelected)
-                .voteCount(votedMembers.size())
-                .votedMembers(votedMembers)
-                .build();
-    }
-
-    public static ClubNoticeResponseDTO.VoteNotice toVoteNoticeDTO(
-            Vote vote,
-            List<ClubNoticeResponseDTO.EachItem> itemDTOs
-    ) {
-        return ClubNoticeResponseDTO.VoteNotice.builder()
-                .id(vote.getId())
-                .title(vote.getTitle())
-                .content(vote.getContent())
-                .important(vote.isImportant())
-                .anonymity(vote.isAnonymity())
-                .duplication(vote.isDuplication())
-                .startTime(vote.getStartTime())
-                .deadline(vote.getDeadline())
-                .tag(vote.getTag().getDisplayName())
-                .items(itemDTOs)
-                .build();
-    }
-
-    public static ClubNoticeResponseDTO.MeetingNotice toMeetingNoticeDTO(
+    public static ClubNoticeResponseDTO.ClubNoticeDetail toClubNoticeDetail(
             Notice notice,
-            DetailInfo detailInfo
+            DetailInfo meetingDetail,
+            ClubNoticeResponseDTO.VoteDetail voteDetail,
+            MembershipInfo membershipInfo
     ) {
-        return ClubNoticeResponseDTO.MeetingNotice.builder()
+        return ClubNoticeResponseDTO.ClubNoticeDetail.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
                 .important(notice.isImportant())
-                .tag(notice.getTag().getDisplayName())
-                .detailInfoDTO(detailInfo)
+                .tag(ClubNoticeTagItem.from(notice.getTag()))
+                .meetingDetail(meetingDetail)
+                .voteDetail(voteDetail)
+                .isStaff(membershipInfo.isStaff())
                 .build();
     }
 
-    public static Notice toNotice(ClubMeetingCreatedEvent event) {
-        return Notice.builder()
-                .clubId(event.clubId())
-                .meetingId(event.meetingId())
-                .meetingVersion(event.version())
-                .title(event.title())
-                .content(event.content())
-                .tag(NoticeTag.MEETING)
-                .important(true)
+    public static ClubNoticeResponseDTO.VoteDetail toVoteDetail(Vote vote, List<EachItem> items) {
+        return ClubNoticeResponseDTO.VoteDetail.builder()
+                .id(vote.getId())
+                .title(vote.getTitle())
+                .content(vote.getContent())
+                .anonymity(vote.isAnonymity())
+                .duplication(vote.isDuplication())
+                .startTime(vote.getStartTime())
+                .deadline(vote.getDeadline())
+                .items(items)
+                .build();
+    }
+
+    public static ClubNoticeResponseDTO.EachItem toEachItem(
+            int itemNumber,
+            String item,
+            boolean isSelected, // 현재 로그인한 멤버가 해당 항목에 투표했는지 여부
+            List<MemberExternalDTO.BasicInfo> votedMembers
+    ) {
+        return ClubNoticeResponseDTO.EachItem.builder()
+                .itemNumber(itemNumber)
+                .item(item)
+                .isSelected(isSelected)
+                .voteCount(votedMembers.size())
+                .votedMembers(votedMembers)
                 .build();
     }
 }

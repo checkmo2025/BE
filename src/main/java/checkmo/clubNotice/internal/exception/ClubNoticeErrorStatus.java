@@ -17,10 +17,11 @@ public enum ClubNoticeErrorStatus implements BaseErrorCode {
     NOTICE_MEETING_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_403", "모임 공지사항은 삭제할 수 없습니다."),
 
     // 투표
+    INSUFFICIENT_VOTE_ITEMS(HttpStatus.BAD_REQUEST, "VOTE_400", "투표 항목이 2개 미만입니다."),
     MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_401", "하나의 항목에만 투표 가능합니다."),
+    ITEM_SELECTION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "VOTE_402", "선택한 항목이 투표 항목의 범위를 벗어났습니다."),
     VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_403", "투표 가능 시간이 아닙니다."),
-    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다."),
-    ;
+    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

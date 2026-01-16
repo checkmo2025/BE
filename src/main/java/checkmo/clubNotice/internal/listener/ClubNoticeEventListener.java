@@ -17,7 +17,7 @@ public class ClubNoticeEventListener {
     @ApplicationModuleListener
     public void handleClubMeetingCreatedEvent(ClubMeetingCreatedEvent event) {
         try {
-            clubNoticeCommandService.createMeetingNotice(event);
+            clubNoticeCommandService.createAutomaticMeetingNotice(event);
         } catch (Exception e) {
             log.error("독서 클럽 공지 생성 실패, ClubNoticeCreatedEvent: {}", event, e);
             throw e;

@@ -1,9 +1,15 @@
 package checkmo.clubNotice.web.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,65 +17,83 @@ public class ClubNoticeRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class CreateClubNotice {
+        @NotBlank(message = "공지사항 제목은 필수 입력입니다.")
+        @Size(max = 255, message = "공지사항 제목은 255자 이하로 입력해주세요.")
         private String title;
+        @NotNull(message = "공지사항 내용은 null이 될 수 없습니다.")
+        @Size(max = 1000, message = "공지사항 내용은 1000자 이하로 입력해주세요.")
         private String content;
         private boolean important;
+        private Long meetingId;
+        private Long meetingVersion;
+        @Valid
+        private CreateClubVote vote;
+
+        @AssertTrue(message = "미팅 ID와 미팅 버전은 함께 제공되어야 합니다.")
+        private boolean isMeetingIdAndVersionTogether() {
+            return (meetingId == null) == (meetingVersion == null);
+        }
     }
 
     @Getter
     @NoArgsConstructor
     public static class CreateClubVote {
-        @NotBlank                 // title은 필수
+        @NotBlank(message = "투표 제목은 필수 입력입니다.")
+        @Size(max = 255, message = "투표 제목은 255자 이하로 입력해주세요.")
         private String title;
-
-        @Size(max = 255)
+        @Size(max = 255, message = "투표 내용은 255자 이하로 입력해주세요.")
         private String content;
-
-        private boolean important;
-
-        @NotNull
+        @NotNull(message = "투표 항목1은 null이 될 수 없습니다.")
+        @Size(max = 255, message = "투표 항목1은 255자 이하로 입력해주세요.")
         private String item1;
-
-        @NotNull
+        @NotNull(message = "투표 항목2는 null이 될 수 없습니다.")
+        @Size(max = 255, message = "투표 항목2는 255자 이하로 입력해주세요.")
         private String item2;
-
         private String item3;
         private String item4;
         private String item5;
         private boolean anonymity;
         private boolean duplication;
+        @NotNull(message = "투표 시작 시간은 null이 될 수 없습니다.")
         private LocalDateTime startTime;
+        @NotNull(message = "투표 마감 시간은 null이 될 수 없습니다.")
         private LocalDateTime deadline;
+
+        @AssertTrue(message = "투표 시작 시간은 현재 시간 이후여야 합니다.")
+        private boolean isStartTimeAfterNow() {
+            if (startTime == null) {
+                return true;
+            }
+            return startTime.isBefore(LocalDateTime.now());
+        }
+
+        @AssertTrue(message = "투표 시작 시간은 마감 시간보다 이전이어야 합니다.")
+        private boolean isStartTimeBeforeDeadLine() {
+            if (startTime == null || deadline == null) {
+                return true;
+            }
+            return startTime.isBefore(deadline);
+        }
     }
 
     @Getter
     @NoArgsConstructor
     public static class VoteResult {
-        private boolean item1;
-        private boolean item2;
-        private boolean item3;
-        private boolean item4;
-        private boolean item5;
+        @NotNull(message = "선택한 투표 항목 번호는 필수입니다.")
+        @Size(min = 1, max = 5, message = "선택 항목은 1개 이상 5개 이하입니다.")
+        private List<@Min(1) @Max(5) Integer> selectedItemNumbers;
 
         // 몇 개를 선택했는지 확인하는 DTO용 메서드로, 복수 선택 검증에서 사용됨
         public int countSelectedItems() {
-            int count = 0;
-            if (item1) {
-                count++;
+            return selectedItemNumbers == null ? 0 : selectedItemNumbers.size();
+        }
+
+        @AssertTrue(message = "선택한 투표 항목 번호는 중복될 수 없습니다.")
+        private boolean isSelectedItemNumbersUnique() {
+            if (selectedItemNumbers == null) {
+                return true;
             }
-            if (item2) {
-                count++;
-            }
-            if (item3) {
-                count++;
-            }
-            if (item4) {
-                count++;
-            }
-            if (item5) {
-                count++;
-            }
-            return count;
+            return selectedItemNumbers.size() == new HashSet<>(selectedItemNumbers).size();
         }
     }
 }

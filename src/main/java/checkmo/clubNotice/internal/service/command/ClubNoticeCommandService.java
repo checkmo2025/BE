@@ -3,17 +3,13 @@ package checkmo.clubNotice.internal.service.command;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
-import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
 import checkmo.clubNotice.internal.exception.ClubNoticeException;
-import checkmo.clubNotice.internal.repository.ClubMemberVoteRepository;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
-import checkmo.clubNotice.internal.repository.VoteRepository;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubNotice;
-import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResult;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +26,9 @@ public class ClubNoticeCommandService {
 
     private final ClubNoticeQueryService clubNoticeQueryService;
 
-    private final VoteRepository voteRepository;
     private final NoticeRepository noticeRepository;
-    private final ClubMemberVoteRepository clubMemberVoteRepository;
 
-    public Notice createPureNotice(Long clubId, String memberId, CreateClubNotice request) {
+    public Notice createNotice(Long clubId, String memberId, CreateClubNotice request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
@@ -44,17 +38,16 @@ public class ClubNoticeCommandService {
         return notice;
     }
 
-    public void deletePureNotice(Long clubId, Long noticeId, String memberId) {
+    public void deleteNotice(Long clubId, String memberId, Long noticeId) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
-        notice.validateDeletable();
 
         noticeRepository.delete(notice);
     }
 
-    public void createMeetingNotice(ClubMeetingCreatedEvent event) {
+    public void createAutomaticMeetingNotice(ClubMeetingCreatedEvent event) {
         clubManagementAPI.validateClub(event.clubId());
 
         Notice existingNotice = noticeRepository.findByMeetingId(event.meetingId()).orElse(null);
@@ -73,43 +66,24 @@ public class ClubNoticeCommandService {
         noticeRepository.save(notice);
     }
 
-    public Vote createVote(Long clubId, String memberId, CreateClubVote request) {
-        clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.validateStaffClubMember(clubId, memberId);
-
-        Vote vote = ClubNoticeConverter.toVote(request, clubId);
-        //TODO: 데드라인이 현재 시간보다 이전인지, 시작시간이 데드라인보다 이전인지, 시작시간이 현재시간보다 이전인지 검증이 필요하지 않나
-        voteRepository.save(vote);
-
-        return vote;
-    }
-
-    public void deleteVote(Long clubId, Long voteId, String memberId) {
-        clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.validateStaffClubMember(clubId, memberId);
-
-        Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
-
-        voteRepository.delete(vote);
-    }
-
-    public Long haveVote(Long clubId, Long voteId, String memberId, VoteResult request) {
+    public Long haveVote(Long clubId, String memberId, Long noticeId, Long voteId, VoteResult request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
 
-        Vote vote = clubNoticeQueryService.validateVote(clubId, voteId);
+        Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
+        Vote vote = notice.getVote();
+        if (vote == null || vote.getId() == null || !vote.getId().equals(voteId)) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_NOT_FOUND);
+        }
+
         validateVotingTime(vote);
+        vote.validateChoiceCountBasedOnDuplication(request.countSelectedItems());
 
-        // 투표의 복수 선택이 불가능하다면 여러 항목 선택했는지 검증
-        vote.validateVoteRequest(request.countSelectedItems());
-
-        // 기존 투표 내역 삭제
-        clubMemberVoteRepository.deleteByVoteIdAndClubMemberId(voteId, clubMemberId);
-
-        // ClubMemberVote 생성 및 저장
-        ClubMemberVote clubMemberVote
-                = ClubNoticeConverter.toClubMemberVote(vote, clubMemberId, request);
-        clubMemberVoteRepository.save(clubMemberVote);
+        vote.upsertClubMemberVote(
+                clubMemberId,
+                request.getSelectedItemNumbers(),
+                ClubNoticeConverter.toClubMemberVote(vote, clubMemberId, request)
+        );
 
         return vote.getId();
     }

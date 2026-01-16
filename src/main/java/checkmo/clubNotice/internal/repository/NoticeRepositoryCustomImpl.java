@@ -24,9 +24,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
     ) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(notice.clubId.eq(clubId));
-        if (onlyImportant) {
-            predicate.and(notice.important.eq(true));
-        }
+        predicate.and(notice.important.eq(onlyImportant));
         if (cursorId != null) {
             predicate.and(notice.id.lt(cursorId));
         }
