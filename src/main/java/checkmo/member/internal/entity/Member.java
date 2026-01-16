@@ -38,13 +38,23 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
+    @Column(length = 10, nullable = false)
+    private String name;
+
     @Column(nullable = false)
-    private String nickName;
+    private String phoneNumber;
 
     @Column(length = 20, nullable = false)
+    private String nickName;
+
+    @Column(length = 40)
     private String description;
 
     private String imgUrl;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberTerms> memberTerms = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
@@ -64,10 +74,11 @@ public class Member extends BaseEntity {
     @Column(name = "category")
     private Set<MemberInterestCategory> interestCategories = new HashSet<>();
 
-    public void updateAdditionalInfo(String nickName, String description, String imgUrl) {
+    public void updateAdditionalInfo(String nickName, String name, String phoneNumber, String description) {
         this.nickName = nickName != null ? nickName : "";
+        this.name = name != null ? name : "";
+        this.phoneNumber = phoneNumber != null ? phoneNumber : "";
         this.description = description != null ? description : "";
-        this.imgUrl = imgUrl != null ? imgUrl : "";
     }
 
     public void updateProfile(String description, String imgUrl) {
@@ -76,6 +87,15 @@ public class Member extends BaseEntity {
     }
 
     public void updateInterestCategories(Set<MemberInterestCategory> newCategories) {
+        this.interestCategories.clear();
+        if (newCategories != null) {
+            this.interestCategories.addAll(newCategories);
+        }
+    }
+
+    public void updateImageAndInterestCategories(String imgUrl, Set<MemberInterestCategory> newCategories) {
+        if (imgUrl != null) this.imgUrl = imgUrl;
+
         this.interestCategories.clear();
         if (newCategories != null) {
             this.interestCategories.addAll(newCategories);
