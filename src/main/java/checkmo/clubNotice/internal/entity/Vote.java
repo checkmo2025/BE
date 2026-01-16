@@ -6,8 +6,6 @@ import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,12 +34,6 @@ public class Vote extends BaseEntity {
 
     private String content;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private NoticeTag tag = NoticeTag.VOTE;
-
-    private boolean important;
-
     @Column(nullable = false)
     private String item1;
 
@@ -64,27 +56,46 @@ public class Vote extends BaseEntity {
 
     private LocalDateTime deadline;
 
-    @Column(name = "club_id", nullable = false)
-    private Long clubId;
-
     @Builder.Default
-    @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClubMemberVote> clubMemberVotes = new ArrayList<>();
 
-    public List<String> getItems() {
-        List<String> items = new ArrayList<>();
-        items.add(item1);
-        items.add(item2);
-        if (item3 != null) {
-            items.add(item3);
+    public List<Integer> getItemNumbers() {
+        List<Integer> itemNumbers = new ArrayList<>();
+        if (hasText(item1)) {
+            itemNumbers.add(1);
         }
-        if (item4 != null) {
-            items.add(item4);
+        if (hasText(item2)) {
+            itemNumbers.add(2);
         }
-        if (item5 != null) {
-            items.add(item5);
+        if (hasText(item3)) {
+            itemNumbers.add(3);
         }
-        return items;
+        if (hasText(item4)) {
+            itemNumbers.add(4);
+        }
+        if (hasText(item5)) {
+            itemNumbers.add(5);
+        }
+
+        if (itemNumbers.size() < 2) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.INSUFFICIENT_VOTE_ITEMS);
+        }
+        return itemNumbers;
+    }
+
+    public String getItemByNumber(Integer itemNumber) {
+        if (itemNumber == null) {
+            return null;
+        }
+        return switch (itemNumber) {
+            case 1 -> item1;
+            case 2 -> item2;
+            case 3 -> item3;
+            case 4 -> item4;
+            case 5 -> item5;
+            default -> null;
+        };
     }
 
     public boolean isWithinVotingPeriod(LocalDateTime localDateTime) {
@@ -97,10 +108,32 @@ public class Vote extends BaseEntity {
         return true;
     }
 
-    public void validateVoteRequest(int selectedItems) {
+    public void validateChoiceCountBasedOnDuplication(int selectedItems) {
         if (!this.duplication && selectedItems > 1) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
         }
     }
 
+    private boolean hasText(String text) {
+        return text != null && !text.isBlank();
+    }
+
+    public void upsertClubMemberVote(
+            Long clubMemberId,
+            List<Integer> selectedItemNumbers,
+            ClubMemberVote created
+    ) {
+        List<Integer> safeNumbers = selectedItemNumbers == null ? List.of() : selectedItemNumbers;
+
+        ClubMemberVote exisiting = clubMemberVotes.stream()
+                .filter(vote -> clubMemberId.equals(vote.getClubMemberId()))
+                .findFirst()
+                .orElse(null);
+
+        if (exisiting != null) {
+            exisiting.updateSelectedItems(safeNumbers);
+            return;
+        }
+        clubMemberVotes.add(created);
+    }
 }

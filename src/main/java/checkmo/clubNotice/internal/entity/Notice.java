@@ -3,14 +3,17 @@ package checkmo.clubNotice.internal.entity;
 import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
 import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.common.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,22 +51,16 @@ public class Notice extends BaseEntity {
     @Column(name = "club_id", nullable = false)
     private Long clubId;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "vote_id", unique = true, nullable = true)
+    private Vote vote;
+
     public boolean isNotOlderThan(Long meetingVersion) {
         if (meetingVersion == null) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_VERSION_NOT_NULL);
         }
 
         return this.meetingVersion >= meetingVersion;
-    }
-
-    public boolean isCreatedAfter(LocalDateTime anotherCreatedAt) {
-        return this.getCreatedAt().isAfter(anotherCreatedAt);
-    }
-
-    public void validateDeletable() {
-        if (this.tag.isMeeting()) {
-            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_DELETE_FORBIDDEN);
-        }
     }
 
 }
