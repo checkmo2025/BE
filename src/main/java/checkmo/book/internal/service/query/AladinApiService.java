@@ -18,6 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Transactional(readOnly = true)
 public class AladinApiService {
 
+    private static final int RECOMMENDED_MAX_RESULTS = 28;
+
     private final RestTemplate restTemplate;
 
     private final AladinProperties aladinProperties;
@@ -61,12 +63,45 @@ public class AladinApiService {
         }
     }
 
+    public BookResponseDTO.BookList retrieveRecommendedBooks() {
+        try {
+            String url = buildHttpUrl();
+
+            var response = restTemplate.getForObject(
+                    url,
+                    AladinApiResponseDTO.BookList.class
+            );
+
+            if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            }
+
+            return BookConverter.toBookList(response, 1);
+
+        } catch (Exception e) {
+            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+        }
+    }
+
+    private String buildHttpUrl() {
+        return UriComponentsBuilder
+                .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemList())
+                .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
+                .queryParam("QueryType", aladinProperties.getSearch().getRecommendQueryType())
+                .queryParam("MaxResults", RECOMMENDED_MAX_RESULTS)
+                .queryParam("SearchTarget", aladinProperties.getSearch().getSearchTarget())
+                .queryParam("output", aladinProperties.getSearch().getOutput())
+                .queryParam("Version", aladinProperties.getAuth().getVersion())
+                .build()
+                .toUriString();
+    }
+
     private String buildHttpUrl(String keyword, int page) {
         return UriComponentsBuilder
                 .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemSearch())
                 .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
                 .queryParam("Query", keyword)
-                .queryParam("QueryType", aladinProperties.getSearch().getQueryType())
+                .queryParam("QueryType", aladinProperties.getSearch().getSearchQueryType())
                 .queryParam("MaxResults", aladinProperties.getSearch().getMaxResults())
                 .queryParam("start", page)
                 .queryParam("output", aladinProperties.getSearch().getOutput())
