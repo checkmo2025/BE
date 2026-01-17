@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,7 @@ public class BookStory extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @JoinColumn(name = "member_id", nullable = false)
+    @Column(name = "member_id", nullable = false)
     private String memberId;
 
     @Column(name = "book_id", nullable = false)
