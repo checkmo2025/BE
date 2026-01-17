@@ -4,6 +4,7 @@ import checkmo.bookStory.BookStoryEvent;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.member.MemberEvent;
 import checkmo.notification.internal.service.command.NotificationCommandService;
+import checkmo.notification.internal.service.command.NotificationSettingCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class NotificationEventListener {
 
     private final NotificationCommandService notificationCommandService;
+    private final NotificationSettingCommandService notificationSettingCommandService;
 
     @ApplicationModuleListener
     public void handleNotificationEvent(BookStoryEvent.BookStoryLiked event) {
@@ -42,6 +44,16 @@ public class NotificationEventListener {
             notificationCommandService.createNotification(event);
         } catch (Exception e) {
             log.error("독서 클럽 가입 승인 알림 생성 실패, JoinClubEvent: {}", event, e);
+            throw e;
+        }
+    }
+
+    @ApplicationModuleListener
+    public void handleMemberRegistrationCompleted(MemberEvent.MemberRegistrationCompleted event) {
+        try {
+            notificationSettingCommandService.createNotificationSetting(event.memberId());
+        } catch (Exception e) {
+            log.error("알림 설정 생성 실패, MemberRegistrationCompleted: {}", event, e);
             throw e;
         }
     }
