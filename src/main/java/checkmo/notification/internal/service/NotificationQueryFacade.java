@@ -6,8 +6,10 @@ import checkmo.member.MemberAPI;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.service.query.NotificationQueryService;
+import checkmo.notification.internal.service.query.NotificationSettingQueryService;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList;
+import checkmo.notification.web.dto.NotificationResponseDTO.SettingInfo;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class NotificationQueryFacade {
     private final MemberAPI memberAPI;
 
     private final NotificationQueryService notificationQueryService;
+    private final NotificationSettingQueryService notificationSettingQueryService;
 
     @Cacheable(value = "notifications", key = "#memberId")
     public BasicInfoPreviewList retrieveNotificationPreviews(String memberId, int size) {
@@ -58,6 +61,10 @@ public class NotificationQueryFacade {
                 notificationCursorResult,
                 DEFAULT_PAGE_SIZE
         );
+    }
+
+    public SettingInfo retrieveNotificationSetting(String memberId) {
+        return notificationSettingQueryService.getNotificationSetting(memberId);
     }
 
     private List<String> extractSenderIds(List<Notification> notifications) {
