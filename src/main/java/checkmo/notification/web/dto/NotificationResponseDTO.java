@@ -51,4 +51,15 @@ public class NotificationResponseDTO {
         private LocalDateTime createdAt;
         private String redirectPath;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SettingInfo {
+        private boolean bookStoryLiked;
+        private boolean bookStoryComment;
+        private boolean clubNoticeCreated;
+        private boolean clubMeetingCreated;
+    }
 }
