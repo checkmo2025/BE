@@ -47,6 +47,10 @@ public class NotificationSetting extends BaseEntity {
     @Builder.Default
     private boolean clubMeetingCreated = true;
 
+    @Column(name = "new_follower", nullable = false)
+    @Builder.Default
+    private boolean newFollower = true;
+
     public void toggleBookStoryLiked() {
         this.bookStoryLiked = !this.bookStoryLiked;
     }
@@ -61,6 +65,10 @@ public class NotificationSetting extends BaseEntity {
 
     public void toggleClubMeetingCreated() {
         this.clubMeetingCreated = !this.clubMeetingCreated;
+    }
+
+    public void toggleNewFollower() {
+        this.newFollower = !this.newFollower;
     }
 
 }

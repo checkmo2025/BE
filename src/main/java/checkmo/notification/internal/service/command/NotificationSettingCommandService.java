@@ -37,6 +37,7 @@ public class NotificationSettingCommandService {
             case BOOK_STORY_COMMENT -> setting.toggleBookStoryComment();
             case CLUB_NOTICE_CREATED -> setting.toggleClubNoticeCreated();
             case CLUB_MEETING_CREATED -> setting.toggleClubMeetingCreated();
+            case NEW_FOLLOWER -> setting.toggleNewFollower();
         }
     }
 }

@@ -25,6 +25,7 @@ public class NotificationSettingQueryService {
                 .bookStoryComment(setting.isBookStoryComment())
                 .clubNoticeCreated(setting.isClubNoticeCreated())
                 .clubMeetingCreated(setting.isClubMeetingCreated())
+                .newFollower(setting.isNewFollower())
                 .build();
     }
 }

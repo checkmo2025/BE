@@ -61,5 +61,6 @@ public class NotificationResponseDTO {
         private boolean bookStoryComment;
         private boolean clubNoticeCreated;
         private boolean clubMeetingCreated;
+        private boolean newFollower;
     }
 }
