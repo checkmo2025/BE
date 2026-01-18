@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 public class NotificationConverter {
 
     public static String getRedirectPath(Notification.NotificationType notificationType, Long bookStoryId) {
-        if (Notification.NotificationType.LIKE == notificationType) {
+        if (Notification.NotificationType.LIKE == notificationType
+                || Notification.NotificationType.COMMENT == notificationType) {
             return "/bookstory/" + bookStoryId + "/detail"; // 프론트엔드 경로
         }
-        return null; // 지금은 LIKE 타입일 경우 무조건 bookStoryId를 사용하지만, 다른 타입이 추가될 경우를 대비하여 null 반환
+        return null;
     }
 
     public static String getRedirectPath(Notification.NotificationType notificationType, String Nickname) {

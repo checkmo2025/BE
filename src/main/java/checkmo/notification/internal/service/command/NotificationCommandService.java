@@ -57,6 +57,36 @@ public class NotificationCommandService {
     }
 
     /**
+     * 댓글 알림 생성
+     *
+     * @param event 댓글 알림 정보 DTO
+     */
+    @CacheEvict(value = "notifications", key = "#event.receiverId()")
+    public void createNotification(BookStoryEvent.BookStoryComment event) {
+        NotificationType type = NotificationType.COMMENT;
+        Long sourceId = event.eventId();
+        if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
+            return;
+        }
+
+        String redirectPath = NotificationConverter.getRedirectPath(type, event.bookStoryId());
+
+        Notification notification = Notification.builder()
+                .notificationType(type)
+                .sourceId(sourceId)
+                .redirectPath(redirectPath)
+                .targetName(null)
+                .senderId(event.senderId())
+                .receiverId(event.receiverId())
+                .build();
+        try {
+            notificationRepository.save(notification);
+        } catch (DataIntegrityViolationException e) {
+            // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
+        }
+    }
+
+    /**
      * 팔로우(구독) 알림 생성
      *
      * @param event 팔로우 알림 정보 DTO

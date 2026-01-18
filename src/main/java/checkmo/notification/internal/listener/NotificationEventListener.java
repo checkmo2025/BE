@@ -29,6 +29,16 @@ public class NotificationEventListener {
     }
 
     @ApplicationModuleListener
+    public void handleNotificationEvent(BookStoryEvent.BookStoryComment event) {
+        try {
+            notificationCommandService.createNotification(event);
+        } catch (Exception e) {
+            log.error("책이야기 댓글 알림 생성 실패, CommentEvent: {}", event, e);
+            throw e;
+        }
+    }
+
+    @ApplicationModuleListener
     public void handleNotificationEvent(MemberEvent.Follow event) {
         try {
             notificationCommandService.createNotification(event);

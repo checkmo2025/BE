@@ -59,6 +59,6 @@ public class Notification extends BaseEntity {
     }
 
     public enum NotificationType {
-        LIKE, FOLLOW, JOIN_CLUB
+        LIKE, COMMENT, FOLLOW, JOIN_CLUB
     }
 }
