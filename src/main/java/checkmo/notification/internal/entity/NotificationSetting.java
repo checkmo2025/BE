@@ -47,4 +47,20 @@ public class NotificationSetting extends BaseEntity {
     @Builder.Default
     private boolean clubMeetingCreated = true;
 
+    public void toggleBookStoryLiked() {
+        this.bookStoryLiked = !this.bookStoryLiked;
+    }
+
+    public void toggleBookStoryComment() {
+        this.bookStoryComment = !this.bookStoryComment;
+    }
+
+    public void toggleClubNoticeCreated() {
+        this.clubNoticeCreated = !this.clubNoticeCreated;
+    }
+
+    public void toggleClubMeetingCreated() {
+        this.clubMeetingCreated = !this.clubMeetingCreated;
+    }
+
 }
