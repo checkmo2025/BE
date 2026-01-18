@@ -5,5 +5,6 @@ public enum NotificationSettingType {
     BOOK_STORY_COMMENT,
     CLUB_NOTICE_CREATED,
     CLUB_MEETING_CREATED,
-    NEW_FOLLOWER
+    NEW_FOLLOWER,
+    JOIN_CLUB
 }

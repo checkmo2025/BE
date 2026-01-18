@@ -38,6 +38,7 @@ public class NotificationSettingCommandService {
             case CLUB_NOTICE_CREATED -> setting.toggleClubNoticeCreated();
             case CLUB_MEETING_CREATED -> setting.toggleClubMeetingCreated();
             case NEW_FOLLOWER -> setting.toggleNewFollower();
+            case JOIN_CLUB -> setting.toggleJoinClub();
         }
     }
 }
