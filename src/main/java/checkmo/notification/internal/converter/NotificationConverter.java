@@ -54,8 +54,8 @@ public class NotificationConverter {
         // 클럽 알림: clubName 사용,
         // 사용자 알림: senderNickname 사용
         String displayName = notification.getNotificationType().isClubNotification()
-                ? clubNameMap.get(notification.getDomainId())
-                : senderNicknameMap.get(notification.getSenderId());
+                ? clubNameMap.getOrDefault(notification.getDomainId(), "삭제된 클럽")
+                : senderNicknameMap.getOrDefault(notification.getSenderId(), "탈퇴한 회원");
 
         // sourceId는 클럽 미팅/공지 알림에서만 필요
         Long sourceId = notification.getNotificationType().needsSourceId()
