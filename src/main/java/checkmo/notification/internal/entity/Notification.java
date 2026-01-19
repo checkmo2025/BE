@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"notification_type", "source_id"})
+        @UniqueConstraint(columnNames = {"notification_type", "source_id", "receiver_id"})
 })
 public class Notification extends BaseEntity {
 
@@ -59,6 +59,6 @@ public class Notification extends BaseEntity {
     }
 
     public enum NotificationType {
-        LIKE, COMMENT, FOLLOW, JOIN_CLUB
+        LIKE, COMMENT, FOLLOW, JOIN_CLUB, CLUB_MEETING_CREATED, CLUB_NOTICE_CREATED
     }
 }
