@@ -69,7 +69,7 @@ public class NotificationQueryFacade {
 
     private Map<String, String> fetchSenderNicknameMap(List<Notification> notifications) {
         List<String> senderIds = notifications.stream()
-                .filter(n -> !isClubNotification(n.getNotificationType()))
+                .filter(n -> !n.getNotificationType().isClubNotification())
                 .map(Notification::getSenderId)
                 .distinct()
                 .toList();
@@ -78,16 +78,10 @@ public class NotificationQueryFacade {
 
     private Map<Long, String> fetchClubNameMap(List<Notification> notifications) {
         List<Long> clubIds = notifications.stream()
-                .filter(n -> isClubNotification(n.getNotificationType()))
+                .filter(n -> n.getNotificationType().isClubNotification())
                 .map(Notification::getDomainId)
                 .distinct()
                 .toList();
         return clubManagementAPI.fetchClubNamesByClubIds(clubIds);
-    }
-
-    private boolean isClubNotification(NotificationType type) {
-        return type == NotificationType.JOIN_CLUB
-                || type == NotificationType.CLUB_MEETING_CREATED
-                || type == NotificationType.CLUB_NOTICE_CREATED;
     }
 }

@@ -56,6 +56,17 @@ public class Notification extends BaseEntity {
     }
 
     public enum NotificationType {
-        LIKE, COMMENT, FOLLOW, JOIN_CLUB, CLUB_MEETING_CREATED, CLUB_NOTICE_CREATED
+        LIKE, COMMENT, FOLLOW, JOIN_CLUB, CLUB_MEETING_CREATED, CLUB_NOTICE_CREATED;
+
+        public boolean isClubNotification() {
+            return this == JOIN_CLUB
+                    || this == CLUB_MEETING_CREATED
+                    || this == CLUB_NOTICE_CREATED;
+        }
+
+        public boolean needsSourceId() {
+            return this == CLUB_MEETING_CREATED
+                    || this == CLUB_NOTICE_CREATED;
+        }
     }
 }

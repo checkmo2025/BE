@@ -53,12 +53,12 @@ public class NotificationConverter {
     ) {
         // 클럽 알림: clubName 사용,
         // 사용자 알림: senderNickname 사용
-        String displayName = isClubNotification(notification.getNotificationType())
+        String displayName = notification.getNotificationType().isClubNotification()
                 ? clubNameMap.get(notification.getDomainId())
                 : senderNicknameMap.get(notification.getSenderId());
 
         // sourceId는 클럽 미팅/공지 알림에서만 필요
-        Long sourceId = needsSourceId(notification.getNotificationType())
+        Long sourceId = notification.getNotificationType().needsSourceId()
                 ? notification.getSourceId()
                 : null;
 
@@ -71,16 +71,5 @@ public class NotificationConverter {
                 .read(notification.isRead())
                 .createdAt(notification.getCreatedAt())
                 .build();
-    }
-
-    private static boolean isClubNotification(Notification.NotificationType type) {
-        return type == Notification.NotificationType.JOIN_CLUB
-                || type == Notification.NotificationType.CLUB_MEETING_CREATED
-                || type == Notification.NotificationType.CLUB_NOTICE_CREATED;
-    }
-
-    private static boolean needsSourceId(Notification.NotificationType type) {
-        return type == Notification.NotificationType.CLUB_MEETING_CREATED
-                || type == Notification.NotificationType.CLUB_NOTICE_CREATED;
     }
 }
