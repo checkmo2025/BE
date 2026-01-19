@@ -14,6 +14,7 @@ import checkmo.notification.internal.entity.Notification.NotificationType;
 import checkmo.notification.internal.exception.NotificationErrorStatus;
 import checkmo.notification.internal.exception.NotificationException;
 import checkmo.notification.internal.repository.NotificationRepository;
+import checkmo.notification.internal.repository.NotificationSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -31,18 +32,21 @@ public class NotificationCommandService {
     private final ClubManagementAPI clubManagementAPI;
 
     private final NotificationRepository notificationRepository;
+    private final NotificationSettingRepository notificationSettingRepository;
 
     private final CacheManager cacheManager;
-
 
     /**
      * 좋아요 알림 생성
      *
      * @param event 좋아요 알림 정보 DTO
      */
-    @CacheEvict(value = "notifications", key = "#event.receiverId()")
     public void createNotification(BookStoryEvent.BookStoryLiked event) {
         NotificationType type = NotificationType.LIKE;
+        if (!isNotificationEnabled(event.receiverId(), type)) {
+            return;
+        }
+
         Long sourceId = event.eventId();
         if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
             return;
@@ -61,6 +65,7 @@ public class NotificationCommandService {
                 .build();
         try {
             notificationRepository.save(notification);
+            evictNotificationCache(event.receiverId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -71,9 +76,12 @@ public class NotificationCommandService {
      *
      * @param event 댓글 알림 정보 DTO
      */
-    @CacheEvict(value = "notifications", key = "#event.receiverId()")
     public void createNotification(BookStoryEvent.BookStoryComment event) {
         NotificationType type = NotificationType.COMMENT;
+        if (!isNotificationEnabled(event.receiverId(), type)) {
+            return;
+        }
+
         Long sourceId = event.eventId();
         if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
             return;
@@ -91,6 +99,7 @@ public class NotificationCommandService {
                 .build();
         try {
             notificationRepository.save(notification);
+            evictNotificationCache(event.receiverId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -101,9 +110,12 @@ public class NotificationCommandService {
      *
      * @param event 팔로우 알림 정보 DTO
      */
-    @CacheEvict(value = "notifications", key = "#event.followingId()")
     public void createNotification(MemberEvent.Follow event) {
         Notification.NotificationType type = Notification.NotificationType.FOLLOW;
+        if (!isNotificationEnabled(event.followingId(), type)) {
+            return;
+        }
+
         Long sourceId = event.eventId();
         if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
             return;
@@ -125,6 +137,7 @@ public class NotificationCommandService {
                 .build();
         try {
             notificationRepository.save(notification);
+            evictNotificationCache(event.followingId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -135,9 +148,12 @@ public class NotificationCommandService {
      *
      * @param event 독서 클럽 가입 승인 알림 정보 DTO
      */
-    @CacheEvict(value = "notifications", key = "#event.memberId()")
     public void createNotification(JoinClubEvent event) {
         Notification.NotificationType type = Notification.NotificationType.JOIN_CLUB;
+        if (!isNotificationEnabled(event.memberId(), type)) {
+            return;
+        }
+
         Long sourceId = event.eventId();
         if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
             return;
@@ -157,6 +173,7 @@ public class NotificationCommandService {
                 .build();
         try {
             notificationRepository.save(notification);
+            evictNotificationCache(event.memberId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -196,6 +213,10 @@ public class NotificationCommandService {
 
     private void createClubNotification(NotificationType type, Long sourceId, String redirectPath,
                                         String clubName, String receiverId) {
+        if (!isNotificationEnabled(receiverId, type)) {
+            return;
+        }
+
         Notification notification = Notification.builder()
                 .notificationType(type)
                 .sourceId(sourceId)
@@ -217,6 +238,12 @@ public class NotificationCommandService {
         if (cache != null) {
             cache.evict(memberId);
         }
+    }
+
+    private boolean isNotificationEnabled(String receiverId, NotificationType type) {
+        return notificationSettingRepository.findByMemberId(receiverId)
+                .map(setting -> setting.isEnabled(type))
+                .orElse(true);
     }
 
     /**
