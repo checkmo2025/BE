@@ -44,14 +44,9 @@ public class NotificationCommandService {
             return;
         }
 
-        Long sourceId = event.eventId();
-        if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
-            return;
-        }
-
         Notification notification = Notification.builder()
                 .notificationType(type)
-                .sourceId(sourceId)
+                .sourceId(event.eventId())
                 .domainId(event.bookStoryId())
                 .senderId(event.senderId())
                 .receiverId(event.receiverId())
@@ -75,14 +70,9 @@ public class NotificationCommandService {
             return;
         }
 
-        Long sourceId = event.eventId();
-        if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
-            return;
-        }
-
         Notification notification = Notification.builder()
                 .notificationType(type)
-                .sourceId(sourceId)
+                .sourceId(event.eventId())
                 .domainId(event.bookStoryId())
                 .senderId(event.senderId())
                 .receiverId(event.receiverId())
@@ -106,15 +96,10 @@ public class NotificationCommandService {
             return;
         }
 
-        Long sourceId = event.eventId();
-        if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
-            return;
-        }
-
         // domainId = null, 프론트에서 displayName(닉네임)으로 프로필 페이지 접근
         Notification notification = Notification.builder()
                 .notificationType(type)
-                .sourceId(sourceId)
+                .sourceId(event.eventId())
                 .domainId(null)
                 .senderId(event.followerId())
                 .receiverId(event.followingId())
@@ -138,14 +123,9 @@ public class NotificationCommandService {
             return;
         }
 
-        Long sourceId = event.eventId();
-        if (notificationRepository.existsByNotificationTypeAndSourceId(type, sourceId)) {
-            return;
-        }
-
         Notification notification = Notification.builder()
                 .notificationType(type)
-                .sourceId(sourceId)
+                .sourceId(event.eventId())
                 .domainId(event.clubId())
                 .senderId("SYSTEM")
                 .receiverId(event.memberId())
