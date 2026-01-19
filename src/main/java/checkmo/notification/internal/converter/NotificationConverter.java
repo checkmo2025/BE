@@ -13,46 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NotificationConverter {
 
-    public static String getRedirectPath(Notification.NotificationType notificationType, Long bookStoryId) {
-        if (Notification.NotificationType.LIKE == notificationType
-                || Notification.NotificationType.COMMENT == notificationType) {
-            return "/bookstory/" + bookStoryId + "/detail"; // 프론트엔드 경로
-        }
-        return null;
-    }
-
-    public static String getRedirectPath(Notification.NotificationType notificationType, String Nickname) {
-        if (Notification.NotificationType.FOLLOW == notificationType) {
-            return "/info/others/" + Nickname; // 프론트엔드 경로
-        }
-        return null; // 지금은 FOLLOW 타입일 경우 무조건 Nickname을 사용하지만, 다른 타입이 추가될 경우를 대비하여 null 반환
-    }
-
-    public static String getRedirectPathForClub(Notification.NotificationType notificationType, Long clubId) {
-        if (Notification.NotificationType.JOIN_CLUB == notificationType) {
-            return "/bookclub/" + clubId + "/home";
-        }
-        return null;
-    }
-
-    public static String getRedirectPathForClubMeeting(Long clubId, Long meetingId) {
-        return "/bookclub/" + clubId + "/meeting/" + meetingId;
-    }
-
-    public static String getRedirectPathForClubNotice(Long clubId, Long noticeId) {
-        return "/bookclub/" + clubId + "/notice/" + noticeId;
-    }
-
     public static BasicInfoPreviewList convertToPreviewListDTO(
             List<Notification> notifications,
-            Map<String, String> senderNicknameMap
+            Map<String, String> senderNicknameMap,
+            Map<Long, String> clubNameMap
     ) {
-
         List<BasicInfo> previewList = notifications.stream()
-                .map(notification -> convertToPreviewDTO(
-                        notification,
-                        notification.getSenderId() != null ? senderNicknameMap.get(notification.getSenderId()) : null
-                ))
+                .map(notification -> convertToBasicInfo(notification, senderNicknameMap, clubNameMap))
                 .toList();
 
         return BasicInfoPreviewList.builder()
@@ -60,33 +27,15 @@ public class NotificationConverter {
                 .build();
     }
 
-    public static BasicInfo convertToPreviewDTO(
-            Notification notification,
-            String senderNickname
-    ) {
-        return BasicInfo.builder()
-                .notificationId(notification.getId())
-                .notificationType(notification.getNotificationType())
-                .senderNickname(senderNickname)
-                .targetName(notification.getTargetName())
-                .read(notification.isRead())
-                .createdAt(notification.getCreatedAt())
-                .redirectPath(notification.getRedirectPath())
-                .build();
-    }
-
     public static BasicInfoList convertToNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
+            Map<Long, String> clubNameMap,
             CursorResult<Notification> cursorResult,
             int pageSize
     ) {
-
         var notificationList = notifications.stream()
-                .map(notification -> convertToPreviewDTO(
-                        notification,
-                        notification.getSenderId() != null ? senderNicknameMap.get(notification.getSenderId()) : null
-                ))
+                .map(notification -> convertToBasicInfo(notification, senderNicknameMap, clubNameMap))
                 .toList();
 
         return BasicInfoList.builder()
@@ -95,5 +44,43 @@ public class NotificationConverter {
                 .nextCursor(cursorResult.nextCursor())
                 .pageSize(pageSize)
                 .build();
+    }
+
+    private static BasicInfo convertToBasicInfo(
+            Notification notification,
+            Map<String, String> senderNicknameMap,
+            Map<Long, String> clubNameMap
+    ) {
+        // 클럽 알림: clubName 사용,
+        // 사용자 알림: senderNickname 사용
+        String displayName = isClubNotification(notification.getNotificationType())
+                ? clubNameMap.get(notification.getDomainId())
+                : senderNicknameMap.get(notification.getSenderId());
+
+        // sourceId는 클럽 미팅/공지 알림에서만 필요
+        Long sourceId = needsSourceId(notification.getNotificationType())
+                ? notification.getSourceId()
+                : null;
+
+        return BasicInfo.builder()
+                .notificationId(notification.getId())
+                .notificationType(notification.getNotificationType())
+                .domainId(notification.getDomainId())
+                .sourceId(sourceId)
+                .displayName(displayName)
+                .read(notification.isRead())
+                .createdAt(notification.getCreatedAt())
+                .build();
+    }
+
+    private static boolean isClubNotification(Notification.NotificationType type) {
+        return type == Notification.NotificationType.JOIN_CLUB
+                || type == Notification.NotificationType.CLUB_MEETING_CREATED
+                || type == Notification.NotificationType.CLUB_NOTICE_CREATED;
+    }
+
+    private static boolean needsSourceId(Notification.NotificationType type) {
+        return type == Notification.NotificationType.CLUB_MEETING_CREATED
+                || type == Notification.NotificationType.CLUB_NOTICE_CREATED;
     }
 }
