@@ -2,6 +2,7 @@ package checkmo.clubNotice.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
+import checkmo.clubNotice.ClubNoticeEvent.ClubNoticeCreated;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -17,6 +18,7 @@ import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResult;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,8 @@ public class ClubNoticeCommandService {
     private final NoticeRepository noticeRepository;
     private final ClubMemberVoteRepository clubMemberVoteRepository;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     public Notice createPureNotice(Long clubId, String memberId, CreateClubNotice request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
@@ -41,7 +45,19 @@ public class ClubNoticeCommandService {
         Notice notice = ClubNoticeConverter.toNotice(request, clubId);
         noticeRepository.save(notice);
 
+        publishNoticeCreatedEvent(notice, clubId);
+
         return notice;
+    }
+
+    private void publishNoticeCreatedEvent(Notice notice, Long clubId) {
+        String clubName = clubManagementAPI.fetchClubName(clubId);
+        ClubNoticeCreated event = ClubNoticeCreated.builder()
+                .eventId(notice.getId())
+                .clubId(clubId)
+                .clubName(clubName)
+                .build();
+        applicationEventPublisher.publishEvent(event);
     }
 
     public void deletePureNotice(Long clubId, Long noticeId, String memberId) {
