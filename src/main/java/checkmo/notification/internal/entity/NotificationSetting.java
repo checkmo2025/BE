@@ -1,6 +1,7 @@
 package checkmo.notification.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.notification.internal.entity.Notification.NotificationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -79,4 +80,14 @@ public class NotificationSetting extends BaseEntity {
         this.joinClub = !this.joinClub;
     }
 
+    public boolean isEnabled(NotificationType type) {
+        return switch (type) {
+            case LIKE -> bookStoryLiked;
+            case COMMENT -> bookStoryComment;
+            case FOLLOW -> newFollower;
+            case JOIN_CLUB -> joinClub;
+            case CLUB_MEETING_CREATED -> clubMeetingCreated;
+            case CLUB_NOTICE_CREATED -> clubNoticeCreated;
+        };
+    }
 }
