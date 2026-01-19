@@ -11,4 +11,8 @@ public class MemberEvent {
     @Builder
     public record DeleteProfileImage(String imageUrl) {
     }
+
+    @Builder
+    public record MemberRegistrationCompleted(String memberId) {
+    }
 }

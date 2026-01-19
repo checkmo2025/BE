@@ -18,6 +18,22 @@ public interface ClubManagementAPI {
     void validateClub(Long clubId) throws ClubManagementException;
 
     /**
+     * 특정 모임의 이름을 조회.
+     *
+     * @param clubId 모임 ID
+     * @return 모임 이름
+     */
+    String fetchClubName(Long clubId) throws ClubManagementException;
+
+    /**
+     * 여러 모임의 이름을 배치 조회.
+     *
+     * @param clubIds 모임 ID 목록
+     * @return 모임 ID를 키로 하는 모임 이름 맵
+     */
+    Map<Long, String> fetchClubNamesByClubIds(List<Long> clubIds);
+
+    /**
      * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다.
      *
      * @param memberId 회원 ID

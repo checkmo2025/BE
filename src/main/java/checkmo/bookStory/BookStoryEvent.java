@@ -11,4 +11,8 @@ public class BookStoryEvent {
     @Builder
     public record BookStoryLiked(Long eventId, String senderId, String receiverId, Long bookStoryId) {
     }
+
+    @Builder
+    public record BookStoryComment(Long eventId, String senderId, String receiverId, Long bookStoryId) {
+    }
 }
