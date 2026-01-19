@@ -42,11 +42,8 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private boolean isRead = false;
 
-    @Column(nullable = false)
-    private String redirectPath;
-
-    @Column
-    private String targetName; // 대상 엔티티의 이름 (클럽명, 사용자명 등)
+    @Column(name = "domain_id")
+    private Long domainId; // 알림 대상 도메인의 ID (bookStoryId, clubId 등). FOLLOW의 경우 null
 
     @Column(name = "receiver_id", nullable = false)
     private String receiverId;

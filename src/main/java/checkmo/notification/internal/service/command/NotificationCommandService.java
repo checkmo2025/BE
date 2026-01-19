@@ -5,10 +5,8 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
 import checkmo.clubNotice.ClubNoticeEvent.ClubNoticeCreated;
-import checkmo.member.MemberAPI;
 import checkmo.member.MemberEvent;
 import java.util.List;
-import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.entity.Notification.NotificationType;
 import checkmo.notification.internal.exception.NotificationErrorStatus;
@@ -28,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class NotificationCommandService {
 
-    private final MemberAPI memberAPI;
     private final ClubManagementAPI clubManagementAPI;
 
     private final NotificationRepository notificationRepository;
@@ -52,14 +49,10 @@ public class NotificationCommandService {
             return;
         }
 
-        String redirectPath = NotificationConverter.getRedirectPath(type, event.bookStoryId());
-
-        // Notification 객체를 생성하고 저장 (targetName = null)
         Notification notification = Notification.builder()
                 .notificationType(type)
                 .sourceId(sourceId)
-                .redirectPath(redirectPath)
-                .targetName(null)
+                .domainId(event.bookStoryId())
                 .senderId(event.senderId())
                 .receiverId(event.receiverId())
                 .build();
@@ -87,13 +80,10 @@ public class NotificationCommandService {
             return;
         }
 
-        String redirectPath = NotificationConverter.getRedirectPath(type, event.bookStoryId());
-
         Notification notification = Notification.builder()
                 .notificationType(type)
                 .sourceId(sourceId)
-                .redirectPath(redirectPath)
-                .targetName(null)
+                .domainId(event.bookStoryId())
                 .senderId(event.senderId())
                 .receiverId(event.receiverId())
                 .build();
@@ -121,17 +111,11 @@ public class NotificationCommandService {
             return;
         }
 
-        // 팔로우 누른 사람의 닉네임을 가져옴
-        String FollowerNickname = memberAPI.fetchNickname(event.followerId());
-
-        String redirectPath = NotificationConverter.getRedirectPath(type, FollowerNickname);
-
-        // Notification 객체를 생성하고 저장 (targetName = followerNickname)
+        // domainId = null, 프론트에서 displayName(닉네임)으로 프로필 페이지 접근
         Notification notification = Notification.builder()
                 .notificationType(type)
                 .sourceId(sourceId)
-                .redirectPath(redirectPath)
-                .targetName(FollowerNickname)
+                .domainId(null)
                 .senderId(event.followerId())
                 .receiverId(event.followingId())
                 .build();
@@ -159,15 +143,10 @@ public class NotificationCommandService {
             return;
         }
 
-        String redirectPath
-                = NotificationConverter.getRedirectPathForClub(Notification.NotificationType.JOIN_CLUB, event.clubId());
-
-        // Notification 객체를 생성하고 저장 (sender 없이, targetName 포함)
         Notification notification = Notification.builder()
                 .notificationType(type)
                 .sourceId(sourceId)
-                .redirectPath(redirectPath)
-                .targetName(event.clubName())
+                .domainId(event.clubId())
                 .senderId("SYSTEM")
                 .receiverId(event.memberId())
                 .build();
@@ -187,11 +166,10 @@ public class NotificationCommandService {
     public void createNotification(ClubMeetingCreated event) {
         NotificationType type = NotificationType.CLUB_MEETING_CREATED;
         Long sourceId = event.eventId();
-        String redirectPath = NotificationConverter.getRedirectPathForClubMeeting(event.clubId(), event.eventId());
 
         List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
         for (String memberId : memberIds) {
-            createClubNotification(type, sourceId, redirectPath, event.clubName(), memberId);
+            createClubNotification(type, sourceId, event.clubId(), memberId);
         }
     }
 
@@ -203,16 +181,15 @@ public class NotificationCommandService {
     public void createNotification(ClubNoticeCreated event) {
         NotificationType type = NotificationType.CLUB_NOTICE_CREATED;
         Long sourceId = event.eventId();
-        String redirectPath = NotificationConverter.getRedirectPathForClubNotice(event.clubId(), event.eventId());
 
         List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
         for (String memberId : memberIds) {
-            createClubNotification(type, sourceId, redirectPath, event.clubName(), memberId);
+            createClubNotification(type, sourceId, event.clubId(), memberId);
         }
     }
 
-    private void createClubNotification(NotificationType type, Long sourceId, String redirectPath,
-                                        String clubName, String receiverId) {
+    private void createClubNotification(NotificationType type, Long sourceId, Long clubId,
+                                        String receiverId) {
         if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
@@ -220,8 +197,7 @@ public class NotificationCommandService {
         Notification notification = Notification.builder()
                 .notificationType(type)
                 .sourceId(sourceId)
-                .redirectPath(redirectPath)
-                .targetName(clubName)
+                .domainId(clubId)
                 .senderId("SYSTEM")
                 .receiverId(receiverId)
                 .build();
