@@ -30,9 +30,17 @@ public class NotificationConverter {
 
     public static String getRedirectPathForClub(Notification.NotificationType notificationType, Long clubId) {
         if (Notification.NotificationType.JOIN_CLUB == notificationType) {
-            return "/bookclub/" + clubId + "/home"; // 프론트엔드 경로
+            return "/bookclub/" + clubId + "/home";
         }
         return null;
+    }
+
+    public static String getRedirectPathForClubMeeting(Long clubId, Long meetingId) {
+        return "/bookclub/" + clubId + "/meeting/" + meetingId;
+    }
+
+    public static String getRedirectPathForClubNotice(Long clubId, Long noticeId) {
+        return "/bookclub/" + clubId + "/notice/" + noticeId;
     }
 
     public static BasicInfoPreviewList convertToPreviewListDTO(

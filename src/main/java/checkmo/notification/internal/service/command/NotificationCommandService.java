@@ -1,9 +1,13 @@
 package checkmo.notification.internal.service.command;
 
 import checkmo.bookStory.BookStoryEvent;
+import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
+import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
+import checkmo.clubNotice.ClubNoticeEvent.ClubNoticeCreated;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberEvent;
+import java.util.List;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.entity.Notification.NotificationType;
@@ -11,6 +15,8 @@ import checkmo.notification.internal.exception.NotificationErrorStatus;
 import checkmo.notification.internal.exception.NotificationException;
 import checkmo.notification.internal.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -22,8 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationCommandService {
 
     private final MemberAPI memberAPI;
+    private final ClubManagementAPI clubManagementAPI;
 
     private final NotificationRepository notificationRepository;
+
+    private final CacheManager cacheManager;
+
 
     /**
      * 좋아요 알림 생성
@@ -149,6 +159,63 @@ public class NotificationCommandService {
             notificationRepository.save(notification);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
+        }
+    }
+
+    /**
+     * 정기 모임 생성 알림 생성
+     *
+     * @param event 정기 모임 생성 알림 정보 DTO
+     */
+    public void createNotification(ClubMeetingCreated event) {
+        NotificationType type = NotificationType.CLUB_MEETING_CREATED;
+        Long sourceId = event.eventId();
+        String redirectPath = NotificationConverter.getRedirectPathForClubMeeting(event.clubId(), event.eventId());
+
+        List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
+        for (String memberId : memberIds) {
+            createClubNotification(type, sourceId, redirectPath, event.clubName(), memberId);
+        }
+    }
+
+    /**
+     * 공지사항 생성 알림 생성
+     *
+     * @param event 공지사항 생성 알림 정보 DTO
+     */
+    public void createNotification(ClubNoticeCreated event) {
+        NotificationType type = NotificationType.CLUB_NOTICE_CREATED;
+        Long sourceId = event.eventId();
+        String redirectPath = NotificationConverter.getRedirectPathForClubNotice(event.clubId(), event.eventId());
+
+        List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
+        for (String memberId : memberIds) {
+            createClubNotification(type, sourceId, redirectPath, event.clubName(), memberId);
+        }
+    }
+
+    private void createClubNotification(NotificationType type, Long sourceId, String redirectPath,
+                                        String clubName, String receiverId) {
+        Notification notification = Notification.builder()
+                .notificationType(type)
+                .sourceId(sourceId)
+                .redirectPath(redirectPath)
+                .targetName(clubName)
+                .senderId("SYSTEM")
+                .receiverId(receiverId)
+                .build();
+        try {
+            notificationRepository.save(notification);
+            evictNotificationCache(receiverId);
+        } catch (DataIntegrityViolationException e) {
+            // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
+        }
+    }
+
+    private void evictNotificationCache(String memberId) {
+        Cache cache = cacheManager.getCache("notifications");
+        if (cache != null) {
+            cache.evict(memberId);
         }
     }
 
