@@ -7,18 +7,22 @@ import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.NoticeComment;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
 import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
+import checkmo.clubNotice.internal.service.query.NoticeCommentQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticePreviewList;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.EachItem;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.NoticeCommentList;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.BasicInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +47,7 @@ public class ClubNoticeQueryFacade {
     private final MemberAPI memberAPI;
 
     private final ClubNoticeQueryService clubNoticeQueryService;
+    private final NoticeCommentQueryService noticeCommentQueryService;
 
     public ClubNoticePreviewList retrieveClubNoticeList(
             Long clubId,
@@ -94,6 +99,43 @@ public class ClubNoticeQueryFacade {
 
         return ClubNoticeConverter.toClubNoticeDetail(notice, meetingDetail, voteDetail, clubMembershipInfo);
     }
+
+    public NoticeCommentList retrieveNoticeComments(Long clubId, Long noticeId, String memberId, Long cursorId) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubNoticeQueryService.validateNotice(clubId, noticeId);
+
+        CursorResult<checkmo.clubNotice.internal.entity.NoticeComment> commentCursorResult =
+                CursorPagingHelper.getPage(
+                        size -> noticeCommentQueryService.retrieveNoticeComments(
+                                noticeId,
+                                cursorId,
+                                size
+                        ),
+                        checkmo.clubNotice.internal.entity.NoticeComment::getId,
+                        DEFAULT_PAGE_SIZE
+                );
+
+        Set<Long> clubMemberIds
+                = ExtractHelper.extractSet(commentCursorResult.content(), NoticeComment::getClubMemberId);
+        Map<Long, BasicInfo> clubMemberIdToMemberInfo = fetchBasicInfoByClubMemberId(clubMemberIds);
+
+        List<ClubNoticeResponseDTO.NoticeComment> commentList = commentCursorResult.content().stream()
+                .map(comment -> {
+                    MemberExternalDTO.BasicInfo memberInfo =
+                            clubMemberIdToMemberInfo.get(comment.getClubMemberId());
+                    return ClubNoticeConverter.toNoticeComment(comment, memberInfo);
+                })
+                .toList();
+
+        return NoticeCommentList.builder()
+                .comments(commentList)
+                .hasNext(commentCursorResult.hasNext())
+                .nextCursor(commentCursorResult.nextCursor())
+                .build();
+    }
+
+    // ========== retrieveClubNoticeDetail builder ==========
 
     private ClubNoticeResponseDTO.VoteDetail buildVoteDetail(Vote vote, Long myClubMemberId) {
         if (vote == null) {
@@ -245,5 +287,4 @@ public class ClubNoticeQueryFacade {
                         (a, b) -> a
                 ));
     }
-
 }

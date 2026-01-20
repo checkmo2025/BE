@@ -70,4 +70,19 @@ public class Notice extends BaseEntity {
         return this.meetingVersion >= meetingVersion;
     }
 
+    public void addComment(NoticeComment comment) {
+        if (comment == null) {
+            return;
+        }
+        comment.setNotice(this);
+        this.comments.add(comment);
+    }
+
+    public void removeComment(NoticeComment noticeComment) {
+        if (noticeComment == null) {
+            return;
+        }
+        this.comments.remove(noticeComment);
+        noticeComment.setNotice(null);
+    }
 }

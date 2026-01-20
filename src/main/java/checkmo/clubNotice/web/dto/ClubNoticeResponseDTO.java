@@ -95,4 +95,26 @@ public class ClubNoticeResponseDTO {
         private int voteCount;
         private List<MemberExternalDTO.BasicInfo> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class NoticeCommentList {
+        private List<NoticeComment> comments;
+        private boolean hasNext;
+        private Long nextCursor;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class NoticeComment {
+        private Long id;
+        private MemberExternalDTO.BasicInfo authorInfo;
+        private String content;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+    }
 }

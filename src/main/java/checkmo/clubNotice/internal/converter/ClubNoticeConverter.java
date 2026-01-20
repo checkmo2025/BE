@@ -5,6 +5,7 @@ import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
+import checkmo.clubNotice.internal.entity.NoticeComment;
 import checkmo.clubNotice.internal.entity.NoticeTag;
 import checkmo.clubNotice.internal.entity.Vote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
@@ -83,6 +84,16 @@ public class ClubNoticeConverter {
                 .build();
     }
 
+    public static NoticeComment toNoticeComment(
+            ClubNoticeRequestDTO.CreateClubNoticeComment request,
+            Long clubMemberId
+    ) {
+        return NoticeComment.builder()
+                .content(request.getContent())
+                .clubMemberId(clubMemberId)
+                .build();
+    }
+
     // ========== DTO 변환 ==========
     public static ClubNoticeResponseDTO.ClubNoticePreview toClubNoticePreview(Notice notice) {
         return ClubNoticePreview.builder()
@@ -136,6 +147,19 @@ public class ClubNoticeConverter {
                 .isSelected(isSelected)
                 .voteCount(votedMembers.size())
                 .votedMembers(votedMembers)
+                .build();
+    }
+
+    public static ClubNoticeResponseDTO.NoticeComment toNoticeComment(
+            NoticeComment comment,
+            MemberExternalDTO.BasicInfo memberInfo
+    ) {
+        return ClubNoticeResponseDTO.NoticeComment.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .authorInfo(memberInfo)
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
                 .build();
     }
 }

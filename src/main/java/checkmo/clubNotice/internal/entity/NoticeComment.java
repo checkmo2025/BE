@@ -34,4 +34,18 @@ public class NoticeComment extends BaseEntity {
 
     private Long clubMemberId;
 
+    public void setNotice(Notice notice) {
+        if (notice == null) {
+            return;
+        }
+        this.notice = notice;
+    }
+
+    public boolean isAuthor(Long clubMemberId) {
+        return this.clubMemberId.equals(clubMemberId);
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

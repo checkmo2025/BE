@@ -28,5 +28,4 @@ public class ClubNoticeQueryService {
         return noticeRepository.findByIdAndClubId(noticeId, clubId)
                 .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND));
     }
-
 }

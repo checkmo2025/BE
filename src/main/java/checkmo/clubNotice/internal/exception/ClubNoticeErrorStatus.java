@@ -21,7 +21,11 @@ public enum ClubNoticeErrorStatus implements BaseErrorCode {
     MULTIPLE_SELECTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "VOTE_401", "하나의 항목에만 투표 가능합니다."),
     ITEM_SELECTION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "VOTE_402", "선택한 항목이 투표 항목의 범위를 벗어났습니다."),
     VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_403", "투표 가능 시간이 아닙니다."),
-    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다.");
+    VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다."),
+
+    // 댓글
+    NOTICE_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_COMMENT_400", "공지사항 댓글을 찾을 수 없습니다."),
+    NOTICE_COMMENT_UNAUTHORIZED(HttpStatus.FORBIDDEN, "NOTICE_COMMENT_401", "공지사항 댓글 수정/삭제 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

@@ -96,4 +96,11 @@ public class ClubNoticeRequestDTO {
             return selectedItemNumbers.size() == new HashSet<>(selectedItemNumbers).size();
         }
     }
+
+    @Getter
+    @NoArgsConstructor
+    public static class CreateClubNoticeComment {
+        @NotBlank(message = "공지사항 댓글 내용은 필수입니다.")
+        private String content;
+    }
 }
