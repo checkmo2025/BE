@@ -9,6 +9,7 @@ import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.FindEmailResult;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -197,5 +198,18 @@ public class MemberController {
             @PathVariable String memberNickname
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveOthersDetailInfo(memberNickname, memberId));
+    }
+
+    @Operation(summary = "이메일 찾기 API", description = "이름과 전화번호를 통해 가입된 이메일을 찾습니다. 뒤 4자리는 마스킹 처리됩니다.")
+    @PostMapping("/find-email")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "가입된 계정이 여러 개입니다. 관리자에게 문의해주세요.")
+    })
+    public ApiResponse<FindEmailResult> findEmail(
+        @Valid @RequestBody MemberRequestDTO.FindEmail request
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberEmail(request));
     }
 }

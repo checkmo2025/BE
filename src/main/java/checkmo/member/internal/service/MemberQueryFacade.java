@@ -8,6 +8,7 @@ import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
+import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
@@ -140,5 +141,22 @@ public class MemberQueryFacade {
                 .map(profileMap::get)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    public MemberResponseDTO.FindEmailResult retrieveMemberEmail(MemberRequestDTO.FindEmail request) {
+        String email = memberQueryService.retrieveMemberEmail(request);
+        String maskedEmail = maskEmail(email);
+        return MemberResponseDTO.FindEmailResult.builder()
+                 .email(maskedEmail)
+                 .build();
+    }
+
+    private String maskEmail(String email) {
+        int atIndex = email.indexOf("@");
+        if (atIndex < 0) return email;
+        String id = email.substring(0, atIndex);
+        String domain = email.substring(atIndex);
+        if (id.length() <= 4) return "****" + domain;
+        return id.substring(0, id.length() - 4) + "****" + domain;
     }
 }

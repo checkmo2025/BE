@@ -64,4 +64,14 @@ public class MemberRequestDTO {
         @Size(min = 1, max = 6, message = "관심 카테고리는 1개에서 6개까지 선택 가능합니다")
         private List<MemberInterestCategory> categories;
     }
+
+    @Getter
+    @NoArgsConstructor
+    public static class FindEmail {
+        @NotBlank(message = "이름은 필수 입력 항목입니다.")
+        private String name;
+
+        @NotBlank(message = "전화번호는 필수 입력 항목입니다.")
+        private String phoneNumber;
+    }
 }

@@ -6,6 +6,7 @@ import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjection;
+import checkmo.member.web.dto.MemberRequestDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -97,5 +98,25 @@ public class MemberQueryService {
                         MemberIdAndNicknameProjection::getId,       // key: memberId
                         MemberIdAndNicknameProjection::getNickName  // value: nickname
                 ));
+    }
+
+    /**
+     * 회원 이름과 전화번호로 가입한 이메일 찾기
+     */
+    public String retrieveMemberEmail(MemberRequestDTO.FindEmail request) {
+        List<Member> members = memberRepository.findAllByNameAndPhoneNumber(request.getName(), request.getPhoneNumber());
+
+        // 계정이 없는 경우
+        if (members.isEmpty()) {
+            throw new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND);
+        }
+
+        // 계정이 2개 이상인 경우
+        if (members.size() > 1) {
+            throw new MemberException(MemberErrorStatus.MULTIPLE_ACCOUNTS_FOUND);
+        }
+
+        // 1개인 경우에만 이메일 반환
+        return members.getFirst().getEmail();
     }
 }
