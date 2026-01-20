@@ -64,8 +64,14 @@ public class MemberCommandService {
             new HashSet<>(request.getCategories())
         );
 
-        // 프로필 완료 상태로 변경 이벤트 발행
+        // 프로필 완료 상태로 변경
         authenticationAPI.completeProfile(memberId);
+
+        // 회원 등록 완료 이벤트 발행
+        eventPublisher.publishEvent(
+                MemberEvent.MemberRegistrationCompleted.builder()
+                        .memberId(memberId)
+                        .build());
     }
 
     /**

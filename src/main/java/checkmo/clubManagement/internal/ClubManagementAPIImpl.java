@@ -31,6 +31,19 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
+    public String fetchClubName(Long clubId) throws ClubManagementException {
+        return clubManagementQueryService.validateClub(clubId).getName();
+    }
+
+    @Override
+    public Map<Long, String> fetchClubNamesByClubIds(List<Long> clubIds) {
+        if (clubIds == null || clubIds.isEmpty()) {
+            return Map.of();
+        }
+        return clubManagementQueryService.retrieveClubNamesByIds(clubIds);
+    }
+
+    @Override
     public ClubList fetchMyClubs(String memberId) {
         return clubMemberQueryService.retrieveClubList(memberId);
     }

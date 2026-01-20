@@ -4,8 +4,11 @@ import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubRepository;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameProjection;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,5 +35,14 @@ public class ClubManagementQueryService {
     public Club validateClub(Long clubId) throws ClubManagementException {
         return clubRepository.findById(clubId)
                 .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_NOT_FOUND));
+    }
+
+    public Map<Long, String> retrieveClubNamesByIds(List<Long> clubIds) {
+        List<ClubIdAndNameProjection> results = clubRepository.findIdAndNameByIdIn(clubIds);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        ClubIdAndNameProjection::getId,
+                        ClubIdAndNameProjection::getName
+                ));
     }
 }

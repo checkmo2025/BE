@@ -1,13 +1,17 @@
 package checkmo.notification.internal.service;
 
+import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
+import checkmo.notification.internal.entity.Notification.NotificationType;
 import checkmo.notification.internal.service.query.NotificationQueryService;
+import checkmo.notification.internal.service.query.NotificationSettingQueryService;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList;
+import checkmo.notification.web.dto.NotificationResponseDTO.SettingInfo;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -24,19 +28,19 @@ public class NotificationQueryFacade {
 
     // Domain level 2
     private final MemberAPI memberAPI;
+    private final ClubManagementAPI clubManagementAPI;
 
     private final NotificationQueryService notificationQueryService;
+    private final NotificationSettingQueryService notificationSettingQueryService;
 
     @Cacheable(value = "notifications", key = "#memberId")
     public BasicInfoPreviewList retrieveNotificationPreviews(String memberId, int size) {
         List<Notification> notifications = notificationQueryService.retrieveUnreadNotifications(memberId, size);
 
-        List<String> senderIds = extractSenderIds(notifications);
+        Map<String, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
+        Map<Long, String> clubNameMap = fetchClubNameMap(notifications);
 
-        // 발신자 닉네임 배치 조회로 처리
-        Map<String, String> senderNicknameMap = memberAPI.fetchNicknameByMemberIds(senderIds);
-
-        return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap);
+        return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap, clubNameMap);
     }
 
     public BasicInfoList retrieveNotifications(String memberId, Long cursorId) {
@@ -47,23 +51,37 @@ public class NotificationQueryFacade {
         );
         List<Notification> notifications = notificationCursorResult.content();
 
-        List<String> senderIds = extractSenderIds(notifications);
-
-        // 알림 보낸 사람 닉네임 배치 조회
-        Map<String, String> senderNicknameMap = memberAPI.fetchNicknameByMemberIds(senderIds);
+        Map<String, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
+        Map<Long, String> clubNameMap = fetchClubNameMap(notifications);
 
         return NotificationConverter.convertToNotificationListDTO(
                 notifications,
                 senderNicknameMap,
+                clubNameMap,
                 notificationCursorResult,
                 DEFAULT_PAGE_SIZE
         );
     }
 
-    private List<String> extractSenderIds(List<Notification> notifications) {
-        return notifications.stream()
+    public SettingInfo retrieveNotificationSetting(String memberId) {
+        return notificationSettingQueryService.getNotificationSetting(memberId);
+    }
+
+    private Map<String, String> fetchSenderNicknameMap(List<Notification> notifications) {
+        List<String> senderIds = notifications.stream()
+                .filter(n -> !n.getNotificationType().isClubNotification())
                 .map(Notification::getSenderId)
                 .distinct()
                 .toList();
+        return memberAPI.fetchNicknameByMemberIds(senderIds);
+    }
+
+    private Map<Long, String> fetchClubNameMap(List<Notification> notifications) {
+        List<Long> clubIds = notifications.stream()
+                .filter(n -> n.getNotificationType().isClubNotification())
+                .map(Notification::getDomainId)
+                .distinct()
+                .toList();
+        return clubManagementAPI.fetchClubNamesByClubIds(clubIds);
     }
 }

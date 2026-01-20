@@ -2,6 +2,7 @@ package checkmo.clubMeeting.internal.service.command;
 
 import checkmo.book.BookAPI;
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
@@ -52,6 +53,9 @@ public class ClubMeetingCommandService {
 
         // 미팅 기반 공지사항 생성 이벤트 발행
         publishMeetingCreatedEvent(meeting);
+
+        // 미팅 생성 알림 이벤트 발행
+        publishMeetingCreatedNotificationEvent(meeting, clubId);
 
         return meeting.getId();
     }
@@ -151,6 +155,17 @@ public class ClubMeetingCommandService {
                 .version(meeting.getVersion())
                 .title(meeting.getTitle())
                 .content(meeting.getContent())
+                .build();
+
+        applicationEventPublisher.publishEvent(event);
+    }
+
+    private void publishMeetingCreatedNotificationEvent(Meeting meeting, Long clubId) {
+        String clubName = clubManagementAPI.fetchClubName(clubId);
+        ClubMeetingCreated event = ClubMeetingCreated.builder()
+                .eventId(meeting.getId())
+                .clubId(clubId)
+                .clubName(clubName)
                 .build();
 
         applicationEventPublisher.publishEvent(event);

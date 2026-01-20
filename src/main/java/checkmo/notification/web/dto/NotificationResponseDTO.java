@@ -43,12 +43,25 @@ public class NotificationResponseDTO {
     public static class BasicInfo {
         private Long notificationId;
         private Notification.NotificationType notificationType;
-        private String senderNickname;
-        private String targetName; // 대상 이름 (클럽명, 사용자명 등)
+        private Long domainId; // 알림 대상 도메인의 ID. FOLLOW의 경우 null
+        private Long sourceId; // 알림 출처 엔티티의 ID (meetingId, noticeId 등)
+        private String displayName; // 사람 알림: 닉네임, 시스템 알림: 클럽명
         private boolean read;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private LocalDateTime createdAt;
-        private String redirectPath;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SettingInfo {
+        private boolean bookStoryLiked;
+        private boolean bookStoryComment;
+        private boolean clubNoticeCreated;
+        private boolean clubMeetingCreated;
+        private boolean newFollower;
+        private boolean joinClub;
     }
 }

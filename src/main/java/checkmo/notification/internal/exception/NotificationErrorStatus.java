@@ -12,6 +12,7 @@ public enum NotificationErrorStatus implements BaseErrorCode {
 
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_400", "알림을 찾을 수 없습니다."),
     NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "NOTIFICATION_401", "이미 읽은 알림입니다."),
+    NOTIFICATION_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_402", "알림 설정을 찾을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
