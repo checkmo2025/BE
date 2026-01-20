@@ -18,7 +18,7 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     @Override
     public void deleteAuthData(String memberId) {
         tokenCacheService.deleteRefreshToken(memberId);
-        authRepository.deleteById(memberId);
+        authRepository.findById(memberId).ifPresent(authRepository::delete);
     }
 
     @Override

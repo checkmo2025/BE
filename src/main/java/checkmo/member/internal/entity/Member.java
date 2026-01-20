@@ -96,8 +96,8 @@ public class Member extends BaseEntity {
     public void updateImageAndInterestCategories(String imgUrl, Set<MemberInterestCategory> newCategories) {
         if (imgUrl != null) this.imgUrl = imgUrl;
 
-        this.interestCategories.clear();
         if (newCategories != null) {
+            this.interestCategories.clear();
             this.interestCategories.addAll(newCategories);
         }
     }
