@@ -13,4 +13,10 @@ public interface BookStoryQueryRepository {
             Long cursorId,
             int pageSize
     );
+
+    List<BookStory> searchBookStories(
+            String bookId,
+            Long cursorId,
+            int pageSize
+    );
 }

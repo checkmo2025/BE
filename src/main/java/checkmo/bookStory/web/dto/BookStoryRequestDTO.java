@@ -36,4 +36,11 @@ public class BookStoryRequestDTO {
         @NotBlank(message = "댓글 내용을 입력해주세요.")
         private String content;
     }
+
+    @Getter
+    @NoArgsConstructor
+    public static class CommentUpdate {
+        @NotBlank(message = "수정할 댓글 내용을 입력해주세요.")
+        private String content;
+    }
 }

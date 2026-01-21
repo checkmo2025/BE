@@ -17,11 +17,11 @@ VALUES
 -- =========================
 -- 2) member
 -- =========================
-INSERT INTO member (id, email, nick_name, description, img_url, created_at, updated_at)
+INSERT INTO member (id, email, name, phone_number, nick_name, description, img_url, created_at, updated_at)
 VALUES
-    ('mem-001', 'test1@checkmo.local', '테스터1', '로컬 시드 유저1', NULL, @now, @now),
-    ('mem-002', 'test2@checkmo.local', '테스터2', '로컬 시드 유저2', NULL, @now, @now),
-    ('mem-003', 'admin@checkmo.local',  '어드민1','어드민 시드 유저1',  NULL, @now, @now);
+    ('mem-001', 'test1@checkmo.local', '홍길동', '010-1234-5678', '테스터1', '로컬 시드 유저1', NULL, @now, @now),
+    ('mem-002', 'test2@checkmo.local', '김철수', '010-2345-6789', '테스터2', '로컬 시드 유저2', NULL, @now, @now),
+    ('mem-003', 'admin@checkmo.local', '박영희', '010-3456-7890', '어드민1', '어드민 시드 유저1', NULL, @now, @now);
 
 -- =========================
 -- 3) member_interest_categories
@@ -190,15 +190,17 @@ VALUES
 -- =========================
 -- 13) book_story
 -- =========================
-INSERT INTO book_story (id, member_id, book_id, title, description, likes, comments_count, created_at, updated_at)
+INSERT INTO book_story (id, member_id, book_id, title, description, likes, comments_count, view_count, deleted, deleted_at, created_at, updated_at)
 VALUES
-    (1, 'mem-001', '9791193324530', '마지막 기도 감상', '복수와 신앙 사이의 갈등이 인상적', 2, 1, @now, @now),
-    (2, 'mem-001', '9791192128610', '녹색 자본론 정리', '억압/배제의 구조를 인류학적으로 읽다', 1, 0, @now, @now),
-    (3, 'mem-002', '9791192005317', '살인자ㅇ난감 메모', '장면 전환 템포가 좋았던 포인트', 0, 0, @now, @now),
-    (4, 'mem-002', '9791192625133', '거인의 어깨 요약', '투자 대가들의 공통점/차이점 정리', 0, 2, @now, @now),
-    (5, 'mem-003', '9791193528723', '인생의 태도 한 문장', '태도가 결국 선택을 바꾼다', 1, 0, @now, @now),
-    (6, 'mem-003', '9791193790403', '해리포터 1권 재독', '초반 세계관 소개가 완벽한 입문서', 0, 1, @now, @now),
-    (7, 'mem-003', '9791193790496', '불의 잔 4권 포인트', '전개의 밀도와 복선 회수 메모', 2, 0, @now, @now);
+    (1, 'mem-001', '9791193324530', '마지막 기도 감상', '복수와 신앙 사이의 갈등이 인상적', 2, 1, 15, b'0', NULL, @now, @now),
+    (2, 'mem-001', '9791192128610', '녹색 자본론 정리', '억압/배제의 구조를 인류학적으로 읽다', 1, 0, 8, b'0', NULL, @now, @now),
+    (3, 'mem-002', '9791192005317', '살인자ㅇ난감 메모', '장면 전환 템포가 좋았던 포인트', 0, 0, 3, b'0', NULL, @now, @now),
+    (4, 'mem-002', '9791192625133', '거인의 어깨 요약', '투자 대가들의 공통점/차이점 정리', 0, 2, 12, b'0', NULL, @now, @now),
+    (5, 'mem-003', '9791193528723', '인생의 태도 한 문장', '태도가 결국 선택을 바꾼다', 1, 0, 5, b'0', NULL, @now, @now),
+    (6, 'mem-003', '9791193790403', '해리포터 1권 재독', '초반 세계관 소개가 완벽한 입문서', 0, 1, 20, b'0', NULL, @now, @now),
+    (7, 'mem-003', '9791193790496', '불의 잔 4권 포인트', '전개의 밀도와 복선 회수 메모', 2, 0, 10, b'0', NULL, @now, @now),
+    (8, 'mem-003', '9791192005317', '드라마 먼저 보고 본 살인자ㅇ난감 후기', '영화보다 확실히 내용도 더 자세하게 뭔가 깊이가 있어서 많은 생각을 할 수 있었어요', 0, 0, 0, b'0', NULL, @now, @now),
+    (9, 'mem-002', '9791193394564', '트럼프 정책 정리', '미국 우선주의 정책의 핵심 요약', 0, 0, 2, b'1', @now, @now, @now);
 
 -- =========================
 -- 14) book_story_liked
@@ -218,14 +220,15 @@ VALUES
 -- =========================
 -- 15) comment
 -- =========================
-INSERT INTO comment (id, book_story_id, parent_comment_id, member_id, content, created_at, updated_at)
+INSERT INTO comment (id, book_story_id, parent_comment_id, member_id, content, deleted, deleted_at, created_at, updated_at)
 VALUES
-    (1, 1, NULL, 'mem-002', '저도 이 지점에서 주인공이 급격히 흔들리는 게 인상적이었어요.', @now, @now),
+    (1, 1, NULL, 'mem-001', '저도 이 지점에서 주인공이 급격히 흔들리는 게 인상적이었어요.', b'1', @now, @now, @now),
+    (2, 1, NULL, 'mem-002', '주인공의 위기 상황 때 정말 심장이 철렁했어요...', b'0', NULL, @now, @now),
 
-    (2, 4, NULL, 'mem-003', '세 사람(그레이엄/버핏/린치) 관점 정리 너무 좋네요. 저는 리스크 관리 파트가 기억에 남았어요.', @now, @now),
-    (3, 4, 2,    'mem-002', '맞아요. 특히 “잃지 않는 것”을 우선으로 보는 관점이 현실적이더라고요.', @now, @now),
+    (3, 4, NULL, 'mem-003', '세 사람(그레이엄/버핏/린치) 관점 정리 너무 좋네요. 저는 리스크 관리 파트가 기억에 남았어요.', b'0', NULL, @now, @now),
+    (4, 4, 2,    'mem-002', '맞아요. 특히 "잃지 않는 것"을 우선으로 보는 관점이 현실적이더라고요.', b'0', NULL, @now, @now),
 
-    (4, 6, NULL, 'mem-001', '입문서로서 완성도가 진짜 높죠. 세계관 소개가 과하지 않으면서도 몰입되더라구요.', @now, @now);
+    (5, 6, NULL, 'mem-001', '입문서로서 완성도가 진짜 높죠. 세계관 소개가 과하지 않으면서도 몰입되더라구요.', b'0', NULL, @now, @now);
 
 -- =========================
 -- 16) follow
@@ -268,38 +271,48 @@ VALUES
 
 -- =========================
 -- 20) notification
--- 알림 타입: LIKE / FOLLOW / JOIN_CLUB
+-- 알림 타입: LIKE / COMMENT / FOLLOW / JOIN_CLUB / CLUB_MEETING_CREATED / CLUB_NOTICE_CREATED
+-- source_id: 알림 출처 엔티티 ID, domain_id: 대상 도메인 ID (FOLLOW는 null)
 -- =========================
 INSERT INTO notification (
-    id, receiver_id, sender_id, source_id, target_name, notification_type, redirect_path,
+    id, receiver_id, sender_id, source_id, domain_id, notification_type,
     is_read, created_at, updated_at
 )
 VALUES
-    -- ===== LIKE 알림 (book_story_liked 기반) =====
-    (1, 'mem-001', 'mem-002', 101, '마지막 기도 감상', 'LIKE', '/book-stories/1', b'0', @now, @now),
+    -- ===== LIKE 알림 (source_id = book_story_liked.id, domain_id = book_story_id) =====
+    (1, 'mem-001', 'mem-002', 101, 1, 'LIKE', b'0', @now, @now),
+    (2, 'mem-001', 'mem-003', 102, 1, 'LIKE', b'0', @now, @now),
+    (3, 'mem-001', 'mem-002', 103, 2, 'LIKE', b'1', @now, @now),
+    (4, 'mem-003', 'mem-001', 104, 5, 'LIKE', b'0', @now, @now),
+    (5, 'mem-003', 'mem-001', 105, 7, 'LIKE', b'0', @now, @now),
+    (6, 'mem-003', 'mem-002', 106, 7, 'LIKE', b'1', @now, @now),
 
-    (2, 'mem-001', 'mem-003', 102, '마지막 기도 감상', 'LIKE', '/book-stories/1', b'0', @now, @now),
+    -- ===== COMMENT 알림 (source_id = comment.id, domain_id = book_story_id) =====
+    (7, 'mem-001', 'mem-002', 1, 1, 'COMMENT', b'0', @now, @now),
+    (8, 'mem-002', 'mem-003', 2, 4, 'COMMENT', b'0', @now, @now),
+    (9, 'mem-003', 'mem-001', 4, 6, 'COMMENT', b'1', @now, @now),
 
-    (3, 'mem-001', 'mem-002', 103, '녹색 자본론 정리', 'LIKE', '/book-stories/2', b'1', @now, @now),
+    -- ===== FOLLOW 알림 (source_id = follow.id, domain_id = null) =====
+    (10, 'mem-003', 'mem-001', 201, NULL, 'FOLLOW', b'0', @now, @now),
+    (11, 'mem-003', 'mem-002', 202, NULL, 'FOLLOW', b'0', @now, @now),
+    (12, 'mem-001', 'mem-003', 203, NULL, 'FOLLOW', b'1', @now, @now),
+    (13, 'mem-002', 'mem-003', 204, NULL, 'FOLLOW', b'0', @now, @now),
 
-    (4, 'mem-003', 'mem-001', 104, '인생의 태도 한 문장', 'LIKE', '/book-stories/5', b'0', @now, @now),
+    -- ===== JOIN_CLUB 알림 (source_id = club_member.id, domain_id = club_id) =====
+    (14, 'mem-002', 'SYSTEM', 2, 1, 'JOIN_CLUB', b'0', @now, @now),
+    (15, 'mem-001', 'SYSTEM', 4, 2, 'JOIN_CLUB', b'0', @now, @now),
+    (16, 'mem-002', 'SYSTEM', 5, 2, 'JOIN_CLUB', b'1', @now, @now),
 
-    (5, 'mem-003', 'mem-001', 105, '불의 잔 4권 포인트', 'LIKE', '/book-stories/7', b'0', @now, @now),
+    -- ===== CLUB_MEETING_CREATED 알림 (source_id = meeting.id, domain_id = club_id) =====
+    (17, 'mem-001', 'SYSTEM', 1, 1, 'CLUB_MEETING_CREATED', b'0', @now, @now),
+    (18, 'mem-002', 'SYSTEM', 1, 1, 'CLUB_MEETING_CREATED', b'0', @now, @now),
+    (19, 'mem-001', 'SYSTEM', 2, 1, 'CLUB_MEETING_CREATED', b'1', @now, @now),
+    (20, 'mem-002', 'SYSTEM', 2, 1, 'CLUB_MEETING_CREATED', b'0', @now, @now),
+    (21, 'mem-001', 'SYSTEM', 3, 2, 'CLUB_MEETING_CREATED', b'0', @now, @now),
+    (22, 'mem-002', 'SYSTEM', 3, 2, 'CLUB_MEETING_CREATED', b'0', @now, @now),
 
-    (6, 'mem-003', 'mem-002', 106, '불의 잔 4권 포인트', 'LIKE', '/book-stories/7', b'1', @now, @now),
-
-    -- ===== FOLLOW 알림 (follow 기반) =====
-    (7, 'mem-003', 'mem-001', 201, '테스터1', 'FOLLOW', '/members/mem-001', b'0', @now, @now),
-
-    (8, 'mem-003', 'mem-002', 202, '테스터2', 'FOLLOW', '/members/mem-002', b'0', @now, @now),
-
-    (9, 'mem-001', 'mem-003', 203, '어드민1', 'FOLLOW', '/members/mem-003', b'1', @now, @now),
-
-    (10, 'mem-002', 'mem-003', 204, '어드민1', 'FOLLOW', '/members/mem-003', b'0', @now, @now),
-
-    -- ===== JOIN_CLUB 알림 (가입 승인 가정) =====
-    (11, 'mem-002', 'mem-001', 2, '서울 독서모임', 'JOIN_CLUB', '/clubs/1', b'0', @now, @now),
-
-    (12, 'mem-001', 'mem-003', 4, '에세이 살롱', 'JOIN_CLUB', '/clubs/2', b'0', @now, @now),
-
-    (13, 'mem-002', 'mem-003', 5, '에세이 살롱', 'JOIN_CLUB', '/clubs/2', b'1', @now, @now);
+    -- ===== CLUB_NOTICE_CREATED 알림 (source_id = notice.id, domain_id = club_id) =====
+    (23, 'mem-001', 'SYSTEM', 4, 1, 'CLUB_NOTICE_CREATED', b'0', @now, @now),
+    (24, 'mem-002', 'SYSTEM', 4, 1, 'CLUB_NOTICE_CREATED', b'0', @now, @now),
+    (25, 'mem-001', 'SYSTEM', 5, 2, 'CLUB_NOTICE_CREATED', b'1', @now, @now),
+    (26, 'mem-002', 'SYSTEM', 5, 2, 'CLUB_NOTICE_CREATED', b'0', @now, @now);

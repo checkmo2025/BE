@@ -38,10 +38,27 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         };
     }
 
+    @Override
+    public List<BookStory> searchBookStories(String bookId, Long cursorId, int pageSize) {
+        return queryFactory
+                .selectFrom(bookStory)
+                .where(
+                        notDeleted(),
+                        createCursorExp(cursorId),
+                        bookStory.bookId.eq(bookId)
+                )
+                .orderBy(bookStory.id.desc())
+                .limit(pageSize)
+                .fetch();
+    }
+
     private List<BookStory> findAllBookStories(Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
-                .where(createCursorExp(cursorId))
+                .where(
+                        notDeleted(),
+                        createCursorExp(cursorId)
+                )
                 .orderBy(bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
@@ -57,6 +74,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
+                        notDeleted(),
                         createCursorExp(cursorId),
                         bookStory.memberId.in(followingMemberIds)
                 )
@@ -69,6 +87,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
+                        notDeleted(),
                         createCursorExp(cursorId),
                         bookStory.memberId.eq(memberId)
                 )
@@ -92,6 +111,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
+                        notDeleted(),
                         createCursorExp(cursorId),
                         bookStory.memberId.in(clubMemberIds)
                 )
@@ -108,12 +128,17 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
+                        notDeleted(),
                         createCursorExp(cursorId),
                         bookStory.memberId.eq(targetMemberId)
                 )
                 .orderBy(bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
+    }
+
+    private BooleanExpression notDeleted() {
+        return bookStory.deleted.eq(false);
     }
 
     private BooleanExpression createCursorExp(Long cursorId) {

@@ -7,6 +7,7 @@ import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
+import checkmo.bookStory.internal.repository.projection.BookStoryPrevNextProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import java.util.HashSet;
 import java.util.List;
@@ -50,14 +51,22 @@ public class BookStoryQueryService {
         return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize);
     }
 
+    public List<BookStory> retrieveBookStories(
+            String bookId,
+            Long cursorId,
+            int pageSize
+    ) {
+        return bookStoryRepository.searchBookStories(bookId, cursorId, pageSize);
+    }
+
     /**
-     * 책 이야기 엔티티 조회
+     * 책 이야기 엔티티 조회 (삭제되지 않은 것만)
      *
      * @param bookStoryId 조회할 책 이야기의 ID
      * @return 조회된 책 이야기 엔티티
      */
     public BookStory retrieveBookStory(Long bookStoryId) {
-        return bookStoryRepository.findById(bookStoryId)
+        return bookStoryRepository.findByIdAndDeletedFalse(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
     }
 
@@ -99,5 +108,9 @@ public class BookStoryQueryService {
                         bookStoryId -> bookStoryId,
                         likedIdSet::contains
                 ));
+    }
+
+    public BookStoryPrevNextProjection retrievePrevNextBookStoryId(String memberId, Long bookStoryId) {
+        return bookStoryRepository.findPrevNextBookStoryId(memberId, bookStoryId);
     }
 }

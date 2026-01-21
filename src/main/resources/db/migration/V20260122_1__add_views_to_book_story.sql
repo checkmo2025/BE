@@ -1,0 +1,4 @@
+ALTER TABLE book_story
+    ADD COLUMN view_count INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN deleted BIT(1) NOT NULL DEFAULT b'0',
+    ADD COLUMN deleted_at DATETIME NULL;

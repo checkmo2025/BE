@@ -90,7 +90,7 @@ public class BookStoryController {
             throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
         }
 
-        var bookStoriesByScope = bookStoryQueryFacade.retrieveBookStories(memberId, scope, clubId, targetMemberNickname,
+        var bookStoriesByScope = bookStoryQueryFacade.fetchBookStories(memberId, scope, clubId, targetMemberNickname,
                 cursorId);
         return ApiResponse.onSuccess(bookStoriesByScope);
     }
@@ -192,5 +192,70 @@ public class BookStoryController {
         Long resultBookStoryId = bookStoryCommentCommandService.createComment(memberId, bookStoryId, parentCommentId,
                 request);
         return ApiResponse.onSuccess(resultBookStoryId);
+    }
+
+    @Operation(summary = "책 이야기 댓글 수정 API", description = "책 이야기에 작성한 댓글을 수정합니다.")
+    @Parameters({
+            @Parameter(name = "bookStoryId", description = "댓글이 속한 책 이야기 ID", required = true, example = "1"),
+            @Parameter(name = "commentId", description = "수정할 댓글 ID", required = true, example = "10")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "댓글 수정 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기 또는 댓글을 찾을 수 없음")
+    })
+    @PatchMapping("/{bookStoryId}/comments/{commentId}")
+    public ApiResponse<Long> updateComment(
+            @CurrentId String memberId,
+            @PathVariable Long bookStoryId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody BookStoryRequestDTO.CommentUpdate request
+    ) {
+        Long resultCommentId = bookStoryCommentCommandService.updateComment(memberId, bookStoryId, commentId, request);
+        return ApiResponse.onSuccess(resultCommentId);
+    }
+
+    @Operation(summary = "책 이야기 댓글 삭제 API", description = "책 이야기에 작성한 댓글을 삭제합니다. (대댓글이 있는 경우 '삭제된 댓글입니다'로 표시)")
+    @Parameters({
+            @Parameter(name = "bookStoryId", description = "댓글이 속한 책 이야기 ID", required = true, example = "1"),
+            @Parameter(name = "commentId", description = "삭제할 댓글 ID", required = true, example = "10")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "댓글 삭제 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기 또는 댓글을 찾을 수 없음")
+    })
+    @DeleteMapping("/{bookStoryId}/comments/{commentId}")
+    public ApiResponse<Long> deleteComment(
+            @CurrentId String memberId,
+            @PathVariable Long bookStoryId,
+            @PathVariable Long commentId
+    ) {
+        Long resultCommentId = bookStoryCommentCommandService.deleteComment(memberId, bookStoryId, commentId);
+        return ApiResponse.onSuccess(resultCommentId);
+    }
+
+    @Operation(summary = "특정 책으로 쓰여진 책이야기 조회 API", description = "특정 책으로 작성된 모든 책이야기를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "bookId", description = "책이야기를 작성한 책 ID", required = true, example = "9791192005317"),
+            @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "1")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/search/{bookId}")
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getBookStoriesByBook(
+            @CurrentId String memberId,
+            @PathVariable String bookId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var bookStoriesByBook = bookStoryQueryFacade.fetchBookStoriesByBook(memberId, bookId, cursorId);
+        return ApiResponse.onSuccess(bookStoriesByBook);
     }
 }

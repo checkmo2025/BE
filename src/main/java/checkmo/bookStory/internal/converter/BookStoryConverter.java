@@ -3,6 +3,7 @@ package checkmo.bookStory.internal.converter;
 import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.repository.projection.BookStoryPrevNextProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.member.MemberExternalDTO;
@@ -32,8 +33,7 @@ public class BookStoryConverter {
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
             BasicInfoWithFollow authorInfo,
-            boolean isLiked,
-            int commentCount
+            boolean isLiked
     ) {
         return BookStoryResponseDTO.BasicInfo.builder()
                 .bookStoryId(bookStory.getId())
@@ -45,7 +45,8 @@ public class BookStoryConverter {
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
-                .commentCount(commentCount)
+                .viewCount(bookStory.getViewCount())
+                .commentCount(bookStory.getCommentsCount())
                 .build();
     }
 
@@ -55,7 +56,8 @@ public class BookStoryConverter {
             BookExternalDTO.BasicInfo bookInfo,
             BasicInfoWithFollow authorInfo,
             boolean isLiked,
-            List<BookStoryResponseDTO.CommentInfo> commentList
+            List<BookStoryResponseDTO.CommentInfo> commentList,
+            BookStoryPrevNextProjection bookStoryPrevNextProjection
     ) {
         return BookStoryResponseDTO.DetailInfo.builder()
                 .bookStoryId(bookStory.getId())
@@ -67,8 +69,11 @@ public class BookStoryConverter {
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
+                .viewCount(bookStory.getViewCount())
                 .commentCount(bookStory.getCommentsCount())
                 .comments(commentList)
+                .prevBookStoryId(bookStoryPrevNextProjection.getPrevId())
+                .nextBookStoryId(bookStoryPrevNextProjection.getNextId())
                 .build();
     }
 
@@ -104,12 +109,25 @@ public class BookStoryConverter {
             MemberExternalDTO.BasicInfo authorInfo,
             List<BookStoryResponseDTO.CommentInfo> replies
     ) {
+        if (comment.isDeleted()) {
+            return BookStoryResponseDTO.CommentInfo.builder()
+                    .commentId(comment.getId())
+                    .content(null)
+                    .authorInfo(null)
+                    .createdAt(comment.getCreatedAt())
+                    .writtenByMe(false)
+                    .deleted(true)
+                    .replies(replies)
+                    .build();
+        }
+
         return BookStoryResponseDTO.CommentInfo.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .authorInfo(authorInfo)
                 .createdAt(comment.getCreatedAt())
                 .writtenByMe(comment.getMemberId().equals(currentMemberId))
+                .deleted(false)
                 .replies(replies)
                 .build();
     }

@@ -57,6 +57,7 @@ public class BookStoryResponseDTO {
 
         private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
         private int commentCount;
+        private int viewCount;
     }
 
     @Getter
@@ -77,9 +78,13 @@ public class BookStoryResponseDTO {
         private LocalDateTime createdAt;
 
         private boolean writtenByMe; // 작성자가 본인인지 여부 (true: 본인, false: 타인)
+        private int viewCount;
         private int commentCount; // 댓글 전체 개수 (대댓글 포함)
 
         private List<CommentInfo> comments;
+
+        private Long prevBookStoryId;
+        private Long nextBookStoryId;
     }
 
     @Getter
@@ -95,6 +100,7 @@ public class BookStoryResponseDTO {
         private LocalDateTime createdAt;
 
         private boolean writtenByMe; // 작성자가 본인인지 여부
+        private boolean deleted; // 삭제된 댓글인지 여부
         private List<CommentInfo> replies; // 대댓글 목록
     }
 }
