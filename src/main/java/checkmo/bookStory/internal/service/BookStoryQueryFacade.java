@@ -10,6 +10,7 @@ import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
+import checkmo.bookStory.internal.service.query.BookStoryViewCacheService;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
@@ -28,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,7 @@ public class BookStoryQueryFacade {
     private final BookAPI bookAPI;
 
     private final BookStoryQueryService bookStoryQueryService;
+    private final BookStoryViewCacheService viewCacheService;
 
     /**
      * 특정 책 이야기의 상세 정보를 조회합니다.
@@ -55,22 +58,25 @@ public class BookStoryQueryFacade {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.retrieveBookStory(bookStoryId);
 
-        // 2. 책 정보 조회
+        // 2. 레디스에 조회 수 카운트 증가
+        viewCacheService.incrementViewCount(bookStoryId, memberId);
+
+        // 3. 책 정보 조회
         BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookStory.getBookId());
 
-        // 3. 작성자 정보 조회
+        // 4. 작성자 정보 조회
         BasicInfoWithFollow authorInfo = memberAPI.fetchMemberBasicInfoWithFollow(
                 bookStory.getMemberId(), memberId);
 
-        // 4. 좋아요 여부 조회
+        // 5. 좋아요 여부 조회
         Boolean isLiked = bookStoryQueryService.checkBookStoryLikeByMemberId(memberId, List.of(bookStory))
                 .getOrDefault(bookStory.getId(), false);
 
-        // 5. 댓글 조회 (부모 댓글만, 대댓글은 컨버터에서 DTO 변환 시 자동 포함)
+        // 6. 댓글 조회 (부모 댓글만, 대댓글은 컨버터에서 DTO 변환 시 자동 포함)
         List<Comment> comments = bookStoryQueryService.retrieveBookStoryComments(bookStoryId);
 
-        // 6. 댓글 작성자들 정보 조회
-        // 6-1. 댓글 작성자들 Id 목록 조회 (Set으로 중복 제거)
+        // 7. 댓글 작성자들 정보 조회
+        // 7-1. 댓글 작성자들 Id 목록 조회 (Set으로 중복 제거)
         Set<String> commentMemberIds = comments.stream()
                 .flatMap(comment -> Stream.concat(
                         Stream.of(comment.getMemberId()),
@@ -78,16 +84,16 @@ public class BookStoryQueryFacade {
                 ))
                 .collect(Collectors.toSet());
 
-        // 6-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
+        // 7-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
         Map<String, MemberExternalDTO.BasicInfo> commentMemberInfoMap =
                 commentMemberIds.isEmpty() ? Map.of() :
                         memberAPI.fetchMemberBasicInfoByMemberIds(new ArrayList<>(commentMemberIds));
 
-        // 7. 댓글 DTO 변환
+        // 8. 댓글 DTO 변환
         List<CommentInfo> commentDTOList =
                 BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap);
 
-        // 8. DTO 변환
+        // 9. DTO 변환
         return BookStoryConverter.toBookStoryDetailWithComment(
                 bookStory,
                 memberId,
