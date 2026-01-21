@@ -51,6 +51,14 @@ public class BookStoryQueryService {
         return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize);
     }
 
+    public List<BookStory> retrieveBookStories(
+            String bookId,
+            Long cursorId,
+            int pageSize
+    ) {
+        return bookStoryRepository.searchBookStories(bookId, cursorId, pageSize);
+    }
+
     /**
      * 책 이야기 엔티티 조회
      *

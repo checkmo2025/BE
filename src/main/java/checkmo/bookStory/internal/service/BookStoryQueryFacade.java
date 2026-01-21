@@ -118,7 +118,7 @@ public class BookStoryQueryFacade {
      * @param cursorId             페이지 번호 (1부터 시작)
      * @return scope에 따른 책 이야기 목록 DTO
      */
-    public BookStoryResponseDTO.BookStoryList retrieveBookStories(
+    public BookStoryResponseDTO.BookStoryList fetchBookStories(
             String memberId,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId, String targetMemberNickname,
@@ -248,5 +248,50 @@ public class BookStoryQueryFacade {
                     .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.CLUB_ACCESS_DENIED));
         }
         return null;
+    }
+
+    /**
+     * 특정 책으로 작성된 책 이야기 목록을 조회합니다.
+     *
+     * @param memberId 조회하는 회원의 ID
+     * @param bookId   책 ID
+     * @param cursorId 무한 스크롤을 위한 커서 ID
+     * @return bookId에 따른 책 이야기 목록 DTO
+     */
+    public BookStoryResponseDTO.BookStoryList fetchBookStoriesByBook(
+            String memberId,
+            String bookId,
+            Long cursorId
+    ) {
+
+        // 1. BookStory 리스트 조회
+        CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
+                (pageSize) -> bookStoryQueryService.retrieveBookStories(
+                        bookId, cursorId, pageSize
+                ),
+                BookStory::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<BookStory> bookStories = bookStoryCursorResult.content();
+
+        // 좋아요 여부 조회
+        Map<Long, Boolean> isLikedMap = fetchLikedInfo(memberId, bookStories);
+
+        // 책 정보 조회
+        Map<String, BookExternalDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
+
+        // 작성자 정보 조회
+        Map<String, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
+
+        // DTO 변환
+        List<BookStoryResponseDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
+                bookStories, isLikedMap, bookInfoMap, authorInfoMap);
+
+        return BookStoryResponseDTO.BookStoryList.builder()
+                .basicInfoList(basicInfoList)
+                .hasNext(bookStoryCursorResult.hasNext())
+                .nextCursor(bookStoryCursorResult.nextCursor())
+                .pageSize(DEFAULT_PAGE_SIZE)
+                .build();
     }
 }

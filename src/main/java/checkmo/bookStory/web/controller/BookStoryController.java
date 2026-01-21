@@ -90,7 +90,7 @@ public class BookStoryController {
             throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
         }
 
-        var bookStoriesByScope = bookStoryQueryFacade.retrieveBookStories(memberId, scope, clubId, targetMemberNickname,
+        var bookStoriesByScope = bookStoryQueryFacade.fetchBookStories(memberId, scope, clubId, targetMemberNickname,
                 cursorId);
         return ApiResponse.onSuccess(bookStoriesByScope);
     }
@@ -237,5 +237,25 @@ public class BookStoryController {
     ) {
         Long resultCommentId = bookStoryCommentCommandService.deleteComment(memberId, bookStoryId, commentId);
         return ApiResponse.onSuccess(resultCommentId);
+    }
+
+    @Operation(summary = "특정 책으로 쓰여진 책이야기 조회 API", description = "특정 책으로 작성된 모든 책이야기를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "bookId", description = "책이야기를 작성한 책 ID", required = true, example = "9791192005317"),
+            @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "1")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/search/{bookId}")
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getBookStoriesByBook(
+            @CurrentId String memberId,
+            @PathVariable String bookId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var bookStoriesByBook = bookStoryQueryFacade.fetchBookStoriesByBook(memberId, bookId, cursorId);
+        return ApiResponse.onSuccess(bookStoriesByBook);
     }
 }
