@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -83,7 +84,23 @@ public class ClubNoticeController {
         return ApiResponse.onSuccess("공지사항(id:" + createdNotice.getId() + ")이 정상적으로 생성되었습니다.");
     }
 
-    // 공지사항 수정
+    @Operation(summary = "공지사항 수정", description = "공지사항을 수정합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "운영진만 수정 가능"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음"),
+    })
+    @PatchMapping("/{noticeId}")
+    public ApiResponse<String> updateNotice(
+            @PathVariable Long clubId,
+            @PathVariable Long noticeId,
+            @CurrentId String memberId,
+            @RequestBody @Valid ClubNoticeRequestDTO.UpdateClubNotice request
+    ) {
+        clubNoticeCommandService.updateNotice(clubId, noticeId, memberId, request);
+        return ApiResponse.onSuccess("공지사항이 정상적으로 수정되었습니다.");
+    }
 
     @Operation(summary = "공지사항 삭제", description = "공지사항을 삭제합니다.")
     @ApiResponses({
@@ -163,7 +180,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
     })
-    @PostMapping("/{noticeId}/comments/{commentId}")
+    @PatchMapping("/{noticeId}/comments/{commentId}")
     public ApiResponse<String> updateNoticeComment(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,

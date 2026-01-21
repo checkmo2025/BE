@@ -22,35 +22,15 @@ import lombok.NoArgsConstructor;
 public class ClubNoticeConverter {
 
     // ========== Entity 변환 ==========
-    public static Notice toNotice(ClubNoticeRequestDTO.CreateClubNotice request, Long clubId) {
+    public static Notice toNotice(ClubNoticeRequestDTO.CreateClubNotice request, NoticeTag tag, Long clubId) {
         return Notice.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .important(request.isImportant())
-                .tag(NoticeTag.decideTag(request.getVote() != null, request.getMeetingId() != null))
+                .tag(tag)
                 .meetingId(request.getMeetingId())
                 .meetingVersion(request.getMeetingVersion())
-                .vote(toVote(request.getVote()))
                 .clubId(clubId)
-                .build();
-    }
-
-    public static Vote toVote(ClubNoticeRequestDTO.CreateClubVote request) {
-        if (request == null) {
-            return null;
-        }
-        return Vote.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .item1(request.getItem1())
-                .item2(request.getItem2())
-                .item3(request.getItem3())
-                .item4(request.getItem4())
-                .item5(request.getItem5())
-                .anonymity(request.isAnonymity())
-                .duplication(request.isDuplication())
-                .startTime(request.getStartTime())
-                .deadline(request.getDeadline())
                 .build();
     }
 
@@ -117,6 +97,7 @@ public class ClubNoticeConverter {
                 .content(notice.getContent())
                 .important(notice.isImportant())
                 .tag(ClubNoticeTagItem.from(notice.getTag()))
+                .imageUrls(notice.getImageUrls())
                 .createdAt(notice.getCreatedAt())
                 .meetingDetail(meetingDetail)
                 .voteDetail(voteDetail)

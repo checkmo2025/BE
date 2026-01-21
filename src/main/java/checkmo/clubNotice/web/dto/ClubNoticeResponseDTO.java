@@ -65,6 +65,7 @@ public class ClubNoticeResponseDTO {
         private String content;
         private boolean important;
         private ClubNoticeTagItem tag;
+        private List<String> imageUrls;
         private LocalDateTime createdAt;
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private DetailInfo meetingDetail; // 모임 공지인 경우에만 포함

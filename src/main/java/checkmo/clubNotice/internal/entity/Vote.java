@@ -60,6 +60,29 @@ public class Vote extends BaseEntity {
     @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClubMemberVote> clubMemberVotes = new ArrayList<>();
 
+    public static Vote of(
+            String title, String content,
+            String item1, String item2, String item3, String item4, String item5,
+            boolean anonymity, boolean duplication,
+            LocalDateTime startTime, LocalDateTime deadline
+    ) {
+        Vote vote = Vote.builder()
+                .title(title)
+                .content(content)
+                .item1(item1)
+                .item2(item2)
+                .item3(item4)
+                .item4(item4)
+                .item5(item5)
+                .anonymity(anonymity)
+                .duplication(duplication)
+                .startTime(startTime)
+                .deadline(deadline)
+                .build();
+        vote.validateVotePeriod();
+        return vote;
+    }
+
     public List<Integer> getItemNumbers() {
         List<Integer> itemNumbers = new ArrayList<>();
         if (hasText(item1)) {
@@ -136,4 +159,19 @@ public class Vote extends BaseEntity {
         }
         clubMemberVotes.add(created);
     }
+
+    public void update(LocalDateTime deadline) {
+        this.deadline = deadline;
+        validateVotePeriod();
+    }
+
+    private void validateVotePeriod() {
+        if (startTime == null || deadline == null) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_PERIOD_REQUIRED);
+        }
+        if (!startTime.isBefore(deadline)) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_START_AFTER_DEADLINE);
+        }
+    }
+
 }

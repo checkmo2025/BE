@@ -22,11 +22,16 @@ public enum ClubNoticeErrorStatus implements BaseErrorCode {
     ITEM_SELECTION_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "VOTE_402", "선택한 항목이 투표 항목의 범위를 벗어났습니다."),
     VOTE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "VOTE_403", "투표 가능 시간이 아닙니다."),
     VOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "VOTE_404", "투표를 찾을 수 없습니다."),
+    VOTE_PERIOD_REQUIRED(HttpStatus.BAD_REQUEST, "VOTE_405", "투표 시작/마감 시간은 필수입니다."),
+    VOTE_START_AFTER_DEADLINE(HttpStatus.BAD_REQUEST, "VOTE_406", "투표 시작 시간은 마감 시간 이전이어야 합니다."),
+    VOTE_ALREADY_EXISTS(HttpStatus.CONFLICT, "VOTE_407", "이미 공지사항에 투표가 연결되어 있습니다."),
 
     // 댓글
     NOTICE_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_COMMENT_400", "공지사항 댓글을 찾을 수 없습니다."),
-    NOTICE_COMMENT_UNAUTHORIZED(HttpStatus.FORBIDDEN, "NOTICE_COMMENT_401", "공지사항 댓글 수정/삭제 권한이 없습니다.");
+    NOTICE_COMMENT_UNAUTHORIZED(HttpStatus.FORBIDDEN, "NOTICE_COMMENT_401", "공지사항 댓글 수정/삭제 권한이 없습니다."),
 
+    // 이미지
+    NOTICE_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "NOTICE_IMAGE_400", "공지사항 이미지 최대 업로드 개수를 초과했습니다.");
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;
