@@ -70,4 +70,13 @@ public class BookStoryCommandService {
 
         bookStoryRepository.delete(bookStory);
     }
+
+    /**
+     * 회원 탈퇴 시 해당 회원의 모든 책이야기를 삭제(완전 삭제 아님)
+     *
+     * @param memberId 탈퇴하는 회원의 ID
+     */
+    public void softDeleteAllByMemberId(String memberId) {
+        bookStoryRepository.softDeleteAllByMemberId(memberId);
+    }
 }

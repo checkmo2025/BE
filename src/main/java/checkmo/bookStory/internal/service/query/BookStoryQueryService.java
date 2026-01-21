@@ -60,13 +60,13 @@ public class BookStoryQueryService {
     }
 
     /**
-     * 책 이야기 엔티티 조회
+     * 책 이야기 엔티티 조회 (삭제되지 않은 것만)
      *
      * @param bookStoryId 조회할 책 이야기의 ID
      * @return 조회된 책 이야기 엔티티
      */
     public BookStory retrieveBookStory(Long bookStoryId) {
-        return bookStoryRepository.findById(bookStoryId)
+        return bookStoryRepository.findByIdAndDeletedFalse(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
     }
 

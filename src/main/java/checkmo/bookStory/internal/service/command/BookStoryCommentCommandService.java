@@ -140,4 +140,13 @@ public class BookStoryCommentCommandService {
         // 6. 삭제된 댓글 ID 반환
         return commentId;
     }
+
+    /**
+     * 회원 탈퇴 시 해당 회원의 모든 댓글을 삭제(완전 삭제 아님)
+     *
+     * @param memberId 탈퇴하는 회원의 ID
+     */
+    public void softDeleteAllByMemberId(String memberId) {
+        commentRepository.softDeleteAllByMemberId(memberId);
+    }
 }

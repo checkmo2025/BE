@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -39,6 +40,11 @@ public class BookStory extends BaseEntity {
     @Builder.Default
     private int viewCount = 0;
 
+    @Builder.Default
+    private boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -66,13 +72,6 @@ public class BookStory extends BaseEntity {
     public void addCommentToList(Comment comment) {
         this.comments.add(comment);
         this.commentsCount++;
-    }
-
-    public void removeCommentFromList(Comment comment) {
-        this.comments.remove(comment);
-        if (this.commentsCount > 0) {
-            this.commentsCount--;
-        }
     }
 
     public void addBookStoryLiked(BookStoryLiked bookStoryLiked) {
