@@ -15,7 +15,7 @@ public class BookStoryViewCacheService {
 
     // 조회수 저장 (bookStory:viewCount:{bookStoryId})
     private static final String VIEW_COUNT_KEY = "bookStory:viewCount:";
-    // 중복 조회를 막기 위한 유저 저장 (bookStory:viewLog:{memberId})
+    // 중복 조회를 막기 위한 유저 저장 (bookStory:viewLog:{bookStoryId}:{memberId})
     private static final String VIEW_USER_LOG_KEY = "bookStory:viewLog:";
 
     /**
