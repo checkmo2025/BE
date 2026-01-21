@@ -20,6 +20,8 @@ import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.NoticeCommentList;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
+import checkmo.common.template.PagePagingHelper;
+import checkmo.common.template.PageResult;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfo;
@@ -31,6 +33,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,30 +51,34 @@ public class ClubNoticeQueryFacade {
 
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
+    private final PageableHandlerMethodArgumentResolverCustomizer pageableHandlerMethodArgumentResolverCustomizer;
 
     public ClubNoticePreviewList retrieveClubNoticeList(
             Long clubId,
             String memberId,
-            Long cursorId,
+            int page,
             boolean onlyImportant
     ) {
         clubManagementAPI.validateClub(clubId);
         MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
-        CursorResult<Notice> noticeCursorResult = CursorPagingHelper.getPage(
-                size -> clubNoticeQueryService.retrieveNotices(clubId, onlyImportant, cursorId, size),
-                Notice::getId,
+        PageResult<Notice> noticePageResult = PagePagingHelper.getPage(
+                pageable -> clubNoticeQueryService.retrieveNotices(clubId, onlyImportant, pageable),
+                page,
                 DEFAULT_PAGE_SIZE
         );
 
         return ClubNoticePreviewList.builder()
                 .noticeList(
-                        noticeCursorResult.content().stream()
+                        noticePageResult.content().stream()
                                 .map(ClubNoticeConverter::toClubNoticePreview)
                                 .toList()
                 )
-                .hasNext(noticeCursorResult.hasNext())
-                .nextCursor(noticeCursorResult.nextCursor())
+                .page(noticePageResult.page())
+                .size(noticePageResult.size())
+                .totalElements(noticePageResult.totalElements())
+                .totalPages(noticePageResult.totalPages())
+                .hasNext(noticePageResult.hasNext())
                 .isStaff(clubMembershipInfoInfo.isStaff())
                 .build();
     }

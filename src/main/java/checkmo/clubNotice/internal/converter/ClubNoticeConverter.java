@@ -101,6 +101,7 @@ public class ClubNoticeConverter {
                 .title(notice.getTitle())
                 .important(notice.isImportant())
                 .tagItem(ClubNoticeTagItem.from(notice.getTag()))
+                .createdAt(notice.getCreatedAt())
                 .build();
     }
 
@@ -116,6 +117,7 @@ public class ClubNoticeConverter {
                 .content(notice.getContent())
                 .important(notice.isImportant())
                 .tag(ClubNoticeTagItem.from(notice.getTag()))
+                .createdAt(notice.getCreatedAt())
                 .meetingDetail(meetingDetail)
                 .voteDetail(voteDetail)
                 .isStaff(membershipInfo.isStaff())

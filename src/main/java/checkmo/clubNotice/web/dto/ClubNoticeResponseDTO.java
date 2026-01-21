@@ -19,8 +19,11 @@ public class ClubNoticeResponseDTO {
     @Builder
     public static class ClubNoticePreviewList {
         List<ClubNoticePreview> noticeList;
+        private int page;
+        private int size;
+        private long totalElements;
+        private int totalPages;
         private boolean hasNext;
-        private Long nextCursor;
         private boolean isStaff;
     }
 
@@ -33,6 +36,7 @@ public class ClubNoticeResponseDTO {
         private String title;
         private boolean important;
         private ClubNoticeTagItem tagItem;
+        private LocalDateTime createdAt;
     }
 
     @Getter
@@ -61,6 +65,7 @@ public class ClubNoticeResponseDTO {
         private String content;
         private boolean important;
         private ClubNoticeTagItem tag;
+        private LocalDateTime createdAt;
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private DetailInfo meetingDetail; // 모임 공지인 경우에만 포함
         @JsonInclude(JsonInclude.Include.NON_NULL)

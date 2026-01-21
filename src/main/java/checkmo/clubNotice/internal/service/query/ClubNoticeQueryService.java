@@ -4,9 +4,10 @@ import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
 import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +21,8 @@ public class ClubNoticeQueryService {
         return noticeRepository.findWithVoteAndClubMemberVotesByIdAndClubId(noticeId, clubId);
     }
 
-    public List<Notice> retrieveNotices(Long clubId, boolean onlyImportant, Long cursorId, Integer size) {
-        return noticeRepository.findAllByClubIdAndCursorPaging(clubId, onlyImportant, cursorId, size);
+    public Page<Notice> retrieveNotices(Long clubId, boolean onlyImportant, Pageable pageable) {
+        return noticeRepository.findAllByClubIdAndCursorPaging(clubId, onlyImportant, pageable);
     }
 
     public Notice validateNotice(Long clubId, Long noticeId) throws ClubNoticeException {
