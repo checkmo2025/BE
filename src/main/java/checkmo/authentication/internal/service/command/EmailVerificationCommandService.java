@@ -1,17 +1,22 @@
 package checkmo.authentication.internal.service.command;
 
 import checkmo.authentication.AuthenticationEvent;
+import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +34,7 @@ public class EmailVerificationCommandService {
     // 외부 서비스
     private final RedisTemplate<String, Object> redisTemplate;
     private final ApplicationEventPublisher eventPublisher;
+    private final PasswordEncoder passwordEncoder;
 
     private final AuthRepository authRepository;
 
@@ -88,5 +94,46 @@ public class EmailVerificationCommandService {
         redisTemplate.opsForHash().put(redisKey, "verified", true);
 
         return true;
+    }
+
+    public void sendTempPassword(String email) {
+        AuthUser user = authRepository.findByEmail(email)
+            .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+
+        String tempPassword = generateTempPassword();
+
+        user.updatePassword(passwordEncoder.encode(tempPassword));
+
+        eventPublisher.publishEvent(
+            AuthenticationEvent.SendTempPassword.builder()
+                                                     .email(email)
+                                                     .tempPassword(tempPassword)
+                                                     .build());
+    }
+
+    private String generateTempPassword() {
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String specials = "!@#$%^&*";
+        String all = letters + digits + specials;
+
+        List<Character> chars = new ArrayList<>();
+
+        chars.add(letters.charAt(secureRandom.nextInt(letters.length())));   // 문자 1개
+        chars.add(digits.charAt(secureRandom.nextInt(digits.length())));     // 숫자 1개
+        chars.add(specials.charAt(secureRandom.nextInt(specials.length()))); // 특수 1개
+
+        for (int i = 0; i < 9; i++) {
+            chars.add(all.charAt(secureRandom.nextInt(all.length())));
+        }
+
+        Collections.shuffle(chars, secureRandom);
+
+        StringBuilder sb = new StringBuilder();
+        for (char c : chars) {
+            sb.append(c);
+        }
+
+        return sb.toString();
     }
 }

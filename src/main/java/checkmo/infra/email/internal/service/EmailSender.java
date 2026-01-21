@@ -28,4 +28,18 @@ public class EmailSender {
             throw new RuntimeException("Failed to send verification email", e);
         }
     }
+
+    public void sendTempPassword(String email, String tempPassword) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("책모 임시 비밀번호");
+            message.setText("임시 비밀번호: " + tempPassword + "\n\n" + "로그인 후 마이페이지에서 비밀번호를 변경해주세요.");
+            javaMailSender.send(message); // 이메일 발송
+            log.info("임시 비밀번호 발송 성공: {}", email);
+        } catch (Exception e) {
+            log.error("임시 비밀번호 발송 실패: email={}, error={}", email, e.getMessage());
+            throw new RuntimeException("Failed to send temp password", e);
+        }
+    }
 }

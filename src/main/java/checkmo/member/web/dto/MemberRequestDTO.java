@@ -39,7 +39,7 @@ public class MemberRequestDTO {
     @NoArgsConstructor
     public static class AdditionalInfo {
         @NotBlank(message = "닉네임은 필수입니다")
-        @Size(max = 12, message = "닉네임은 최대 12자까지 가능합니다")
+        @Size(max = 20, message = "닉네임은 최대 20자까지 가능합니다")
         @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
                 message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")
         @Schema(description = "닉네임(영어 소문자 및 특수문자 최대 20자)", example = "nick")
@@ -63,5 +63,15 @@ public class MemberRequestDTO {
         @NotEmpty(message = "관심 카테고리는 최소 1개 이상 선택해야 합니다")
         @Size(min = 1, max = 6, message = "관심 카테고리는 1개에서 6개까지 선택 가능합니다")
         private List<MemberInterestCategory> categories;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class FindEmail {
+        @NotBlank(message = "이름은 필수 입력 항목입니다.")
+        private String name;
+
+        @NotBlank(message = "전화번호는 필수 입력 항목입니다.")
+        private String phoneNumber;
     }
 }

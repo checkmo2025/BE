@@ -62,4 +62,12 @@ public class MemberResponseDTO {
         private boolean following;
         private Set<MemberInterestCategory> categories;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class FindEmailResult {
+        private String email;
+    }
 }

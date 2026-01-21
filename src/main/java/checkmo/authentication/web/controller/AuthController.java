@@ -94,4 +94,22 @@ public class AuthController {
         authFacade.logout(request, response);
         return ApiResponse.onSuccess(null);
     }
+
+    @Operation(summary = "비밀번호 재발급(임시 비밀번호 발송)", description = "등록된 이메일로 임시 비밀번호를 발송합니다.")
+    @Parameter(name = "email", description = "비밀번호를 재발급받을 이메일 주소", required = true, example = "test@example.com")
+    @PostMapping("/temp-password")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 이메일로 가입된 회원을 찾을 수 없습니다.")
+    })
+    public ApiResponse<String> sendTempPassword(
+        @RequestParam
+        @Email(message = "유효한 이메일 주소를 입력해주세요")
+        @NotBlank(message = "이메일은 필수입니다")
+        String email
+    ) {
+        emailVerificationCommandService.sendTempPassword(email);
+        return ApiResponse.onSuccess("임시 비밀번호가 이메일로 발송되었습니다.");
+    }
 }

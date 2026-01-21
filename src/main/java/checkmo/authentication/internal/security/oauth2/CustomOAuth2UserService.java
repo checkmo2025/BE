@@ -1,10 +1,12 @@
 package checkmo.authentication.internal.security.oauth2;
 
+import checkmo.authentication.AuthenticationEvent;
 import checkmo.authentication.internal.converter.AuthConverter;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -23,6 +25,7 @@ import org.springframework.util.StringUtils;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final AuthRepository authRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -47,6 +50,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private AuthUser registerNewMember(OAuth2Attributes attributes, String registrationId) {
         AuthUser newUser = AuthConverter.toOAuth2User(attributes, registrationId);
-        return authRepository.save(newUser);
+        AuthUser savedUser = authRepository.save(newUser);
+
+        eventPublisher.publishEvent(
+            AuthenticationEvent.CreateMember.builder()
+                                            .id(savedUser.getId())
+                                            .email(savedUser.getEmail())
+                                            .build());
+
+        return savedUser;
     }
 }
