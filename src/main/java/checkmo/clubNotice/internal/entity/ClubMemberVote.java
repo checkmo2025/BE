@@ -2,6 +2,7 @@ package checkmo.clubNotice.internal.entity;
 
 import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
 import checkmo.clubNotice.internal.exception.ClubNoticeException;
+import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,7 +28,7 @@ import lombok.NoArgsConstructor;
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"club_member_id", "vote_id"})
 })
-public class ClubMemberVote {
+public class ClubMemberVote extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
