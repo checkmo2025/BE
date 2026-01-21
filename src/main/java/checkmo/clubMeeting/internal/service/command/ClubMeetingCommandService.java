@@ -3,7 +3,6 @@ package checkmo.clubMeeting.internal.service.command;
 import checkmo.book.BookAPI;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
-import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -51,9 +50,6 @@ public class ClubMeetingCommandService {
         Meeting meeting = ClubMeetingConverter.toMeeting(request, clubId, bookId);
         meetingRepository.saveAndFlush(meeting);
 
-        // 미팅 기반 공지사항 생성 이벤트 발행
-        publishMeetingCreatedEvent(meeting);
-
         // 미팅 생성 알림 이벤트 발행
         publishMeetingCreatedNotificationEvent(meeting, clubId);
 
@@ -75,9 +71,6 @@ public class ClubMeetingCommandService {
         );
 
         meetingRepository.saveAndFlush(meeting);
-
-        // 새로운 공지사항 삭제 후 생성 이벤트 발행
-        publishMeetingCreatedEvent(meeting);
 
         return meeting.getId();
     }
@@ -146,18 +139,6 @@ public class ClubMeetingCommandService {
         // 10. 기존 팀과 새로 생성된 Team을 명시적으로 저장 (내부적으로 ClubMemberTeam도 저장됨)
         meetingRepository.save(meeting);
         teamRepository.saveAll(existingTeams);
-    }
-
-    private void publishMeetingCreatedEvent(Meeting meeting) {
-        ClubMeetingCreatedEvent event = ClubMeetingCreatedEvent.builder()
-                .clubId(meeting.getId())
-                .meetingId(meeting.getId())
-                .version(meeting.getVersion())
-                .title(meeting.getTitle())
-                .content(meeting.getContent())
-                .build();
-
-        applicationEventPublisher.publishEvent(event);
     }
 
     private void publishMeetingCreatedNotificationEvent(Meeting meeting, Long clubId) {

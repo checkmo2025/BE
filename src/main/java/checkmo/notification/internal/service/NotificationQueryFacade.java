@@ -6,7 +6,6 @@ import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
 import checkmo.notification.internal.converter.NotificationConverter;
 import checkmo.notification.internal.entity.Notification;
-import checkmo.notification.internal.entity.Notification.NotificationType;
 import checkmo.notification.internal.service.query.NotificationQueryService;
 import checkmo.notification.internal.service.query.NotificationSettingQueryService;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;

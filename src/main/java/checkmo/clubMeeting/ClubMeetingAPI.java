@@ -21,4 +21,12 @@ public interface ClubMeetingAPI {
      * @return 조회된 모임 ID와 상세 정보 DTO의 맵
      */
     Map<Long, DetailInfo> fetchMeetingDetailInfoByMeetingIds(Set<Long> meetingIds);
+
+    /**
+     * 특정 동아리 내에 모임이 존재하는지 확인합니다.
+     *
+     * @param clubId    동아리 ID
+     * @param meetingId 모임 ID
+     */
+    boolean isMeetingInClub(Long clubId, Long meetingId);
 }

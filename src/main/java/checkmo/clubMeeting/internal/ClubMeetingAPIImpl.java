@@ -10,6 +10,7 @@ import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
+import checkmo.common.template.ExtractHelper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,12 +44,17 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         if (meetings.size() != meetingIds.size()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.MEETING_NOT_FOUND);
         }
-
-        List<String> bookIds = extractBookIds(meetings);
+        List<String> bookIds = ExtractHelper.extractDistinctList(meetings, Meeting::getBookId);
 
         Map<String, BasicInfo> bookBasicInfo = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
         return toMeetingInfoMap(meetings, bookBasicInfo);
+    }
+
+    @Override
+    public boolean isMeetingInClub(Long clubId, Long meetingId) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        return meeting.getClubId().equals(clubId);
     }
 
     private Map<Long, DetailInfo> toMeetingInfoMap(List<Meeting> meetings, Map<String, BasicInfo> bookBasicInfo) {
@@ -62,10 +68,4 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 ));
     }
 
-    private List<String> extractBookIds(List<Meeting> meetings) {
-        return meetings.stream()
-                .map(Meeting::getBookId)
-                .distinct()
-                .toList();
-    }
 }

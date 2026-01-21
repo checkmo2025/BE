@@ -22,7 +22,7 @@ public class S3Controller {
 
     private final S3Service s3Service;
 
-    @Operation(summary = "이미지용 presigned URL 발급 API", description = "프로필 이미지/독서 클럽의 이미지 업로드를 위한 S3 presigned URL을 발급합니다.")
+    @Operation(summary = "이미지용 presigned URL 발급 API", description = "프로필 이미지/독서 클럽/클럽 공지사항의 이미지 업로드를 위한 S3 presigned URL을 발급합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
@@ -32,6 +32,7 @@ public class S3Controller {
     public ApiResponse<S3ResponseDTO.PresignedUrl> getProfileImageUploadUrl(
             @Valid @RequestBody S3RequestDTO.ImageUpload request
     ) {
-        return ApiResponse.onSuccess(s3Service.generatePresignedUploadUrl(request.getOriginalFileName(), request.getContentType()));
+        return ApiResponse.onSuccess(
+                s3Service.generatePresignedUploadUrl(request.getOriginalFileName(), request.getContentType()));
     }
 }

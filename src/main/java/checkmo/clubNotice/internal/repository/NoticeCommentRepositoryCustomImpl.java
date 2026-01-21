@@ -1,8 +1,8 @@
 package checkmo.clubNotice.internal.repository;
 
-import static checkmo.clubNotice.internal.entity.QVote.vote;
+import static checkmo.clubNotice.internal.entity.QNoticeComment.noticeComment;
 
-import checkmo.clubNotice.internal.entity.Vote;
+import checkmo.clubNotice.internal.entity.NoticeComment;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -12,24 +12,22 @@ import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class VoteRepositoryCustomImpl implements VoteRepositoryCustom {
+public class NoticeCommentRepositoryCustomImpl implements NoticeCommentRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Vote> findByClubIdAndCursorPaging(Long clubId, boolean onlyImportant, Long cursorId, Integer size) {
+    public List<NoticeComment> findAllByNoticeIdAndCursorPaging(Long noticeId, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
-        predicate.and(vote.clubId.eq(clubId));
-        if (onlyImportant) {
-            predicate.and(vote.important.eq(true));
-        }
+        predicate.and(noticeComment.notice.id.eq(noticeId));
+
         if (cursorId != null) {
-            predicate.and(vote.id.lt(cursorId));
+            predicate.and(noticeComment.id.lt(cursorId));
         }
 
-        JPAQuery<Vote> query = queryFactory.selectFrom(vote)
+        JPAQuery<NoticeComment> query = queryFactory.selectFrom(noticeComment)
                 .where(predicate)
-                .orderBy(vote.createdAt.desc());
-
+                .orderBy(noticeComment.createdAt.desc());
+        
         if (size != null) {
             query.limit(size);
         }

@@ -13,6 +13,7 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetail;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
+import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import lombok.RequiredArgsConstructor;
@@ -46,11 +47,11 @@ public class ClubManagementQueryFacade {
         );
 
         List<Club> clubs = clubCursorResult.content();
-        List<Long> clubIds = extractClubIds(clubs);
+        List<Long> clubIds = ExtractHelper.extractDistinctList(clubs, Club::getId);
 
         // 클럽별 멤버 상태 배치 조회
-        Map<Long, ClubMember.ClubMemberStatus> statusMap = clubMemberQueryService.retrieveClubMemberStatusByClubIds(
-                memberId, clubIds);
+        Map<Long, ClubMember.ClubMemberStatus> statusMap
+                = clubMemberQueryService.retrieveClubMemberStatusByClubIds(memberId, clubIds);
 
         List<ClubResponseDTO.ClubWithMyStatus> clubList = clubs.stream()
                 .map(club -> toClubWithMyStatusDTO(club, statusMap))
@@ -79,12 +80,6 @@ public class ClubManagementQueryFacade {
                 .club(clubDetail)
                 .isMember(isMember)
                 .build();
-    }
-
-    private List<Long> extractClubIds(List<Club> clubs) {
-        return clubs.stream()
-                .map(Club::getId)
-                .toList();
     }
 
     public ClubResponseDTO.MyClubList retrieveMyClubList(String memberId) {
@@ -161,7 +156,7 @@ public class ClubManagementQueryFacade {
                 DEFAULT_PAGE_SIZE
         );
         List<ClubMember> clubMembers = clubMemberCursorResult.content();
-        List<String> memberIds = extractMemberIds(clubMembers);
+        List<String> memberIds = ExtractHelper.extractDistinctList(clubMembers, ClubMember::getMemberId);
 
         Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
 
@@ -179,16 +174,6 @@ public class ClubManagementQueryFacade {
                 .pageSize(dtoList.size())
                 .isStaff(true) // 항상 true
                 .build();
-    }
-
-    private List<String> extractMemberIds(List<ClubMember> clubMembers) {
-        if (clubMembers == null) {
-            return List.of();
-        }
-        return clubMembers.stream()
-                .map(checkmo.clubManagement.internal.entity.ClubMember::getMemberId)
-                .distinct()
-                .toList();
     }
 
     public Boolean isClubMemberStaff(Long clubId, String memberId) {
