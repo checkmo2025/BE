@@ -45,7 +45,7 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class JoinClub {
         @NotNull(message = "가입 메시지는 null일 수 없습니다.")
-        @Size(max = 255, message = "가입 메시지는 255자 이하로 입력해주세요.")
+        @Size(max = 300, message = "가입 메시지는 300자 이하로 입력해주세요.")
         private String joinMessage;
     }
 
@@ -53,9 +53,9 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class ClubDetail {
         @NotBlank(message = "클럽 이름은 필수 입력입니다.")
-        @Size(min = 1, max = 255, message = "클럽 이름은 1자 이상 255자 이하로 입력해주세요.")
+        @Size(min = 1, max = 40, message = "클럽 이름은 1자 이상 40자 이하로 입력해주세요.")
         private String name;
-        @Size(max = 255, message = "클럽 설명은 255자 이하로 입력해주세요.")
+        @Size(max = 500, message = "클럽 설명은 500자 이하로 입력해주세요.")
         private String description;
         @Size(max = 255, message = "프로필 이미지 URL은 255자 이하로 입력해주세요.")
         private String profileImageUrl;
@@ -64,7 +64,7 @@ public class ClubRequestDTO {
         @Size(min = 1, max = 6, message = "관심 카테고리는 1개 이상 6개 이하로 선택해주세요.")
         private List<ClubInterestCategory> category;
         @NotBlank(message = "활동 지역은 필수 입력입니다.")
-        @Size(max = 255, message = "활동 지역은 255자 이하로 입력해주세요.")
+        @Size(max = 40, message = "활동 지역은 40자 이하로 입력해주세요.")
         private String region;
         private List<Club.ParticipantType> participantTypes;
         private String insta;
