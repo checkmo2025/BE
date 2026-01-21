@@ -107,4 +107,37 @@ public class BookStoryCommentCommandService {
         // 6. 수정된 댓글 ID 반환
         return commentId;
     }
+
+    /**
+     * 댓글 삭제 (소프트 삭제)
+     *
+     * @param memberId    삭제 요청자 ID
+     * @param bookStoryId 책이야기 ID
+     * @param commentId   삭제할 댓글 ID
+     * @return 삭제된 댓글 ID
+     */
+    public Long deleteComment(
+            String memberId,
+            Long bookStoryId,
+            Long commentId
+    ) {
+        // 1. 책이야기 존재 여부 확인
+        bookStoryQueryService.retrieveBookStory(bookStoryId);
+
+        // 2. 댓글 조회
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.COMMENT_NOT_FOUND));
+
+        // 3. 댓글이 해당 책이야기에 속하는지 확인
+        comment.verifyBookStory(bookStoryId);
+
+        // 4. 댓글 작성자 검증
+        comment.verifyOwner(memberId);
+
+        // 5. 소프트 삭제 처리
+        comment.softDelete();
+
+        // 6. 삭제된 댓글 ID 반환
+        return commentId;
+    }
 }

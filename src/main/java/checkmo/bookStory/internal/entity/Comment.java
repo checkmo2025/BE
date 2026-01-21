@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -49,6 +50,11 @@ public class Comment extends BaseEntity {
     @OrderBy("createdAt ASC")
     private List<Comment> childrenComment = new ArrayList<>(); // 대댓글 리스트들
 
+    @Builder.Default
+    private boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
     public void addChildComment(Comment childComment) {
         childrenComment.add(childComment);
     }
@@ -73,5 +79,10 @@ public class Comment extends BaseEntity {
 
     public void updateContent(String content) {
         this.content = content;
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

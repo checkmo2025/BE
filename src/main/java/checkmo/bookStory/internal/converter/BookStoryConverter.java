@@ -105,12 +105,25 @@ public class BookStoryConverter {
             MemberExternalDTO.BasicInfo authorInfo,
             List<BookStoryResponseDTO.CommentInfo> replies
     ) {
+        if (comment.isDeleted()) {
+            return BookStoryResponseDTO.CommentInfo.builder()
+                    .commentId(comment.getId())
+                    .content(null)
+                    .authorInfo(null)
+                    .createdAt(comment.getCreatedAt())
+                    .writtenByMe(false)
+                    .deleted(true)
+                    .replies(replies)
+                    .build();
+        }
+
         return BookStoryResponseDTO.CommentInfo.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .authorInfo(authorInfo)
                 .createdAt(comment.getCreatedAt())
                 .writtenByMe(comment.getMemberId().equals(currentMemberId))
+                .deleted(false)
                 .replies(replies)
                 .build();
     }
