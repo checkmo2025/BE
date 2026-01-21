@@ -61,6 +61,7 @@ public class ClubNoticeConverter {
                 .item3(selected.contains(3))
                 .item4(selected.contains(4))
                 .item5(selected.contains(5))
+                .item6(selected.contains(6))
                 .build();
     }
 

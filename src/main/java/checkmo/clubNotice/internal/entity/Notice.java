@@ -98,7 +98,7 @@ public class Notice extends BaseEntity {
     // ========== 투표 ==========
     public void attachVote(
             String title, String content,
-            String item1, String item2, String item3, String item4, String item5,
+            String item1, String item2, String item3, String item4, String item5, String item6,
             boolean anonymity, boolean duplication,
             LocalDateTime startTime, LocalDateTime deadline
     ) {
@@ -106,7 +106,7 @@ public class Notice extends BaseEntity {
             throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_ALREADY_EXISTS);
         }
         this.vote = Vote.of(
-                title, content, item1, item2, item3, item4, item5, anonymity, duplication, startTime, deadline
+                title, content, item1, item2, item3, item4, item5, item6, anonymity, duplication, startTime, deadline
         );
     }
 

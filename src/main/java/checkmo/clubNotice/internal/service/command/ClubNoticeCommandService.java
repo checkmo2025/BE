@@ -53,6 +53,7 @@ public class ClubNoticeCommandService {
                     vote.getItem3(),
                     vote.getItem4(),
                     vote.getItem5(),
+                    vote.getItem6(),
                     vote.isAnonymity(),
                     vote.isDuplication(),
                     vote.getStartTime(),
@@ -147,6 +148,7 @@ public class ClubNoticeCommandService {
         }
 
         validateVotingTime(vote);
+        vote.validateSelectedItemNumbersExist(request.getSelectedItemNumbers());
         vote.validateChoiceCountBasedOnDuplication(request.countSelectedItems());
 
         vote.upsertClubMemberVote(
@@ -160,8 +162,6 @@ public class ClubNoticeCommandService {
 
     private void validateVotingTime(Vote vote) {
         LocalDateTime now = LocalDateTime.now();
-        if (!vote.isWithinVotingPeriod(now)) {
-            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_TIME_EXPIRED);
-        }
+        vote.validateVotingTime(now);
     }
 }

@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -51,7 +50,6 @@ public class ClubNoticeQueryFacade {
 
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
-    private final PageableHandlerMethodArgumentResolverCustomizer pageableHandlerMethodArgumentResolverCustomizer;
 
     public ClubNoticePreviewList retrieveClubNoticeList(
             Long clubId,
@@ -202,6 +200,7 @@ public class ClubNoticeQueryFacade {
             addIfSelected(map, 3, clubMemberVote.isItem3(), clubMemberVote.getClubMemberId());
             addIfSelected(map, 4, clubMemberVote.isItem4(), clubMemberVote.getClubMemberId());
             addIfSelected(map, 5, clubMemberVote.isItem5(), clubMemberVote.getClubMemberId());
+            addIfSelected(map, 6, clubMemberVote.isItem6(), clubMemberVote.getClubMemberId());
         }
         return map;
     }

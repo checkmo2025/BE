@@ -54,6 +54,7 @@ public class ClubNoticeRequestDTO {
         private String item3;
         private String item4;
         private String item5;
+        private String item6;
         private boolean anonymity;
         private boolean duplication;
         @NotNull(message = "투표 시작 시간은 null이 될 수 없습니다.")
@@ -96,8 +97,8 @@ public class ClubNoticeRequestDTO {
     @NoArgsConstructor
     public static class VoteResult {
         @NotNull(message = "선택한 투표 항목 번호는 필수입니다.")
-        @Size(min = 1, max = 5, message = "선택 항목은 1개 이상 5개 이하입니다.")
-        private List<@Min(1) @Max(5) Integer> selectedItemNumbers;
+        @Size(min = 1, max = 6, message = "선택 항목은 1개 이상 6개 이하입니다.")
+        private List<@Min(1) @Max(6) Integer> selectedItemNumbers;
 
         // 몇 개를 선택했는지 확인하는 DTO용 메서드로, 복수 선택 검증에서 사용됨
         public int countSelectedItems() {

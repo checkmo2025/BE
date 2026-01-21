@@ -38,6 +38,7 @@ public class ClubMemberVote {
     private boolean item3;
     private boolean item4;
     private boolean item5;
+    private boolean item6;
 
     @Column(name = "club_member_id", nullable = false)
     private Long clubMemberId;
@@ -59,6 +60,7 @@ public class ClubMemberVote {
         this.item3 = false;
         this.item4 = false;
         this.item5 = false;
+        this.item6 = false;
 
         if (selectedItems == null) {
             return;
@@ -74,8 +76,9 @@ public class ClubMemberVote {
                 case 3 -> this.item3 = true;
                 case 4 -> this.item4 = true;
                 case 5 -> this.item5 = true;
+                case 6 -> this.item6 = true;
                 default -> {
-                    throw new ClubNoticeException(ClubNoticeErrorStatus.ITEM_SELECTION_OUT_OF_RANGE);
+                    throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_ITEM_NOT_FOUND);
                 }
             }
         }

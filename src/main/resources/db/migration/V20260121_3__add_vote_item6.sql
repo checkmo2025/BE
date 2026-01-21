@@ -1,0 +1,5 @@
+ALTER TABLE vote
+    ADD COLUMN item6 VARCHAR(255);
+
+ALTER TABLE club_member_vote
+    ADD COLUMN item6 BIT NOT NULL;

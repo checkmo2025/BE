@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Vote extends BaseEntity {
+    private static final int MIN_ITEM_COUNT = 2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +47,8 @@ public class Vote extends BaseEntity {
 
     private String item5;
 
+    private String item6;
+
     @Column(nullable = false)
     private boolean anonymity;
 
@@ -60,9 +63,10 @@ public class Vote extends BaseEntity {
     @OneToMany(mappedBy = "vote", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClubMemberVote> clubMemberVotes = new ArrayList<>();
 
+    // ========== 정적 팩토리 메서드 ==========
     public static Vote of(
             String title, String content,
-            String item1, String item2, String item3, String item4, String item5,
+            String item1, String item2, String item3, String item4, String item5, String item6,
             boolean anonymity, boolean duplication,
             LocalDateTime startTime, LocalDateTime deadline
     ) {
@@ -71,9 +75,10 @@ public class Vote extends BaseEntity {
                 .content(content)
                 .item1(item1)
                 .item2(item2)
-                .item3(item4)
+                .item3(item3)
                 .item4(item4)
                 .item5(item5)
+                .item6(item6)
                 .anonymity(anonymity)
                 .duplication(duplication)
                 .startTime(startTime)
@@ -83,6 +88,7 @@ public class Vote extends BaseEntity {
         return vote;
     }
 
+    // ========== 조회 메서드 ==========
     public List<Integer> getItemNumbers() {
         List<Integer> itemNumbers = new ArrayList<>();
         if (hasText(item1)) {
@@ -100,8 +106,11 @@ public class Vote extends BaseEntity {
         if (hasText(item5)) {
             itemNumbers.add(5);
         }
+        if (hasText(item6)) {
+            itemNumbers.add(6);
+        }
 
-        if (itemNumbers.size() < 2) {
+        if (itemNumbers.size() < MIN_ITEM_COUNT) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.INSUFFICIENT_VOTE_ITEMS);
         }
         return itemNumbers;
@@ -117,30 +126,12 @@ public class Vote extends BaseEntity {
             case 3 -> item3;
             case 4 -> item4;
             case 5 -> item5;
+            case 6 -> item6;
             default -> null;
         };
     }
-
-    public boolean isWithinVotingPeriod(LocalDateTime localDateTime) {
-        if (startTime != null && localDateTime.isBefore(startTime)) {
-            return false;
-        }
-        if (deadline != null && localDateTime.isAfter(deadline)) {
-            return false;
-        }
-        return true;
-    }
-
-    public void validateChoiceCountBasedOnDuplication(int selectedItems) {
-        if (!this.duplication && selectedItems > 1) {
-            throw new ClubNoticeException(ClubNoticeErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
-        }
-    }
-
-    private boolean hasText(String text) {
-        return text != null && !text.isBlank();
-    }
-
+    
+    // ========== 업데이트 메서드 ==========
     public void upsertClubMemberVote(
             Long clubMemberId,
             List<Integer> selectedItemNumbers,
@@ -148,13 +139,13 @@ public class Vote extends BaseEntity {
     ) {
         List<Integer> safeNumbers = selectedItemNumbers == null ? List.of() : selectedItemNumbers;
 
-        ClubMemberVote exisiting = clubMemberVotes.stream()
+        ClubMemberVote existing = clubMemberVotes.stream()
                 .filter(vote -> clubMemberId.equals(vote.getClubMemberId()))
                 .findFirst()
                 .orElse(null);
 
-        if (exisiting != null) {
-            exisiting.updateSelectedItems(safeNumbers);
+        if (existing != null) {
+            existing.updateSelectedItems(safeNumbers);
             return;
         }
         clubMemberVotes.add(created);
@@ -165,6 +156,32 @@ public class Vote extends BaseEntity {
         validateVotePeriod();
     }
 
+    // ========== 검증 메서드 ==========
+    public void validateVotingTime(LocalDateTime localDateTime) {
+        if (startTime != null && deadline != null) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_PERIOD_REQUIRED);
+        }
+        if (!localDateTime.isBefore(startTime) || !localDateTime.isAfter(deadline)) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_TIME_INVALID);
+        }
+    }
+
+    public void validateChoiceCountBasedOnDuplication(int selectedItems) {
+        if (!this.duplication && selectedItems > 1) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.MULTIPLE_SELECTION_NOT_ALLOWED);
+        }
+    }
+
+    public void validateSelectedItemNumbersExist(List<Integer> selectedItemNumbers) {
+        List<Integer> validItemNumbers = getItemNumbers();
+        List<Integer> itemNumbers = selectedItemNumbers == null ? List.of() : selectedItemNumbers;
+        boolean inValid = itemNumbers.stream()
+                .anyMatch(num -> !validItemNumbers.contains(num));
+        if (inValid) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_ITEM_NOT_FOUND);
+        }
+    }
+
     private void validateVotePeriod() {
         if (startTime == null || deadline == null) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_PERIOD_REQUIRED);
@@ -172,6 +189,11 @@ public class Vote extends BaseEntity {
         if (!startTime.isBefore(deadline)) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_START_AFTER_DEADLINE);
         }
+    }
+
+    // ========== 헬퍼 메서드 ==========
+    private boolean hasText(String text) {
+        return text != null && !text.isBlank();
     }
 
 }
