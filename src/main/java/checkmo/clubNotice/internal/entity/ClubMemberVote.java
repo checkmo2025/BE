@@ -49,7 +49,7 @@ public class ClubMemberVote extends BaseEntity {
     private Vote vote;
 
     public void setVote(Vote vote) {
-        if (this.vote == null) {
+        if (vote == null) {
             return;
         }
         this.vote = vote;

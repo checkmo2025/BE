@@ -130,7 +130,7 @@ public class Vote extends BaseEntity {
             default -> null;
         };
     }
-    
+
     // ========== 업데이트 메서드 ==========
     public void upsertClubMemberVote(
             Long clubMemberId,
@@ -158,10 +158,10 @@ public class Vote extends BaseEntity {
 
     // ========== 검증 메서드 ==========
     public void validateVotingTime(LocalDateTime localDateTime) {
-        if (startTime != null && deadline != null) {
+        if (startTime == null || deadline == null) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_PERIOD_REQUIRED);
         }
-        if (!localDateTime.isBefore(startTime) || !localDateTime.isAfter(deadline)) {
+        if (localDateTime.isBefore(startTime) || localDateTime.isAfter(deadline)) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.VOTE_TIME_INVALID);
         }
     }

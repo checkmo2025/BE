@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,7 +43,7 @@ public class NoticeComment extends BaseEntity {
     }
 
     public boolean isAuthor(Long clubMemberId) {
-        return this.clubMemberId.equals(clubMemberId);
+        return Objects.equals(this.clubMemberId, clubMemberId);
     }
 
     public void updateContent(String content) {

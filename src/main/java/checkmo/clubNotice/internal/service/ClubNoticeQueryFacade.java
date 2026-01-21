@@ -55,13 +55,13 @@ public class ClubNoticeQueryFacade {
             Long clubId,
             String memberId,
             int page,
-            boolean onlyImportant
+            boolean important
     ) {
         clubManagementAPI.validateClub(clubId);
         MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
         PageResult<Notice> noticePageResult = PagePagingHelper.getPage(
-                pageable -> clubNoticeQueryService.retrieveNotices(clubId, onlyImportant, pageable),
+                pageable -> clubNoticeQueryService.retrieveNotices(clubId, important, pageable),
                 page,
                 DEFAULT_PAGE_SIZE
         );

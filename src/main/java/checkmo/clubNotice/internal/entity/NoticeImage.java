@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "uk_notice_image_order", columnNames = {"notice_id", "order_index"})
+        @UniqueConstraint(name = "uk_notice_image_order", columnNames = {"notice_id", "sort_order"})
 })
 public class NoticeImage extends BaseEntity {
     @Id

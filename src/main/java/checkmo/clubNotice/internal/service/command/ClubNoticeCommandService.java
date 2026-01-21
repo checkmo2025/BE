@@ -124,7 +124,7 @@ public class ClubNoticeCommandService {
         );
     }
 
-    public Long haveVote(Long clubId, String memberId, Long noticeId, Long voteId, VoteResult request) {
+    public Long haveVote(Long clubId, Long noticeId, Long voteId, String memberId, VoteResult request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
 

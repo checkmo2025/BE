@@ -16,11 +16,9 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     Optional<Notice> findByIdAndClubId(Long noticeId, Long clubId);
 
-    Optional<Notice> findByMeetingId(Long meetingId);
-
     @Query("SELECT n FROM Notice n "
             + "WHERE n.clubId = :clubId "
-            + "AND n.important = :onlyImportant "
+            + "AND n.important = :important "
             + "ORDER BY n.createdAt DESC, n.id DESC ")
-    Page<Notice> findAllByClubIdAndCursorPaging(Long clubId, boolean onlyImportant, Pageable pageable);
+    Page<Notice> findAllByClubIdAndImportant(Long clubId, boolean important, Pageable pageable);
 }

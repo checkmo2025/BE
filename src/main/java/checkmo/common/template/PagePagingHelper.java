@@ -10,7 +10,7 @@ public class PagePagingHelper {
     }
 
     /**
-     * Offset 기반 페이지네이션 로직을 처리하는 제너릭 메서드(Spring Data Pageable 시용)
+     * Offset 기반 페이지네이션 로직을 처리하는 제너릭 메서드(Spring Data Pageable 사용)
      *
      * @param dataFetcher Pageable을 받아 Page<T>를 반환하는 함수
      * @param page        1-based 페이지 번호

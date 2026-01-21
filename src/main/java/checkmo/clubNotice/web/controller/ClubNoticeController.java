@@ -35,7 +35,7 @@ public class ClubNoticeController {
     private final ClubNoticeCommandService clubNoticeCommandService;
     private final NoticeCommentCommandService noticeCommentCommandService;
 
-    @Operation(summary = "공지사항 목록 조회", description = "특정 모임의 공지사항 목록을 조회합니다. 중요하는 공지 또는 중요하지 않은 공지를 조회합니다.")
+    @Operation(summary = "공지사항 목록 조회", description = "특정 모임의 공지사항 목록을 조회합니다. 중요한 공지 또는 중요하지 않은 공지만 조회합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "모임 멤버가 아님"),
@@ -47,10 +47,10 @@ public class ClubNoticeController {
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "false") boolean onlyImportant
+            @RequestParam(required = false, defaultValue = "false") boolean important
     ) {
         return ApiResponse.onSuccess(
-                clubNoticeQueryFacade.retrieveClubNoticeList(clubId, memberId, page, onlyImportant));
+                clubNoticeQueryFacade.retrieveClubNoticeList(clubId, memberId, page, important));
     }
 
     @Operation(summary = "공지사항 상세 조회", description = "공지사항 상세 정보를 조회합니다.")
@@ -133,7 +133,7 @@ public class ClubNoticeController {
             @CurrentId String memberId,
             @RequestBody @Valid ClubNoticeRequestDTO.VoteResult request
     ) {
-        Long participatingVoteId = clubNoticeCommandService.haveVote(clubId, memberId, noticeId, voteId, request);
+        Long participatingVoteId = clubNoticeCommandService.haveVote(clubId, noticeId, voteId, memberId, request);
         return ApiResponse.onSuccess("투표(id:" + participatingVoteId + ")에 투표했습니다.");
     }
 

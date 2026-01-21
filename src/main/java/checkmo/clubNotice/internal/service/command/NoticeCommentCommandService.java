@@ -51,7 +51,7 @@ public class NoticeCommentCommandService {
         NoticeComment noticeComment = noticeCommentQueryService.validateNoticeComment(noticeId, commentId);
         if (!noticeComment.isAuthor(clubMemberId)) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_COMMENT_UNAUTHORIZED);
-            // 운영진, 작성자 검증
+            // TODO: 운영진, 작성자 검증
         }
         notice.removeComment(noticeComment);
     }

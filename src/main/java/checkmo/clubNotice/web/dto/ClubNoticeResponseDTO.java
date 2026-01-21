@@ -95,7 +95,7 @@ public class ClubNoticeResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class EachItem {
-        private int itemNumber; // 항목 번호 (1~5)
+        private int itemNumber; // 항목 번호 (1~6)
         private String item;
         private boolean isSelected; // 현재 로그인한 멤버가 해당 항목에 투표했는지 여부
         private int voteCount;

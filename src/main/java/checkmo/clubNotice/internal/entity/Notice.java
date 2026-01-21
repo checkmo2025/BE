@@ -98,6 +98,9 @@ public class Notice extends BaseEntity {
     }
 
     public void updateVoteDeadline(LocalDateTime voteDeadline) {
+        if (this.vote == null) {
+            return;
+        }
         this.vote.update(voteDeadline);
     }
 
@@ -120,29 +123,32 @@ public class Notice extends BaseEntity {
 
     // ========== 이미지 ==========
     public List<String> replaceImages(List<String> images) {
-        List<String> newImages = images == null ? List.of() : images;
-        if (newImages.size() > MAX_IMAGE_COUNT) {
+        if (images == null) {
+            return List.of(); // null이면 변경 없음
+        }
+        
+        if (images.size() > MAX_IMAGE_COUNT) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_IMAGE_LIMIT_EXCEEDED);
         }
 
         List<String> oldImages = getImageUrls();
 
         List<String> removedImages = oldImages.stream()
-                .filter(url -> !newImages.contains(url))
+                .filter(url -> !images.contains(url))
                 .toList();
 
         // Hibernate flush 순서에 따른 Duplicate entry 문제를 피하기 위해 기존 이미지 업데이트 후 나머지 삽입/삭제
-        int commonSize = Math.min(this.images.size(), newImages.size());
+        int commonSize = Math.min(this.images.size(), images.size());
         for (int i = 0; i < commonSize; i++) {
             NoticeImage img = this.images.get(i);
-            img.update(newImages.get(i), i);
+            img.update(images.get(i), i);
         }
 
-        for (int i = commonSize; i < newImages.size(); i++) {
-            this.images.add(NoticeImage.of(this, newImages.get(i), i));
+        for (int i = commonSize; i < images.size(); i++) {
+            this.images.add(NoticeImage.of(this, images.get(i), i));
         }
 
-        for (int i = this.images.size() - 1; i >= newImages.size(); i--) {
+        for (int i = this.images.size() - 1; i >= images.size(); i--) {
             this.images.remove(i);
         }
 
