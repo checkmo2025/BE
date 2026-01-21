@@ -82,6 +82,9 @@ public class BookStoryResponseDTO {
         private int commentCount; // 댓글 전체 개수 (대댓글 포함)
 
         private List<CommentInfo> comments;
+
+        private Long prevBookStoryId;
+        private Long nextBookStoryId;
     }
 
     @Getter

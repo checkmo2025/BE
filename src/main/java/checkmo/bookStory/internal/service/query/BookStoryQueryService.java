@@ -7,6 +7,7 @@ import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
+import checkmo.bookStory.internal.repository.projection.BookStoryPrevNextProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import java.util.HashSet;
 import java.util.List;
@@ -99,5 +100,9 @@ public class BookStoryQueryService {
                         bookStoryId -> bookStoryId,
                         likedIdSet::contains
                 ));
+    }
+
+    public BookStoryPrevNextProjection retrievePrevNextBookStoryId(String memberId, Long bookStoryId) {
+        return bookStoryRepository.findPrevNextBookStoryId(memberId, bookStoryId);
     }
 }

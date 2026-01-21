@@ -3,6 +3,7 @@ package checkmo.bookStory.internal.converter;
 import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.repository.projection.BookStoryPrevNextProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.member.MemberExternalDTO;
@@ -55,7 +56,8 @@ public class BookStoryConverter {
             BookExternalDTO.BasicInfo bookInfo,
             BasicInfoWithFollow authorInfo,
             boolean isLiked,
-            List<BookStoryResponseDTO.CommentInfo> commentList
+            List<BookStoryResponseDTO.CommentInfo> commentList,
+            BookStoryPrevNextProjection bookStoryPrevNextProjection
     ) {
         return BookStoryResponseDTO.DetailInfo.builder()
                 .bookStoryId(bookStory.getId())
@@ -70,6 +72,8 @@ public class BookStoryConverter {
                 .viewCount(bookStory.getViewCount())
                 .commentCount(bookStory.getCommentsCount())
                 .comments(commentList)
+                .prevBookStoryId(bookStoryPrevNextProjection.getPrevId())
+                .nextBookStoryId(bookStoryPrevNextProjection.getNextId())
                 .build();
     }
 

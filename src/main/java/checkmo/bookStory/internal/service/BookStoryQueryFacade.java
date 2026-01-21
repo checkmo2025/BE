@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,14 +92,19 @@ public class BookStoryQueryFacade {
         List<CommentInfo> commentDTOList =
                 BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap);
 
-        // 9. DTO 변환
+        // 9. 책이야기 작성자의 이전, 다음 책이야기 아이디 조회
+        var bookStoryPrevNextProjection
+                = bookStoryQueryService.retrievePrevNextBookStoryId(bookStory.getMemberId(), bookStoryId);
+
+        // 10. DTO 변환
         return BookStoryConverter.toBookStoryDetailWithComment(
                 bookStory,
                 memberId,
                 bookInfo,
                 authorInfo,
                 isLiked,
-                commentDTOList
+                commentDTOList,
+                bookStoryPrevNextProjection
         );
     }
 
