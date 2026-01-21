@@ -22,7 +22,7 @@ public class AuthRequestDTO {
         @NotBlank(message = "비밀번호는 필수입니다")
         @Size(min = 6, max = 12, message = "비밀번호는 6-12자여야 합니다")
         @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$", message = "비밀번호는 영어 및 특수문자를 포함해야 합니다")
-        @Schema(description = "비밀번호(영어+특수문자 포함 6~10자", example = "pass123!")
+        @Schema(description = "비밀번호(영어+특수문자 포함 6~12자", example = "pass123!")
         private String password;
     }
 
