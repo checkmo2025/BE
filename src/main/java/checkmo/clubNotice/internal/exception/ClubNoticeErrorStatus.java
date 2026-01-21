@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 public enum ClubNoticeErrorStatus implements BaseErrorCode {
     // 공지사항
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_400", "공지사항을 찾을 수 없습니다."),
-    NOTICE_MEETING_VERSION_NOT_NULL(HttpStatus.BAD_REQUEST, "NOTICE_401",
-            "모임 공지사항의 경우 meetingVersion은 null이 아니어야 합니다."),
-    NOTICE_INVALID_TAG_TYPE(HttpStatus.BAD_REQUEST, "NOTICE_402", "유효하지 않은 공지 유형입니다. (공지, 모임, 투표 중 하나)"),
-    NOTICE_MEETING_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE_403", "모임 공지사항은 삭제할 수 없습니다."),
+    MEETING_NOT_IN_CLUB(HttpStatus.BAD_REQUEST, "NOTICE_401", "공지사항의 모임이 해당 동아리에 속해있지 않습니다."),
 
     // 투표
     INSUFFICIENT_VOTE_ITEMS(HttpStatus.BAD_REQUEST, "VOTE_400", "투표 항목이 2개 미만입니다."),

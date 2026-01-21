@@ -25,16 +25,10 @@ public class ClubNoticeRequestDTO {
         private String content;
         private boolean important;
         private Long meetingId;
-        private Long meetingVersion;
         @Size(max = 5, message = "공지사항 이미지는 최대 5개까지 가능합니다.")
         private List<@NotBlank(message = "공지사항 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
         @Valid
         private CreateClubVote vote;
-
-        @AssertTrue(message = "미팅 ID와 미팅 버전은 함께 제공되어야 합니다.")
-        private boolean isMeetingIdAndVersionTogether() {
-            return (meetingId == null) == (meetingVersion == null);
-        }
     }
 
     @Getter
@@ -74,16 +68,10 @@ public class ClubNoticeRequestDTO {
         private String content;
         private boolean important;
         private Long meetingId;
-        private Long meetingVersion;
         @Size(max = 5, message = "공지사항 이미지는 최대 5개까지 가능합니다.")
         private List<@NotBlank(message = "공지사항 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
         @Valid
         private UpdateClubVote vote;
-
-        @AssertTrue(message = "미팅 ID와 미팅 버전은 함께 제공되어야 합니다.")
-        private boolean isMeetingIdAndVersionTogether() {
-            return (meetingId == null) == (meetingVersion == null);
-        }
     }
 
     @Getter

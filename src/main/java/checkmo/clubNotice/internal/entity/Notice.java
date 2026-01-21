@@ -52,9 +52,6 @@ public class Notice extends BaseEntity {
     @Column(name = "meeting_id")
     private Long meetingId;
 
-    @Column(name = "meeting_version")
-    private Long meetingVersion;
-
     @Column(name = "club_id", nullable = false)
     private Long clubId;
 
@@ -76,23 +73,13 @@ public class Notice extends BaseEntity {
             String title,
             String content,
             boolean important,
-            Long meetingId,
-            Long meetingVersion
+            Long meetingId
     ) {
         this.title = title;
         this.content = content;
         this.important = important;
         this.meetingId = meetingId;
-        this.meetingVersion = meetingVersion;
         this.tag = NoticeTag.decideTag(this.vote != null, meetingId != null);
-    }
-
-    public boolean isNotOlderThan(Long meetingVersion) {
-        if (meetingVersion == null) {
-            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_MEETING_VERSION_NOT_NULL);
-        }
-
-        return this.meetingVersion >= meetingVersion;
     }
 
     // ========== 투표 ==========

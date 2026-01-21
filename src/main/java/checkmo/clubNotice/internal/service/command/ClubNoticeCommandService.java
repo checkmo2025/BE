@@ -1,7 +1,7 @@
 package checkmo.clubNotice.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
+import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubNotice.ClubNoticeEvent;
 import checkmo.clubNotice.ClubNoticeEvent.ClubNoticeCreated;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubNoticeCommandService {
 
     private final ClubManagementAPI clubManagementAPI;
+    private final ClubMeetingAPI clubMeetingAPI;
 
     private final ClubNoticeQueryService clubNoticeQueryService;
 
@@ -41,6 +42,9 @@ public class ClubNoticeCommandService {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
         NoticeTag tag = NoticeTag.decideTag(request.getVote() != null, request.getMeetingId() != null);
+        if (tag.isMeeting() && !clubMeetingAPI.isMeetingInClub(clubId, request.getMeetingId())) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
+        }
         Notice notice = ClubNoticeConverter.toNotice(request, tag, clubId);
         notice.replaceImages(request.getImageUrls());
         CreateClubVote vote = request.getVote();
@@ -82,13 +86,14 @@ public class ClubNoticeCommandService {
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
-
+        if (request.getMeetingId() != null && !clubMeetingAPI.isMeetingInClub(clubId, request.getMeetingId())) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
+        }
         notice.update(
                 request.getTitle(),
                 request.getContent(),
                 request.isImportant(),
-                request.getMeetingId(),
-                request.getMeetingVersion()
+                request.getMeetingId()
         );
         if (request.getVote() != null) {
             notice.updateVoteDeadline(request.getVote().getDeadline());
@@ -117,25 +122,6 @@ public class ClubNoticeCommandService {
                         .imageUrls(removedImages)
                         .build()
         );
-    }
-
-    public void createAutomaticMeetingNotice(ClubMeetingCreatedEvent event) {
-        clubManagementAPI.validateClub(event.clubId());
-
-        Notice existingNotice = noticeRepository.findByMeetingId(event.meetingId()).orElse(null);
-
-        // 기존 공지가 있고, 그 공지가  같은 버전이거나 최신 버전이라면 이벤트 무시
-        if (existingNotice != null && existingNotice.isNotOlderThan(event.version())) {
-            return;
-        }
-
-        // 기존 공지사항이 존재하면 삭제하고 새로 생성 (비즈니스 요구사항)
-        if (existingNotice != null) {
-            noticeRepository.delete(existingNotice);
-        }
-
-        Notice notice = ClubNoticeConverter.toNotice(event);
-        noticeRepository.save(notice);
     }
 
     public Long haveVote(Long clubId, String memberId, Long noticeId, Long voteId, VoteResult request) {

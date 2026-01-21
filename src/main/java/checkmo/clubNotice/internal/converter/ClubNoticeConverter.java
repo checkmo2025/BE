@@ -1,7 +1,6 @@
 package checkmo.clubNotice.internal.converter;
 
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
-import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -29,21 +28,7 @@ public class ClubNoticeConverter {
                 .important(request.isImportant())
                 .tag(tag)
                 .meetingId(request.getMeetingId())
-                .meetingVersion(request.getMeetingVersion())
                 .clubId(clubId)
-                .build();
-    }
-
-    public static Notice toNotice(ClubMeetingCreatedEvent event) {
-        return Notice.builder()
-                .title(event.title())
-                .content(event.content())
-                .important(true)
-                .tag(NoticeTag.MEETING)
-                .meetingId(event.meetingId())
-                .meetingVersion(event.version())
-                .clubId(event.clubId())
-                .vote(null)
                 .build();
     }
 

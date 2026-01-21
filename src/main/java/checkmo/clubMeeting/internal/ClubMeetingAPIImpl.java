@@ -11,14 +11,13 @@ import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.common.template.ExtractHelper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +49,12 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         Map<String, BasicInfo> bookBasicInfo = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
         return toMeetingInfoMap(meetings, bookBasicInfo);
+    }
+
+    @Override
+    public boolean isMeetingInClub(Long clubId, Long meetingId) {
+        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        return meeting.getClubId().equals(clubId);
     }
 
     private Map<Long, DetailInfo> toMeetingInfoMap(List<Meeting> meetings, Map<String, BasicInfo> bookBasicInfo) {
