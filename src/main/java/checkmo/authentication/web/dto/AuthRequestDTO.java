@@ -34,7 +34,7 @@ public class AuthRequestDTO {
         private String email;
 
         @NotBlank(message = "비밀번호는 필수입니다")
-        @Size(min = 6, max = 10, message = "비밀번호는 6-10자여야 합니다")
+        @Size(min = 6, max = 12, message = "비밀번호는 6-12자여야 합니다")
         @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$", message = "비밀번호는 영어 및 특수문자를 포함해야 합니다")
         private String password;
     }

@@ -11,4 +11,8 @@ public class AuthenticationEvent {
     @Builder
     public record SendVerificationEmail(String email, String verificationCode) {
     }
+
+    @Builder
+    public record SendTempPassword(String email, String tempPassword){
+    }
 }

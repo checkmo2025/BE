@@ -49,4 +49,8 @@ public class AuthUser extends BaseEntity {
     public boolean isDeactivated() {
         return deactivatedAt != null;
     }
+
+    public void updatePassword(String encryptedPassword) {
+        this.password = encryptedPassword;
+    }
 }

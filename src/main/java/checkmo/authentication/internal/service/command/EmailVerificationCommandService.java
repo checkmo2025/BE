@@ -1,6 +1,7 @@
 package checkmo.authentication.internal.service.command;
 
 import checkmo.authentication.AuthenticationEvent;
+import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
@@ -12,6 +13,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ public class EmailVerificationCommandService {
     // 외부 서비스
     private final RedisTemplate<String, Object> redisTemplate;
     private final ApplicationEventPublisher eventPublisher;
+    private final PasswordEncoder passwordEncoder;
 
     private final AuthRepository authRepository;
 
@@ -88,5 +91,38 @@ public class EmailVerificationCommandService {
         redisTemplate.opsForHash().put(redisKey, "verified", true);
 
         return true;
+    }
+
+    public void sendTempPassword(String email) {
+        AuthUser user = authRepository.findByEmail(email)
+            .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+
+        String tempPassword = generateTempPassword();
+
+        user.updatePassword(passwordEncoder.encode(tempPassword));
+
+        eventPublisher.publishEvent(
+            AuthenticationEvent.SendTempPassword.builder()
+                                                     .email(email)
+                                                     .tempPassword(tempPassword)
+                                                     .build());
+    }
+
+    private String generateTempPassword() {
+        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            int index = secureRandom.nextInt(charSet.length());
+            sb.append(charSet.charAt(index));
+        }
+
+        String password = sb.toString();
+
+        if (password.matches("^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$")) {
+            return password;
+        }
+
+        return generateTempPassword();
     }
 }

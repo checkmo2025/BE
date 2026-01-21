@@ -23,4 +23,14 @@ public class EmailEventListener {
             throw e;
         }
     }
+
+    @ApplicationModuleListener
+    public void handleTempPasswordEvent(AuthenticationEvent.SendTempPassword event) {
+        try {
+            emailSender.sendTempPassword(event.email(), event.tempPassword());
+        } catch (Exception e) {
+            log.error("임시 비밀번호 전송 실패, SendTempPassword: {}", event, e);
+            throw e;
+        }
+    }
 }
