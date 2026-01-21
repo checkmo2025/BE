@@ -101,21 +101,22 @@ public class ClubNoticeCommandService {
         }
     }
 
+    public void deleteNotice(Long clubId, String memberId, Long noticeId) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
+
+        Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
+        publishNoticeImageDeletedEvent(notice.getImageUrls());
+
+        noticeRepository.delete(notice);
+    }
+
     private void publishNoticeImageDeletedEvent(List<String> removedImages) {
         applicationEventPublisher.publishEvent(
                 ClubNoticeEvent.DeleteNoticeImage.builder()
                         .imageUrls(removedImages)
                         .build()
         );
-    }
-
-    public void deleteNotice(Long clubId, String memberId, Long noticeId) {
-        clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.validateStaffClubMember(clubId, memberId);
-
-        Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
-
-        noticeRepository.delete(notice);
     }
 
     public void createAutomaticMeetingNotice(ClubMeetingCreatedEvent event) {
