@@ -35,6 +35,10 @@ public class BookStory extends BaseEntity {
     @Builder.Default
     private int commentsCount = 0;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private int viewCount = 0;
+
     private String title;
 
     @Column(columnDefinition = "TEXT")
