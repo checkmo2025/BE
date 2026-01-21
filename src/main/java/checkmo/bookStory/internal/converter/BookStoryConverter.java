@@ -32,8 +32,7 @@ public class BookStoryConverter {
             String currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
             BasicInfoWithFollow authorInfo,
-            boolean isLiked,
-            int commentCount
+            boolean isLiked
     ) {
         return BookStoryResponseDTO.BasicInfo.builder()
                 .bookStoryId(bookStory.getId())
@@ -45,7 +44,8 @@ public class BookStoryConverter {
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
-                .commentCount(commentCount)
+                .viewCount(bookStory.getViewCount())
+                .commentCount(bookStory.getCommentsCount())
                 .build();
     }
 
@@ -67,6 +67,7 @@ public class BookStoryConverter {
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
+                .viewCount(bookStory.getViewCount())
                 .commentCount(bookStory.getCommentsCount())
                 .comments(commentList)
                 .build();

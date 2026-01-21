@@ -225,8 +225,7 @@ public class BookStoryQueryFacade {
                         memberId,
                         bookInfoMap.get(bookStory.getBookId()),
                         authorInfoMap.get(bookStory.getMemberId()),
-                        isLikedMap.getOrDefault(bookStory.getId(), false),
-                        bookStory.getCommentsCount()
+                        isLikedMap.getOrDefault(bookStory.getId(), false)
                 )).toList();
     }
 
