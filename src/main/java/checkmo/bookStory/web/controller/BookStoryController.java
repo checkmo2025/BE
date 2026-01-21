@@ -193,4 +193,27 @@ public class BookStoryController {
                 request);
         return ApiResponse.onSuccess(resultBookStoryId);
     }
+
+    @Operation(summary = "책 이야기 댓글 수정 API", description = "책 이야기에 작성한 댓글을 수정합니다.")
+    @Parameters({
+            @Parameter(name = "bookStoryId", description = "댓글이 속한 책 이야기 ID", required = true, example = "1"),
+            @Parameter(name = "commentId", description = "수정할 댓글 ID", required = true, example = "10")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "댓글 수정 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 이야기 또는 댓글을 찾을 수 없음")
+    })
+    @PatchMapping("/{bookStoryId}/comments/{commentId}")
+    public ApiResponse<Long> updateComment(
+            @CurrentId String memberId,
+            @PathVariable Long bookStoryId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody BookStoryRequestDTO.CommentUpdate request
+    ) {
+        Long resultCommentId = bookStoryCommentCommandService.updateComment(memberId, bookStoryId, commentId, request);
+        return ApiResponse.onSuccess(resultCommentId);
+    }
 }

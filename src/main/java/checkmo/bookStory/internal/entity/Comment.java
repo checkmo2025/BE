@@ -64,4 +64,14 @@ public class Comment extends BaseEntity {
             throw new BookStoryException(BookStoryErrorStatus.COMMENT_DEPTH_LIMIT_EXCEEDED);
         }
     }
+
+    public void verifyOwner(String memberId) {
+        if (!this.memberId.equals(memberId)) {
+            throw new BookStoryException(BookStoryErrorStatus.COMMENT_NOT_AUTHORIZED);
+        }
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

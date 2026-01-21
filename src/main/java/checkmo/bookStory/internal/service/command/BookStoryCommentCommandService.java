@@ -72,4 +72,39 @@ public class BookStoryCommentCommandService {
         // 7. 댓글 작성된 책이야기 ID 반환
         return bookStoryId;
     }
+
+    /**
+     * 댓글 수정
+     *
+     * @param memberId    수정 요청자 ID
+     * @param bookStoryId 책이야기 ID
+     * @param commentId   수정할 댓글 ID
+     * @param request     수정할 댓글 내용
+     * @return 수정된 댓글 ID
+     */
+    public Long updateComment(
+            String memberId,
+            Long bookStoryId,
+            Long commentId,
+            BookStoryRequestDTO.CommentUpdate request
+    ) {
+        // 1. 책이야기 존재 여부 확인
+        bookStoryQueryService.retrieveBookStory(bookStoryId);
+
+        // 2. 댓글 조회
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.COMMENT_NOT_FOUND));
+
+        // 3. 댓글이 해당 책이야기에 속하는지 확인
+        comment.verifyBookStory(bookStoryId);
+
+        // 4. 댓글 작성자 검증
+        comment.verifyOwner(memberId);
+
+        // 5. 댓글 내용 수정
+        comment.updateContent(request.getContent());
+
+        // 6. 수정된 댓글 ID 반환
+        return commentId;
+    }
 }
