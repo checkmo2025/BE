@@ -31,11 +31,15 @@ public class MemberCommandService {
                 .id(memberId)
                 .email(email)
                 .nickName("")
+                .name("")
+                .phoneNumber("")
                 .description("")
                 .imgUrl(null)
                 .build();
 
         memberRepository.save(member);
+
+        // TODO: 여기서 약관 내역 DB에 저장 (멤버 생성 후)
     }
 
     /**
@@ -50,14 +54,24 @@ public class MemberCommandService {
 
         member.updateAdditionalInfo(
                 request.getNickname(),
-                request.getDescription(),
-                request.getImgUrl()
+                request.getName(),
+                request.getPhoneNumber(),
+                request.getDescription()
         );
 
-        member.updateInterestCategories(new HashSet<>(request.getCategories()));
+        member.updateImageAndInterestCategories(
+            request.getImgUrl(),
+            new HashSet<>(request.getCategories())
+        );
 
-        // 프로필 완료 상태로 변경 이벤트 발행
+        // 프로필 완료 상태로 변경
         authenticationAPI.completeProfile(memberId);
+
+        // 회원 등록 완료 이벤트 발행
+        eventPublisher.publishEvent(
+                MemberEvent.MemberRegistrationCompleted.builder()
+                        .memberId(memberId)
+                        .build());
     }
 
     /**

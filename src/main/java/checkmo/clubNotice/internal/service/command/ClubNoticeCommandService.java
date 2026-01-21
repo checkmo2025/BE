@@ -2,6 +2,7 @@ package checkmo.clubNotice.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreatedEvent;
+import checkmo.clubNotice.ClubNoticeEvent.ClubNoticeCreated;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.Vote;
@@ -13,6 +14,7 @@ import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubNotice;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResult;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,9 @@ public class ClubNoticeCommandService {
 
     private final NoticeRepository noticeRepository;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+
     public Notice createNotice(Long clubId, String memberId, CreateClubNotice request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
@@ -35,7 +40,19 @@ public class ClubNoticeCommandService {
         Notice notice = ClubNoticeConverter.toNotice(request, clubId);
         noticeRepository.save(notice);
 
+        publishNoticeCreatedEvent(notice, clubId);
+
         return notice;
+    }
+
+    private void publishNoticeCreatedEvent(Notice notice, Long clubId) {
+        String clubName = clubManagementAPI.fetchClubName(clubId);
+        ClubNoticeCreated event = ClubNoticeCreated.builder()
+                .eventId(notice.getId())
+                .clubId(clubId)
+                .clubName(clubName)
+                .build();
+        applicationEventPublisher.publishEvent(event);
     }
 
     public void deleteNotice(Long clubId, String memberId, Long noticeId) {

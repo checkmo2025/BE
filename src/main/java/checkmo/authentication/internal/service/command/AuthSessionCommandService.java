@@ -44,10 +44,10 @@ public class AuthSessionCommandService {
 
         } catch (AuthenticationException authEx) {
             // 인증 실패 시 예외 처리
-            throw new AuthException(AuthErrorStatus.INVALID_CREDENTIALS, "이메일 또는 비밀번호가 일치하지 않습니다");
+            throw new AuthException(AuthErrorStatus.INVALID_CREDENTIALS);
         } catch (Exception e) {
             // 기타 예외 처리
-            throw new AuthException(AuthErrorStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류: 로그인 처리 중 오류가 발생했습니다");
+            throw new AuthException(AuthErrorStatus.INTERNAL_SERVER_ERROR);
         }
 
         // 인증 성공 후 Authentication 객체 반환

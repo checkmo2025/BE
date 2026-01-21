@@ -2,10 +2,13 @@ package checkmo.notification.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.notification.web.dto.NotificationSettingType;
 import checkmo.notification.internal.service.NotificationQueryFacade;
 import checkmo.notification.internal.service.command.NotificationCommandService;
+import checkmo.notification.internal.service.command.NotificationSettingCommandService;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList;
+import checkmo.notification.web.dto.NotificationResponseDTO.SettingInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,6 +29,7 @@ public class NotificationController {
 
     private final NotificationQueryFacade notificationQueryFacade;
     private final NotificationCommandService notificationCommandService;
+    private final NotificationSettingCommandService notificationSettingCommandService;
 
     @Operation(summary = "알림 전체 조회", description = "특정 회원의 전체 알림을 조회합니다.")
     @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
@@ -77,5 +81,35 @@ public class NotificationController {
     ) {
         notificationCommandService.markNotificationAsRead(notificationId, memberId);
         return ApiResponse.onSuccess(notificationId);
+    }
+
+    @Operation(summary = "알림 설정 조회", description = "회원의 알림 설정을 조회합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림 설정을 찾을 수 없음")
+    })
+    @GetMapping("/settings")
+    public ApiResponse<SettingInfo> getNotificationSetting(
+            @CurrentId String memberId
+    ) {
+        var setting = notificationQueryFacade.retrieveNotificationSetting(memberId);
+        return ApiResponse.onSuccess(setting);
+    }
+
+    @Operation(summary = "알림 설정 토글", description = "특정 알림 설정을 토글합니다. (켜짐 <-> 꺼짐)")
+    @Parameter(name = "settingType", description = "알림 설정 타입", required = true, example = "BOOK_STORY_LIKED")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "알림 설정을 찾을 수 없음")
+    })
+    @PatchMapping("/settings/{settingType}")
+    public ApiResponse<Void> toggleNotificationSetting(
+            @CurrentId String memberId,
+            @PathVariable NotificationSettingType settingType
+    ) {
+        notificationSettingCommandService.toggleNotificationSetting(memberId, settingType);
+        return ApiResponse.onSuccess(null);
     }
 }

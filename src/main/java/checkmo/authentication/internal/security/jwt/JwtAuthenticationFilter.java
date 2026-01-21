@@ -1,5 +1,9 @@
 package checkmo.authentication.internal.security.jwt;
 
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.repository.AuthRepository;
+import checkmo.common.apiPayload.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
@@ -32,12 +36,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
+    private final AuthRepository authRepository;
+    private final ObjectMapper objectMapper;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private final List<String> excludedPaths = List.of(
             "/swagger-ui/**",
             "/v3/api-docs/**",
+            "/api/auth/**",
+            "/api/members/check-nickname",
             "/health"
     );
 
@@ -71,7 +79,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (tokenCacheService.isAccessTokenBlacklisted(accessToken)) {
                     log.warn("[JWT 필터] 블랙리스트에 등록된 Access Token 입니다. 요청 거부.");
-                    filterChain.doFilter(request, response); // 인증 없이 계속 진행
+                    SecurityContextHolder.clearContext();
+                    //filterChain.doFilter(request, response); // 인증 없이 계속 진행
+                    sendErrorResponse(response, AuthErrorStatus.TOKEN_BLACKLISTED);
+                    return;
+                }
+
+                // 유령 회원(삭제된 회원) 여부 확인
+                String memberId = jwtTokenProvider.getUserIdFromToken(accessToken);
+                if (!authRepository.existsById(memberId)) {
+                    log.warn("[JWT 필터] 존재하지 않는 계정(유령 회원) 감지: memberId={}", memberId);
+                    tokenCacheService.saveBlacklistToken(accessToken);
+                    sendErrorResponse(response, AuthErrorStatus.GHOST_MEMBER_CLEANED_UP);
                     return;
                 }
 
@@ -135,5 +154,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // SecurityContext에 새로운 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("Access Token 재발급 성공: 새로운 Access Token 생성 (memberId={})", memberId);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, AuthErrorStatus status) throws IOException {
+        jwtCookieUtil.deleteTokenFromCookie(response, "accessToken");
+        jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
+
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(status.getHttpStatus().value());; // 401 Unauthorized
+        response.setContentType("application/json");
+
+        ApiResponse<Object> errorResponse = ApiResponse.onFailure(
+            status.getCode(),
+            status.getMessage(),
+            null
+        );
+
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

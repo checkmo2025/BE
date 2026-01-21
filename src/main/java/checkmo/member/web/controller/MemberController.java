@@ -41,7 +41,7 @@ public class MemberController {
 
     private final MemberQueryService memberQueryService;
 
-    @Operation(summary = "회원 추가 정보 입력", description = "회원가입 후 추가 정보를 입력합니다.")
+    @Operation(summary = "회원 추가 정보 입력", description = "회원 추가 정보를 입력합니다.")
     @PostMapping("/additional-info")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),

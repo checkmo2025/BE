@@ -28,6 +28,8 @@ public class AuthUserCommandService {
     private final ApplicationEventPublisher eventPublisher;
 
     public AuthUser signUp(AuthRequestDTO.SignUp request) {
+        // TODO: Member 모듈의 API를 통해 필수 약관 동의 여부 체크
+        
         // 이메일 중복 확인
         if (authRepository.existsByEmail(request.getEmail())) {
             throw new AuthException(AuthErrorStatus.MEMBER_ALREADY_EXISTS);
@@ -51,6 +53,7 @@ public class AuthUserCommandService {
                 AuthenticationEvent.CreateMember.builder()
                         .id(savedUser.getId())
                         .email(savedUser.getEmail())
+                        // TODO: 동의한 약관 ID 리스트 보냄
                         .build());
 
         return newUser;

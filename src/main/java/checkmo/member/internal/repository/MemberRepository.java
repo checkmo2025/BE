@@ -3,6 +3,7 @@ package checkmo.member.internal.repository;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjection;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,8 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
     @Query("select m.id as id, m.nickName as nickName, m.imgUrl as imgUrl from Member m where m.id in :memberIds")
     List<MemberBasicInfoProjection> findIdNicknameAndImgUrlByIdIn(@Param("memberIds") List<String> memberIds);
+
+    // 생성일시가 특정 시간 이전이고, 추가정보(nickname)가 아직 입력되지 않은(프로필 미완료) 회원 조회
+    @Query("SELECT m FROM Member m WHERE m.createdAt < :threshold AND (m.nickName IS NULL OR m.nickName = '')")
+    List<Member> findAllGhostMembers(@Param("threshold") LocalDateTime threshold);
 }
