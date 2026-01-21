@@ -117,6 +117,6 @@ public class MemberQueryService {
         }
 
         // 1개인 경우에만 이메일 반환
-        return members.getFirst().getEmail();
+        return members.get(0).getEmail();
     }
 }

@@ -19,7 +19,7 @@ public class EmailEventListener {
         try {
             emailSender.sendVerificationEmail(event.email(), event.verificationCode());
         } catch (Exception e) {
-            log.error("이메일 전송 실패, SendVerificationEmail: {}", event, e);
+            log.error("이메일 전송 실패, email: {}", event.email(), e);
             throw e;
         }
     }
@@ -29,7 +29,7 @@ public class EmailEventListener {
         try {
             emailSender.sendTempPassword(event.email(), event.tempPassword());
         } catch (Exception e) {
-            log.error("임시 비밀번호 전송 실패, SendTempPassword: {}", event, e);
+            log.error("임시 비밀번호 전송 실패, email: {}", event.email(), e);
             throw e;
         }
     }

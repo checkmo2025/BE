@@ -8,7 +8,10 @@ import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -109,20 +112,28 @@ public class EmailVerificationCommandService {
     }
 
     private String generateTempPassword() {
-        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String specials = "!@#$%^&*";
+        String all = letters + digits + specials;
+
+        List<Character> chars = new ArrayList<>();
+
+        chars.add(letters.charAt(secureRandom.nextInt(letters.length())));   // 문자 1개
+        chars.add(digits.charAt(secureRandom.nextInt(digits.length())));     // 숫자 1개
+        chars.add(specials.charAt(secureRandom.nextInt(specials.length()))); // 특수 1개
+
+        for (int i = 0; i < 9; i++) {
+            chars.add(all.charAt(secureRandom.nextInt(all.length())));
+        }
+
+        Collections.shuffle(chars, secureRandom);
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 12; i++) {
-            int index = secureRandom.nextInt(charSet.length());
-            sb.append(charSet.charAt(index));
+        for (char c : chars) {
+            sb.append(c);
         }
 
-        String password = sb.toString();
-
-        if (password.matches("^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$")) {
-            return password;
-        }
-
-        return generateTempPassword();
+        return sb.toString();
     }
 }
