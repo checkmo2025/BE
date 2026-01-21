@@ -1,0 +1,3 @@
+ALTER TABLE comment
+    ADD COLUMN deleted BIT(1) NOT NULL DEFAULT b'0',
+    ADD COLUMN deleted_at DATETIME(6) NULL;
