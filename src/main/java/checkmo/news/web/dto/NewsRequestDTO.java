@@ -17,6 +17,7 @@ public class NewsRequestDTO {
         @Size(max = 40, message = "소식 제목은 40자 이하로 입력해주세요.")
         private String title;
 
+        @NotBlank(message = "요청자 이메일은 필수입니다.")
         private String requesterEmail;
 
         @NotBlank(message = "소식 내용은 필수입니다.")
@@ -43,6 +44,7 @@ public class NewsRequestDTO {
         @Size(max = 40, message = "소식 제목은 40자 이하로 입력해주세요.")
         private String title;
 
+        @NotBlank(message = "요청자 이메일은 필수입니다.")
         private String requesterEmail;
 
         @NotBlank(message = "소식 내용은 필수입니다.")
