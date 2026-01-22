@@ -33,6 +33,18 @@ public class NewsConverter {
                 .build();
     }
 
+    public static NewsResponseDTO.DetailInfo toDetailInfo(News news) {
+        return NewsResponseDTO.DetailInfo.builder()
+                .newsId(news.getId())
+                .title(news.getTitle())
+                .content(news.getContent())
+                .thumbnailUrl(news.getThumbnailUrl())
+                .originalLink(news.getOriginalLink())
+                .imageUrls(news.getImageUrls())
+                .publishStartAt(news.getPublishStartAt())
+                .build();
+    }
+
     private static String truncateDescription(String content) {
         if (content == null) {
             return null;

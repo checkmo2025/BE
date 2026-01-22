@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,9 +36,7 @@ public class NewsController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ApiResponse<Long> createNews(
-            @Valid @RequestBody NewsRequestDTO.CreateNews request
-    ) {
+    public ApiResponse<Long> createNews(@Valid @RequestBody NewsRequestDTO.CreateNews request) {
         Long newsId = newsCommandService.createNews(request);
         return ApiResponse.onSuccess(newsId);
     }
@@ -51,12 +50,23 @@ public class NewsController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.")
     })
     @GetMapping
-    public ApiResponse<NewsResponseDTO.NewsList> getNewsList(
-            @RequestParam(required = false) Long cursorId
-    ) {
+    public ApiResponse<NewsResponseDTO.NewsList> getNewsList(@RequestParam(required = false) Long cursorId) {
         NewsResponseDTO.NewsList newsList = newsQueryFacade.fetchNewsList(cursorId);
         return ApiResponse.onSuccess(newsList);
     }
 
-    // 소식 상세 조회 API
+    @Operation(summary = "소식 상세 조회", description = "특정 소식의 상세 정보를 조회합니다.")
+    @Parameter(name = "newsId", description = "조회할 소식 ID", required = true, example = "1")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "소식을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.")
+    })
+    @GetMapping("/{newsId}")
+    public ApiResponse<NewsResponseDTO.DetailInfo> getNews(@PathVariable Long newsId) {
+        NewsResponseDTO.DetailInfo detailInfo = newsQueryFacade.fetchNewsDetail(newsId);
+        return ApiResponse.onSuccess(detailInfo);
+    }
 }

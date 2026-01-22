@@ -38,4 +38,9 @@ public class NewsQueryFacade {
                 .pageSize(DEFAULT_PAGE_SIZE)
                 .build();
     }
+
+    public NewsResponseDTO.DetailInfo fetchNewsDetail(Long newsId) {
+        News news = newsQueryService.retrieveNews(newsId);
+        return NewsConverter.toDetailInfo(news);
+    }
 }

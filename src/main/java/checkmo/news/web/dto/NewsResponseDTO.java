@@ -34,4 +34,20 @@ public class NewsResponseDTO {
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
         private LocalDate publishStartAt;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class DetailInfo {
+        private Long newsId;
+        private String title;
+        private String content;
+        private String thumbnailUrl;
+        private String originalLink;
+        private List<String> imageUrls;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+        private LocalDate publishStartAt;
+    }
 }
