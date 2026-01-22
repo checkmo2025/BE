@@ -116,8 +116,16 @@ public class MemberCommandService {
      * @param memberId 비밀번호를 변경할 회원의 ID
      * @param request  비밀번호 변경 정보 DTO (현재 비밀번호, 새 비밀번호, 새 비밀번호 확인)
      */
-    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdate request) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void updatePassword(String memberId, MemberRequestDTO.UpdatePassword request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new MemberException(MemberErrorStatus.PASSWORD_MISMATCH);
+        }
+
+        boolean isSuccess = authenticationAPI.updatePassword(memberId, request.getCurrentPassword(), request.getNewPassword());
+
+        if (!isSuccess) {
+            throw new MemberException(MemberErrorStatus.CURRENT_PASSWORD_INCORRECT);
+        }
     }
 
     /**

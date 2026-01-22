@@ -17,7 +17,9 @@ public enum MemberErrorStatus implements BaseErrorCode {
     MEMBER_ALREADY_FOLLOWING(HttpStatus.BAD_REQUEST, "FOLLOW_401", "이미 팔로잉 중인 회원입니다."),
     MEMBER_NOT_FOLLOWING(HttpStatus.BAD_REQUEST, "FOLLOW_402", "팔로우 중이지 않은 회원입니다."),
     MEMBER_NOT_FOLLOWER(HttpStatus.BAD_REQUEST, "FOLLOW_403", "팔로워가 아닌 회원입니다."),
-    MULTIPLE_ACCOUNTS_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_409", "해당 정보로 가입된 계정이 여러 개입니다. 관리자에게 문의해주세요.")
+    MULTIPLE_ACCOUNTS_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_409", "해당 정보로 가입된 계정이 여러 개입니다. 관리자에게 문의해주세요."),
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBER_410", "비밀번호가 일치하지 않습니다."),
+    CURRENT_PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_412", "기존 비밀번호가 올바르지 않습니다. 다시 시도해주세요.")
     ;
 
     private final HttpStatus httpStatus;

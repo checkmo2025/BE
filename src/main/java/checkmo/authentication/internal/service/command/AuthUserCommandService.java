@@ -69,4 +69,16 @@ public class AuthUserCommandService {
 
         authUser.completeProfile();
     }
+
+    public boolean updatePassword(String userId, String oldPassword, String newPassword) {
+        AuthUser user = authRepository.findById(userId)
+                                      .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return false;
+        }
+
+        user.updatePassword(passwordEncoder.encode(newPassword));
+        return true;
+    }
 }

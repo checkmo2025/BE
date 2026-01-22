@@ -212,4 +212,14 @@ public class MemberController {
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberEmail(request));
     }
+
+    @Operation(summary = "비밀번호 변경 API", description = "기존 비밀번호 확인 후 새로운 비밀번호로 변경합니다.")
+    @PatchMapping("/me/update-password")
+    public ApiResponse<String> updatePassword(
+        @CurrentId String memberId,
+        @Valid @RequestBody MemberRequestDTO.UpdatePassword request
+    ) {
+        memberCommandService.updatePassword(memberId, request);
+        return ApiResponse.onSuccess("비밀번호가 성공적으로 변경되었습니다.");
+    }
 }
