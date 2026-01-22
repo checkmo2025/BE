@@ -4,8 +4,12 @@ import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.news.internal.converter.NewsConverter;
 import checkmo.news.internal.entity.News;
+import checkmo.news.internal.exception.NewsErrorStatus;
+import checkmo.news.internal.exception.NewsException;
 import checkmo.news.internal.service.query.NewsQueryService;
 import checkmo.news.web.dto.NewsResponseDTO;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,6 +47,12 @@ public class NewsQueryFacade {
 
     public NewsResponseDTO.DetailInfo fetchNewsDetail(Long newsId) {
         News news = newsQueryService.retrieveNews(newsId);
+
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        if (!news.isPublished(today)) {
+            throw new NewsException(NewsErrorStatus.NEWS_NOT_PUBLISHED);
+        }
+
         return NewsConverter.toDetailInfo(news);
     }
 

@@ -115,4 +115,8 @@ public class News extends BaseEntity {
         this.publishStartAt = publishStartAt;
         this.publishEndAt = publishEndAt;
     }
+
+    public boolean isPublished(LocalDate today) {
+        return !today.isBefore(publishStartAt) && !today.isAfter(publishEndAt);
+    }
 }
