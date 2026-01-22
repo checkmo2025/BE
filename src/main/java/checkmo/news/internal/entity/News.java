@@ -1,6 +1,8 @@
 package checkmo.news.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.news.internal.exception.NewsErrorStatus;
+import checkmo.news.internal.exception.NewsException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,6 +36,7 @@ public class News extends BaseEntity {
     @Column(nullable = false, length = 40)
     private String title;
 
+    @Column(nullable = false)
     private String requesterEmail;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -63,7 +66,7 @@ public class News extends BaseEntity {
         }
 
         if (imageUrls.size() > MAX_IMAGE_COUNT) {
-            throw new IllegalArgumentException("이미지는 최대 " + MAX_IMAGE_COUNT + "개까지 등록 가능합니다.");
+            throw new NewsException(NewsErrorStatus.NEWS_IMAGE_LIMIT_EXCEEDED);
         }
 
         List<String> oldImages = getImageUrls();
