@@ -6,6 +6,7 @@ import checkmo.news.internal.entity.News;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ public class NewsQueryRepositoryImpl implements NewsQueryRepository {
 
     @Override
     public List<News> searchNews(Long cursorId, int pageSize) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
         return queryFactory
                 .selectFrom(news)
