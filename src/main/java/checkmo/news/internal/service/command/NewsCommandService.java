@@ -22,9 +22,9 @@ public class NewsCommandService {
         validatePublishRange(request.getPublishStartAt(), request.getPublishEndAt());
 
         News news = NewsConverter.toNews(request);
-        news.replaceImages(request.getImageUrls());
-
         News savedNews = newsRepository.save(news);
+        savedNews.replaceImages(request.getImageUrls());
+
         return savedNews.getId();
     }
 
