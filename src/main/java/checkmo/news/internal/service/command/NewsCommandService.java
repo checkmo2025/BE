@@ -2,6 +2,8 @@ package checkmo.news.internal.service.command;
 
 import checkmo.news.internal.converter.NewsConverter;
 import checkmo.news.internal.entity.News;
+import checkmo.news.internal.exception.NewsErrorStatus;
+import checkmo.news.internal.exception.NewsException;
 import checkmo.news.internal.repository.NewsRepository;
 import checkmo.news.web.dto.NewsRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +23,30 @@ public class NewsCommandService {
 
         News savedNews = newsRepository.save(news);
         return savedNews.getId();
+    }
+
+    public Long updateNews(Long newsId, NewsRequestDTO.UpdateNews request) {
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new NewsException(NewsErrorStatus.NEWS_NOT_FOUND));
+
+        news.update(
+                request.getTitle(),
+                request.getRequesterEmail(),
+                request.getContent(),
+                request.getThumbnailUrl(),
+                request.getOriginalLink(),
+                request.getPublishStartAt(),
+                request.getPublishEndAt()
+        );
+        news.replaceImages(request.getImageUrls());
+
+        return news.getId();
+    }
+
+    public void deleteNews(Long newsId) {
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new NewsException(NewsErrorStatus.NEWS_NOT_FOUND));
+
+        newsRepository.delete(news);
     }
 }

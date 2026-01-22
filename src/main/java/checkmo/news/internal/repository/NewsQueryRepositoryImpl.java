@@ -31,6 +31,16 @@ public class NewsQueryRepositoryImpl implements NewsQueryRepository {
                 .fetch();
     }
 
+    @Override
+    public List<News> searchNewsForAdmin(Long cursorId, int pageSize) {
+        return queryFactory
+                .selectFrom(news)
+                .where(createCursorExp(cursorId))
+                .orderBy(news.id.desc())
+                .limit(pageSize)
+                .fetch();
+    }
+
     private BooleanExpression isPublished(LocalDate today) {
         return news.publishStartAt.loe(today)
                 .and(news.publishEndAt.goe(today));

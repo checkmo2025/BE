@@ -97,4 +97,22 @@ public class News extends BaseEntity {
     public List<String> getImageUrls() {
         return this.images.stream().map(NewsImage::getImageUrl).toList();
     }
+
+    public void update(
+            String title,
+            String requesterEmail,
+            String content,
+            String thumbnailUrl,
+            String originalLink,
+            LocalDate publishStartAt,
+            LocalDate publishEndAt
+    ) {
+        this.title = title;
+        this.requesterEmail = requesterEmail;
+        this.content = content;
+        this.thumbnailUrl = thumbnailUrl;
+        this.originalLink = originalLink;
+        this.publishStartAt = publishStartAt;
+        this.publishEndAt = publishEndAt;
+    }
 }

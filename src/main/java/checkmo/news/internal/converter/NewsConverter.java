@@ -45,6 +45,32 @@ public class NewsConverter {
                 .build();
     }
 
+    public static NewsResponseDTO.AdminBasicInfo toAdminBasicInfo(News news) {
+        return NewsResponseDTO.AdminBasicInfo.builder()
+                .newsId(news.getId())
+                .title(news.getTitle())
+                .requesterEmail(news.getRequesterEmail())
+                .createdAt(news.getCreatedAt().toLocalDate())
+                .publishStartAt(news.getPublishStartAt())
+                .publishEndAt(news.getPublishEndAt())
+                .build();
+    }
+
+    public static NewsResponseDTO.AdminDetailInfo toAdminDetailInfo(News news) {
+        return NewsResponseDTO.AdminDetailInfo.builder()
+                .newsId(news.getId())
+                .title(news.getTitle())
+                .requesterEmail(news.getRequesterEmail())
+                .content(news.getContent())
+                .thumbnailUrl(news.getThumbnailUrl())
+                .originalLink(news.getOriginalLink())
+                .imageUrls(news.getImageUrls())
+                .createdAt(news.getCreatedAt().toLocalDate())
+                .publishStartAt(news.getPublishStartAt())
+                .publishEndAt(news.getPublishEndAt())
+                .build();
+    }
+
     private static String truncateDescription(String content) {
         if (content == null) {
             return null;
