@@ -161,10 +161,7 @@ public class MemberQueryFacade {
         );
 
         List<RecommendedMember> friends = recommendedMembers.stream()
-                .map(m -> RecommendedMember.builder()
-                        .nickname(m.getNickName())
-                        .profileImageUrl(m.getImgUrl())
-                        .build())
+                .map(MemberConverter::toRecommendedMember)
                 .toList();
 
         return RecommendedMemberList.builder()
