@@ -25,17 +25,30 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
             List<MemberInterestCategory> myInterests,
             int limit
     ) {
-        EnumPath<MemberInterestCategory> interest =
-                Expressions.enumPath(MemberInterestCategory.class, "interest");
-
-        // 1. 이미 팔로우한 사람들의 ID 조회 (제외 대상)
+        // 1. 이미 팔로우한 사람들의 ID 조회
         List<String> followingIds = queryFactory
                 .select(follow.following.id)
                 .from(follow)
                 .where(follow.follower.id.eq(currentMemberId))
                 .fetch();
 
-        // 2. 추천 쿼리 실행
+        // 2. 관심사가 없으면 아무나 추천
+        if (myInterests == null || myInterests.isEmpty()) {
+            return queryFactory
+                    .select(member)
+                    .from(member)
+                    .where(
+                            member.id.ne(currentMemberId),
+                            notInFollowingIds(followingIds)
+                    )
+                    .limit(limit)
+                    .fetch();
+        }
+
+        // 3. 관심사가 있으면 관심사 기반 추천
+        EnumPath<MemberInterestCategory> interest =
+                Expressions.enumPath(MemberInterestCategory.class, "interest");
+
         return queryFactory
                 .select(member)
                 .from(member)
