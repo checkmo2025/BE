@@ -6,6 +6,7 @@ import checkmo.common.template.ExtractHelper;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
@@ -13,6 +14,8 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
+import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,8 @@ import java.util.stream.Collectors;
 public class MemberQueryFacade {
 
     // 페이징 기본 크기 상수
-    public static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int RECOMMENDED_MEMBER_LIMIT = 4;
 
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
@@ -146,5 +150,25 @@ public class MemberQueryFacade {
         String domain = email.substring(atIndex);
         if (id.length() <= 4) return "****" + domain;
         return id.substring(0, id.length() - 4) + "****" + domain;
+    }
+
+    public RecommendedMemberList retrieveRecommendedMembers(String memberId) {
+        Member member = memberQueryService.retrieveMember(memberId);
+        List<MemberInterestCategory> myInterests = List.copyOf(member.getInterestCategories());
+
+        List<Member> recommendedMembers = memberQueryService.retrieveRecommendedMembers(
+                memberId, myInterests, RECOMMENDED_MEMBER_LIMIT
+        );
+
+        List<RecommendedMember> friends = recommendedMembers.stream()
+                .map(m -> RecommendedMember.builder()
+                        .nickname(m.getNickName())
+                        .profileImageUrl(m.getImgUrl())
+                        .build())
+                .toList();
+
+        return RecommendedMemberList.builder()
+                .friends(friends)
+                .build();
     }
 }

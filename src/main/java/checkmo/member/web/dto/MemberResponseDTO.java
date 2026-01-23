@@ -70,4 +70,21 @@ public class MemberResponseDTO {
     public static class FindEmailResult {
         private String email;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RecommendedMember {
+        private String nickname;
+        private String profileImageUrl;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RecommendedMemberList {
+        private List<RecommendedMember> friends;
+    }
 }
