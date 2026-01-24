@@ -1,6 +1,7 @@
 package checkmo.member.internal.service.query;
 
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
@@ -118,5 +119,13 @@ public class MemberQueryService {
 
         // 1개인 경우에만 이메일 반환
         return members.get(0).getEmail();
+    }
+
+    public List<Member> retrieveRecommendedMembers(
+            String memberId,
+            List<MemberInterestCategory> myInterests,
+            int limit
+    ) {
+        return memberRepository.findRecommendMembers(memberId, myInterests, limit);
     }
 }
