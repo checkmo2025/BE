@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 public enum ClubMeetingErrorStatus implements BaseErrorCode {
 
     // 발제
-    TOPIC_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "TOPIC_401", "발제는 반드시 독서모임에 속해야 합니다."),
+    TOPIC_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "TOPIC_401", "발제는 반드시 정기모임에 속해야 합니다."),
     TOPIC_CLUB_MEMBER_REQUIRED(HttpStatus.BAD_REQUEST, "TOPIC_402", "발제는 반드시 독서클럽 회원이 작성해야 합니다."),
     TOPIC_FORBIDDEN(HttpStatus.FORBIDDEN, "TOPIC_403", "해당 발제에 대한 권한이 없습니다."),
     TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "TOPIC_404", "발제를 찾을 수 없습니다."),
@@ -22,11 +22,12 @@ public enum ClubMeetingErrorStatus implements BaseErrorCode {
 
     // 팀
     TEAM_NUMBER_DUPLICATED_REQUEST(HttpStatus.BAD_REQUEST, "TEAM_401", "중복된 팀 번호가 요청되었습니다."),
-    TEAM_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "TEAM_402", "팀은 반드시 독서모임에 속해야 합니다."),
+    TEAM_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "TEAM_402", "팀은 반드시 정기모임에 속해야 합니다."),
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM_404", "팀을 찾을 수 없습니다."),
 
     // 미팅
-    MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_404", "독서모임을 찾을 수 없습니다."),
+    MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_401", "해당 정기모임을 찾을 수 없습니다."),
+    NEXT_MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_402", "다음 정기모임이 존재하지 않습니다."),
 
     // 페이지네이션 파라미터
     CURSOR_ID_POSITIVE(HttpStatus.BAD_REQUEST, "PAGINATION_401", "커서 값은 양수여야 합니다."),

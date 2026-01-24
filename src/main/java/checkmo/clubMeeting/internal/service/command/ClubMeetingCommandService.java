@@ -10,9 +10,9 @@ import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
 import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfUpdate;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingCreate;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.MeetingUpdate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,9 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ClubMeetingCommandService {
 
-    // Domain level 1
     private final BookAPI bookAPI;
-
     private final ClubManagementAPI clubManagementAPI;
 
     private final ClubMeetingQueryService clubMeetingQueryService;
@@ -39,40 +37,33 @@ public class ClubMeetingCommandService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    // TODO: 전체적으로 Meeting 존재 여부 검증을 Service에서 해야 함 -> 따라서 API endpoint를 club/{clubId}/meeting/{meetingId}/... 이런 식으로 바꿔야 함
-
-    public Long createMeeting(Long clubId, String memberId, MeetingCreate request) {
+    public void createMeeting(Long clubId, String memberId, BookShelfCreate request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         String bookId = bookAPI.fetchOrCreateBook(request.getBookInfo());
 
         Meeting meeting = ClubMeetingConverter.toMeeting(request, clubId, bookId);
-        meetingRepository.saveAndFlush(meeting);
+        Meeting savedMeeting = meetingRepository.saveAndFlush(meeting);
 
         // 미팅 생성 알림 이벤트 발행
-        publishMeetingCreatedNotificationEvent(meeting, clubId);
-
-        return meeting.getId();
+        publishMeetingCreatedNotificationEvent(savedMeeting, clubId);
     }
 
-    public Long updateMeeting(Long meetingId, String memberId, MeetingUpdate request) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        clubManagementAPI.validateClub(meeting.getClubId());
-        clubManagementAPI.validateStaffClubMember(meeting.getClubId(), memberId);
+    public void updateMeeting(Long clubId, Long meetingId, String memberId, BookShelfUpdate request) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         meeting.updateMeeting(
                 request.getTitle(),
                 request.getMeetingTime(),
                 request.getLocation(),
-                request.getContent(),
                 request.getGeneration(),
                 request.getTag()
         );
 
         meetingRepository.saveAndFlush(meeting);
-
-        return meeting.getId();
     }
 
     public void manageTeam(Long meetingId, String memberId, MeetingRequestDTO.TeamManage request) {

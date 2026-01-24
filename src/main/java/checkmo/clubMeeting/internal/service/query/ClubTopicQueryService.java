@@ -17,7 +17,7 @@ public class ClubTopicQueryService {
     private final TopicRepository topicRepository;
 
     public List<Topic> retrieveTopics(Long meetingId, Long cursorId, Integer size) {
-        return topicRepository.findAllByCursorOrderByIdDesc(meetingId, cursorId, size);
+        return topicRepository.findAllByMeetingIdAndCursorOrderByIdDesc(meetingId, cursorId, size);
     }
 
     public Topic validateTopic(Long topicId, Long meetingId) throws ClubMeetingException {

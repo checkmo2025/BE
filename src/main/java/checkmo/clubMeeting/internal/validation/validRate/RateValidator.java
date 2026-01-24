@@ -12,9 +12,9 @@ public class RateValidator implements ConstraintValidator<ValidRate, Double> {
             return true;
         }
 
-        if (value < 1.0 || value > 5.0) {
+        if (value < 0.5 || value > 5.0) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("평점은 1.0 이상 5.0 이하만 가능합니다.")
+            context.buildConstraintViolationWithTemplate("평점은 0.5 이상 5.0 이하만 가능합니다.")
                     .addConstraintViolation();
             return false;
         }

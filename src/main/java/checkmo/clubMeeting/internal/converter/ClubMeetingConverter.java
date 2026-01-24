@@ -6,8 +6,8 @@ import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.member.MemberExternalDTO;
 import java.util.List;
@@ -21,7 +21,7 @@ public class ClubMeetingConverter {
     // ?? -> 엔티티 변환
     // =====================================================
 
-    public static Meeting toMeeting(MeetingRequestDTO.MeetingCreate request, Long clubId, String bookId) {
+    public static Meeting toMeeting(BookShelfCreate request, Long clubId, String bookId) {
         return Meeting.builder()
                 .title(request.getTitle())
                 .meetingTime(request.getMeetingTime())

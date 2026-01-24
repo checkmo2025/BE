@@ -16,7 +16,7 @@ public class TopicRepositoryCustomImpl implements TopicRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Topic> findAllByCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
+    public List<Topic> findAllByMeetingIdAndCursorOrderByIdDesc(Long meetingId, Long cursorId, Integer size) {
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(topic.meeting.id.eq(meetingId));
 

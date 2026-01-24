@@ -27,6 +27,7 @@ import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfo;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,6 @@ import org.springframework.stereotype.Service;
 public class ClubMeetingQueryFacade {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF = 3;
     private static final int TOPIC_PREVIEW_SIZE_FOR_MEETING = 4;
 
     private final BookAPI bookAPI;
@@ -54,17 +54,17 @@ public class ClubMeetingQueryFacade {
     private final ClubBookReviewQueryService clubBookReviewQueryService;
     private final ClubMeetingTeamQueryService clubMeetingTeamQueryService;
 
+    // ========== 책장 관련 조회 메서드 ==========
     public BookShelfResponseDTO.BookShelfList retrieveBookShelfList(
             Long clubId,
-            Long cursorId,
-            Integer generation,
-            String memberId
+            String memberId,
+            Long cursorId
     ) {
         clubManagementAPI.validateClub(clubId);
         MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
         CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
-                pageSize -> clubMeetingQueryService.retrieveMeetings(clubId, generation, cursorId, pageSize),
+                pageSize -> clubMeetingQueryService.retrieveMeetings(clubId, cursorId, pageSize),
                 Meeting::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -82,49 +82,34 @@ public class ClubMeetingQueryFacade {
                 .build();
     }
 
-    // TODO: getBookShelftDetail, findTopicsByMeeting 간 중복 제거
-    public BookShelfResponseDTO.BookShelfDetail retrieveBookShelfDetail(Long meetingId, String memberId) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(meeting.getClubId(), memberId);
+    public BookShelfResponseDTO.BookShelfDetail retrieveBookShelfDetail(Long clubId, Long meetingId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
-        // [발제 미리보기] 발제 리스트 조회
-        CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
-                size -> clubTopicQueryService.retrieveTopics(meetingId, null, size),
-                Topic::getId,
-                TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF
-        );
-        List<Topic> topics = topicCursorResult.content();
-
-        // 발제의 작성자 정보 배치 조회
-        List<String> authorIds = ExtractHelper.extractDistinctList(topics, Topic::getMemberId);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
-
-        // 미팅의 책 정보 조회
         DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
 
         return BookShelfDetail.builder()
                 .meetingInfo(ClubMeetingConverter.toMeetingInfoDTO(meeting))
                 .bookDetailInfo(bookInfo)
-                .topicList(
-                        BookShelfResponseDTO.TopicList.builder()
-                                .topicDetailList(mapTopicsToTopicDetail(topics, authorInfoMap, memberId))
-                                .hasNext(topicCursorResult.hasNext())
-                                .nextCursor(topicCursorResult.nextCursor())
-                                .membershipInfo(null)
-                                .build()
-                )
                 .membershipInfo(clubMembershipInfoInfo)
                 .build();
     }
 
-    public BookShelfResponseDTO.TopicList retrieveTopicList(Long meetingId, Long cursorId, String memberId) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(meeting.getClubId(), memberId);
+    public BookShelfResponseDTO.TopicList retrieveTopicList(
+            Long clubId,
+            Long meetingId,
+            String memberId,
+            Long cursorId
+    ) {
+        clubManagementAPI.validateClub(clubId);
+        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
                 size -> clubTopicQueryService.retrieveTopics(meetingId, cursorId, size),
                 Topic::getId,
-                TOPIC_PREVIEW_SIZE_FOR_BOOKSHELF
+                DEFAULT_PAGE_SIZE
         );
         List<Topic> topics = topicCursorResult.content();
 
@@ -141,12 +126,17 @@ public class ClubMeetingQueryFacade {
     }
 
     public BookShelfResponseDTO.BookReviewList retrieveBookReviewList(
-            Long meetingId, Long lastReviewId, String memberId) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(meeting.getClubId(), memberId);
+            Long clubId,
+            Long meetingId,
+            String memberId,
+            Long cursorId
+    ) {
+        clubManagementAPI.validateClub(clubId);
+        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<BookReview> bookReviewCursorResult = CursorPagingHelper.getPage(
-                size -> clubBookReviewQueryService.retrieveBookReviews(meetingId, lastReviewId, size),
+                size -> clubBookReviewQueryService.retrieveBookReviews(meetingId, cursorId, size),
                 BookReview::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -161,6 +151,18 @@ public class ClubMeetingQueryFacade {
                 .hasNext(bookReviewCursorResult.hasNext())
                 .nextCursor(bookReviewCursorResult.nextCursor())
                 .membershipInfo(clubMembershipInfoInfo)
+                .build();
+    }
+
+    // ========== 미팅 관련 조회 메서드 ==========
+    public MeetingResponseDTO.NextMeetingRedirect retrieveNextMeeting(Long clubId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+
+        Meeting nextMeeting = clubMeetingQueryService.retrieveNextFutureMeeting(clubId, LocalDateTime.now());
+        return MeetingResponseDTO.NextMeetingRedirect.builder()
+                .meetingId(nextMeeting.getId())
+                .redirectUrl("/clubs/" + clubId + "/meetings/" + nextMeeting.getId())
                 .build();
     }
 

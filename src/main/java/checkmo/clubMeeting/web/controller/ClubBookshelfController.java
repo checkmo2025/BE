@@ -3,6 +3,7 @@ package checkmo.clubMeeting.web.controller;
 import checkmo.authentication.CurrentId;
 import checkmo.clubMeeting.internal.service.ClubMeetingQueryFacade;
 import checkmo.clubMeeting.internal.service.command.ClubBookReviewCommandService;
+import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
 import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
@@ -26,233 +27,294 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/api/clubs/{clubId}/bookshelves")
 @RequiredArgsConstructor
-@Tag(name = "독서모임-책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
+@Tag(name = "책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
 public class ClubBookshelfController {
 
     private final ClubMeetingQueryFacade clubMeetingQueryFacade;
+    private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubTopicCommandService clubTopicCommandService;
     private final ClubBookReviewCommandService clubBookReviewCommandService;
 
-    @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 사이즈만큼 조회합니다.(최신순 정렬)")
+    // ========== 책장 ==========
+    @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 조회합니다.(최신순 정렬)")
     @Parameters({
             @Parameter(name = "clubId", description = "책장을 조회할 클럽 ID", required = true, example = "1"),
             @Parameter(name = "cursorId", description = "마지막으로 조회한 책장 ID (무한 스크롤용)", required = false, example = "10"),
-            @Parameter(name = "size", description = "조회할 책장 개수", required = false, example = "9"),
-            @Parameter(name = "generation", description = "활동 기수", required = false, example = "1"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 클럽을 찾을 수 없습니다."),
     })
-    @GetMapping("/api/clubs/{clubId}/bookshelves")
+    @GetMapping
     public ApiResponse<BookShelfResponseDTO.BookShelfList> getBookShelfList(
             @PathVariable Long clubId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @RequestParam(required = false) Integer generation,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfList bookShelfList
-                = clubMeetingQueryFacade.retrieveBookShelfList(clubId, cursorId, generation, memberId);
-        return ApiResponse.onSuccess(bookShelfList);
+        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfList(clubId, memberId, cursorId));
     }
 
-    @Operation(summary = "책장 상세 조회 API", description = "책장의 상세 정보를 조회합니다.")
+    @Operation(summary = "책장 상세 조회 API", description = "책장의 상세 정보를 조회합니다.(책장의 기본 정보만 제공, 발제/한줄평/정기모임은 API 별도 제공)")
     @Parameters({
+            @Parameter(name = "clubId", description = "책장이 속한 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "책장(책장이 곧 Meeting)의 ID", required = true, example = "1"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
     })
-    @GetMapping("/api/bookshelves/{meetingId}")
+    @GetMapping("/{meetingId}")
     public ApiResponse<BookShelfResponseDTO.BookShelfDetail> getBookShelfDetail(
+            @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookShelfDetail bookShelfDetail
-                = clubMeetingQueryFacade.retrieveBookShelfDetail(meetingId, memberId);
-        return ApiResponse.onSuccess(bookShelfDetail);
+        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfDetail(clubId, meetingId, memberId));
     }
 
-    @Operation(summary = "한줄평 조회 API", description = "한줄평을 조회합니다.")
+    @Operation(summary = "책장 생성 API", description = "책장을 생성합니다.")
     @Parameters({
-            @Parameter(name = "meetingId", description = "한줄평을 조회할 정기 독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "cursorId", description = "마지막으로 조회한 한줄평 ID (무한 스크롤용)", required = false, example = "10"),
-            @Parameter(name = "size", description = "조회할 한줄평 개수", required = false, example = "15"),
+            @Parameter(name = "clubId", description = "책장을 생성할 독서클럽 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
+    })
+    @PostMapping
+    public ApiResponse<String> createMeeting(
+            @PathVariable Long clubId,
+            @RequestBody @Valid BookShelfRequestDTO.BookShelfCreate request,
+            @CurrentId String memberId
+    ) {
+        clubMeetingCommandService.createMeeting(clubId, memberId, request);
+        return ApiResponse.onSuccess("책장이 정상적으로 생성되었습니다.");
+    }
+
+    @Operation(summary = "책장 수정 API", description = "책장을 수정합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "책장이 속한 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "수정할 정기 책장 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
+    })
+    @PatchMapping("/{meetingId}")
+    public ApiResponse<String> updateMeeting(
+            @PathVariable Long clubId,
+            @PathVariable Long meetingId,
+            @RequestBody @Valid BookShelfRequestDTO.BookShelfUpdate request,
+            @CurrentId String memberId
+    ) {
+        clubMeetingCommandService.updateMeeting(clubId, meetingId, memberId, request);
+        return ApiResponse.onSuccess("책장이 정상적으로 수정되었습니다.");
+    }
+
+    // ========== 발제 ==========
+    @Operation(summary = "책장에 대한 발제 조회 API", description = "발제를 최신순으로 조회합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "발제를 조회할 정기모임 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "마지막으로 조회한 발제 ID (무한 스크롤용)", required = false, example = "10"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
     })
-    @GetMapping("/api/meetings/{meetingId}/reviews")
-    public ApiResponse<BookShelfResponseDTO.BookReviewList> getAllReviews(
+    @GetMapping("/{meetingId}/topics")
+    public ApiResponse<BookShelfResponseDTO.TopicList> getTopicList(
+            @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.BookReviewList bookReviewList
-                = clubMeetingQueryFacade.retrieveBookReviewList(meetingId, cursorId, memberId);
-        return ApiResponse.onSuccess(bookReviewList);
-    }
-
-    @Operation(summary = "한줄평 생성 API", description = "한줄평을 생성합니다.")
-    @Parameters({
-            @Parameter(name = "meetingId", description = "한줄평을 등록한 정기 독서모임 ID", required = true, example = "1"),
-    })
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "한줄평은 20자 이하로 입력해주세요."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 0.5 단위로만 입력 가능합니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 1.0 이상 5.0 이하만 가능합니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
-    })
-    @PostMapping("/api/meetings/{meetingId}/reviews")
-    public ApiResponse<Long> createReview(
-            @PathVariable Long meetingId,
-            @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
-            @CurrentId String memberId
-    ) {
-        Long bookReviewId = clubBookReviewCommandService.createBookReview(meetingId, memberId, request);
-        return ApiResponse.onSuccess(bookReviewId);
-    }
-
-    @Operation(summary = "한줄평 수정 API", description = "한줄평을 수정합니다.")
-    @Parameters({
-            @Parameter(name = "meetingId", description = "한줄평을 수정할 정기 독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "reviewId", description = "수정할 한줄평 ID", required = true, example = "1"),
-    })
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "한줄평은 20자 이하로 입력해주세요."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 0.5 단위로만 입력 가능합니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 1.0 이상 5.0 이하만 가능합니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 한줄평을 찾을 수 없습니다."),
-    })
-    @PatchMapping("/api/meetings/{meetingId}/reviews/{reviewId}")
-    public ApiResponse<Long> updateReview(
-            @PathVariable Long meetingId,
-            @PathVariable Long reviewId,
-            @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
-            @CurrentId String memberId
-    ) {
-        Long updatedReviewId = clubBookReviewCommandService.updateBookReview(meetingId, reviewId, memberId, request);
-        return ApiResponse.onSuccess(updatedReviewId);
-    }
-
-    @Operation(summary = "한줄평 삭제 API", description = "한줄평을 삭제합니다.")
-    @Parameters({
-            @Parameter(name = "meetingId", description = "한줄평을 삭제할 정기 독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "reviewId", description = "삭제할 한줄평 ID", required = true, example = "1"),
-    })
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 한줄평을 찾을 수 없습니다."),
-    })
-    @DeleteMapping("/api/meetings/{meetingId}/reviews/{reviewId}")
-    public ApiResponse<Void> deleteReview(
-            @PathVariable Long meetingId,
-            @PathVariable Long reviewId,
-            @CurrentId String memberId
-    ) {
-        clubBookReviewCommandService.deleteBookReview(meetingId, reviewId, memberId);
-        return ApiResponse.onSuccess(null);
+        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveTopicList(clubId, meetingId, memberId, cursorId));
     }
 
     @Operation(summary = "발제 등록 API", description = "발제를 등록합니다.")
     @Parameters({
-            @Parameter(name = "meetingId", description = "발제를 등록할 정기 독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "발제를 등록할 정기모임 ID", required = true, example = "1"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
     })
-    @PostMapping("/api/meetings/{meetingId}/topics")
-    public ApiResponse<Long> createTopic(
+    @PostMapping("/{meetingId}/topics")
+    public ApiResponse<String> createTopic(
+            @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestBody @Valid BookShelfRequestDTO.TopicCreate request,
             @CurrentId String memberId
     ) {
-        Long topicId = clubTopicCommandService.createTopic(meetingId, memberId, request);
-        return ApiResponse.onSuccess(topicId);
+        clubTopicCommandService.createTopic(clubId, meetingId, memberId, request);
+        return ApiResponse.onSuccess("발제가 정상적으로 생성되었습니다.");
     }
 
     @Operation(summary = "발제 수정 API", description = "발제를 수정합니다.")
     @Parameters({
-            @Parameter(name = "meetingId", description = "발제를 수정할 정기 독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "발제를 수정할 정기모임 ID", required = true, example = "1"),
             @Parameter(name = "topicId", description = "수정할 발제 ID", required = true, example = "1"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 발제에 대한 수정 권한이 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다."),
     })
-    @PatchMapping("/api/meetings/{meetingId}/topics/{topicId}")
-    public ApiResponse<Long> updateTopic(
+    @PatchMapping("/{meetingId}/topics/{topicId}")
+    public ApiResponse<String> updateTopic(
+            @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
             @RequestBody @Valid BookShelfRequestDTO.TopicCreate request,
             @CurrentId String memberId
     ) {
-        Long updatedTopicId = clubTopicCommandService.updateTopic(meetingId, topicId, memberId, request);
-        return ApiResponse.onSuccess(updatedTopicId);
+        clubTopicCommandService.updateTopic(clubId, meetingId, topicId, memberId, request);
+        return ApiResponse.onSuccess("발제가 정상적으로 삭제되었습니다.");
     }
 
     @Operation(summary = "발제 삭제 API", description = "발제를 삭제합니다.")
     @Parameters({
-            @Parameter(name = "meetingId", description = "발제를 삭제할 정기 독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "발제를 삭제할 정기모임 ID", required = true, example = "1"),
             @Parameter(name = "topicId", description = "삭제할 발제 ID", required = true, example = "1"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 발제에 대한 삭제 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다."),
     })
-    @DeleteMapping("/api/meetings/{meetingId}/topics/{topicId}")
-    public ApiResponse<Void> deleteTopic(
+    @DeleteMapping("/{meetingId}/topics/{topicId}")
+    public ApiResponse<String> deleteTopic(
+            @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
             @CurrentId String memberId
     ) {
-        clubTopicCommandService.deleteTopic(meetingId, topicId, memberId);
-        return ApiResponse.onSuccess(null);
+        clubTopicCommandService.deleteTopic(clubId, meetingId, topicId, memberId);
+        return ApiResponse.onSuccess("발제가 정상적으로 삭제되었습니다.");
     }
 
-    @Operation(summary = "미팅에 대한 발제 조회 API", description = "[책장] 페이지 - 발제를 최신순으로 조회합니다.")
+    // ========== 한줄평 ==========
+    @Operation(summary = "한줄평 조회 API", description = "한줄평을 조회합니다.")
     @Parameters({
-            @Parameter(name = "meetingId", description = "발제를 조회할 정기 독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "cursorId", description = "마지막으로 조회한 발제 ID (무한 스크롤용)", required = false, example = "10"),
-            @Parameter(name = "size", description = "조회할 발제 개수", required = false, example = "15"),
+            @Parameter(name = "clubId", description = "한줄평을 조회할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "한줄평을 조회할 정기 독서모임 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "마지막으로 조회한 한줄평 ID (무한 스크롤용)", required = false, example = "10"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기 독서모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
     })
-    @GetMapping("/api/meetings/{meetingId}/topics")
-    public ApiResponse<BookShelfResponseDTO.TopicList> getTopicList(
+    @GetMapping("/{meetingId}/reviews")
+    public ApiResponse<BookShelfResponseDTO.BookReviewList> getBookReviewList(
+            @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
             @CurrentId String memberId
     ) {
-        BookShelfResponseDTO.TopicList topicList
-                = clubMeetingQueryFacade.retrieveTopicList(meetingId, cursorId, memberId);
-        return ApiResponse.onSuccess(topicList);
+        return ApiResponse.onSuccess(
+                clubMeetingQueryFacade.retrieveBookReviewList(clubId, meetingId, memberId, cursorId));
+    }
+
+    @Operation(summary = "한줄평 생성 API", description = "한줄평을 생성합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "한줄평을 등록할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "한줄평을 등록한 정기모임 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "한줄평은 300자 이하로 입력해주세요."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 0.5 단위로만 입력 가능합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 1.0 이상 5.0 이하만 가능합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
+    })
+    @PostMapping("/{meetingId}/reviews")
+    public ApiResponse<String> createReview(
+            @PathVariable Long clubId,
+            @PathVariable Long meetingId,
+            @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
+            @CurrentId String memberId
+    ) {
+        clubBookReviewCommandService.createBookReview(clubId, meetingId, memberId, request);
+        return ApiResponse.onSuccess("한줄평이 생성되었습니다.");
+    }
+
+    @Operation(summary = "한줄평 수정 API", description = "한줄평을 수정합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "한줄평을 수정할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "한줄평을 수정할 정기모임 ID", required = true, example = "1"),
+            @Parameter(name = "reviewId", description = "수정할 한줄평 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "한줄평은 300자 이하로 입력해주세요."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 0.5 단위로만 입력 가능합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "평점은 1.0 이상 5.0 이하만 가능합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 한줄평을 찾을 수 없습니다."),
+    })
+    @PatchMapping("/{meetingId}/reviews/{reviewId}")
+    public ApiResponse<String> updateReview(
+            @PathVariable Long clubId,
+            @PathVariable Long meetingId,
+            @PathVariable Long reviewId,
+            @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
+            @CurrentId String memberId
+    ) {
+        clubBookReviewCommandService.updateBookReview(clubId, meetingId, reviewId, memberId, request);
+        return ApiResponse.onSuccess("한줄평이 수정되었습니다.");
+    }
+
+    @Operation(summary = "한줄평 삭제 API", description = "한줄평을 삭제합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "한줄평을 삭제할 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "한줄평을 삭제할 정기모임 ID", required = true, example = "1"),
+            @Parameter(name = "reviewId", description = "삭제할 한줄평 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "이 한줄평에 대한 수정/삭제 권한이 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 한줄평을 찾을 수 없습니다."),
+    })
+    @DeleteMapping("/{meetingId}/reviews/{reviewId}")
+    public ApiResponse<String> deleteReview(
+            @PathVariable Long clubId,
+            @PathVariable Long meetingId,
+            @PathVariable Long reviewId,
+            @CurrentId String memberId
+    ) {
+        clubBookReviewCommandService.deleteBookReview(clubId, meetingId, reviewId, memberId);
+        return ApiResponse.onSuccess("한줄평이 삭제되었습니다.");
     }
 }

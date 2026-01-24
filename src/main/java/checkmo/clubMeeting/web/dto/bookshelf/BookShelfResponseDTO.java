@@ -52,7 +52,6 @@ public class BookShelfResponseDTO {
         private MembershipInfo membershipInfo;
         private MeetingInfo meetingInfo;
         private BookExternalDTO.DetailInfo bookDetailInfo;
-        private TopicList topicList;
     }
 
     @Getter

@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ClubBookReviewCommandService {
 
-
     private final ClubManagementAPI clubManagementAPI;
 
     private final ClubMeetingQueryService clubMeetingQueryService;
@@ -37,16 +36,17 @@ public class ClubBookReviewCommandService {
             maxAttempts = 5,
             backoff = @Backoff(delay = 300)
     )
-    public Long createBookReview(Long meetingId, String memberId, BookReviewCreate request) {
+    public void createBookReview(Long clubId, Long meetingId, String memberId, BookReviewCreate request) {
+        clubManagementAPI.validateClub(clubId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);
         bookReview.setMeeting(meeting);
 
         meeting.addSumRate(bookReview.getRate());
 
-        return bookReviewRepository.save(bookReview).getId();
+        bookReviewRepository.save(bookReview);
     }
 
     @Retryable(
@@ -54,9 +54,11 @@ public class ClubBookReviewCommandService {
             maxAttempts = 5,
             backoff = @Backoff(delay = 300)
     )
-    public Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
+    public void updateBookReview(
+            Long clubId, Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
+        clubManagementAPI.validateClub(clubId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
@@ -76,8 +78,6 @@ public class ClubBookReviewCommandService {
             meeting.subtractSumRate(oldRate);
             meeting.addSumRate(newRate);
         }
-
-        return bookReview.getId();
     }
 
     @Retryable(
@@ -85,9 +85,10 @@ public class ClubBookReviewCommandService {
             maxAttempts = 5,
             backoff = @Backoff(delay = 300)
     )
-    public void deleteBookReview(Long meetingId, Long reviewId, String memberId) {
+    public void deleteBookReview(Long clubId, Long meetingId, Long reviewId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {

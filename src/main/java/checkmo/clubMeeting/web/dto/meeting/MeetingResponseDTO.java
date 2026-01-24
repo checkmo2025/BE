@@ -17,6 +17,15 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class NextMeetingRedirect {
+        private Long meetingId;
+        private String redirectUrl;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MeetingDetail {
         private MembershipInfo membershipInfo;
         private MeetingInfo meetingInfo;

@@ -37,19 +37,21 @@ public class ClubTopicCommandService {
     private final TopicRepository topicRepository;
     private final TeamTopicRepository teamTopicRepository;
 
-    public Long createTopic(Long meetingId, String memberId, TopicCreate request) {
+    public void createTopic(Long clubId, Long meetingId, String memberId, TopicCreate request) {
+        clubManagementAPI.validateClub(clubId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
 
         Topic topic = ClubMeetingConverter.toTopic(request, memberId, clubMemberId);
         topic.setMeeting(meeting);
 
-        return topicRepository.save(topic).getId();
+        topicRepository.save(topic);
     }
 
-    public Long updateTopic(Long meetingId, Long topicId, String memberId, TopicCreate request) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
+    public Long updateTopic(Long clubId, Long meetingId, Long topicId, String memberId, TopicCreate request) {
+        clubManagementAPI.validateClub(clubId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        clubMeetingQueryService.validateMeeting(meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
@@ -63,9 +65,10 @@ public class ClubTopicCommandService {
         return topic.getId();
     }
 
-    public void deleteTopic(Long meetingId, Long topicId, String memberId) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
+    public void deleteTopic(Long clubId, Long meetingId, Long topicId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        clubMeetingQueryService.validateMeeting(meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
