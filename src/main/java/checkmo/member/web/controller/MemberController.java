@@ -10,6 +10,7 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.FindEmailResult;
+import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -211,5 +212,18 @@ public class MemberController {
         @Valid @RequestBody MemberRequestDTO.FindEmail request
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberEmail(request));
+    }
+
+    @Operation(summary = "추천 친구 조회 API", description = "관심사가 겹치는 회원을 추천합니다. 겹치는 관심사가 많은 순으로 최대 4명을 추천합니다.")
+    @GetMapping("/me/recommend")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    public ApiResponse<RecommendedMemberList> getRecommendedFriends(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveRecommendedMembers(memberId));
     }
 }
