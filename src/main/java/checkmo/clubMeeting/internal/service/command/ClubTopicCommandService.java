@@ -48,7 +48,7 @@ public class ClubTopicCommandService {
         topicRepository.save(topic);
     }
 
-    public Long updateTopic(Long clubId, Long meetingId, Long topicId, String memberId, TopicCreate request) {
+    public void updateTopic(Long clubId, Long meetingId, Long topicId, String memberId, TopicCreate request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
         clubMeetingQueryService.validateMeeting(meetingId);
@@ -61,8 +61,6 @@ public class ClubTopicCommandService {
         topic.updateTopic(
                 request.getDescription()
         );
-
-        return topic.getId();
     }
 
     public void deleteTopic(Long clubId, Long meetingId, Long topicId, String memberId) {
@@ -80,15 +78,15 @@ public class ClubTopicCommandService {
     }
 
     public MeetingResponseDTO.TopicSelection toggleTopic(
+            Long clubId,
             Long meetingId,
             Long topicId,
             String memberId,
             MeetingRequestDTO.TopicSelection request
     ) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
-
-        // 팀, 발제 존재 여부 및 일치 여부 확인
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        clubMeetingQueryService.validateMeeting(meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, request.getTeamNumber());
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
@@ -110,7 +108,6 @@ public class ClubTopicCommandService {
                     .build();
             teamTopic.setTeam(team);
             teamTopic.setTopic(topic);
-
             try {
                 teamTopicRepository.saveAndFlush(teamTopic);
             } catch (DataIntegrityViolationException e) {

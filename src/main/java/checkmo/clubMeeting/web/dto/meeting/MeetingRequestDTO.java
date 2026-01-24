@@ -2,6 +2,7 @@ package checkmo.clubMeeting.web.dto.meeting;
 
 import checkmo.clubMeeting.internal.validation.validTeamManage.ValidTeamManage;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -34,6 +35,7 @@ public class MeetingRequestDTO {
     @NoArgsConstructor
     public static class TeamMember {
         @Min(value = 1, message = "팀 번호는 1 이상의 정수여야 합니다.")
+        @Max(value = 12, message = "팀 번호는 12 이하의 정수여야 합니다.")
         @NotNull(message = "팀 번호는 null이 될 수 없습니다.")
         private Integer teamNumber;
 

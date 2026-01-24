@@ -54,7 +54,7 @@ public class Meeting extends BaseEntity {
     private String bookId;
 
     @Builder.Default
-    @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Team> teams = new ArrayList<>();
 
     @Builder.Default
@@ -64,6 +64,21 @@ public class Meeting extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<BookReview> bookReviews = new ArrayList<>();
+
+    // ========= Domain Mehtods =========
+    public void updateMeeting(
+            String title,
+            LocalDateTime meetingTime,
+            String location,
+            Integer generation,
+            String tag
+    ) {
+        this.title = title;
+        this.meetingTime = meetingTime;
+        this.location = location;
+        this.generation = generation;
+        this.tag = tag;
+    }
 
     public void addSumRate(double rate) {
         this.sumRate += rate;
@@ -79,25 +94,26 @@ public class Meeting extends BaseEntity {
     }
 
     public double calculateAverageRate() {
-        if (this.bookReviews.isEmpty()) {
-            return 0;
-        } else {
-            return this.sumRate / this.bookReviews.size();
-        }
+        return this.bookReviews.isEmpty() ? 0 : this.sumRate / this.bookReviews.size();
     }
 
-    public void updateMeeting(
-            String title,
-            LocalDateTime meetingTime,
-            String location,
-            Integer generation,
-            String tag
-    ) {
-        this.title = title;
-        this.meetingTime = meetingTime;
-        this.location = location;
-        this.generation = generation;
-        this.tag = tag;
+    // ========= 연관관계 메서드 =========
+    public void addTeam(Team team) {
+        if (team == null) {
+            return;
+        }
+        team.setMeeting(this);
+    }
+
+    public void removeTeam(Team team) {
+        if (team == null) {
+            return;
+        }
+        team.removeMeeting();
+    }
+
+    public void cleatTeams() {
+        new ArrayList<>(this.teams).forEach(Team::removeMeeting);
     }
 
 }

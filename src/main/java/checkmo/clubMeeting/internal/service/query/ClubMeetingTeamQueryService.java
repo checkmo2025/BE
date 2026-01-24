@@ -2,18 +2,18 @@ package checkmo.clubMeeting.internal.service.query;
 
 import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Team;
-import checkmo.clubMeeting.internal.entity.TeamTopic;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.ClubMemberTeamRepository;
 import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.repository.TeamTopicRepository;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +30,12 @@ public class ClubMeetingTeamQueryService {
         return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
     }
 
-    public List<ClubMemberTeam> retrieveClubMemberTeams(Long teamId) {
-        return clubMemberTeamRepository.findAllByTeamIds(List.of(teamId));
+    public List<Integer> retrieveExistingTeamNumbers(Long meetingId) {
+        return teamRepository.findTeamNumberByMeetingId(meetingId);
+    }
+
+    public List<ClubMemberTeam> retrieveClubMemberTeams(Long teamId, Long cursorId, int size) {
+        return clubMemberTeamRepository.findAllByTeamIdsAndCursorId(teamId, cursorId, PageRequest.of(0, size));
     }
 
     public Map<Long, Long> retrieveTeamIdByClubMemberId(List<Long> teamIds) {
@@ -47,23 +51,11 @@ public class ClubMeetingTeamQueryService {
                 ));
     }
 
-    public List<TeamTopic> retrieveTeamTopics(Long teamId, Integer size) {
-        Pageable pageable = (size == null) ? Pageable.unpaged() : PageRequest.of(0, size);
-        return teamTopicRepository.findAllWithTopicByTeamIdOrderByDesc(teamId, pageable);
-    }
-
-    public Map<Long, List<Integer>> retrieveSelectedTeamNumbersByTopicIds(List<Long> topicIds) {
+    public Set<Long> retrieveSelectedTopicIds(Long teamId, List<Long> topicIds) {
         if (topicIds == null || topicIds.isEmpty()) {
-            return Map.of();
+            return Set.of();
         }
-
-        List<TeamTopic> teamTopics = teamTopicRepository.findAllWithTeamByTopicIds(topicIds);
-        return teamTopics.stream()
-                .collect(Collectors.groupingBy(
-                        teamTopic -> teamTopic.getTopic().getId(), // key: 토픽 ID
-                        Collectors.mapping(tt -> tt.getTeam().getTeamNumber(), Collectors.toList())
-                        //value: 해당 토픽을 선택한 팀 번호 리스트(같은 그룹에 속하는 TeamTopic의 팀 번호 List 생성)
-                ));
+        return new HashSet<>(teamTopicRepository.findTopicIdsByTeamIdAndTopicIds(teamId, topicIds));
     }
 
     public Team validateTeam(Long meetingId, Integer teamNumber) throws ClubMeetingException {
