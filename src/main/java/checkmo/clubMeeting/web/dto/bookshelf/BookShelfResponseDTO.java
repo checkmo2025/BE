@@ -39,7 +39,7 @@ public class BookShelfResponseDTO {
     @Builder
     public static class MeetingInfo {
         private Long meetingId;
-        private int generation;
+        private Integer generation;
         private String tag;
         private double averageRate;
     }

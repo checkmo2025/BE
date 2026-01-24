@@ -44,7 +44,7 @@ public class MeetingResponseDTO {
         private String title;
         private LocalDateTime meetingTime;
         private String location;
-        private int generation;
+        private Integer generation;
         private String tag;
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private BookExternalDTO.BasicInfo bookInfo; // CalendarMeeting - List<MeetingInfo> 캘린더 조회할 때 NULL

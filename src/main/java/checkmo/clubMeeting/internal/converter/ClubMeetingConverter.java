@@ -26,7 +26,6 @@ public class ClubMeetingConverter {
                 .title(request.getTitle())
                 .meetingTime(request.getMeetingTime())
                 .location(request.getLocation())
-                .content(request.getContent())
                 .generation(request.getGeneration())
                 .tag(request.getTag())
                 .clubId(clubId)
@@ -152,7 +151,6 @@ public class ClubMeetingConverter {
                 .location(meeting.getLocation())
                 .generation(meeting.getGeneration())
                 .tag(meeting.getTag())
-                .content(meeting.getContent())
                 .bookInfo(bookInfo)
                 .build();
     }

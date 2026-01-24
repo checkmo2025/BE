@@ -36,11 +36,7 @@ public class Meeting extends BaseEntity {
 
     private String location;
 
-    @Column(length = 1000)
-    private String content;
-
-    @Column(nullable = false)
-    private int generation;
+    private Integer generation;
 
     private String tag;
 
@@ -94,14 +90,12 @@ public class Meeting extends BaseEntity {
             String title,
             LocalDateTime meetingTime,
             String location,
-            String content,
-            int generation,
+            Integer generation,
             String tag
     ) {
         this.title = title;
         this.meetingTime = meetingTime;
         this.location = location;
-        this.content = content;
         this.generation = generation;
         this.tag = tag;
     }
