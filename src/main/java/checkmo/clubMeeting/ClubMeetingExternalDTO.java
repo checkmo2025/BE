@@ -21,7 +21,7 @@ public class ClubMeetingExternalDTO {
         private String title;
         private LocalDateTime meetingTime;
         private String location;
-        private int generation;
+        private Integer generation;
         private String tag;
         private String content;
         private BookExternalDTO.BasicInfo bookInfo;
