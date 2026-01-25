@@ -187,7 +187,7 @@ public class ClubBookshelfController {
             @CurrentId String memberId
     ) {
         clubTopicCommandService.updateTopic(clubId, meetingId, topicId, memberId, request);
-        return ApiResponse.onSuccess("발제가 정상적으로 삭제되었습니다.");
+        return ApiResponse.onSuccess("발제가 정상적으로 수정되었습니다.");
     }
 
     @Operation(summary = "발제 삭제 API", description = "발제를 삭제합니다.")

@@ -40,7 +40,7 @@ public class ClubTopicCommandService {
     public void createTopic(Long clubId, Long meetingId, String memberId, TopicCreate request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = ClubMeetingConverter.toTopic(request, memberId, clubMemberId);
         topic.setMeeting(meeting);
@@ -51,7 +51,7 @@ public class ClubTopicCommandService {
     public void updateTopic(Long clubId, Long meetingId, Long topicId, String memberId, TopicCreate request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        clubMeetingQueryService.validateMeeting(meetingId);
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
@@ -66,7 +66,7 @@ public class ClubTopicCommandService {
     public void deleteTopic(Long clubId, Long meetingId, Long topicId, String memberId) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        clubMeetingQueryService.validateMeeting(meetingId);
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
         if (!topic.isOwnedBy(clubMemberId)) {
@@ -86,7 +86,7 @@ public class ClubTopicCommandService {
     ) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        clubMeetingQueryService.validateMeeting(meetingId);
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, request.getTeamNumber());
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 

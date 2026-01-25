@@ -39,7 +39,7 @@ public class ClubBookReviewCommandService {
     public void createBookReview(Long clubId, Long meetingId, String memberId, BookReviewCreate request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);
         bookReview.setMeeting(meeting);
@@ -58,7 +58,7 @@ public class ClubBookReviewCommandService {
             Long clubId, Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {
@@ -88,7 +88,7 @@ public class ClubBookReviewCommandService {
     public void deleteBookReview(Long clubId, Long meetingId, Long reviewId, String memberId) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meetingId);
         if (!bookReview.getClubMemberId().equals(clubMemberId)) {

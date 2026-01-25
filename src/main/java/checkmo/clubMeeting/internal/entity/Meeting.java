@@ -112,8 +112,4 @@ public class Meeting extends BaseEntity {
         team.removeMeeting();
     }
 
-    public void cleatTeams() {
-        new ArrayList<>(this.teams).forEach(Team::removeMeeting);
-    }
-
 }

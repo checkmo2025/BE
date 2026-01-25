@@ -6,7 +6,6 @@ import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +19,6 @@ public class ClubMeetingQueryService {
 
     public List<Meeting> retrieveMeetings(Long clubId, Long cursorId, Integer size) {
         return meetingRepository.findAllByClubIdAndCursorDesc(clubId, cursorId, size);
-    }
-
-    public List<Meeting> retrieveMeetings(Set<Long> meetingIds) {
-        return meetingRepository.findAllById(meetingIds);
     }
 
     public Meeting retrieveNextFutureMeeting(Long clubId, LocalDateTime now) {

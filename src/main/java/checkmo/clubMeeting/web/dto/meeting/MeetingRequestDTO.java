@@ -16,6 +16,7 @@ public class MeetingRequestDTO {
     public static class TopicSelection {
         @NotNull(message = "팀 번호는 필수 입력입니다.")
         @Min(value = 1, message = "팀 번호는 1 이상의 정수여야 합니다.")
+        @Max(value = 12, message = "팀 번호는 12 이하의 정수여야 합니다.")
         private Integer teamNumber;
 
         @NotNull(message = "발제 선택 여부는 필수 입력입니다.")

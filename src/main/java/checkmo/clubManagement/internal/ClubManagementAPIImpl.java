@@ -74,14 +74,14 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
         if (clubMembers.size() != clubMemberIds.size()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
         }
-        for (ClubMember clubMember : clubMembers) {
+        clubMembers.forEach(clubMember -> {
             if (!clubMember.getClub().getId().equals(clubId)) {
                 throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
             }
             if (!clubMember.isActive()) {
                 throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
             }
-        }
+        });
     }
 
     @Override
