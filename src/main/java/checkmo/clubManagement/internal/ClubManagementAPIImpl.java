@@ -63,6 +63,28 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
+    public void validateActiveClubMembers(Long clubId, Set<Long> clubMemberIds) throws ClubManagementException {
+        if (clubId == null) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_NOT_FOUND);
+        }
+        if (clubMemberIds == null || clubMemberIds.isEmpty()) {
+            return;
+        }
+        List<ClubMember> clubMembers = clubMemberQueryService.retrieveClubMembers(clubMemberIds);
+        if (clubMembers.size() != clubMemberIds.size()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
+        }
+        clubMembers.forEach(clubMember -> {
+            if (!clubMember.getClub().getId().equals(clubId)) {
+                throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
+            }
+            if (!clubMember.isActive()) {
+                throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+            }
+        });
+    }
+
+    @Override
     public Long fetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 

@@ -54,8 +54,18 @@ public interface ClubManagementAPI {
      *
      * @param clubId   모임 ID
      * @param memberId 회원 ID
+     * @throws ClubManagementException STAFF 상태가 아닐 경우 예외 발생
      */
     void validateStaffClubMember(Long clubId, String memberId) throws ClubManagementException;
+
+    /**
+     * 특정 모임의 특정 회원들이 club에 속하고, ACTIVE 상태인지 검증
+     *
+     * @param clubId        모임 ID
+     * @param clubMemberIds 모임 멤버십 ID 집합 (중복 X)
+     * @throws ClubManagementException 클럽에 속하지 않거나, ACTIVE 상태가 아닌 멤버가 있을 경우 예외 발생
+     */
+    void validateActiveClubMembers(Long clubId, Set<Long> clubMemberIds) throws ClubManagementException;
 
     /**
      * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증

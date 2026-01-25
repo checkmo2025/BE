@@ -6,6 +6,7 @@ import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.TopicRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +17,8 @@ public class ClubTopicQueryService {
 
     private final TopicRepository topicRepository;
 
-    public List<Topic> retrieveTopics(Long meetingId, Long cursorId, Integer size) {
-        return topicRepository.findAllByCursorOrderByIdDesc(meetingId, cursorId, size);
+    public List<Topic> retrieveTopics(Long meetingId, Long cursorId, int size) {
+        return topicRepository.findByMeetingIdWithCursor(meetingId, cursorId, PageRequest.of(0, size));
     }
 
     public Topic validateTopic(Long topicId, Long meetingId) throws ClubMeetingException {
