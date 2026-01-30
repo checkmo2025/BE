@@ -1,16 +1,27 @@
 package checkmo.clubManagement.web.dto;
 
-import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubContact;
 import checkmo.clubManagement.internal.entity.ClubInterestCategory;
+import checkmo.clubManagement.internal.entity.ClubParticipantType;
 import checkmo.member.MemberExternalDTO;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 public class ClubResponseDTO {
+
+    public enum MyClubMemberStatus {
+        NONE,
+        PENDING,
+        MEMBER,
+        STAFF,
+        OWNER,
+        BLOCKED
+    }
 
     @Getter
     @NoArgsConstructor
@@ -32,38 +43,32 @@ public class ClubResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubList {
-        private List<ClubWithMyStatus> clubList;
-        private boolean hasNext;
-        private Long nextCursor;
-        private int pageSize;
+    public static class ClubParticipantTypeItem {
+        private String code;
+        private String description;
+
+        public static ClubParticipantTypeItem from(ClubParticipantType clubParticipantType) {
+            return ClubParticipantTypeItem.builder()
+                    .code(clubParticipantType.name())
+                    .description(clubParticipantType.getDescription())
+                    .build();
+        }
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubWithMyStatus {
-        private ClubDetail club;
-        private boolean isMember;
-    }
+    public static class ClubContactItem {
+        private String link;
+        private String label;
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MyClubList {
-        private List<ClubInfo> clubList;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MyPageClubList {
-        private List<ClubDetail> clubList;
-        private boolean hasNext;
-        private Long nextCursor;
+        public static ClubContactItem from(ClubContact clubContact) {
+            return ClubContactItem.builder()
+                    .link(clubContact.getLink())
+                    .label(clubContact.getLabel())
+                    .build();
+        }
     }
 
     @Getter
@@ -73,25 +78,45 @@ public class ClubResponseDTO {
     public static class ClubDetail {
         private Long clubId;
         private String name;
+        @JsonInclude(JsonInclude.Include.NON_NULL) // 독서모임 검색
         private String description;
         private String profileImageUrl;
-        private boolean open;
-        private List<ClubCategoryItem> category;
+        private boolean isOpen;
         private String region;
-        private List<Club.ParticipantType> participantTypes;
-        private String insta;
-        private String kakao;
-        private boolean isStaff;
+        private List<ClubCategoryItem> category;
+        private List<ClubParticipantTypeItem> participantTypes;
+        @JsonInclude(JsonInclude.Include.NON_NULL) // 독서모임 검색
+        private List<ClubContactItem> links;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubInfo {
+    public static class ClubList {
+        private List<ClubDetailWithMyStatus> clubList;
+        private boolean hasNext;
+        private Long nextCursor;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubDetailWithMyStatus {
+        private ClubDetail club;
+        private MyClubMemberStatus myStatus;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyMembership {
         private Long clubId;
-        private String clubName;
-        private Boolean open;      // 모임 공개 여부 (true: 공개, false: 비공개), MyClubList-ClubInfoDTO에서 사용될 때는 null
+        private MyClubMemberStatus myStatus;
+        private boolean isActive;
+        private boolean isStaff;
     }
 
     @Getter
@@ -102,8 +127,6 @@ public class ClubResponseDTO {
         private List<ClubMember> clubMembers; // 모임 회원 목록
         private boolean hasNext;
         private Long nextCursor;
-        private int pageSize;
-        private boolean isStaff;
     }
 
     @Getter
@@ -112,8 +135,13 @@ public class ClubResponseDTO {
     @Builder
     public static class ClubMember {
         private Long clubMemberId;
-        private MemberExternalDTO.BasicInfo basicInfo;
-        private String joinMessage; // 회원의 가입 메시지, ClubMemberStatus가 PENDING인 경우에만 사용됨
+        private MemberExternalDTO.DetailInfo detailInfo;
+        @JsonInclude(JsonInclude.Include.NON_NULL) // ClubMemberStatus가 PENDING인 경우에만 사용됨
+        private String joinMessage;
         private String clubMemberStatus;
+        @JsonInclude(JsonInclude.Include.NON_NULL) // ClubMemberStatus가 PENDING인 경우에만 사용됨
+        private LocalDateTime appliedAt;
+        @JsonInclude(JsonInclude.Include.NON_NULL) // ClubMemberStatus가 MEMBER, STAFF, OWNER인 경우에만 사용됨
+        private LocalDateTime joinedAt;
     }
 }
