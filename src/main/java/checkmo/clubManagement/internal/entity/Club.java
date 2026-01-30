@@ -1,5 +1,7 @@
 package checkmo.clubManagement.internal.entity;
 
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -14,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,24 +46,16 @@ public class Club extends BaseEntity {
     private String profileImgUrl;
 
     @Column(nullable = false)
-    private boolean open;
+    private boolean isOpen;
+
+    private String region;
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "club_participants", joinColumns = @JoinColumn(name = "club_id"))
     @Column(name = "participant_type")
-    private List<ParticipantType> participantTypes = new ArrayList<>();
-
-    private String region;
-
-    private String insta;
-
-    private String kakao;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<ClubMember> clubMembers = new ArrayList<>();
+    private List<ClubParticipantType> participantTypes = new ArrayList<>();
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
@@ -72,22 +67,27 @@ public class Club extends BaseEntity {
     @Column(name = "category")
     private Set<ClubInterestCategory> interestCategories = new HashSet<>();
 
-    public void addClubMember(ClubMember clubMember) {
-        this.clubMembers.add(clubMember);
-        clubMember.setClub(this);
-    }
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "club_contacts", joinColumns = @JoinColumn(name = "club_id"))
+    private List<ClubContact> links = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ClubMember> clubMembers = new ArrayList<>();
 
     public void updateField(
             String name,
             String description,
             String profileImgUrl,
-            List<ParticipantType> participantTypes,
+            boolean isOpen,
             String region,
-            String insta,
-            String kakao
+            List<ClubParticipantType> participantTypes,
+            List<ClubContact> links
     ) {
         if (name != null) {
-            this.name = name;
+            this.name = name.trim();
         }
         if (description != null) {
             this.description = description;
@@ -95,9 +95,7 @@ public class Club extends BaseEntity {
         if (profileImgUrl != null) {
             this.profileImgUrl = profileImgUrl;
         }
-
-        // open 필드는 수정 불가 → 반영하지 않음
-
+        this.isOpen = isOpen;
         if (participantTypes != null) {
             this.participantTypes.clear();
             this.participantTypes.addAll(participantTypes);
@@ -105,11 +103,9 @@ public class Club extends BaseEntity {
         if (region != null) {
             this.region = region;
         }
-        if (insta != null) {
-            this.insta = insta;
-        }
-        if (kakao != null) {
-            this.kakao = kakao;
+        if (links != null) {
+            this.links.clear();
+            this.links.addAll(links);
         }
     }
 
@@ -125,23 +121,40 @@ public class Club extends BaseEntity {
         return !this.name.equals(clubName);
     }
 
-    public enum ParticipantType {
-        STUDENT("대학생"),
-        WORKER("직장인"),
-        ONLINE("온라인"),
-        CLUB("동아리"),
-        MEETING("모임"),
-        OFFLINE("대면");
-
-        private final String description;
-
-        ParticipantType(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
+    // ============= 클럽 멤버 관련 메서드 ==============
+    public void addOwner(String memberId, LocalDateTime now) {
+        ClubMember clubMember = ClubMember.ownerOf(memberId, now);
+        this.clubMembers.add(clubMember);
+        clubMember.setClub(this);
     }
 
+    public ClubMember applyMember(String memberId, String joinMessage, LocalDateTime now) {
+        ClubMemberStatus status = decideInitialStatus();
+        ClubMember clubMember = ClubMember.apply(memberId, status, joinMessage, now);
+        this.clubMembers.add(clubMember);
+        clubMember.setClub(this);
+        return clubMember;
+    }
+
+    public void reapplyMember(ClubMember existing, String message, LocalDateTime now) {
+        if (existing.getClub() == null || !this.id.equals(existing.getClub().getId())) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
+        }
+        ClubMemberStatus status = decideInitialStatus();
+        existing.reapply(status, message, now);
+    }
+
+    public void removeMember(ClubMember clubMember) {
+        if (clubMember.getClub() == null || !this.id.equals(clubMember.getClub().getId())) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
+        }
+        this.clubMembers.remove(clubMember);
+        clubMember.setClub(null);
+    }
+
+    private ClubMemberStatus decideInitialStatus() {
+        return this.isOpen
+                ? ClubMemberStatus.MEMBER
+                : ClubMemberStatus.PENDING;
+    }
 }
