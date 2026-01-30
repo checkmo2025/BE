@@ -1,7 +1,7 @@
 package checkmo.clubManagement.internal.repository;
 
 import checkmo.clubManagement.internal.entity.Club;
-import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameProjection;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +11,6 @@ public interface ClubRepository extends JpaRepository<Club, Long>, ClubRepositor
     boolean existsByName(String clubName);
 
     @Query("select c.id as id, c.name as name from Club c where c.id in :clubIds")
-    List<ClubIdAndNameProjection> findIdAndNameByIdIn(@Param("clubIds") List<Long> clubIds);
+    List<ClubIdAndName> findIdAndNameByIdIn(@Param("clubIds") List<Long> clubIds);
 }
 
