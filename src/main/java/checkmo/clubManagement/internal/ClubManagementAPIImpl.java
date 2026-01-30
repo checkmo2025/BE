@@ -12,8 +12,10 @@ import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
+import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubManagementAPIImpl implements ClubManagementAPI {
 
     private final ClubManagementQueryService clubManagementQueryService;
+    private final ClubManagementCommandService clubManagementCommandService;
     private final ClubMemberQueryService clubMemberQueryService;
 
     @Override
@@ -134,5 +137,10 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
         List<ClubMember> clubMembers
                 = clubMemberQueryService.retrieveClubMembers(clubId, ClubMemberStatus.activeStatuses(), cursorId, size);
         return ClubManagementConverter.toMembershipDTOList(clubMembers);
+    }
+
+    @Override
+    public void touchLastActivity(Long clubId, LocalDateTime lastActivityTime) {
+        clubManagementCommandService.updateLastActivityTime(clubId, lastActivityTime);
     }
 }

@@ -34,8 +34,8 @@ public class ClubManagementCommandService {
         }
 
         Club club = ClubManagementConverter.toClub(request);
+        club.initializeLastActivityAt(LocalDateTime.now());
         club.updateInterestCategories(new HashSet<>(request.getCategory()));
-
         club.addOwner(memberId, LocalDateTime.now());
 
         clubRepository.save(club);
@@ -60,6 +60,10 @@ public class ClubManagementCommandService {
                 ClubManagementConverter.toClubContacts(request.getLinks())
         );
         club.updateInterestCategories(new HashSet<>(request.getCategory()));
+    }
+
+    public void updateLastActivityTime(Long clubId, LocalDateTime lastActivityTime) {
+        clubRepository.updateLastActivityTime(clubId, lastActivityTime);
     }
 
     private void validateClubName(ClubDetail request, Club club) throws ClubManagementException {

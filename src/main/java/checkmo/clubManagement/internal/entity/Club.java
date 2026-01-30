@@ -50,6 +50,8 @@ public class Club extends BaseEntity {
 
     private String region;
 
+    private LocalDateTime lastActivityAt;
+
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
@@ -76,6 +78,12 @@ public class Club extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClubMember> clubMembers = new ArrayList<>();
+
+    public void initializeLastActivityAt(LocalDateTime now) {
+        if (this.lastActivityAt == null) {
+            this.lastActivityAt = now;
+        }
+    }
 
     public void updateField(
             String name,
