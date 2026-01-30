@@ -4,7 +4,7 @@ import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubRepository;
-import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameProjection;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +24,6 @@ public class ClubManagementQueryService {
         return clubRepository.searchClubs(filter, cursorId, pageSize);
     }
 
-    public Club retrieveClub(Long clubId) {
-        return validateClub(clubId);
-    }
-
     public boolean isDuplicateClubName(String clubName) {
         return clubRepository.existsByName(clubName);
     }
@@ -38,11 +34,11 @@ public class ClubManagementQueryService {
     }
 
     public Map<Long, String> retrieveClubNamesByIds(List<Long> clubIds) {
-        List<ClubIdAndNameProjection> results = clubRepository.findIdAndNameByIdIn(clubIds);
+        List<ClubIdAndName> results = clubRepository.findIdAndNameByIdIn(clubIds);
         return results.stream()
                 .collect(Collectors.toMap(
-                        ClubIdAndNameProjection::getId,
-                        ClubIdAndNameProjection::getName
+                        ClubIdAndName::getId,
+                        ClubIdAndName::getName
                 ));
     }
 }

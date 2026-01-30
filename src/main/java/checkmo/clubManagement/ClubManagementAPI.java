@@ -34,7 +34,7 @@ public interface ClubManagementAPI {
     Map<Long, String> fetchClubNamesByClubIds(List<Long> clubIds);
 
     /**
-     * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다.
+     * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다. 이때 회원이 활성화 상태인 모임만 조회됩니다.
      *
      * @param memberId 회원 ID
      * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
