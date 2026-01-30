@@ -36,11 +36,21 @@ public class MemberQueryService {
      * 회원 기본 정보 조회
      *
      * @param memberId 회원 ID
-     * @return 회원 기본 정보 DTO
+     * @return 회원 엔티티
      */
     public Member retrieveMember(String memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    /**
+     * 회원 기본 정보 목록 조회
+     *
+     * @param memberIds 회원 ID 목록
+     * @return 회원 엔티티 리스트
+     */
+    public List<Member> retrieveMemberById(List<String> memberIds) {
+        return memberRepository.findAllById(memberIds);
     }
 
     /**
@@ -105,7 +115,8 @@ public class MemberQueryService {
      * 회원 이름과 전화번호로 가입한 이메일 찾기
      */
     public String retrieveMemberEmail(MemberRequestDTO.FindEmail request) {
-        List<Member> members = memberRepository.findAllByNameAndPhoneNumber(request.getName(), request.getPhoneNumber());
+        List<Member> members = memberRepository.findAllByNameAndPhoneNumber(request.getName(),
+                request.getPhoneNumber());
 
         // 계정이 없는 경우
         if (members.isEmpty()) {
