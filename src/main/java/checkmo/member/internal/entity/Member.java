@@ -111,4 +111,8 @@ public class Member extends BaseEntity {
             throw new MemberException(MemberErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
         }
     }
+
+    public void updateEmail(String newEmail) {
+        this.email = newEmail;
+    }
 }

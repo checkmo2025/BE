@@ -116,8 +116,16 @@ public class MemberCommandService {
      * @param memberId 비밀번호를 변경할 회원의 ID
      * @param request  비밀번호 변경 정보 DTO (현재 비밀번호, 새 비밀번호, 새 비밀번호 확인)
      */
-    public void updatePassword(String memberId, MemberRequestDTO.PasswordUpdate request) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void updatePassword(String memberId, MemberRequestDTO.UpdatePassword request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new MemberException(MemberErrorStatus.PASSWORD_MISMATCH);
+        }
+
+        boolean isSuccess = authenticationAPI.updatePassword(memberId, request.getCurrentPassword(), request.getNewPassword());
+
+        if (!isSuccess) {
+            throw new MemberException(MemberErrorStatus.CURRENT_PASSWORD_INCORRECT);
+        }
     }
 
     /**
@@ -136,5 +144,25 @@ public class MemberCommandService {
      */
     public void deleteMember(String memberId) {
         throw new UnsupportedOperationException("추후 구현 예정");
+    }
+
+    /**
+     * 이메일 변경
+     * @param memberId
+     * @param request
+     */
+    public void updateEmail(String memberId, MemberRequestDTO.UpdateEmail request) {
+        // 새 이메일 중복 체크
+        if (memberRepository.existsByEmail(request.getNewEmail())) {
+            throw new MemberException(MemberErrorStatus.EMAIL_ALREADY_EXISTS);
+        }
+
+        // 소셜체크 + 기존이메일체크 + 인증번호체크
+        authenticationAPI.updateEmail(memberId, request.getCurrentEmail(), request.getNewEmail(), request.getVerificationCode());
+
+        // 성공 시 Member 이메일 업데이트
+        Member member = memberRepository.findById(memberId)
+                                        .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+        member.updateEmail(request.getNewEmail());
     }
 }

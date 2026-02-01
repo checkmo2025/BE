@@ -87,4 +87,13 @@ public class MemberResponseDTO {
     public static class RecommendedMemberList {
         private List<RecommendedMember> friends;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LoginStatus {
+        private String provider;
+        private String email;
+    }
 }

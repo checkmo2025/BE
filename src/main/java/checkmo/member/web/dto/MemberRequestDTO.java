@@ -2,6 +2,7 @@ package checkmo.member.web.dto;
 
 import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -25,14 +26,17 @@ public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    public static class PasswordUpdate {
+    public static class UpdatePassword {
         @NotBlank(message = "현재 비밀번호는 필수입니다")
         private String currentPassword;
 
         @NotBlank(message = "새 비밀번호는 필수입니다")
-        @Size(min = 6, max = 10, message = "비밀번호는 6-10자여야 합니다")
+        @Size(min = 6, max = 12, message = "비밀번호는 6-12자여야 합니다")
         @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$", message = "비밀번호는 영어 및 특수문자를 포함해야 합니다")
         private String newPassword;
+
+        @NotBlank(message = "비밀번호 확인은 필수입니다")
+        private String confirmPassword;
     }
 
     @Getter
@@ -73,5 +77,19 @@ public class MemberRequestDTO {
 
         @NotBlank(message = "전화번호는 필수 입력 항목입니다.")
         private String phoneNumber;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class UpdateEmail {
+        @NotBlank(message = "기존 이메일을 입력해주세요.")
+        private String currentEmail;
+
+        @NotBlank(message = "변경할 이메일을 입력해주세요.")
+        @Email(message = "유효한 이메일 형식이 아닙니다.")
+        private String newEmail;
+
+        @NotBlank(message = "인증번호를 입력해주세요.")
+        private String verificationCode;
     }
 }

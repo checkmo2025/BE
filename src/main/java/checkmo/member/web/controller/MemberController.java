@@ -214,6 +214,39 @@ public class MemberController {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberEmail(request));
     }
 
+    @Operation(summary = "비밀번호 변경 API", description = "기존 비밀번호 확인 후 새로운 비밀번호로 변경합니다.")
+    @PatchMapping("/me/update-password")
+    public ApiResponse<String> updatePassword(
+        @CurrentId String memberId,
+        @Valid @RequestBody MemberRequestDTO.UpdatePassword request
+    ) {
+        memberCommandService.updatePassword(memberId, request);
+        return ApiResponse.onSuccess("비밀번호가 성공적으로 변경되었습니다.");
+    }
+
+    @Operation(summary = "이메일 변경 API", description = "인증번호 확인 후 새로운 이메일로 변경합니다. 일반 로그인 유저만 가능합니다.")
+    @PatchMapping("/me/update-email")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청(기존 이메일 불일치, 이미 사용중인 이메일 등)"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스입니다.")
+    })
+    public ApiResponse<String> updateEmail(
+        @CurrentId String memberId,
+        @Valid @RequestBody MemberRequestDTO.UpdateEmail request
+    ) {
+        memberCommandService.updateEmail(memberId, request);
+        return ApiResponse.onSuccess("이메일이 성공적으로 변경되었습니다.");
+    }
+
+    @Operation(summary = "소셜 로그인 연동 관리", description = "현재 로그인된 계정의 가입 수단과 이메일 정보를 조회합니다.")
+    @GetMapping("/me/login-status")
+    public ApiResponse<MemberResponseDTO.LoginStatus> getLoginStatus(
+        @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveLoginStatus(memberId));
+    }
+
     @Operation(summary = "추천 친구 조회 API", description = "관심사가 겹치는 회원을 추천합니다. 겹치는 관심사가 많은 순으로 최대 4명을 추천합니다.")
     @GetMapping("/me/recommend")
     @ApiResponses({

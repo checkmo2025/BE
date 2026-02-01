@@ -168,4 +168,20 @@ public class MemberQueryFacade {
                 .friends(friends)
                 .build();
     }
+
+    public MemberResponseDTO.LoginStatus retrieveLoginStatus(String memberId) {
+        Member member = memberQueryService.retrieveMember(memberId);
+
+        String prefix = member.getId().split("_")[0];
+
+        String provider = switch (prefix) {
+            case "LOCAL", "KAKAO", "GOOGLE", "NAVER" -> prefix;
+            default -> "SOCIAL";
+        };
+
+        return MemberResponseDTO.LoginStatus.builder()
+                                            .provider(provider)
+                                            .email(member.getEmail())
+                                            .build();
+    }
 }

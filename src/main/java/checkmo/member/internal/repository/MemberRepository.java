@@ -33,4 +33,6 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberR
     List<Member> findAllGhostMembers(@Param("threshold") LocalDateTime threshold);
 
     List<Member> findAllByNameAndPhoneNumber(String name, String phoneNumber);
+
+    boolean existsByEmail(String email);
 }

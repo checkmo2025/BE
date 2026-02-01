@@ -1,5 +1,6 @@
 package checkmo.authentication.web.controller;
 
+import checkmo.authentication.AuthenticationEvent;
 import checkmo.authentication.internal.service.AuthFacade;
 import checkmo.authentication.internal.service.command.EmailVerificationCommandService;
 import checkmo.authentication.web.dto.AuthRequestDTO;
@@ -25,7 +26,7 @@ public class AuthController {
     private final EmailVerificationCommandService emailVerificationCommandService;
     private final AuthFacade authFacade;
 
-    @Operation(summary = "이메일 인증번호 요청", description = "회원가입 시 이메일 인증번호를 요청합니다.")
+    @Operation(summary = "이메일 인증번호 요청", description = "이메일 인증번호를 요청합니다. (SIGN_UP: 회원가입, UPDATE_EMAIL: 이메일 변경)")
     @Parameter(name = "email", description = "인증을 요청할 이메일 주소", required = true, example = "test@example.com")
     @PostMapping("/email-verification")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
@@ -36,9 +37,10 @@ public class AuthController {
             @RequestParam
             @Email(message = "유효한 이메일 주소를 입력해주세요")
             @NotBlank(message = "이메일은 필수입니다")
-            String email
+            String email,
+            @RequestParam(defaultValue = "SIGN_UP") AuthenticationEvent.VerificationType type
     ) {
-        emailVerificationCommandService.sendEmailVerification(email);
+        emailVerificationCommandService.sendEmailVerification(email, type);
         return ApiResponse.onSuccess("인증번호가 이메일로 발송되었습니다.");
     }
 
