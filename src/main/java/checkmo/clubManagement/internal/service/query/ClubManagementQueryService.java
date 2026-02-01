@@ -25,7 +25,7 @@ public class ClubManagementQueryService {
     }
 
     public boolean isDuplicateClubName(String clubName) {
-        return clubRepository.existsByName(clubName);
+        return clubRepository.existsByName(clubName.trim());
     }
 
     public Club validateClub(Long clubId) throws ClubManagementException {

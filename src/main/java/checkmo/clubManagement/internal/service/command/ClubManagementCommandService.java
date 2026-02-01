@@ -29,7 +29,7 @@ public class ClubManagementCommandService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public void createClub(String memberId, ClubDetail request) {
-        if (clubManagementQueryService.isDuplicateClubName(request.getName())) {
+        if (clubManagementQueryService.isDuplicateClubName(request.getName().trim())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
         }
 

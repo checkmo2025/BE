@@ -13,10 +13,12 @@ import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberStatusAction;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.JoinClub;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -63,8 +65,8 @@ public class ClubMemberCommandService {
             case APPROVE -> approveJoin(club, target, now);
             case REJECT -> rejectJoin(club, target);
             case CHANGE_ROLE -> changeRole(actor, target, request.getStatus());
-            case TRANSFER_OWNER -> transferOwner(actor, target);
-            case KICK -> kickMember(target, now);
+            case TRANSFER_OWNER -> transferOwner(club, actor, target);
+            case KICK -> kickMember(club, actor, target, now);
         }
     }
 
@@ -99,7 +101,7 @@ public class ClubMemberCommandService {
         target.updateStatus(newStatus);
     }
 
-    private void transferOwner(ClubMember actor, ClubMember target) {
+    private void transferOwner(Club club, ClubMember actor, ClubMember target) {
         if (!actor.isOwner()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ONLY);
         }
@@ -111,10 +113,13 @@ public class ClubMemberCommandService {
         }
         actor.updateStatus(ClubMemberStatus.STAFF);
         target.updateStatus(ClubMemberStatus.OWNER);
+        log.info("{} Club 개설자 권한 이전: originalOwnerId={}, newOwnerId={}",
+                club.getName(), actor.getId(), target.getId());
     }
 
-    private void kickMember(ClubMember target, LocalDateTime now) {
+    private void kickMember(Club club, ClubMember actor, ClubMember target, LocalDateTime now) {
         target.kick(now);
+        log.info("{} Club 멤버 강제 탈퇴: actorId={}, targetId={}", club.getName(), actor.getId(), target.getId());
     }
 
     private void publishJoinClubEvent(String memberId, Club club, ClubMember clubMember) {

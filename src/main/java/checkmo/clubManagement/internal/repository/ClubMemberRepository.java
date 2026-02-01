@@ -28,7 +28,7 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
             + "WHERE cm.memberId = :memberId "
             + "AND cm.clubMemberStatus IN :statuses "
             + "AND (:cursorId IS NULL OR cm.id < :cursorId) "
-            + "ORDER BY cm.id ASC")
+            + "ORDER BY cm.id DESC")
     List<ClubIdAndNameAndClubMemberId> findMyClubByCursor(
             String memberId, EnumSet<ClubMemberStatus> statuses, Long cursorId, Pageable pageable);
 
@@ -36,7 +36,7 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     @Query("SELECT cm FROM ClubMember cm "
             + "WHERE cm.club.id = :clubId "
-            + "AND (:cursorId IS NULL OR cm.id <: cursorId) "
+            + "AND (:cursorId IS NULL OR cm.id < :cursorId) "
             + "AND (:statuses IS NULL OR cm.clubMemberStatus IN :statuses) "
             + "ORDER BY cm.id DESC")
     List<ClubMember> findByClubIdAndStatuses(

@@ -71,7 +71,6 @@ public class Club extends BaseEntity {
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.LAZY)
-    @Enumerated(EnumType.STRING)
     @CollectionTable(name = "club_contacts", joinColumns = @JoinColumn(name = "club_id"))
     private List<ClubContact> links = new ArrayList<>();
 

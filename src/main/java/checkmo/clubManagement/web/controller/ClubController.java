@@ -54,7 +54,7 @@ public class ClubController {
     public ApiResponse<Boolean> checkClubNameDuplicate(
             @RequestParam @NotBlank(message = "clubName은 필수 입력입니다.") @Size(max = 40, message = "클럽 이름은 40자 이하로 입력해주세요.") String clubName
     ) {
-        return ApiResponse.onSuccess(clubManagementQueryService.isDuplicateClubName(clubName.trim()));
+        return ApiResponse.onSuccess(clubManagementQueryService.isDuplicateClubName(clubName));
     }
 
     @Operation(summary = "독서 모임 생성 API", description = "새로운 독서 모임을 생성합니다.")
@@ -188,7 +188,7 @@ public class ClubController {
     @GetMapping("/{clubId}/members")
     public ApiResponse<ClubResponseDTO.ClubMemberList> getClubMembers(
             @PathVariable Long clubId,
-            @RequestParam ClubMemberStatusFilter status,
+            @RequestParam(required = false, defaultValue = "ALL") ClubMemberStatusFilter status,
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
     ) {

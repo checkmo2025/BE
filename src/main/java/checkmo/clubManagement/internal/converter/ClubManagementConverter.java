@@ -87,7 +87,7 @@ public class ClubManagementConverter {
                 .clubMemberStatus(staus.name());
         if (staus.isJoinInProgress()) {
             builder.joinMessage(clubMember.getJoinMessage())
-                    .appliedAt(clubMember.getCreatedAt());
+                    .appliedAt(clubMember.getAppliedAt());
         } else if (staus.isActive()) {
             builder.joinedAt(clubMember.getJoinedAt());
         }

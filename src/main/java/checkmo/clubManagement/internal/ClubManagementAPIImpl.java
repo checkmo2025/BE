@@ -140,6 +140,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
+    @Transactional
     public void touchLastActivity(Long clubId, LocalDateTime lastActivityTime) {
         clubManagementCommandService.updateLastActivityTime(clubId, lastActivityTime);
     }

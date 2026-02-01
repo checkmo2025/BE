@@ -20,7 +20,8 @@ public class ClubResponseDTO {
         MEMBER,
         STAFF,
         OWNER,
-        BLOCKED
+        WITHDRAWN,
+        KICKED
     }
 
     @Getter

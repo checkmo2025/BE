@@ -100,7 +100,7 @@ public class ClubRequestDTO {
         ClubMemberStatusUpdateCommand command;
         ClubMemberStatus status; // CHANGE_ROLE일 때만 필요
 
-        @AssertTrue(message = "CHAGE_ROLE 요청에서는 status는 MEMBER 또는 STAFF만 허용됩니다.")
+        @AssertTrue(message = "CHAGNE_ROLE 요청에서는 status는 MEMBER 또는 STAFF만 허용됩니다.")
         private boolean isValidStatusWhenChangeRole() {
             if (command != ClubMemberStatusUpdateCommand.CHANGE_ROLE) {
                 return true;
