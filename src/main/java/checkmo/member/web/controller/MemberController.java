@@ -237,4 +237,12 @@ public class MemberController {
         memberCommandService.updateEmail(memberId, request);
         return ApiResponse.onSuccess("이메일이 성공적으로 변경되었습니다.");
     }
+
+    @Operation(summary = "소셜 로그인 연동 관리", description = "현재 로그인된 계정의 가입 수단과 이메일 정보를 조회합니다.")
+    @GetMapping("/me/login-status")
+    public ApiResponse<MemberResponseDTO.LoginStatus> getLoginStatus(
+        @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveLoginStatus(memberId));
+    }
 }

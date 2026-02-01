@@ -70,4 +70,13 @@ public class MemberResponseDTO {
     public static class FindEmailResult {
         private String email;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LoginStatus {
+        private String provider;
+        private String email;
+    }
 }

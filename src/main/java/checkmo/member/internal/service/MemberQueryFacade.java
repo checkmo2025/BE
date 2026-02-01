@@ -147,4 +147,28 @@ public class MemberQueryFacade {
         if (id.length() <= 4) return "****" + domain;
         return id.substring(0, id.length() - 4) + "****" + domain;
     }
+
+    public MemberResponseDTO.LoginStatus retrieveLoginStatus(String memberId) {
+        Member member = memberQueryService.retrieveMember(memberId);
+
+        String id = member.getId();
+        String provider;
+
+        if (id.startsWith("LOCAL_")) {
+            provider = "LOCAL";
+        } else if (id.startsWith("KAKAO_")) {
+            provider = "KAKAO";
+        } else if (id.startsWith("GOOGLE_")) {
+            provider = "GOOGLE";
+        } else if (id.startsWith("NAVER_")) {
+            provider = "NAVER";
+        } else {
+            provider = "SOCIAL";
+        }
+
+        return MemberResponseDTO.LoginStatus.builder()
+                                            .provider(provider)
+                                            .email(member.getEmail())
+                                            .build();
+    }
 }
