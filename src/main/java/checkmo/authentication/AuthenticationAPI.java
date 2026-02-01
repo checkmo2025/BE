@@ -22,4 +22,6 @@ public interface AuthenticationAPI {
      * @return 비밀번호 변경 성공 여부
      */
     boolean updatePassword(String memberId, String currentPassword, String newPassword);
+
+    void updateEmail(String memberId, String currentEmail, String newEmail, String verificationCode);
 }

@@ -53,4 +53,8 @@ public class AuthUser extends BaseEntity {
     public void updatePassword(String encryptedPassword) {
         this.password = encryptedPassword;
     }
+
+    public void updateEmail(String newEmail) {
+        this.email = newEmail;
+    }
 }

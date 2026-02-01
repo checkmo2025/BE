@@ -145,4 +145,24 @@ public class MemberCommandService {
     public void deleteMember(String memberId) {
         throw new UnsupportedOperationException("추후 구현 예정");
     }
+
+    /**
+     * 이메일 변경
+     * @param memberId
+     * @param request
+     */
+    public void updateEmail(String memberId, MemberRequestDTO.UpdateEmail request) {
+        // 새 이메일 중복 체크
+        if (memberRepository.existsByEmail(request.getNewEmail())) {
+            throw new MemberException(MemberErrorStatus.EMAIL_ALREADY_EXISTS);
+        }
+
+        // 소셜체크 + 기존이메일체크 + 인증번호체크
+        authenticationAPI.updateEmail(memberId, request.getCurrentEmail(), request.getNewEmail(), request.getVerificationCode());
+
+        // 성공 시 Member 이메일 업데이트
+        Member member = memberRepository.findById(memberId)
+                                        .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+        member.updateEmail(request.getNewEmail());
+    }
 }

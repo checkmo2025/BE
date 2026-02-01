@@ -9,10 +9,14 @@ public class AuthenticationEvent {
     }
 
     @Builder
-    public record SendVerificationEmail(String email, String verificationCode) {
+    public record SendVerificationEmail(String email, String verificationCode, VerificationType type) {
     }
 
     @Builder
     public record SendTempPassword(String email, String tempPassword){
+    }
+
+    public enum VerificationType {
+        SIGN_UP, UPDATE_EMAIL
     }
 }

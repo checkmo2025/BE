@@ -24,6 +24,7 @@ public class AuthUserCommandService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationCommandService emailVerificationCommandService;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -80,5 +81,25 @@ public class AuthUserCommandService {
 
         user.updatePassword(passwordEncoder.encode(newPassword));
         return true;
+    }
+
+    public void updateEmail(String memberId, String currentEmail, String newEmail, String verificationCode) {
+        AuthUser authUser = authRepository.findById(memberId)
+                                          .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+
+        // 소셜 유저 차단
+        if (!authUser.getId().startsWith("LOCAL_")) {
+            throw new AuthException(AuthErrorStatus.SOCIAL_MEMBER_CANNOT_CHANGE_EMAIL);
+        }
+
+        // 입력한 기존 이메일이 실제 DB 값과 일치하는지
+        if (!authUser.getEmail().equals(currentEmail)) {
+            throw new AuthException(AuthErrorStatus.CURRENT_EMAIL_INCORRECT);
+        }
+
+        // 인증번호 검증
+        emailVerificationCommandService.verifyEmailCode(new AuthRequestDTO.EmailVerification(newEmail, verificationCode));
+
+        authUser.updateEmail(newEmail);
     }
 }
