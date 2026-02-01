@@ -172,20 +172,12 @@ public class MemberQueryFacade {
     public MemberResponseDTO.LoginStatus retrieveLoginStatus(String memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
 
-        String id = member.getId();
-        String provider;
+        String prefix = member.getId().split("_")[0];
 
-        if (id.startsWith("LOCAL_")) {
-            provider = "LOCAL";
-        } else if (id.startsWith("KAKAO_")) {
-            provider = "KAKAO";
-        } else if (id.startsWith("GOOGLE_")) {
-            provider = "GOOGLE";
-        } else if (id.startsWith("NAVER_")) {
-            provider = "NAVER";
-        } else {
-            provider = "SOCIAL";
-        }
+        String provider = switch (prefix) {
+            case "LOCAL", "KAKAO", "GOOGLE", "NAVER" -> prefix;
+            default -> "SOCIAL";
+        };
 
         return MemberResponseDTO.LoginStatus.builder()
                                             .provider(provider)
