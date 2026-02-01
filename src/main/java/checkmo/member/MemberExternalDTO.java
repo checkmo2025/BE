@@ -35,4 +35,18 @@ public class MemberExternalDTO {
         private String profileImageUrl;
         private boolean following;    // 조회하는 사람 기준으로 팔로우 여부
     }
+
+    /**
+     * 회원의 상세 정보 DTO, 회원의 이름과 이메일 등 추가 정보를 포함 외부 도메인에서 회원의 상세 정보를 필요로 할 때 사용
+     */
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class DetailInfo {
+        private String nickname;
+        private String profileImageUrl;
+        private String name;
+        private String email;
+    }
 }

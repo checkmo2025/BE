@@ -5,6 +5,7 @@ import checkmo.member.internal.entity.Member;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -46,6 +47,13 @@ public class MemberConverter {
                 .nickname(profile.getNickname())
                 .profileImageUrl(profile.getProfileImageUrl())
                 .following(profile.isFollowing())
+                .build();
+    }
+
+    public static RecommendedMember toRecommendedMember(Member member) {
+        return RecommendedMember.builder()
+                .nickname(member.getNickName())
+                .profileImageUrl(member.getImgUrl())
                 .build();
     }
 }

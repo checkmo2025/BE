@@ -1,20 +1,23 @@
 package checkmo.clubManagement.internal.service.query;
 
-import checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
-import checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameAndClubMemberId;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,28 +28,29 @@ public class ClubMemberQueryService {
 
     public ClubMember validateClubMember(Long clubId, String memberId) throws ClubManagementException {
         return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
-                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_ONLY));
+                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND));
     }
 
-    public ClubList retrieveClubList(String memberId) {
-        // 회원ID를 통해 JPQL로 클럽 ID와 이름을 조회하고 DTO로 변환
-        var clubIdAndNameByMemberId = clubMemberRepository.findClubIdAndNameByMemberId(memberId);
-
-        // Object[] -> BasicInfo 변환
-        var myClubInfoList = clubIdAndNameByMemberId.stream()
-                .map(row -> new BasicInfo((Long) row[0], (String) row[1]))
-                .toList();
-
-        return ClubList.builder()
-                .clubList(myClubInfoList)
-                .build();
+    public ClubMember validateClubMember(Long clubId, Long clubMemberId) throws ClubManagementException {
+        return clubMemberRepository.findByIdAndClubId(clubMemberId, clubId)
+                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND));
     }
 
-    public List<ClubMember> retrieveClubMembers(String memberId, Long cursorId, Integer size) {
-        return clubMemberRepository.findClubMembersByMemberIdOrderByIdAsc(memberId, cursorId, Pageable.ofSize(size));
+    public List<ClubIdAndName> retrieveActiveClubIdAndName(String memberId) {
+        EnumSet<ClubMemberStatus> activeStatuses = ClubMemberStatus.activeStatuses();
+        return clubMemberRepository.findClubIdAndNameByMemberIdAndStatuses(memberId, activeStatuses);
     }
 
-    public Map<Long, ClubMember.ClubMemberStatus> retrieveClubMemberStatusByClubIds(
+    public List<ClubIdAndNameAndClubMemberId> retrieveMyActiveClubsByCursor(String memberId, Long cursorId, int size) {
+        EnumSet<ClubMemberStatus> activeStatuses = ClubMemberStatus.activeStatuses();
+        return clubMemberRepository.findMyClubByCursor(memberId, activeStatuses, cursorId, PageRequest.of(0, size));
+    }
+
+    public Optional<ClubMember> findClubMember(Long clubId, String memberId) {
+        return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId);
+    }
+
+    public Map<Long, ClubMemberStatus> retrieveClubMemberStatusByClubIds(
             String memberId,
             List<Long> clubIds
     ) {
@@ -54,34 +58,26 @@ public class ClubMemberQueryService {
         List<ClubMember> members = clubMemberRepository.findAllByMemberIdAndClubIdIn(memberId, clubIds);
 
         // Map<clubId, ClubMemberStatus> 형태로 변환 후 반환
+        // 만약 clubMember가 없으면 해당 clubId는 키에 포함되지 않음
         return members.stream()
-                .collect(Collectors.toMap(clubMember -> clubMember.getClub().getId(), ClubMember::getClubMemberStatus));
+                .collect(Collectors.toMap(
+                        clubMember -> clubMember.getClub().getId(),
+                        ClubMember::getClubMemberStatus,
+                        (a, b) -> a
+                ));
     }
 
-    public List<ClubMember> retrieveClubMembers(Long clubId, String status, Long cursorId, Integer size) {
-        List<ClubMember.ClubMemberStatus> clubMemberStatus;
-        if ("ALL".equalsIgnoreCase(status)) {
-            clubMemberStatus = null;
-        } else if ("ACTIVE".equalsIgnoreCase(status)) {
-            clubMemberStatus = List.of(ClubMember.ClubMemberStatus.MEMBER, ClubMember.ClubMemberStatus.STAFF);
-        } else {
-            try {
-                clubMemberStatus = List.of(ClubMember.ClubMemberStatus.valueOf(status.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
-            }
-        }
-
-        return clubMemberRepository.findClubMembersByClubIdInClubMemberStatusOrderByIdDesc(
-                clubId,
-                clubMemberStatus,
-                cursorId,
-                size
-        );
+    public List<ClubMember> retrieveClubMembers(
+            Long clubId, EnumSet<ClubMemberStatus> statuses, Long cursorId, int size) {
+        return clubMemberRepository.findByClubIdAndStatuses(clubId, statuses, cursorId, PageRequest.of(0, size));
     }
 
     public List<String> retrieveActiveMemberIds(Long clubId) {
-        return clubMemberRepository.findActiveMemberIdsByClubId(clubId);
+        return clubMemberRepository.findByClubIdAndStatuses(clubId, ClubMemberStatus.activeStatuses(), null,
+                        Pageable.unpaged())
+                .stream()
+                .map(ClubMember::getMemberId)
+                .toList();
     }
 
     public List<ClubMember> retrieveClubMembers(Set<Long> clubMemberIds) {

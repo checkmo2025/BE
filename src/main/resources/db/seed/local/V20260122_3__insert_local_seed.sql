@@ -243,31 +243,32 @@ VALUES
 -- =========================
 -- 17) vote
 -- =========================
-INSERT INTO vote (id, club_id, title, content, tag, important, anonymity, duplication, start_time, deadline,
-                  item1, item2, item3, item4, item5, created_at, updated_at)
+INSERT INTO vote (id, title, content, anonymity, duplication, start_time, deadline,
+                  item1, item2, item3, item4, item5, item6, created_at, updated_at)
 VALUES
-    (1, 1, '다음 모임 시간 투표', '선호 시간을 골라주세요', 'VOTE', b'1', b'0', b'0',
+    (1, '다음 모임 시간 투표', '선호 시간을 골라주세요', b'0', b'0',
      @now, DATE_ADD(@now, INTERVAL 14 DAY),
-     '토요일 오전', '토요일 오후', '일요일 오전', NULL, NULL, @now, @now);
+     '토요일 오전', '토요일 오후', '일요일 오전', NULL, NULL, NULL, @now, @now);
 
 -- =========================
 -- 18) club_member_vote
 -- =========================
-INSERT INTO club_member_vote (vote_id, club_member_id, item1, item2, item3, item4, item5)
+INSERT INTO club_member_vote (vote_id, club_member_id, item1, item2, item3, item4, item5, item6, created_at, updated_at)
 VALUES
-    (1, 1, b'1', b'0', b'0', b'0', b'0'),
-    (1, 2, b'0', b'1', b'0', b'0', b'0');
+    (1, 1, b'1', b'0', b'0', b'0', b'0', b'0', @now, @now),
+    (1, 2, b'0', b'1', b'0', b'0', b'0', b'0', @now, @now);
 
 -- =========================
 -- 19) notice
 -- =========================
-INSERT INTO notice (id, club_id, meeting_id, meeting_version, title, content, tag, important, created_at, updated_at)
+INSERT INTO notice (id, club_id, meeting_id, vote_id, title, content, tag, important, created_at, updated_at)
 VALUES
-    (1, 1, 1, 1, '[모임공지] 살인자ㅇ난감 함께 읽기', '모임 정보가 생성되었습니다. 장소/시간 확인 후 참여 부탁드려요.', 'MEETING', b'1', @now, @now),
-    (2, 1, 2, 1, '[모임공지] 거인의 어깨 1 스터디',  '모임 정보가 생성되었습니다. 토론 주제는 투자 철학 요약/비교입니다.', 'MEETING', b'1', @now, @now),
-    (3, 2, 3, 1, '[모임공지] 인생의 태도 모임',      '좋아하는 문장을 한 문장씩 공유하는 방식으로 진행합니다.',         'MEETING', b'1', @now, @now),
-    (4, 1, NULL, 1, '[공지] 모임 규칙', '장소/시간 확인 부탁드립니다.', 'NOTICE', b'1', @now, @now),
-    (5, 2, NULL, 1, '발제 자료 공유',         '발제 예제 링크를 공유합니다.', 'NOTICE', b'0', @now, @now);
+    (1, 1, 1, NULL, '[모임공지] 살인자ㅇ난감 함께 읽기', '모임 정보가 생성되었습니다. 장소/시간 확인 후 참여 부탁드려요.', 'MEETING', b'1', @now, @now),
+    (2, 1, 2, NULL, '[모임공지] 거인의 어깨 1 스터디',  '모임 정보가 생성되었습니다. 토론 주제는 투자 철학 요약/비교입니다.', 'MEETING', b'1', @now, @now),
+    (3, 2, 3, NULL, '[모임공지] 인생의 태도 모임',      '좋아하는 문장을 한 문장씩 공유하는 방식으로 진행합니다.',         'MEETING', b'1', @now, @now),
+    (4, 1, NULL, NULL, '[공지] 모임 규칙', '장소/시간 확인 부탁드립니다.', 'GENERAL', b'1', @now, @now),
+    (5, 2, NULL, NULL, '발제 자료 공유',         '발제 예제 링크를 공유합니다.', 'GENERAL', b'0', @now, @now),
+    (6, 1, NULL, 1, '다음 모임 시간 투표', '선호 시간을 골라주세요', 'VOTE', b'1', @now, @now);
 
 -- =========================
 -- 20) notification

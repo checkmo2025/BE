@@ -4,12 +4,18 @@ import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.ClubManagementExternalDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
+import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubManagementAPIImpl implements ClubManagementAPI {
 
     private final ClubManagementQueryService clubManagementQueryService;
+    private final ClubManagementCommandService clubManagementCommandService;
     private final ClubMemberQueryService clubMemberQueryService;
 
     @Override
@@ -45,7 +52,13 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
 
     @Override
     public ClubList fetchMyClubs(String memberId) {
-        return clubMemberQueryService.retrieveClubList(memberId);
+        List<ClubIdAndName> clubIdAndNames = clubMemberQueryService.retrieveActiveClubIdAndName(memberId);
+        List<BasicInfo> myClubBasicInfoList = clubIdAndNames.stream()
+                .map(cm -> new BasicInfo(cm.getId(), cm.getName()))
+                .toList();
+        return ClubManagementExternalDTO.ClubList.builder()
+                .clubList(myClubBasicInfoList)
+                .build();
     }
 
     @Override
@@ -60,6 +73,28 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
         if (!clubMember.isStaff()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
+    }
+
+    @Override
+    public void validateActiveClubMembers(Long clubId, Set<Long> clubMemberIds) throws ClubManagementException {
+        if (clubId == null) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_NOT_FOUND);
+        }
+        if (clubMemberIds == null || clubMemberIds.isEmpty()) {
+            return;
+        }
+        List<ClubMember> clubMembers = clubMemberQueryService.retrieveClubMembers(clubMemberIds);
+        if (clubMembers.size() != clubMemberIds.size()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
+        }
+        clubMembers.forEach(clubMember -> {
+            if (!clubMember.getClub().getId().equals(clubId)) {
+                throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
+            }
+            if (!clubMember.isActive()) {
+                throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+            }
+        });
     }
 
     @Override
@@ -100,7 +135,13 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
             Integer size
     ) {
         List<ClubMember> clubMembers
-                = clubMemberQueryService.retrieveClubMembers(clubId, "ACTIVE", cursorId, size);
+                = clubMemberQueryService.retrieveClubMembers(clubId, ClubMemberStatus.activeStatuses(), cursorId, size);
         return ClubManagementConverter.toMembershipDTOList(clubMembers);
+    }
+
+    @Override
+    @Transactional
+    public void touchLastActivity(Long clubId, LocalDateTime lastActivityTime) {
+        clubManagementCommandService.updateLastActivityTime(clubId, lastActivityTime);
     }
 }

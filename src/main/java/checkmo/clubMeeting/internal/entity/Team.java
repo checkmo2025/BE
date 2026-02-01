@@ -44,7 +44,7 @@ public class Team extends BaseEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
@@ -52,11 +52,8 @@ public class Team extends BaseEntity {
     @Builder.Default
     private List<ClubMemberTeam> clubMemberTeams = new ArrayList<>();
 
-    public void clearMemberTeams() {
-        this.clubMemberTeams.clear();
-    }
-
     // == 연관관계 메서드 == //
+
     public void setMeeting(Meeting meeting) {
         if (meeting == null) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.TEAM_MEETING_REQUIRED);
@@ -78,5 +75,16 @@ public class Team extends BaseEntity {
             this.meeting.getTeams().remove(this);
             this.meeting = null;
         }
+    }
+
+    public void addClubMemberTeam(ClubMemberTeam clubMemberTeam) {
+        if (clubMemberTeam == null) {
+            return;
+        }
+        clubMemberTeam.setTeam(this);
+    }
+
+    public void clearClubMemberTeam() {
+        this.clubMemberTeams.clear();
     }
 }

@@ -1,8 +1,25 @@
 package checkmo.clubManagement.internal.entity;
 
+import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Builder
@@ -21,6 +38,12 @@ public class ClubMember extends BaseEntity {
 
     private String joinMessage;
 
+    private LocalDateTime appliedAt; // 이번 가입 신청일
+
+    private LocalDateTime joinedAt; // 이번 가입 승인일
+
+    private LocalDateTime endedAt; // 탈퇴/강퇴일
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
     @Setter
@@ -29,20 +52,89 @@ public class ClubMember extends BaseEntity {
     @Column(name = "member_id", nullable = false)
     private String memberId;
 
-    public boolean isStaff() {
-        return this.clubMemberStatus == ClubMemberStatus.STAFF;
+    // 정적 팩토리 메서드 - 클럽장 전용 메서드
+    public static ClubMember ownerOf(String memberId, LocalDateTime now) {
+        return ClubMember.builder()
+                .memberId(memberId)
+                .clubMemberStatus(ClubMemberStatus.OWNER)
+                .appliedAt(now)
+                .joinedAt(now)
+                .build();
     }
 
-    public boolean isActive() {
-        return this.clubMemberStatus == ClubMemberStatus.MEMBER || this.clubMemberStatus == ClubMemberStatus.STAFF;
+    // 정적 팩토리 메서드 - 신규 가입 신청 전용 메서드
+    public static ClubMember apply(String memberId, ClubMemberStatus status, String message, LocalDateTime now) {
+        return ClubMember.builder()
+                .memberId(memberId)
+                .clubMemberStatus(status)
+                .joinMessage(message)
+                .appliedAt(now)
+                .joinedAt(status == ClubMemberStatus.MEMBER ? now : null)
+                .build();
+    }
+
+    // 재가입 전용 메서드
+    public void reapply(ClubMemberStatus status, String message, LocalDateTime now) {
+        if (this.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_ALREADY_JOINED);
+        }
+        this.clubMemberStatus = status;
+        this.joinMessage = message;
+        this.appliedAt = now;
+        this.joinedAt = (status == ClubMemberStatus.MEMBER) ? now : null;
+    }
+
+    // 가입 승인 전용 메서드
+    public void join(LocalDateTime now) {
+        if (!this.getClubMemberStatus().isJoinInProgress()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+        this.clubMemberStatus = ClubMemberStatus.MEMBER;
+        this.joinedAt = now;
+    }
+
+    // 탈퇴 전용 메서드
+    public void leave(LocalDateTime now) {
+        if (this.isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_CANNOT_LEAVE);
+        }
+        if (!this.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+        this.clubMemberStatus = ClubMemberStatus.WITHDRAWN;
+        this.endedAt = now;
+    }
+
+    // 강퇴 전용 메서드
+    public void kick(LocalDateTime now) {
+        if (this.getClubMemberStatus().isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_CANNOT_BE_KICKED);
+        }
+        if (!this.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+        this.clubMemberStatus = ClubMemberStatus.KICKED;
+        this.endedAt = now;
     }
 
     public void updateStatus(ClubMemberStatus newStatus) {
         this.clubMemberStatus = newStatus;
     }
 
-    public enum ClubMemberStatus {
-        MEMBER, STAFF, PENDING, BLOCKED
+    // 상태 확인 메서드
+    public boolean isOwner() {
+        return this.clubMemberStatus.isOwner();
     }
 
+    public boolean isStaff() {
+        return this.clubMemberStatus.isStaff();
+    }
+
+    public boolean isActive() {
+        return this.clubMemberStatus.isActive();
+    }
+
+    public boolean isJoinInProgress() {
+        return this.clubMemberStatus.isJoinInProgress();
+    }
 }

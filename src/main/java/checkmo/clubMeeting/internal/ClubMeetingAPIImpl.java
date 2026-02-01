@@ -2,19 +2,11 @@ package checkmo.clubMeeting.internal;
 
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
-import checkmo.book.BookExternalDTO.BasicInfo;
 import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
-import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
-import checkmo.common.template.ExtractHelper;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,37 +27,9 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     }
 
     @Override
-    public Map<Long, DetailInfo> fetchMeetingDetailInfoByMeetingIds(Set<Long> meetingIds) {
-        if (meetingIds == null) {
-            return Map.of();
-        }
-
-        List<Meeting> meetings = clubMeetingQueryService.retrieveMeetings(meetingIds);
-        if (meetings.size() != meetingIds.size()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.MEETING_NOT_FOUND);
-        }
-        List<String> bookIds = ExtractHelper.extractDistinctList(meetings, Meeting::getBookId);
-
-        Map<String, BasicInfo> bookBasicInfo = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
-
-        return toMeetingInfoMap(meetings, bookBasicInfo);
-    }
-
-    @Override
     public boolean isMeetingInClub(Long clubId, Long meetingId) {
         Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
         return meeting.getClubId().equals(clubId);
-    }
-
-    private Map<Long, DetailInfo> toMeetingInfoMap(List<Meeting> meetings, Map<String, BasicInfo> bookBasicInfo) {
-        return meetings.stream()
-                .collect(Collectors.toMap(
-                        Meeting::getId,
-                        meeting -> ClubMeetingConverter.toMeetingInfoExternalDTO(
-                                meeting,
-                                bookBasicInfo.get(meeting.getBookId())
-                        )
-                ));
     }
 
 }

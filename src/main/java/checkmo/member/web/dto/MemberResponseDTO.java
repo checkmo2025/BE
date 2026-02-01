@@ -75,6 +75,23 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class RecommendedMember {
+        private String nickname;
+        private String profileImageUrl;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RecommendedMemberList {
+        private List<RecommendedMember> friends;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class LoginStatus {
         private String provider;
         private String email;

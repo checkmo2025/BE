@@ -6,11 +6,10 @@ import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.member.MemberExternalDTO;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -21,12 +20,11 @@ public class ClubMeetingConverter {
     // ?? -> 엔티티 변환
     // =====================================================
 
-    public static Meeting toMeeting(MeetingRequestDTO.MeetingCreate request, Long clubId, String bookId) {
+    public static Meeting toMeeting(BookShelfCreate request, Long clubId, String bookId) {
         return Meeting.builder()
                 .title(request.getTitle())
                 .meetingTime(request.getMeetingTime())
                 .location(request.getLocation())
-                .content(request.getContent())
                 .generation(request.getGeneration())
                 .tag(request.getTag())
                 .clubId(clubId)
@@ -80,14 +78,14 @@ public class ClubMeetingConverter {
             Meeting meeting,
             BookExternalDTO.BasicInfo bookInfo
     ) {
-        BookShelfResponseDTO.MeetingInfo meetingInfo = toMeetingInfoDTO(meeting);
+        BookShelfResponseDTO.MeetingInfo meetingInfo = toMeetingInfoDTOForBookshelves(meeting);
         return BookShelfResponseDTO.BookShelfInfo.builder()
                 .meetingInfo(meetingInfo)
                 .bookInfo(bookInfo)
                 .build();
     }
 
-    public static BookShelfResponseDTO.MeetingInfo toMeetingInfoDTO(Meeting meeting) {
+    public static BookShelfResponseDTO.MeetingInfo toMeetingInfoDTOForBookshelves(Meeting meeting) {
         return BookShelfResponseDTO.MeetingInfo.builder()
                 .meetingId(meeting.getId())
                 .generation(meeting.getGeneration())
@@ -112,28 +110,26 @@ public class ClubMeetingConverter {
     // ?? -> MeetingResponseDTO 변환
     // =====================================================
 
-    public static MeetingResponseDTO.MeetingInfo toMeetingInfoDTO(Meeting meeting, BookExternalDTO.BasicInfo bookInfo) {
+    public static MeetingResponseDTO.MeetingInfo toMeetingInfoDTOForMeeting(Meeting meeting) {
         return MeetingResponseDTO.MeetingInfo.builder()
                 .meetingId(meeting.getId())
                 .title(meeting.getTitle())
                 .meetingTime(meeting.getMeetingTime())
                 .location(meeting.getLocation())
-                .generation(meeting.getGeneration())
-                .tag(meeting.getTag())
-                .bookInfo(bookInfo)
                 .build();
     }
 
     public static MeetingResponseDTO.Topic toTopicDTO(
             Topic topic,
             MemberExternalDTO.BasicInfo authorInfo,
-            List<Integer> teamNumbers
+            boolean isSelected
     ) {
         return MeetingResponseDTO.Topic.builder()
                 .topicId(topic.getId())
                 .content(topic.getDescription())
-                .authorInfo(authorInfo)
-                .teamNumbers(teamNumbers)
+                .createdAt(topic.getCreatedAt())
+                .author(authorInfo)
+                .isSelected(isSelected)
                 .build();
     }
 
@@ -152,7 +148,6 @@ public class ClubMeetingConverter {
                 .location(meeting.getLocation())
                 .generation(meeting.getGeneration())
                 .tag(meeting.getTag())
-                .content(meeting.getContent())
                 .bookInfo(bookInfo)
                 .build();
     }
