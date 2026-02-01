@@ -14,6 +14,7 @@ import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfUpdate;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamManage;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +49,7 @@ public class ClubMeetingCommandService {
         Meeting meeting = ClubMeetingConverter.toMeeting(request, clubId, bookId);
         Meeting savedMeeting = meetingRepository.saveAndFlush(meeting);
 
+        clubManagementAPI.touchLastActivity(clubId, LocalDateTime.now());
         publishMeetingCreatedNotificationEvent(savedMeeting, clubId);
     }
 
@@ -76,6 +78,7 @@ public class ClubMeetingCommandService {
         );
 
         meetingRepository.saveAndFlush(meeting);
+        clubManagementAPI.touchLastActivity(clubId, LocalDateTime.now());
     }
 
     public void manageTeam(Long clubId, Long meetingId, String memberId, MeetingRequestDTO.TeamManage request) {

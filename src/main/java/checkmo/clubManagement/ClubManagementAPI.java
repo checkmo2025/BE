@@ -4,6 +4,7 @@ import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +35,7 @@ public interface ClubManagementAPI {
     Map<Long, String> fetchClubNamesByClubIds(List<Long> clubIds);
 
     /**
-     * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다.
+     * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다. 이때 회원이 활성화 상태인 모임만 조회됩니다.
      *
      * @param memberId 회원 ID
      * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
@@ -104,4 +105,12 @@ public interface ClubManagementAPI {
      * @return 멤버십 목록
      */
     List<MembershipInfo> fetchActiveMembershipInfo(Long clubId, Long cursorId, Integer size);
+
+    /**
+     * 특정 모임의 마지막 활동 시간을 갱신합니다.
+     *
+     * @param clubId           모임 ID
+     * @param lastActivityTime 마지막 활동 시간
+     */
+    void touchLastActivity(Long clubId, LocalDateTime lastActivityTime);
 }

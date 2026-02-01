@@ -3,26 +3,29 @@ package checkmo.clubManagement.internal.service;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.entity.ClubMember.ClubMemberStatus;
+import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameAndClubMemberId;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
+import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberStatusFilter;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
-import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetail;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailWithMyStatus;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.MyClubMemberStatus;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.MyMembership;
+import checkmo.clubManagement.web.dto.myClub.MyClubResponseDTO;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
-
-import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -35,13 +38,29 @@ public class ClubManagementQueryFacade {
     private final ClubManagementQueryService clubManagementQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
 
+    public ClubResponseDTO.ClubDetail retrieveClubDetail(Long clubId, String memberId) {
+        Club club = clubManagementQueryService.validateClub(clubId);
+        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+        boolean isStaff = clubMember.isStaff();
+        if (!isStaff) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
+        }
+
+        return ClubManagementConverter.toClubDetailDTO(club, true);
+    }
+
+    public ClubResponseDTO.ClubDetail retrieveClubHome(Long clubId) {
+        Club club = clubManagementQueryService.validateClub(clubId);
+        return ClubManagementConverter.toClubDetailDTO(club, false);
+    }
+
     public ClubResponseDTO.ClubList retrieveClubList(
             String memberId,
             ClubRequestDTO.ClubSearchFilter filter,
-            ClubRequestDTO.CursorInfo pageRequest
+            Long cursorId
     ) {
         CursorResult<Club> clubCursorResult = CursorPagingHelper.getPage(
-                pageSize -> clubManagementQueryService.retrieveClubs(filter, pageRequest.cursorId(), pageSize),
+                size -> clubManagementQueryService.retrieveClubs(filter, cursorId, size),
                 Club::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -50,98 +69,86 @@ public class ClubManagementQueryFacade {
         List<Long> clubIds = ExtractHelper.extractDistinctList(clubs, Club::getId);
 
         // 클럽별 멤버 상태 배치 조회
-        Map<Long, ClubMember.ClubMemberStatus> statusMap
+        Map<Long, ClubMemberStatus> statusMap
                 = clubMemberQueryService.retrieveClubMemberStatusByClubIds(memberId, clubIds);
 
-        List<ClubResponseDTO.ClubWithMyStatus> clubList = clubs.stream()
-                .map(club -> toClubWithMyStatusDTO(club, statusMap))
+        List<ClubDetailWithMyStatus> clubList = clubs.stream()
+                .map(club -> toClubDetailWithMyStatusDTO(club, statusMap))
                 .toList();
 
-        // 8. 최종 DTO 변환
         return ClubResponseDTO.ClubList.builder()
                 .clubList(clubList)
                 .hasNext(clubCursorResult.hasNext())
                 .nextCursor(clubCursorResult.nextCursor())
-                .pageSize(clubList.size())
                 .build();
     }
 
-    private ClubResponseDTO.ClubWithMyStatus toClubWithMyStatusDTO(
+    private ClubDetailWithMyStatus toClubDetailWithMyStatusDTO(
             Club club,
-            Map<Long, ClubMember.ClubMemberStatus> statusMap
+            Map<Long, ClubMemberStatus> statusMap
     ) {
-        ClubMember.ClubMemberStatus status = statusMap.get(club.getId());
-        boolean isStaff = (status == ClubMemberStatus.STAFF);
-        boolean isMember = (status != null);
+        ClubMemberStatus rawStatus = statusMap.get(club.getId());
+        ClubResponseDTO.MyClubMemberStatus myStatus =
+                (rawStatus == null) ? MyClubMemberStatus.NONE : MyClubMemberStatus.valueOf(rawStatus.name());
+        ClubResponseDTO.ClubDetail clubDetail = ClubManagementConverter.toClubDetailDTO(club, false);
 
-        ClubResponseDTO.ClubDetail clubDetail = ClubManagementConverter.toClubDetailDTO(club, isStaff);
-
-        return ClubResponseDTO.ClubWithMyStatus.builder()
+        return ClubDetailWithMyStatus.builder()
                 .club(clubDetail)
-                .isMember(isMember)
+                .myStatus(myStatus)
                 .build();
     }
 
-    public ClubResponseDTO.MyClubList retrieveMyClubList(String memberId) {
-        // 1. 회원이 가입한 모임 목록 조회
-        List<BasicInfo> myClubs = clubMemberQueryService.retrieveClubList(memberId)
-                .getClubList();
-
-        // 2. 모임 정보 DTO로 변환
-        List<ClubResponseDTO.ClubInfo> clubInfoList = myClubs.stream()
-                .map(ClubManagementConverter::toClubInfoDTO)
-                .toList();
-
-        // 3. 최종 DTO 반환
-        return ClubResponseDTO.MyClubList.builder()
-                .clubList(clubInfoList)
-                .build();
-    }
-
-    public ClubResponseDTO.MyPageClubList retrieveMyPageClubList(String memberId, Long cursorId) {
-        CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
-                pageSize -> clubMemberQueryService.retrieveClubMembers(memberId, cursorId, pageSize),
-                ClubMember::getId,
+    public MyClubResponseDTO.MyClubList retrieveMyClubList(String memberId, Long cursorId) {
+        CursorResult<ClubIdAndNameAndClubMemberId> cursorResult = CursorPagingHelper.getPage(
+                size -> clubMemberQueryService.retrieveMyActiveClubsByCursor(memberId, cursorId, size),
+                ClubIdAndNameAndClubMemberId::getClubMemberId,
                 DEFAULT_PAGE_SIZE
         );
-        List<ClubMember> clubMembers = clubMemberCursorResult.content();
+        List<MyClubResponseDTO.ClubInfo> clubInfoList = cursorResult.content().stream()
+                .map(c -> MyClubResponseDTO.ClubInfo.builder()
+                        .clubId(c.getClubId())
+                        .clubName(c.getClubName())
+                        .build()
+                )
+                .toList();
 
-        List<ClubResponseDTO.ClubDetail> clubList = convertToClubResponseDTO(clubMembers);
-        return ClubResponseDTO.MyPageClubList.builder()
-                .clubList(clubList)
-                .hasNext(clubMemberCursorResult.hasNext())
-                .nextCursor(clubMemberCursorResult.nextCursor())
+        return MyClubResponseDTO.MyClubList.builder()
+                .clubList(clubInfoList)
+                .hasNext(cursorResult.hasNext())
+                .nextCursor(cursorResult.nextCursor())
                 .build();
     }
 
-    private List<ClubDetail> convertToClubResponseDTO(List<ClubMember> clubMembers) {
-        return clubMembers.stream()
-                .map(cm -> ClubManagementConverter.toClubDetailDTO(
-                        cm.getClub(),
-                        cm.isStaff()
-                ))
-                .toList();
+    public ClubResponseDTO.MyMembership retrieveMyMembership(Long clubId, String memberId) {
+        clubManagementQueryService.validateClub(clubId);
+        Optional<ClubMember> clubMemberOpt = clubMemberQueryService.findClubMember(clubId, memberId);
+        if (clubMemberOpt.isEmpty()) {
+            return toNoneMembershipResponse(clubId);
+        }
+        ClubMember clubMember = clubMemberOpt.get();
+
+        MyClubMemberStatus myStatus = MyClubMemberStatus.valueOf(clubMember.getClubMemberStatus().name());
+        return ClubResponseDTO.MyMembership.builder()
+                .clubId(clubId)
+                .myStatus(myStatus)
+                .isActive(clubMember.isActive())
+                .isStaff(clubMember.isStaff())
+                .build();
     }
 
-    public ClubResponseDTO.ClubDetail retrieveClubDetail(Long clubId, String memberId) {
-        // 1. Service에서 순수 엔티티 조회
-        Club club = clubManagementQueryService.retrieveClub(clubId);
-
-        // 2. 운영진 권한 확인
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        boolean isStaff = clubMember.isStaff();
-        if (!isStaff) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
-        }
-
-        // 3. DTO 변환 후 반환
-        return ClubManagementConverter.toClubDetailDTO(club, isStaff);
+    private MyMembership toNoneMembershipResponse(Long clubId) {
+        return MyMembership.builder()
+                .clubId(clubId)
+                .myStatus(MyClubMemberStatus.NONE)
+                .isActive(false)
+                .isStaff(false)
+                .build();
     }
 
     public ClubResponseDTO.ClubMemberList retrieveClubMemberList(
             Long clubId,
             String memberId,
-            String clubMemberStatus,
+            ClubMemberStatusFilter statusFilter,
             Long cursorId
     ) {
         clubManagementQueryService.validateClub(clubId);
@@ -151,18 +158,19 @@ public class ClubManagementQueryFacade {
         }
 
         CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
-                size -> clubMemberQueryService.retrieveClubMembers(clubId, clubMemberStatus, cursorId, size),
+                size -> clubMemberQueryService.retrieveClubMembers(clubId, statusFilter.toClubMemberStatusesOrNull(),
+                        cursorId, size),
                 ClubMember::getId,
                 DEFAULT_PAGE_SIZE
         );
         List<ClubMember> clubMembers = clubMemberCursorResult.content();
         List<String> memberIds = ExtractHelper.extractDistinctList(clubMembers, ClubMember::getMemberId);
 
-        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
+        Map<String, MemberExternalDTO.DetailInfo> memberInfoMap = memberAPI.fetchMemberDetailInfoByMemberIds(memberIds);
 
         List<ClubResponseDTO.ClubMember> dtoList = clubMembers.stream()
                 .map(cm -> {
-                    MemberExternalDTO.BasicInfo memberInfo = memberInfoMap.get(cm.getMemberId());
+                    MemberExternalDTO.DetailInfo memberInfo = memberInfoMap.get(cm.getMemberId());
                     return ClubManagementConverter.toClubMemberDTO(cm, memberInfo);
                 })
                 .toList();
@@ -171,15 +179,6 @@ public class ClubManagementQueryFacade {
                 .clubMembers(dtoList)
                 .hasNext(clubMemberCursorResult.hasNext())
                 .nextCursor(clubMemberCursorResult.nextCursor())
-                .pageSize(dtoList.size())
-                .isStaff(true) // 항상 true
                 .build();
     }
-
-    public Boolean isClubMemberStaff(Long clubId, String memberId) {
-        clubManagementQueryService.validateClub(clubId);
-        ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
-        return clubMember.isStaff();
-    }
-
 }
