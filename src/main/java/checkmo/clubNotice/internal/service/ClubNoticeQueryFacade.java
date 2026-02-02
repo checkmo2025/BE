@@ -58,7 +58,7 @@ public class ClubNoticeQueryFacade {
             boolean important
     ) {
         clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembershipInfoInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
         PageResult<Notice> noticePageResult = PagePagingHelper.getPage(
                 pageable -> clubNoticeQueryService.retrieveNotices(clubId, important, pageable),
@@ -77,7 +77,6 @@ public class ClubNoticeQueryFacade {
                 .totalElements(noticePageResult.totalElements())
                 .totalPages(noticePageResult.totalPages())
                 .hasNext(noticePageResult.hasNext())
-                .isStaff(clubMembershipInfoInfo.isStaff())
                 .build();
     }
 
@@ -102,7 +101,7 @@ public class ClubNoticeQueryFacade {
             voteDetail = buildVoteDetail(notice.getVote(), clubMembershipInfo.getClubMemberId());
         }
 
-        return ClubNoticeConverter.toClubNoticeDetail(notice, meetingDetail, voteDetail, clubMembershipInfo);
+        return ClubNoticeConverter.toClubNoticeDetail(notice, meetingDetail, voteDetail);
     }
 
     public NoticeCommentList retrieveNoticeComments(Long clubId, Long noticeId, String memberId, Long cursorId) {
