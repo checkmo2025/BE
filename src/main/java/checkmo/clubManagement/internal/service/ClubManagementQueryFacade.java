@@ -131,8 +131,8 @@ public class ClubManagementQueryFacade {
         return ClubResponseDTO.MyMembership.builder()
                 .clubId(clubId)
                 .myStatus(myStatus)
-                .isActive(clubMember.isActive())
-                .isStaff(clubMember.isStaff())
+                .active(clubMember.isActive())
+                .staff(clubMember.isStaff())
                 .build();
     }
 
@@ -140,8 +140,8 @@ public class ClubManagementQueryFacade {
         return MyMembership.builder()
                 .clubId(clubId)
                 .myStatus(MyClubMemberStatus.NONE)
-                .isActive(false)
-                .isStaff(false)
+                .active(false)
+                .staff(false)
                 .build();
     }
 

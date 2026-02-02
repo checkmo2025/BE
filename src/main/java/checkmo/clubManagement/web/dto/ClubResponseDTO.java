@@ -5,6 +5,8 @@ import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -114,10 +116,26 @@ public class ClubResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MyMembership {
+        @Schema(description = "모임 ID", example = "12345")
         private Long clubId;
+        @Schema(description = """
+                회원의 모임 내 상태
+                - NONE: 모임에서 아무런 이력이 없는 상태
+                - PENDING: 모임 가입을 신청해서 승인을 대기중인 상태
+                - MEMBER: 모임의 정식 회원으로 활동 중인 상태
+                - STAFF: 모임의 운영진으로 활동 중인 상태
+                - OWNER: 모임의 소유자(최고 운영자)인 상태
+                - WITHDRAWN: 모임에서 자진 탈퇴한 상태
+                - KICKED: 모임에서 강제 탈퇴된 상태
+                """,
+                example = "MEMBER")
         private MyClubMemberStatus myStatus;
-        private boolean isActive;
-        private boolean isStaff;
+        @JsonProperty("isActive")
+        @Schema(description = "회원이 모임에서 활동 가능한지 여부(MEMBER, STAFF, OWNER이면 true, 그외 false)", example = "true")
+        private boolean active;
+        @JsonProperty("isStaff")
+        @Schema(description = "회원이 모임의 운영진인지 여부(STAFF, OWNER이면 ture, 그외 false)", example = "false")
+        private boolean staff;
     }
 
     @Getter

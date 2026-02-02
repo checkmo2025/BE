@@ -161,7 +161,7 @@ public class ClubController {
 
     @Operation(summary = "클럽에서의 나의 상태 조회", description = "클럽에서 현재 로그인한 사용자의 멤버 상태를 반환합니다. 403 발생 시 클라이언트는 이 API를 호출하여 상태를 갱신할 수 있습니다.")
     @Parameters({
-            @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "clubId", description = "조회할 독서클럽 ID", required = true, example = "1"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
