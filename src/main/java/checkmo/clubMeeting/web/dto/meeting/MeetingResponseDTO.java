@@ -1,7 +1,7 @@
 package checkmo.clubMeeting.web.dto.meeting;
 
-import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.member.MemberExternalDTO;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -53,7 +53,6 @@ public class MeetingResponseDTO {
         private List<Topic> topics;
         private boolean hasNext;
         private Long nextCursor;
-        private MembershipInfo membershipInfo;
     }
 
     @Getter
@@ -61,9 +60,10 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMemberList {
-        private MembershipInfo membershipInfo;
+        @Schema(description = "존재하는 팀 번호 목록", example = "[1, 2, 3]")
         private List<Integer> existingTeamNumbers;
-        private List<MeetingMember> members; // 모임 참여자 목록
+        @Schema(description = "모임 참여자 목록")
+        private List<MeetingMember> members;
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -73,8 +73,10 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMember {
+        @Schema(description = "참여자 정보(프로필 사진, 닉네임 정보)")
         private MemberExternalDTO.BasicInfo memberInfo; // 참여자 정보
-        private Integer teamNumber; // 배정된 팀 번호
+        @Schema(description = "배정된 팀 번호(만약 팀이 배정되지 않았다면 null)", example = "1")
+        private Integer teamNumber;
     }
 
     @Getter
@@ -86,7 +88,6 @@ public class MeetingResponseDTO {
         private List<MemberExternalDTO.BasicInfo> members; // 해당 팀의 참여자 목록
         private boolean hasNext;
         private Long nextCursor;
-        private MembershipInfo membershipInfo;
     }
 
     @Getter

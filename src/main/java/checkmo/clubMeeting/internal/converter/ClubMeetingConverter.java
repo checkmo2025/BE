@@ -70,7 +70,7 @@ public class ClubMeetingConverter {
                 .topicId(topic.getId())
                 .content(topic.getDescription())
                 .authorInfo(authorInfo)
-                .isAuthor(topic.isOwnedBy(memberId))
+                .author(topic.isOwnedBy(memberId))
                 .build();
     }
 
@@ -96,28 +96,21 @@ public class ClubMeetingConverter {
 
     public static BookShelfResponseDTO.BookReviewDetail toBookReviewDetailDTO(
             BookReview bookReview,
-            MemberExternalDTO.BasicInfo memberInfo
+            MemberExternalDTO.BasicInfo memberInfo,
+            boolean isAuthor
     ) {
         return BookShelfResponseDTO.BookReviewDetail.builder()
                 .bookReviewId(bookReview.getId())
                 .description(bookReview.getDescription())
                 .rate(bookReview.getRate())
                 .authorInfo(memberInfo)
+                .author(isAuthor)
                 .build();
     }
 
     // =====================================================
     // ?? -> MeetingResponseDTO 변환
     // =====================================================
-
-    public static MeetingResponseDTO.MeetingInfo toMeetingInfoDTOForMeeting(Meeting meeting) {
-        return MeetingResponseDTO.MeetingInfo.builder()
-                .meetingId(meeting.getId())
-                .title(meeting.getTitle())
-                .meetingTime(meeting.getMeetingTime())
-                .location(meeting.getLocation())
-                .build();
-    }
 
     public static MeetingResponseDTO.Topic toTopicDTO(
             Topic topic,

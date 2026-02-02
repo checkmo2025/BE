@@ -47,6 +47,10 @@ public class BookReview extends BaseEntity {
         this.rate = rate;
     }
 
+    public boolean isOwnedBy(Long clubMemberId) {
+        return this.clubMemberId.equals(clubMemberId);
+    }
+
     public void setMeeting(Meeting meeting) {
         if (this.meeting == meeting) {
             return;

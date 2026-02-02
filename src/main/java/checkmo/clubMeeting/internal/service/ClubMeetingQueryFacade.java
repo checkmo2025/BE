@@ -57,7 +57,7 @@ public class ClubMeetingQueryFacade {
             Long cursorId
     ) {
         clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
         CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
                 pageSize -> clubMeetingQueryService.retrieveMeetings(clubId, cursorId, pageSize),
@@ -74,13 +74,12 @@ public class ClubMeetingQueryFacade {
                 .bookShelfInfoList(mapMeetingsToBookshelfInfo(meetings, bookInfoMap))
                 .hasNext(meetingCursorResult.hasNext())
                 .nextCursor(meetingCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
     public BookShelfResponseDTO.BookShelfDetail retrieveBookShelfDetail(Long clubId, Long meetingId, String memberId) {
         clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
@@ -88,7 +87,6 @@ public class ClubMeetingQueryFacade {
         return BookShelfDetail.builder()
                 .meetingInfo(ClubMeetingConverter.toMeetingInfoDTOForBookshelves(meeting))
                 .bookDetailInfo(bookInfo)
-                .membershipInfo(clubMembership)
                 .build();
     }
 
@@ -99,7 +97,7 @@ public class ClubMeetingQueryFacade {
             Long cursorId
     ) {
         clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
@@ -117,7 +115,6 @@ public class ClubMeetingQueryFacade {
                 .topicDetailList(mapTopicsToTopicDetail(topics, authorInfoMap, memberId))
                 .hasNext(topicCursorResult.hasNext())
                 .nextCursor(topicCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
@@ -128,7 +125,7 @@ public class ClubMeetingQueryFacade {
             Long cursorId
     ) {
         clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        MembershipInfo membershipInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<BookReview> bookReviewCursorResult = CursorPagingHelper.getPage(
@@ -143,10 +140,10 @@ public class ClubMeetingQueryFacade {
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         return BookShelfResponseDTO.BookReviewList.builder()
-                .bookReviewDetailList(mapReviewsToReviewDetail(bookReviews, authorInfoMap))
+                .bookReviewDetailList(
+                        mapReviewsToReviewDetail(bookReviews, membershipInfo.getClubMemberId(), authorInfoMap))
                 .hasNext(bookReviewCursorResult.hasNext())
                 .nextCursor(bookReviewCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
@@ -226,7 +223,6 @@ public class ClubMeetingQueryFacade {
                 .existingTeamNumbers(ExtractHelper.extractDistinctList(teams, Team::getTeamNumber))
                 .hasNext(membershipCursorResult.hasNext())
                 .nextCursor(membershipCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
@@ -238,7 +234,7 @@ public class ClubMeetingQueryFacade {
             Long cursorId
     ) {
         clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
 
@@ -266,14 +262,13 @@ public class ClubMeetingQueryFacade {
                 .members(memberBasicInfoMap.values().stream().toList())
                 .hasNext(clubMemberTeamCursorResult.hasNext())
                 .nextCursor(clubMemberTeamCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
     public MeetingResponseDTO.TeamTopic retrieveSelectableTopics(
             Long clubId, Long meetingId, Integer teamNumber, String memberId, Long cursorId) {
         clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
 
@@ -303,7 +298,6 @@ public class ClubMeetingQueryFacade {
                         .toList())
                 .hasNext(topicCursorResult.hasNext())
                 .nextCursor(topicCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
@@ -329,12 +323,14 @@ public class ClubMeetingQueryFacade {
 
     private List<BookShelfResponseDTO.BookReviewDetail> mapReviewsToReviewDetail(
             List<BookReview> bookReviews,
+            Long actorId,
             Map<String, MemberExternalDTO.BasicInfo> authorInfoMap
     ) {
         return bookReviews.stream()
                 .map(review -> ClubMeetingConverter.toBookReviewDetailDTO(
                         review,
-                        authorInfoMap.get(review.getMemberId())
+                        authorInfoMap.get(review.getMemberId()),
+                        review.isOwnedBy(actorId)
                 ))
                 .toList();
     }
