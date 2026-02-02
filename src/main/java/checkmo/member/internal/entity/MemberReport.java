@@ -33,7 +33,7 @@ public class MemberReport extends BaseEntity {
     private Member reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reportedMember_id")
+    @JoinColumn(name = "reported_member_id")
     private Member reportedMember;
 
     @Enumerated(EnumType.STRING)
