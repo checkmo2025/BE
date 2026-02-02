@@ -73,6 +73,8 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMember {
+        @Schema(description = "클럽 멤버십 ID", example = "101")
+        private Long clubMemberId;
         @Schema(description = "참여자 정보(프로필 사진, 닉네임 정보)")
         private MemberExternalDTO.BasicInfo memberInfo; // 참여자 정보
         @Schema(description = "배정된 팀 번호(만약 팀이 배정되지 않았다면 null)", example = "1")

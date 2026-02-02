@@ -53,7 +53,6 @@ public class Team extends BaseEntity {
     private List<ClubMemberTeam> clubMemberTeams = new ArrayList<>();
 
     // == 연관관계 메서드 == //
-
     public void setMeeting(Meeting meeting) {
         if (meeting == null) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.TEAM_MEETING_REQUIRED);
@@ -84,7 +83,16 @@ public class Team extends BaseEntity {
         clubMemberTeam.setTeam(this);
     }
 
-    public void clearClubMemberTeam() {
-        this.clubMemberTeams.clear();
+    public void removeAllClubMemberTeams() {
+        for (ClubMemberTeam cmt : new ArrayList<>(this.clubMemberTeams)) {
+            removeClubMemberTeam(cmt);
+        }
+    }
+
+    private void removeClubMemberTeam(ClubMemberTeam clubMemberTeam) {
+        if (clubMemberTeam == null || !clubMemberTeams.contains(clubMemberTeam)) {
+            return;
+        }
+        this.clubMemberTeams.remove(clubMemberTeam);
     }
 }

@@ -380,6 +380,7 @@ public class ClubMeetingQueryFacade {
         MemberExternalDTO.BasicInfo memberInfo = memberBasicInfoMap.get(memberId);
         Integer teamNumber = memberIdToTeamNumberMap.get(memberId);
         return MeetingResponseDTO.MeetingMember.builder()
+                .clubMemberId(membershipInfo.getClubMemberId())
                 .memberInfo(memberInfo)
                 .teamNumber(teamNumber)
                 .build();
