@@ -46,12 +46,12 @@ public class ClubManagementQueryFacade {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        return ClubManagementConverter.toClubDetailDTO(club, true);
+        return ClubManagementConverter.toClubDetailDTO(club, true, true);
     }
 
     public ClubResponseDTO.ClubDetail retrieveClubHome(Long clubId) {
         Club club = clubManagementQueryService.validateClub(clubId);
-        return ClubManagementConverter.toClubDetailDTO(club, false);
+        return ClubManagementConverter.toClubDetailDTO(club, true, false);
     }
 
     public ClubResponseDTO.ClubList retrieveClubList(
@@ -90,7 +90,7 @@ public class ClubManagementQueryFacade {
         ClubMemberStatus rawStatus = statusMap.get(club.getId());
         ClubResponseDTO.MyClubMemberStatus myStatus =
                 (rawStatus == null) ? MyClubMemberStatus.NONE : MyClubMemberStatus.valueOf(rawStatus.name());
-        ClubResponseDTO.ClubDetail clubDetail = ClubManagementConverter.toClubDetailDTO(club, false);
+        ClubResponseDTO.ClubDetail clubDetail = ClubManagementConverter.toClubDetailDTO(club, false, false);
 
         return ClubDetailWithMyStatus.builder()
                 .club(clubDetail)
