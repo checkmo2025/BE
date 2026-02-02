@@ -10,12 +10,15 @@ import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
+import checkmo.member.internal.service.query.MemberReportQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
+import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
+import checkmo.member.web.dto.MemberResponseDTO.ReportList;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,7 @@ public class MemberQueryFacade {
 
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
+    private final MemberReportQueryService memberReportQueryService;
 
     public DetailInfo retrieveMemberDetailInfo(String memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
@@ -169,6 +173,18 @@ public class MemberQueryFacade {
                 .build();
     }
 
+    public ReportList retrieveReportsByMemberNickname(String nickname) {
+        var reports = memberReportQueryService.retrieveReportsByReportedMemberNickname(nickname);
+
+        List<ReportInfo> reportInfos = reports.stream()
+                .map(MemberConverter::toReportInfo)
+                .toList();
+
+        return ReportList.builder()
+                .reports(reportInfos)
+                .build();
+    }
+
     public MemberResponseDTO.LoginStatus retrieveLoginStatus(String memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
 
@@ -185,3 +201,4 @@ public class MemberQueryFacade {
                                             .build();
     }
 }
+

@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatus;
 public enum MemberErrorStatus implements BaseErrorCode {
     // 회원
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_400", "해당 회원을 찾을 수 없습니다."),
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBER_410", "비밀번호가 일치하지 않습니다."),
+    CURRENT_PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_412", "기존 비밀번호가 올바르지 않습니다. 다시 시도해주세요."),
+    EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_413", "이미 사용 중인 이메일입니다."),
+    CURRENT_EMAIL_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_414", "입력하신 기존 이메일 정보가 정확하지 않습니다."),
 
     // 팔로우
     MEMBER_CANNOT_FOLLOW_SELF(HttpStatus.BAD_REQUEST, "FOLLOW_400", "자기 자신을 팔로잉할 수 없습니다."),
@@ -18,11 +22,9 @@ public enum MemberErrorStatus implements BaseErrorCode {
     MEMBER_NOT_FOLLOWING(HttpStatus.BAD_REQUEST, "FOLLOW_402", "팔로우 중이지 않은 회원입니다."),
     MEMBER_NOT_FOLLOWER(HttpStatus.BAD_REQUEST, "FOLLOW_403", "팔로워가 아닌 회원입니다."),
     MULTIPLE_ACCOUNTS_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_409", "해당 정보로 가입된 계정이 여러 개입니다. 관리자에게 문의해주세요."),
-    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBER_410", "비밀번호가 일치하지 않습니다."),
-    CURRENT_PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_412", "기존 비밀번호가 올바르지 않습니다. 다시 시도해주세요."),
-    EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_413", "이미 사용 중인 이메일입니다."),
-    CURRENT_EMAIL_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_414", "입력하신 기존 이메일 정보가 정확하지 않습니다.")
-        ;
+
+    // 신고
+    CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "REPORT_400", "자기 자신을 신고할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
