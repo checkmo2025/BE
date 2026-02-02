@@ -122,7 +122,7 @@ public class ClubMeetingConverter {
                 .content(topic.getDescription())
                 .createdAt(topic.getCreatedAt())
                 .author(authorInfo)
-                .isSelected(isSelected)
+                .selected(isSelected)
                 .build();
     }
 

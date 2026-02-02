@@ -39,7 +39,7 @@ public class ClubMeetingController {
     private final ClubMeetingCommandService clubMeetingCommandService;
     private final ClubTopicCommandService clubTopicCommandService;
 
-    @Operation(summary = "이번 모임 바로가기 API", description = "미래 정기모임 중 가장 빠른 정기모임 상세보기 화면으로 이동합니다.")
+    @Operation(summary = "이번 모임 바로가기", description = "미래 정기모임 중 가장 빠른 정기모임 상세보기 화면으로 이동합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "이번 모임을 조회할 독서클럽 ID", required = true, example = "1"),
     })
@@ -57,7 +57,7 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveNextMeeting(clubId, memberId));
     }
 
-    @Operation(summary = "정기모임 조회 API", description = "정기모임 정보를 조회합니다.")
+    @Operation(summary = "정기모임 조회", description = "정기모임 정보를 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "정기 독서 모임을 조회할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "조회할 정기모임 ID", required = true, example = "1"),
@@ -77,7 +77,7 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveMeetingInfo(clubId, meetingId, memberId));
     }
 
-    @Operation(summary = "[운영진] 조 관리 - 독서모임 회원 전체 조회 API",
+    @Operation(summary = "[운영진] 조 관리 - 독서모임 회원 전체 조회",
             description = "독서클럽의 모든 회원 정보(OWNER, STAFF, MEMBER)와 함께, 해당 미팅에 배정된 팀 번호까지 페이지네이션 조회합니다. " +
                     "만약 팀 번호가 null이면 아직 아무 팀에도 배정되지 않은 것입니다.")
     @Parameters({
@@ -103,7 +103,7 @@ public class ClubMeetingController {
                 clubMeetingQueryFacade.retrieveMeetingMemberList(clubId, meetingId, memberId, cursorId));
     }
 
-    @Operation(summary = "[운영진] 정기모임 조 관리 API", description = "Response Body를 기준으로 팀을 교체합니다.")
+    @Operation(summary = "[운영진] 정기모임 조 관리", description = "Response Body를 기준으로 팀을 교체합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "팀을 관리할 정기 독서 모임 ID", required = true, example = "1"),
@@ -126,7 +126,7 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(null);
     }
 
-    @Operation(summary = "미팅 팀별 참여 인원 조회 API", description = "독서모임의 팀별 참여 인원을 커서 기반 조회합니다.")
+    @Operation(summary = "미팅 팀별 참여 인원 조회", description = "독서모임의 팀별 참여 인원을 커서 기반 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
@@ -152,7 +152,7 @@ public class ClubMeetingController {
                 clubMeetingQueryFacade.retrieveTeamMember(clubId, meetingId, teamNumber, memberId, cursorId));
     }
 
-    @Operation(summary = "팀별 Topic 조회 API", description = "팀별로 Topic을 조회합니다.")
+    @Operation(summary = "팀별 발제 조회", description = "팀별로 발제를 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
@@ -178,7 +178,7 @@ public class ClubMeetingController {
                 clubMeetingQueryFacade.retrieveSelectableTopics(clubId, meetingId, teamNumber, memberId, cursorId));
     }
 
-    @Operation(summary = "팀에서 Topic 선택/해제 API", description = "[모임] 팀에서 Topic을 선택/해제합니다.")
+    @Operation(summary = "팀에서 발제 선택/해제", description = "팀에서 발제를 선택/해제합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),

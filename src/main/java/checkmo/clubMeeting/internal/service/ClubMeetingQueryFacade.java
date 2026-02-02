@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -259,7 +260,21 @@ public class ClubMeetingQueryFacade {
 
         return MeetingResponseDTO.TeamMember.builder()
                 .teamNumber(teamNumber)
-                .members(memberBasicInfoMap.values().stream().toList())
+                .members(clubMemberTeams.stream()
+                        .map(clubMemberTeam -> {
+                            Long clubMemberId = clubMemberTeam.getClubMemberId();
+                            MembershipInfo membershipInfo = clubMemberIdToClubMembership.get(clubMemberId);
+                            MemberExternalDTO.BasicInfo memberInfo = memberBasicInfoMap.get(
+                                    membershipInfo.getMemberId());
+                            return MeetingResponseDTO.MeetingMember.builder()
+                                    .clubMemberId(clubMemberId)
+                                    .memberInfo(memberInfo)
+                                    .teamNumber(null)
+                                    .build();
+                        })
+                        .filter(Objects::nonNull)
+                        .toList()
+                )
                 .hasNext(clubMemberTeamCursorResult.hasNext())
                 .nextCursor(clubMemberTeamCursorResult.nextCursor())
                 .build();

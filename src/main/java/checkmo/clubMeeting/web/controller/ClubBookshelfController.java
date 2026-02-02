@@ -38,7 +38,7 @@ public class ClubBookshelfController {
     private final ClubBookReviewCommandService clubBookReviewCommandService;
 
     // ========== 책장 ==========
-    @Operation(summary = "책장 간편 조회 API", description = "책장을 커서 기반 조회합니다.(최신순 정렬)")
+    @Operation(summary = "책장 간편 조회", description = "책장을 커서 기반 조회합니다.(최신순 정렬)")
     @Parameters({
             @Parameter(name = "clubId", description = "책장을 조회할 클럽 ID", required = true, example = "1"),
             @Parameter(name = "cursorId", description = "마지막으로 조회한 책장 ID (무한 스크롤용)", required = false, example = "10"),
@@ -57,7 +57,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfList(clubId, memberId, cursorId));
     }
 
-    @Operation(summary = "책장 상세 조회 API", description = "책장의 상세 정보를 조회합니다.(책장의 기본 정보만 제공, 발제/한줄평/정기모임은 API 별도 제공)")
+    @Operation(summary = "책장 상세 조회", description = "책장의 상세 정보를 조회합니다.(책장의 기본 정보만 제공, 발제/한줄평/정기모임은 API 별도 제공)")
     @Parameters({
             @Parameter(name = "clubId", description = "책장이 속한 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "책장(책장이 곧 Meeting)의 ID", required = true, example = "1"),
@@ -77,7 +77,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfDetail(clubId, meetingId, memberId));
     }
 
-    @Operation(summary = "책장 생성 API", description = "책장을 생성합니다.")
+    @Operation(summary = "책장 생성", description = "책장을 생성합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "책장을 생성할 독서클럽 ID", required = true, example = "1"),
     })
@@ -97,7 +97,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess("책장이 정상적으로 생성되었습니다.");
     }
 
-    @Operation(summary = "책장 수정 API", description = "책장을 수정합니다.")
+    @Operation(summary = "책장 수정", description = "책장을 수정합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "책장이 속한 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "수정할 정기 책장 ID", required = true, example = "1"),
@@ -120,7 +120,7 @@ public class ClubBookshelfController {
     }
 
     // ========== 발제 ==========
-    @Operation(summary = "책장에 대한 발제 조회 API", description = "발제를 최신순으로 조회합니다.")
+    @Operation(summary = "책장에 대한 발제 조회", description = "발제를 최신순으로 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "발제를 조회할 정기모임 ID", required = true, example = "1"),
@@ -142,7 +142,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveTopicList(clubId, meetingId, memberId, cursorId));
     }
 
-    @Operation(summary = "발제 등록 API", description = "발제를 등록합니다.")
+    @Operation(summary = "발제 등록", description = "발제를 등록합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "발제를 등록할 정기모임 ID", required = true, example = "1"),
@@ -164,7 +164,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess("발제가 정상적으로 생성되었습니다.");
     }
 
-    @Operation(summary = "발제 수정 API", description = "발제를 수정합니다.")
+    @Operation(summary = "발제 수정", description = "발제를 수정합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "발제를 수정할 정기모임 ID", required = true, example = "1"),
@@ -190,7 +190,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess("발제가 정상적으로 수정되었습니다.");
     }
 
-    @Operation(summary = "발제 삭제 API", description = "발제를 삭제합니다.")
+    @Operation(summary = "발제 삭제", description = "발제를 삭제합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "발제를 조회할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "발제를 삭제할 정기모임 ID", required = true, example = "1"),
@@ -216,7 +216,7 @@ public class ClubBookshelfController {
     }
 
     // ========== 한줄평 ==========
-    @Operation(summary = "한줄평 조회 API", description = "한줄평을 조회합니다.")
+    @Operation(summary = "한줄평 조회", description = "한줄평을 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "한줄평을 조회할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "한줄평을 조회할 정기 독서모임 ID", required = true, example = "1"),
@@ -239,7 +239,7 @@ public class ClubBookshelfController {
                 clubMeetingQueryFacade.retrieveBookReviewList(clubId, meetingId, memberId, cursorId));
     }
 
-    @Operation(summary = "한줄평 생성 API", description = "한줄평을 생성합니다.")
+    @Operation(summary = "한줄평 생성", description = "한줄평을 생성합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "한줄평을 등록할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "한줄평을 등록한 정기모임 ID", required = true, example = "1"),
@@ -264,7 +264,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess("한줄평이 생성되었습니다.");
     }
 
-    @Operation(summary = "한줄평 수정 API", description = "한줄평을 수정합니다.")
+    @Operation(summary = "한줄평 수정", description = "한줄평을 수정합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "한줄평을 수정할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "한줄평을 수정할 정기모임 ID", required = true, example = "1"),
@@ -293,7 +293,7 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess("한줄평이 수정되었습니다.");
     }
 
-    @Operation(summary = "한줄평 삭제 API", description = "한줄평을 삭제합니다.")
+    @Operation(summary = "한줄평 삭제", description = "한줄평을 삭제합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "한줄평을 삭제할 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "한줄평을 삭제할 정기모임 ID", required = true, example = "1"),
