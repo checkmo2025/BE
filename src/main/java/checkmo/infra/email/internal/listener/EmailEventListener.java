@@ -17,7 +17,11 @@ public class EmailEventListener {
     @ApplicationModuleListener
     public void handleEmailEvent(AuthenticationEvent.SendVerificationEmail event) {
         try {
-            emailSender.sendVerificationEmail(event.email(), event.verificationCode());
+            String subject = (event.type() == AuthenticationEvent.VerificationType.UPDATE_EMAIL)
+                ? "[책모] 이메일 변경 인증번호 안내"
+                : "[책모] 회원가입 인증번호 안내";
+
+            emailSender.sendVerificationEmail(event.email(), event.verificationCode(), subject);
         } catch (Exception e) {
             log.error("이메일 전송 실패, email: {}", event.email(), e);
             throw e;

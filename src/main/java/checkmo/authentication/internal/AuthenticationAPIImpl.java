@@ -25,4 +25,14 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     public void completeProfile(String memberId) {
         authUserCommandService.completeProfile(memberId);
     }
+
+    @Override
+    public boolean updatePassword(String memberId, String currentPassword, String newPassword) {
+        return authUserCommandService.updatePassword(memberId, currentPassword, newPassword);
+    }
+
+    @Override
+    public void updateEmail(String memberId, String currentEmail, String newEmail, String verificationCode) {
+        authUserCommandService.updateEmail(memberId, currentEmail, newEmail, verificationCode);
+    }
 }

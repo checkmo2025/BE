@@ -2,6 +2,7 @@ package checkmo.member.internal;
 
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import checkmo.member.MemberExternalDTO.DetailInfo;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
@@ -74,6 +75,24 @@ public class MemberAPIImpl implements MemberAPI {
                         projection -> MemberExternalDTO.BasicInfo.builder()
                                 .nickname(projection.getNickName())
                                 .profileImageUrl(projection.getImgUrl())
+                                .build()
+                ));
+    }
+
+    @Override
+    public Map<String, DetailInfo> fetchMemberDetailInfoByMemberIds(List<String> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Member> members = memberQueryService.retrieveMemberById(memberIds);
+        return members.stream()
+                .collect(Collectors.toMap(
+                        Member::getId,
+                        member -> MemberExternalDTO.DetailInfo.builder()
+                                .nickname(member.getNickName())
+                                .profileImageUrl(member.getImgUrl())
+                                .name(member.getName())
+                                .email(member.getEmail())
                                 .build()
                 ));
     }

@@ -38,7 +38,7 @@ public class EmailVerificationCommandService {
 
     private final AuthRepository authRepository;
 
-    public void sendEmailVerification(String email) {
+    public void sendEmailVerification(String email, AuthenticationEvent.VerificationType type) {
         // 이미 인증번호가 Redis에 존재하면 예외 처리
         String redisKey = EMAIL_VERIFICATION_PREFIX + email;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
@@ -65,6 +65,7 @@ public class EmailVerificationCommandService {
                 AuthenticationEvent.SendVerificationEmail.builder()
                         .email(email)
                         .verificationCode(verificationCode)
+                        .type(type)
                         .build());
     }
 

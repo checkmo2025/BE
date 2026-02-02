@@ -45,6 +45,14 @@ public interface MemberAPI {
     Map<String, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<String> memberIds);
 
     /**
+     * 회원 ID 목록으로 공유용 디테일 회원 정보 조회
+     *
+     * @param memberIds 조회할 회원 ID 목록
+     * @return 회원 ID와 디테일 정보 매핑 리스트
+     */
+    Map<String, MemberExternalDTO.DetailInfo> fetchMemberDetailInfoByMemberIds(List<String> memberIds);
+
+    /**
      * 팔로우 상태를 포함한 공유용 회원 정보 조회
      *
      * @param targetMemberId  조회 대상 회원 ID

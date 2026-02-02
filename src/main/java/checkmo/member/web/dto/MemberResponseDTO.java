@@ -112,4 +112,13 @@ public class MemberResponseDTO {
     public static class ReportList {
         private List<ReportInfo> reports;
     }
+  
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LoginStatus {
+        private String provider;
+        private String email;
+    }
 }
