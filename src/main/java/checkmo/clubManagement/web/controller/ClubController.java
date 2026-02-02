@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -109,7 +110,6 @@ public class ClubController {
 
     @Operation(summary = "독서 모임 검색", description = "키워드와 필터 기반으로 독서 모임을 검색합니다.")
     @Parameters({
-            @Parameter(name = "filter", description = "검색 필터 (키워드, 입력 필터, 결과 필터)"),
             @Parameter(name = "cursorId", description = "커서 기반 페이지네이션을 위한 마지막 독서 모임 ID", required = false, example = "10"),
     })
     @ApiResponses({
@@ -118,7 +118,7 @@ public class ClubController {
     })
     @GetMapping("/search")
     public ApiResponse<ClubResponseDTO.ClubList> searchClubs(
-            @ModelAttribute ClubRequestDTO.ClubSearchFilter filter,
+            @ModelAttribute @ParameterObject ClubRequestDTO.ClubSearchFilter filter,
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
     ) {

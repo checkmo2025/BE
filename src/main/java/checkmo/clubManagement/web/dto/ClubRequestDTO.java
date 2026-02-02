@@ -5,6 +5,7 @@ import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -79,8 +80,26 @@ public class ClubRequestDTO {
     }
 
     public record ClubSearchFilter(
+            @Schema(description = "검색하려는 키워드", example = "북", maxLength = 40)
             String keyword,
+            @Schema(description = """
+                    입력 필터(독서모임을 어떤 것으로 검색할지 결정)
+                    - NAME: 모임명 기준 검색
+                    - REGION: 지역명 기준 검색
+                    """,
+                    example = "NAME")
             ClubSearchInputFilter inputFilter,
+            @Schema(description = """
+                    출력 필터(검색 결과로 어떤 모임을 받을지 결정)
+                    - ALL: 모든 모임
+                    - STUDENT: 대학생 대상 모임
+                    - WORKER: 직장인 대상 모임
+                    - ONLINE: 온라인 모임
+                    - CLUB: 동아리 모임
+                    - MEETING: 소규모 모임
+                    - OFFLINE: 오프라인 모임
+                    """,
+                    example = "ALL")
             ClubSearchOutputFilter outputFilter
     ) {
         public ClubSearchFilter {
