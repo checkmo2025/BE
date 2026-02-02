@@ -37,6 +37,7 @@ public class MemberReport extends BaseEntity {
     private Member reportedMember;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ReportType reportType;
 
     @Column(length = 500)

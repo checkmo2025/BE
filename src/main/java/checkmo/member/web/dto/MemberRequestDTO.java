@@ -5,6 +5,7 @@ import checkmo.member.internal.entity.ReportType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -83,6 +84,7 @@ public class MemberRequestDTO {
         @Schema(description = "신고 대상 회원 닉네임")
         private String reportedMemberNickname;
 
+        @NotNull(message = "신고 종류는 필수입니다.")
         @Schema(description = "신고 종류", example = "GENERAL")
         private ReportType reportType;
 
