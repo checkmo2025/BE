@@ -19,18 +19,18 @@ import lombok.NoArgsConstructor;
 public class ClubRequestDTO {
 
     public enum ClubSearchInputFilter {
-        NAME, // 모임명
-        REGION; // 지역명
+        NAME,
+        REGION;
     }
 
     public enum ClubSearchOutputFilter {
-        ALL, // 전체
-        STUDENT, // 대학생
-        WORKER, // 직장인
-        ONLINE, // 온라인
-        CLUB, // 동아리
-        MEETING, // 모임
-        OFFLINE; // 대면
+        ALL,
+        STUDENT,
+        WORKER,
+        ONLINE,
+        CLUB,
+        MEETING,
+        OFFLINE;
 
         public ClubParticipantType toClubParticipantTypeOrNull() {
             return switch (this) {
@@ -70,13 +70,13 @@ public class ClubRequestDTO {
     }
 
     public enum ClubMemberStatusUpdateCommand {
-        APPROVE, // PENDING -> MEMBER
-        REJECT, // PENDING 삭제
+        APPROVE,
+        REJECT,
 
-        CHANGE_ROLE, // MEMBER <-> STAFF
-        TRANSFER_OWNER, // actor: OWNER -> STAFF, target: MEMBER/STAFF -> OWNER
+        CHANGE_ROLE,
+        TRANSFER_OWNER,
 
-        KICK, // MEMBER/STAFF -> KICKED
+        KICK,
     }
 
     public record ClubSearchFilter(
@@ -116,7 +116,16 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class ClubMemberStatusAction {
         @NotNull
+        @Schema(description = """
+                수행할 명령어
+                - APPROVE: 가입 승인 (PENDING -> MEMBER)
+                - REJECT: 가입 거절 (PENDING 삭제)
+                - CHANGE_ROLE: 회원/운영진 역할 변경 (MEMBER <-> STAFF)
+                - TRANSFER_OWNER: 모임 소유권 이전 (actor: OWNER -> STAFF, target: MEMBER/STAFF -> OWNER)
+                - KICK: 강제 탈퇴 (MEMBER/STAFF -> KICKED)
+                """)
         ClubMemberStatusUpdateCommand command;
+        @Schema(description = "변경할 상태 (CHANGE_ROLE일 때만 필요, 다른 command에서는 무시됨)")
         ClubMemberStatus status; // CHANGE_ROLE일 때만 필요
 
         @AssertTrue(message = "CHAGNE_ROLE 요청에서는 status는 MEMBER 또는 STAFF만 허용됩니다.")

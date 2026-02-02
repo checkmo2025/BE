@@ -178,7 +178,17 @@ public class ClubController {
     @Operation(summary = "[운영진] 독서모임 회원 관리용 조회", description = "독서 모임의 회원을 관리하기 위해 회원 정보를 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "조회할 독서 모임 ID", required = true, example = "1"),
-            @Parameter(name = "status", description = "조회할 회원 상태 (ALL, ACTIVE, MEMBER, STAFF, OWNER, PENDING, BLOCKED 중 선택)", required = false, example = "ALL")
+            @Parameter(name = "status", description = """
+                    멤버 상태 필터(어떤 멤버 상태의 멤버들을 조회할지 결정)
+                    - ALL: 존재하는 모든 멤버 상태(MEMBER, STAFF, OWNER, PENDING, WITHDRAWN, KICKED)
+                    - ACTIVE: 활동 중인 멤버 상태 (MEMBER, STAFF, OWNER)
+                    - MEMBER: 일반 회원
+                    - STAFF: 운영진
+                    - OWNER: 소유자(최고 운영자)
+                    - PENDING: 가입 대기 중인 회원
+                    - WITHDRAWN: 탈퇴한 회원
+                    - KICKED: 강제 탈퇴된 회원
+                    """, required = true, example = "ACTIVE"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -188,7 +198,7 @@ public class ClubController {
     @GetMapping("/{clubId}/members")
     public ApiResponse<ClubResponseDTO.ClubMemberList> getClubMembers(
             @PathVariable Long clubId,
-            @RequestParam(required = false, defaultValue = "ALL") ClubMemberStatusFilter status,
+            @RequestParam ClubMemberStatusFilter status,
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
     ) {
@@ -199,7 +209,7 @@ public class ClubController {
     @Operation(summary = "[운영진] 독서 모임 회원 등급 수정", description = "독서 모임 회원의 등급을 수정합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "수정할 독서 모임 ID", required = true, example = "1"),
-            @Parameter(name = "clubMemberId", description = "등급을 수정할 독서 모임 회원 ID", required = true, example = "10"),
+            @Parameter(name = "clubMemberId", description = "등급이 수정될 독서 모임 회원 ID", required = true, example = "10"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
