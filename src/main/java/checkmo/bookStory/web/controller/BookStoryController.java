@@ -51,22 +51,57 @@ public class BookStoryController {
         return ApiResponse.onSuccess(bookStoryId);
     }
 
-    @Operation(summary = "책 이야기 전체보기 API", description = "조건에 따라 책 이야기 목록을 조회합니다.")
+    @Operation(summary = "전체 책이야기 조회 API", description = "모든 책이야기 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getAllBookStories(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var bookStories = bookStoryQueryFacade.fetchAllBookStories(memberId, cursorId);
+        return ApiResponse.onSuccess(bookStories);
+    }
+
+    @Operation(summary = "내가 쓴 책이야기 조회 API", description = "로그인한 회원이 작성한 책이야기 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/me")
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getMyBookStories(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var bookStories = bookStoryQueryFacade.fetchMyBookStories(memberId, cursorId);
+        return ApiResponse.onSuccess(bookStories);
+    }
+
+    @Operation(summary = "팔로잉 책이야기 조회 API", description = "팔로우한 회원들의 책이야기 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/following")
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getFollowingBookStories(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var bookStories = bookStoryQueryFacade.fetchFollowingBookStories(memberId, cursorId);
+        return ApiResponse.onSuccess(bookStories);
+    }
+
+    @Operation(summary = "특정 회원 책이야기 조회 API", description = "특정 회원이 작성한 책이야기 목록을 조회합니다.")
     @Parameters({
-            @Parameter(
-                    name = "scope",
-                    description = """
-                            조회 범위:
-                            • ALL: 전체 책이야기
-                            • FOLLOWING: 팔로우한 회원의 책이야기
-                            • MY: 내 책이야기
-                            • CLUB: 특정 클럽 책이야기 (clubId 필수)
-                            • TARGET: 특정 회원의 책이야기 (targetMemberNickname 필수)""",
-                    required = true,
-                    example = "ALL"
-            ),
-            @Parameter(name = "clubId", description = "조회하는 Club ID (scope가 CLUB일 때 필수)", required = false, example = "1"),
-            @Parameter(name = "targetMemberNickname", description = "조회할 회원의 닉네임 (scope가 TARGET일 때 필수)", required = false, example = "MODUGGAGI"),
+            @Parameter(name = "nickname", description = "조회할 회원의 닉네임", required = true, example = "책벌레"),
             @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
     })
     @ApiResponses({
@@ -74,25 +109,34 @@ public class BookStoryController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
     })
-    @GetMapping
-    public ApiResponse<BookStoryResponseDTO.BookStoryList> getBookStories(
+    @GetMapping("/members/{nickname}")
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getMemberBookStories(
             @CurrentId String memberId,
-            @RequestParam(required = false, defaultValue = "ALL") BookStoryRequestDTO.BookStoryScope scope,
-            @RequestParam(required = false) Long clubId,
-            @RequestParam(required = false) String targetMemberNickname,
+            @PathVariable String nickname,
             @RequestParam(required = false) Long cursorId
     ) {
-        if (scope == BookStoryRequestDTO.BookStoryScope.CLUB && clubId == null) {
-            throw new IllegalArgumentException("scope가 CLUB일 때는 clubId 파라미터가 필수입니다.");
-        }
+        var bookStories = bookStoryQueryFacade.fetchMemberBookStories(memberId, nickname, cursorId);
+        return ApiResponse.onSuccess(bookStories);
+    }
 
-        if (scope == BookStoryRequestDTO.BookStoryScope.TARGET && targetMemberNickname == null) {
-            throw new IllegalArgumentException("scope가 TARGET일 때는 targetMemberNickname 파라미터가 필수입니다.");
-        }
-
-        var bookStoriesByScope = bookStoryQueryFacade.fetchBookStories(memberId, scope, clubId, targetMemberNickname,
-                cursorId);
-        return ApiResponse.onSuccess(bookStoriesByScope);
+    @Operation(summary = "클럽 책이야기 조회 API", description = "특정 클럽 멤버들이 작성한 책이야기 목록을 조회합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "조회할 클럽 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/clubs/{clubId}")
+    public ApiResponse<BookStoryResponseDTO.BookStoryList> getClubBookStories(
+            @CurrentId String memberId,
+            @PathVariable Long clubId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var bookStories = bookStoryQueryFacade.fetchClubBookStories(memberId, clubId, cursorId);
+        return ApiResponse.onSuccess(bookStories);
     }
 
     @Operation(summary = "책 이야기 상세 조회 API", description = "특정 책 이야기의 상세 정보를 조회합니다.")
