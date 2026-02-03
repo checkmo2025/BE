@@ -1,6 +1,6 @@
 services:
   app:
-    image: 667183278509.dkr.ecr.ap-northeast-2.amazonaws.com/checkmo-ecr
+    image: 958533309301.dkr.ecr.ap-northeast-2.amazonaws.com/checkmo
     container_name: checkmo-app
     env_file:
       - .env
@@ -21,17 +21,30 @@ services:
     container_name: nginx-proxy
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       # nginx 설정 파일 저장할 볼륨
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       # GitHub Actions에서 전송할 nginx 설정 파일들
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      # SSL 인증서 및 인증용 파일 공유
+      - /home/ubuntu/certbot/conf:/etc/letsencrypt
+      - /home/ubuntu/certbot/www:/var/www/certbot
     restart: unless-stopped
     networks:
       - app-network
     depends_on:
       app:
         condition: service_healthy
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - /home/ubuntu/certbot/conf:/etc/letsencrypt
+      - /home/ubuntu/certbot/www:/var/www/certbot
+    networks:
+      - app-network
 
 networks:
   app-network:

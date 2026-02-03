@@ -5,6 +5,7 @@ import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberCommandService;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
+import checkmo.member.internal.service.command.MemberReportCommandService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
@@ -40,6 +41,7 @@ public class MemberController {
 
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberCommandService memberCommandService;
+    private final MemberReportCommandService memberReportCommandService;
 
     private final MemberQueryService memberQueryService;
 
@@ -258,5 +260,21 @@ public class MemberController {
             @CurrentId String memberId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveRecommendedMembers(memberId));
+    }
+
+    @Operation(summary = "회원 신고 API", description = "특정 회원을 신고합니다.")
+    @PostMapping("/report")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    public ApiResponse<Long> reportMember(
+            @CurrentId String memberId,
+            @Valid @RequestBody MemberRequestDTO.CreateReport request
+    ) {
+        Long reportId = memberReportCommandService.createReport(memberId, request);
+        return ApiResponse.onSuccess(reportId);
     }
 }

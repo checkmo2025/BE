@@ -1,9 +1,6 @@
 package checkmo.bookStory.web.dto;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
-
 import checkmo.book.BookExternalDTO;
-import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,21 +18,10 @@ public class BookStoryResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookStoryList {
-        private ScopeInfo scopeInfo;    // 현재 선택된 범위 정보
-        private ClubList memberClubList; // 사용자가 속한 클럽 목록
         private List<BasicInfo> basicInfoList;
         private boolean hasNext;
         private Long nextCursor;
         private int pageSize;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class ScopeInfo {
-        private BookStoryRequestDTO.BookStoryScope scope; // 현재 범위 (ALL, MY, CLUB)
-        private ClubManagementExternalDTO.BasicInfo selectedClub; // 선택된 클럽 정보 (CLUB scope일 때만)
     }
 
     @Getter

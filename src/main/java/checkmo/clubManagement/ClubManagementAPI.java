@@ -1,6 +1,5 @@
 package checkmo.clubManagement;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
 import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
@@ -33,14 +32,6 @@ public interface ClubManagementAPI {
      * @return 모임 ID를 키로 하는 모임 이름 맵
      */
     Map<Long, String> fetchClubNamesByClubIds(List<Long> clubIds);
-
-    /**
-     * 특정 회원이 가입한 모임 목록을 조회합니다. 마이페이지 등 다른 서비스에서 사용됩니다. 이때 회원이 활성화 상태인 모임만 조회됩니다.
-     *
-     * @param memberId 회원 ID
-     * @return 회원이 가입한 모임의 간략한 정보 목록 DTO
-     */
-    ClubList fetchMyClubs(String memberId);
 
     /**
      * 특정 클럽에 속한 ACTIVE한 회원 ID 목록을 조회합니다.

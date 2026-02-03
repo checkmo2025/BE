@@ -2,10 +2,12 @@ package checkmo.member.internal.converter;
 
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberReport;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
+import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -54,6 +56,17 @@ public class MemberConverter {
         return RecommendedMember.builder()
                 .nickname(member.getNickName())
                 .profileImageUrl(member.getImgUrl())
+                .build();
+    }
+
+    public static ReportInfo toReportInfo(MemberReport report) {
+        return ReportInfo.builder()
+                .reportId(report.getId())
+                .reportedMemberNickname(report.getReportedMember().getNickName())
+                .reportedMemberProfileImageUrl(report.getReportedMember().getImgUrl())
+                .reportType(report.getReportType().getDescription())
+                .content(report.getContent())
+                .createdAt(report.getCreatedAt())
                 .build();
     }
 }
