@@ -68,6 +68,9 @@ jobs:
             
             # 컨테이너 재실행
             docker compose up -d
-            
+
+            # nginx DNS 캐시 초기화
+            docker compose restart nginx
+
             # 미사용 이미지 정리
             docker image prune -f
