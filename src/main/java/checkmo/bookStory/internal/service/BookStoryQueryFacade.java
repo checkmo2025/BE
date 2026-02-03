@@ -1,22 +1,16 @@
 package checkmo.bookStory.internal.service;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.BasicInfo;
-import static checkmo.clubManagement.ClubManagementExternalDTO.ClubList;
-
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
-import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
-import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.service.query.BookStoryViewCacheService;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.CommentInfo;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.DetailInfo;
-import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -39,7 +33,6 @@ public class BookStoryQueryFacade {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
 
-    private final ClubManagementAPI clubManagementAPI;
     private final MemberAPI memberAPI;
     private final BookAPI bookAPI;
 
@@ -109,25 +102,67 @@ public class BookStoryQueryFacade {
     }
 
     /**
-     * scope에 따라 책 이야기 목록을 조회합니다. 비즈니스 로직을 Facade에서 처리하여 컨트롤러는 단순히 호출만 담당
-     *
-     * @param memberId             조회하는 회원의 ID
-     * @param scope                조회 범위 ("ALL", "MY", "FOLLOWING", "CLUB", "TARGET")
-     * @param clubId               클럽 ID (scope가 "CLUB"일 때 필수)
-     * @param targetMemberNickname 대상 회원 닉네임 (scope가 "TARGET"일 때 필수)
-     * @param cursorId             페이지 번호 (1부터 시작)
-     * @return scope에 따른 책 이야기 목록 DTO
+     * 전체 책이야기 목록을 조회합니다.
      */
-    public BookStoryResponseDTO.BookStoryList fetchBookStories(
+    public BookStoryResponseDTO.BookStoryList fetchAllBookStories(String memberId, Long cursorId) {
+        return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.ALL, null, null, cursorId);
+    }
+
+    /**
+     * 내가 작성한 책이야기 목록을 조회합니다.
+     */
+    public BookStoryResponseDTO.BookStoryList fetchMyBookStories(String memberId, Long cursorId) {
+        return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.MY, null, null, cursorId);
+    }
+
+    /**
+     * 팔로우한 회원들의 책이야기 목록을 조회합니다.
+     */
+    public BookStoryResponseDTO.BookStoryList fetchFollowingBookStories(String memberId, Long cursorId) {
+        return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.FOLLOWING, null, null, cursorId);
+    }
+
+    /**
+     * 특정 회원의 책이야기 목록을 조회합니다.
+     */
+    public BookStoryResponseDTO.BookStoryList fetchMemberBookStories(
             String memberId,
-            BookStoryRequestDTO.BookStoryScope scope,
-            Long clubId, String targetMemberNickname,
+            String targetNickname,
             Long cursorId
     ) {
-        // 1. targetMemberId 조회 (SCOPE=TARGET인 경우)
-        String targetMemberId = resolveTargetMemberId(scope, targetMemberNickname);
+        String targetMemberId = memberAPI.fetchMemberId(targetNickname);
+        return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.TARGET, null, targetMemberId, cursorId);
+    }
 
-        // 2. BookStory 리스트 조회
+    /**
+     * 특정 클럽 멤버들의 책이야기 목록을 조회합니다.
+     */
+    public BookStoryResponseDTO.BookStoryList fetchClubBookStories(
+            String memberId,
+            Long clubId,
+            Long cursorId
+    ) {
+        return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.CLUB, clubId, null, cursorId);
+    }
+
+    /**
+     * scope에 따라 책 이야기 목록을 조회합니다. 비즈니스 로직을 Facade에서 처리하여 컨트롤러는 단순히 호출만 담당
+     *
+     * @param memberId       조회하는 회원의 ID
+     * @param scope          조회 범위 ("ALL", "MY", "FOLLOWING", "CLUB", "TARGET")
+     * @param clubId         클럽 ID (scope가 "CLUB"일 때 필수)
+     * @param targetMemberId 대상 회원 ID (scope가 "TARGET"일 때 필수)
+     * @param cursorId       커서 ID
+     * @return scope에 따른 책 이야기 목록 DTO
+     */
+    private BookStoryResponseDTO.BookStoryList fetchBookStoriesInternal(
+            String memberId,
+            BookStoryRequestDTO.BookStoryScope scope,
+            Long clubId,
+            String targetMemberId,
+            Long cursorId
+    ) {
+        // 1. BookStory 리스트 조회
         CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
                 (pageSize) -> bookStoryQueryService.retrieveBookStories(
                         memberId, scope, clubId, targetMemberId, cursorId, pageSize
@@ -137,47 +172,25 @@ public class BookStoryQueryFacade {
         );
         List<BookStory> bookStories = bookStoryCursorResult.content();
 
-        // 좋아요 여부 조회
+        // 2. 좋아요 여부 조회
         Map<Long, Boolean> isLikedMap = fetchLikedInfo(memberId, bookStories);
 
-        // 책 정보 조회
+        // 3. 책 정보 조회
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
 
-        // 작성자 정보 조회
+        // 4. 작성자 정보 조회
         Map<String, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
-        // DTO 변환
+        // 5. DTO 변환
         List<BookStoryResponseDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
                 bookStories, isLikedMap, bookInfoMap, authorInfoMap);
 
-        // 클럽 정보 조회
-        ClubList clubList = clubManagementAPI.fetchMyClubs(memberId);
-        BasicInfo basicInfo = findClubInfoForScope(scope, clubId, clubList);
-
-        // 스코프 정보 변환 및 최종 응답 DTO 변환
-        var scopeInfo = BookStoryResponseDTO.ScopeInfo.builder()
-                .scope(scope)
-                .selectedClub(basicInfo)
-                .build();
-
         return BookStoryResponseDTO.BookStoryList.builder()
-                .scopeInfo(scopeInfo)
-                .memberClubList(clubList)
                 .basicInfoList(basicInfoList)
                 .hasNext(bookStoryCursorResult.hasNext())
                 .nextCursor(bookStoryCursorResult.nextCursor())
                 .pageSize(DEFAULT_PAGE_SIZE)
                 .build();
-    }
-
-    /**
-     * TARGET 스코프인 경우 닉네임으로 targetMemberId 조회
-     */
-    private String resolveTargetMemberId(BookStoryRequestDTO.BookStoryScope scope, String targetMemberNickname) {
-        if (scope == BookStoryRequestDTO.BookStoryScope.TARGET) {
-            return memberAPI.fetchMemberId(targetMemberNickname);
-        }
-        return null;
     }
 
     /**
@@ -231,23 +244,6 @@ public class BookStoryQueryFacade {
                         authorInfoMap.get(bookStory.getMemberId()),
                         isLikedMap.getOrDefault(bookStory.getId(), false)
                 )).toList();
-    }
-
-    /**
-     * 스코프에 해당하는 클럽 정보 조회
-     */
-    private BasicInfo findClubInfoForScope(
-            BookStoryRequestDTO.BookStoryScope scope,
-            Long clubId,
-            ClubList clubList
-    ) {
-        if (scope == BookStoryRequestDTO.BookStoryScope.CLUB) {
-            return clubList.getClubList().stream()
-                    .filter(club -> club.getClubId().equals(clubId))
-                    .findFirst()
-                    .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.CLUB_ACCESS_DENIED));
-        }
-        return null;
     }
 
     /**
