@@ -15,4 +15,8 @@ public class ClubManagementEvent {
     @Builder
     public record ClubDeletedEvent(Long clubId) {
     }
+
+    @Builder
+    public record DeleteClubImage(String imageUrl) {
+    }
 }

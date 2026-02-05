@@ -1,6 +1,7 @@
 package checkmo.infra.s3.internal.service;
 
 import checkmo.infra.s3.internal.config.properties.S3Properties;
+import checkmo.infra.s3.internal.entity.FileUploadType;
 import checkmo.infra.s3.internal.exception.S3ErrorStatus;
 import checkmo.infra.s3.internal.exception.S3InfraException;
 import checkmo.infra.s3.web.dto.S3ResponseDTO;
@@ -31,14 +32,14 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Properties s3Properties;
 
-    public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType) {
+    public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType, FileUploadType uploadType) {
         // Content-Type 검증
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
             throw new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE);
         }
 
         // S3에 저장될 파일의 고유 경로(key) 생성
-        String key = generateUniqueKey(fileName);
+        String key = generateUniqueKey(fileName, uploadType);
 
         // 생성된 key를 기반으로 presigned url 생성
         String presignedUrl = generatePresignedUrl(key, contentType);
@@ -130,13 +131,13 @@ public class S3Service {
         }
     }
 
-    private String generateUniqueKey(String originalFileName) {
+    private String generateUniqueKey(String originalFileName, FileUploadType uploadType) {
         String extension = getFileExtension(originalFileName);
 
         String uniqueId = UUID.randomUUID().toString();
 
         // S3 버킷에 저장될 경로와 UUID 파일명.확장자 -> 이게 Key가 됨
-        return String.format("images/%s%s", uniqueId, extension);
+        return String.format("images/%s/%s%s", uploadType.getPath(), uniqueId, extension);
     }
 
     private String getFileExtension(String fileName) {

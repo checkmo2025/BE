@@ -1,5 +1,6 @@
 package checkmo.clubManagement.internal.service.command;
 
+import checkmo.clubManagement.ClubManagementEvent;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -49,6 +50,15 @@ public class ClubManagementCommandService {
         }
 
         validateClubName(request, club);
+
+        String oldImageUrl = club.getProfileImgUrl();
+        if (oldImageUrl != null && !oldImageUrl.equals(request.getProfileImageUrl())) {
+            applicationEventPublisher.publishEvent(
+                    ClubManagementEvent.DeleteClubImage.builder()
+                            .imageUrl(oldImageUrl)
+                            .build()
+            );
+        }
 
         club.updateField(
                 request.getName(),

@@ -1,4 +1,4 @@
 @org.springframework.modulith.ApplicationModule(
-        allowedDependencies = {"authentication", "member", "clubNotice", "common"}
+        allowedDependencies = {"authentication", "member", "clubManagement", "clubNotice", "common"}
 )
 package checkmo.infra;
