@@ -1,11 +1,15 @@
 package checkmo.clubManagement.internal.service.query;
 
 import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
+import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
+import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,5 +44,13 @@ public class ClubManagementQueryService {
                         ClubIdAndName::getId,
                         ClubIdAndName::getName
                 ));
+    }
+
+    public List<ClubRecommendation> recommend(
+            EnumSet<ClubInterestCategory> interestCategories,
+            LocalDateTime lastActivityAt,
+            String memberId
+    ) {
+        return clubRepository.findRecommendations(interestCategories, lastActivityAt, memberId, 3);
     }
 }

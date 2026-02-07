@@ -125,6 +125,17 @@ public class ClubController {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubList(memberId, filter, cursorId));
     }
 
+    @Operation(summary = "독서 모임 추천", description = "회원의 관심 카테고리를 기반으로 독서 모임을 추천합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공")
+    })
+    @GetMapping("/recommendations")
+    public ApiResponse<ClubResponseDTO.ClubRecommendationList> recommendClubs(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(clubManagementQueryFacade.recommend(memberId));
+    }
+
     @Operation(summary = "독서 모임 홈 화면", description = "누구나 볼 수 있는 독서모임 홈 화면 정보를 제공합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "조회할 독서클럽 ID", required = true, example = "1"),
