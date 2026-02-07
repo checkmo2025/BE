@@ -3,8 +3,10 @@ package checkmo.member.internal;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.DetailInfo;
+import checkmo.member.MemberExternalDTO.InterestCategoryInfo;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
@@ -13,6 +15,8 @@ import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -144,4 +148,19 @@ public class MemberAPIImpl implements MemberAPI {
         return memberFollowQueryService.retrieveFollowingIds(memberId);
     }
 
+    @Override
+    public InterestCategoryInfo fetchInterestCategory(String memberId) {
+        Member member = memberQueryService.retrieveMember(memberId);
+        Set<MemberInterestCategory> interestCategories = member.getInterestCategories();
+        List<String> categories = (interestCategories == null)
+                ? List.of()
+                : interestCategories.stream()
+                        .filter(Objects::nonNull)
+                        .map(Enum::name)
+                        .sorted()
+                        .toList();
+        return MemberExternalDTO.InterestCategoryInfo.builder()
+                .categories(categories)
+                .build();
+    }
 }

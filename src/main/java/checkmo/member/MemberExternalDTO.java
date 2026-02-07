@@ -1,5 +1,6 @@
 package checkmo.member;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,5 +49,16 @@ public class MemberExternalDTO {
         private String profileImageUrl;
         private String name;
         private String email;
+    }
+
+    /**
+     * 회원이 선택한 관심 카테고리 목록 DTO
+     */
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class InterestCategoryInfo {
+        private List<String> categories;
     }
 }

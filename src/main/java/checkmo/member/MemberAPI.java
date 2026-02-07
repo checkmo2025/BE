@@ -1,6 +1,7 @@
 package checkmo.member;
 
 import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
+import checkmo.member.MemberExternalDTO.InterestCategoryInfo;
 import java.util.List;
 import java.util.Map;
 
@@ -80,4 +81,12 @@ public interface MemberAPI {
      * @return 팔로우하는 회원 ID 목록
      */
     List<String> fetchFollowingIds(String memberId);
+
+    /**
+     * 회원의 관심 카테고리 정보를 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 관심 카테고리 정보
+     */
+    InterestCategoryInfo fetchInterestCategory(String memberId);
 }
