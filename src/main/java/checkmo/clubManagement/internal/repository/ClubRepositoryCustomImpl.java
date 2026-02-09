@@ -14,8 +14,10 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.EnumPath;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
@@ -115,17 +117,24 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
         // 관심사가 있으면 겹침 수 계산 후 정렬
         EnumPath<ClubInterestCategory> interest =
                 Expressions.enumPath(ClubInterestCategory.class, "interest");
+
+        NumberExpression<Long> overlapCountExpr = new CaseBuilder()
+                .when(interest.in(memberCategories))
+                .then(interest)
+                .otherwise((ClubInterestCategory) null)
+                .countDistinct();
+
         return queryFactory
                 .select(Projections.constructor(
                         ClubRecommendation.class,
                         club.id.as("clubId"),
                         club.name.as("clubName"),
-                        interest.countDistinct().as("overlapCount"),
+                        overlapCountExpr.as("overlapCount"),
                         clubMember.id.countDistinct().as("activeMemberCount"),
                         club.lastActivityAt.as("lastActivityAt")
                 ))
                 .from(club)
-                .join(club.interestCategories, interest)
+                .leftJoin(club.interestCategories, interest)
                 .leftJoin(clubMember)
                 .on(
                         clubMember.club.eq(club),
@@ -140,7 +149,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
                         club.lastActivityAt
                 )
                 .orderBy(
-                        interest.countDistinct().desc(),
+                        overlapCountExpr.desc(),
                         clubMember.id.countDistinct().desc(),
                         club.lastActivityAt.desc(),
                         club.id.desc()
