@@ -67,7 +67,6 @@ public class ClubMeetingQueryFacade {
         );
         List<Meeting> meetings = meetingCursorResult.content();
 
-        // 미팅의 책 정보 배치 조회
         List<String> bookIds = ExtractHelper.extractDistinctList(meetings, Meeting::getBookId);
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
@@ -108,7 +107,6 @@ public class ClubMeetingQueryFacade {
         );
         List<Topic> topics = topicCursorResult.content();
 
-        // 발제의 작성자 정보 배치 조회
         List<String> authorIds = ExtractHelper.extractDistinctList(topics, Topic::getMemberId);
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
@@ -287,6 +285,8 @@ public class ClubMeetingQueryFacade {
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
 
+        List<Integer> existingTeamNumbers = clubMeetingTeamQueryService.retrieveExistingTeamNumbers(meetingId);
+
         CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
                 size -> clubTopicQueryService.retrieveTopics(meetingId, cursorId, size),
                 Topic::getId,
@@ -302,7 +302,8 @@ public class ClubMeetingQueryFacade {
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
 
         return MeetingResponseDTO.TeamTopic.builder()
-                .teamNumber(teamNumber)
+                .existingTeamNumbers(existingTeamNumbers)
+                .requestedTeamNumber(teamNumber)
                 .topics(topics.stream()
                         .map(t -> ClubMeetingConverter.toTopicDTO(
                                         t,
