@@ -1,5 +1,6 @@
 package checkmo.infra.s3.internal.listener;
 
+import checkmo.clubManagement.ClubManagementEvent;
 import checkmo.clubNotice.ClubNoticeEvent;
 import checkmo.infra.s3.internal.service.S3Service;
 import checkmo.member.MemberEvent;
@@ -20,6 +21,11 @@ public class S3EventListener {
     @ApplicationModuleListener
     public void handleDeleteProfileImageEvent(MemberEvent.DeleteProfileImage event) {
         deleteSingleUrl(event.imageUrl(), "프로필 이미지", event);
+    }
+
+    @ApplicationModuleListener
+    public void handleDeleteClubImageEvent(ClubManagementEvent.DeleteClubImage event) {
+        deleteSingleUrl(event.imageUrl(), "클럽 이미지", event);
     }
 
     @ApplicationModuleListener
