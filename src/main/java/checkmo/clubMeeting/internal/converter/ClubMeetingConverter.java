@@ -4,12 +4,16 @@ import checkmo.book.BookExternalDTO;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
 import checkmo.member.MemberExternalDTO;
+import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -70,7 +74,7 @@ public class ClubMeetingConverter {
                 .topicId(topic.getId())
                 .content(topic.getDescription())
                 .authorInfo(authorInfo)
-                .isAuthor(topic.isOwnedBy(memberId))
+                .author(topic.isOwnedBy(memberId))
                 .build();
     }
 
@@ -96,28 +100,21 @@ public class ClubMeetingConverter {
 
     public static BookShelfResponseDTO.BookReviewDetail toBookReviewDetailDTO(
             BookReview bookReview,
-            MemberExternalDTO.BasicInfo memberInfo
+            MemberExternalDTO.BasicInfo memberInfo,
+            boolean isAuthor
     ) {
         return BookShelfResponseDTO.BookReviewDetail.builder()
                 .bookReviewId(bookReview.getId())
                 .description(bookReview.getDescription())
                 .rate(bookReview.getRate())
                 .authorInfo(memberInfo)
+                .author(isAuthor)
                 .build();
     }
 
     // =====================================================
     // ?? -> MeetingResponseDTO 변환
     // =====================================================
-
-    public static MeetingResponseDTO.MeetingInfo toMeetingInfoDTOForMeeting(Meeting meeting) {
-        return MeetingResponseDTO.MeetingInfo.builder()
-                .meetingId(meeting.getId())
-                .title(meeting.getTitle())
-                .meetingTime(meeting.getMeetingTime())
-                .location(meeting.getLocation())
-                .build();
-    }
 
     public static MeetingResponseDTO.Topic toTopicDTO(
             Topic topic,
@@ -129,14 +126,44 @@ public class ClubMeetingConverter {
                 .content(topic.getDescription())
                 .createdAt(topic.getCreatedAt())
                 .author(authorInfo)
-                .isSelected(isSelected)
+                .selected(isSelected)
                 .build();
+    }
+
+    public static MeetingInfo toMeetingInfoWithTeams(
+            Meeting meeting,
+            List<Team> teams,
+            Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembers
+    ) {
+        List<Team> safeTeams = (teams != null) ? teams : List.of();
+        Map<Integer, List<MeetingResponseDTO.MeetingMember>> safeTeamNumberToMembers
+                = (teamNumberToMembers != null) ? teamNumberToMembers : Map.of();
+
+        List<Integer> existingTeamNumbers = safeTeams.stream()
+                .map(Team::getTeamNumber)
+                .distinct()
+                .sorted()
+                .toList();
+
+        return MeetingInfo.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .existingTeamNumbers(existingTeamNumbers)
+                .teams(existingTeamNumbers.stream()
+                        .map(teamNumber -> MeetingResponseDTO.TeamMember.builder()
+                                .teamNumber(teamNumber)
+                                .members(safeTeamNumberToMembers.getOrDefault(teamNumber, List.of()))
+                                .build())
+                        .toList())
+                .build();
+
     }
 
     // =====================================================
     // ?? -> ClubMeetingExternalDTO 변환
     // =====================================================
-
     public static DetailInfo toMeetingInfoExternalDTO(
             Meeting meeting,
             BookExternalDTO.BasicInfo bookInfo

@@ -94,7 +94,7 @@ public class ClubManagementConverter {
         return builder.build();
     }
 
-    public static ClubResponseDTO.ClubDetail toClubDetailDTO(Club club, boolean isIncludeDetails) {
+    public static ClubResponseDTO.ClubDetail toClubDetailDTO(Club club, boolean isDetail) {
         ClubDetailBuilder builder = ClubResponseDTO.ClubDetail.builder()
                 .clubId(club.getId())
                 .name(club.getName())
@@ -103,8 +103,7 @@ public class ClubManagementConverter {
                 .region(club.getRegion())
                 .category(mapToItems(club.getInterestCategories(), ClubCategoryItem::from))
                 .participantTypes(mapToItems(club.getParticipantTypes(), ClubParticipantTypeItem::from));
-
-        if (isIncludeDetails) {
+        if (isDetail) {
             builder.description(club.getDescription())
                     .links(mapToItems(club.getLinks(), ClubResponseDTO.ClubContactItem::from));
         }

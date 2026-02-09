@@ -141,7 +141,7 @@ public class ClubTopicCommandService {
         return MeetingResponseDTO.TopicSelection.builder()
                 .topicId(topicId)
                 .teamNumber(teamNumber)
-                .isSelected(isSelected)
+                .selected(isSelected)
                 .build();
     }
 }

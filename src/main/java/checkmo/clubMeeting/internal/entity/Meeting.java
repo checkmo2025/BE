@@ -105,6 +105,12 @@ public class Meeting extends BaseEntity {
         team.setMeeting(this);
     }
 
+    public void removeAllTeams() {
+        for (Team team : new ArrayList<>(this.teams)) {
+            removeTeam(team);
+        }
+    }
+
     public void removeTeam(Team team) {
         if (team == null) {
             return;

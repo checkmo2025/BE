@@ -14,6 +14,7 @@ import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfUpdate;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamManage;
+import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO.TeamMember;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,14 @@ public class ClubMeetingCommandService {
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
+        List<TeamMember> teamMemberList = request.getTeamMemberList();
+        if (teamMemberList == null || teamMemberList.isEmpty()) {
+            // 전체 팀 제거
+            meeting.removeAllTeams();
+            meetingRepository.save(meeting);
+            return;
+        }
+
         // 요청 정리: teamNumber -> distinct ClubMemberIds
         Map<Integer, List<Long>> requestTeamNumberToClubMemberIds = normalizeTeamManageRequest(request);
         Set<Integer> requestTeamNumbers = requestTeamNumberToClubMemberIds.keySet();
@@ -109,16 +118,17 @@ public class ClubMeetingCommandService {
             }
         }
 
-        // 요청에는 없는데 존재하는 팀은 meeting에서 제거
+        // 요청에는 없는데 존재하는 팀(팀 발제, 팀원) 제거
         removeTeamsNotInRequest(existingTeams, requestTeamNumbers, meeting);
-
-        // 기존 ClubMemberTeam 모두 제거
-        meeting.getTeams().forEach(Team::clearClubMemberTeam);
 
         // 요청 ClubMemberTeam 재생성
         for (Map.Entry<Integer, List<Long>> e : requestTeamNumberToClubMemberIds.entrySet()) {
-            Team team = existingTeamNumberToTeam.get(e.getKey());
-            for (Long cmId : e.getValue()) {
+            Integer teamNumber = e.getKey();
+            List<Long> clubMemberIds = e.getValue();
+
+            Team team = existingTeamNumberToTeam.get(teamNumber);
+            team.removeAllClubMemberTeams(); // 기존 팀원 제거 (중복 방지)
+            for (Long cmId : e.getValue()) { // 요청 팀원으로 다시 채우기
                 ClubMemberTeam mt = ClubMemberTeam.builder()
                         .clubMemberId(cmId)
                         .build();

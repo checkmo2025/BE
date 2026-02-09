@@ -1,11 +1,10 @@
 package checkmo.clubMeeting.web.dto.bookshelf;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
-
 import checkmo.book.BookExternalDTO;
 import checkmo.member.MemberExternalDTO;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +18,6 @@ public class BookShelfResponseDTO {
     @Builder
     public static class BookShelfList {
         private List<BookShelfInfo> bookShelfInfoList;
-        private MembershipInfo membershipInfo;
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -49,7 +47,6 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BookShelfDetail {
-        private MembershipInfo membershipInfo;
         private MeetingInfo meetingInfo;
         private BookExternalDTO.DetailInfo bookDetailInfo;
     }
@@ -60,7 +57,6 @@ public class BookShelfResponseDTO {
     @Builder
     public static class BookReviewList {
         private List<BookReviewDetail> bookReviewDetailList;
-        private MembershipInfo membershipInfo;
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -74,6 +70,13 @@ public class BookShelfResponseDTO {
         private String description;
         private double rate;
         private MemberExternalDTO.BasicInfo authorInfo;
+        @Getter(AccessLevel.NONE)
+        private boolean author;
+
+        @JsonProperty("isAuthor")
+        public boolean isAuthor() {
+            return author;
+        }
     }
 
     @Getter
@@ -81,8 +84,6 @@ public class BookShelfResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TopicList {
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        private MembershipInfo membershipInfo;
         private List<TopicDetail> topicDetailList;
         private boolean hasNext;
         private Long nextCursor;
@@ -96,7 +97,13 @@ public class BookShelfResponseDTO {
         private Long topicId;
         private String content;
         private MemberExternalDTO.BasicInfo authorInfo;
-        private boolean isAuthor;
+        @Getter(AccessLevel.NONE)
+        private boolean author;
+
+        @JsonProperty("isAuthor")
+        public boolean isAuthor() {
+            return author;
+        }
     }
 
 }

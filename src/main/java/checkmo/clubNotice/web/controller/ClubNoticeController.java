@@ -161,7 +161,7 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
     })
-    @PostMapping("/{noticeId}")
+    @PostMapping("/{noticeId}/comments")
     public ApiResponse<String> createNoticeComment(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,

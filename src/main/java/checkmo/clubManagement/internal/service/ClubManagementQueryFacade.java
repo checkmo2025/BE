@@ -2,17 +2,20 @@ package checkmo.clubManagement.internal.service;
 
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.Club;
+import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameAndClubMemberId;
+import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberStatusFilter;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailWithMyStatus;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubRecommendationList;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.MyClubMemberStatus;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.MyMembership;
 import checkmo.clubManagement.web.dto.myClub.MyClubResponseDTO;
@@ -21,9 +24,12 @@ import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +57,7 @@ public class ClubManagementQueryFacade {
 
     public ClubResponseDTO.ClubDetail retrieveClubHome(Long clubId) {
         Club club = clubManagementQueryService.validateClub(clubId);
-        return ClubManagementConverter.toClubDetailDTO(club, false);
+        return ClubManagementConverter.toClubDetailDTO(club, true);
     }
 
     public ClubResponseDTO.ClubList retrieveClubList(
@@ -131,8 +137,8 @@ public class ClubManagementQueryFacade {
         return ClubResponseDTO.MyMembership.builder()
                 .clubId(clubId)
                 .myStatus(myStatus)
-                .isActive(clubMember.isActive())
-                .isStaff(clubMember.isStaff())
+                .active(clubMember.isActive())
+                .staff(clubMember.isStaff())
                 .build();
     }
 
@@ -140,8 +146,8 @@ public class ClubManagementQueryFacade {
         return MyMembership.builder()
                 .clubId(clubId)
                 .myStatus(MyClubMemberStatus.NONE)
-                .isActive(false)
-                .isStaff(false)
+                .active(false)
+                .staff(false)
                 .build();
     }
 
@@ -180,5 +186,51 @@ public class ClubManagementQueryFacade {
                 .hasNext(clubMemberCursorResult.hasNext())
                 .nextCursor(clubMemberCursorResult.nextCursor())
                 .build();
+    }
+
+    public ClubRecommendationList recommend(String memberId) {
+        List<String> memberInterestCategories = memberAPI.fetchInterestCategory(memberId).getCategories();
+        EnumSet<ClubInterestCategory> interestCategories = mapToClubInterestCategories(memberInterestCategories);
+
+        LocalDateTime lastActivityAt = LocalDateTime.now().minusYears(1);
+
+        List<ClubRecommendation> result
+                = clubManagementQueryService.recommend(interestCategories, lastActivityAt, memberId);
+
+        List<ClubResponseDTO.ClubRecommendation> recommendations = IntStream.range(0, result.size())
+                .mapToObj(i -> {
+                    ClubRecommendation rec = result.get(i);
+                    return ClubResponseDTO.ClubRecommendation.builder()
+                            .rank(i + 1)
+                            .clubId(rec.getClubId())
+                            .clubName(rec.getClubName())
+                            .overlapCount(rec.getOverlapCount())
+                            .activeMemberCount(rec.getActiveMemberCount())
+                            .lastActivityAt(rec.getLastActivityAt())
+                            .build();
+                })
+                .toList();
+
+        return ClubResponseDTO.ClubRecommendationList.builder()
+                .recommendations(recommendations)
+                .build();
+    }
+
+    private EnumSet<ClubInterestCategory> mapToClubInterestCategories(List<String> categories) {
+        if (categories == null || categories.isEmpty()) {
+            return EnumSet.noneOf(ClubInterestCategory.class);
+        }
+        EnumSet<ClubInterestCategory> result = EnumSet.noneOf(ClubInterestCategory.class);
+        for (String category : categories) {
+            if (category == null || category.isBlank()) {
+                continue;
+            }
+            try {
+                result.add(ClubInterestCategory.valueOf(category.trim().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // 알 수 없는 카테고리는 무시
+            }
+        }
+        return result;
     }
 }

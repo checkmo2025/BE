@@ -5,6 +5,7 @@ import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -18,18 +19,18 @@ import lombok.NoArgsConstructor;
 public class ClubRequestDTO {
 
     public enum ClubSearchInputFilter {
-        NAME, // 모임명
-        REGION; // 지역명
+        NAME,
+        REGION;
     }
 
     public enum ClubSearchOutputFilter {
-        ALL, // 전체
-        STUDENT, // 대학생
-        WORKER, // 직장인
-        ONLINE, // 온라인
-        CLUB, // 동아리
-        MEETING, // 모임
-        OFFLINE; // 대면
+        ALL,
+        STUDENT,
+        WORKER,
+        ONLINE,
+        CLUB,
+        MEETING,
+        OFFLINE;
 
         public ClubParticipantType toClubParticipantTypeOrNull() {
             return switch (this) {
@@ -69,18 +70,36 @@ public class ClubRequestDTO {
     }
 
     public enum ClubMemberStatusUpdateCommand {
-        APPROVE, // PENDING -> MEMBER
-        REJECT, // PENDING 삭제
+        APPROVE,
+        REJECT,
 
-        CHANGE_ROLE, // MEMBER <-> STAFF
-        TRANSFER_OWNER, // actor: OWNER -> STAFF, target: MEMBER/STAFF -> OWNER
+        CHANGE_ROLE,
+        TRANSFER_OWNER,
 
-        KICK, // MEMBER/STAFF -> KICKED
+        KICK,
     }
 
     public record ClubSearchFilter(
+            @Schema(description = "검색하려는 키워드", example = "북", maxLength = 40)
             String keyword,
+            @Schema(description = """
+                    입력 필터(독서모임을 어떤 것으로 검색할지 결정)
+                    - NAME: 모임명 기준 검색
+                    - REGION: 지역명 기준 검색
+                    """,
+                    example = "NAME")
             ClubSearchInputFilter inputFilter,
+            @Schema(description = """
+                    출력 필터(검색 결과로 어떤 모임을 받을지 결정)
+                    - ALL: 모든 모임
+                    - STUDENT: 대학생 대상 모임
+                    - WORKER: 직장인 대상 모임
+                    - ONLINE: 온라인 모임
+                    - CLUB: 동아리 모임
+                    - MEETING: 소규모 모임
+                    - OFFLINE: 오프라인 모임
+                    """,
+                    example = "ALL")
             ClubSearchOutputFilter outputFilter
     ) {
         public ClubSearchFilter {
@@ -97,10 +116,19 @@ public class ClubRequestDTO {
     @NoArgsConstructor
     public static class ClubMemberStatusAction {
         @NotNull
+        @Schema(description = """
+                수행할 명령어
+                - APPROVE: 가입 승인 (PENDING -> MEMBER)
+                - REJECT: 가입 거절 (PENDING 삭제)
+                - CHANGE_ROLE: 회원/운영진 역할 변경 (MEMBER <-> STAFF)
+                - TRANSFER_OWNER: 모임 소유권 이전 (actor: OWNER -> STAFF, target: MEMBER/STAFF -> OWNER)
+                - KICK: 강제 탈퇴 (MEMBER/STAFF -> KICKED)
+                """)
         ClubMemberStatusUpdateCommand command;
+        @Schema(description = "변경할 상태 (CHANGE_ROLE일 때만 필요, 다른 command에서는 무시됨)")
         ClubMemberStatus status; // CHANGE_ROLE일 때만 필요
 
-        @AssertTrue(message = "CHAGNE_ROLE 요청에서는 status는 MEMBER 또는 STAFF만 허용됩니다.")
+        @AssertTrue(message = "CHANGE_ROLE 요청에서는 status는 MEMBER 또는 STAFF만 허용됩니다.")
         private boolean isValidStatusWhenChangeRole() {
             if (command != ClubMemberStatusUpdateCommand.CHANGE_ROLE) {
                 return true;

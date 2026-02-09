@@ -1,6 +1,5 @@
 package checkmo.clubNotice.internal.converter;
 
-import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubNotice.internal.entity.ClubMemberVote;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -74,8 +73,7 @@ public class ClubNoticeConverter {
     public static ClubNoticeResponseDTO.ClubNoticeDetail toClubNoticeDetail(
             Notice notice,
             DetailInfo meetingDetail,
-            ClubNoticeResponseDTO.VoteDetail voteDetail,
-            MembershipInfo membershipInfo
+            ClubNoticeResponseDTO.VoteDetail voteDetail
     ) {
         return ClubNoticeResponseDTO.ClubNoticeDetail.builder()
                 .id(notice.getId())
@@ -87,7 +85,6 @@ public class ClubNoticeConverter {
                 .createdAt(notice.getCreatedAt())
                 .meetingDetail(meetingDetail)
                 .voteDetail(voteDetail)
-                .isStaff(membershipInfo.isStaff())
                 .build();
     }
 
@@ -113,7 +110,7 @@ public class ClubNoticeConverter {
         return ClubNoticeResponseDTO.EachItem.builder()
                 .itemNumber(itemNumber)
                 .item(item)
-                .isSelected(isSelected)
+                .selected(isSelected)
                 .voteCount(votedMembers.size())
                 .votedMembers(votedMembers)
                 .build();
@@ -124,7 +121,7 @@ public class ClubNoticeConverter {
             MemberExternalDTO.BasicInfo memberInfo
     ) {
         return ClubNoticeResponseDTO.NoticeComment.builder()
-                .id(comment.getId())
+                .commentId(comment.getId())
                 .content(comment.getContent())
                 .authorInfo(memberInfo)
                 .createdAt(comment.getCreatedAt())

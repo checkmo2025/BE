@@ -2,12 +2,12 @@ package checkmo.clubMeeting.internal.service;
 
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
+import checkmo.book.BookExternalDTO.BasicInfo;
 import checkmo.book.BookExternalDTO.DetailInfo;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
-import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.Topic;
@@ -20,7 +20,6 @@ import checkmo.clubMeeting.internal.service.query.ClubTopicQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.BookShelfDetail;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
-import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
@@ -34,9 +33,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ClubMeetingQueryFacade {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
@@ -56,8 +57,7 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        validateClubAndClubMembership(clubId, memberId);
 
         CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
                 pageSize -> clubMeetingQueryService.retrieveMeetings(clubId, cursorId, pageSize),
@@ -66,21 +66,18 @@ public class ClubMeetingQueryFacade {
         );
         List<Meeting> meetings = meetingCursorResult.content();
 
-        // 미팅의 책 정보 배치 조회
-        List<String> bookIds = ExtractHelper.extractDistinctList(meetings, Meeting::getBookId);
-        Map<String, BookExternalDTO.BasicInfo> bookInfoMap = bookAPI.fetchBookBasicInfoByBookIds(bookIds);
+        Map<String, BasicInfo> bookInfoMap
+                = bookAPI.fetchBookBasicInfoByBookIds(ExtractHelper.extractDistinctList(meetings, Meeting::getBookId));
 
         return BookShelfResponseDTO.BookShelfList.builder()
                 .bookShelfInfoList(mapMeetingsToBookshelfInfo(meetings, bookInfoMap))
                 .hasNext(meetingCursorResult.hasNext())
                 .nextCursor(meetingCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
     public BookShelfResponseDTO.BookShelfDetail retrieveBookShelfDetail(Long clubId, Long meetingId, String memberId) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        validateClubAndClubMembership(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
@@ -88,7 +85,6 @@ public class ClubMeetingQueryFacade {
         return BookShelfDetail.builder()
                 .meetingInfo(ClubMeetingConverter.toMeetingInfoDTOForBookshelves(meeting))
                 .bookDetailInfo(bookInfo)
-                .membershipInfo(clubMembership)
                 .build();
     }
 
@@ -98,8 +94,7 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        validateClubAndClubMembership(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
@@ -109,15 +104,14 @@ public class ClubMeetingQueryFacade {
         );
         List<Topic> topics = topicCursorResult.content();
 
-        // 발제의 작성자 정보 배치 조회
-        List<String> authorIds = ExtractHelper.extractDistinctList(topics, Topic::getMemberId);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap
+                = memberAPI.fetchMemberBasicInfoByMemberIds(
+                ExtractHelper.extractDistinctList(topics, Topic::getMemberId));
 
         return BookShelfResponseDTO.TopicList.builder()
                 .topicDetailList(mapTopicsToTopicDetail(topics, authorInfoMap, memberId))
                 .hasNext(topicCursorResult.hasNext())
                 .nextCursor(topicCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
@@ -127,8 +121,7 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        MembershipInfo membershipInfo = validateClubAndClubMembership(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<BookReview> bookReviewCursorResult = CursorPagingHelper.getPage(
@@ -138,22 +131,21 @@ public class ClubMeetingQueryFacade {
         );
         List<BookReview> bookReviews = bookReviewCursorResult.content();
 
-        // 한줄평 작성자 정보 배치 조회
-        List<String> authorIds = ExtractHelper.extractDistinctList(bookReviews, BookReview::getMemberId);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap =
+                memberAPI.fetchMemberBasicInfoByMemberIds(
+                        ExtractHelper.extractDistinctList(bookReviews, BookReview::getMemberId));
 
         return BookShelfResponseDTO.BookReviewList.builder()
-                .bookReviewDetailList(mapReviewsToReviewDetail(bookReviews, authorInfoMap))
+                .bookReviewDetailList(
+                        mapReviewsToReviewDetail(bookReviews, membershipInfo.getClubMemberId(), authorInfoMap))
                 .hasNext(bookReviewCursorResult.hasNext())
                 .nextCursor(bookReviewCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
     // ========== 미팅 관련 조회 메서드 ==========
     public MeetingResponseDTO.NextMeetingRedirect retrieveNextMeeting(Long clubId, String memberId) {
-        clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        validateClubAndClubMembership(clubId, memberId);
 
         Meeting nextMeeting = clubMeetingQueryService.retrieveNextFutureMeeting(clubId, LocalDateTime.now());
         return MeetingResponseDTO.NextMeetingRedirect.builder()
@@ -167,18 +159,40 @@ public class ClubMeetingQueryFacade {
             Long meetingId,
             String memberId
     ) {
-        clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        validateClubAndClubMembership(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
-        List<Integer> existingTeamNumbers = clubMeetingTeamQueryService.retrieveExistingTeamNumbers(meetingId);
 
-        return MeetingInfo.builder()
-                .meetingId(meeting.getId())
-                .title(meeting.getTitle())
-                .meetingTime(meeting.getMeetingTime())
-                .location(meeting.getLocation())
-                .existingTeamNumbers(existingTeamNumbers)
-                .build();
+        List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
+        if (teams == null || teams.isEmpty()) {
+            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, List.of(), Map.of());
+        }
+
+        List<Long> teamIds = ExtractHelper.extractDistinctList(teams, Team::getId);
+        Map<Long, Integer> teamIdToTeamNumberMap = mapTeamIdToTeamNumber(teams);
+
+        // 미팅의 모든 팀원 조회
+        Map<Long, Long> clubMemberIdToTeamIdMap = clubMeetingTeamQueryService.retrieveTeamIdByClubMemberId(teamIds);
+        if (clubMemberIdToTeamIdMap == null || clubMemberIdToTeamIdMap.isEmpty()) {
+            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, Map.of());
+        }
+
+        // 클럽 멤버의 멤버십 정보 배치 조회
+        Map<Long, MembershipInfo> clubMemberIdToMembershipInfoMap
+                = clubManagementAPI.fetchMembershipInfoByClubMemberIds(clubMemberIdToTeamIdMap.keySet());
+
+        // 멤버십에 해당하는 멤버 정보 배치 조회
+        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap
+                = memberAPI.fetchMemberBasicInfoByMemberIds(extractMemberIds(clubMemberIdToMembershipInfoMap));
+
+        // teamNumber -> members 리스트 맵 구성
+        Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembersMap = mapTeamNumberToMeetingMembers(
+                clubMemberIdToTeamIdMap,
+                teamIdToTeamNumberMap,
+                clubMemberIdToMembershipInfoMap,
+                memberBasicInfoMap
+        );
+
+        return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, teamNumberToMembersMap);
     }
 
     public MeetingResponseDTO.MeetingMemberList retrieveMeetingMemberList(
@@ -187,12 +201,11 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
-        clubMeetingQueryService.validateMeeting(clubId, meetingId);
+        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
         if (!clubMembership.isStaff()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_STAFF_ONLY);
         }
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<MembershipInfo> membershipCursorResult = CursorPagingHelper.getPage(
                 size -> clubManagementAPI.fetchActiveMembershipInfo(clubId, cursorId, size),
@@ -201,20 +214,21 @@ public class ClubMeetingQueryFacade {
         );
         List<MembershipInfo> clubMembershipList = membershipCursorResult.content();
 
-        List<String> memberIds = ExtractHelper.extractDistinctList(clubMembershipList, MembershipInfo::getMemberId);
-        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
+        Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
+                = memberAPI.fetchMemberBasicInfoByMemberIds(
+                ExtractHelper.extractDistinctList(clubMembershipList, MembershipInfo::getMemberId));
 
         // 미팅에 존재하는 모든 팀 조회
         List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
-        List<Long> teamIds = ExtractHelper.extractDistinctList(teams, Team::getId);
         Map<Long, Integer> teamIdToTeamNumberMap = mapTeamIdToTeamNumber(teams);
+        List<Long> teamIds = ExtractHelper.extractDistinctList(teams, Team::getId);
 
         // Map<clubMemberId, teamId> 형태로 모든 팀의 팀원 조회
         Map<Long, Long> memberIdToTeamIdMap = clubMeetingTeamQueryService.retrieveTeamIdByClubMemberId(teamIds);
 
         // memberId -> teamNumber 맵 구성
-        Map<String, Integer> memberIdToTeamNumberMap
-                = mapMemberIdToTeamNumber(clubMembershipList, memberIdToTeamIdMap, teamIdToTeamNumberMap);
+        Map<Long, Integer> memberIdToTeamNumberMap
+                = mapClubMemberIdToTeamNumber(clubMembershipList, memberIdToTeamIdMap, teamIdToTeamNumberMap);
 
         return MeetingResponseDTO.MeetingMemberList.builder()
                 .members(
@@ -226,56 +240,16 @@ public class ClubMeetingQueryFacade {
                 .existingTeamNumbers(ExtractHelper.extractDistinctList(teams, Team::getTeamNumber))
                 .hasNext(membershipCursorResult.hasNext())
                 .nextCursor(membershipCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
-                .build();
-    }
-
-    public MeetingResponseDTO.TeamMember retrieveTeamMember(
-            Long clubId,
-            Long meetingId,
-            Integer teamNumber,
-            String memberId,
-            Long cursorId
-    ) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
-        clubMeetingQueryService.validateMeeting(clubId, meetingId);
-        Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
-
-        CursorResult<ClubMemberTeam> clubMemberTeamCursorResult = CursorPagingHelper.getPage(
-                size -> clubMeetingTeamQueryService.retrieveClubMemberTeams(
-                        team.getId(),
-                        cursorId,
-                        size
-                ),
-                ClubMemberTeam::getId,
-                DEFAULT_PAGE_SIZE
-        );
-        List<ClubMemberTeam> clubMemberTeams = clubMemberTeamCursorResult.content();
-
-        // 클럽 멤버의 기본 정보 배치 조회
-        Set<Long> clubMemberIds = ExtractHelper.extractSet(clubMemberTeams, ClubMemberTeam::getClubMemberId);
-        Map<Long, MembershipInfo> clubMemberIdToClubMembership = clubManagementAPI.fetchMembershipInfoByClubMemberIds(
-                clubMemberIds);
-        List<String> memberIds = extractMemberIds(clubMemberIdToClubMembership);
-        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap
-                = memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
-
-        return MeetingResponseDTO.TeamMember.builder()
-                .teamNumber(teamNumber)
-                .members(memberBasicInfoMap.values().stream().toList())
-                .hasNext(clubMemberTeamCursorResult.hasNext())
-                .nextCursor(clubMemberTeamCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
     }
 
     public MeetingResponseDTO.TeamTopic retrieveSelectableTopics(
             Long clubId, Long meetingId, Integer teamNumber, String memberId, Long cursorId) {
-        clubManagementAPI.validateClub(clubId);
-        MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        validateClubAndClubMembership(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
+
+        List<Integer> existingTeamNumbers = clubMeetingTeamQueryService.retrieveExistingTeamNumbers(meetingId);
 
         CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
                 size -> clubTopicQueryService.retrieveTopics(meetingId, cursorId, size),
@@ -288,11 +262,13 @@ public class ClubMeetingQueryFacade {
         Set<Long> selectedTopicIds = clubMeetingTeamQueryService.retrieveSelectedTopicIds(team.getId(), topicIds);
 
         // 토픽 작성자 정보 배치 조회
-        List<String> authorIds = ExtractHelper.extractDistinctList(topics, Topic::getMemberId);
-        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap = memberAPI.fetchMemberBasicInfoByMemberIds(authorIds);
+        Map<String, MemberExternalDTO.BasicInfo> authorInfoMap
+                = memberAPI.fetchMemberBasicInfoByMemberIds(
+                ExtractHelper.extractDistinctList(topics, Topic::getMemberId));
 
         return MeetingResponseDTO.TeamTopic.builder()
-                .teamNumber(teamNumber)
+                .existingTeamNumbers(existingTeamNumbers)
+                .requestedTeamNumber(teamNumber)
                 .topics(topics.stream()
                         .map(t -> ClubMeetingConverter.toTopicDTO(
                                         t,
@@ -303,8 +279,12 @@ public class ClubMeetingQueryFacade {
                         .toList())
                 .hasNext(topicCursorResult.hasNext())
                 .nextCursor(topicCursorResult.nextCursor())
-                .membershipInfo(clubMembership)
                 .build();
+    }
+
+    private MembershipInfo validateClubAndClubMembership(Long clubId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        return clubManagementAPI.fetchMembershipInfo(clubId, memberId);
     }
 
     private List<BookShelfResponseDTO.TopicDetail> mapTopicsToTopicDetail(
@@ -329,36 +309,78 @@ public class ClubMeetingQueryFacade {
 
     private List<BookShelfResponseDTO.BookReviewDetail> mapReviewsToReviewDetail(
             List<BookReview> bookReviews,
+            Long actorId,
             Map<String, MemberExternalDTO.BasicInfo> authorInfoMap
     ) {
         return bookReviews.stream()
                 .map(review -> ClubMeetingConverter.toBookReviewDetailDTO(
                         review,
-                        authorInfoMap.get(review.getMemberId())
+                        authorInfoMap.get(review.getMemberId()),
+                        review.isOwnedBy(actorId)
                 ))
                 .toList();
     }
 
-    private Map<String, Integer> mapMemberIdToTeamNumber(
+    private Map<Long, Integer> mapClubMemberIdToTeamNumber(
             List<MembershipInfo> membershipInfos,
             Map<Long, Long> clubMemberIdToTeamIdMap,
             Map<Long, Integer> teamIdToTeamNumberMap
     ) {
-        Map<String, Integer> result = new HashMap<>();
+        if (membershipInfos == null || membershipInfos.isEmpty()) {
+            return Map.of();
+        }
 
+        Map<Long, Integer> result = new HashMap<>();
         for (MembershipInfo membershipInfo : membershipInfos) {
             Long clubMemberId = membershipInfo.getClubMemberId();
-            String memberId = membershipInfo.getMemberId();
-
             Long teamId = clubMemberIdToTeamIdMap.get(clubMemberId);
             if (teamId == null) {
                 // 팀이 없는 멤버는 teamNumber = null
-                result.put(memberId, null);
+                result.put(clubMemberId, null);
                 continue;
             }
 
             Integer teamNumber = teamIdToTeamNumberMap.get(teamId);
-            result.put(memberId, teamNumber);
+            result.put(clubMemberId, teamNumber);
+        }
+
+        return result;
+    }
+
+    private Map<Integer, List<MeetingResponseDTO.MeetingMember>> mapTeamNumberToMeetingMembers(
+            Map<Long, Long> clubMemberIdToTeamIdMap,
+            Map<Long, Integer> teamIdToTeamNumberMap,
+            Map<Long, MembershipInfo> clubMemberIdToMembershipMap,
+            Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
+    ) {
+        Map<Integer, List<MeetingResponseDTO.MeetingMember>> result = new HashMap<>();
+
+        for (Map.Entry<Long, Long> e : clubMemberIdToTeamIdMap.entrySet()) {
+            Long clubMemberId = e.getKey();
+            Long teamId = e.getValue();
+
+            Integer teamNumber = teamIdToTeamNumberMap.get(teamId);
+            if (teamNumber == null) {
+                continue;
+            }
+
+            MembershipInfo membership = clubMemberIdToMembershipMap.get(clubMemberId);
+            if (membership == null) {
+                continue;
+            }
+
+            MemberExternalDTO.BasicInfo info = memberInfoMap.get(membership.getMemberId());
+            if (info == null) {
+                continue;
+            }
+
+            MeetingResponseDTO.MeetingMember dto = MeetingResponseDTO.MeetingMember.builder()
+                    .clubMemberId(clubMemberId)
+                    .memberInfo(info)
+                    .teamNumber(null)
+                    .build();
+
+            result.computeIfAbsent(teamNumber, k -> new java.util.ArrayList<>()).add(dto);
         }
 
         return result;
@@ -378,12 +400,13 @@ public class ClubMeetingQueryFacade {
     private MeetingResponseDTO.MeetingMember toMeetingMemberDTO(
             MembershipInfo membershipInfo,
             Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
-            Map<String, Integer> memberIdToTeamNumberMap
+            Map<Long, Integer> clubMemberIdToTeamNumberMap
     ) {
-        String memberId = membershipInfo.getMemberId();
-        MemberExternalDTO.BasicInfo memberInfo = memberBasicInfoMap.get(memberId);
-        Integer teamNumber = memberIdToTeamNumberMap.get(memberId);
+        MemberExternalDTO.BasicInfo memberInfo = memberBasicInfoMap.get(membershipInfo.getMemberId());
+        Long clubMemberId = membershipInfo.getClubMemberId();
+        Integer teamNumber = clubMemberIdToTeamNumberMap.get(clubMemberId);
         return MeetingResponseDTO.MeetingMember.builder()
+                .clubMemberId(clubMemberId)
                 .memberInfo(memberInfo)
                 .teamNumber(teamNumber)
                 .build();
