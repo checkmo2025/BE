@@ -125,33 +125,7 @@ public class ClubMeetingController {
         clubMeetingCommandService.manageTeam(clubId, meetingId, memberId, request);
         return ApiResponse.onSuccess(null);
     }
-
-    @Operation(summary = "미팅 팀별 참여 인원 조회", description = "독서모임의 팀별 참여 인원을 커서 기반 조회합니다.")
-    @Parameters({
-            @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
-            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "teamNumber", description = "팀 번호(조회하려는 조 이름이 x조(x는 A부터 Z까지 알파벳 중 하나)이면 x - ‘A’ + 1 로 조회하려는 조 번호로 요청", required = true, example = "1"),
-            @Parameter(name = "cursorId", description = "커서 ID (null이면 처음부터 조회)", required = false, example = "5"),
-    })
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다.")
-    })
-    @GetMapping("/{meetingId}/teams/{teamNumber}/members")
-    public ApiResponse<MeetingResponseDTO.TeamMember> getTeamMembers(
-            @PathVariable Long clubId,
-            @PathVariable Long meetingId,
-            @PathVariable @Min(value = 1) Integer teamNumber,
-            @RequestParam(required = false) @ValidCursor Long cursorId,
-            @CurrentId String memberId
-    ) {
-        return ApiResponse.onSuccess(
-                clubMeetingQueryFacade.retrieveTeamMember(clubId, meetingId, teamNumber, memberId, cursorId));
-    }
-
+    
     @Operation(summary = "팀별 발제 조회", description = "팀별로 발제를 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),

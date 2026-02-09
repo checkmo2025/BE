@@ -4,12 +4,16 @@ import checkmo.book.BookExternalDTO;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
+import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
 import checkmo.member.MemberExternalDTO;
+import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -126,10 +130,40 @@ public class ClubMeetingConverter {
                 .build();
     }
 
+    public static MeetingInfo toMeetingInfoWithTeams(
+            Meeting meeting,
+            List<Team> teams,
+            Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembers
+    ) {
+        List<Team> safeTeams = (teams != null) ? teams : List.of();
+        Map<Integer, List<MeetingResponseDTO.MeetingMember>> safeTeamNumberToMembers
+                = (teamNumberToMembers != null) ? teamNumberToMembers : Map.of();
+
+        List<Integer> existingTeamNumbers = safeTeams.stream()
+                .map(Team::getTeamNumber)
+                .distinct()
+                .sorted()
+                .toList();
+
+        return MeetingInfo.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .existingTeamNumbers(existingTeamNumbers)
+                .teams(existingTeamNumbers.stream()
+                        .map(teamNumber -> MeetingResponseDTO.TeamMember.builder()
+                                .teamNumber(teamNumber)
+                                .members(safeTeamNumberToMembers.getOrDefault(teamNumber, List.of()))
+                                .build())
+                        .toList())
+                .build();
+
+    }
+
     // =====================================================
     // ?? -> ClubMeetingExternalDTO 변환
     // =====================================================
-
     public static DetailInfo toMeetingInfoExternalDTO(
             Meeting meeting,
             BookExternalDTO.BasicInfo bookInfo

@@ -32,6 +32,7 @@ public class MeetingResponseDTO {
         private LocalDateTime meetingTime;
         private String location;
         private List<Integer> existingTeamNumbers;
+        private List<TeamMember> teams;
     }
 
     @Getter
@@ -81,7 +82,7 @@ public class MeetingResponseDTO {
         private Long clubMemberId;
         @Schema(description = "참여자 정보(프로필 사진, 닉네임 정보)")
         private MemberExternalDTO.BasicInfo memberInfo; // 참여자 정보
-        @JsonInclude(JsonInclude.Include.NON_NULL) // TeamMember 팀별 인원 조회에서 사용 X
+        @JsonInclude(JsonInclude.Include.NON_NULL) // 정기모임 조회에서 사용 X
         @Schema(description = "배정된 팀 번호(만약 팀이 배정되지 않았다면 null)", example = "1")
         private Integer teamNumber;
     }
@@ -93,8 +94,6 @@ public class MeetingResponseDTO {
     public static class TeamMember {
         private Integer teamNumber; // 팀 번호
         private List<MeetingMember> members; // 해당 팀의 참여자 목록
-        private boolean hasNext;
-        private Long nextCursor;
     }
 
     @Getter
