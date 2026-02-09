@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -95,10 +96,15 @@ public class ClubNoticeResponseDTO {
     public static class EachItem {
         private int itemNumber; // 항목 번호 (1~6)
         private String item;
-        @JsonProperty("isSelected")
+        @Getter(AccessLevel.NONE)
         private boolean selected; // 현재 로그인한 멤버가 해당 항목에 투표했는지 여부
         private int voteCount;
         private List<MemberExternalDTO.BasicInfo> votedMembers; // 해당 항목에 투표한 멤버 닉네임과 프로필 사진 url
+
+        @JsonProperty("isSelected")
+        public boolean isSelected() {
+            return selected;
+        }
     }
 
     @Getter

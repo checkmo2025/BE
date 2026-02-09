@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,8 +45,13 @@ public class MeetingResponseDTO {
         private String content;
         private LocalDateTime createdAt;
         private MemberExternalDTO.BasicInfo author;
-        @JsonProperty("isSelected")
+        @Getter(AccessLevel.NONE)
         private boolean selected;
+
+        @JsonProperty("isSelected")
+        public boolean isSelected() {
+            return selected;
+        }
     }
 
     @Getter
@@ -103,7 +109,12 @@ public class MeetingResponseDTO {
     public static class TopicSelection {
         private Long topicId;
         private Integer teamNumber; // 요청을 보낸 팀 번호
+        @Getter(AccessLevel.NONE)
+        private boolean selected; // 발제 선택 여부
+
         @JsonProperty("isSelected")
-        private Boolean selected; // 발제 선택 여부
+        public Boolean isSelected() {
+            return selected;
+        }
     }
 }

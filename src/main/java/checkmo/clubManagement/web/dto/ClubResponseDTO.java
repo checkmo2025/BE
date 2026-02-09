@@ -5,7 +5,6 @@ import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -130,10 +129,8 @@ public class ClubResponseDTO {
                 """,
                 example = "MEMBER")
         private MyClubMemberStatus myStatus;
-        @JsonProperty("isActive")
         @Schema(description = "회원이 모임에서 활동 가능한지 여부(MEMBER, STAFF, OWNER이면 true, 그외 false)", example = "true")
         private boolean active;
-        @JsonProperty("isStaff")
         @Schema(description = "회원이 모임의 운영진인지 여부(STAFF, OWNER이면 ture, 그외 false)", example = "false")
         private boolean staff;
     }

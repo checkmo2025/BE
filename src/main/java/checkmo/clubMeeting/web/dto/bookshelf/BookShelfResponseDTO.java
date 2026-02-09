@@ -4,6 +4,7 @@ import checkmo.book.BookExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -69,8 +70,13 @@ public class BookShelfResponseDTO {
         private String description;
         private double rate;
         private MemberExternalDTO.BasicInfo authorInfo;
-        @JsonProperty("isAuthor")
+        @Getter(AccessLevel.NONE)
         private boolean author;
+
+        @JsonProperty("isAuthor")
+        public boolean isAuthor() {
+            return author;
+        }
     }
 
     @Getter
@@ -91,8 +97,13 @@ public class BookShelfResponseDTO {
         private Long topicId;
         private String content;
         private MemberExternalDTO.BasicInfo authorInfo;
-        @JsonProperty("isAuthor")
+        @Getter(AccessLevel.NONE)
         private boolean author;
+
+        @JsonProperty("isAuthor")
+        public boolean isAuthor() {
+            return author;
+        }
     }
 
 }
