@@ -25,11 +25,11 @@ import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -197,18 +197,20 @@ public class ClubManagementQueryFacade {
         List<ClubRecommendation> result
                 = clubManagementQueryService.recommend(interestCategories, lastActivityAt, memberId);
 
-        List<ClubResponseDTO.ClubRecommendation> recommendations = new ArrayList<ClubResponseDTO.ClubRecommendation>();
-        for (int i = 0; i < result.size(); i++) {
-            ClubRecommendation clubRecommendation = result.get(i);
-            recommendations.add(ClubResponseDTO.ClubRecommendation.builder()
-                    .rank(i + 1)
-                    .clubId(clubRecommendation.getClubId())
-                    .clubName(clubRecommendation.getClubName())
-                    .overlapCount(clubRecommendation.getOverlapCount())
-                    .activeMemberCount(clubRecommendation.getActiveMemberCount())
-                    .lastActivityAt(clubRecommendation.getLastActivityAt())
-                    .build());
-        }
+        List<ClubResponseDTO.ClubRecommendation> recommendations = IntStream.range(0, result.size())
+                .mapToObj(i -> {
+                    ClubRecommendation rec = result.get(i);
+                    return ClubResponseDTO.ClubRecommendation.builder()
+                            .rank(i + 1)
+                            .clubId(rec.getClubId())
+                            .clubName(rec.getClubName())
+                            .overlapCount(rec.getOverlapCount())
+                            .activeMemberCount(rec.getActiveMemberCount())
+                            .lastActivityAt(rec.getLastActivityAt())
+                            .build();
+                })
+                .toList();
+
         return ClubResponseDTO.ClubRecommendationList.builder()
                 .recommendations(recommendations)
                 .build();
