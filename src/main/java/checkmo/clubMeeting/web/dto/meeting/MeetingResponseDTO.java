@@ -113,7 +113,7 @@ public class MeetingResponseDTO {
         private boolean selected; // 발제 선택 여부
 
         @JsonProperty("isSelected")
-        public Boolean isSelected() {
+        public boolean isSelected() {
             return selected;
         }
     }
