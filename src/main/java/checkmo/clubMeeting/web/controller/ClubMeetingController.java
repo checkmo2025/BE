@@ -103,7 +103,7 @@ public class ClubMeetingController {
                 clubMeetingQueryFacade.retrieveMeetingMemberList(clubId, meetingId, memberId, cursorId));
     }
 
-    @Operation(summary = "[운영진] 정기모임 조 관리", description = "Response Body를 기준으로 팀을 교체합니다.")
+    @Operation(summary = "[운영진] 정기모임 조 관리", description = "Request Body를 기준으로 팀을 교체합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "팀을 관리할 정기 독서 모임 ID", required = true, example = "1"),
@@ -125,7 +125,7 @@ public class ClubMeetingController {
         clubMeetingCommandService.manageTeam(clubId, meetingId, memberId, request);
         return ApiResponse.onSuccess(null);
     }
-    
+
     @Operation(summary = "팀별 발제 조회", description = "팀별로 발제를 조회합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),

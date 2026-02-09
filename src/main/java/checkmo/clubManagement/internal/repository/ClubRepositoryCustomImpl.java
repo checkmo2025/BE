@@ -7,6 +7,7 @@ import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubInterestCategory;
 import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
+import checkmo.clubManagement.internal.entity.QClubMember;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubSearchOutputFilter;
@@ -168,10 +169,11 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
     }
 
     private BooleanExpression notRelated(String memberId) {
+        QClubMember subClubMember = new QClubMember("subClubMember");
         return JPAExpressions.selectOne()
-                .from(clubMember)
-                .where(clubMember.club.id.eq(club.id),
-                        clubMember.memberId.eq(memberId)
+                .from(subClubMember)
+                .where(subClubMember.club.id.eq(club.id),
+                        subClubMember.memberId.eq(memberId)
                 )
                 .notExists();
     }

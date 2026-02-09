@@ -187,7 +187,7 @@ public class ClubResponseDTO {
         private Long overlapCount;
         @Schema(description = "모임의 활성화 상태인 클럽 멤버 수(모임 추천 기능 확인을 위해 넣은 필드로, 안정됐다고 판단되면 사라질 수 있습니다)", example = "150")
         private Long activeMemberCount;
-        @Schema(description = "모임의 최근 활동 시간(독서모임 생성 또는 정기모임 생성/수정할 떄마다 반영)(모임 추천 기능 확인을 위해 넣은 필드로, 안정됐다고 판단되면 사라질 수 있습니다)", example = "2024-06-01T12:34:56")
+        @Schema(description = "모임의 최근 활동 시간(독서모임 생성 또는 정기모임 생성/수정할 때마다 반영)(모임 추천 기능 확인을 위해 넣은 필드로, 안정됐다고 판단되면 사라질 수 있습니다)", example = "2024-06-01T12:34:56")
         private LocalDateTime lastActivityAt;
     }
 }

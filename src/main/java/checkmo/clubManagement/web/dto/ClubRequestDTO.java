@@ -128,7 +128,7 @@ public class ClubRequestDTO {
         @Schema(description = "변경할 상태 (CHANGE_ROLE일 때만 필요, 다른 command에서는 무시됨)")
         ClubMemberStatus status; // CHANGE_ROLE일 때만 필요
 
-        @AssertTrue(message = "CHAGNE_ROLE 요청에서는 status는 MEMBER 또는 STAFF만 허용됩니다.")
+        @AssertTrue(message = "CHANGE_ROLE 요청에서는 status는 MEMBER 또는 STAFF만 허용됩니다.")
         private boolean isValidStatusWhenChangeRole() {
             if (command != ClubMemberStatusUpdateCommand.CHANGE_ROLE) {
                 return true;
