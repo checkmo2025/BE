@@ -24,7 +24,11 @@ public enum MemberErrorStatus implements BaseErrorCode {
     MULTIPLE_ACCOUNTS_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_409", "해당 정보로 가입된 계정이 여러 개입니다. 관리자에게 문의해주세요."),
 
     // 신고
-    CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "REPORT_400", "자기 자신을 신고할 수 없습니다.");
+    CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "REPORT_400", "자기 자신을 신고할 수 없습니다."),
+
+    // 약관
+    TERMS_NOT_FOUND(HttpStatus.NOT_FOUND, "TERMS_400", "해당 약관을 찾을 수 없습니다."),
+    REQUIRED_TERMS_NOT_AGREE(HttpStatus.BAD_REQUEST, "TERMS_401", "필수 약관에 동의해야 회원가입이 가능합니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

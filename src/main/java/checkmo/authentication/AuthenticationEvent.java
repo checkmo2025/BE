@@ -1,11 +1,12 @@
 package checkmo.authentication;
 
+import java.util.List;
 import lombok.Builder;
 
 public class AuthenticationEvent {
 
     @Builder
-    public record CreateMember(String id, String email) {
+    public record CreateMember(String id, String email, List<Long> agreedTermsIds) {
     }
 
     @Builder

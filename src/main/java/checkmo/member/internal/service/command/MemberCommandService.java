@@ -4,12 +4,17 @@ import checkmo.authentication.AuthenticationAPI;
 import checkmo.member.MemberEvent;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberTerms;
+import checkmo.member.internal.entity.Terms;
 import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.internal.repository.MemberTermsRepository;
+import checkmo.member.internal.repository.TermsRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import java.util.HashSet;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -26,7 +31,13 @@ public class MemberCommandService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public void createMember(String memberId, String email) {
+    private final MemberTermsRepository memberTermsRepository;
+
+    private final TermsRepository termsRepository;
+
+    public void createMember(String memberId, String email, List<Long> agreedTermsIds) {
+        validateRequiredTerms(agreedTermsIds);
+
         Member member = Member.builder()
                 .id(memberId)
                 .email(email)
@@ -39,7 +50,30 @@ public class MemberCommandService {
 
         memberRepository.save(member);
 
-        // TODO: 여기서 약관 내역 DB에 저장 (멤버 생성 후)
+        // 여기서 약관 내역 DB에 저장 (멤버 생성 후)
+        for (Long termsId : agreedTermsIds) {
+            Terms terms = termsRepository.findById(termsId)
+                                         .orElseThrow(() -> new MemberException(MemberErrorStatus.TERMS_NOT_FOUND));
+
+            MemberTerms memberTerms = MemberTerms.builder()
+                                                 .member(member)
+                                                 .terms(terms)
+                                                 .isAgreed(true)
+                                                 .build();
+
+            memberTermsRepository.save(memberTerms);
+        }
+    }
+
+    private void validateRequiredTerms(List<Long> agreedTermsIds) {
+        List<Long> requiredTermsIds = termsRepository.findAll().stream()
+                                                     .filter(Terms::isRequired)
+                                                     .map(Terms::getId)
+                                                     .toList();
+
+        if (agreedTermsIds == null || !agreedTermsIds.containsAll(requiredTermsIds)) {
+            throw new MemberException(MemberErrorStatus.REQUIRED_TERMS_NOT_AGREE);
+        }
     }
 
     /**

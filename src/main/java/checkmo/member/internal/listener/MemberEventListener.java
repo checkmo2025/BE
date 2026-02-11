@@ -17,6 +17,6 @@ public class MemberEventListener {
     @EventListener
     @Transactional(propagation = Propagation.MANDATORY)
     public void createMember(AuthenticationEvent.CreateMember event) {
-        memberCommandService.createMember(event.id(), event.email());
+        memberCommandService.createMember(event.id(), event.email(), event.agreedTermsIds());
     }
 }
