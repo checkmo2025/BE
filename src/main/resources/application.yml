@@ -14,3 +14,6 @@ spring:
 
 server:
   forward-headers-strategy: NATIVE
+
+springdoc:
+  use-fqn: true
