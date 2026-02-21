@@ -29,6 +29,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -197,13 +198,26 @@ public class ClubManagementQueryFacade {
         List<ClubRecommendation> result
                 = clubManagementQueryService.recommend(interestCategories, lastActivityAt, memberId);
 
+        // 추천 결과 기반으로 클럽 정보 배치 조회
+        List<Long> clubIds = ExtractHelper.extractDistinctList(result, ClubRecommendation::getClubId);
+        List<Club> clubs = clubManagementQueryService.retrieveClubs(clubIds);
+        Map<Long, Club> clubMap = clubs.stream().collect(Collectors.toMap(Club::getId, c -> c));
+
         List<ClubResponseDTO.ClubRecommendation> recommendations = IntStream.range(0, result.size())
                 .mapToObj(i -> {
                     ClubRecommendation rec = result.get(i);
+                    Club club = clubMap.get(rec.getClubId());
+                    if (club == null) {
+                        // 추천 결과에 클럽 정보가 없는 경우는 무시 (정상적으로는 발생하지 않아야 함)
+                        return null;
+                    }
+                    ClubDetailWithMyStatus clubDTO = ClubResponseDTO.ClubDetailWithMyStatus.builder()
+                            .club(ClubManagementConverter.toClubDetailDTO(club, false))
+                            .myStatus(MyClubMemberStatus.NONE)
+                            .build();
                     return ClubResponseDTO.ClubRecommendation.builder()
                             .rank(i + 1)
-                            .clubId(rec.getClubId())
-                            .clubName(rec.getClubName())
+                            .clubInfo(clubDTO)
                             .overlapCount(rec.getOverlapCount())
                             .activeMemberCount(rec.getActiveMemberCount())
                             .lastActivityAt(rec.getLastActivityAt())
