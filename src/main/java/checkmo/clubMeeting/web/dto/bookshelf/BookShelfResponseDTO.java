@@ -20,6 +20,14 @@ public class BookShelfResponseDTO {
         private List<BookShelfInfo> bookShelfInfoList;
         private boolean hasNext;
         private Long nextCursor;
+
+        @Getter(AccessLevel.NONE)
+        private boolean staff;
+
+        @JsonProperty("isStaff")
+        public boolean isStaff() {
+            return staff;
+        }
     }
 
     @Getter

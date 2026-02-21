@@ -57,7 +57,7 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
 
         CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
                 pageSize -> clubMeetingQueryService.retrieveMeetings(clubId, cursorId, pageSize),
@@ -73,6 +73,7 @@ public class ClubMeetingQueryFacade {
                 .bookShelfInfoList(mapMeetingsToBookshelfInfo(meetings, bookInfoMap))
                 .hasNext(meetingCursorResult.hasNext())
                 .nextCursor(meetingCursorResult.nextCursor())
+                .staff(clubMembership.isStaff())
                 .build();
     }
 
