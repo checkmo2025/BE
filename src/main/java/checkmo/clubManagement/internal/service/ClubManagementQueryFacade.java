@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -226,7 +227,7 @@ public class ClubManagementQueryFacade {
                 .toList();
 
         return ClubResponseDTO.ClubRecommendationList.builder()
-                .recommendations(recommendations)
+                .recommendations(recommendations.stream().filter(Objects::nonNull).toList())
                 .build();
     }
 
