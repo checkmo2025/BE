@@ -18,7 +18,9 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @Query("SELECT n FROM Notice n "
             + "WHERE n.clubId = :clubId "
-            + "AND n.important = :important "
+            + "AND n.pinned = :pinned "
             + "ORDER BY n.createdAt DESC, n.id DESC ")
-    Page<Notice> findAllByClubIdAndImportant(Long clubId, boolean important, Pageable pageable);
+    Page<Notice> findAllByClubIdAndPinned(Long clubId, boolean pinned, Pageable pageable);
+
+    long countByClubIdAndPinnedTrue(Long clubId);
 }

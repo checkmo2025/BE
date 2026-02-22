@@ -1,0 +1,2 @@
+ALTER TABLE notice
+    CHANGE COLUMN important is_pinned TINYINT(1) NOT NULL DEFAULT 0;

@@ -1,5 +1,6 @@
 package checkmo.clubNotice.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,12 +25,18 @@ public class ClubNoticeRequestDTO {
         @NotNull(message = "공지사항 내용은 null이 될 수 없습니다.")
         @Size(max = 1000, message = "공지사항 내용은 1000자 이하로 입력해주세요.")
         private String content;
-        private boolean important;
+        @Getter(AccessLevel.NONE)
+        private boolean pinned;
         private Long meetingId;
         @Size(max = 5, message = "공지사항 이미지는 최대 5개까지 가능합니다.")
         private List<@NotBlank(message = "공지사항 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
         @Valid
         private CreateClubVote vote;
+
+        @JsonProperty("isPinned")
+        public boolean isPinned() {
+            return pinned;
+        }
     }
 
     @Getter
@@ -70,13 +78,19 @@ public class ClubNoticeRequestDTO {
         @NotNull(message = "공지사항 내용은 null이 될 수 없습니다.")
         @Size(max = 1000, message = "공지사항 내용은 1000자 이하로 입력해주세요.")
         private String content;
-        private boolean important;
+        @Getter(AccessLevel.NONE)
+        private boolean pinned;
         private Long meetingId;
         @Size(max = 5, message = "공지사항 이미지는 최대 5개까지 가능합니다.")
         private List<@NotBlank(message = "공지사항 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
         // 미포함/null -> 이미지 변경 X, 빈 리스트 -> 이미지 모두 삭제, 값 있음 -> 이미지 교체
         @Valid
         private UpdateClubVote vote;
+
+        @JsonProperty("isPinned")
+        public boolean isPinned() {
+            return pinned;
+        }
     }
 
     @Getter

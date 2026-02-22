@@ -35,9 +35,15 @@ public class ClubNoticeResponseDTO {
     public static final class ClubNoticePreview {
         private Long id;
         private String title;
-        private boolean important;
+        @Getter(AccessLevel.NONE)
+        private boolean pinned;
         private ClubNoticeTagItem tagItem;
         private LocalDateTime createdAt;
+
+        @JsonProperty("isPinned")
+        public boolean isPinned() {
+            return pinned;
+        }
     }
 
     @Getter
@@ -64,7 +70,8 @@ public class ClubNoticeResponseDTO {
         private Long id;
         private String title;
         private String content;
-        private boolean important;
+        @Getter(AccessLevel.NONE)
+        private boolean pinned;
         private ClubNoticeTagItem tag;
         private List<String> imageUrls;
         private LocalDateTime createdAt;
@@ -72,6 +79,11 @@ public class ClubNoticeResponseDTO {
         private DetailInfo meetingDetail; // 모임 공지인 경우에만 포함
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private VoteDetail voteDetail; // 투표 공지인 경우에만 포함
+
+        @JsonProperty("isPinned")
+        public boolean isPinned() {
+            return pinned;
+        }
     }
 
     @Getter
