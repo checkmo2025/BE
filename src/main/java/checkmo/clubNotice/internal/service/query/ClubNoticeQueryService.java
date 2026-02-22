@@ -21,8 +21,8 @@ public class ClubNoticeQueryService {
         return noticeRepository.findWithVoteAndClubMemberVotesByIdAndClubId(noticeId, clubId);
     }
 
-    public Page<Notice> retrieveNotices(Long clubId, boolean important, Pageable pageable) {
-        return noticeRepository.findAllByClubIdAndPinned(clubId, important, pageable);
+    public Page<Notice> retrieveNotices(Long clubId, boolean pinned, Pageable pageable) {
+        return noticeRepository.findAllByClubIdAndPinned(clubId, pinned, pageable);
     }
 
     public Notice validateNotice(Long clubId, Long noticeId) throws ClubNoticeException {
