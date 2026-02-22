@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ClubNoticeCommandService {
 
+    private static final int MAX_PINNED_COUNT = 5;
+
     private final ClubManagementAPI clubManagementAPI;
     private final ClubMeetingAPI clubMeetingAPI;
 
@@ -45,6 +47,10 @@ public class ClubNoticeCommandService {
         if (tag.isMeeting() && !clubMeetingAPI.isMeetingInClub(clubId, request.getMeetingId())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
         }
+        if (request.isPinned()) {
+            validatePinnedLimit(clubId);
+        }
+
         Notice notice = ClubNoticeConverter.toNotice(request, tag, clubId);
         notice.replaceImages(request.getImageUrls());
         CreateClubVote vote = request.getVote();
@@ -89,10 +95,13 @@ public class ClubNoticeCommandService {
         if (request.getMeetingId() != null && !clubMeetingAPI.isMeetingInClub(clubId, request.getMeetingId())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
         }
+        if (!notice.isPinned() && request.isPinned()) {
+            validatePinnedLimit(clubId);
+        }
         notice.update(
                 request.getTitle(),
                 request.getContent(),
-                request.isImportant(),
+                request.isPinned(),
                 request.getMeetingId()
         );
         if (request.getVote() != null) {
@@ -103,6 +112,13 @@ public class ClubNoticeCommandService {
         noticeRepository.flush();
         if (!removedImages.isEmpty()) {
             publishNoticeImageDeletedEvent(removedImages);
+        }
+    }
+
+    private void validatePinnedLimit(Long clubId) {
+        long pinnedCount = noticeRepository.countByClubIdAndPinnedTrue(clubId);
+        if (pinnedCount >= MAX_PINNED_COUNT) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.PINNED_NOTICE_LIMIT_EXCEEDED);
         }
     }
 

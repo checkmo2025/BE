@@ -22,7 +22,7 @@ public class ClubNoticeQueryService {
     }
 
     public Page<Notice> retrieveNotices(Long clubId, boolean important, Pageable pageable) {
-        return noticeRepository.findAllByClubIdAndImportant(clubId, important, pageable);
+        return noticeRepository.findAllByClubIdAndPinned(clubId, important, pageable);
     }
 
     public Notice validateNotice(Long clubId, Long noticeId) throws ClubNoticeException {

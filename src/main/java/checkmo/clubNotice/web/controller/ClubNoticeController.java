@@ -47,10 +47,10 @@ public class ClubNoticeController {
             @CurrentId String memberId,
             @PathVariable Long clubId,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "false") boolean important
+            @RequestParam(name = "is-pinned", defaultValue = "false") boolean pinned
     ) {
         return ApiResponse.onSuccess(
-                clubNoticeQueryFacade.retrieveClubNoticeList(clubId, memberId, page, important));
+                clubNoticeQueryFacade.retrieveClubNoticeList(clubId, memberId, page, pinned));
     }
 
     @Operation(summary = "공지사항 상세 조회", description = "공지사항 상세 정보를 조회합니다.")
