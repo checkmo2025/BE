@@ -109,8 +109,8 @@ public class MemberQueryFacade {
             return Collections.emptyList();
         }
 
-        // 1. 회원 기본 정보 배치 조회
-        List<MemberBasicInfoProjection> memberInfoList = memberQueryService.retrieveMemberBasicInfos(
+        // 1. 활성 회원 기본 정보 배치 조회
+        List<MemberBasicInfoProjection> memberInfoList = memberQueryService.retrieveActiveMemberBasicInfos(
                 targetMemberIds);
 
         // 2. 팔로우 상태 배치 조회
@@ -201,4 +201,3 @@ public class MemberQueryFacade {
                                             .build();
     }
 }
-
