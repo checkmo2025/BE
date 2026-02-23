@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -51,6 +52,8 @@ public class Member extends BaseEntity {
     private String description;
 
     private String imgUrl;
+
+    private LocalDateTime deactivatedAt;
 
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -114,5 +117,17 @@ public class Member extends BaseEntity {
 
     public void updateEmail(String newEmail) {
         this.email = newEmail;
+    }
+
+    public void deactivate() {
+        this.deactivatedAt = LocalDateTime.now();
+    }
+
+    public boolean isDeactivated() {
+        return deactivatedAt != null;
+    }
+
+    public boolean isActive() {
+        return deactivatedAt == null;
     }
 }
