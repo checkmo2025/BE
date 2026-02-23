@@ -134,7 +134,15 @@ public class MemberCommandService {
      * @param memberId 비활성화할 회원의 ID
      */
     public void deactivateMember(String memberId) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+
+        if (member.isDeactivated()) {
+            return;
+        }
+
+        member.deactivate();
+        authenticationAPI.deactivateMember(memberId);
     }
 
     /**
