@@ -11,7 +11,9 @@ import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
+import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.TeamKey;
 import checkmo.member.MemberExternalDTO;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -140,10 +142,12 @@ public class ClubMeetingConverter {
         Map<Integer, List<MeetingResponseDTO.MeetingMember>> safeTeamNumberToMembers
                 = (teamNumberToMembers != null) ? teamNumberToMembers : Map.of();
 
-        List<Integer> existingTeamNumbers = safeTeams.stream()
-                .map(Team::getTeamNumber)
-                .distinct()
-                .sorted()
+        List<MeetingResponseDTO.TeamKey> existingTeams = safeTeams.stream()
+                .map(team -> MeetingResponseDTO.TeamKey.builder()
+                        .teamId(team.getId())
+                        .teamNumber(team.getTeamNumber())
+                        .build())
+                .sorted(Comparator.comparingInt(TeamKey::getTeamNumber))
                 .toList();
 
         return MeetingInfo.builder()
@@ -151,11 +155,11 @@ public class ClubMeetingConverter {
                 .title(meeting.getTitle())
                 .meetingTime(meeting.getMeetingTime())
                 .location(meeting.getLocation())
-                .existingTeamNumbers(existingTeamNumbers)
-                .teams(existingTeamNumbers.stream()
-                        .map(teamNumber -> MeetingResponseDTO.TeamMember.builder()
-                                .teamNumber(teamNumber)
-                                .members(safeTeamNumberToMembers.getOrDefault(teamNumber, List.of()))
+                .existingTeams(existingTeams)
+                .teamMembers(existingTeams.stream()
+                        .map(teamKey -> MeetingResponseDTO.TeamMember.builder()
+                                .teamKey(teamKey)
+                                .members(safeTeamNumberToMembers.getOrDefault(teamKey.getTeamNumber(), List.of()))
                                 .build())
                         .toList())
                 .staff(staff)

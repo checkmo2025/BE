@@ -1,7 +1,6 @@
 package checkmo.clubMeeting.web.dto.meeting;
 
 import checkmo.member.MemberExternalDTO;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -27,13 +26,24 @@ public class MeetingResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class TeamKey {
+        @Schema(description = "팀 ID", example = "153")
+        private Long teamId;
+        @Schema(description = "팀 번호", example = "1")
+        private Integer teamNumber;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MeetingInfo {
         private Long meetingId;
         private String title;
         private LocalDateTime meetingTime;
         private String location;
-        private List<Integer> existingTeamNumbers;
-        private List<TeamMember> teams;
+        private List<TeamKey> existingTeams;
+        private List<TeamMember> teamMembers;
         @Getter(AccessLevel.NONE)
         private boolean staff;
 
@@ -95,7 +105,6 @@ public class MeetingResponseDTO {
         private Long clubMemberId;
         @Schema(description = "참여자 정보(프로필 사진, 닉네임 정보)")
         private MemberExternalDTO.BasicInfo memberInfo; // 참여자 정보
-        @JsonInclude(JsonInclude.Include.NON_NULL) // 정기모임 조회에서 사용 X
         @Schema(description = "배정된 팀 번호(만약 팀이 배정되지 않았다면 null)", example = "1")
         private Integer teamNumber;
     }
@@ -105,8 +114,8 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TeamMember {
-        private Integer teamNumber; // 팀 번호
-        private List<MeetingMember> members; // 해당 팀의 참여자 목록
+        private TeamKey teamKey;
+        private List<MeetingMember> members;
     }
 
     @Getter
