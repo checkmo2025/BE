@@ -6,6 +6,7 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -103,9 +104,10 @@ public class ClubNoticeRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class VoteResult {
-        @NotNull(message = "선택한 투표 항목 번호는 필수입니다.")
-        @Size(min = 1, max = 6, message = "투표 항목 번호는 1부터 6 사이여야 합니다.")
-        private List<@Min(1) @Max(6) Integer> selectedItemNumbers;
+        @NotEmpty(message = "투표 항목을 최소 1개 이상 선택해야 합니다.")
+        @Size(max = 6, message = "투표 항목은 최대 6개이하여야 합니다.")
+        private List<@Min(value = 1, message = "투표 항목 번호는 1 이상이어야 합니다.")
+        @Max(value = 6, message = "투표 항목 번호는 6이하여야 합니다.") Integer> selectedItemNumbers;
 
         // 몇 개를 선택했는지 확인하는 DTO용 메서드로, 복수 선택 검증에서 사용됨
         public int countSelectedItems() {
