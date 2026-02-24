@@ -34,6 +34,13 @@ public class MeetingResponseDTO {
         private String location;
         private List<Integer> existingTeamNumbers;
         private List<TeamMember> teams;
+        @Getter(AccessLevel.NONE)
+        private boolean staff;
+
+        @JsonProperty("isStaff")
+        public boolean isStaff() {
+            return staff;
+        }
     }
 
     @Getter
