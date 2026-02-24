@@ -19,6 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubNoticeQueryService {
     private final NoticeRepository noticeRepository;
 
+    public Optional<Notice> retrieveLatestNotice(Long clubId) {
+        return noticeRepository.findTop1ByClubIdOrderByCreatedAtDescIdDesc(clubId);
+    }
+
     public Optional<Notice> retrieveNoticeDetailWithVoteAndClubMemberVotes(Long clubId, Long noticeId) {
         return noticeRepository.findWithVoteAndClubMemberVotesByIdAndClubId(noticeId, clubId);
     }

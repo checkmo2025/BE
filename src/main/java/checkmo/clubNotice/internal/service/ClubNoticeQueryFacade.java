@@ -16,6 +16,7 @@ import checkmo.clubNotice.internal.service.query.NoticeCommentQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticePreviewPage;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.EachItem;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.LatestNoticePreview;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.NoticeCommentList;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
@@ -51,6 +52,16 @@ public class ClubNoticeQueryFacade {
 
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
+
+    public LatestNoticePreview retrieveLatestNotice(Long clubId) {
+        clubManagementAPI.validateClub(clubId);
+        Notice notice = clubNoticeQueryService.retrieveLatestNotice(clubId)
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_EMPTY));
+        return ClubNoticeResponseDTO.LatestNoticePreview.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .build();
+    }
 
     public ClubNoticePreviewPage retrieveClubNoticeList(
             Long clubId,

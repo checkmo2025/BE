@@ -35,6 +35,18 @@ public class ClubNoticeController {
     private final ClubNoticeCommandService clubNoticeCommandService;
     private final NoticeCommentCommandService noticeCommentCommandService;
 
+    @Operation(summary = "최신 공지사항 1개 조회", description = "모임의 최신 공지사항 1개를 조회합니다. 공지사항이 없을 경우 NOTICE_EMTPY 에러를 반환합니다.")
+    @GetMapping("/latest")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음"),
+    })
+    public ApiResponse<ClubNoticeResponseDTO.LatestNoticePreview> getLatestNotice(
+            @PathVariable Long clubId
+    ) {
+        return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveLatestNotice(clubId));
+    }
+
     @Operation(summary = "공지사항 목록 조회", description = "중요한 공지(최대 5개)와 중요하지 않은 공지(10개)를 조회합니다. offset 기반 페이지네이션은 중요하지 않은 공지에만 적용됩니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),

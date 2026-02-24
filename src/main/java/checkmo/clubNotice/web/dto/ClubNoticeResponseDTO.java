@@ -19,6 +19,15 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class LatestNoticePreview {
+        private Long id;
+        private String title;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class ClubNoticePreviewPage {
         private List<ClubNoticePreview> pinnedNotices;
         private NormalNoticePreviewPage normalNotices;

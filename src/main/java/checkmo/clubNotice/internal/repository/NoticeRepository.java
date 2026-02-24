@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
+    Optional<Notice> findTop1ByClubIdOrderByCreatedAtDescIdDesc(Long clubId);
+
     @Query("SELECT DISTINCT n FROM Notice n "
             + "LEFT JOIN FETCH n.vote v "
             + "LEFT JOIN FETCH v.clubMemberVotes cmv "
