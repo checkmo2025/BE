@@ -7,7 +7,7 @@ import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
-import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameAndClubMemberId;
+import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
@@ -106,24 +106,18 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public MyClubResponseDTO.MyClubList retrieveMyClubList(String memberId, Long cursorId) {
-        CursorResult<ClubIdAndNameAndClubMemberId> cursorResult = CursorPagingHelper.getPage(
-                size -> clubMemberQueryService.retrieveMyActiveClubsByCursor(memberId, cursorId, size),
-                ClubIdAndNameAndClubMemberId::getClubMemberId,
-                DEFAULT_PAGE_SIZE
-        );
-        List<MyClubResponseDTO.ClubInfo> clubInfoList = cursorResult.content().stream()
+    public MyClubResponseDTO.MyClubList retrieveMyClubList(String memberId) {
+        List<ClubIdAndName> clubIdAndNames = clubMemberQueryService.retrieveAllMyActiveClubs(memberId);
+        List<MyClubResponseDTO.ClubInfo> clubInfoList = clubIdAndNames.stream()
                 .map(c -> MyClubResponseDTO.ClubInfo.builder()
-                        .clubId(c.getClubId())
-                        .clubName(c.getClubName())
+                        .clubId(c.getId())
+                        .clubName(c.getName())
                         .build()
                 )
                 .toList();
 
         return MyClubResponseDTO.MyClubList.builder()
                 .clubList(clubInfoList)
-                .hasNext(cursorResult.hasNext())
-                .nextCursor(cursorResult.nextCursor())
                 .build();
     }
 

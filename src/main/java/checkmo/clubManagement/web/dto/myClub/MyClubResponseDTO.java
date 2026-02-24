@@ -14,8 +14,6 @@ public class MyClubResponseDTO {
     @Builder
     public static class MyClubList {
         private List<ClubInfo> clubList;
-        private boolean hasNext;
-        private Long nextCursor;
     }
 
     @Getter

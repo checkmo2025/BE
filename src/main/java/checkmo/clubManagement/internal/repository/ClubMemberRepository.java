@@ -3,7 +3,6 @@ package checkmo.clubManagement.internal.repository;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
-import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameAndClubMemberId;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -22,15 +21,6 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
             + "AND cm.clubMemberStatus IN :statuses "
             + "ORDER BY cm.id ASC")
     List<ClubIdAndName> findClubIdAndNameByMemberIdAndStatuses(String memberId, EnumSet<ClubMemberStatus> statuses);
-
-    @Query("SELECT c.id AS clubId, c.name AS clubName, cm.id AS clubMemberId "
-            + "FROM ClubMember cm JOIN cm.club c "
-            + "WHERE cm.memberId = :memberId "
-            + "AND cm.clubMemberStatus IN :statuses "
-            + "AND (:cursorId IS NULL OR cm.id < :cursorId) "
-            + "ORDER BY cm.id DESC")
-    List<ClubIdAndNameAndClubMemberId> findMyClubByCursor(
-            String memberId, EnumSet<ClubMemberStatus> statuses, Long cursorId, Pageable pageable);
 
     List<ClubMember> findAllByMemberIdAndClubIdIn(String memberId, List<Long> clubIds);
 
