@@ -7,7 +7,7 @@ import checkmo.clubNotice.internal.service.command.ClubNoticeCommandService;
 import checkmo.clubNotice.internal.service.command.NoticeCommentCommandService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
-import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticePreviewList;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticePreviewPage;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.NoticeCommentList;
 import checkmo.common.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +35,7 @@ public class ClubNoticeController {
     private final ClubNoticeCommandService clubNoticeCommandService;
     private final NoticeCommentCommandService noticeCommentCommandService;
 
-    @Operation(summary = "공지사항 목록 조회", description = "특정 모임의 공지사항 목록을 조회합니다. 중요한 공지 또는 중요하지 않은 공지만 조회합니다.")
+    @Operation(summary = "공지사항 목록 조회", description = "중요한 공지(최대 5개)와 중요하지 않은 공지(10개)를 조회합니다. offset 기반 페이지네이션은 중요하지 않은 공지에만 적용됩니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "모임 멤버가 아님"),
@@ -43,14 +43,13 @@ public class ClubNoticeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없음"),
     })
     @GetMapping
-    public ApiResponse<ClubNoticePreviewList> getNoticeList(
+    public ApiResponse<ClubNoticePreviewPage> getNoticeList(
             @CurrentId String memberId,
             @PathVariable Long clubId,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(name = "is-pinned", defaultValue = "false") boolean pinned
+            @RequestParam(defaultValue = "1") int page
     ) {
         return ApiResponse.onSuccess(
-                clubNoticeQueryFacade.retrieveClubNoticeList(clubId, memberId, page, pinned));
+                clubNoticeQueryFacade.retrieveClubNoticeList(clubId, memberId, page));
     }
 
     @Operation(summary = "공지사항 상세 조회", description = "공지사항 상세 정보를 조회합니다.")

@@ -1,6 +1,7 @@
 package checkmo.clubNotice.internal.repository;
 
 import checkmo.clubNotice.internal.entity.Notice;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,11 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Optional<Notice> findWithVoteAndClubMemberVotesByIdAndClubId(Long noticeId, Long clubId);
 
     Optional<Notice> findByIdAndClubId(Long noticeId, Long clubId);
+
+    @Query("SELECT n FROM Notice n "
+            + "WHERE n.clubId = :clubId AND n.pinned = true "
+            + "ORDER BY n.createdAt DESC, n.id DESC")
+    List<Notice> findTopPinnedByClubId(Long clubId, Pageable pageable);
 
     @Query("SELECT n FROM Notice n "
             + "WHERE n.clubId = :clubId "

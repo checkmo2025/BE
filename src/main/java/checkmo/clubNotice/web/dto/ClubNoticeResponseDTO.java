@@ -19,8 +19,17 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubNoticePreviewList {
-        List<ClubNoticePreview> noticeList;
+    public static class ClubNoticePreviewPage {
+        private List<ClubNoticePreview> pinnedNotices;
+        private NormalNoticePreviewPage normalNotices;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class NormalNoticePreviewPage {
+        private List<ClubNoticePreview> notices;
         private int page;
         private int size;
         private long totalElements;
@@ -32,7 +41,7 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static final class ClubNoticePreview {
+    public static class ClubNoticePreview {
         private Long id;
         private String title;
         @Getter(AccessLevel.NONE)
