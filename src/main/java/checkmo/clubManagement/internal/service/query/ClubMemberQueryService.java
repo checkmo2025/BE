@@ -6,7 +6,6 @@ import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
-import checkmo.clubManagement.internal.repository.projection.ClubIdAndNameAndClubMemberId;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -36,14 +35,9 @@ public class ClubMemberQueryService {
                 .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND));
     }
 
-    public List<ClubIdAndName> retrieveActiveClubIdAndName(String memberId) {
+    public List<ClubIdAndName> retrieveAllMyActiveClubs(String memberId) {
         EnumSet<ClubMemberStatus> activeStatuses = ClubMemberStatus.activeStatuses();
         return clubMemberRepository.findClubIdAndNameByMemberIdAndStatuses(memberId, activeStatuses);
-    }
-
-    public List<ClubIdAndNameAndClubMemberId> retrieveMyActiveClubsByCursor(String memberId, Long cursorId, int size) {
-        EnumSet<ClubMemberStatus> activeStatuses = ClubMemberStatus.activeStatuses();
-        return clubMemberRepository.findMyClubByCursor(memberId, activeStatuses, cursorId, PageRequest.of(0, size));
     }
 
     public Optional<ClubMember> findClubMember(Long clubId, String memberId) {

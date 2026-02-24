@@ -160,12 +160,13 @@ public class ClubMeetingQueryFacade {
             Long meetingId,
             String memberId
     ) {
-        validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
+        boolean staff = clubMembership.isStaff();
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
         if (teams == null || teams.isEmpty()) {
-            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, List.of(), Map.of());
+            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, List.of(), Map.of(), staff);
         }
 
         List<Long> teamIds = ExtractHelper.extractDistinctList(teams, Team::getId);
@@ -174,7 +175,7 @@ public class ClubMeetingQueryFacade {
         // 미팅의 모든 팀원 조회
         Map<Long, Long> clubMemberIdToTeamIdMap = clubMeetingTeamQueryService.retrieveTeamIdByClubMemberId(teamIds);
         if (clubMemberIdToTeamIdMap == null || clubMemberIdToTeamIdMap.isEmpty()) {
-            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, Map.of());
+            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, Map.of(), staff);
         }
 
         // 클럽 멤버의 멤버십 정보 배치 조회
@@ -193,7 +194,7 @@ public class ClubMeetingQueryFacade {
                 memberBasicInfoMap
         );
 
-        return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, teamNumberToMembersMap);
+        return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, teamNumberToMembersMap, staff);
     }
 
     public MeetingResponseDTO.MeetingMemberList retrieveMeetingMemberList(

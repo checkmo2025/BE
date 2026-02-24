@@ -133,7 +133,8 @@ public class ClubMeetingConverter {
     public static MeetingInfo toMeetingInfoWithTeams(
             Meeting meeting,
             List<Team> teams,
-            Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembers
+            Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembers,
+            boolean staff
     ) {
         List<Team> safeTeams = (teams != null) ? teams : List.of();
         Map<Integer, List<MeetingResponseDTO.MeetingMember>> safeTeamNumberToMembers
@@ -157,6 +158,7 @@ public class ClubMeetingConverter {
                                 .members(safeTeamNumberToMembers.getOrDefault(teamNumber, List.of()))
                                 .build())
                         .toList())
+                .staff(staff)
                 .build();
 
     }
