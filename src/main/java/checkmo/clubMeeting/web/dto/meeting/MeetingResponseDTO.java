@@ -88,10 +88,8 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MeetingMemberList {
-        @Schema(description = "존재하는 팀 번호 목록", example = "[1, 2, 3]")
-        private List<Integer> existingTeamNumbers;
-        @Schema(description = "모임 참여자 목록")
-        private List<MeetingMember> members;
+        private List<TeamKey> existingTeams;
+        private List<MeetingMember> clubMembers;
         private boolean hasNext;
         private Long nextCursor;
     }
@@ -105,8 +103,8 @@ public class MeetingResponseDTO {
         private Long clubMemberId;
         @Schema(description = "참여자 정보(프로필 사진, 닉네임 정보)")
         private MemberExternalDTO.BasicInfo memberInfo; // 참여자 정보
-        @Schema(description = "배정된 팀 번호(만약 팀이 배정되지 않았다면 null)", example = "1")
-        private Integer teamNumber;
+        @Schema(description = "배정된 팀 식별 정보(만약 팀이 배정되지 않았다면 null)", example = "1")
+        private TeamKey teamKey;
     }
 
     @Getter

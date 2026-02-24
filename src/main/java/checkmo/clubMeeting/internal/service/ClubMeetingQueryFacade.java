@@ -166,7 +166,7 @@ public class ClubMeetingQueryFacade {
 
         List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
         if (teams == null || teams.isEmpty()) {
-            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, List.of(), Map.of(), staff);
+            return ClubMeetingConverter.toMeetingInfoDTO(meeting, List.of(), Map.of(), staff);
         }
 
         List<Long> teamIds = ExtractHelper.extractDistinctList(teams, Team::getId);
@@ -175,7 +175,7 @@ public class ClubMeetingQueryFacade {
         // 미팅의 모든 팀원 조회
         Map<Long, Long> clubMemberIdToTeamIdMap = clubMeetingTeamQueryService.retrieveTeamIdByClubMemberId(teamIds);
         if (clubMemberIdToTeamIdMap == null || clubMemberIdToTeamIdMap.isEmpty()) {
-            return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, Map.of(), staff);
+            return ClubMeetingConverter.toMeetingInfoDTO(meeting, teams, Map.of(), staff);
         }
 
         // 클럽 멤버의 멤버십 정보 배치 조회
@@ -194,7 +194,7 @@ public class ClubMeetingQueryFacade {
                 memberBasicInfoMap
         );
 
-        return ClubMeetingConverter.toMeetingInfoWithTeams(meeting, teams, teamNumberToMembersMap, staff);
+        return ClubMeetingConverter.toMeetingInfoDTO(meeting, teams, teamNumberToMembersMap, staff);
     }
 
     public MeetingResponseDTO.MeetingMemberList retrieveMeetingMemberList(
@@ -209,37 +209,43 @@ public class ClubMeetingQueryFacade {
         }
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
+        // 미팅에 존재하는 모든 팀 조회
+        List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
+        List<Long> teamIds = ExtractHelper.extractDistinctList(teams, Team::getId);
+        Map<Long, Integer> teamIdToTeamNumberMap = mapTeamIdToTeamNumber(teams);
+
+        // 전체 클럽 회원 조회
         CursorResult<MembershipInfo> membershipCursorResult = CursorPagingHelper.getPage(
                 size -> clubManagementAPI.fetchActiveMembershipInfo(clubId, cursorId, size),
                 MembershipInfo::getClubMemberId,
                 DEFAULT_PAGE_SIZE
         );
         List<MembershipInfo> clubMembershipList = membershipCursorResult.content();
-
+        if (clubMembershipList == null || clubMembershipList.isEmpty()) {
+            return MeetingResponseDTO.MeetingMemberList.builder()
+                    .existingTeams(ClubMeetingConverter.toExistingTeamsDTO(teams))
+                    .clubMembers(List.of())
+                    .hasNext(membershipCursorResult.hasNext())
+                    .nextCursor(membershipCursorResult.nextCursor())
+                    .build();
+        }
+        // 클럽 멤버의 멤버 정보 배치 조회
         Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
                 = memberAPI.fetchMemberBasicInfoByMemberIds(
                 ExtractHelper.extractDistinctList(clubMembershipList, MembershipInfo::getMemberId));
 
-        // 미팅에 존재하는 모든 팀 조회
-        List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
-        Map<Long, Integer> teamIdToTeamNumberMap = mapTeamIdToTeamNumber(teams);
-        List<Long> teamIds = ExtractHelper.extractDistinctList(teams, Team::getId);
-
-        // Map<clubMemberId, teamId> 형태로 모든 팀의 팀원 조회
-        Map<Long, Long> memberIdToTeamIdMap = clubMeetingTeamQueryService.retrieveTeamIdByClubMemberId(teamIds);
-
-        // memberId -> teamNumber 맵 구성
-        Map<Long, Integer> memberIdToTeamNumberMap
-                = mapClubMemberIdToTeamNumber(clubMembershipList, memberIdToTeamIdMap, teamIdToTeamNumberMap);
-
+        // 팀 배정 정보 조회
+        Map<Long, Long> clubMemberIdToTeamIdMap = clubMeetingTeamQueryService.retrieveTeamIdByClubMemberId(teamIds);
         return MeetingResponseDTO.MeetingMemberList.builder()
-                .members(
-                        clubMembershipList.stream()
-                                .map(membership
-                                        -> toMeetingMemberDTO(membership, memberInfoMap, memberIdToTeamNumberMap))
-                                .toList()
+                .existingTeams(ClubMeetingConverter.toExistingTeamsDTO(teams))
+                .clubMembers(
+                        ClubMeetingConverter.toMeetingMembersDTO(
+                                clubMembershipList,
+                                memberInfoMap,
+                                clubMemberIdToTeamIdMap,
+                                teamIdToTeamNumberMap
+                        )
                 )
-                .existingTeamNumbers(ExtractHelper.extractDistinctList(teams, Team::getTeamNumber))
                 .hasNext(membershipCursorResult.hasNext())
                 .nextCursor(membershipCursorResult.nextCursor())
                 .build();
@@ -323,32 +329,6 @@ public class ClubMeetingQueryFacade {
                 .toList();
     }
 
-    private Map<Long, Integer> mapClubMemberIdToTeamNumber(
-            List<MembershipInfo> membershipInfos,
-            Map<Long, Long> clubMemberIdToTeamIdMap,
-            Map<Long, Integer> teamIdToTeamNumberMap
-    ) {
-        if (membershipInfos == null || membershipInfos.isEmpty()) {
-            return Map.of();
-        }
-
-        Map<Long, Integer> result = new HashMap<>();
-        for (MembershipInfo membershipInfo : membershipInfos) {
-            Long clubMemberId = membershipInfo.getClubMemberId();
-            Long teamId = clubMemberIdToTeamIdMap.get(clubMemberId);
-            if (teamId == null) {
-                // 팀이 없는 멤버는 teamNumber = null
-                result.put(clubMemberId, null);
-                continue;
-            }
-
-            Integer teamNumber = teamIdToTeamNumberMap.get(teamId);
-            result.put(clubMemberId, teamNumber);
-        }
-
-        return result;
-    }
-
     private Map<Integer, List<MeetingResponseDTO.MeetingMember>> mapTeamNumberToMeetingMembers(
             Map<Long, Long> clubMemberIdToTeamIdMap,
             Map<Long, Integer> teamIdToTeamNumberMap,
@@ -379,7 +359,7 @@ public class ClubMeetingQueryFacade {
             MeetingResponseDTO.MeetingMember dto = MeetingResponseDTO.MeetingMember.builder()
                     .clubMemberId(clubMemberId)
                     .memberInfo(info)
-                    .teamNumber(null)
+                    .teamKey(null)
                     .build();
 
             result.computeIfAbsent(teamNumber, k -> new java.util.ArrayList<>()).add(dto);
@@ -397,21 +377,6 @@ public class ClubMeetingQueryFacade {
                         Team::getId, // key: 팀 ID
                         Team::getTeamNumber // value: 팀 번호
                 ));
-    }
-
-    private MeetingResponseDTO.MeetingMember toMeetingMemberDTO(
-            MembershipInfo membershipInfo,
-            Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
-            Map<Long, Integer> clubMemberIdToTeamNumberMap
-    ) {
-        MemberExternalDTO.BasicInfo memberInfo = memberBasicInfoMap.get(membershipInfo.getMemberId());
-        Long clubMemberId = membershipInfo.getClubMemberId();
-        Integer teamNumber = clubMemberIdToTeamNumberMap.get(clubMemberId);
-        return MeetingResponseDTO.MeetingMember.builder()
-                .clubMemberId(clubMemberId)
-                .memberInfo(memberInfo)
-                .teamNumber(teamNumber)
-                .build();
     }
 
     // ========== 추출 메서드 ==========

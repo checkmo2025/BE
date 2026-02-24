@@ -1,6 +1,7 @@
 package checkmo.clubMeeting.internal.converter;
 
 import checkmo.book.BookExternalDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -132,23 +133,15 @@ public class ClubMeetingConverter {
                 .build();
     }
 
-    public static MeetingInfo toMeetingInfoWithTeams(
+    public static MeetingInfo toMeetingInfoDTO(
             Meeting meeting,
             List<Team> teams,
             Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembers,
             boolean staff
     ) {
-        List<Team> safeTeams = (teams != null) ? teams : List.of();
+        List<TeamKey> existingTeams = toExistingTeamsDTO(teams);
         Map<Integer, List<MeetingResponseDTO.MeetingMember>> safeTeamNumberToMembers
                 = (teamNumberToMembers != null) ? teamNumberToMembers : Map.of();
-
-        List<MeetingResponseDTO.TeamKey> existingTeams = safeTeams.stream()
-                .map(team -> MeetingResponseDTO.TeamKey.builder()
-                        .teamId(team.getId())
-                        .teamNumber(team.getTeamNumber())
-                        .build())
-                .sorted(Comparator.comparingInt(TeamKey::getTeamNumber))
-                .toList();
 
         return MeetingInfo.builder()
                 .meetingId(meeting.getId())
@@ -165,6 +158,54 @@ public class ClubMeetingConverter {
                 .staff(staff)
                 .build();
 
+    }
+
+    public static List<MeetingResponseDTO.TeamKey> toExistingTeamsDTO(List<Team> teams) {
+        List<Team> safeTeams = (teams != null) ? teams : List.of();
+        return safeTeams.stream()
+                .map(t -> MeetingResponseDTO.TeamKey.builder()
+                        .teamId(t.getId())
+                        .teamNumber(t.getTeamNumber())
+                        .build())
+                .sorted(Comparator.comparingInt(MeetingResponseDTO.TeamKey::getTeamNumber))
+                .toList();
+    }
+
+    public static List<MeetingResponseDTO.MeetingMember> toMeetingMembersDTO(
+            List<MembershipInfo> clubMemberships,
+            Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
+            Map<Long, Long> clubMemberIdToTeamIdMap,
+            Map<Long, Integer> teamIdToTeamNumberMap
+    ) {
+        List<MembershipInfo> safeMemberships = (clubMemberships != null) ? clubMemberships : List.of();
+        Map<String, MemberExternalDTO.BasicInfo> safeMemberInfoMap =
+                (memberBasicInfoMap != null) ? memberBasicInfoMap : Map.of();
+        Map<Long, Long> safeClubMemberToTeamIdMap =
+                (clubMemberIdToTeamIdMap != null) ? clubMemberIdToTeamIdMap : Map.of();
+        Map<Long, Integer> safeTeamIdToTeamNumberMap =
+                (teamIdToTeamNumberMap != null) ? teamIdToTeamNumberMap : Map.of();
+
+        return safeMemberships.stream()
+                .map(m -> {
+                    Long clubMemberId = m.getClubMemberId();
+                    String memberId = m.getMemberId();
+
+                    MemberExternalDTO.BasicInfo basic = safeMemberInfoMap.get(memberId);
+
+                    Long teamId = safeClubMemberToTeamIdMap.get(clubMemberId);
+                    MeetingResponseDTO.TeamKey teamKey = (teamId == null) ? null
+                            : MeetingResponseDTO.TeamKey.builder()
+                                    .teamId(teamId)
+                                    .teamNumber(safeTeamIdToTeamNumberMap.get(teamId))
+                                    .build();
+
+                    return MeetingResponseDTO.MeetingMember.builder()
+                            .clubMemberId(clubMemberId)
+                            .memberInfo(basic)
+                            .teamKey(teamKey)
+                            .build();
+                })
+                .toList();
     }
 
     // =====================================================
