@@ -21,6 +21,7 @@ import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.BookShelfDetail;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingMemberList;
+import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.TeamKey;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
@@ -236,12 +237,14 @@ public class ClubMeetingQueryFacade {
     }
 
     public MeetingResponseDTO.TeamTopic retrieveSelectableTopics(
-            Long clubId, Long meetingId, Integer teamNumber, String memberId, Long cursorId) {
+            Long clubId, Long meetingId, Long teamId, String memberId, Long cursorId
+    ) {
         validateClubAndClubMembership(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
-        Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamNumber);
+        Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamId);
 
-        List<Integer> existingTeamNumbers = clubMeetingTeamQueryService.retrieveExistingTeamNumbers(meetingId);
+        List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
+        List<TeamKey> existingTeams = ClubMeetingConverter.toExistingTeamsDTO(teams);
 
         CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
                 size -> clubTopicQueryService.retrieveTopics(meetingId, cursorId, size),
@@ -259,8 +262,8 @@ public class ClubMeetingQueryFacade {
                 ExtractHelper.extractDistinctList(topics, Topic::getMemberId));
 
         return MeetingResponseDTO.TeamTopic.builder()
-                .existingTeamNumbers(existingTeamNumbers)
-                .requestedTeamNumber(teamNumber)
+                .existingTeams(existingTeams)
+                .requestedTeam(ClubMeetingConverter.toTeamKeyDTO(team))
                 .topics(topics.stream()
                         .map(t -> ClubMeetingConverter.toTopicDTO(
                                         t,

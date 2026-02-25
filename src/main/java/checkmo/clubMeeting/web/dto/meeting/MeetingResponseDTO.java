@@ -76,8 +76,8 @@ public class MeetingResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TeamTopic {
-        private List<Integer> existingTeamNumbers;
-        private Integer requestedTeamNumber;
+        private List<TeamKey> existingTeams;
+        private TeamKey requestedTeam;
         private List<Topic> topics;
         private boolean hasNext;
         private Long nextCursor;

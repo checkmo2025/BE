@@ -163,12 +163,19 @@ public class ClubMeetingConverter {
     public static List<MeetingResponseDTO.TeamKey> toExistingTeamsDTO(List<Team> teams) {
         List<Team> safeTeams = (teams != null) ? teams : List.of();
         return safeTeams.stream()
-                .map(t -> MeetingResponseDTO.TeamKey.builder()
-                        .teamId(t.getId())
-                        .teamNumber(t.getTeamNumber())
-                        .build())
+                .map(ClubMeetingConverter::toTeamKeyDTO)
                 .sorted(Comparator.comparingInt(MeetingResponseDTO.TeamKey::getTeamNumber))
                 .toList();
+    }
+
+    public static MeetingResponseDTO.TeamKey toTeamKeyDTO(Team team) {
+        if (team == null) {
+            return null;
+        }
+        return MeetingResponseDTO.TeamKey.builder()
+                .teamId(team.getId())
+                .teamNumber(team.getTeamNumber())
+                .build();
     }
 
     public static List<MeetingResponseDTO.MeetingMember> toMeetingMembersDTO(
