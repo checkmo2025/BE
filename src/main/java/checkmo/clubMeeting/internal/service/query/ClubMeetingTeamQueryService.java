@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,14 +27,6 @@ public class ClubMeetingTeamQueryService {
 
     public List<Team> retrieveTeams(Long meetingId) {
         return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
-    }
-
-    public List<Integer> retrieveExistingTeamNumbers(Long meetingId) {
-        return teamRepository.findTeamNumberByMeetingId(meetingId);
-    }
-
-    public List<ClubMemberTeam> retrieveClubMemberTeams(Long teamId, Long cursorId, int size) {
-        return clubMemberTeamRepository.findAllByTeamIdsAndCursorId(teamId, cursorId, PageRequest.of(0, size));
     }
 
     public Map<Long, Long> retrieveTeamIdByClubMemberId(List<Long> teamIds) {
@@ -56,6 +47,11 @@ public class ClubMeetingTeamQueryService {
             return Set.of();
         }
         return new HashSet<>(teamTopicRepository.findTopicIdsByTeamIdAndTopicIds(teamId, topicIds));
+    }
+
+    public Team validateTeam(Long meetingId, Long teamId) throws ClubMeetingException {
+        return teamRepository.findByIdAndMeetingId(teamId, meetingId)
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TEAM_NOT_FOUND));
     }
 
     public Team validateTeam(Long meetingId, Integer teamNumber) throws ClubMeetingException {

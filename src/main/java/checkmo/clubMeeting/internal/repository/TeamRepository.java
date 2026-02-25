@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
+    Optional<Team> findByIdAndMeetingId(Long id, Long meetingId);
+
     Optional<Team> findByMeetingIdAndTeamNumber(Long meetingId, Integer teamNumber);
 
     List<Team> findAllByMeetingIdOrderByTeamNumberAsc(Long meetingId);

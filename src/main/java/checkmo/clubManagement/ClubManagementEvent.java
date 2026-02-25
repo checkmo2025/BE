@@ -13,10 +13,10 @@ public class ClubManagementEvent {
     }
 
     @Builder
-    public record ClubDeletedEvent(Long clubId) {
+    public record DeletedClubEvent(Long clubId) {
     }
 
     @Builder
-    public record DeleteClubImage(String imageUrl) {
+    public record DeleteClubImageEvent(String imageUrl) {
     }
 }

@@ -16,12 +16,10 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -130,7 +128,7 @@ public class ClubMeetingController {
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "teamNumber", description = "팀  번호(조회하려는 조 이름이 x조(x는 A부터 Z까지 알파벳 중 하나)이면 x - ‘A’ + 1 로 조회하려는 조 번호로 요청", required = true, example = "1"),
+            @Parameter(name = "teamId", description = "팀  ID(조회하려는 조 이름이 x조)", required = true, example = "1"),
             @Parameter(name = "cursorId", description = "커서 ID (null이면 처음부터 조회)", required = false, example = "5"),
     })
     @ApiResponses({
@@ -140,41 +138,16 @@ public class ClubMeetingController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다.")
     })
-    @GetMapping("/{meetingId}/teams/{teamNumber}/topics")
+    @GetMapping("/{meetingId}/teams/{teamId}/topics")
     public ApiResponse<MeetingResponseDTO.TeamTopic> getSelectedTopics(
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
-            @PathVariable @Min(value = 1) Integer teamNumber,
+            @PathVariable Long teamId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
             @CurrentId String memberId
     ) {
         return ApiResponse.onSuccess(
-                clubMeetingQueryFacade.retrieveSelectableTopics(clubId, meetingId, teamNumber, memberId, cursorId));
+                clubMeetingQueryFacade.retrieveSelectableTopics(clubId, meetingId, teamId, memberId, cursorId));
     }
 
-    @Operation(summary = "팀에서 발제 선택/해제", description = "팀에서 발제를 선택/해제합니다.")
-    @Parameters({
-            @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
-            @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "topicId", description = "선택/해제할 Topic ID", required = true, example = "1"),
-    })
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 모임의 회원이 아닙니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "독서클럽을 찾을 수 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 팀을 찾을 수 없습니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 발제를 찾을 수 없습니다.")
-    })
-    @PostMapping("/{meetingId}/topics/{topicId}")
-    public ApiResponse<MeetingResponseDTO.TopicSelection> selectOrCancelTopic(
-            @PathVariable Long clubId,
-            @PathVariable Long meetingId,
-            @PathVariable Long topicId,
-            @RequestBody @Valid MeetingRequestDTO.TopicSelection request,
-            @CurrentId String memberId
-    ) {
-        return ApiResponse.onSuccess(
-                clubTopicCommandService.toggleTopic(clubId, meetingId, topicId, memberId, request));
-    }
 }

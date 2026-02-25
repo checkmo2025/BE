@@ -108,6 +108,24 @@ public class ClubController {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubDetail(clubId, memberId));
     }
 
+    @Operation(summary = "[개설자] 독서 모임 삭제", description = "지정한 클럽을 삭제합니다. 삭제된 클럽은 복구할 수 없습니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "삭제할 독서클럽 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 독서클럽을 찾을 수 없습니다.")
+    })
+    @DeleteMapping("/{clubId}")
+    public ApiResponse<String> deleteClub(
+            @PathVariable Long clubId,
+            @CurrentId String memberId
+    ) {
+        clubManagementCommandService.deleteClub(clubId, memberId);
+        return ApiResponse.onSuccess("독서모임이 정상적으로 삭제되었습니다.");
+    }
+
     @Operation(summary = "독서 모임 검색", description = "키워드와 필터 기반으로 독서 모임을 검색합니다.")
     @Parameters({
             @Parameter(name = "cursorId", description = "커서 기반 페이지네이션을 위한 마지막 독서 모임 ID", required = false, example = "10"),
