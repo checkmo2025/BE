@@ -161,4 +161,10 @@ public class ClubMeetingCommandService {
                 .toList();
         toRemove.forEach(meeting::removeTeam);
     }
+
+    public void deleteAll(Long clubId) {
+        List<Meeting> meetings = meetingRepository.findAllByClubId(clubId);
+        meetingRepository.deleteAll(meetings);
+        meetingRepository.flush();
+    }
 }

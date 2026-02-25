@@ -2,6 +2,7 @@ package checkmo.clubMeeting.internal.repository;
 
 import checkmo.clubMeeting.internal.entity.Meeting;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,6 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long>, Meeting
             Long clubId, LocalDateTime now);
 
     Optional<Meeting> findByClubIdAndId(Long clubId, Long meetingId);
+
+    List<Meeting> findAllByClubId(Long clubId);
 }

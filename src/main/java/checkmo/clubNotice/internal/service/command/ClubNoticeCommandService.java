@@ -132,14 +132,6 @@ public class ClubNoticeCommandService {
         noticeRepository.delete(notice);
     }
 
-    private void publishNoticeImageDeletedEvent(List<String> removedImages) {
-        applicationEventPublisher.publishEvent(
-                ClubNoticeEvent.DeleteNoticeImage.builder()
-                        .imageUrls(removedImages)
-                        .build()
-        );
-    }
-
     public Long haveVote(Long clubId, Long noticeId, Long voteId, String memberId, VoteResult request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
@@ -166,5 +158,26 @@ public class ClubNoticeCommandService {
     private void validateVotingTime(Vote vote) {
         LocalDateTime now = LocalDateTime.now();
         vote.validateVotingTime(now);
+    }
+
+    public void deleteAll(Long clubId) {
+        List<Notice> notices = noticeRepository.findAllWithImagesByClubId(clubId);
+        List<String> imageUrls = notices.stream()
+                .flatMap(n -> n.getImageUrls().stream())
+                .distinct()
+                .toList();
+        if (!imageUrls.isEmpty()) {
+            publishNoticeImageDeletedEvent(imageUrls);
+        }
+        noticeRepository.deleteAll(notices);
+        noticeRepository.flush();
+    }
+
+    private void publishNoticeImageDeletedEvent(List<String> removedImages) {
+        applicationEventPublisher.publishEvent(
+                ClubNoticeEvent.DeleteNoticeImage.builder()
+                        .imageUrls(removedImages)
+                        .build()
+        );
     }
 }
