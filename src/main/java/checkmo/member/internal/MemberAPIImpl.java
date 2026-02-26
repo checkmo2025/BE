@@ -95,9 +95,7 @@ public class MemberAPIImpl implements MemberAPI {
         Map<String, DetailInfo> result = initializeWithdrawnDetailInfoMap(distinctMemberIds);
 
         List<Member> members = memberQueryService.retrieveMemberById(distinctMemberIds);
-        members.stream()
-                .filter(Member::isActive)
-                .forEach(member -> result.put(member.getId(), toDetailInfo(member)));
+        members.forEach(member -> result.put(member.getId(), toDetailInfo(member)));
 
         return result;
     }

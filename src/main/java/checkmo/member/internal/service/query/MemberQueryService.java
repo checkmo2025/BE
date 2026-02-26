@@ -40,7 +40,7 @@ public class MemberQueryService {
      * @return 회원 엔티티
      */
     public Member retrieveMember(String memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
@@ -51,7 +51,7 @@ public class MemberQueryService {
      * @return 회원 엔티티 리스트
      */
     public List<Member> retrieveMemberById(List<String> memberIds) {
-        return memberRepository.findAllById(memberIds);
+        return memberRepository.findAllByIdInAndDeactivatedAtIsNull(memberIds);
     }
 
     /**

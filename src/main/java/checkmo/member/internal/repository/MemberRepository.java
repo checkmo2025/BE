@@ -13,6 +13,8 @@ import org.springframework.data.repository.query.Param;
 public interface MemberRepository extends JpaRepository<Member, String>, MemberRepositoryCustom {
 
     boolean existsByNickNameAndDeactivatedAtIsNull(String nickName);
+    Optional<Member> findByIdAndDeactivatedAtIsNull(String id);
+    List<Member> findAllByIdInAndDeactivatedAtIsNull(List<String> ids);
 
     @Query("select m from Member m where m.nickName = :nickName and m.deactivatedAt is null")
     Optional<Member> findByNickName(@Param("nickName") String nickName);
@@ -32,6 +34,8 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberR
     // 생성일시가 특정 시간 이전이고, 추가정보(nickname)가 아직 입력되지 않은(프로필 미완료) 회원 조회
     @Query("SELECT m FROM Member m WHERE m.createdAt < :threshold AND (m.nickName IS NULL OR m.nickName = '')")
     List<Member> findAllGhostMembers(@Param("threshold") LocalDateTime threshold);
+
+    List<Member> findAllByDeactivatedAtBefore(LocalDateTime threshold);
 
     List<Member> findAllByNameAndPhoneNumber(String name, String phoneNumber);
 
