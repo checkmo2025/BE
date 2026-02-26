@@ -44,7 +44,7 @@ public class MemberFollowCommandService {
         }
 
         // 회원 조회
-        Member follower = memberRepository.findById(memberId)
+        Member follower = memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로잉 관계 생성

@@ -10,6 +10,7 @@ import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjecti
 import checkmo.member.web.dto.MemberRequestDTO;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class MemberQueryService {
      * @return 중복 여부 (true: 중복됨, false: 사용 가능)
      */
     public boolean isNicknameDuplicated(String nickname) {
-        return memberRepository.existsByNickName(nickname);
+        return memberRepository.existsByNickNameAndDeactivatedAtIsNull(nickname);
     }
 
     /**
@@ -39,7 +40,7 @@ public class MemberQueryService {
      * @return 회원 엔티티
      */
     public Member retrieveMember(String memberId) {
-        return memberRepository.findById(memberId)
+        return memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
@@ -50,7 +51,7 @@ public class MemberQueryService {
      * @return 회원 엔티티 리스트
      */
     public List<Member> retrieveMemberById(List<String> memberIds) {
-        return memberRepository.findAllById(memberIds);
+        return memberRepository.findAllByIdInAndDeactivatedAtIsNull(memberIds);
     }
 
     /**
@@ -64,14 +65,8 @@ public class MemberQueryService {
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
-    /**
-     * 회원 ID 목록으로 회원 기본 정보 배치 조회
-     *
-     * @param memberIds 회원 ID 목록
-     * @return 회원 ID와 기본 정보 DTO의 매핑
-     */
-    public List<MemberBasicInfoProjection> retrieveMemberBasicInfos(List<String> memberIds) {
-        return memberRepository.findIdNicknameAndImgUrlByIdIn(memberIds);
+    public List<MemberBasicInfoProjection> retrieveActiveMemberBasicInfos(List<String> memberIds) {
+        return memberRepository.findActiveIdNicknameAndImgUrlByIdIn(memberIds);
     }
 
     /**
@@ -85,29 +80,16 @@ public class MemberQueryService {
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
-    /**
-     * 회원ID로 회원 닉네임 조회
-     *
-     * @param memberId 회원 ID
-     * @return 회원 닉네임
-     */
-    public String retrieveMemberNickname(String memberId) {
-        return memberRepository.findNicknameById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+    public Optional<String> retrieveActiveMemberNickname(String memberId) {
+        return memberRepository.findActiveNicknameById(memberId);
     }
 
-    /**
-     * 회원 ID 목록으로 회원 닉네임 배치 조회
-     *
-     * @param memberIds 회원 ID 목록
-     * @return 회원 ID와 닉네임의 매핑 정보
-     */
-    public Map<String, String> retrieveMemberNicknameByMemberIds(List<String> memberIds) {
-        List<MemberIdAndNicknameProjection> results = memberRepository.findIdAndNicknameByIdIn(memberIds);
+    public Map<String, String> retrieveActiveMemberNicknameByMemberIds(List<String> memberIds) {
+        List<MemberIdAndNicknameProjection> results = memberRepository.findActiveIdAndNicknameByIdIn(memberIds);
         return results.stream()
                 .collect(Collectors.toMap(
-                        MemberIdAndNicknameProjection::getId,       // key: memberId
-                        MemberIdAndNicknameProjection::getNickName  // value: nickname
+                        MemberIdAndNicknameProjection::getId,
+                        MemberIdAndNicknameProjection::getNickName
                 ));
     }
 

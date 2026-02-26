@@ -277,4 +277,19 @@ public class MemberController {
         Long reportId = memberReportCommandService.createReport(memberId, request);
         return ApiResponse.onSuccess(reportId);
     }
+
+    @Operation(summary = "회원 탈퇴 API", description = "회원을 탈퇴합니다.")
+    @PostMapping("/withdrawal")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    public ApiResponse<Void> withdrawMember(
+            @CurrentId String memberId
+    ) {
+        memberCommandService.deactivateMember(memberId);
+        return ApiResponse.onSuccess();
+    }
 }

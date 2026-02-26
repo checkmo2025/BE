@@ -97,6 +97,14 @@ public class BookStoryQueryService {
                 .distinct()
                 .toList();
 
+        if (memberId == null) {
+            return bookStoryIds.stream()
+                    .collect(Collectors.toMap(
+                            bookStoryId -> bookStoryId,
+                            bookStoryId -> false
+                    ));
+        }
+
         // 배치로 좋아요한 BookStory ID 목록 조회
         List<Long> likedBookStoryIds = bookStoryLikedRepository.findLikedBookStoryIds(memberId,
                 bookStoryIds);
