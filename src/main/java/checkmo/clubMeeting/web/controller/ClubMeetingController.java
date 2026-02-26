@@ -76,12 +76,11 @@ public class ClubMeetingController {
     }
 
     @Operation(summary = "[운영진] 조 관리 - 독서모임 회원 전체 조회",
-            description = "독서클럽의 모든 회원 정보(OWNER, STAFF, MEMBER)와 함께, 해당 미팅에 배정된 팀 번호까지 페이지네이션 조회합니다. " +
+            description = "독서클럽의 모든 회원 정보(OWNER, STAFF, MEMBER)에 배정된 팀 정보를 맵핑합니다. " +
                     "만약 팀 번호가 null이면 아직 아무 팀에도 배정되지 않은 것입니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
-            @Parameter(name = "cursorId", description = "커서 ID (null이면 처음부터 조회)", required = false, example = "5"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -94,11 +93,10 @@ public class ClubMeetingController {
     public ApiResponse<MeetingResponseDTO.MeetingMemberList> getMeetingMembers(
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
-            @RequestParam(required = false) @ValidCursor Long cursorId,
             @CurrentId String memberId
     ) {
         return ApiResponse.onSuccess(
-                clubMeetingQueryFacade.retrieveMeetingMemberList(clubId, meetingId, memberId, cursorId));
+                clubMeetingQueryFacade.retrieveMeetingMemberList(clubId, meetingId, memberId));
     }
 
     @Operation(summary = "[운영진] 정기모임 조 관리", description = "Request Body를 기준으로 팀을 교체합니다.")

@@ -90,8 +90,6 @@ public class MeetingResponseDTO {
     public static class MeetingMemberList {
         private List<TeamKey> existingTeams;
         private List<MeetingMember> clubMembers;
-        private boolean hasNext;
-        private Long nextCursor;
     }
 
     @Getter

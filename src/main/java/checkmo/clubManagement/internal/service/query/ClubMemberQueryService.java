@@ -66,6 +66,10 @@ public class ClubMemberQueryService {
         return clubMemberRepository.findByClubIdAndStatuses(clubId, statuses, cursorId, PageRequest.of(0, size));
     }
 
+    public List<ClubMember> retrieveClubMembers(Long clubId, EnumSet<ClubMemberStatus> statuses) {
+        return clubMemberRepository.findByClubIdAndStatuses(clubId, statuses, null, Pageable.unpaged());
+    }
+
     public List<String> retrieveActiveMemberIds(Long clubId) {
         return clubMemberRepository.findByClubIdAndStatuses(clubId, ClubMemberStatus.activeStatuses(), null,
                         Pageable.unpaged())
