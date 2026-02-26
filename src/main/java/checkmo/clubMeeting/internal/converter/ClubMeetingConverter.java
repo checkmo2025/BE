@@ -10,6 +10,7 @@ import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.MeetingDetailInfo;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.TeamKey;
@@ -98,6 +99,17 @@ public class ClubMeetingConverter {
                 .generation(meeting.getGeneration())
                 .tag(meeting.getTag())
                 .averageRate(meeting.calculateAverageRate())
+                .build();
+    }
+
+    public static MeetingDetailInfo toMeetingDetailInfo(Meeting meeting) {
+        return BookShelfResponseDTO.MeetingDetailInfo.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .generation(meeting.getGeneration())
+                .tag(meeting.getTag())
                 .build();
     }
 

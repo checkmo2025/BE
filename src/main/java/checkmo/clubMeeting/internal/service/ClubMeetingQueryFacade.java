@@ -19,6 +19,7 @@ import checkmo.clubMeeting.internal.service.query.ClubMeetingTeamQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubTopicQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.BookShelfDetail;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.BookShelfUpdate;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingMemberList;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.TeamKey;
@@ -79,7 +80,7 @@ public class ClubMeetingQueryFacade {
                 .build();
     }
 
-    public BookShelfResponseDTO.BookShelfDetail retrieveBookShelfDetail(Long clubId, Long meetingId, String memberId) {
+    public BookShelfResponseDTO.BookShelfDetail retrieveBookShelf(Long clubId, Long meetingId, String memberId) {
         validateClubAndClubMembership(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
@@ -87,6 +88,19 @@ public class ClubMeetingQueryFacade {
 
         return BookShelfDetail.builder()
                 .meetingInfo(ClubMeetingConverter.toMeetingInfoDTOForBookshelves(meeting))
+                .bookDetailInfo(bookInfo)
+                .build();
+    }
+
+    public BookShelfUpdate retrieveBookShelfDetail(Long clubId, Long meetingId, String memberId) {
+        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
+        if (!clubMembership.isStaff()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_STAFF_ONLY);
+        }
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
+        DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
+        return BookShelfUpdate.builder()
+                .meetingInfo(ClubMeetingConverter.toMeetingDetailInfo(meeting))
                 .bookDetailInfo(bookInfo)
                 .build();
     }
@@ -419,5 +433,4 @@ public class ClubMeetingQueryFacade {
                 .distinct()
                 .toList();
     }
-
 }

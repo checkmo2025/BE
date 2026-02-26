@@ -74,10 +74,10 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfDetail(clubId, meetingId, memberId));
+        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelf(clubId, meetingId, memberId));
     }
 
-    @Operation(summary = "책장 생성", description = "책장을 생성합니다.")
+    @Operation(summary = "[운영진] 책장 생성", description = "책장을 생성합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "책장을 생성할 독서클럽 ID", required = true, example = "1"),
     })
@@ -97,7 +97,27 @@ public class ClubBookshelfController {
         return ApiResponse.onSuccess("책장이 정상적으로 생성되었습니다.");
     }
 
-    @Operation(summary = "책장 수정", description = "책장을 수정합니다.")
+    @Operation(summary = "[운영진] 책장 수정 조회", description = "책장 수정에 필요한 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "책장이 속한 독서클럽 ID", required = true, example = "1"),
+            @Parameter(name = "meetingId", description = "수정할 정기 책장 ID", required = true, example = "1"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "독서클럽 운영진만 접근할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "해당 클럽의 회원이 아닙니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 정기모임을 찾을 수 없습니다."),
+    })
+    @GetMapping("/{meetingId}/edit")
+    public ApiResponse<BookShelfResponseDTO.BookShelfUpdate> getBookShelfEditInfo(
+            @PathVariable Long clubId,
+            @PathVariable Long meetingId,
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfDetail(clubId, meetingId, memberId));
+    }
+
+    @Operation(summary = "[운영진] 책장 수정", description = "책장을 수정합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "책장이 속한 독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "수정할 정기 책장 ID", required = true, example = "1"),
