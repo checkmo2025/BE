@@ -160,8 +160,30 @@ public class ClubNoticeCommandService {
         vote.validateVotingTime(now);
     }
 
-    public void deleteAll(Long clubId) {
+    public void deleteAllByClubId(Long clubId) {
         List<Notice> notices = noticeRepository.findAllWithImagesByClubId(clubId);
+        if (notices.isEmpty()) {
+            return;
+        }
+        publishNoticeImageDeletedIfAny(notices);
+        noticeRepository.deleteAll(notices);
+        noticeRepository.flush();
+    }
+
+    public void deleteAllByMeetingId(Long clubId, Long meetingId) {
+        if (meetingId == null) {
+            return;
+        }
+        List<Notice> notices = noticeRepository.findAllWithImagesByClubIdAndMeetingId(clubId, meetingId);
+        if (notices.isEmpty()) {
+            return;
+        }
+        publishNoticeImageDeletedIfAny(notices);
+        noticeRepository.deleteAll(notices);
+        noticeRepository.flush();
+    }
+
+    private void publishNoticeImageDeletedIfAny(List<Notice> notices) {
         List<String> imageUrls = notices.stream()
                 .flatMap(n -> n.getImageUrls().stream())
                 .distinct()
@@ -169,8 +191,6 @@ public class ClubNoticeCommandService {
         if (!imageUrls.isEmpty()) {
             publishNoticeImageDeletedEvent(imageUrls);
         }
-        noticeRepository.deleteAll(notices);
-        noticeRepository.flush();
     }
 
     private void publishNoticeImageDeletedEvent(List<String> removedImages) {

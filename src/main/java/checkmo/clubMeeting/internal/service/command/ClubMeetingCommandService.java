@@ -3,6 +3,7 @@ package checkmo.clubMeeting.internal.service.command;
 import checkmo.book.BookAPI;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
+import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingDeleted;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -80,6 +81,19 @@ public class ClubMeetingCommandService {
 
         meetingRepository.saveAndFlush(meeting);
         clubManagementAPI.touchLastActivity(clubId, LocalDateTime.now());
+    }
+
+    public void deleteMeeting(Long clubId, Long meetingId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.validateStaffClubMember(clubId, memberId);
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
+        meetingRepository.delete(meeting);
+        ClubMeetingDeleted event = ClubMeetingDeleted.builder()
+                .eventId(meetingId)
+                .clubId(clubId)
+                .meetingId(meetingId)
+                .build();
+        applicationEventPublisher.publishEvent(event);
     }
 
     public void manageTeam(Long clubId, Long meetingId, String memberId, MeetingRequestDTO.TeamManage request) {

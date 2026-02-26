@@ -9,8 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
-    @Query("SELECT DISTINCT n FROM Notice n LEFT JOIN n.images WHERE n.clubId = :clubId")
+    @Query("SELECT DISTINCT n FROM Notice n LEFT JOIN FETCH n.images WHERE n.clubId = :clubId")
     List<Notice> findAllWithImagesByClubId(Long clubId);
+
+    @Query("SELECT DISTINCT n FROM Notice n LEFT JOIN FETCH n.images WHERE n.clubId = :clubId AND n.meetingId = :meetingId")
+    List<Notice> findAllWithImagesByClubIdAndMeetingId(Long clubId, Long meetingId);
 
     Optional<Notice> findTop1ByClubIdOrderByCreatedAtDescIdDesc(Long clubId);
 
