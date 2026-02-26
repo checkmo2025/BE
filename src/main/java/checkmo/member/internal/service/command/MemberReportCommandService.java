@@ -20,7 +20,7 @@ public class MemberReportCommandService {
     private final MemberReportRepository memberReportRepository;
 
     public Long createReport(String reporterId, MemberRequestDTO.CreateReport request) {
-        Member reporter = memberRepository.findById(reporterId)
+        Member reporter = memberRepository.findByIdAndDeactivatedAtIsNull(reporterId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         Member reportedMember = memberRepository.findByNickName(request.getReportedMemberNickname())

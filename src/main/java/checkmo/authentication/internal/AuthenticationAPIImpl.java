@@ -27,6 +27,12 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     }
 
     @Override
+    public void deactivateMember(String memberId) {
+        tokenCacheService.deleteRefreshToken(memberId);
+        authUserCommandService.deactivateMember(memberId);
+    }
+
+    @Override
     public boolean updatePassword(String memberId, String currentPassword, String newPassword) {
         return authUserCommandService.updatePassword(memberId, currentPassword, newPassword);
     }
