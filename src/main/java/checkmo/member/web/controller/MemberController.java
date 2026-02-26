@@ -292,20 +292,4 @@ public class MemberController {
         memberCommandService.deactivateMember(memberId);
         return ApiResponse.onSuccess();
     }
-
-    @Operation(summary = "회원 계정 복구 API", description = "탈퇴한 회원 중 7일이 지나지 않은 회원의 계정을 복구합니다.")
-    @PostMapping("/withdrawl")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
-    })
-    public ApiResponse<Long> restoreMember(
-            @CurrentId String memberId,
-            @Valid @RequestBody MemberRequestDTO.CreateReport request
-    ) {
-        Long reportId = memberReportCommandService.createReport(memberId, request);
-        return ApiResponse.onSuccess(reportId);
-    }
 }
