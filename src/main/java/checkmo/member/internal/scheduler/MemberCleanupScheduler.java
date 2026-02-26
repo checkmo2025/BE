@@ -56,7 +56,6 @@ public class MemberCleanupScheduler {
      * 매일 새벽 3시에 실행
      */
     @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
-    @Transactional
     public void cleanupExpiredDeactivatedMembers() {
         LocalDateTime threshold = LocalDateTime.now().minusYears(1);
         List<Member> expiredMembers = memberRepository.findAllByDeactivatedAtBefore(threshold);
@@ -72,7 +71,11 @@ public class MemberCleanupScheduler {
                 .toList();
 
         for (String memberId : expiredMemberIds) {
-            memberCommandService.deleteMember(memberId);
+            try {
+                memberCommandService.deleteMember(memberId);
+            } catch (Exception e) {
+                log.error("탈퇴 1년 경과 회원 삭제 실패. memberId={}", memberId, e);
+            }
         }
 
         log.info("탈퇴 1년 경과 회원 삭제 완료");
