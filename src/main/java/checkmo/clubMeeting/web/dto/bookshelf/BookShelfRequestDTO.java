@@ -27,7 +27,7 @@ public class BookShelfRequestDTO {
         @Min(value = 1, message = "기수는 1 이상의 정수여야 합니다.")
         private Integer generation;
 
-        @Size(max = 4, message = "태그는 최대 4글자까지 입력 가능합니다.")
+        @Size(max = 10, message = "태그는 최대 10글자까지 입력 가능합니다.")
         private String tag;
 
         @Valid
@@ -49,7 +49,7 @@ public class BookShelfRequestDTO {
         @Min(value = 1, message = "기수는 1 이상의 정수여야 합니다.")
         private Integer generation;
 
-        @Size(max = 4, message = "태그는 최대 4글자까지 입력 가능합니다.")
+        @Size(max = 10, message = "태그는 최대 10글자까지 입력 가능합니다.")
         private String tag;
     }
 
