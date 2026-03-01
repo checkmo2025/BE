@@ -67,6 +67,17 @@ public class BookConverter {
                 .build();
     }
 
+    public static BookExternalDTO.BookCreate toBookCreate(DetailInfo detail) {
+        return BookExternalDTO.BookCreate.builder()
+                .isbn(detail.getIsbn())
+                .title(detail.getTitle())
+                .author(detail.getAuthor())
+                .imgUrl(detail.getImgUrl())
+                .publisher(detail.getPublisher())
+                .description(detail.getDescription())
+                .build();
+    }
+
     public static BookResponseDTO.BookList toBookList(AladinApiResponseDTO.BookList bookList, int page) {
         if (isInvalidResponse(bookList)) {
             return createEmptyBookListResponse();

@@ -1,7 +1,6 @@
 package checkmo.book.web.controller;
 
 import checkmo.authentication.CurrentId;
-import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.command.BookSocialCommandService;
 import checkmo.book.internal.service.query.AladinApiService;
@@ -19,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,18 +77,18 @@ public class BookController {
         return ApiResponse.onSuccess(result);
     }
 
-    @Operation(summary = "책 좋아요/취소 API", description = "책 정보와 함께 좋아요를 추가하거나 취소합니다. DB에 없는 책이면 전달받은 정보로 생성 후 처리합니다.")
+    @Operation(summary = "책 좋아요/취소 API", description = "ISBN으로 좋아요를 추가하거나 취소합니다. DB에 없는 책이면 알라딘 조회 후 생성하여 처리합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
     })
-    @PostMapping("/like")
+    @PostMapping("/{isbn}/like")
     public ApiResponse<BookResponseDTO.LikeResult> toggleLikeBook(
             @CurrentId String memberId,
-            @RequestBody BookExternalDTO.BookCreate request
+            @PathVariable String isbn
     ) {
-        BookResponseDTO.LikeResult result = bookSocialCommandService.toggleLikeOnBook(memberId, request);
+        BookResponseDTO.LikeResult result = bookSocialCommandService.toggleLikeOnBook(memberId, isbn);
         boolean liked = result.isLiked();
 
         if (liked) {
