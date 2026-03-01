@@ -62,6 +62,8 @@ public class MemberResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean following;
+        private long followerCount;
+        private long followingCount;
         private Set<MemberInterestCategory> categories;
     }
 

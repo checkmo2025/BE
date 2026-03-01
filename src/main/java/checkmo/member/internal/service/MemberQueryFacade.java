@@ -53,13 +53,29 @@ public class MemberQueryFacade {
     public othersDetailInfo retrieveOthersDetailInfo(String targetMemberNickname, String memberId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
+        long followerCount = memberFollowQueryService.countFollowers(targetMember.getId());
+        long followingCount = memberFollowQueryService.countFollowings(targetMember.getId());
 
-        return MemberConverter.toOtherProfile(targetMember, isFollowing);
+        return MemberConverter.toOtherProfile(
+                targetMember,
+                isFollowing,
+                followerCount,
+                followingCount
+        );
     }
 
     public MemberResponseDTO.FollowList retrieveFollowers(String memberId, Long cursorId) {
+        return retrieveFollowers(memberId, memberId, cursorId);
+    }
+
+    public MemberResponseDTO.FollowList retrieveOtherFollowers(String targetMemberNickname, String currentMemberId, Long cursorId) {
+        Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        return retrieveFollowers(targetMember.getId(), currentMemberId, cursorId);
+    }
+
+    private MemberResponseDTO.FollowList retrieveFollowers(String targetMemberId, String currentMemberId, Long cursorId) {
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
-                size -> memberFollowQueryService.retrieveFollowers(memberId, cursorId, size),
+                size -> memberFollowQueryService.retrieveFollowers(targetMemberId, cursorId, size),
                 Follow::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -67,7 +83,7 @@ public class MemberQueryFacade {
         List<String> followerIdList = ExtractHelper.extractDistinctList(followerList, follow -> follow.getFollower().getId());
 
         // 배치 조회 (내부 DTO)
-        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followerIdList, memberId);
+        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followerIdList, currentMemberId);
 
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
@@ -77,8 +93,17 @@ public class MemberQueryFacade {
     }
 
     public MemberResponseDTO.FollowList retrieveFollowings(String memberId, Long cursorId) {
+        return retrieveFollowings(memberId, memberId, cursorId);
+    }
+
+    public MemberResponseDTO.FollowList retrieveOtherFollowings(String targetMemberNickname, String currentMemberId, Long cursorId) {
+        Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        return retrieveFollowings(targetMember.getId(), currentMemberId, cursorId);
+    }
+
+    private MemberResponseDTO.FollowList retrieveFollowings(String targetMemberId, String currentMemberId, Long cursorId) {
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
-                size -> memberFollowQueryService.retrieveFollowingIds(memberId, cursorId, size),
+                size -> memberFollowQueryService.retrieveFollowingIds(targetMemberId, cursorId, size),
                 Follow::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -87,7 +112,7 @@ public class MemberQueryFacade {
         List<String> followingIdList = ExtractHelper.extractDistinctList(followingList, follow -> follow.getFollowing().getId());
 
         // 배치 조회 (내부 DTO)
-        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followingIdList, memberId);
+        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followingIdList, currentMemberId);
 
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
