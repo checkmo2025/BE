@@ -20,20 +20,6 @@ public class BookCommandService {
     private final BookRepository bookRepository;
     private final AladinApiService aladinApiService;
 
-    public String saveBook(BookExternalDTO.BookCreate request) {
-        if (bookRepository.existsById(request.getIsbn())) {
-            return request.getIsbn();
-        }
-
-        try {
-            Book book = BookConverter.toBook(request);
-            return bookRepository.save(book).getId();
-        } catch (DataIntegrityViolationException e) {
-            // 동시성으로 같은 ISBN이 먼저 생성된 경우
-            return request.getIsbn();
-        }
-    }
-
     public String fetchOrCreateBook(String isbn) {
         if (isbn == null || isbn.isBlank()) {
             throw new BookException(BookErrorStatus.BOOK_INVALID_REQUEST);
@@ -46,5 +32,19 @@ public class BookCommandService {
         var detail = aladinApiService.retrieveBookDetailInfo(isbn);
         BookExternalDTO.BookCreate request = BookConverter.toBookCreate(detail);
         return saveBook(request);
+    }
+
+    private String saveBook(BookExternalDTO.BookCreate request) {
+        if (bookRepository.existsById(request.getIsbn())) {
+            return request.getIsbn();
+        }
+
+        try {
+            Book book = BookConverter.toBook(request);
+            return bookRepository.save(book).getId();
+        } catch (DataIntegrityViolationException e) {
+            // 동시성으로 같은 ISBN이 먼저 생성된 경우
+            return request.getIsbn();
+        }
     }
 }

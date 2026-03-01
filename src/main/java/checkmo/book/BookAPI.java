@@ -30,14 +30,6 @@ public interface BookAPI {
     Map<String, BookExternalDTO.BasicInfo> fetchBookBasicInfoByBookIds(List<String> bookIds);
 
     /**
-     * 책을 조회하거나, 존재하지 않으면 생성합니다.
-     *
-     * @param request 생성할 책 정보 DTO
-     * @return 조회되거나 생성된 책의 ID (ISBN)
-     */
-    String fetchOrCreateBook(BookExternalDTO.BookCreate request);
-
-    /**
      * ISBN으로 책을 조회하거나, 존재하지 않으면 외부 API를 통해 생성합니다.
      *
      * @param isbn 책 ISBN

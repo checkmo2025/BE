@@ -46,11 +46,6 @@ public class BookAPIImpl implements BookAPI {
     }
 
     @Override
-    public String fetchOrCreateBook(BookExternalDTO.BookCreate request) {
-        return bookCommandService.saveBook(request);
-    }
-
-    @Override
     public String fetchOrCreateBook(String isbn) {
         return bookCommandService.fetchOrCreateBook(isbn);
     }
