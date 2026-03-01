@@ -18,7 +18,6 @@ import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.MyReportInfo;
 import checkmo.member.web.dto.MemberResponseDTO.MyReportList;
-import checkmo.member.web.dto.MemberResponseDTO.ReporterInfo;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
@@ -190,8 +189,6 @@ public class MemberQueryFacade {
     }
 
     public MyReportList retrieveMyReports(String memberId, Long cursorId) {
-        Member reporter = memberQueryService.retrieveMember(memberId);
-
         CursorResult<MemberReport> reportCursorResult = CursorPagingHelper.getPage(
                 size -> memberReportQueryService.retrieveMyReports(memberId, cursorId, size),
                 MemberReport::getId,
@@ -203,10 +200,6 @@ public class MemberQueryFacade {
                 .toList();
 
         return MyReportList.builder()
-                .reporter(ReporterInfo.builder()
-                        .nickname(reporter.getNickName())
-                        .profileImageUrl(reporter.getImgUrl())
-                        .build())
                 .reports(reportInfos)
                 .hasNext(reportCursorResult.hasNext())
                 .nextCursor(reportCursorResult.nextCursor())

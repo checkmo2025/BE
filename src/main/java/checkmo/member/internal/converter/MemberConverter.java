@@ -73,6 +73,8 @@ public class MemberConverter {
 
     public static MyReportInfo toMyReportInfo(MemberReport report) {
         return MyReportInfo.builder()
+                .reportedMemberNickname(report.getReportedMember().getNickName())
+                .reportedMemberProfileImageUrl(report.getReportedMember().getImgUrl())
                 .reportType(report.getReportType().name())
                 .content(report.getContent())
                 .reportDate(report.getCreatedAt())

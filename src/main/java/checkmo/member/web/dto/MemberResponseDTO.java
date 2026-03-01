@@ -118,6 +118,8 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MyReportInfo {
+        private String reportedMemberNickname;
+        private String reportedMemberProfileImageUrl;
         private String reportType;
         private String content;
 
@@ -130,19 +132,9 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MyReportList {
-        private ReporterInfo reporter;
         private List<MyReportInfo> reports;
         private boolean hasNext;
         private Long nextCursor;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class ReporterInfo {
-        private String nickname;
-        private String profileImageUrl;
     }
   
     @Getter

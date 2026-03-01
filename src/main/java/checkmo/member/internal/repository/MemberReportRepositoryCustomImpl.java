@@ -19,6 +19,7 @@ public class MemberReportRepositoryCustomImpl implements MemberReportRepositoryC
     public List<MemberReport> findMyReports(String reporterId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(memberReport)
+                .join(memberReport.reportedMember).fetchJoin()
                 .where(
                         memberReport.reporter.id.eq(reporterId),
                         cursorCondition(cursorId)
