@@ -1,15 +1,12 @@
 package checkmo.book.internal.service.command;
 
-import checkmo.book.internal.converter.BookConverter;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.entity.BookLiked;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.repository.BookRepository;
 import checkmo.book.internal.repository.BookLikedRepository;
-import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.web.dto.BookResponseDTO;
-import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +19,6 @@ public class BookSocialCommandService {
     private final BookCommandService bookCommandService;
     private final BookRepository bookRepository;
     private final BookLikedRepository bookLikedRepository;
-    private final AladinApiService aladinApiService;
 
     /**
      * 책 좋아요를 토글(추가/제거)합니다.
@@ -54,14 +50,9 @@ public class BookSocialCommandService {
             throw new BookException(BookErrorStatus.BOOK_INVALID_REQUEST);
         }
 
-        return bookRepository.findById(isbn)
-                .orElseGet(() -> {
-                    DetailInfo detail = aladinApiService.retrieveBookDetailInfo(isbn);
-                    var request = BookConverter.toBookCreate(detail);
-                    String bookId = bookCommandService.saveBook(request);
-                    return bookRepository.findById(bookId)
-                            .orElseThrow(() -> new BookException(BookErrorStatus.BOOK_NOT_FOUND));
-                });
+        String bookId = bookCommandService.fetchOrCreateBook(isbn);
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookException(BookErrorStatus.BOOK_NOT_FOUND));
     }
 
     private void deleteBookLiked(Book book, BookLiked bookLiked) {
