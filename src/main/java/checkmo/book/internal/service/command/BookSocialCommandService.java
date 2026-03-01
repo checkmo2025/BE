@@ -8,6 +8,7 @@ import checkmo.book.internal.repository.BookRepository;
 import checkmo.book.internal.repository.BookLikedRepository;
 import checkmo.book.web.dto.BookResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,9 +38,18 @@ public class BookSocialCommandService {
                     return toLikeResult(book.getId(), false);
                 })
                 .orElseGet(() -> {
-                    addBookLiked(book, memberId);
-                    syncBookLikes(book.getId());
-                    return toLikeResult(book.getId(), true);
+                    try {
+                        addBookLiked(book, memberId);
+                        syncBookLikes(book.getId());
+                        return toLikeResult(book.getId(), true);
+                    } catch (DataIntegrityViolationException e) {
+                        // 동시성으로 동일(member_id, book_id) 좋아요가 먼저 생성된 경우 성공으로 간주
+                        if (bookLikedRepository.findByBook_IdAndMemberId(book.getId(), memberId).isPresent()) {
+                            syncBookLikes(book.getId());
+                            return toLikeResult(book.getId(), true);
+                        }
+                        throw e;
+                    }
                 });
     }
 
