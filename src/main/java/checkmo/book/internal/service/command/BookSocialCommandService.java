@@ -30,19 +30,17 @@ public class BookSocialCommandService {
     public BookResponseDTO.LikeResult toggleLikeOnBook(String memberId, String isbn) {
         Book book = retrieveOrCreateBook(isbn);
 
-        BookLiked existingLike = bookLikedRepository.findByBookAndMember(book.getId(), memberId)
-                .orElse(null);
-        if (existingLike != null) {
-            deleteBookLiked(book, existingLike);
-            syncBookLikes(book.getId());
-            return toLikeResult(book.getId(), false);
-        }
-
-        if (!bookLikedRepository.existsByMemberIdAndBookId(memberId, book.getId())) {
-            addBookLiked(book, memberId);
-        }
-        syncBookLikes(book.getId());
-        return toLikeResult(book.getId(), true);
+        return bookLikedRepository.findByBook_IdAndMemberId(book.getId(), memberId)
+                .map(existingLike -> {
+                    deleteBookLiked(book, existingLike);
+                    syncBookLikes(book.getId());
+                    return toLikeResult(book.getId(), false);
+                })
+                .orElseGet(() -> {
+                    addBookLiked(book, memberId);
+                    syncBookLikes(book.getId());
+                    return toLikeResult(book.getId(), true);
+                });
     }
 
     private Book retrieveOrCreateBook(String isbn) {
