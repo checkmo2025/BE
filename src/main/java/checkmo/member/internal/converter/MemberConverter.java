@@ -33,13 +33,19 @@ public class MemberConverter {
                 .build();
     }
 
-    public static othersDetailInfo toOtherProfile(Member member, boolean isFollowing) {
+    public static othersDetailInfo toOtherProfile(
+            Member member,
+            boolean isFollowing,
+            long followerCount,
+            long followingCount
+    ) {
         return othersDetailInfo.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
-                .categories(member.getInterestCategories())
                 .following(isFollowing)
+                .followerCount(followerCount)
+                .followingCount(followingCount)
                 .build();
     }
 

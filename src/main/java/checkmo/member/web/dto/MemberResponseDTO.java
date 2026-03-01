@@ -26,6 +26,15 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class FollowCount {
+        private long followerCount;
+        private long followingCount;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class BasicInfoWithFollow {
         private String nickname;
         private String profileImageUrl;
@@ -62,7 +71,8 @@ public class MemberResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean following;
-        private Set<MemberInterestCategory> categories;
+        private long followerCount;
+        private long followingCount;
     }
 
     @Getter

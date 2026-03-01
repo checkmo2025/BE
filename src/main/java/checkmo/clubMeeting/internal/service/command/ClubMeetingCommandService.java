@@ -46,7 +46,7 @@ public class ClubMeetingCommandService {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
-        String bookId = bookAPI.fetchOrCreateBook(request.getBookInfo());
+        String bookId = bookAPI.fetchOrCreateBook(request.getIsbn());
 
         Meeting meeting = ClubMeetingConverter.toMeeting(request, clubId, bookId);
         Meeting savedMeeting = meetingRepository.saveAndFlush(meeting);

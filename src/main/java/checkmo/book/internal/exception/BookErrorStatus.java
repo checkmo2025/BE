@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum BookErrorStatus implements BaseErrorCode {
 
+    BOOK_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "BOOK_401", "책 요청 정보가 올바르지 않습니다."),
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_400", "책을 찾을 수 없습니다."),
     ALADIN_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BOOK_500", "알라딘 API 호출에 실패했습니다."),
     ;
