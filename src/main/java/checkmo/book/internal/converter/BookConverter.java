@@ -35,6 +35,19 @@ public class BookConverter {
                 .build();
     }
 
+    public static BookResponseDTO.LikedBookInfo toLikedBookInfo(Book book, boolean likedByMe) {
+        return BookResponseDTO.LikedBookInfo.builder()
+                .isbn(book.getId())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .imgUrl(book.getImgUrl())
+                .publisher(book.getPublisher())
+                .description(book.getDescription())
+                .likes(book.getLikes())
+                .likedByMe(likedByMe)
+                .build();
+    }
+
     public static Map<String, BookExternalDTO.BasicInfo> toBasicInfoDTOMap(Map<String, Book> booksMap) {
         return booksMap.entrySet().stream()
                 .collect(Collectors.toMap(

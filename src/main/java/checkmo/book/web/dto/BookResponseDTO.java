@@ -20,6 +20,7 @@ public class BookResponseDTO {
         private String publisher;
         private String description;
         private String link;
+        private boolean likedByMe;
     }
 
     @Getter
@@ -30,5 +31,40 @@ public class BookResponseDTO {
         private List<DetailInfo> detailInfoList;
         private boolean hasNext;
         private Integer currentPage;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LikeResult {
+        private String isbn;
+        private boolean liked;
+        private int likes;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LikedBookInfo {
+        private String isbn;
+        private String title;
+        private String author;
+        private String imgUrl;
+        private String publisher;
+        private String description;
+        private int likes;
+        private boolean likedByMe;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LikedBookList {
+        private List<LikedBookInfo> books;
+        private boolean hasNext;
+        private Long nextCursor;
     }
 }
