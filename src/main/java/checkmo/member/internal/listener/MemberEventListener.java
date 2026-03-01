@@ -19,4 +19,10 @@ public class MemberEventListener {
     public void createMember(AuthenticationEvent.CreateMember event) {
         memberCommandService.createMember(event.id(), event.email());
     }
+
+    @EventListener
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void reactivateMember(AuthenticationEvent.ReactivateMember event) {
+        memberCommandService.reactivateIfDeactivated(event.id());
+    }
 }

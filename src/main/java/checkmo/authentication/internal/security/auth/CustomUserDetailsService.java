@@ -27,8 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "해당 이메일을 가진 사용자를 찾을 수 없습니다: " + email));
 
-        // 비활성화된 계정, 탈퇴한 계정 등의 상태 검증
-        validateMemberStatus(user);
+        // 로그인 성공 시점 자동 복구 정책 때문에 로그인 단계에서는 비활성 상태를 차단하지 않는다.
         return new PrincipalDetails(user);
     }
 

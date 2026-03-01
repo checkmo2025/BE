@@ -147,6 +147,12 @@ public class MemberCommandService {
         authenticationAPI.deactivateMember(memberId);
     }
 
+    public void reactivateIfDeactivated(String memberId) {
+        memberRepository.findById(memberId)
+                .filter(Member::isDeactivated)
+                .ifPresent(Member::reactivate);
+    }
+
     /**
      * 회원 계정 완전 삭제 (hard delete)
      *

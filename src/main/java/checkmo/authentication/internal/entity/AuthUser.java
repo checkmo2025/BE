@@ -34,6 +34,10 @@ public class AuthUser extends BaseEntity {
         this.deactivatedAt = LocalDateTime.now();
     }
 
+    public void reactivate() {
+        this.deactivatedAt = null;
+    }
+
     public void completeProfile() {
         this.profileCompleted = true;
     }
