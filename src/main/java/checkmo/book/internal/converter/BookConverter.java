@@ -41,8 +41,6 @@ public class BookConverter {
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .imgUrl(book.getImgUrl())
-                .publisher(book.getPublisher())
-                .description(book.getDescription())
                 .likes(book.getLikes())
                 .likedByMe(likedByMe)
                 .build();

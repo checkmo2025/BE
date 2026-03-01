@@ -52,8 +52,6 @@ public class BookResponseDTO {
         private String title;
         private String author;
         private String imgUrl;
-        private String publisher;
-        private String description;
         private int likes;
         private boolean likedByMe;
     }
