@@ -8,8 +8,6 @@ import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +45,7 @@ public class BookLikeQueryService {
         List<String> bookIds = cursorResult.content().stream()
                 .map(liked -> liked.getBook().getId())
                 .toList();
-        Set<String> likedBookIdSet = retrieveLikedBookIdSet(currentMemberId, bookIds);
+        Set<String> likedBookIdSet = bookLikedRepository.findLikedBookIdSet(currentMemberId, bookIds);
 
         List<BookResponseDTO.LikedBookInfo> books = cursorResult.content().stream()
                 .map(liked -> toLikedBookInfo(liked, likedBookIdSet))
@@ -66,13 +64,6 @@ public class BookLikeQueryService {
             return bookLikedRepository.findByMemberIdOrderByIdDesc(memberId, pageable);
         }
         return bookLikedRepository.findByMemberIdAndIdLessThanOrderByIdDesc(memberId, cursorId, pageable);
-    }
-
-    private Set<String> retrieveLikedBookIdSet(String memberId, List<String> bookIds) {
-        if (memberId == null || bookIds == null || bookIds.isEmpty()) {
-            return Collections.emptySet();
-        }
-        return new HashSet<>(bookLikedRepository.findLikedBookIds(memberId, bookIds));
     }
 
     private BookResponseDTO.LikedBookInfo toLikedBookInfo(BookLiked liked, Set<String> likedBookIdSet) {

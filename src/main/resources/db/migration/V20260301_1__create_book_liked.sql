@@ -9,6 +9,5 @@ CREATE TABLE IF NOT EXISTS book_liked (
     updated_at DATETIME(6),
     PRIMARY KEY (id),
     CONSTRAINT uk_book_liked_member_book UNIQUE (member_id, book_id),
-    CONSTRAINT fk_book_liked_book FOREIGN KEY (book_id) REFERENCES book (id),
-    CONSTRAINT fk_book_liked_member FOREIGN KEY (member_id) REFERENCES member (id)
+    CONSTRAINT fk_book_liked_book FOREIGN KEY (book_id) REFERENCES book (id)
 ) ENGINE=InnoDB;

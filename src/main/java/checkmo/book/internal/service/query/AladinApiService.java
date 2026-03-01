@@ -8,8 +8,6 @@ import checkmo.book.internal.repository.BookLikedRepository;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -137,7 +135,7 @@ public class AladinApiService {
         List<String> bookIds = bookList.getDetailInfoList().stream()
                 .map(DetailInfo::getIsbn)
                 .toList();
-        Set<String> likedBookIds = retrieveLikedBookIdSet(memberId, bookIds);
+        Set<String> likedBookIds = bookLikedRepository.findLikedBookIdSet(memberId, bookIds);
 
         List<DetailInfo> updatedDetails = bookList.getDetailInfoList().stream()
                 .map(detail -> DetailInfo.builder()
@@ -157,12 +155,5 @@ public class AladinApiService {
                 .hasNext(bookList.isHasNext())
                 .currentPage(bookList.getCurrentPage())
                 .build();
-    }
-
-    private Set<String> retrieveLikedBookIdSet(String memberId, List<String> bookIds) {
-        if (memberId == null || bookIds == null || bookIds.isEmpty()) {
-            return Collections.emptySet();
-        }
-        return new HashSet<>(bookLikedRepository.findLikedBookIds(memberId, bookIds));
     }
 }
