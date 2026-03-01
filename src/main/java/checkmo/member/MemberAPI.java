@@ -89,4 +89,12 @@ public interface MemberAPI {
      * @return 관심 카테고리 정보
      */
     InterestCategoryInfo fetchInterestCategory(String memberId);
+
+    /**
+     * 회원 ID로 회원의 이메일을 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 회원 이메일
+     */
+    String fetchMemberEmail(String memberId);
 }
