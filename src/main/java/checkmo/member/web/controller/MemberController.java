@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -297,9 +299,11 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Void> withdrawMember(
-            @CurrentId String memberId
+            @CurrentId String memberId,
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        memberCommandService.deactivateMember(memberId);
+        memberCommandService.deactivateMember(memberId, request, response);
         return ApiResponse.onSuccess();
     }
 }

@@ -11,6 +11,8 @@ import checkmo.member.internal.repository.MemberReportRepository;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -135,7 +137,7 @@ public class MemberCommandService {
      *
      * @param memberId 비활성화할 회원의 ID
      */
-    public void deactivateMember(String memberId) {
+    public void deactivateMember(String memberId, HttpServletRequest request, HttpServletResponse response) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
@@ -144,7 +146,7 @@ public class MemberCommandService {
         }
 
         member.deactivate();
-        authenticationAPI.deactivateMember(memberId);
+        authenticationAPI.deactivateMember(memberId, request, response);
     }
 
     public void reactivateIfDeactivated(String memberId) {
