@@ -3,7 +3,10 @@ package checkmo.authentication.internal;
 import checkmo.authentication.AuthenticationAPI;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.internal.security.jwt.TokenCacheService;
+import checkmo.authentication.internal.service.command.AuthSessionCommandService;
 import checkmo.authentication.internal.service.command.AuthUserCommandService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class AuthenticationAPIImpl implements AuthenticationAPI {
 
     private final AuthUserCommandService authUserCommandService;
+    private final AuthSessionCommandService authSessionCommandService;
     private final TokenCacheService tokenCacheService;
     private final AuthRepository authRepository;
 
@@ -27,8 +31,8 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     }
 
     @Override
-    public void deactivateMember(String memberId) {
-        tokenCacheService.deleteRefreshToken(memberId);
+    public void deactivateMember(String memberId, HttpServletRequest request, HttpServletResponse response) {
+        authSessionCommandService.logout(request, response);
         authUserCommandService.deactivateMember(memberId);
     }
 

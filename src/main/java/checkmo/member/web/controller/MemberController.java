@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -262,6 +264,16 @@ public class MemberController {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveRecommendedMembers(memberId));
     }
 
+    @Operation(summary = "내 신고 목록 조회 API", description = "현재 로그인한 회원이 신고한 목록을 커서 기반으로 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @GetMapping("/me/reports")
+    public ApiResponse<MemberResponseDTO.MyReportList> getMyReports(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMyReports(memberId, cursorId));
+    }
+
     @Operation(summary = "회원 신고 API", description = "특정 회원을 신고합니다.")
     @PostMapping("/report")
     @ApiResponses({
@@ -287,9 +299,11 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Void> withdrawMember(
-            @CurrentId String memberId
+            @CurrentId String memberId,
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        memberCommandService.deactivateMember(memberId);
+        memberCommandService.deactivateMember(memberId, request, response);
         return ApiResponse.onSuccess();
     }
 }

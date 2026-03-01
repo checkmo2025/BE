@@ -7,6 +7,7 @@ import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberInterestCategory;
+import checkmo.member.internal.entity.MemberReport;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
@@ -15,6 +16,8 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.MyReportInfo;
+import checkmo.member.web.dto.MemberResponseDTO.MyReportList;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
@@ -182,6 +185,24 @@ public class MemberQueryFacade {
 
         return ReportList.builder()
                 .reports(reportInfos)
+                .build();
+    }
+
+    public MyReportList retrieveMyReports(String memberId, Long cursorId) {
+        CursorResult<MemberReport> reportCursorResult = CursorPagingHelper.getPage(
+                size -> memberReportQueryService.retrieveMyReports(memberId, cursorId, size),
+                MemberReport::getId,
+                DEFAULT_PAGE_SIZE
+        );
+
+        List<MyReportInfo> reportInfos = reportCursorResult.content().stream()
+                .map(MemberConverter::toMyReportInfo)
+                .toList();
+
+        return MyReportList.builder()
+                .reports(reportInfos)
+                .hasNext(reportCursorResult.hasNext())
+                .nextCursor(reportCursorResult.nextCursor())
                 .build();
     }
 

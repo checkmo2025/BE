@@ -28,6 +28,10 @@ public class NewsQueryService {
         return newsRepository.searchNewsForAdmin(cursorId, pageSize);
     }
 
+    public List<News> retrieveMyNewsList(String requesterEmail, Long cursorId, int pageSize) {
+        return newsRepository.searchMyNews(requesterEmail, cursorId, pageSize);
+    }
+
     public Page<News> retrieveNewsPageForAdmin(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         return newsRepository.findAll(pageable);

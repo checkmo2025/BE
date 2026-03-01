@@ -130,6 +130,10 @@ public class Member extends BaseEntity {
         this.deactivatedAt = LocalDateTime.now();
     }
 
+    public void reactivate() {
+        this.deactivatedAt = null;
+    }
+
     public boolean isDeactivated() {
         return deactivatedAt != null;
     }

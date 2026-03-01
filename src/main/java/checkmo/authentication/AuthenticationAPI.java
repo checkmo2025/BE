@@ -1,5 +1,8 @@
 package checkmo.authentication;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 public interface AuthenticationAPI {
 
     /**
@@ -12,7 +15,7 @@ public interface AuthenticationAPI {
     /**
      * 특정 회원의 인증 계정을 비활성화하고 세션을 만료시킵니다.
      */
-    void deactivateMember(String memberId);
+    void deactivateMember(String memberId, HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 특정 회원의 인증 관련 데이터(계정 정보, 권한, 토큰 등)를 완전히 삭제합니다.

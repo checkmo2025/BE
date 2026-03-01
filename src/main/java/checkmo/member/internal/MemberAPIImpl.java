@@ -163,6 +163,12 @@ public class MemberAPIImpl implements MemberAPI {
                 .build();
     }
 
+    @Override
+    public String fetchMemberEmail(String memberId) {
+        Member member = memberQueryService.retrieveMember(memberId);
+        return member.getEmail();
+    }
+
     private MemberExternalDTO.BasicInfo withdrawnBasicInfo() {
         return MemberExternalDTO.BasicInfo.builder()
                 .nickname(WITHDRAWN_MEMBER_NICKNAME)

@@ -16,6 +16,10 @@ public class AuthenticationEvent {
     public record SendTempPassword(String email, String tempPassword){
     }
 
+    @Builder
+    public record ReactivateMember(String id) {
+    }
+
     public enum VerificationType {
         SIGN_UP, UPDATE_EMAIL
     }
