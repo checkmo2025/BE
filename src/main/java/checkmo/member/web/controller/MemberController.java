@@ -262,6 +262,16 @@ public class MemberController {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveRecommendedMembers(memberId));
     }
 
+    @Operation(summary = "내 신고 목록 조회 API", description = "현재 로그인한 회원이 신고한 목록을 커서 기반으로 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @GetMapping("/me/reports")
+    public ApiResponse<MemberResponseDTO.MyReportList> getMyReports(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMyReports(memberId, cursorId));
+    }
+
     @Operation(summary = "회원 신고 API", description = "특정 회원을 신고합니다.")
     @PostMapping("/report")
     @ApiResponses({

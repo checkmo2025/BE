@@ -112,6 +112,38 @@ public class MemberResponseDTO {
     public static class ReportList {
         private List<ReportInfo> reports;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyReportInfo {
+        private String reportType;
+        private String content;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+        private LocalDateTime reportDate;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyReportList {
+        private ReporterInfo reporter;
+        private List<MyReportInfo> reports;
+        private boolean hasNext;
+        private Long nextCursor;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ReporterInfo {
+        private String nickname;
+        private String profileImageUrl;
+    }
   
     @Getter
     @NoArgsConstructor

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface MemberReportRepository extends JpaRepository<MemberReport, Long> {
+public interface MemberReportRepository extends JpaRepository<MemberReport, Long>, MemberReportRepositoryCustom {
 
     @EntityGraph(attributePaths = {"reportedMember"})
     List<MemberReport> findByReportedMemberNickName(String nickName);
