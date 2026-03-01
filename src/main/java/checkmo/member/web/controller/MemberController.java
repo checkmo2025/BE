@@ -228,8 +228,16 @@ public class MemberController {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberDetailInfo(memberId));
     }
 
+    @Operation(summary = "내 팔로워/팔로잉 수 조회 API", description = "현재 로그인한 회원의 팔로워 수와 팔로잉 수를 조회합니다.")
+    @GetMapping("/me/follow-count")
+    public ApiResponse<MemberResponseDTO.FollowCount> getMyFollowCount(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMyFollowCount(memberId));
+    }
+
     @Operation(summary = "다른 사람 프로필 조회 API", description =
-            "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태, 팔로워/팔로잉 수를 포함합니다.\n" +
+            "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 팔로우 상태, 팔로워/팔로잉 수를 포함합니다.\n" +
                     "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
     public ApiResponse<othersDetailInfo> getOtherProfile(

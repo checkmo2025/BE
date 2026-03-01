@@ -50,6 +50,16 @@ public class MemberQueryFacade {
         return MemberConverter.toMemberProfileWithCategory(member);
     }
 
+    public MemberResponseDTO.FollowCount retrieveMyFollowCount(String memberId) {
+        long followerCount = memberFollowQueryService.countFollowers(memberId);
+        long followingCount = memberFollowQueryService.countFollowings(memberId);
+
+        return MemberResponseDTO.FollowCount.builder()
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .build();
+    }
+
     public othersDetailInfo retrieveOthersDetailInfo(String targetMemberNickname, String memberId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());

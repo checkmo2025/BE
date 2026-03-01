@@ -43,7 +43,6 @@ public class MemberConverter {
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
-                .categories(member.getInterestCategories())
                 .following(isFollowing)
                 .followerCount(followerCount)
                 .followingCount(followingCount)
