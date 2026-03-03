@@ -29,10 +29,6 @@ public class ClubMeetingTeamQueryService {
         return teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
     }
 
-    public List<Integer> retrieveExistingTeamNumbers(Long meetingId) {
-        return teamRepository.findTeamNumberByMeetingId(meetingId);
-    }
-
     public Map<Long, Long> retrieveTeamIdByClubMemberId(List<Long> teamIds) {
         if (teamIds == null || teamIds.isEmpty()) {
             return Map.of();
@@ -64,7 +60,7 @@ public class ClubMeetingTeamQueryService {
     }
 
     public Team validateTeam(Long meetingId, Long teamId) throws ClubMeetingException {
-        return teamRepository.findByMeetingIdAndId(meetingId, teamId)
+        return teamRepository.findByIdAndMeetingId(teamId, meetingId)
                 .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TEAM_NOT_FOUND));
     }
 

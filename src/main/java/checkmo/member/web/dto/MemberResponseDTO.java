@@ -26,6 +26,15 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class FollowCount {
+        private long followerCount;
+        private long followingCount;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class BasicInfoWithFollow {
         private String nickname;
         private String profileImageUrl;
@@ -62,7 +71,8 @@ public class MemberResponseDTO {
         private String description;
         private String profileImageUrl;
         private boolean following;
-        private Set<MemberInterestCategory> categories;
+        private long followerCount;
+        private long followingCount;
     }
 
     @Getter
@@ -111,6 +121,30 @@ public class MemberResponseDTO {
     @Builder
     public static class ReportList {
         private List<ReportInfo> reports;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyReportInfo {
+        private String reportedMemberNickname;
+        private String reportedMemberProfileImageUrl;
+        private String reportType;
+        private String content;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+        private LocalDateTime reportDate;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MyReportList {
+        private List<MyReportInfo> reports;
+        private boolean hasNext;
+        private Long nextCursor;
     }
   
     @Getter

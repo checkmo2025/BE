@@ -14,8 +14,9 @@ import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
 import checkmo.clubNotice.internal.service.query.NoticeCommentQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO;
-import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticePreviewList;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.ClubNoticePreviewPage;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.EachItem;
+import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.LatestNoticePreview;
 import checkmo.clubNotice.web.dto.ClubNoticeResponseDTO.NoticeCommentList;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Service;
 public class ClubNoticeQueryFacade {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PINNED_NOTICES = 5;
 
     private static final String ANONYMOUS_NAME = "익명";
     private static final String ANONYMOUS_PROFILE_URL = "https://avatars.githubusercontent.com/u/217887881?s=200&v=4";
@@ -51,32 +53,50 @@ public class ClubNoticeQueryFacade {
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
 
-    public ClubNoticePreviewList retrieveClubNoticeList(
+    public LatestNoticePreview retrieveLatestNotice(Long clubId) {
+        clubManagementAPI.validateClub(clubId);
+        Notice notice = clubNoticeQueryService.retrieveLatestNotice(clubId)
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_EMPTY));
+        return ClubNoticeResponseDTO.LatestNoticePreview.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .build();
+    }
+
+    public ClubNoticePreviewPage retrieveClubNoticeList(
             Long clubId,
             String memberId,
-            int page,
-            boolean important
+            int page
     ) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.fetchMembershipInfo(clubId, memberId);
 
-        PageResult<Notice> noticePageResult = PagePagingHelper.getPage(
-                pageable -> clubNoticeQueryService.retrieveNotices(clubId, important, pageable),
+        List<Notice> pinnedNotices = clubNoticeQueryService.retrievePinnedNotices(clubId, MAX_PINNED_NOTICES);
+
+        PageResult<Notice> normalPageResult = PagePagingHelper.getPage(
+                pageable -> clubNoticeQueryService.retrieveNormalNotices(clubId, pageable),
                 page,
                 DEFAULT_PAGE_SIZE
         );
 
-        return ClubNoticePreviewList.builder()
-                .noticeList(
-                        noticePageResult.content().stream()
+        return ClubNoticePreviewPage.builder()
+                .pinnedNotices(
+                        pinnedNotices.stream()
                                 .map(ClubNoticeConverter::toClubNoticePreview)
                                 .toList()
                 )
-                .page(noticePageResult.page())
-                .size(noticePageResult.size())
-                .totalElements(noticePageResult.totalElements())
-                .totalPages(noticePageResult.totalPages())
-                .hasNext(noticePageResult.hasNext())
+                .normalNotices(
+                        ClubNoticeResponseDTO.NormalNoticePreviewPage.builder()
+                                .notices(normalPageResult.content().stream()
+                                        .map(ClubNoticeConverter::toClubNoticePreview)
+                                        .toList())
+                                .page(normalPageResult.page())
+                                .size(normalPageResult.size())
+                                .totalElements(normalPageResult.totalElements())
+                                .totalPages(normalPageResult.totalPages())
+                                .hasNext(normalPageResult.hasNext())
+                                .build()
+                )
                 .build();
     }
 

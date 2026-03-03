@@ -1,6 +1,7 @@
 package checkmo.authentication.internal.security.jwt;
 
 import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.common.apiPayload.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,12 +100,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("[JWT 필터] Access Token 유효성 검사 통과");
             }
+        } catch (AuthException e) {
+            log.warn("[JWT 필터] 비활성/유효하지 않은 회원 토큰 감지: {}", e.getMessage());
+            clearInvalidSession(response, accessToken);
+            SecurityContextHolder.clearContext();
         } catch (ExpiredJwtException e) { // Access Token이 존재하지만 만료된 경우
             log.warn("[JWT 필터] Access Token 만료됨: {}", e.getMessage());
             reissueAccessToken(request, response); // Refresh Token을 사용해 재발급 시도
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void clearInvalidSession(HttpServletResponse response, String accessToken) {
+        if (StringUtils.hasText(accessToken)) {
+            tokenCacheService.saveBlacklistToken(accessToken);
+        }
+        jwtCookieUtil.deleteTokenFromCookie(response, "accessToken");
+        jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
     }
 
     // Access Token이 만료된 경우, Refresh Token을 사용해 재발급

@@ -18,6 +18,7 @@ public class OAuth2Attributes {
         return switch (registrationId.toLowerCase()) {
             case Provider.GOOGLE -> ofGoogle(attributes);
             case Provider.KAKAO -> ofKakao(attributes);
+            case Provider.NAVER -> ofNaver(attributes);
             default -> throw new IllegalArgumentException("지원하지 않는 소셜 로그인입니다: " + registrationId);
         };
     }
@@ -34,6 +35,14 @@ public class OAuth2Attributes {
         return OAuth2Attributes.builder()
                 .email((String) kakaoAccount.get(Provider.Kakao.EMAIL))
                 .providerId(String.valueOf(attributes.get(Provider.Kakao.PROVIDER_ID)))
+                .build();
+    }
+
+    private static OAuth2Attributes ofNaver(Map<String, Object> attributes) {
+        Map<String, Object> response = (Map<String, Object>) attributes.get(Provider.Naver.RESPONSE);
+        return OAuth2Attributes.builder()
+                .email((String) response.get(Provider.Naver.EMAIL))
+                .providerId((String) response.get(Provider.Naver.PROVIDER_ID))
                 .build();
     }
 }

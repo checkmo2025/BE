@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ClubNoticeCommandService {
 
+    private static final int MAX_PINNED_COUNT = 5;
+
     private final ClubManagementAPI clubManagementAPI;
     private final ClubMeetingAPI clubMeetingAPI;
 
@@ -45,6 +47,10 @@ public class ClubNoticeCommandService {
         if (tag.isMeeting() && clubMeetingAPI.isNotMeetingBelongsToClub(clubId, request.getMeetingId())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
         }
+        if (request.isPinned()) {
+            validatePinnedLimit(clubId);
+        }
+
         Notice notice = ClubNoticeConverter.toNotice(request, tag, clubId);
         notice.replaceImages(request.getImageUrls());
         CreateClubVote vote = request.getVote();
@@ -90,10 +96,13 @@ public class ClubNoticeCommandService {
                 request.getMeetingId())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
         }
+        if (!notice.isPinned() && request.isPinned()) {
+            validatePinnedLimit(clubId);
+        }
         notice.update(
                 request.getTitle(),
                 request.getContent(),
-                request.isImportant(),
+                request.isPinned(),
                 request.getMeetingId()
         );
         if (request.getVote() != null) {
@@ -107,6 +116,13 @@ public class ClubNoticeCommandService {
         }
     }
 
+    private void validatePinnedLimit(Long clubId) {
+        long pinnedCount = noticeRepository.countByClubIdAndPinnedTrue(clubId);
+        if (pinnedCount >= MAX_PINNED_COUNT) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.PINNED_NOTICE_LIMIT_EXCEEDED);
+        }
+    }
+
     public void deleteNotice(Long clubId, String memberId, Long noticeId) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
@@ -115,14 +131,6 @@ public class ClubNoticeCommandService {
         publishNoticeImageDeletedEvent(notice.getImageUrls());
 
         noticeRepository.delete(notice);
-    }
-
-    private void publishNoticeImageDeletedEvent(List<String> removedImages) {
-        applicationEventPublisher.publishEvent(
-                ClubNoticeEvent.DeleteNoticeImage.builder()
-                        .imageUrls(removedImages)
-                        .build()
-        );
     }
 
     public Long haveVote(Long clubId, Long noticeId, Long voteId, String memberId, VoteResult request) {
@@ -151,5 +159,46 @@ public class ClubNoticeCommandService {
     private void validateVotingTime(Vote vote) {
         LocalDateTime now = LocalDateTime.now();
         vote.validateVotingTime(now);
+    }
+
+    public void deleteAllByClubId(Long clubId) {
+        List<Notice> notices = noticeRepository.findAllWithImagesByClubId(clubId);
+        if (notices.isEmpty()) {
+            return;
+        }
+        publishNoticeImageDeletedIfAny(notices);
+        noticeRepository.deleteAll(notices);
+        noticeRepository.flush();
+    }
+
+    public void deleteAllByMeetingId(Long clubId, Long meetingId) {
+        if (meetingId == null) {
+            return;
+        }
+        List<Notice> notices = noticeRepository.findAllWithImagesByClubIdAndMeetingId(clubId, meetingId);
+        if (notices.isEmpty()) {
+            return;
+        }
+        publishNoticeImageDeletedIfAny(notices);
+        noticeRepository.deleteAll(notices);
+        noticeRepository.flush();
+    }
+
+    private void publishNoticeImageDeletedIfAny(List<Notice> notices) {
+        List<String> imageUrls = notices.stream()
+                .flatMap(n -> n.getImageUrls().stream())
+                .distinct()
+                .toList();
+        if (!imageUrls.isEmpty()) {
+            publishNoticeImageDeletedEvent(imageUrls);
+        }
+    }
+
+    private void publishNoticeImageDeletedEvent(List<String> removedImages) {
+        applicationEventPublisher.publishEvent(
+                ClubNoticeEvent.DeleteNoticeImage.builder()
+                        .imageUrls(removedImages)
+                        .build()
+        );
     }
 }

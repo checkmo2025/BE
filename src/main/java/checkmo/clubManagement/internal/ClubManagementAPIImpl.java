@@ -115,12 +115,12 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public List<MembershipInfo> fetchActiveMembershipInfo(
-            Long clubId, Long cursorId,
-            Integer size
-    ) {
+    public List<MembershipInfo> fetchAllActiveMembershipInfo(Long clubId) {
         List<ClubMember> clubMembers
-                = clubMemberQueryService.retrieveClubMembers(clubId, ClubMemberStatus.activeStatuses(), cursorId, size);
+                = clubMemberQueryService.retrieveClubMembers(clubId, ClubMemberStatus.activeStatuses());
+        if (clubMembers == null || clubMembers.isEmpty()) {
+            return List.of();
+        }
         return ClubManagementConverter.toMembershipDTOList(clubMembers);
     }
 

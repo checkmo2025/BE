@@ -1,5 +1,6 @@
 package checkmo.news.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.news.internal.service.NewsQueryFacade;
 import checkmo.news.web.dto.NewsResponseDTO;
@@ -32,6 +33,22 @@ public class NewsController {
     @GetMapping
     public ApiResponse<NewsResponseDTO.NewsList> getNewsList(@RequestParam(required = false) Long cursorId) {
         NewsResponseDTO.NewsList newsList = newsQueryFacade.fetchNewsList(cursorId);
+        return ApiResponse.onSuccess(newsList);
+    }
+
+    @Operation(summary = "내 소식 조회", description = "로그인한 사용자가 요청한 소식 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "1")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류가 발생했습니다.")
+    })
+    @GetMapping("/me")
+    public ApiResponse<NewsResponseDTO.NewsList> getMyNewsList(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        NewsResponseDTO.NewsList newsList = newsQueryFacade.fetchMyNewsList(memberId, cursorId);
         return ApiResponse.onSuccess(newsList);
     }
 

@@ -4,15 +4,13 @@ import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.DetailInfo;
 import checkmo.member.MemberExternalDTO.InterestCategoryInfo;
-import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
-import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
-import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
-import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,10 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberAPIImpl implements MemberAPI {
 
+    private static final String WITHDRAWN_MEMBER_NICKNAME = "탈퇴한 회원";
+
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
-
-    private final MemberQueryFacade memberQueryFacade;
 
     @Override
     public String fetchMemberId(String nickname) {
@@ -39,66 +37,67 @@ public class MemberAPIImpl implements MemberAPI {
 
     @Override
     public String fetchNickname(String memberId) {
-        return memberQueryService.retrieveMemberNickname(memberId);
+        if (memberId == null) {
+            return WITHDRAWN_MEMBER_NICKNAME;
+        }
+
+        return memberQueryService.retrieveActiveMemberNickname(memberId)
+                .orElse(WITHDRAWN_MEMBER_NICKNAME);
     }
 
     @Override
     public Map<String, String> fetchNicknameByMemberIds(List<String> memberIds) {
-        if (memberIds == null || memberIds.isEmpty()) {
+        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+        if (distinctMemberIds.isEmpty()) {
             return Map.of();
         }
 
-        return memberQueryService.retrieveMemberNicknameByMemberIds(memberIds);
+        Map<String, String> result = initializeWithdrawnNicknameMap(distinctMemberIds);
+
+        result.putAll(memberQueryService.retrieveActiveMemberNicknameByMemberIds(distinctMemberIds));
+        return result;
     }
 
     @Override
     public MemberExternalDTO.BasicInfo fetchMemberBasicInfo(String memberId) {
-        Member member = memberQueryService.retrieveMember(memberId);
-        BasicInfoWithDescription profileDTO = MemberConverter.toMemberProfileWithProfileImage(
-                member);
+        if (memberId == null) {
+            return withdrawnBasicInfo();
+        }
 
-        return MemberExternalDTO.BasicInfo.builder()
-                .nickname(profileDTO.getNickname())
-                .profileImageUrl(profileDTO.getProfileImageUrl())
-                .build();
+        var basicInfoMap = fetchMemberBasicInfoByMemberIds(List.of(memberId));
+        return basicInfoMap.getOrDefault(memberId, withdrawnBasicInfo());
     }
 
     @Override
     public Map<String, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<String> memberIds) {
-        if (memberIds == null || memberIds.isEmpty()) {
+        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+        if (distinctMemberIds.isEmpty()) {
             return Map.of();
         }
 
-        // 1. Repository를 통해 IN 쿼리로 모든 회원 정보 조회 (Projection 사용)
-        List<MemberBasicInfoProjection> results = memberQueryService.retrieveMemberBasicInfos(memberIds);
+        Map<String, MemberExternalDTO.BasicInfo> result = initializeWithdrawnBasicInfoMap(distinctMemberIds);
 
-        // 2. 조회된 Projection 리스트를 Map으로 변환
-        return results.stream()
-                .collect(Collectors.toMap(
-                        MemberBasicInfoProjection::getId,
-                        projection -> MemberExternalDTO.BasicInfo.builder()
-                                .nickname(projection.getNickName())
-                                .profileImageUrl(projection.getImgUrl())
-                                .build()
-                ));
+        List<MemberBasicInfoProjection> activeMembers =
+                memberQueryService.retrieveActiveMemberBasicInfos(distinctMemberIds);
+
+        activeMembers.forEach(projection -> result.put(projection.getId(), toBasicInfo(projection)));
+
+        return result;
     }
 
     @Override
     public Map<String, DetailInfo> fetchMemberDetailInfoByMemberIds(List<String> memberIds) {
-        if (memberIds == null || memberIds.isEmpty()) {
+        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+        if (distinctMemberIds.isEmpty()) {
             return Map.of();
         }
-        List<Member> members = memberQueryService.retrieveMemberById(memberIds);
-        return members.stream()
-                .collect(Collectors.toMap(
-                        Member::getId,
-                        member -> MemberExternalDTO.DetailInfo.builder()
-                                .nickname(member.getNickName())
-                                .profileImageUrl(member.getImgUrl())
-                                .name(member.getName())
-                                .email(member.getEmail())
-                                .build()
-                ));
+
+        Map<String, DetailInfo> result = initializeWithdrawnDetailInfoMap(distinctMemberIds);
+
+        List<Member> members = memberQueryService.retrieveMemberById(distinctMemberIds);
+        members.forEach(member -> result.put(member.getId(), toDetailInfo(member)));
+
+        return result;
     }
 
     @Override
@@ -106,10 +105,13 @@ public class MemberAPIImpl implements MemberAPI {
             String targetMemberId,
             String currentMemberId
     ) {
-        // 팔로우 상태를 조회
-        boolean isFollowing = memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
+        if (targetMemberId == null) {
+            return withdrawnBasicInfoWithFollow();
+        }
 
         var basicInfoDTO = fetchMemberBasicInfo(targetMemberId);
+        boolean isWithdrawn = isWithdrawnBasicInfo(basicInfoDTO);
+        boolean isFollowing = !isWithdrawn && memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
 
         return MemberExternalDTO.BasicInfoWithFollow.builder()
                 .nickname(basicInfoDTO.getNickname())
@@ -123,21 +125,18 @@ public class MemberAPIImpl implements MemberAPI {
             List<String> targetMemberIds,
             String currentMemberId
     ) {
-        if (targetMemberIds == null || targetMemberIds.isEmpty()) {
+        List<String> distinctTargetIds = distinctNonNullIds(targetMemberIds);
+        if (distinctTargetIds.isEmpty()) {
             return Map.of();
         }
 
-        // 1. Facade에서 내부 DTO로 배치 조회
-        List<BasicInfoWithFollow> profiles
-                = memberQueryFacade.retrieveMemberBasicInfoWithFollows(targetMemberIds, currentMemberId);
+        Map<String, MemberExternalDTO.BasicInfo> basicInfoMap = fetchMemberBasicInfoByMemberIds(distinctTargetIds);
+        Map<String, Boolean> followStatusMap =
+                memberFollowQueryService.checkFollowStatusByMemberId(currentMemberId, distinctTargetIds);
 
-        // 2. 내부 DTO → 외부 DTO 변환 후 Map으로 변환
-        // targetMemberIds와 profiles는 순서가 일치하므로 zip 형태로 매핑
-        Map<String, MemberExternalDTO.BasicInfoWithFollow> result = new java.util.HashMap<>();
-        for (int i = 0; i < targetMemberIds.size() && i < profiles.size(); i++) {
-            String memberId = targetMemberIds.get(i);
-            BasicInfoWithFollow profile = profiles.get(i);
-            result.put(memberId, MemberConverter.toMemberProfileWithFollowStatus(profile));
+        Map<String, MemberExternalDTO.BasicInfoWithFollow> result = new HashMap<>();
+        for (String targetId : distinctTargetIds) {
+            result.put(targetId, toBasicInfoWithFollow(targetId, basicInfoMap, followStatusMap));
         }
 
         return result;
@@ -161,6 +160,101 @@ public class MemberAPIImpl implements MemberAPI {
                         .toList();
         return MemberExternalDTO.InterestCategoryInfo.builder()
                 .categories(categories)
+                .build();
+    }
+
+    @Override
+    public String fetchMemberEmail(String memberId) {
+        Member member = memberQueryService.retrieveMember(memberId);
+        return member.getEmail();
+    }
+
+    private MemberExternalDTO.BasicInfo withdrawnBasicInfo() {
+        return MemberExternalDTO.BasicInfo.builder()
+                .nickname(WITHDRAWN_MEMBER_NICKNAME)
+                .profileImageUrl(null)
+                .build();
+    }
+
+    private Map<String, String> initializeWithdrawnNicknameMap(List<String> memberIds) {
+        Map<String, String> result = new HashMap<>();
+        memberIds.forEach(memberId -> result.put(memberId, WITHDRAWN_MEMBER_NICKNAME));
+        return result;
+    }
+
+    private Map<String, MemberExternalDTO.BasicInfo> initializeWithdrawnBasicInfoMap(List<String> memberIds) {
+        Map<String, MemberExternalDTO.BasicInfo> result = new HashMap<>();
+        memberIds.forEach(memberId -> result.put(memberId, withdrawnBasicInfo()));
+        return result;
+    }
+
+    private Map<String, MemberExternalDTO.DetailInfo> initializeWithdrawnDetailInfoMap(List<String> memberIds) {
+        Map<String, MemberExternalDTO.DetailInfo> result = new HashMap<>();
+        memberIds.forEach(memberId -> result.put(memberId, withdrawnDetailInfo()));
+        return result;
+    }
+
+    private MemberExternalDTO.BasicInfo toBasicInfo(MemberBasicInfoProjection projection) {
+        return MemberExternalDTO.BasicInfo.builder()
+                .nickname(projection.getNickName())
+                .profileImageUrl(projection.getImgUrl())
+                .build();
+    }
+
+    private MemberExternalDTO.DetailInfo toDetailInfo(Member member) {
+        return MemberExternalDTO.DetailInfo.builder()
+                .nickname(member.getNickName())
+                .profileImageUrl(member.getImgUrl())
+                .name(member.getName())
+                .email(member.getEmail())
+                .build();
+    }
+
+    private List<String> distinctNonNullIds(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        return ids.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> new java.util.ArrayList<>(new LinkedHashSet<>(list))));
+    }
+
+    private boolean isWithdrawnBasicInfo(MemberExternalDTO.BasicInfo basicInfo) {
+        return WITHDRAWN_MEMBER_NICKNAME.equals(basicInfo.getNickname())
+                && basicInfo.getProfileImageUrl() == null;
+    }
+
+    private MemberExternalDTO.BasicInfoWithFollow toBasicInfoWithFollow(
+            String targetId,
+            Map<String, MemberExternalDTO.BasicInfo> basicInfoMap,
+            Map<String, Boolean> followStatusMap
+    ) {
+        MemberExternalDTO.BasicInfo basicInfo = basicInfoMap.getOrDefault(targetId, withdrawnBasicInfo());
+        boolean isWithdrawn = isWithdrawnBasicInfo(basicInfo);
+        boolean isFollowing = !isWithdrawn && followStatusMap.getOrDefault(targetId, false);
+
+        return MemberExternalDTO.BasicInfoWithFollow.builder()
+                .nickname(basicInfo.getNickname())
+                .profileImageUrl(basicInfo.getProfileImageUrl())
+                .following(isFollowing)
+                .build();
+    }
+
+    private MemberExternalDTO.DetailInfo withdrawnDetailInfo() {
+        return MemberExternalDTO.DetailInfo.builder()
+                .nickname(WITHDRAWN_MEMBER_NICKNAME)
+                .profileImageUrl(null)
+                .name(null)
+                .email(null)
+                .build();
+    }
+
+    private MemberExternalDTO.BasicInfoWithFollow withdrawnBasicInfoWithFollow() {
+        return MemberExternalDTO.BasicInfoWithFollow.builder()
+                .nickname(WITHDRAWN_MEMBER_NICKNAME)
+                .profileImageUrl(null)
+                .following(false)
                 .build();
     }
 }

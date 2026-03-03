@@ -71,6 +71,17 @@ public class AuthUserCommandService {
         authUser.completeProfile();
     }
 
+    public void deactivateMember(String memberId) {
+        AuthUser authUser = authRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+
+        if (authUser.isDeactivated()) {
+            return;
+        }
+
+        authUser.deactivate();
+    }
+
     public boolean updatePassword(String userId, String oldPassword, String newPassword) {
         AuthUser user = authRepository.findById(userId)
                                       .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));

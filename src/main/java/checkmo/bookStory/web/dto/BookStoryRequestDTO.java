@@ -1,7 +1,7 @@
 package checkmo.bookStory.web.dto;
 
-import checkmo.book.BookExternalDTO;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +14,9 @@ public class BookStoryRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class BookStoryCreate {
-        private BookExternalDTO.BookCreate bookInfo; // 책 정보
+        @NotBlank(message = "ISBN은 필수입니다.")
+        @Pattern(regexp = "^\\d{13}$", message = "ISBN은 13자리 숫자여야 합니다.")
+        private String isbn;
 
         @NotBlank(message = "책 이야기에 제목을 입력해주세요.")
         private String title;

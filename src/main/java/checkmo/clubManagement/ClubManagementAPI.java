@@ -88,14 +88,12 @@ public interface ClubManagementAPI {
             throws ClubManagementException;
 
     /**
-     * 특정 클럽에 속한 ACTIVE한 회원 목록을 커서 기반 조회합니다.
+     * 특정 클럽에 속한 ACTIVE한 회원 목록을 전체 조회합니다.
      *
-     * @param clubId   클럽 ID
-     * @param cursorId 마지막으로 조회된 멤버십 ID (처음 조회 시 null)
-     * @param size     한 번에 조회할 멤버십 수
+     * @param clubId 클럽 ID
      * @return 멤버십 목록
      */
-    List<MembershipInfo> fetchActiveMembershipInfo(Long clubId, Long cursorId, Integer size);
+    List<MembershipInfo> fetchAllActiveMembershipInfo(Long clubId);
 
     /**
      * 특정 모임의 마지막 활동 시간을 갱신합니다.

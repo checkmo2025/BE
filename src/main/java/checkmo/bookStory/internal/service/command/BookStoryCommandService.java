@@ -29,7 +29,7 @@ public class BookStoryCommandService {
      * @param request  책이야기 요청 DTO
      */
     public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreate request) {
-        String bookId = bookAPI.fetchOrCreateBook(request.getBookInfo());
+        String bookId = bookAPI.fetchOrCreateBook(request.getIsbn());
 
         BookStory bookStory = BookStoryConverter.toBookStory(request, memberId, bookId);
         BookStory savedBookStory = bookStoryRepository.save(bookStory);

@@ -164,7 +164,7 @@ public class ClubRequestDTO {
         private String description;
         @Size(max = 255, message = "프로필 이미지 URL은 255자 이하로 입력해주세요.")
         private String profileImageUrl;
-        private boolean isOpen;
+        private boolean open;
         @NotBlank(message = "활동 지역은 필수 입력입니다.")
         @Size(max = 40, message = "활동 지역은 40자 이하로 입력해주세요.")
         private String region;

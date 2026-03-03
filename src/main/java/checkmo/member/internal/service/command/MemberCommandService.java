@@ -6,9 +6,13 @@ import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
+import checkmo.member.internal.repository.FollowRepository;
+import checkmo.member.internal.repository.MemberReportRepository;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,6 +27,8 @@ public class MemberCommandService {
     private final AuthenticationAPI authenticationAPI;
 
     private final MemberRepository memberRepository;
+    private final FollowRepository followRepository;
+    private final MemberReportRepository memberReportRepository;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -49,8 +55,7 @@ public class MemberCommandService {
      * @return void -> 어차피 회원 프로필 정보 완료 후에는 메인 화면에 로그인된 상태로 리다이렉트
      */
     public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+        Member member = findActiveMember(memberId);
 
         member.updateAdditionalInfo(
                 request.getNickname(),
@@ -86,8 +91,7 @@ public class MemberCommandService {
             MemberRequestDTO.MemberProfileUpdate request
     ) {
         // 회원 조회
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+        Member member = findActiveMember(memberId);
 
         String existingImageUrl = member.getImgUrl();
         String newImageUrl = request.getImgUrl();
@@ -133,8 +137,22 @@ public class MemberCommandService {
      *
      * @param memberId 비활성화할 회원의 ID
      */
-    public void deactivateMember(String memberId) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+    public void deactivateMember(String memberId, HttpServletRequest request, HttpServletResponse response) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+
+        if (member.isDeactivated()) {
+            return;
+        }
+
+        member.deactivate();
+        authenticationAPI.deactivateMember(memberId, request, response);
+    }
+
+    public void reactivateIfDeactivated(String memberId) {
+        memberRepository.findById(memberId)
+                .filter(Member::isDeactivated)
+                .ifPresent(Member::reactivate);
     }
 
     /**
@@ -143,7 +161,18 @@ public class MemberCommandService {
      * @param memberId 삭제할 회원의 ID
      */
     public void deleteMember(String memberId) {
-        throw new UnsupportedOperationException("추후 구현 예정");
+        Member member = memberRepository.findById(memberId)
+                .orElse(null);
+
+        if (member == null) {
+            authenticationAPI.deleteAuthData(memberId);
+            return;
+        }
+
+        memberReportRepository.deleteAllByMemberId(memberId);
+        followRepository.deleteAllByMemberId(memberId);
+        memberRepository.delete(member);
+        authenticationAPI.deleteAuthData(memberId);
     }
 
     /**
@@ -161,8 +190,12 @@ public class MemberCommandService {
         authenticationAPI.updateEmail(memberId, request.getCurrentEmail(), request.getNewEmail(), request.getVerificationCode());
 
         // 성공 시 Member 이메일 업데이트
-        Member member = memberRepository.findById(memberId)
-                                        .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+        Member member = findActiveMember(memberId);
         member.updateEmail(request.getNewEmail());
+    }
+
+    private Member findActiveMember(String memberId) {
+        return memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 }

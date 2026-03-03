@@ -6,6 +6,7 @@ import checkmo.member.internal.entity.MemberReport;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.MyReportInfo;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
 import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
@@ -32,13 +33,19 @@ public class MemberConverter {
                 .build();
     }
 
-    public static othersDetailInfo toOtherProfile(Member member, boolean isFollowing) {
+    public static othersDetailInfo toOtherProfile(
+            Member member,
+            boolean isFollowing,
+            long followerCount,
+            long followingCount
+    ) {
         return othersDetailInfo.builder()
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
-                .categories(member.getInterestCategories())
                 .following(isFollowing)
+                .followerCount(followerCount)
+                .followingCount(followingCount)
                 .build();
     }
 
@@ -67,6 +74,16 @@ public class MemberConverter {
                 .reportType(report.getReportType().getDescription())
                 .content(report.getContent())
                 .createdAt(report.getCreatedAt())
+                .build();
+    }
+
+    public static MyReportInfo toMyReportInfo(MemberReport report) {
+        return MyReportInfo.builder()
+                .reportedMemberNickname(report.getReportedMember().getNickName())
+                .reportedMemberProfileImageUrl(report.getReportedMember().getImgUrl())
+                .reportType(report.getReportType().name())
+                .content(report.getContent())
+                .reportDate(report.getCreatedAt())
                 .build();
     }
 }

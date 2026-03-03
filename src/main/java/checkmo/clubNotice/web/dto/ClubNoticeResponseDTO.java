@@ -19,8 +19,26 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ClubNoticePreviewList {
-        List<ClubNoticePreview> noticeList;
+    public static class LatestNoticePreview {
+        private Long id;
+        private String title;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubNoticePreviewPage {
+        private List<ClubNoticePreview> pinnedNotices;
+        private NormalNoticePreviewPage normalNotices;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class NormalNoticePreviewPage {
+        private List<ClubNoticePreview> notices;
         private int page;
         private int size;
         private long totalElements;
@@ -32,12 +50,18 @@ public class ClubNoticeResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static final class ClubNoticePreview {
+    public static class ClubNoticePreview {
         private Long id;
         private String title;
-        private boolean important;
+        @Getter(AccessLevel.NONE)
+        private boolean pinned;
         private ClubNoticeTagItem tagItem;
         private LocalDateTime createdAt;
+
+        @JsonProperty("isPinned")
+        public boolean isPinned() {
+            return pinned;
+        }
     }
 
     @Getter
@@ -64,7 +88,8 @@ public class ClubNoticeResponseDTO {
         private Long id;
         private String title;
         private String content;
-        private boolean important;
+        @Getter(AccessLevel.NONE)
+        private boolean pinned;
         private ClubNoticeTagItem tag;
         private List<String> imageUrls;
         private LocalDateTime createdAt;
@@ -72,6 +97,11 @@ public class ClubNoticeResponseDTO {
         private DetailInfo meetingDetail; // 모임 공지인 경우에만 포함
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private VoteDetail voteDetail; // 투표 공지인 경우에만 포함
+
+        @JsonProperty("isPinned")
+        public boolean isPinned() {
+            return pinned;
+        }
     }
 
     @Getter

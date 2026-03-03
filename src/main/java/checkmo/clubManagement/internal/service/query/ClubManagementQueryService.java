@@ -28,6 +28,13 @@ public class ClubManagementQueryService {
         return clubRepository.searchClubs(filter, cursorId, pageSize);
     }
 
+    public List<Club> retrieveClubs(List<Long> clubIds) {
+        if (clubIds == null || clubIds.isEmpty()) {
+            return List.of();
+        }
+        return clubRepository.findAllById(clubIds);
+    }
+
     public boolean isDuplicateClubName(String clubName) {
         return clubRepository.existsByName(clubName.trim());
     }

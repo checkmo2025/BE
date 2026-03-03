@@ -17,4 +17,8 @@ public class MemberReportQueryService {
     public List<MemberReport> retrieveReportsByReportedMemberNickname(String nickname) {
         return memberReportRepository.findByReportedMemberNickName(nickname);
     }
+
+    public List<MemberReport> retrieveMyReports(String memberId, Long cursorId, int pageSize) {
+        return memberReportRepository.findMyReports(memberId, cursorId, pageSize);
+    }
 }

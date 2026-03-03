@@ -1,4 +1,4 @@
 @org.springframework.modulith.ApplicationModule(
-        allowedDependencies = {"common"}
+        allowedDependencies = {"common", "authentication", "member"}
 )
 package checkmo.book;

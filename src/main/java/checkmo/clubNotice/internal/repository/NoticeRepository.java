@@ -1,6 +1,7 @@
 package checkmo.clubNotice.internal.repository;
 
 import checkmo.clubNotice.internal.entity.Notice;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
+    @Query("SELECT DISTINCT n FROM Notice n LEFT JOIN FETCH n.images WHERE n.clubId = :clubId")
+    List<Notice> findAllWithImagesByClubId(Long clubId);
+
+    @Query("SELECT DISTINCT n FROM Notice n LEFT JOIN FETCH n.images WHERE n.clubId = :clubId AND n.meetingId = :meetingId")
+    List<Notice> findAllWithImagesByClubIdAndMeetingId(Long clubId, Long meetingId);
+
+    Optional<Notice> findTop1ByClubIdOrderByCreatedAtDescIdDesc(Long clubId);
+
     @Query("SELECT DISTINCT n FROM Notice n "
             + "LEFT JOIN FETCH n.vote v "
             + "LEFT JOIN FETCH v.clubMemberVotes cmv "
@@ -17,8 +26,15 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Optional<Notice> findByIdAndClubId(Long noticeId, Long clubId);
 
     @Query("SELECT n FROM Notice n "
+            + "WHERE n.clubId = :clubId AND n.pinned = true "
+            + "ORDER BY n.createdAt DESC, n.id DESC")
+    List<Notice> findTopPinnedByClubId(Long clubId, Pageable pageable);
+
+    @Query("SELECT n FROM Notice n "
             + "WHERE n.clubId = :clubId "
-            + "AND n.important = :important "
+            + "AND n.pinned = :pinned "
             + "ORDER BY n.createdAt DESC, n.id DESC ")
-    Page<Notice> findAllByClubIdAndImportant(Long clubId, boolean important, Pageable pageable);
+    Page<Notice> findAllByClubIdAndPinned(Long clubId, boolean pinned, Pageable pageable);
+
+    long countByClubIdAndPinnedTrue(Long clubId);
 }

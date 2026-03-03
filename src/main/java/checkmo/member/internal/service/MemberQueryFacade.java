@@ -7,6 +7,7 @@ import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberInterestCategory;
+import checkmo.member.internal.entity.MemberReport;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
@@ -15,6 +16,8 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.MyReportInfo;
+import checkmo.member.web.dto.MemberResponseDTO.MyReportList;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
@@ -47,16 +50,42 @@ public class MemberQueryFacade {
         return MemberConverter.toMemberProfileWithCategory(member);
     }
 
+    public MemberResponseDTO.FollowCount retrieveMyFollowCount(String memberId) {
+        long followerCount = memberFollowQueryService.countFollowers(memberId);
+        long followingCount = memberFollowQueryService.countFollowings(memberId);
+
+        return MemberResponseDTO.FollowCount.builder()
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .build();
+    }
+
     public othersDetailInfo retrieveOthersDetailInfo(String targetMemberNickname, String memberId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
+        long followerCount = memberFollowQueryService.countFollowers(targetMember.getId());
+        long followingCount = memberFollowQueryService.countFollowings(targetMember.getId());
 
-        return MemberConverter.toOtherProfile(targetMember, isFollowing);
+        return MemberConverter.toOtherProfile(
+                targetMember,
+                isFollowing,
+                followerCount,
+                followingCount
+        );
     }
 
     public MemberResponseDTO.FollowList retrieveFollowers(String memberId, Long cursorId) {
+        return retrieveFollowers(memberId, memberId, cursorId);
+    }
+
+    public MemberResponseDTO.FollowList retrieveOtherFollowers(String targetMemberNickname, String currentMemberId, Long cursorId) {
+        Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        return retrieveFollowers(targetMember.getId(), currentMemberId, cursorId);
+    }
+
+    private MemberResponseDTO.FollowList retrieveFollowers(String targetMemberId, String currentMemberId, Long cursorId) {
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
-                size -> memberFollowQueryService.retrieveFollowers(memberId, cursorId, size),
+                size -> memberFollowQueryService.retrieveFollowers(targetMemberId, cursorId, size),
                 Follow::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -64,7 +93,7 @@ public class MemberQueryFacade {
         List<String> followerIdList = ExtractHelper.extractDistinctList(followerList, follow -> follow.getFollower().getId());
 
         // 배치 조회 (내부 DTO)
-        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followerIdList, memberId);
+        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followerIdList, currentMemberId);
 
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
@@ -74,8 +103,17 @@ public class MemberQueryFacade {
     }
 
     public MemberResponseDTO.FollowList retrieveFollowings(String memberId, Long cursorId) {
+        return retrieveFollowings(memberId, memberId, cursorId);
+    }
+
+    public MemberResponseDTO.FollowList retrieveOtherFollowings(String targetMemberNickname, String currentMemberId, Long cursorId) {
+        Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        return retrieveFollowings(targetMember.getId(), currentMemberId, cursorId);
+    }
+
+    private MemberResponseDTO.FollowList retrieveFollowings(String targetMemberId, String currentMemberId, Long cursorId) {
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
-                size -> memberFollowQueryService.retrieveFollowingIds(memberId, cursorId, size),
+                size -> memberFollowQueryService.retrieveFollowingIds(targetMemberId, cursorId, size),
                 Follow::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -84,7 +122,7 @@ public class MemberQueryFacade {
         List<String> followingIdList = ExtractHelper.extractDistinctList(followingList, follow -> follow.getFollowing().getId());
 
         // 배치 조회 (내부 DTO)
-        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followingIdList, memberId);
+        List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followingIdList, currentMemberId);
 
         return MemberResponseDTO.FollowList.builder()
                 .followList(profiles)
@@ -109,8 +147,8 @@ public class MemberQueryFacade {
             return Collections.emptyList();
         }
 
-        // 1. 회원 기본 정보 배치 조회
-        List<MemberBasicInfoProjection> memberInfoList = memberQueryService.retrieveMemberBasicInfos(
+        // 1. 활성 회원 기본 정보 배치 조회
+        List<MemberBasicInfoProjection> memberInfoList = memberQueryService.retrieveActiveMemberBasicInfos(
                 targetMemberIds);
 
         // 2. 팔로우 상태 배치 조회
@@ -185,6 +223,24 @@ public class MemberQueryFacade {
                 .build();
     }
 
+    public MyReportList retrieveMyReports(String memberId, Long cursorId) {
+        CursorResult<MemberReport> reportCursorResult = CursorPagingHelper.getPage(
+                size -> memberReportQueryService.retrieveMyReports(memberId, cursorId, size),
+                MemberReport::getId,
+                DEFAULT_PAGE_SIZE
+        );
+
+        List<MyReportInfo> reportInfos = reportCursorResult.content().stream()
+                .map(MemberConverter::toMyReportInfo)
+                .toList();
+
+        return MyReportList.builder()
+                .reports(reportInfos)
+                .hasNext(reportCursorResult.hasNext())
+                .nextCursor(reportCursorResult.nextCursor())
+                .build();
+    }
+
     public MemberResponseDTO.LoginStatus retrieveLoginStatus(String memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
 
@@ -201,4 +257,3 @@ public class MemberQueryFacade {
                                             .build();
     }
 }
-

@@ -3,6 +3,7 @@ package checkmo.member.internal.scheduler;
 import checkmo.authentication.AuthenticationAPI;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.internal.service.command.MemberCommandService;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class MemberCleanupScheduler {
 
     private final MemberRepository memberRepository;
     private final AuthenticationAPI authenticationAPI;
+    private final MemberCommandService memberCommandService;
 
     /**
      * 프로필 미완료(유령) 회원 삭제 스케줄러
@@ -47,5 +49,35 @@ public class MemberCleanupScheduler {
 
             log.info("유령 회원 삭제 완료");
         }
+    }
+
+    /**
+     * 탈퇴 후 1년이 지난 회원 계정 하드 삭제 스케줄러
+     * 매일 새벽 3시에 실행
+     */
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    public void cleanupExpiredDeactivatedMembers() {
+        LocalDateTime threshold = LocalDateTime.now().minusYears(1);
+        List<Member> expiredMembers = memberRepository.findAllByDeactivatedAtBefore(threshold);
+
+        if (expiredMembers.isEmpty()) {
+            return;
+        }
+
+        log.info("탈퇴 1년 경과 회원 삭제 시작: {}명", expiredMembers.size());
+
+        List<String> expiredMemberIds = expiredMembers.stream()
+                .map(Member::getId)
+                .toList();
+
+        for (String memberId : expiredMemberIds) {
+            try {
+                memberCommandService.deleteMember(memberId);
+            } catch (Exception e) {
+                log.error("탈퇴 1년 경과 회원 삭제 실패. memberId={}", memberId, e);
+            }
+        }
+
+        log.info("탈퇴 1년 경과 회원 삭제 완료");
     }
 }

@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -162,6 +164,40 @@ public class MemberController {
         return ApiResponse.onSuccess(followerList);
     }
 
+    @Operation(summary = "다른 사람 팔로잉 목록 조회 API", description = "특정 회원의 팔로잉 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/{memberNickname}/followings")
+    public ApiResponse<MemberResponseDTO.FollowList> getOtherFollowingList(
+            @CurrentId String memberId,
+            @PathVariable String memberNickname,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var followingList = memberQueryFacade.retrieveOtherFollowings(memberNickname, memberId, cursorId);
+        return ApiResponse.onSuccess(followingList);
+    }
+
+    @Operation(summary = "다른 사람 팔로워 목록 조회 API", description = "특정 회원의 팔로워 목록을 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @GetMapping("/{memberNickname}/followers")
+    public ApiResponse<MemberResponseDTO.FollowList> getOtherFollowerList(
+            @CurrentId String memberId,
+            @PathVariable String memberNickname,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        var followerList = memberQueryFacade.retrieveOtherFollowers(memberNickname, memberId, cursorId);
+        return ApiResponse.onSuccess(followerList);
+    }
+
     @Operation(summary = "내 프로필 편집 API", description = "내 프로필을 편집합니다. 프로필 이미지, 소개, 관심 카테고리를 수정할 수 있습니다.")
     @PatchMapping("/me")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
@@ -192,8 +228,16 @@ public class MemberController {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberDetailInfo(memberId));
     }
 
+    @Operation(summary = "내 팔로워/팔로잉 수 조회 API", description = "현재 로그인한 회원의 팔로워 수와 팔로잉 수를 조회합니다.")
+    @GetMapping("/me/follow-count")
+    public ApiResponse<MemberResponseDTO.FollowCount> getMyFollowCount(
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMyFollowCount(memberId));
+    }
+
     @Operation(summary = "다른 사람 프로필 조회 API", description =
-            "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 관심 카테고리, 팔로우 상태를 포함합니다.\n" +
+            "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 팔로우 상태, 팔로워/팔로잉 수를 포함합니다.\n" +
                     "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
     public ApiResponse<othersDetailInfo> getOtherProfile(
@@ -262,6 +306,16 @@ public class MemberController {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveRecommendedMembers(memberId));
     }
 
+    @Operation(summary = "내 신고 목록 조회 API", description = "현재 로그인한 회원이 신고한 목록을 커서 기반으로 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @GetMapping("/me/reports")
+    public ApiResponse<MemberResponseDTO.MyReportList> getMyReports(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMyReports(memberId, cursorId));
+    }
+
     @Operation(summary = "회원 신고 API", description = "특정 회원을 신고합니다.")
     @PostMapping("/report")
     @ApiResponses({
@@ -276,5 +330,22 @@ public class MemberController {
     ) {
         Long reportId = memberReportCommandService.createReport(memberId, request);
         return ApiResponse.onSuccess(reportId);
+    }
+
+    @Operation(summary = "회원 탈퇴 API", description = "회원을 탈퇴합니다.")
+    @PostMapping("/withdrawal")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    public ApiResponse<Void> withdrawMember(
+            @CurrentId String memberId,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        memberCommandService.deactivateMember(memberId, request, response);
+        return ApiResponse.onSuccess();
     }
 }

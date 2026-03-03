@@ -1,11 +1,10 @@
 package checkmo.clubMeeting.web.dto.bookshelf;
 
-import checkmo.book.BookExternalDTO;
 import checkmo.clubMeeting.internal.validation.validRate.ValidRate;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -27,12 +26,12 @@ public class BookShelfRequestDTO {
         @Min(value = 1, message = "기수는 1 이상의 정수여야 합니다.")
         private Integer generation;
 
-        @Size(max = 4, message = "태그는 최대 4글자까지 입력 가능합니다.")
+        @Size(max = 10, message = "태그는 최대 10글자까지 입력 가능합니다.")
         private String tag;
 
-        @Valid
-        @NotNull(message = "책 정보는 null이 될 수 없습니다.")
-        private BookExternalDTO.BookCreate bookInfo;
+        @NotBlank(message = "ISBN은 필수입니다.")
+        @Pattern(regexp = "^\\d{13}$", message = "ISBN은 13자리 숫자여야 합니다.")
+        private String isbn;
     }
 
     @Getter
@@ -49,7 +48,7 @@ public class BookShelfRequestDTO {
         @Min(value = 1, message = "기수는 1 이상의 정수여야 합니다.")
         private Integer generation;
 
-        @Size(max = 4, message = "태그는 최대 4글자까지 입력 가능합니다.")
+        @Size(max = 10, message = "태그는 최대 10글자까지 입력 가능합니다.")
         private String tag;
     }
 

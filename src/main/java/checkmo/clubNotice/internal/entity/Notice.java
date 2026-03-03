@@ -43,7 +43,8 @@ public class Notice extends BaseEntity {
     @Column(length = 1000)
     private String content;
 
-    private boolean important;
+    @Column(name = "is_pinned")
+    private boolean pinned;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -72,12 +73,12 @@ public class Notice extends BaseEntity {
     public void update(
             String title,
             String content,
-            boolean important,
+            boolean pinned,
             Long meetingId
     ) {
         this.title = title;
         this.content = content;
-        this.important = important;
+        this.pinned = pinned;
         this.meetingId = meetingId;
         this.tag = NoticeTag.decideTag(this.vote != null, meetingId != null);
     }
@@ -126,7 +127,7 @@ public class Notice extends BaseEntity {
         if (images == null) {
             return List.of(); // null이면 변경 없음
         }
-        
+
         if (images.size() > MAX_IMAGE_COUNT) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_IMAGE_LIMIT_EXCEEDED);
         }

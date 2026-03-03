@@ -8,6 +8,7 @@ import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationSucce
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -44,6 +45,14 @@ public class SecurityConfig {
                         .requestMatchers("/").permitAll() // 홈페이지 접근 허용
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/health").permitAll() // Swagger UI 접근 허용
                         .requestMatchers("/login/oauth2/**").permitAll() // OAuth2 로그인 허용
+                        .requestMatchers(HttpMethod.GET, "/api/books/me/likes").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/book-stories/me", "/api/book-stories/following", "/api/book-stories/clubs/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/book-stories", "/api/book-stories/*", "/api/book-stories/search/*", "/api/book-stories/members/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/news/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/members/me", "/api/members/me/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/members/*").permitAll()
                         .requestMatchers("/api/members/additional-info").authenticated()
                         .requestMatchers("/api/auth/**", "/api/members/check-nickname").permitAll()
                         .anyRequest().authenticated()

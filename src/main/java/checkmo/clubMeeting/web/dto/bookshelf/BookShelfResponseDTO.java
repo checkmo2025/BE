@@ -3,6 +3,7 @@ package checkmo.clubMeeting.web.dto.bookshelf;
 import checkmo.book.BookExternalDTO;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,14 @@ public class BookShelfResponseDTO {
         private List<BookShelfInfo> bookShelfInfoList;
         private boolean hasNext;
         private Long nextCursor;
+
+        @Getter(AccessLevel.NONE)
+        private boolean staff;
+
+        @JsonProperty("isStaff")
+        public boolean isStaff() {
+            return staff;
+        }
     }
 
     @Getter
@@ -49,6 +58,28 @@ public class BookShelfResponseDTO {
     public static class BookShelfDetail {
         private MeetingInfo meetingInfo;
         private BookExternalDTO.DetailInfo bookDetailInfo;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookShelfUpdate {
+        private MeetingDetailInfo meetingInfo;
+        private BookExternalDTO.DetailInfo bookDetailInfo;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MeetingDetailInfo {
+        private Long meetingId;
+        private String title;
+        private LocalDateTime meetingTime;
+        private String location;
+        private Integer generation;
+        private String tag;
     }
 
     @Getter

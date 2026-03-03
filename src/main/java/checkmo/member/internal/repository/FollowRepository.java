@@ -9,12 +9,20 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface FollowRepository extends JpaRepository<Follow, Long>, FollowRepositoryCustom {
 
+    long countByFollowing_Id(String followingId);
+
+    long countByFollower_Id(String followerId);
+
     @Query("SELECT COUNT(f) > 0 FROM Follow f WHERE f.follower.id = :followerId AND f.following.id = :followingId")
     boolean existsByFollow(String followerId, String followingId);
 
     @Modifying
     @Query("DELETE FROM Follow f WHERE f.follower.id = :followerId AND f.following.id = :followingId")
     void deleteByFollow(String followerId, String followingId);
+
+    @Modifying
+    @Query("DELETE FROM Follow f WHERE f.follower.id = :memberId OR f.following.id = :memberId")
+    void deleteAllByMemberId(String memberId);
 
     @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :memberId")
     List<String> getFollowingMemberIds(String memberId);

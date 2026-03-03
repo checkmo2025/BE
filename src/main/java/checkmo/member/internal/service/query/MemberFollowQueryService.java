@@ -46,6 +46,10 @@ public class MemberFollowQueryService {
      * 특정 회원의 팔로우 여부 확인
      */
     public boolean isFollowing(String memberId, String targetMemberId) {
+        if (memberId == null || targetMemberId == null) {
+            return false;
+        }
+
         if (Member.isSameMember(memberId, targetMemberId)) {
             return true; // 자기 자신을 팔로우하는 것은 항상 true
         }
@@ -64,6 +68,15 @@ public class MemberFollowQueryService {
     public Map<String, Boolean> checkFollowStatusByMemberId(String currentMemberId, List<String> targetMemberIds) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Map.of();
+        }
+
+        if (currentMemberId == null) {
+            return targetMemberIds.stream()
+                    .distinct()
+                    .collect(Collectors.toMap(
+                            targetId -> targetId,
+                            targetId -> false
+                    ));
         }
 
         // 실제로 팔로우하고 있는 대상들을 배치로 조회
@@ -86,5 +99,25 @@ public class MemberFollowQueryService {
      */
     public List<String> retrieveFollowingIds(String memberId) {
         return followRepository.getFollowingMemberIds(memberId);
+    }
+
+    /**
+     * 특정 회원의 팔로워 수를 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 팔로워 수
+     */
+    public long countFollowers(String memberId) {
+        return followRepository.countByFollowing_Id(memberId);
+    }
+
+    /**
+     * 특정 회원의 팔로잉 수를 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 팔로잉 수
+     */
+    public long countFollowings(String memberId) {
+        return followRepository.countByFollower_Id(memberId);
     }
 }

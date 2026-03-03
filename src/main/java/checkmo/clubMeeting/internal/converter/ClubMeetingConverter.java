@@ -1,6 +1,7 @@
 package checkmo.clubMeeting.internal.converter;
 
 import checkmo.book.BookExternalDTO;
+import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -9,9 +10,12 @@ import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO;
+import checkmo.clubMeeting.web.dto.bookshelf.BookShelfResponseDTO.MeetingDetailInfo;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
+import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.TeamKey;
 import checkmo.member.MemberExternalDTO;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -98,6 +102,17 @@ public class ClubMeetingConverter {
                 .build();
     }
 
+    public static MeetingDetailInfo toMeetingDetailInfo(Meeting meeting) {
+        return BookShelfResponseDTO.MeetingDetailInfo.builder()
+                .meetingId(meeting.getId())
+                .title(meeting.getTitle())
+                .meetingTime(meeting.getMeetingTime())
+                .location(meeting.getLocation())
+                .generation(meeting.getGeneration())
+                .tag(meeting.getTag())
+                .build();
+    }
+
     public static BookShelfResponseDTO.BookReviewDetail toBookReviewDetailDTO(
             BookReview bookReview,
             MemberExternalDTO.BasicInfo memberInfo,
@@ -130,35 +145,86 @@ public class ClubMeetingConverter {
                 .build();
     }
 
-    public static MeetingInfo toMeetingInfoWithTeams(
+    public static MeetingInfo toMeetingInfoDTO(
             Meeting meeting,
             List<Team> teams,
-            Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembers
+            Map<Integer, List<MeetingResponseDTO.MeetingMember>> teamNumberToMembers,
+            boolean staff
     ) {
-        List<Team> safeTeams = (teams != null) ? teams : List.of();
+        List<TeamKey> existingTeams = toExistingTeamsDTO(teams);
         Map<Integer, List<MeetingResponseDTO.MeetingMember>> safeTeamNumberToMembers
                 = (teamNumberToMembers != null) ? teamNumberToMembers : Map.of();
-
-        List<Integer> existingTeamNumbers = safeTeams.stream()
-                .map(Team::getTeamNumber)
-                .distinct()
-                .sorted()
-                .toList();
 
         return MeetingInfo.builder()
                 .meetingId(meeting.getId())
                 .title(meeting.getTitle())
                 .meetingTime(meeting.getMeetingTime())
                 .location(meeting.getLocation())
-                .existingTeamNumbers(existingTeamNumbers)
-                .teams(existingTeamNumbers.stream()
-                        .map(teamNumber -> MeetingResponseDTO.TeamMember.builder()
-                                .teamNumber(teamNumber)
-                                .members(safeTeamNumberToMembers.getOrDefault(teamNumber, List.of()))
+                .existingTeams(existingTeams)
+                .teamMembers(existingTeams.stream()
+                        .map(teamKey -> MeetingResponseDTO.TeamMember.builder()
+                                .teamKey(teamKey)
+                                .members(safeTeamNumberToMembers.getOrDefault(teamKey.getTeamNumber(), List.of()))
                                 .build())
                         .toList())
+                .staff(staff)
                 .build();
 
+    }
+
+    public static List<MeetingResponseDTO.TeamKey> toExistingTeamsDTO(List<Team> teams) {
+        List<Team> safeTeams = (teams != null) ? teams : List.of();
+        return safeTeams.stream()
+                .map(ClubMeetingConverter::toTeamKeyDTO)
+                .sorted(Comparator.comparingInt(MeetingResponseDTO.TeamKey::getTeamNumber))
+                .toList();
+    }
+
+    public static MeetingResponseDTO.TeamKey toTeamKeyDTO(Team team) {
+        if (team == null) {
+            return null;
+        }
+        return MeetingResponseDTO.TeamKey.builder()
+                .teamId(team.getId())
+                .teamNumber(team.getTeamNumber())
+                .build();
+    }
+
+    public static List<MeetingResponseDTO.MeetingMember> toMeetingMembersDTO(
+            List<MembershipInfo> clubMemberships,
+            Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
+            Map<Long, Long> clubMemberIdToTeamIdMap,
+            Map<Long, Integer> teamIdToTeamNumberMap
+    ) {
+        List<MembershipInfo> safeMemberships = (clubMemberships != null) ? clubMemberships : List.of();
+        Map<String, MemberExternalDTO.BasicInfo> safeMemberInfoMap =
+                (memberBasicInfoMap != null) ? memberBasicInfoMap : Map.of();
+        Map<Long, Long> safeClubMemberToTeamIdMap =
+                (clubMemberIdToTeamIdMap != null) ? clubMemberIdToTeamIdMap : Map.of();
+        Map<Long, Integer> safeTeamIdToTeamNumberMap =
+                (teamIdToTeamNumberMap != null) ? teamIdToTeamNumberMap : Map.of();
+
+        return safeMemberships.stream()
+                .map(m -> {
+                    Long clubMemberId = m.getClubMemberId();
+                    String memberId = m.getMemberId();
+
+                    MemberExternalDTO.BasicInfo basic = safeMemberInfoMap.get(memberId);
+
+                    Long teamId = safeClubMemberToTeamIdMap.get(clubMemberId);
+                    MeetingResponseDTO.TeamKey teamKey = (teamId == null) ? null
+                            : MeetingResponseDTO.TeamKey.builder()
+                                    .teamId(teamId)
+                                    .teamNumber(safeTeamIdToTeamNumberMap.get(teamId))
+                                    .build();
+
+                    return MeetingResponseDTO.MeetingMember.builder()
+                            .clubMemberId(clubMemberId)
+                            .memberInfo(basic)
+                            .teamKey(teamKey)
+                            .build();
+                })
+                .toList();
     }
 
     // =====================================================

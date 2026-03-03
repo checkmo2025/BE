@@ -80,14 +80,14 @@ public class ClubResponseDTO {
     public static class ClubDetail {
         private Long clubId;
         private String name;
-        @JsonInclude(JsonInclude.Include.NON_NULL) // 독서모임 검색
+        @JsonInclude(JsonInclude.Include.NON_NULL) // 독서모임 검색, 추천
         private String description;
         private String profileImageUrl;
         private boolean isOpen;
         private String region;
         private List<ClubCategoryItem> category;
         private List<ClubParticipantTypeItem> participantTypes;
-        @JsonInclude(JsonInclude.Include.NON_NULL) // 독서모임 검색
+        @JsonInclude(JsonInclude.Include.NON_NULL) // 독서모임 검색, 추천
         private List<ClubContactItem> links;
     }
 
@@ -176,10 +176,8 @@ public class ClubResponseDTO {
     public static class ClubRecommendation {
         @Schema(description = "정렬 순서", example = "1")
         private int rank;
-        @Schema(description = "추천하는 모임 ID", example = "12345")
-        private Long clubId;
-        @Schema(description = "추천하는 모임 이름", example = "책읽는 사람들")
-        private String clubName;
+        @Schema(description = "추천 모임의 상세 정보")
+        private ClubDetailWithMyStatus clubInfo;
         @Schema(description = "멤버의 선호 카테고리와 모임의 카테고리 간의 겹치는 항목 수(모임 추천 기능 확인을 위해 넣은 필드로, 안정됐다고 판단되면 사라질 수 있습니다) ", example = "3")
         private Long overlapCount;
         @Schema(description = "모임의 활성화 상태인 클럽 멤버 수(모임 추천 기능 확인을 위해 넣은 필드로, 안정됐다고 판단되면 사라질 수 있습니다)", example = "150")
