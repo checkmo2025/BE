@@ -26,9 +26,10 @@ public class WebSocketSecurityConfig {
                 .simpTypeMatchers(
                         SimpMessageType.CONNECT,
                         SimpMessageType.DISCONNECT,
-                        SimpMessageType.UNSUBSCRIBE,
-                        SimpMessageType.SUBSCRIBE
+                        SimpMessageType.UNSUBSCRIBE
                 ).authenticated()
+                .simpSubscribeDestMatchers("/sub/**").authenticated()
+                .simpDestMatchers("/pub/**").authenticated()
                 .simpTypeMatchers(SimpMessageType.HEARTBEAT).permitAll()
                 // 그 외 모든 메시지에 대해서는 접근 거부
                 .anyMessage().denyAll();

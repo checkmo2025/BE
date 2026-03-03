@@ -27,6 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws-stomp")
                 .addInterceptors(httpSessionHandshakeInterceptor())
                 .setAllowedOrigins("*"); // TODO: CORS 설정을 실제 도메인으로 변경해야 합니다.
+        // TODO: SockJS 설정
     }
 
     @Override
@@ -41,6 +42,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setHeartbeatValue(new long[]{20000, 25000});
     }
 
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+        // 메시지의 크기 제한과 타임아웃 설정
+        registry.setMessageSizeLimit(64 * 1024); // 64KB
+        registry.setSendBufferSizeLimit(512 * 1024); // 512KB
+        registry.setTimeToFirstMessage(15_000); // 15초
+    }
+
     @Bean
     public ThreadPoolTaskScheduler heartbeatTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -50,14 +59,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         scheduler.setAwaitTerminationSeconds(10); // 최대 대기 시간 설정 (초 단위)
         scheduler.initialize();
         return scheduler;
-    }
-
-    @Override
-    public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
-        // 메시지의 크기 제한과 타임아웃 설정
-        registry.setMessageSizeLimit(64 * 1024); // 64KB
-        registry.setSendBufferSizeLimit(512 * 1024); // 512KB
-        registry.setTimeToFirstMessage(15_000); // 15초
     }
 
     @Bean
