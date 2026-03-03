@@ -133,6 +133,60 @@ public class ClubTopicCommandService {
         }
     }
 
+    public boolean toggleTopic(
+            Long clubId,
+            Long meetingId,
+            Long teamId,
+            Long topicId,
+            boolean selected,
+            String memberId
+    ) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
+
+        Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamId);
+        Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
+
+        // 팀 발제가 존재하는지(선택된 상태인지) 확인
+        Optional<TeamTopic> existingTeamTopic = teamTopicRepository.findByTeamIdAndTopicId(team.getId(), topic.getId());
+        boolean currentlySelected = existingTeamTopic.isPresent();
+
+        // 요청과 상태가 같으면 무시
+        if (selected == currentlySelected) {
+            return selected;
+        }
+
+        // 상태 변경
+        if (selected) {
+            // 팀 발제 선택
+            TeamTopic teamTopic = TeamTopic.builder()
+                    .team(team)
+                    .topic(topic)
+                    .build();
+            teamTopic.setTeam(team);
+            teamTopic.setTopic(topic);
+            try {
+                teamTopicRepository.saveAndFlush(teamTopic);
+            } catch (DataIntegrityViolationException e) {
+                // 다른 쓰레드가 먼저 팀 발제를 선택한 경우, 선택 성공으로 간주
+                teamTopic.removeTeam();
+                teamTopic.removeTopic();
+            }
+            return true;
+        }
+        // 팀 발제 선택 취소
+        try {
+            TeamTopic teamTopic = existingTeamTopic.get();
+            teamTopic.removeTeam();
+            teamTopic.removeTopic();
+            teamTopicRepository.flush();
+        } catch (OptimisticLockingFailureException e) {
+            // 다른 트랜잭션이 이미 삭제했거나 수정한 경우, 선택 해제 성공으로 간주
+        }
+        return false;
+    }
+
     private MeetingResponseDTO.TopicSelection toTopicSelectionDTO(
             Long topicId,
             Integer teamNumber,

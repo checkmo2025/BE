@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,10 +33,6 @@ public class ClubMeetingTeamQueryService {
         return teamRepository.findTeamNumberByMeetingId(meetingId);
     }
 
-    public List<ClubMemberTeam> retrieveClubMemberTeams(Long teamId, Long cursorId, int size) {
-        return clubMemberTeamRepository.findAllByTeamIdsAndCursorId(teamId, cursorId, PageRequest.of(0, size));
-    }
-
     public Map<Long, Long> retrieveTeamIdByClubMemberId(List<Long> teamIds) {
         if (teamIds == null || teamIds.isEmpty()) {
             return Map.of();
@@ -56,6 +51,21 @@ public class ClubMeetingTeamQueryService {
             return Set.of();
         }
         return new HashSet<>(teamTopicRepository.findTopicIdsByTeamIdAndTopicIds(teamId, topicIds));
+    }
+
+    public boolean isBelongsToClub(Long clubId, Long teamId) {
+        Long actualClubId = teamRepository.findClubIdByTeamId(teamId)
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TEAM_NOT_FOUND));
+        return actualClubId.equals(clubId);
+    }
+
+    public boolean isTeamMember(Long teamId, Long clubMemberId) {
+        return clubMemberTeamRepository.existsByTeamIdAndClubMemberId(teamId, clubMemberId);
+    }
+
+    public Team validateTeam(Long meetingId, Long teamId) throws ClubMeetingException {
+        return teamRepository.findByMeetingIdAndId(meetingId, teamId)
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TEAM_NOT_FOUND));
     }
 
     public Team validateTeam(Long meetingId, Integer teamNumber) throws ClubMeetingException {

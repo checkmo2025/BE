@@ -13,4 +13,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     @Query("SELECT t.teamNumber FROM Team t WHERE t.meeting.id = :meetingId ORDER BY t.teamNumber ASC")
     List<Integer> findTeamNumberByMeetingId(Long meetingId);
+
+    @Query("SELECT t.meeting.clubId FROM Team t WHERE t.id = :teamId")
+    Optional<Long> findClubIdByTeamId(Long teamId);
+
+    Optional<Team> findByMeetingIdAndId(Long meetingId, Long id);
 }
