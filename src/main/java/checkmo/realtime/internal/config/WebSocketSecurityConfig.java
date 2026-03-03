@@ -3,7 +3,9 @@ package checkmo.realtime.internal.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.socket.EnableWebSocketSecurity;
 import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
@@ -30,5 +32,16 @@ public class WebSocketSecurityConfig {
                 // 그 외 모든 메시지에 대해서는 접근 거부
                 .anyMessage().denyAll();
         return messages.build();
+    }
+
+    @Bean(name = "csrfChannelInterceptor")
+    ChannelInterceptor csrfChannelInterceptor() {
+        return new ChannelInterceptor() {
+            @Override
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                // 기본 CSRF 인터셉터 덮어 쓰기 -> 아무 것도 하지 않고 그대로 통과
+                return message;
+            }
+        };
     }
 }
