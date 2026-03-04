@@ -22,10 +22,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final AuthRepository authRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AuthUser user = authRepository.findByEmail(email)
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        AuthUser user = authRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "해당 이메일을 가진 사용자를 찾을 수 없습니다: " + email));
+                        "해당 이메일 또는 아이디를 가진 사용자를 찾을 수 없습니다: " + identifier));
 
         // 로그인 성공 시점 자동 복구 정책 때문에 로그인 단계에서는 비활성 상태를 차단하지 않는다.
         return new PrincipalDetails(user);

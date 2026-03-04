@@ -23,6 +23,13 @@ public interface AuthenticationAPI {
     void deleteAuthData(String memberId);
 
     /**
+     * 추가정보 입력 시 특정 회원의 닉네임을 저장합니다.
+     * @param memberId
+     * @param nickname
+     */
+    void updateNickname(String memberId, String nickname);
+
+    /**
      *
      * @param memberId 현재 로그인 중인 memberId
      * @param currentPassword 기존 비밀번호

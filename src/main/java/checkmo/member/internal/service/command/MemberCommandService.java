@@ -69,6 +69,8 @@ public class MemberCommandService {
             new HashSet<>(request.getCategories())
         );
 
+        authenticationAPI.updateNickname(memberId, request.getNickname());
+
         // 프로필 완료 상태로 변경
         authenticationAPI.completeProfile(memberId);
 
