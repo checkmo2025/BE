@@ -90,6 +90,10 @@ public class AuthUserCommandService {
             return false;
         }
 
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new AuthException(AuthErrorStatus.PASSWORD_SAME_AS_OLD);
+        }
+
         user.updatePassword(passwordEncoder.encode(newPassword));
         return true;
     }
