@@ -27,7 +27,8 @@ public enum AuthErrorStatus implements BaseErrorCode {
     GHOST_MEMBER_CLEANED_UP(HttpStatus.UNAUTHORIZED, "AUTH_405", "추가정보 입력 제한 시간(15분)이 초과되어 초기화되었습니다. 다시 가입해주세요."),
     TOKEN_BLACKLISTED(HttpStatus.UNAUTHORIZED, "AUTH_406", "로그아웃된 토큰입니다. 다시 로그인해주세요."),
     SOCIAL_MEMBER_CANNOT_CHANGE_EMAIL(HttpStatus.BAD_REQUEST, "AUTH_407", "소셜 로그인 회원은 이메일을 변경할 수 없습니다."),
-    CURRENT_EMAIL_INCORRECT(HttpStatus.BAD_REQUEST, "AUTH_408", "입력하신 기존 이메일 정보가 정확하지 않습니다.")
+    CURRENT_EMAIL_INCORRECT(HttpStatus.BAD_REQUEST, "AUTH_408", "입력하신 기존 이메일 정보가 정확하지 않습니다."),
+    PASSWORD_SAME_AS_OLD(HttpStatus.BAD_REQUEST, "AUTH_409", "새 비밀번호가 기존 비밀번호와 동일합니다.")
     ;
 
     private final HttpStatus httpStatus;
