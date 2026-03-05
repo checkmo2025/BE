@@ -31,7 +31,7 @@ public class AuthSessionCommandService {
 
     public Authentication login(AuthRequestDTO.Login request) {
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+                new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword());
 
         Authentication authentication;
 

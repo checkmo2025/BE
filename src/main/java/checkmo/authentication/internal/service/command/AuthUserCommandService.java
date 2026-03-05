@@ -117,4 +117,11 @@ public class AuthUserCommandService {
 
         authUser.updateEmail(newEmail);
     }
+
+    public void updateNickname(String memberId, String nickname) {
+        AuthUser authUser = authRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+
+        authUser.updateNickname(nickname);
+    }
 }
