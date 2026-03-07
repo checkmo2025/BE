@@ -6,6 +6,7 @@ import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingTeamQueryService;
@@ -31,19 +32,27 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     }
 
     @Override
-    public boolean isNotTeamBelongsToClub(Long clubId, Long teamId) {
-        return !clubMeetingTeamQueryService.isBelongsToClub(teamId, clubId);
-    }
-
-    @Override
     public boolean isNotMeetingBelongsToClub(Long clubId, Long meetingId) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        return !meeting.getClubId().equals(clubId);
+        try {
+            Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+            return !meeting.getClubId().equals(clubId);
+        } catch (ClubMeetingException e) {
+            return false;
+        }
     }
 
     @Override
-    public boolean isTeamMember(Long teamId, Long clubMemberId) {
-        return clubMeetingTeamQueryService.isTeamMember(teamId, clubMemberId);
+    public boolean isNotTeamBelongsToClub(Long clubId, Long teamId) {
+        try {
+            return !clubMeetingTeamQueryService.isBelongsToClub(clubId, teamId);
+        } catch (ClubMeetingException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isNotTeamMember(Long teamId, Long clubMemberId) {
+        return !clubMeetingTeamQueryService.isTeamMember(teamId, clubMemberId);
     }
 
     @Override
@@ -54,4 +63,5 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     ) {
         return clubTopicCommandService.toggleTopic(clubId, meetingId, teamId, topicId, selected, memberId);
     }
+
 }
