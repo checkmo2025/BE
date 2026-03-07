@@ -1,0 +1,2 @@
+ALTER TABLE news
+    ADD COLUMN carousel VARCHAR(20) NOT NULL DEFAULT 'GENERAL' AFTER publish_end_at;
