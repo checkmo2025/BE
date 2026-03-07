@@ -1,8 +1,10 @@
 package checkmo.realtime.internal.config;
 
+import checkmo.realtime.internal.interceptor.TeamAuthorizationInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -20,14 +22,18 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     // private final WebSocketProperties webSocketProperties;
+    private final TeamAuthorizationInterceptor teamAuthorizationInterceptor;
+    private final CustomStompErrorHandler customStompErrorHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 클라이언트가 WebSocket 연결을 시도할 때 사용할 엔드포인트를 등록합니다.
-        registry.addEndpoint("/ws-stomp")
+        registry.setErrorHandler(customStompErrorHandler)
+                .addEndpoint("/ws-stomp")
                 .addInterceptors(httpSessionHandshakeInterceptor())
                 .setAllowedOrigins("*"); // TODO: CORS 설정을 실제 도메인으로 변경해야 합니다.
         // TODO: SockJS 설정
+        registry.setErrorHandler(customStompErrorHandler);
     }
 
     @Override
@@ -35,11 +41,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 클라이언트 -> 서버로 들어오는 SEND 목적지 prefix
         registry.setApplicationDestinationPrefixes("/pub");
         // 서버 -> 클라이언트로 나가는 SUBSCRIBE 목적지 prefix (built-in simple broker 사용)
-        registry.enableSimpleBroker("/sub")
+        registry.enableSimpleBroker("/sub", "/queue")
                 // 하트비트 헤더
                 // 서버 -> 클라이언트 : 20초마다, 클라이언트 -> 서버 : 25초마다
                 .setTaskScheduler(heartbeatTaskScheduler())
                 .setHeartbeatValue(new long[]{20000, 25000});
+        registry.setUserDestinationPrefix("/user");
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(teamAuthorizationInterceptor);
     }
 
     @Override
