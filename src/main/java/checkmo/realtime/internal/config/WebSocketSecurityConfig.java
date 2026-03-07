@@ -24,12 +24,13 @@ public class WebSocketSecurityConfig {
         messages
                 // WebSocket 연결, 연결 해제, 구독 취소 메시지에 대해 인증된 사용자만 허용
                 .simpTypeMatchers(
-                        SimpMessageType.CONNECT,
-                        SimpMessageType.DISCONNECT,
-                        SimpMessageType.UNSUBSCRIBE
+                        SimpMessageType.CONNECT, SimpMessageType.DISCONNECT, SimpMessageType.UNSUBSCRIBE
                 ).authenticated()
-                .simpSubscribeDestMatchers("/sub/**").authenticated()
-                .simpDestMatchers("/pub/**").authenticated()
+                .simpSubscribeDestMatchers("/sub/clubs/*/meetings/*/teams/*/chat/messages").authenticated()
+                .simpSubscribeDestMatchers("/sub/clubs/*/meetings/*/teams/*/presentation").authenticated()
+                .simpSubscribeDestMatchers("/user/queue/errors").authenticated()
+                .simpDestMatchers("/pub/clubs/*/meetings/*/teams/*/chat/message").authenticated()
+                .simpDestMatchers("/pub/clubs/*/meetings/*/teams/*/presentation").authenticated()
                 .simpTypeMatchers(SimpMessageType.HEARTBEAT).permitAll()
                 // 그 외 모든 메시지에 대해서는 접근 거부
                 .anyMessage().denyAll();
