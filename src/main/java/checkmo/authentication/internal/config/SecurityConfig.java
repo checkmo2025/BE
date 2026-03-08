@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/members/me", "/api/members/me/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/members/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/members/find-email").permitAll()
                         .requestMatchers("/api/members/additional-info").authenticated()
                         .requestMatchers("/api/auth/**", "/api/members/check-nickname").permitAll()
                         .anyRequest().authenticated()

@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/v3/api-docs/**",
             "/api/auth/**",
             "/api/members/check-nickname",
+            "/api/members/find-email",
             "/health"
     );
 
