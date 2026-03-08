@@ -2,6 +2,7 @@ package checkmo.realtime.internal.service;
 
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingAPI;
+import checkmo.common.apiPayload.exception.GeneralException;
 import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class AuthorizationService {
         try {
             clubManagementAPI.validateStaffClubMember(clubId, memberId);
             return true;
-        } catch (Exception ignore) {
+        } catch (GeneralException ignore) {
             return false;
         }
     }

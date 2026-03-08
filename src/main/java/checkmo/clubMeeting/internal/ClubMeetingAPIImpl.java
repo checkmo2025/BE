@@ -37,7 +37,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
             Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
             return !meeting.getClubId().equals(clubId);
         } catch (ClubMeetingException e) {
-            return false;
+            return true;
         }
     }
 
@@ -46,7 +46,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         try {
             return !clubMeetingTeamQueryService.isBelongsToClub(clubId, teamId);
         } catch (ClubMeetingException e) {
-            return false;
+            return true;
         }
     }
 
