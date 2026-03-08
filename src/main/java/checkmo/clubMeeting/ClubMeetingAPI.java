@@ -13,10 +13,39 @@ public interface ClubMeetingAPI {
     DetailInfo fetchMeetingDetailInfo(Long meetingId);
 
     /**
-     * 특정 동아리 내에 모임이 존재하는지 확인합니다.
+     * 미팅이 특정 동아리에 속하지 않는지 확인합니다.
      *
      * @param clubId    동아리 ID
      * @param meetingId 모임 ID
      */
-    boolean isMeetingInClub(Long clubId, Long meetingId);
+    boolean isNotMeetingBelongsToClub(Long clubId, Long meetingId);
+
+    /**
+     * 팀이 특정 동아리에 속하지 않는지 확인합니다.
+     *
+     * @param clubId 동아리 ID
+     * @param teamId 팀 ID
+     */
+    boolean isNotTeamBelongsToClub(Long clubId, Long teamId);
+
+    /**
+     * 사용자가 팀의 구성원이 아닌지 확인합니다.
+     *
+     * @param teamId       팀 ID
+     * @param clubMemberId 동아리 회원 ID
+     */
+    boolean isNotTeamMember(Long teamId, Long clubMemberId);
+
+    /**
+     * 팀의 발제를 선택 또는 해제합니다.
+     *
+     * @param clubId    동아리 ID
+     * @param meetingId 모임 ID
+     * @param teamId    팀 ID
+     * @param topicId   발제 ID
+     * @param selected  선택 여부 (true: 선택, false: 해제)
+     * @return true: 발제 선택, false: 발제 해제
+     */
+    boolean toggleTopic(Long clubId, Long meetingId, Long teamId, Long topicId, boolean selected, String memberId);
+
 }

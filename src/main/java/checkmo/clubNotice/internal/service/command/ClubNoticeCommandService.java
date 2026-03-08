@@ -44,7 +44,7 @@ public class ClubNoticeCommandService {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
         NoticeTag tag = NoticeTag.decideTag(request.getVote() != null, request.getMeetingId() != null);
-        if (tag.isMeeting() && !clubMeetingAPI.isMeetingInClub(clubId, request.getMeetingId())) {
+        if (tag.isMeeting() && clubMeetingAPI.isNotMeetingBelongsToClub(clubId, request.getMeetingId())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
         }
         if (request.isPinned()) {
@@ -92,7 +92,8 @@ public class ClubNoticeCommandService {
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
-        if (request.getMeetingId() != null && !clubMeetingAPI.isMeetingInClub(clubId, request.getMeetingId())) {
+        if (request.getMeetingId() != null && clubMeetingAPI.isNotMeetingBelongsToClub(clubId,
+                request.getMeetingId())) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.MEETING_NOT_IN_CLUB);
         }
         if (!notice.isPinned() && request.isPinned()) {

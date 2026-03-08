@@ -24,6 +24,7 @@ public enum ClubMeetingErrorStatus implements BaseErrorCode {
     TEAM_NUMBER_DUPLICATED_REQUEST(HttpStatus.BAD_REQUEST, "TEAM_401", "중복된 팀 번호가 요청되었습니다."),
     TEAM_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "TEAM_402", "팀은 반드시 정기모임에 속해야 합니다."),
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM_404", "팀을 찾을 수 없습니다."),
+    TEAM_MEMBER_FORBIDDEN(HttpStatus.FORBIDDEN, "TEAM_405", "팀에 대한 권한이 없습니다."),
 
     // 미팅
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING_401", "해당 정기모임을 찾을 수 없습니다."),

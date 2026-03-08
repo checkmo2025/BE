@@ -86,6 +86,11 @@ dependencies {
     // ============ flyway =============
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
+
+    // ============ web socket =============
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.security:spring-security-messaging'
+
 }
 
 dependencyManagement {
