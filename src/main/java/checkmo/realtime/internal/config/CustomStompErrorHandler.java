@@ -38,26 +38,18 @@ public class CustomStompErrorHandler extends StompSubProtocolErrorHandler {
             @Nullable Message<byte[]> clientMessage,
             RealtimeErrorStatus errorStatus
     ) {
-        String destination = null;
-        String command = null;
-        if (clientMessage != null) {
-            StompHeaderAccessor accessor = StompHeaderAccessor.wrap(clientMessage);
-            destination = accessor.getDestination();
-            command = (accessor.getCommand() != null) ? accessor.getCommand().name() : null;
-        }
-
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
         accessor.setMessage(errorStatus.getCode());
         accessor.setLeaveMutable(true);
 
         byte[] payload;
         try {
-            RealtimeErrorMessage body = RealtimeErrorMessage.of(errorStatus, command, destination);
+            RealtimeErrorMessage body = RealtimeErrorMessage.of(errorStatus);
             payload = objectMapper.writeValueAsBytes(body);
         } catch (Exception e) {
             String fallbackMessage = String.format(
-                    "code: %s, message: %s, command: %s, destination: %s",
-                    errorStatus.getCode(), errorStatus.getMessage(), command, destination
+                    "code: %s, message: %s",
+                    errorStatus.getCode(), errorStatus.getMessage()
             );
             payload = fallbackMessage.getBytes(StandardCharsets.UTF_8);
         }
