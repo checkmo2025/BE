@@ -37,7 +37,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .addInterceptors(httpSessionHandshakeInterceptor())
                 .setAllowedOrigins(allowedOrigins);
         // TODO: SockJS 설정
-        registry.setErrorHandler(customStompErrorHandler);
     }
 
     @Override

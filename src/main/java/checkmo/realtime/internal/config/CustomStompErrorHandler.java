@@ -8,6 +8,7 @@ import jakarta.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -26,10 +27,14 @@ public class CustomStompErrorHandler extends StompSubProtocolErrorHandler {
             @Nullable Message<byte[]> clientMessage,
             Throwable e
     ) {
-        Throwable cause = e.getCause();
-        if (cause instanceof RealtimeException exception) {
-            RealtimeErrorStatus errorStatus = exception.getErrorStatus();
-            return buildErrorFrame(clientMessage, errorStatus);
+        Throwable mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(e);
+        if (mostSpecificCause instanceof RealtimeException exception) {
+            return buildErrorFrame(clientMessage, exception.getErrorStatus());
+        }
+
+        RealtimeException nestedCause = findCause(e, RealtimeException.class);
+        if (nestedCause != null) {
+            RealtimeErrorStatus errorStatus = nestedCause.getErrorStatus();
         }
         return super.handleClientMessageProcessingError(clientMessage, e);
     }
@@ -54,5 +59,16 @@ public class CustomStompErrorHandler extends StompSubProtocolErrorHandler {
             payload = fallbackMessage.getBytes(StandardCharsets.UTF_8);
         }
         return MessageBuilder.createMessage(payload, accessor.getMessageHeaders());
+    }
+
+    private <T extends Throwable> T findCause(Throwable ex, Class<T> type) {
+        Throwable currentException = ex;
+        while (currentException != null) {
+            if (type.isInstance(currentException)) {
+                return type.cast(currentException);
+            }
+            currentException = currentException.getCause();
+        }
+        return null;
     }
 }
