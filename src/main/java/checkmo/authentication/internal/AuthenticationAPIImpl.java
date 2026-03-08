@@ -45,4 +45,9 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     public void updateEmail(String memberId, String currentEmail, String newEmail, String verificationCode) {
         authUserCommandService.updateEmail(memberId, currentEmail, newEmail, verificationCode);
     }
+
+    @Override
+    public void updateNickname(String memberId, String nickname) {
+        authUserCommandService.updateNickname(memberId, nickname);
+    }
 }

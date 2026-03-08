@@ -90,6 +90,10 @@ public class AuthUserCommandService {
             return false;
         }
 
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new AuthException(AuthErrorStatus.PASSWORD_SAME_AS_OLD);
+        }
+
         user.updatePassword(passwordEncoder.encode(newPassword));
         return true;
     }
@@ -112,5 +116,12 @@ public class AuthUserCommandService {
         emailVerificationCommandService.verifyEmailCode(new AuthRequestDTO.EmailVerification(newEmail, verificationCode));
 
         authUser.updateEmail(newEmail);
+    }
+
+    public void updateNickname(String memberId, String nickname) {
+        AuthUser authUser = authRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+
+        authUser.updateNickname(nickname);
     }
 }

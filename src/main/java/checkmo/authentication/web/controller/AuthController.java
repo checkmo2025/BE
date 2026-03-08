@@ -72,7 +72,7 @@ public class AuthController {
         return ApiResponse.onSuccess(signUpResponse);
     }
 
-    @Operation(summary = "이메일 로그인", description = "이메일과 비밀번호로 로그인합니다.")
+    @Operation(summary = "이메일/아이디 로그인", description = "이메일/아이디와 비밀번호로 로그인합니다.")
     @PostMapping("/login")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),

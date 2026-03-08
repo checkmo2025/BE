@@ -28,6 +28,9 @@ public class AuthUser extends BaseEntity {
     @Column(nullable = false)
     private boolean profileCompleted;
 
+    @Column(length = 20, nullable = false)
+    private String nickName;
+
     private LocalDateTime deactivatedAt;
 
     public void deactivate() {
@@ -60,5 +63,9 @@ public class AuthUser extends BaseEntity {
 
     public void updateEmail(String newEmail) {
         this.email = newEmail;
+    }
+
+    public void updateNickname(String nickName) {
+        this.nickName = nickName != null ? nickName : "";
     }
 }

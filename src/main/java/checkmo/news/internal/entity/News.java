@@ -6,6 +6,8 @@ import checkmo.news.internal.exception.NewsException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -53,6 +55,11 @@ public class News extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDate publishEndAt;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private NewsCarousel carousel = NewsCarousel.GENERAL;
 
     @Builder.Default
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -105,7 +112,8 @@ public class News extends BaseEntity {
             String thumbnailUrl,
             String originalLink,
             LocalDate publishStartAt,
-            LocalDate publishEndAt
+            LocalDate publishEndAt,
+            NewsCarousel carousel
     ) {
         this.title = title;
         this.requesterEmail = requesterEmail;
@@ -114,6 +122,7 @@ public class News extends BaseEntity {
         this.originalLink = originalLink;
         this.publishStartAt = publishStartAt;
         this.publishEndAt = publishEndAt;
+        this.carousel = carousel;
     }
 
     public boolean isPublished(LocalDate today) {

@@ -1,5 +1,6 @@
 package checkmo.news.web.dto;
 
+import checkmo.news.internal.entity.NewsCarousel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +31,7 @@ public class NewsResponseDTO {
         private String title;
         private String description;
         private String thumbnailUrl;
+        private NewsCarousel carousel;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
         private LocalDate publishStartAt;
@@ -45,6 +47,7 @@ public class NewsResponseDTO {
         private String content;
         private String thumbnailUrl;
         private String originalLink;
+        private NewsCarousel carousel;
         private List<String> imageUrls;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
@@ -70,6 +73,7 @@ public class NewsResponseDTO {
         private Long newsId;
         private String title;
         private String requesterEmail;
+        private NewsCarousel carousel;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
         private LocalDate createdAt;
@@ -92,6 +96,7 @@ public class NewsResponseDTO {
         private String content;
         private String thumbnailUrl;
         private String originalLink;
+        private NewsCarousel carousel;
         private List<String> imageUrls;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")

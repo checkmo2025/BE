@@ -31,7 +31,7 @@ public class AuthRequestDTO {
     @AllArgsConstructor
     public static class Login {
         @NotBlank(message = "이메일 또는 닉네임을 입력해주세요")
-        private String email;
+        private String identifier;
 
         @NotBlank(message = "비밀번호는 필수입니다")
         @Size(min = 6, max = 12, message = "비밀번호는 6-12자여야 합니다")

@@ -20,6 +20,7 @@ public class NewsConverter {
                 .originalLink(request.getOriginalLink())
                 .publishStartAt(request.getPublishStartAt())
                 .publishEndAt(request.getPublishEndAt())
+                .carousel(request.getCarousel())
                 .build();
     }
 
@@ -29,6 +30,7 @@ public class NewsConverter {
                 .title(news.getTitle())
                 .description(truncateDescription(news.getContent()))
                 .thumbnailUrl(news.getThumbnailUrl())
+                .carousel(news.getCarousel())
                 .publishStartAt(news.getPublishStartAt())
                 .build();
     }
@@ -40,6 +42,7 @@ public class NewsConverter {
                 .content(news.getContent())
                 .thumbnailUrl(news.getThumbnailUrl())
                 .originalLink(news.getOriginalLink())
+                .carousel(news.getCarousel())
                 .imageUrls(news.getImageUrls())
                 .publishStartAt(news.getPublishStartAt())
                 .build();
@@ -50,6 +53,7 @@ public class NewsConverter {
                 .newsId(news.getId())
                 .title(news.getTitle())
                 .requesterEmail(news.getRequesterEmail())
+                .carousel(news.getCarousel())
                 .createdAt(news.getCreatedAt().toLocalDate())
                 .publishStartAt(news.getPublishStartAt())
                 .publishEndAt(news.getPublishEndAt())
@@ -64,6 +68,7 @@ public class NewsConverter {
                 .content(news.getContent())
                 .thumbnailUrl(news.getThumbnailUrl())
                 .originalLink(news.getOriginalLink())
+                .carousel(news.getCarousel())
                 .imageUrls(news.getImageUrls())
                 .createdAt(news.getCreatedAt().toLocalDate())
                 .publishStartAt(news.getPublishStartAt())

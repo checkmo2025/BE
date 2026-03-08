@@ -155,4 +155,12 @@ public class MemberResponseDTO {
         private String provider;
         private String email;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberEmailList {
+        private List<String> emails;
+    }
 }

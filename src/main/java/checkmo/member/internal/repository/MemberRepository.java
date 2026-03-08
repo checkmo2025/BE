@@ -6,6 +6,7 @@ import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjecti
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,6 +39,15 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberR
     List<Member> findAllByDeactivatedAtBefore(LocalDateTime threshold);
 
     List<Member> findAllByNameAndPhoneNumber(String name, String phoneNumber);
+
+    @Query("""
+            select m.email
+            from Member m
+            where m.deactivatedAt is null
+              and (:keyword is null or lower(m.email) like lower(concat('%', :keyword, '%')))
+            order by m.email asc
+            """)
+    List<String> findActiveEmailsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     boolean existsByEmail(String email);
 }
