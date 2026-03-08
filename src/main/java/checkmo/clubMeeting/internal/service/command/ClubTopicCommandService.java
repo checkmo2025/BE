@@ -142,10 +142,13 @@ public class ClubTopicCommandService {
             String memberId
     ) {
         clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamId);
+        if (!clubMeetingTeamQueryService.isTeamMember(teamId, clubMemberId)) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.TEAM_MEMBER_FORBIDDEN);
+        }
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 
         // 팀 발제가 존재하는지(선택된 상태인지) 확인
