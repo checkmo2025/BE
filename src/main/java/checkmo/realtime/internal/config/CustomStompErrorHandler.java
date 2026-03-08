@@ -34,7 +34,7 @@ public class CustomStompErrorHandler extends StompSubProtocolErrorHandler {
 
         RealtimeException nestedCause = findCause(e, RealtimeException.class);
         if (nestedCause != null) {
-            RealtimeErrorStatus errorStatus = nestedCause.getErrorStatus();
+            return buildErrorFrame(clientMessage, nestedCause.getErrorStatus());
         }
         return super.handleClientMessageProcessingError(clientMessage, e);
     }

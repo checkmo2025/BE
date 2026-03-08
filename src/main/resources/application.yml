@@ -21,4 +21,4 @@ springdoc:
 realtime:
   websocket:
     allowed-origins:
-      - ${FRONTED_BASE_URL}
+      - ${FRONTEND_BASE_URL}
