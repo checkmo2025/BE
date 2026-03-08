@@ -1,7 +1,9 @@
 package checkmo.realtime.internal.config;
 
+import checkmo.realtime.internal.config.properties.WebSocketProperties;
 import checkmo.realtime.internal.interceptor.TeamAuthorizationInterceptor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -19,19 +21,21 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
+@EnableConfigurationProperties(WebSocketProperties.class)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    // private final WebSocketProperties webSocketProperties;
+    private final WebSocketProperties webSocketProperties;
     private final TeamAuthorizationInterceptor teamAuthorizationInterceptor;
     private final CustomStompErrorHandler customStompErrorHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        String[] allowedOrigins = webSocketProperties.allowedOrigins().toArray(String[]::new);
         // 클라이언트가 WebSocket 연결을 시도할 때 사용할 엔드포인트를 등록합니다.
         registry.setErrorHandler(customStompErrorHandler)
                 .addEndpoint("/ws-stomp")
                 .addInterceptors(httpSessionHandshakeInterceptor())
-                .setAllowedOrigins("*"); // TODO: CORS 설정을 실제 도메인으로 변경해야 합니다.
+                .setAllowedOrigins(allowedOrigins);
         // TODO: SockJS 설정
         registry.setErrorHandler(customStompErrorHandler);
     }

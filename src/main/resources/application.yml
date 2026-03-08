@@ -17,3 +17,8 @@ server:
 
 springdoc:
   use-fqn: true
+
+realtime:
+  websocket:
+    allowed-origins:
+      - ${FRONTED_BASE_URL}
