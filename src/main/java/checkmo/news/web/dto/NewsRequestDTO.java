@@ -1,5 +1,6 @@
 package checkmo.news.web.dto;
 
+import checkmo.news.internal.entity.NewsCarousel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,6 +34,9 @@ public class NewsRequestDTO {
         @NotNull(message = "게시 종료일은 필수입니다.")
         private LocalDate publishEndAt;
 
+        @NotNull(message = "캐러셀 타입은 필수입니다.")
+        private NewsCarousel carousel;
+
         @Size(max = 5, message = "기타 이미지는 최대 5개까지 가능합니다.")
         private List<@NotBlank(message = "이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
     }
@@ -59,6 +63,9 @@ public class NewsRequestDTO {
 
         @NotNull(message = "게시 종료일은 필수입니다.")
         private LocalDate publishEndAt;
+
+        @NotNull(message = "캐러셀 타입은 필수입니다.")
+        private NewsCarousel carousel;
 
         @Size(max = 5, message = "기타 이미지는 최대 5개까지 가능합니다.")
         private List<@NotBlank(message = "이미지 URL은 비어있을 수 없습니다.") String> imageUrls;

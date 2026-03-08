@@ -41,7 +41,8 @@ public class NewsCommandService {
                 request.getThumbnailUrl(),
                 request.getOriginalLink(),
                 request.getPublishStartAt(),
-                request.getPublishEndAt()
+                request.getPublishEndAt(),
+                request.getCarousel()
         );
         news.replaceImages(request.getImageUrls());
 

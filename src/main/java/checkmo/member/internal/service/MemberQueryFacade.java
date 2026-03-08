@@ -256,4 +256,11 @@ public class MemberQueryFacade {
                                             .email(member.getEmail())
                                             .build();
     }
+
+    public MemberResponseDTO.MemberEmailList retrieveActiveEmailsForAdmin(String keyword, int limit) {
+        List<String> emails = memberQueryService.retrieveActiveEmailsByKeyword(keyword, limit);
+        return MemberResponseDTO.MemberEmailList.builder()
+                .emails(emails)
+                .build();
+    }
 }

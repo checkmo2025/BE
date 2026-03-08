@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,5 +121,11 @@ public class MemberQueryService {
             int limit
     ) {
         return memberRepository.findRecommendMembers(memberId, myInterests, limit);
+    }
+
+    public List<String> retrieveActiveEmailsByKeyword(String keyword, int limit) {
+        String normalizedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
+        int boundedLimit = Math.min(Math.max(limit, 1), 100);
+        return memberRepository.findActiveEmailsByKeyword(normalizedKeyword, PageRequest.of(0, boundedLimit));
     }
 }
