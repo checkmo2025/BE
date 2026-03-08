@@ -35,6 +35,8 @@ public class TeamAuthorizationInterceptor implements ChannelInterceptor {
     private static final PathPattern PUB_PATTERN
             = PARSER.parse("/pub/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}/**");
 
+    private static final String USER_ERRORS = "/user/queue/errors";
+
     private final AuthorizationService authorizationService;
 
     @Override
@@ -58,6 +60,10 @@ public class TeamAuthorizationInterceptor implements ChannelInterceptor {
         String destination = accessor.getDestination();
         if (!StringUtils.hasText(destination)) {
             throw new RealtimeException(RealtimeErrorStatus.MISSING_DESTINATION);
+        }
+
+        if (command == StompCommand.SUBSCRIBE && USER_ERRORS.equals(destination)) {
+            return message;
         }
 
         DestinationVariables vars = extractVariables(destination);
