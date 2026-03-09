@@ -1,0 +1,2 @@
+ALTER TABLE auth_user
+MODIFY COLUMN nick_name VARCHAR(20) NULL;
