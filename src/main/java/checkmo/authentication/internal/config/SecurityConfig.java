@@ -47,8 +47,10 @@ public class SecurityConfig {
                         .requestMatchers("/login/oauth2/**").permitAll() // OAuth2 로그인 허용
                         .requestMatchers(HttpMethod.GET, "/api/books/me/likes").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/book-stories/me", "/api/book-stories/following", "/api/book-stories/clubs/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/book-stories", "/api/book-stories/*", "/api/book-stories/search/*", "/api/book-stories/members/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/book-stories/me", "/api/book-stories/following",
+                                "/api/book-stories/clubs/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/book-stories", "/api/book-stories/*",
+                                "/api/book-stories/search/*", "/api/book-stories/members/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/news/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/members/me", "/api/members/me/**").authenticated()
@@ -56,6 +58,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/members/find-email").permitAll()
                         .requestMatchers("/api/members/additional-info").authenticated()
                         .requestMatchers("/api/auth/**", "/api/members/check-nickname").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/clubs/*/home", "/api/clubs/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/clubs/*/notices/latest").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

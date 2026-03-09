@@ -78,7 +78,8 @@ public class ClubManagementQueryFacade {
 
         // 클럽별 멤버 상태 배치 조회
         Map<Long, ClubMemberStatus> statusMap
-                = clubMemberQueryService.retrieveClubMemberStatusByClubIds(memberId, clubIds);
+                = (memberId == null || memberId.isBlank()) ?
+                Map.of() : clubMemberQueryService.retrieveClubMemberStatusByClubIds(memberId, clubIds);
 
         List<ClubDetailWithMyStatus> clubList = clubs.stream()
                 .map(club -> toClubDetailWithMyStatusDTO(club, statusMap))

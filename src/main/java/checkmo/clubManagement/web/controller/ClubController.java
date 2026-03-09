@@ -126,7 +126,7 @@ public class ClubController {
         return ApiResponse.onSuccess("독서모임이 정상적으로 삭제되었습니다.");
     }
 
-    @Operation(summary = "독서 모임 검색", description = "키워드와 필터 기반으로 독서 모임을 검색합니다.")
+    @Operation(summary = "[비회원 가능] 독서 모임 검색", description = "키워드와 필터 기반으로 독서 모임을 검색합니다.")
     @Parameters({
             @Parameter(name = "cursorId", description = "커서 기반 페이지네이션을 위한 마지막 독서 모임 ID", required = false, example = "10"),
     })
@@ -154,7 +154,7 @@ public class ClubController {
         return ApiResponse.onSuccess(clubManagementQueryFacade.recommend(memberId));
     }
 
-    @Operation(summary = "독서 모임 홈 화면", description = "누구나 볼 수 있는 독서모임 홈 화면 정보를 제공합니다.")
+    @Operation(summary = "[비회원 가능] 독서 모임 홈 화면", description = "독서모임 홈 화면 정보를 제공합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "조회할 독서클럽 ID", required = true, example = "1"),
     })
