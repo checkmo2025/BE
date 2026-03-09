@@ -35,7 +35,7 @@ public class ClubMemberQueryService {
                 .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND));
     }
 
-    public List<ClubIdAndName> retrieveAllMyActiveClubs(String memberId) {
+    public List<ClubIdAndName> retrieveAllActiveClubsByMemberId(String memberId) {
         EnumSet<ClubMemberStatus> activeStatuses = ClubMemberStatus.activeStatuses();
         return clubMemberRepository.findClubIdAndNameByMemberIdAndStatuses(memberId, activeStatuses);
     }

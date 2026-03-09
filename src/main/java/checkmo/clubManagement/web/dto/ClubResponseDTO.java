@@ -185,4 +185,21 @@ public class ClubResponseDTO {
         @Schema(description = "모임의 최근 활동 시간(독서모임 생성 또는 정기모임 생성/수정할 때마다 반영)(모임 추천 기능 확인을 위해 넣은 필드로, 안정됐다고 판단되면 사라질 수 있습니다)", example = "2024-06-01T12:34:56")
         private LocalDateTime lastActivityAt;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubPreviewList {
+        private List<ClubInfo> clubList;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubInfo {
+        private Long clubId;
+        private String clubName;
+    }
 }
