@@ -15,11 +15,12 @@ import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.TeamKey;
 import checkmo.member.MemberExternalDTO;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubMeetingConverter {
@@ -214,9 +215,9 @@ public class ClubMeetingConverter {
                     Long teamId = safeClubMemberToTeamIdMap.get(clubMemberId);
                     MeetingResponseDTO.TeamKey teamKey = (teamId == null) ? null
                             : MeetingResponseDTO.TeamKey.builder()
-                                    .teamId(teamId)
-                                    .teamNumber(safeTeamIdToTeamNumberMap.get(teamId))
-                                    .build();
+                            .teamId(teamId)
+                            .teamNumber(safeTeamIdToTeamNumberMap.get(teamId))
+                            .build();
 
                     return MeetingResponseDTO.MeetingMember.builder()
                             .clubMemberId(clubMemberId)
@@ -236,11 +237,9 @@ public class ClubMeetingConverter {
     ) {
         return DetailInfo.builder()
                 .meetingId(meeting.getId())
-                .title(meeting.getTitle())
-                .meetingTime(meeting.getMeetingTime())
-                .location(meeting.getLocation())
                 .generation(meeting.getGeneration())
                 .tag(meeting.getTag())
+                .averageRate(meeting.calculateAverageRate())
                 .bookInfo(bookInfo)
                 .build();
     }
