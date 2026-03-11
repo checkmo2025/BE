@@ -23,6 +23,9 @@ public class MemberRequestDTO {
 
         private String imgUrl;
 
+        @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = "올바른 전화번호 형식이어야 합니다")
+        private String phoneNumber;
+
         private List<MemberInterestCategory> categories;
     }
 
