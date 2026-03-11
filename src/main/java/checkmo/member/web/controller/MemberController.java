@@ -211,7 +211,7 @@ public class MemberController {
     })
     public ApiResponse<DetailInfo> updateMemberProfile(
             @CurrentId String memberId,
-            @RequestBody MemberRequestDTO.MemberProfileUpdate request
+            @Valid @RequestBody MemberRequestDTO.MemberProfileUpdate request
     ) {
         return ApiResponse.onSuccess(memberCommandService.updateProfile(memberId, request));
     }

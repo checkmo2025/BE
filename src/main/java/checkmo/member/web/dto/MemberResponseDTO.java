@@ -59,6 +59,7 @@ public class MemberResponseDTO {
         private String nickname;
         private String description;
         private String profileImageUrl;
+        private String phoneNumber;
         private Set<MemberInterestCategory> categories;
     }
 
