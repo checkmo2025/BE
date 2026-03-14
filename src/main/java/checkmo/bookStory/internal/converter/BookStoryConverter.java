@@ -77,6 +77,21 @@ public class BookStoryConverter {
                 .build();
     }
 
+    public static BookStoryResponseDTO.AdminBasicInfo toAdminBasicInfo(
+            BookStory bookStory,
+            MemberExternalDTO.DetailInfo authorInfo,
+            BookExternalDTO.BasicInfo bookInfo
+    ) {
+        return BookStoryResponseDTO.AdminBasicInfo.builder()
+                .bookStoryId(bookStory.getId())
+                .bookStoryTitle(bookStory.getTitle())
+                .authorEmail(authorInfo != null ? authorInfo.getEmail() : null)
+                .authorNickname(authorInfo != null ? authorInfo.getNickname() : null)
+                .bookTitle(bookInfo != null ? bookInfo.getTitle() : null)
+                .createdAt(bookStory.getCreatedAt())
+                .build();
+    }
+
     public static List<BookStoryResponseDTO.CommentInfo> toCommentDetailList(
             List<Comment> comments,
             String currentMemberId,

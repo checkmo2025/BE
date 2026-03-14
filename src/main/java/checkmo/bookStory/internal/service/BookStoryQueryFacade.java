@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookStoryQueryFacade {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
+    public static final int ADMIN_PAGE_SIZE = 12;
 
     private final MemberAPI memberAPI;
     private final BookAPI bookAPI;
@@ -47,11 +49,21 @@ public class BookStoryQueryFacade {
      * @return 조회된 책 이야기 상세 정보 DTO
      */
     public DetailInfo fetchBookStoryDetailInfo(String memberId, Long bookStoryId) {
+        return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, true);
+    }
+
+    public DetailInfo fetchBookStoryDetailInfoForAdmin(String memberId, Long bookStoryId) {
+        return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, false);
+    }
+
+    private DetailInfo fetchBookStoryDetailInfoInternal(String memberId, Long bookStoryId, boolean increaseViewCount) {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.retrieveBookStory(bookStoryId);
 
-        // 2. 레디스에 조회 수 카운트 증가
-        viewCacheService.incrementViewCount(bookStoryId, memberId);
+        // 2. 사용자 상세 조회에서만 조회 수 카운트 증가
+        if (increaseViewCount) {
+            viewCacheService.incrementViewCount(bookStoryId, memberId);
+        }
 
         // 3. 책 정보 조회
         BookExternalDTO.BasicInfo bookInfo = bookAPI.fetchBookBasicInfo(bookStory.getBookId());
@@ -288,6 +300,44 @@ public class BookStoryQueryFacade {
                 .hasNext(bookStoryCursorResult.hasNext())
                 .nextCursor(bookStoryCursorResult.nextCursor())
                 .pageSize(DEFAULT_PAGE_SIZE)
+                .build();
+    }
+
+    public BookStoryResponseDTO.AdminBookStoryList fetchBookStoriesForAdmin(String keyword, int page) {
+        int safePage = Math.max(page, 1);
+        Page<BookStory> bookStoryPage =
+                bookStoryQueryService.retrieveBookStoriesForAdmin(keyword, safePage - 1, ADMIN_PAGE_SIZE);
+
+        List<BookStory> bookStories = bookStoryPage.getContent();
+        List<String> memberIds = bookStories.stream()
+                .map(BookStory::getMemberId)
+                .distinct()
+                .toList();
+        List<String> bookIds = bookStories.stream()
+                .map(BookStory::getBookId)
+                .distinct()
+                .toList();
+
+        Map<String, MemberExternalDTO.DetailInfo> authorInfoMap =
+                memberAPI.fetchMemberDetailInfoByMemberIds(memberIds);
+        Map<String, BookExternalDTO.BasicInfo> bookInfoMap =
+                bookAPI.fetchBookBasicInfoByBookIds(bookIds);
+
+        List<BookStoryResponseDTO.AdminBasicInfo> basicInfoList = bookStories.stream()
+                .map(bookStory -> BookStoryConverter.toAdminBasicInfo(
+                        bookStory,
+                        authorInfoMap.get(bookStory.getMemberId()),
+                        bookInfoMap.get(bookStory.getBookId())
+                ))
+                .toList();
+
+        return BookStoryResponseDTO.AdminBookStoryList.builder()
+                .basicInfoList(basicInfoList)
+                .page(safePage)
+                .pageSize(bookStoryPage.getSize())
+                .totalPages(bookStoryPage.getTotalPages())
+                .totalElements(bookStoryPage.getTotalElements())
+                .hasNext(bookStoryPage.hasNext())
                 .build();
     }
 }
