@@ -77,6 +77,34 @@ public class BookStoryResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class AdminBookStoryList {
+        private List<AdminBasicInfo> basicInfoList;
+        private int page;
+        private int pageSize;
+        private int totalPages;
+        private long totalElements;
+        private boolean hasNext;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AdminBasicInfo {
+        private Long bookStoryId;
+        private String bookStoryTitle;
+        private String authorEmail;
+        private String authorNickname;
+        private String bookTitle;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
+        private LocalDateTime createdAt;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class CommentInfo {
         private Long commentId;
         private String content;

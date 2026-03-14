@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    @Query("SELECT c " +
+    @Query("SELECT DISTINCT c " +
             "FROM Comment c " +
             "LEFT JOIN FETCH c.childrenComment " +
             "WHERE c.bookStory.id = :bookStoryId " +

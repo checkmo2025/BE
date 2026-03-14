@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,11 @@ public class BookStoryQueryService {
             int pageSize
     ) {
         return bookStoryRepository.searchBookStories(bookId, cursorId, pageSize);
+    }
+
+    public Page<BookStory> retrieveBookStoriesForAdmin(String keyword, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        return bookStoryRepository.searchBookStoriesForAdmin(keyword, pageable);
     }
 
     /**

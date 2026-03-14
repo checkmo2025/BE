@@ -72,6 +72,18 @@ public class BookStoryCommandService {
     }
 
     /**
+     * 관리자가 책이야기를 삭제
+     *
+     * @param bookStoryId 삭제할 책이야기의 ID
+     */
+    public void deleteBookStoryByAdmin(Long bookStoryId) {
+        BookStory bookStory = bookStoryRepository.findById(bookStoryId)
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
+
+        bookStoryRepository.delete(bookStory);
+    }
+
+    /**
      * 회원 탈퇴 시 해당 회원의 모든 책이야기를 삭제(완전 삭제 아님)
      *
      * @param memberId 탈퇴하는 회원의 ID
