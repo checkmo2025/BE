@@ -19,4 +19,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Modifying
     @Query("UPDATE Comment c SET c.deleted = true, c.deletedAt = CURRENT_TIMESTAMP WHERE c.memberId = :memberId AND c.deleted = false")
     void softDeleteAllByMemberId(@Param("memberId") String memberId);
+
+    @Modifying
+    @Query("DELETE FROM Comment c WHERE c.bookStory.id = :bookStoryId AND c.parentComment IS NOT NULL")
+    void deleteChildCommentsByBookStoryId(@Param("bookStoryId") Long bookStoryId);
+
+    @Modifying
+    @Query("DELETE FROM Comment c WHERE c.bookStory.id = :bookStoryId AND c.parentComment IS NULL")
+    void deleteParentCommentsByBookStoryId(@Param("bookStoryId") Long bookStoryId);
 }
