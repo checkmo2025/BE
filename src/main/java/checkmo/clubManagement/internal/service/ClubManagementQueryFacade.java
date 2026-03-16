@@ -297,4 +297,8 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
+    public ClubResponseDTO.ClubDetail retrieveAdminClubDetail(Long clubId) {
+        Club club = clubManagementQueryService.validateClub(clubId);
+        return ClubManagementConverter.toClubDetailDTO(club, true);
+    }
 }
