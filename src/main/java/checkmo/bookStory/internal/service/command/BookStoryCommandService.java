@@ -5,7 +5,9 @@ import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
+import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
+import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,8 @@ public class BookStoryCommandService {
     private final BookAPI bookAPI;
 
     private final BookStoryRepository bookStoryRepository;
+    private final CommentRepository commentRepository;
+    private final BookStoryLikedRepository bookStoryLikedRepository;
 
     /**
      * 책이야기를 작성
@@ -68,6 +72,26 @@ public class BookStoryCommandService {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
+        deleteBookStoryInternal(bookStory);
+    }
+
+    /**
+     * 관리자가 책이야기를 삭제
+     *
+     * @param bookStoryId 삭제할 책이야기의 ID
+     */
+    public void deleteBookStoryByAdmin(Long bookStoryId) {
+        BookStory bookStory = bookStoryRepository.findById(bookStoryId)
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
+
+        deleteBookStoryInternal(bookStory);
+    }
+
+    private void deleteBookStoryInternal(BookStory bookStory) {
+        Long bookStoryId = bookStory.getId();
+        commentRepository.deleteChildCommentsByBookStoryId(bookStoryId);
+        commentRepository.deleteParentCommentsByBookStoryId(bookStoryId);
+        bookStoryLikedRepository.deleteByBookStoryId(bookStoryId);
         bookStoryRepository.delete(bookStory);
     }
 

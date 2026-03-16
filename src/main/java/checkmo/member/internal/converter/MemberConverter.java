@@ -29,6 +29,7 @@ public class MemberConverter {
                 .nickname(member.getNickName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
+                .phoneNumber(member.getPhoneNumber())
                 .categories(member.getInterestCategories())
                 .build();
     }

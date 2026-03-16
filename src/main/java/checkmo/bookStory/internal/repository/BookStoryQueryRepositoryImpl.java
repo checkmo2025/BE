@@ -10,6 +10,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
@@ -50,6 +53,31 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .orderBy(bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
+    }
+
+    @Override
+    public Page<BookStory> searchBookStoriesForAdmin(String keyword, Pageable pageable) {
+        List<BookStory> content = queryFactory
+                .selectFrom(bookStory)
+                .where(
+                        notDeleted(),
+                        containsTitle(keyword)
+                )
+                .orderBy(bookStory.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(bookStory.count())
+                .from(bookStory)
+                .where(
+                        notDeleted(),
+                        containsTitle(keyword)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total == null ? 0L : total);
     }
 
     private List<BookStory> findAllBookStories(Long cursorId, int pageSize) {
@@ -143,6 +171,13 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
 
     private BooleanExpression createCursorExp(Long cursorId) {
         return cursorId != null ? bookStory.id.lt(cursorId) : null;
+    }
+
+    private BooleanExpression containsTitle(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        return bookStory.title.containsIgnoreCase(keyword.trim());
     }
 
     private void validateClubMember(String memberId, Long clubId) {

@@ -107,7 +107,7 @@ public class MemberCommandService {
                             .build());
         }
 
-        member.updateProfile(request.getDescription(), newImageUrl);
+        member.updateProfile(request.getDescription(), newImageUrl, request.getPhoneNumber());
 
         if (request.getCategories() != null) {
             member.updateInterestCategories(new HashSet<>(request.getCategories()));

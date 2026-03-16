@@ -91,9 +91,12 @@ public class Member extends BaseEntity {
         this.description = description;
     }
 
-    public void updateProfile(String description, String imgUrl) {
+    public void updateProfile(String description, String imgUrl, String phoneNumber) {
         this.description = description != null ? description : "";
         this.imgUrl = imgUrl != null ? imgUrl : "";
+        if (phoneNumber != null && !phoneNumber.isBlank()) {
+            this.phoneNumber = phoneNumber;
+        }
     }
 
     public void updateInterestCategories(Set<MemberInterestCategory> newCategories) {
