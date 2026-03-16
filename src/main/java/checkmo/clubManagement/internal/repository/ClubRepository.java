@@ -26,6 +26,8 @@ public interface ClubRepository extends JpaRepository<Club, Long>, ClubRepositor
             + "WHERE c.id = :clubId")
     void updateLastActivityTime(Long clubId, LocalDateTime time);
 
-    @Query("SELECT c FROM Club c WHERE (:keyword IS NULL OR lower(c.name) LIKE LOWER(concat('%', :keyword, '%')))")
+    @Query("SELECT c FROM Club c " +
+            "WHERE (:keyword IS NULL OR lower(c.name) LIKE LOWER(concat('%', :keyword, '%'))) " +
+            "ORDER BY c.createdAt DESC")
     Page<Club> findClubsByName(String keyword, Pageable pageable);
 }

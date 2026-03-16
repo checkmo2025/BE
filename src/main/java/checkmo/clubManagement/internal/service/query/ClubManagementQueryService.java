@@ -66,6 +66,9 @@ public class ClubManagementQueryService {
 
     public Page<Club> retrieveAdminClubs(String keyword, Pageable pageable) {
         String normalizedKeyword = (keyword == null || keyword.isBlank()) ? "" : keyword.trim();
+        if (normalizedKeyword.length() > 40) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_SEARCH_KEYWORD_TOO_LONG);
+        }
         return clubRepository.findClubsByName(normalizedKeyword, pageable);
     }
 }

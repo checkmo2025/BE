@@ -258,7 +258,7 @@ public class ClubManagementQueryFacade {
         PageResult<Club> pageResult = PagePagingHelper.getPage(
                 pageable -> clubManagementQueryService.retrieveAdminClubs(keyword, pageable),
                 page,
-                DEFAULT_PAGE_SIZE
+                20
         );
 
         List<ClubAdminResponseDTO.ClubPreview> clubs = pageResult.content().stream()
