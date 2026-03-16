@@ -2,23 +2,42 @@ package checkmo.realtime.internal.service;
 
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO.BasicInfo;
+import checkmo.realtime.internal.entity.TeamChatMessage;
+import checkmo.realtime.internal.event.RealtimeEvent;
+import checkmo.realtime.internal.repository.TeamChatMessageRepository;
 import checkmo.realtime.web.dto.ChatResponseMessage;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class ChatService {
     private final MemberAPI memberAPI;
+    private final TeamChatMessageRepository teamChatMessageRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ChatResponseMessage saveTeamChatMessage(
+    @Transactional
+    public void saveTeamChatMessage(
             Long clubId, Long meetingId, Long teamId,
             String senderMemberId, String content
     ) {
-        // TODO: 메시지 저장 로직 구현 (예: 데이터베이스에 저장)
+        teamChatMessageRepository.save(
+                TeamChatMessage.builder()
+                        .clubId(clubId)
+                        .meetingId(meetingId)
+                        .teamId(teamId)
+                        .senderMemberId(senderMemberId)
+                        .content(content)
+                        .sentAt(LocalDateTime.now())
+                        .build()
+        );
+
         BasicInfo basicInfo = memberAPI.fetchMemberBasicInfo(senderMemberId);
-        return ChatResponseMessage.builder()
+        ChatResponseMessage message = ChatResponseMessage.builder()
                 .clubId(clubId)
                 .meetingId(meetingId)
                 .teamId(teamId)
@@ -28,5 +47,7 @@ public class ChatService {
                 .content(content)
                 .sendAt(LocalDateTime.now())
                 .build();
+
+        eventPublisher.publishEvent(new RealtimeEvent.TeamChatSavedEvent(clubId, meetingId, teamId, message));
     }
 }
