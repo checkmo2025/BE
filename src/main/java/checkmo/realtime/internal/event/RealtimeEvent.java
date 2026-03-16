@@ -1,12 +1,11 @@
 package checkmo.realtime.internal.event;
 
-import checkmo.realtime.web.dto.ChatResponseMessage;
-import checkmo.realtime.web.dto.PresentationResponseMessage;
+import checkmo.realtime.web.dto.message.PresentationResponseMessage;
 import lombok.Builder;
 
 public class RealtimeEvent {
     @Builder
-    public record TeamChatSavedEvent(Long clubId, Long meetingId, Long teamId, ChatResponseMessage message) {
+    public record TeamChatSavedEvent(Long clubId, Long meetingId, Long teamId, Long meessageId) {
     }
 
     @Builder

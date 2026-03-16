@@ -3,7 +3,7 @@ package checkmo.realtime.web.controller;
 import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
 import checkmo.realtime.internal.service.PresentationService;
-import checkmo.realtime.web.dto.PresentationRequestMessage;
+import checkmo.realtime.web.dto.message.PresentationRequestMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;

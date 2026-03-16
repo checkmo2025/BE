@@ -1,4 +1,4 @@
-package checkmo.realtime.web.dto;
+package checkmo.realtime.web.dto.message;
 
 import lombok.Builder;
 
@@ -12,6 +12,7 @@ public record ChatResponseMessage(
         String senderMemberId,
         String senderNickname,
         String senderProfileImageUrl,
+        Long messageId,
         String content,
         LocalDateTime sendAt
 ) {

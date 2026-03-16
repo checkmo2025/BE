@@ -2,7 +2,7 @@ package checkmo.realtime.internal.service;
 
 import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.realtime.internal.event.RealtimeEvent;
-import checkmo.realtime.web.dto.PresentationResponseMessage;
+import checkmo.realtime.web.dto.message.PresentationResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

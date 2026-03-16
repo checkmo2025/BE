@@ -15,7 +15,9 @@ public enum RealtimeErrorStatus {
 
     UNAUTHENTICATED("RTM_005", "인증되지 않은 사용자입니다."),
     INVALID_DESTINATION("RTM_006", "유효하지 않은 목적지입니다."),
-    MISSING_DESTINATION("RTM_007", "목적지가 누락되었습니다.");
+    MISSING_DESTINATION("RTM_007", "목적지가 누락되었습니다."),
+
+    MESSAGE_NOT_FOUND("RTM_008", "메시지를 찾을 수 없습니다.");
 
     private final String code;
     private final String message;

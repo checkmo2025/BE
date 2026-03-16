@@ -1,4 +1,4 @@
-package checkmo.realtime.web.dto;
+package checkmo.realtime.web.dto.message;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
