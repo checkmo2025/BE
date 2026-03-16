@@ -15,10 +15,9 @@ import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberStatusFilter;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.*;
+import checkmo.clubManagement.web.dto.admin.ClubAdminResponseDTO;
 import checkmo.clubManagement.web.dto.myClub.MyClubResponseDTO;
-import checkmo.common.template.CursorPagingHelper;
-import checkmo.common.template.CursorResult;
-import checkmo.common.template.ExtractHelper;
+import checkmo.common.template.*;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
 import lombok.RequiredArgsConstructor;
@@ -251,4 +250,51 @@ public class ClubManagementQueryFacade {
                 .clubList(clubInfoList)
                 .build();
     }
+
+    public ClubAdminResponseDTO.ClubPreviewList retrieveAdminClubList(
+            String keyword,
+            int page
+    ) {
+        PageResult<Club> pageResult = PagePagingHelper.getPage(
+                pageable -> clubManagementQueryService.retrieveAdminClubs(keyword, pageable),
+                page,
+                DEFAULT_PAGE_SIZE
+        );
+
+        List<ClubAdminResponseDTO.ClubPreview> clubs = pageResult.content().stream()
+                .map(this::toAdminClubPreview)
+                .toList();
+
+        return ClubAdminResponseDTO.ClubPreviewList.builder()
+                .clubs(clubs)
+                .page(pageResult.page())
+                .size(pageResult.size())
+                .totalElements(pageResult.totalElements())
+                .totalPages(pageResult.totalPages())
+                .hasNext(pageResult.hasNext())
+                .build();
+    }
+
+    private ClubAdminResponseDTO.ClubPreview toAdminClubPreview(Club club) {
+        List<ClubMember> clubMembers = clubMemberQueryService.retrieveClubMembers(club.getId(), ClubMemberStatus.activeStatuses());
+
+        ClubMember owner = clubMembers.stream()
+                .filter(ClubMember::isOwner)
+                .findFirst()
+                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_NOT_FOUND));
+        String ownerEmail = memberAPI.fetchMemberEmail(owner.getMemberId());
+
+        long activeMemberCount = clubMembers.stream()
+                .filter(ClubMember::isActive)
+                .count();
+
+        return ClubAdminResponseDTO.ClubPreview.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .ownerEmail(ownerEmail)
+                .createdAt(club.getCreatedAt())
+                .memberCount(activeMemberCount)
+                .build();
+    }
+
 }
