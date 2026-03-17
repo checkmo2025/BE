@@ -9,16 +9,12 @@ import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -101,6 +97,21 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
+    public Map<String, MemberExternalDTO.PersonalInfo> fetchMemberPersonalInfoByMemberIds(List<String> memberIds) {
+        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+        if (distinctMemberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, MemberExternalDTO.PersonalInfo> result = initializeWithdrawnPersonalInfoMap(distinctMemberIds);
+
+        List<Member> members = memberQueryService.retrieveMemberById(distinctMemberIds);
+        members.forEach(member -> result.put(member.getId(), toPersonalInfo(member)));
+
+        return result;
+    }
+
+    @Override
     public MemberExternalDTO.BasicInfoWithFollow fetchMemberBasicInfoWithFollow(
             String targetMemberId,
             String currentMemberId
@@ -154,10 +165,10 @@ public class MemberAPIImpl implements MemberAPI {
         List<String> categories = (interestCategories == null)
                 ? List.of()
                 : interestCategories.stream()
-                        .filter(Objects::nonNull)
-                        .map(Enum::name)
-                        .sorted()
-                        .toList();
+                .filter(Objects::nonNull)
+                .map(Enum::name)
+                .sorted()
+                .toList();
         return MemberExternalDTO.InterestCategoryInfo.builder()
                 .categories(categories)
                 .build();
@@ -179,6 +190,12 @@ public class MemberAPIImpl implements MemberAPI {
     private Map<String, String> initializeWithdrawnNicknameMap(List<String> memberIds) {
         Map<String, String> result = new HashMap<>();
         memberIds.forEach(memberId -> result.put(memberId, WITHDRAWN_MEMBER_NICKNAME));
+        return result;
+    }
+
+    private Map<String, MemberExternalDTO.PersonalInfo> initializeWithdrawnPersonalInfoMap(List<String> memberIds) {
+        Map<String, MemberExternalDTO.PersonalInfo> result = new HashMap<>();
+        memberIds.forEach(memberId -> result.put(memberId, withdrawnPersonalInfo()));
         return result;
     }
 
@@ -207,6 +224,15 @@ public class MemberAPIImpl implements MemberAPI {
                 .profileImageUrl(member.getImgUrl())
                 .name(member.getName())
                 .email(member.getEmail())
+                .build();
+    }
+
+    private MemberExternalDTO.PersonalInfo toPersonalInfo(Member member) {
+        return MemberExternalDTO.PersonalInfo.builder()
+                .nickname(member.getNickName())
+                .name(member.getName())
+                .email(member.getEmail())
+                .phoneNumber(member.getPhoneNumber())
                 .build();
     }
 
@@ -255,6 +281,15 @@ public class MemberAPIImpl implements MemberAPI {
                 .nickname(WITHDRAWN_MEMBER_NICKNAME)
                 .profileImageUrl(null)
                 .following(false)
+                .build();
+    }
+
+    private MemberExternalDTO.PersonalInfo withdrawnPersonalInfo() {
+        return MemberExternalDTO.PersonalInfo.builder()
+                .nickname(WITHDRAWN_MEMBER_NICKNAME)
+                .name(null)
+                .email(null)
+                .phoneNumber(null)
                 .build();
     }
 }

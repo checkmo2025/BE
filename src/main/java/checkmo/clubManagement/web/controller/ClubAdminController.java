@@ -35,7 +35,7 @@ public class ClubAdminController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "관리자 권한이 필요합니다.")
     })
     @GetMapping
-    public ApiResponse<ClubAdminResponseDTO.ClubPreviewList> getClubList(
+    public ApiResponse<ClubAdminResponseDTO.ClubPreviewPage> getClubList(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page
     ) {
@@ -74,5 +74,23 @@ public class ClubAdminController {
     ) {
         clubManagementCommandService.updateClubByAdmin(clubId, request);
         return ApiResponse.onSuccess("모임이 정상적으로 수정되었습니다.");
+    }
+
+    @Operation(summary = "모임의 활동 멤버 조회", description = "모임 가입 최신순 page기반 20개씩 조회합니다.(page 1-based)")
+    @Parameters({
+            @Parameter(name = "clubId", description = "조회할 모임 ID", required = true, example = "1"),
+            @Parameter(name = "page", description = "페이지 번호 (1부터 시작)", required = false, example = "1")
+    })
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "관리자 권한이 필요합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "모임을 찾을 수 없습니다.")
+    })
+    @GetMapping("/{clubId}/active-members")
+    public ApiResponse<ClubAdminResponseDTO.ClubActiveMemberPreviewPage> getActiveMembers(
+            @PathVariable Long clubId,
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveAdminActiveClubMembers(clubId, page));
     }
 }

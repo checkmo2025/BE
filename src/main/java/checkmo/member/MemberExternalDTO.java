@@ -1,10 +1,11 @@
 package checkmo.member;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * 회원 도메인과 관련된 공유 DTO 클래스 다른 도메인에서 회원 정보를 참조할 때 사용
@@ -49,6 +50,21 @@ public class MemberExternalDTO {
         private String profileImageUrl;
         private String name;
         private String email;
+    }
+
+    /**
+     * 회원의 개인 정보 DTO
+     */
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PersonalInfo {
+        private String nickname;
+        private String name;
+        private String email;
+        private String phoneNumber;
     }
 
     /**

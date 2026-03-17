@@ -33,6 +33,7 @@ import java.util.stream.IntStream;
 public class ClubManagementQueryFacade {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int ADMIN_PAGE_SIZE = 20;
 
     private final MemberAPI memberAPI;
 
@@ -251,21 +252,21 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public ClubAdminResponseDTO.ClubPreviewList retrieveAdminClubList(
+    public ClubAdminResponseDTO.ClubPreviewPage retrieveAdminClubList(
             String keyword,
             int page
     ) {
         PageResult<Club> pageResult = PagePagingHelper.getPage(
                 pageable -> clubManagementQueryService.retrieveAdminClubs(keyword, pageable),
                 page,
-                20
+                ADMIN_PAGE_SIZE
         );
 
         List<ClubAdminResponseDTO.ClubPreview> clubs = pageResult.content().stream()
                 .map(this::toAdminClubPreview)
                 .toList();
 
-        return ClubAdminResponseDTO.ClubPreviewList.builder()
+        return ClubAdminResponseDTO.ClubPreviewPage.builder()
                 .clubs(clubs)
                 .page(pageResult.page())
                 .size(pageResult.size())
@@ -300,5 +301,49 @@ public class ClubManagementQueryFacade {
     public ClubResponseDTO.ClubDetail retrieveAdminClubDetail(Long clubId) {
         Club club = clubManagementQueryService.validateClub(clubId);
         return ClubManagementConverter.toClubDetailDTO(club, true);
+    }
+
+    public ClubAdminResponseDTO.ClubActiveMemberPreviewPage retrieveAdminActiveClubMembers(Long clubId, int page) {
+        clubManagementQueryService.validateClub(clubId);
+
+        PageResult<ClubMember> pageResult = PagePagingHelper.getPage(
+                pageable -> clubMemberQueryService.retrieveClubMembers(clubId, ClubMemberStatus.activeStatuses(), pageable),
+                page,
+                ADMIN_PAGE_SIZE
+        );
+
+        List<String> memberIds = ExtractHelper.extractDistinctList(pageResult.content(), ClubMember::getMemberId);
+        Map<String, MemberExternalDTO.PersonalInfo> memberInfoMap = memberAPI.fetchMemberPersonalInfoByMemberIds(memberIds);
+
+        List<ClubAdminResponseDTO.ClubActiveMemberPreview> members = pageResult.content().stream()
+                .map(clubMember -> toClubActiveMemberPreview(
+                        clubMember,
+                        memberInfoMap.get(clubMember.getMemberId())
+                ))
+                .toList();
+
+        return ClubAdminResponseDTO.ClubActiveMemberPreviewPage.builder()
+                .members(members)
+                .page(pageResult.page())
+                .size(pageResult.size())
+                .totalElements(pageResult.totalElements())
+                .totalPages(pageResult.totalPages())
+                .hasNext(pageResult.hasNext())
+                .build();
+    }
+
+
+    private ClubAdminResponseDTO.ClubActiveMemberPreview toClubActiveMemberPreview(
+            ClubMember clubMember,
+            MemberExternalDTO.PersonalInfo personalInfo
+    ) {
+        return ClubAdminResponseDTO.ClubActiveMemberPreview.builder()
+                .nickname(personalInfo == null ? null : personalInfo.getNickname())
+                .name(personalInfo == null ? null : personalInfo.getName())
+                .email(personalInfo == null ? null : personalInfo.getEmail())
+                .phoneNumber(personalInfo == null ? null : personalInfo.getPhoneNumber())
+                .joinedAt(clubMember.getJoinedAt())
+                .role(ClubAdminResponseDTO.ActiveClubMemberStatus.of(clubMember.getClubMemberStatus()))
+                .build();
     }
 }

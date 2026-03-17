@@ -6,17 +6,15 @@ import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +49,7 @@ public class ClubMemberQueryService {
         // clubMemberRepository에서 clubId IN :clubIds AND memberId = :memberId 조건으로 여러 상태를 한 번에 조회
         List<ClubMember> members = clubMemberRepository.findAllByMemberIdAndClubIdIn(memberId, clubIds);
 
-        // Map<clubId, ClubMemberStatus> 형태로 변환 후 반환
+        // Map<clubId, ActiveClubMemberStatus> 형태로 변환 후 반환
         // 만약 clubMember가 없으면 해당 clubId는 키에 포함되지 않음
         return members.stream()
                 .collect(Collectors.toMap(
@@ -61,9 +59,16 @@ public class ClubMemberQueryService {
                 ));
     }
 
-    public List<ClubMember> retrieveClubMembers(
-            Long clubId, EnumSet<ClubMemberStatus> statuses, Long cursorId, int size) {
+    public List<ClubMember> retrieveClubMembers(Long clubId, EnumSet<ClubMemberStatus> statuses, Long cursorId, int size) {
         return clubMemberRepository.findByClubIdAndStatuses(clubId, statuses, cursorId, PageRequest.of(0, size));
+    }
+
+    public Page<ClubMember> retrieveClubMembers(Long clubId, EnumSet<ClubMemberStatus> statuses, Pageable pageable) {
+        return clubMemberRepository.findClubIdAndStatusesInOrderByDesc(
+                clubId,
+                statuses,
+                pageable
+        );
     }
 
     public List<ClubMember> retrieveClubMembers(Long clubId, EnumSet<ClubMemberStatus> statuses) {

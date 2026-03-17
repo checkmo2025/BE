@@ -2,6 +2,7 @@ package checkmo.member;
 
 import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import checkmo.member.MemberExternalDTO.InterestCategoryInfo;
+
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,14 @@ public interface MemberAPI {
      * @return 회원 ID와 디테일 정보 매핑 리스트
      */
     Map<String, MemberExternalDTO.DetailInfo> fetchMemberDetailInfoByMemberIds(List<String> memberIds);
+
+    /**
+     * 회원 ID 목록으로 공유용 개인 정보 조회
+     *
+     * @param memberIds 조회할 회원 ID 목록
+     * @return 회원 ID와 개인 정보 매핑 리스트
+     */
+    Map<String, MemberExternalDTO.PersonalInfo> fetchMemberPersonalInfoByMemberIds(List<String> memberIds);
 
     /**
      * 팔로우 상태를 포함한 공유용 회원 정보 조회
