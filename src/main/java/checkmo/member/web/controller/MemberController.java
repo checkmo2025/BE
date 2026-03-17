@@ -24,15 +24,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/members")
@@ -240,7 +232,8 @@ public class MemberController {
 
     @Operation(summary = "다른 사람 프로필 조회 API", description =
             "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 팔로우 상태, 팔로워/팔로잉 수를 포함합니다.\n" +
-                    "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.")
+                    "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.\n" +
+                    "모임 목록은 별도 API(GET /api/clubs?memberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
     public ApiResponse<othersDetailInfo> getOtherProfile(
             @CurrentId String memberId,
@@ -252,12 +245,12 @@ public class MemberController {
     @Operation(summary = "이메일 찾기 API", description = "이름과 전화번호를 통해 가입된 이메일을 찾습니다. 뒤 4자리는 마스킹 처리됩니다.")
     @PostMapping("/find-email")
     @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다."),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "가입된 계정이 여러 개입니다. 관리자에게 문의해주세요.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "가입된 계정이 여러 개입니다. 관리자에게 문의해주세요.")
     })
     public ApiResponse<FindEmailResult> findEmail(
-        @Valid @RequestBody MemberRequestDTO.FindEmail request
+            @Valid @RequestBody MemberRequestDTO.FindEmail request
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberEmail(request));
     }
@@ -265,8 +258,8 @@ public class MemberController {
     @Operation(summary = "비밀번호 변경 API", description = "기존 비밀번호 확인 후 새로운 비밀번호로 변경합니다.")
     @PatchMapping("/me/update-password")
     public ApiResponse<String> updatePassword(
-        @CurrentId String memberId,
-        @Valid @RequestBody MemberRequestDTO.UpdatePassword request
+            @CurrentId String memberId,
+            @Valid @RequestBody MemberRequestDTO.UpdatePassword request
     ) {
         memberCommandService.updatePassword(memberId, request);
         return ApiResponse.onSuccess("비밀번호가 성공적으로 변경되었습니다.");
@@ -275,13 +268,13 @@ public class MemberController {
     @Operation(summary = "이메일 변경 API", description = "인증번호 확인 후 새로운 이메일로 변경합니다. 일반 로그인 유저만 가능합니다.")
     @PatchMapping("/me/update-email")
     @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청(기존 이메일 불일치, 이미 사용중인 이메일 등)"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스입니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청(기존 이메일 불일치, 이미 사용중인 이메일 등)"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스입니다.")
     })
     public ApiResponse<String> updateEmail(
-        @CurrentId String memberId,
-        @Valid @RequestBody MemberRequestDTO.UpdateEmail request
+            @CurrentId String memberId,
+            @Valid @RequestBody MemberRequestDTO.UpdateEmail request
     ) {
         memberCommandService.updateEmail(memberId, request);
         return ApiResponse.onSuccess("이메일이 성공적으로 변경되었습니다.");
@@ -290,7 +283,7 @@ public class MemberController {
     @Operation(summary = "소셜 로그인 연동 관리", description = "현재 로그인된 계정의 가입 수단과 이메일 정보를 조회합니다.")
     @GetMapping("/me/login-status")
     public ApiResponse<MemberResponseDTO.LoginStatus> getLoginStatus(
-        @CurrentId String memberId
+            @CurrentId String memberId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveLoginStatus(memberId));
     }
@@ -298,9 +291,9 @@ public class MemberController {
     @Operation(summary = "추천 친구 조회 API", description = "관심사가 겹치는 회원을 추천합니다. 겹치는 관심사가 많은 순으로 최대 4명을 추천합니다.")
     @GetMapping("/me/recommend")
     @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<RecommendedMemberList> getRecommendedFriends(
             @CurrentId String memberId
@@ -321,10 +314,10 @@ public class MemberController {
     @Operation(summary = "회원 신고 API", description = "특정 회원을 신고합니다.")
     @PostMapping("/report")
     @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Long> reportMember(
             @CurrentId String memberId,

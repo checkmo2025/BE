@@ -1,7 +1,6 @@
 package checkmo.clubMeeting;
 
 import checkmo.book.BookExternalDTO;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,12 +17,9 @@ public class ClubMeetingExternalDTO {
     @Builder
     public static class DetailInfo {
         private Long meetingId;
-        private String title;
-        private LocalDateTime meetingTime;
-        private String location;
         private Integer generation;
         private String tag;
-        private String content;
+        private double averageRate;
         private BookExternalDTO.BasicInfo bookInfo;
     }
 

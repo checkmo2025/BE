@@ -14,26 +14,19 @@ import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberStatusFilter;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
-import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetailWithMyStatus;
-import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubRecommendationList;
-import checkmo.clubManagement.web.dto.ClubResponseDTO.MyClubMemberStatus;
-import checkmo.clubManagement.web.dto.ClubResponseDTO.MyMembership;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.*;
+import checkmo.clubManagement.web.dto.admin.ClubAdminResponseDTO;
 import checkmo.clubManagement.web.dto.myClub.MyClubResponseDTO;
-import checkmo.common.template.CursorPagingHelper;
-import checkmo.common.template.CursorResult;
-import checkmo.common.template.ExtractHelper;
+import checkmo.common.template.*;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
-import java.time.LocalDateTime;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +71,8 @@ public class ClubManagementQueryFacade {
 
         // 클럽별 멤버 상태 배치 조회
         Map<Long, ClubMemberStatus> statusMap
-                = clubMemberQueryService.retrieveClubMemberStatusByClubIds(memberId, clubIds);
+                = (memberId == null || memberId.isBlank()) ?
+                Map.of() : clubMemberQueryService.retrieveClubMemberStatusByClubIds(memberId, clubIds);
 
         List<ClubDetailWithMyStatus> clubList = clubs.stream()
                 .map(club -> toClubDetailWithMyStatusDTO(club, statusMap))
@@ -107,7 +101,7 @@ public class ClubManagementQueryFacade {
     }
 
     public MyClubResponseDTO.MyClubList retrieveMyClubList(String memberId) {
-        List<ClubIdAndName> clubIdAndNames = clubMemberQueryService.retrieveAllMyActiveClubs(memberId);
+        List<ClubIdAndName> clubIdAndNames = clubMemberQueryService.retrieveAllActiveClubsByMemberId(memberId);
         List<MyClubResponseDTO.ClubInfo> clubInfoList = clubIdAndNames.stream()
                 .map(c -> MyClubResponseDTO.ClubInfo.builder()
                         .clubId(c.getId())
@@ -241,5 +235,70 @@ public class ClubManagementQueryFacade {
             }
         }
         return result;
+    }
+
+    public ClubPreviewList retrieveClubListByMemberNickname(String memberNickname) {
+        String memberId = memberAPI.fetchMemberId(memberNickname);
+        List<ClubIdAndName> clubIdAndNames = clubMemberQueryService.retrieveAllActiveClubsByMemberId(memberId);
+        List<ClubInfo> clubInfoList = clubIdAndNames.stream()
+                .map(c -> ClubInfo.builder()
+                        .clubId(c.getId())
+                        .clubName(c.getName())
+                        .build())
+                .toList();
+        return ClubPreviewList.builder()
+                .clubList(clubInfoList)
+                .build();
+    }
+
+    public ClubAdminResponseDTO.ClubPreviewList retrieveAdminClubList(
+            String keyword,
+            int page
+    ) {
+        PageResult<Club> pageResult = PagePagingHelper.getPage(
+                pageable -> clubManagementQueryService.retrieveAdminClubs(keyword, pageable),
+                page,
+                20
+        );
+
+        List<ClubAdminResponseDTO.ClubPreview> clubs = pageResult.content().stream()
+                .map(this::toAdminClubPreview)
+                .toList();
+
+        return ClubAdminResponseDTO.ClubPreviewList.builder()
+                .clubs(clubs)
+                .page(pageResult.page())
+                .size(pageResult.size())
+                .totalElements(pageResult.totalElements())
+                .totalPages(pageResult.totalPages())
+                .hasNext(pageResult.hasNext())
+                .build();
+    }
+
+    private ClubAdminResponseDTO.ClubPreview toAdminClubPreview(Club club) {
+        List<ClubMember> clubMembers = clubMemberQueryService.retrieveClubMembers(club.getId(), ClubMemberStatus.activeStatuses());
+
+        ClubMember owner = clubMembers.stream()
+                .filter(ClubMember::isOwner)
+                .findFirst()
+                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_NOT_FOUND));
+        String ownerEmail = memberAPI.fetchMemberEmail(owner.getMemberId());
+
+        long activeMemberCount = clubMembers.stream()
+                .filter(ClubMember::isActive)
+                .count();
+
+        return ClubAdminResponseDTO.ClubPreview.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .ownerEmail(ownerEmail)
+                .createdAt(club.getCreatedAt())
+                .memberCount(activeMemberCount)
+                .build();
+    }
+
+    public ClubResponseDTO.ClubDetail retrieveAdminClubDetail(Long clubId) {
+        Club club = clubManagementQueryService.validateClub(clubId);
+        return ClubManagementConverter.toClubDetailDTO(club, true);
     }
 }

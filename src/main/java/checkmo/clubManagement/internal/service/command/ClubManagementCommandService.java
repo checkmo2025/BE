@@ -11,13 +11,14 @@ import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubDetail;
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -52,30 +53,16 @@ public class ClubManagementCommandService {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
 
-        validateClubName(request, club);
+        validateClubName(club, request);
 
-        String oldImageUrl = club.getProfileImgUrl();
-        if (oldImageUrl != null && !oldImageUrl.equals(request.getProfileImageUrl())) {
-            publishDeletedClubImageEvent(oldImageUrl);
-        }
-
-        club.updateField(
-                request.getName(),
-                request.getDescription(),
-                request.getProfileImageUrl(),
-                request.isOpen(),
-                request.getRegion(),
-                request.getParticipantTypes(),
-                ClubManagementConverter.toClubContacts(request.getLinks())
-        );
-        club.updateInterestCategories(new HashSet<>(request.getCategory()));
+        applyClubUpdate(club, request);
     }
 
     public void updateLastActivityTime(Long clubId, LocalDateTime lastActivityTime) {
         clubRepository.updateLastActivityTime(clubId, lastActivityTime);
     }
 
-    private void validateClubName(ClubDetail request, Club club) throws ClubManagementException {
+    private void validateClubName(Club club, ClubDetail request) throws ClubManagementException {
         if (club.isDifferent(request.getName())
                 && clubManagementQueryService.isDuplicateClubName(request.getName().trim())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
@@ -116,5 +103,31 @@ public class ClubManagementCommandService {
                         .imageUrl(oldImageUrl)
                         .build()
         );
+    }
+
+    public void updateClubByAdmin(Long clubId, ClubDetail request) {
+        Club club = clubManagementQueryService.validateClub(clubId);
+
+        validateClubName(club, request);
+
+        applyClubUpdate(club, request);
+    }
+
+    private void applyClubUpdate(Club club, ClubDetail request) {
+        String oldImageUrl = club.getProfileImgUrl();
+        if (oldImageUrl != null && !oldImageUrl.equals(request.getProfileImageUrl())) {
+            publishDeletedClubImageEvent(oldImageUrl);
+        }
+
+        club.updateField(
+                request.getName(),
+                request.getDescription(),
+                request.getProfileImageUrl(),
+                request.isOpen(),
+                request.getRegion(),
+                request.getParticipantTypes(),
+                ClubManagementConverter.toClubContacts(request.getLinks())
+        );
+        club.updateInterestCategories(new HashSet<>(request.getCategory()));
     }
 }

@@ -56,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/members/find-email").permitAll()
                         .requestMatchers("/api/members/additional-info").authenticated()
                         .requestMatchers("/api/auth/**", "/api/members/check-nickname").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/clubs/*/home", "/api/clubs/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/clubs/*/notices/latest").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

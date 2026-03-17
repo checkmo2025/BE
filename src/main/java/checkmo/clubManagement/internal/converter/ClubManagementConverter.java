@@ -1,7 +1,5 @@
 package checkmo.clubManagement.internal.converter;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
-
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubContact;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -14,13 +12,16 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubDetail.ClubDetailBuild
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubMember.ClubMemberBuilder;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubParticipantTypeItem;
 import checkmo.member.MemberExternalDTO;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubManagementConverter {
@@ -116,5 +117,4 @@ public class ClubManagementConverter {
         }
         return source.stream().map(mapper).toList();
     }
-
 }

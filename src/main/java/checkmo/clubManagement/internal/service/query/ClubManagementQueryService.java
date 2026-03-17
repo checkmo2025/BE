@@ -8,14 +8,17 @@ import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -59,5 +62,13 @@ public class ClubManagementQueryService {
             String memberId
     ) {
         return clubRepository.findRecommendations(interestCategories, lastActivityAt, memberId, 3);
+    }
+
+    public Page<Club> retrieveAdminClubs(String keyword, Pageable pageable) {
+        String normalizedKeyword = (keyword == null || keyword.isBlank()) ? "" : keyword.trim();
+        if (normalizedKeyword.length() > 40) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_SEARCH_KEYWORD_TOO_LONG);
+        }
+        return clubRepository.findClubsByName(normalizedKeyword, pageable);
     }
 }
