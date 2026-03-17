@@ -4,7 +4,6 @@ import checkmo.authentication.CurrentId;
 import checkmo.clubMeeting.internal.service.ClubMeetingQueryFacade;
 import checkmo.clubMeeting.internal.service.command.ClubMeetingCommandService;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
-import checkmo.clubMeeting.internal.validation.validCursor.ValidCursor;
 import checkmo.clubMeeting.web.dto.meeting.MeetingRequestDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO;
 import checkmo.clubMeeting.web.dto.meeting.MeetingResponseDTO.MeetingInfo;
@@ -18,13 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/clubs/{clubId}/meetings")
@@ -122,12 +115,11 @@ public class ClubMeetingController {
         return ApiResponse.onSuccess(null);
     }
 
-    @Operation(summary = "팀별 발제 조회", description = "팀별로 발제를 조회합니다.")
+    @Operation(summary = "팀별 발제 조회", description = "팀별로 발제를 조회합니다. 각 발제에 대해 해당 팀의 선택 여부를 함께 반환합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "독서클럽 ID", required = true, example = "1"),
             @Parameter(name = "meetingId", description = "독서모임 ID", required = true, example = "1"),
             @Parameter(name = "teamId", description = "팀  ID(조회하려는 조 이름이 x조)", required = true, example = "1"),
-            @Parameter(name = "cursorId", description = "커서 ID (null이면 처음부터 조회)", required = false, example = "5"),
     })
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -141,11 +133,9 @@ public class ClubMeetingController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @PathVariable Long teamId,
-            @RequestParam(required = false) @ValidCursor Long cursorId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(
-                clubMeetingQueryFacade.retrieveSelectableTopics(clubId, meetingId, teamId, memberId, cursorId));
+        return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveSelectableTopics(clubId, meetingId, teamId, memberId));
     }
 
 }

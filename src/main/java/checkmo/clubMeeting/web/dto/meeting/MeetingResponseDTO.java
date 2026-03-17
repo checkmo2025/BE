@@ -3,13 +3,10 @@ package checkmo.clubMeeting.web.dto.meeting;
 import checkmo.member.MemberExternalDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 public class MeetingResponseDTO {
 
@@ -79,8 +76,6 @@ public class MeetingResponseDTO {
         private List<TeamKey> existingTeams;
         private TeamKey requestedTeam;
         private List<Topic> topics;
-        private boolean hasNext;
-        private Long nextCursor;
     }
 
     @Getter

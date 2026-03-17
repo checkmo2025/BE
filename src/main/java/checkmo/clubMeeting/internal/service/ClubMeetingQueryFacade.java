@@ -27,15 +27,16 @@ import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubMeetingQueryFacade {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int DEFAULT_BATCH_SIZE = 200;
 
     private final BookAPI bookAPI;
     private final MemberAPI memberAPI;
@@ -260,43 +260,35 @@ public class ClubMeetingQueryFacade {
     }
 
     public MeetingResponseDTO.TeamTopic retrieveSelectableTopics(
-            Long clubId, Long meetingId, Long teamId, String memberId, Long cursorId
+            Long clubId, Long meetingId, Long teamId, String memberId
     ) {
         validateClubAndClubMembership(clubId, memberId);
-        clubMeetingQueryService.validateMeeting(clubId, meetingId);
+
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamId);
 
         List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
-        List<TeamKey> existingTeams = ClubMeetingConverter.toExistingTeamsDTO(teams);
-
-        CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
-                size -> clubTopicQueryService.retrieveTopics(meetingId, cursorId, size),
-                Topic::getId,
-                DEFAULT_PAGE_SIZE
-        );
-        List<Topic> topics = topicCursorResult.content();
+        List<Topic> topics = clubTopicQueryService.retrieveTopics(meetingId);
 
         List<Long> topicIds = ExtractHelper.extractDistinctList(topics, Topic::getId);
         Set<Long> selectedTopicIds = clubMeetingTeamQueryService.retrieveSelectedTopicIds(team.getId(), topicIds);
 
         // 토픽 작성자 정보 배치 조회
         Map<String, MemberExternalDTO.BasicInfo> authorInfoMap
-                = memberAPI.fetchMemberBasicInfoByMemberIds(
-                ExtractHelper.extractDistinctList(topics, Topic::getMemberId));
+                = memberAPI.fetchMemberBasicInfoByMemberIds(ExtractHelper.extractDistinctList(topics, Topic::getMemberId));
 
+        List<TeamKey> existingTeams = ClubMeetingConverter.toExistingTeamsDTO(teams);
         return MeetingResponseDTO.TeamTopic.builder()
                 .existingTeams(existingTeams)
                 .requestedTeam(ClubMeetingConverter.toTeamKeyDTO(team))
                 .topics(topics.stream()
                         .map(t -> ClubMeetingConverter.toTopicDTO(
                                         t,
-                                        authorInfoMap.get(t.getMemberId()),
-                                        selectedTopicIds.contains(t.getId())
+                                        authorInfoMap,
+                                        selectedTopicIds
                                 )
                         )
                         .toList())
-                .hasNext(topicCursorResult.hasNext())
-                .nextCursor(topicCursorResult.nextCursor())
                 .build();
     }
 

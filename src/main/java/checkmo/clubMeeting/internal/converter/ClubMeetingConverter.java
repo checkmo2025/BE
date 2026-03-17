@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClubMeetingConverter {
@@ -134,15 +135,15 @@ public class ClubMeetingConverter {
 
     public static MeetingResponseDTO.Topic toTopicDTO(
             Topic topic,
-            MemberExternalDTO.BasicInfo authorInfo,
-            boolean isSelected
+            Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
+            Set<Long> selectedTopicIds
     ) {
         return MeetingResponseDTO.Topic.builder()
                 .topicId(topic.getId())
                 .content(topic.getDescription())
                 .createdAt(topic.getCreatedAt())
-                .author(authorInfo)
-                .selected(isSelected)
+                .author(authorInfoMap.get(topic.getMemberId()))
+                .selected(selectedTopicIds.contains(topic.getId()))
                 .build();
     }
 
