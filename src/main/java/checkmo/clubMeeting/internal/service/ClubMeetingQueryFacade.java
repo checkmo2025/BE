@@ -60,7 +60,10 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
+        if (!clubMembership.isActive()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+        }
 
         CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
                 pageSize -> clubMeetingQueryService.retrieveMeetings(clubId, cursorId, pageSize),
@@ -81,7 +84,7 @@ public class ClubMeetingQueryFacade {
     }
 
     public BookShelfResponseDTO.BookShelfDetail retrieveBookShelf(Long clubId, Long meetingId, String memberId) {
-        validateClubAndClubMembership(clubId, memberId);
+        validateClubAndClubMembershipActive(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         DetailInfo bookInfo = bookAPI.fetchBookDetailInfo(meeting.getBookId());
@@ -93,7 +96,7 @@ public class ClubMeetingQueryFacade {
     }
 
     public BookShelfUpdate retrieveBookShelfDetail(Long clubId, Long meetingId, String memberId) {
-        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
         if (!clubMembership.isStaff()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_STAFF_ONLY);
         }
@@ -111,7 +114,7 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        validateClubAndClubMembership(clubId, memberId);
+        validateClubAndReturnClubMembership(clubId, memberId);
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<Topic> topicCursorResult = CursorPagingHelper.getPage(
@@ -138,7 +141,10 @@ public class ClubMeetingQueryFacade {
             String memberId,
             Long cursorId
     ) {
-        MembershipInfo membershipInfo = validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo membershipInfo = validateClubAndReturnClubMembership(clubId, memberId);
+        if (!membershipInfo.isActive()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+        }
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         CursorResult<BookReview> bookReviewCursorResult = CursorPagingHelper.getPage(
@@ -162,7 +168,7 @@ public class ClubMeetingQueryFacade {
 
     // ========== 미팅 관련 조회 메서드 ==========
     public MeetingResponseDTO.NextMeetingRedirect retrieveNextMeeting(Long clubId, String memberId) {
-        validateClubAndClubMembership(clubId, memberId);
+        validateClubAndClubMembershipActive(clubId, memberId);
 
         Meeting nextMeeting = clubMeetingQueryService.retrieveNextFutureMeeting(clubId, LocalDateTime.now());
         return MeetingResponseDTO.NextMeetingRedirect.builder()
@@ -176,7 +182,10 @@ public class ClubMeetingQueryFacade {
             Long meetingId,
             String memberId
     ) {
-        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
+        if (!clubMembership.isActive()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+        }
         boolean staff = clubMembership.isStaff();
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
@@ -218,7 +227,7 @@ public class ClubMeetingQueryFacade {
             Long meetingId,
             String memberId
     ) {
-        MembershipInfo clubMembership = validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
         if (!clubMembership.isStaff()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_STAFF_ONLY);
         }
@@ -262,10 +271,17 @@ public class ClubMeetingQueryFacade {
     public MeetingResponseDTO.TeamTopic retrieveSelectableTopics(
             Long clubId, Long meetingId, Long teamId, String memberId
     ) {
-        validateClubAndClubMembership(clubId, memberId);
+        MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
+        if (!clubMembership.isActive()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+        }
 
-        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
+        clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamId);
+
+        if (!clubMembership.isStaff() && !clubMeetingTeamQueryService.isTeamMember(teamId, clubMembership.getClubMemberId())) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.NOT_TEAM_MEMBER_OR_STAFF);
+        }
 
         List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
         List<Topic> topics = clubTopicQueryService.retrieveTopics(meetingId);
@@ -292,9 +308,14 @@ public class ClubMeetingQueryFacade {
                 .build();
     }
 
-    private MembershipInfo validateClubAndClubMembership(Long clubId, String memberId) {
+    private MembershipInfo validateClubAndReturnClubMembership(Long clubId, String memberId) {
         clubManagementAPI.validateClub(clubId);
         return clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+    }
+
+    private void validateClubAndClubMembershipActive(Long clubId, String memberId) {
+        clubManagementAPI.validateClub(clubId);
+        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
     }
 
     private Map<Long, Long> retrieveClubMemberIdToTeamIdMap(List<Team> teams) {
