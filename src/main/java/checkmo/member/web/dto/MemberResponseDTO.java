@@ -164,4 +164,46 @@ public class MemberResponseDTO {
     public static class MemberEmailList {
         private List<String> emails;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AdminMemberList {
+        private List<AdminBasicInfo> memberList;
+        private int page;
+        private int pageSize;
+        private int totalPages;
+        private long totalElements;
+        private boolean hasNext;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AdminBasicInfo {
+        private String memberId;
+        private String nickname;
+        private String name;
+        private String email;
+        private String phoneNumber;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AdminMemberDetailInfo {
+        private String memberId;
+        private String nickname;
+        private String name;
+        private String email;
+        private String phoneNumber;
+        private String description;
+        private String profileImageUrl;
+        private Set<MemberInterestCategory> categories;
+        private boolean active;
+    }
+
 }
