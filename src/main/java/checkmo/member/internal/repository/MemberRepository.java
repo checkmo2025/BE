@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface MemberRepository extends JpaRepository<Member, String>, MemberRepositoryCustom {
 
@@ -50,4 +52,10 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberR
     List<String> findActiveEmailsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     boolean existsByEmail(String email);
+
+    Page<Member> findByIdContainingIgnoreCaseOrEmailContainingIgnoreCase(
+            String idKeyword,
+            String emailKeyword,
+            Pageable pageable
+    );
 }

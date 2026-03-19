@@ -16,6 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
@@ -127,5 +131,19 @@ public class MemberQueryService {
         String normalizedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
         int boundedLimit = Math.min(Math.max(limit, 1), 100);
         return memberRepository.findActiveEmailsByKeyword(normalizedKeyword, PageRequest.of(0, boundedLimit));
+    }
+
+    public Page<Member> retrieveMembersForAdmin(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        if (keyword == null || keyword.isBlank()) {
+            return memberRepository.findAll(pageable);
+        }
+
+        return memberRepository.findByIdContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                keyword,
+                keyword,
+                pageable
+        );
     }
 }

@@ -23,6 +23,7 @@ import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
 import checkmo.member.web.dto.MemberResponseDTO.ReportList;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
+import org.springframework.data.domain.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,7 @@ public class MemberQueryFacade {
     // 페이징 기본 크기 상수
     private static final int DEFAULT_PAGE_SIZE = 20;
     private static final int RECOMMENDED_MEMBER_LIMIT = 4;
+    private static final int ADMIN_PAGE_SIZE = 12;
 
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
@@ -261,6 +263,58 @@ public class MemberQueryFacade {
         List<String> emails = memberQueryService.retrieveActiveEmailsByKeyword(keyword, limit);
         return MemberResponseDTO.MemberEmailList.builder()
                 .emails(emails)
+                .build();
+    }
+
+    /**
+     * 관리자 전용 회원 목록 조회
+     */
+    public MemberResponseDTO.AdminMemberList retrieveMembersForAdmin(String keyword, int page) {
+        int safePage = Math.max(page, 1);
+
+        Page<Member> memberPage = memberQueryService.retrieveMembersForAdmin(
+                keyword,
+                safePage - 1,
+                ADMIN_PAGE_SIZE
+        );
+
+        List<MemberResponseDTO.AdminBasicInfo> memberList = memberPage.getContent().stream()
+                .map(member -> MemberResponseDTO.AdminBasicInfo.builder()
+                        .memberId(member.getId())
+                        .nickname(member.getNickName())
+                        .name(member.getName())
+                        .email(member.getEmail())
+                        .phoneNumber(member.getPhoneNumber())
+                        .build())
+                .toList();
+
+        return MemberResponseDTO.AdminMemberList.builder()
+                .memberList(memberList)
+                .page(safePage)
+                .pageSize(memberPage.getSize())
+                .totalPages(memberPage.getTotalPages())
+                .totalElements(memberPage.getTotalElements())
+                .hasNext(memberPage.hasNext())
+                .build();
+    }
+
+    /**
+     * 관리자 전용 회원 기본 상세 조회
+     * 현재 컨트롤러 기준: 닉네임으로 조회
+     */
+    public MemberResponseDTO.AdminMemberDetailInfo retrieveMemberDetailInfoForAdmin(String memberNickName) {
+        Member member = memberQueryService.retrieveMemberByNickname(memberNickName);
+
+        return MemberResponseDTO.AdminMemberDetailInfo.builder()
+                .memberId(member.getId())
+                .nickname(member.getNickName())
+                .name(member.getName())
+                .email(member.getEmail())
+                .phoneNumber(member.getPhoneNumber())
+                .description(member.getDescription())
+                .profileImageUrl(member.getImgUrl())
+                .categories(member.getInterestCategories())
+                .active(member.isActive())
                 .build();
     }
 }
