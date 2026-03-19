@@ -4,6 +4,7 @@ import checkmo.clubManagement.internal.service.ClubManagementQueryFacade;
 import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
+import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubPreviewList;
 import checkmo.clubManagement.web.dto.admin.ClubAdminResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,5 +75,24 @@ public class ClubAdminController {
     ) {
         clubManagementCommandService.updateClubByAdmin(clubId, request);
         return ApiResponse.onSuccess("모임이 정상적으로 수정되었습니다.");
+    }
+
+    @Operation(
+            summary = "특정 회원 가입 모임 조회 (관리자)",
+            description = "관리자가 특정 회원이 가입한 활성 모임 목록을 조회합니다."
+    )
+    @Parameter(name = "memberNickname", description = "조회할 회원 닉네임", required = true, example = "hy_0716")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "관리자 권한이 필요합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    @GetMapping("/members/{memberNickname}")
+    public ApiResponse<ClubPreviewList> getMemberClubsForAdmin(
+            @PathVariable String memberNickname
+    ) {
+        return ApiResponse.onSuccess(
+                clubManagementQueryFacade.retrieveClubListByMemberNickname(memberNickname)
+        );
     }
 }

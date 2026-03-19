@@ -100,4 +100,27 @@ public class NewsAdminController {
         newsCommandService.deleteNews(newsId);
         return ApiResponse.onSuccess("소식이 성공적으로 삭제되었습니다.");
     }
+
+    @Operation(
+            summary = "특정 회원 등록 소식 조회 (관리자)",
+            description = "관리자가 특정 회원이 등록한 소식 목록을 조회합니다. 커서 기반 무한 스크롤을 지원합니다."
+    )
+    @io.swagger.v3.oas.annotations.Parameters({
+            @Parameter(name = "memberNickname", description = "조회할 회원 닉네임", required = true, example = "hy_0716"),
+            @Parameter(name = "cursorId", description = "커서 ID (처음에는 null)", required = false, example = "1")
+    })
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "관리자 권한이 필요합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    @GetMapping("/members/{memberNickname}")
+    public ApiResponse<NewsResponseDTO.NewsList> getMemberNewsForAdmin(
+            @PathVariable String memberNickname,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        return ApiResponse.onSuccess(
+                newsQueryFacade.fetchMemberNewsListForAdmin(memberNickname, cursorId)
+        );
+    }
 }
