@@ -98,4 +98,9 @@ public class NewsQueryFacade {
         News news = newsQueryService.retrieveNews(newsId);
         return NewsConverter.toAdminDetailInfo(news);
     }
+
+    public NewsResponseDTO.NewsList fetchMemberNewsListForAdmin(String memberNickname, Long cursorId) {
+        String memberId = memberAPI.fetchMemberId(memberNickname);
+        return fetchMyNewsList(memberId, cursorId);
+    }
 }

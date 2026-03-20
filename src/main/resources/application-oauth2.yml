@@ -14,7 +14,7 @@ spring:
             scope:
               - email
               - profile
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://api.checkmo.co.kr/login/oauth2/code/google"
             authorization-grant-type: authorization_code
 
           kakao:
@@ -24,7 +24,7 @@ spring:
             scope:
               - account_email
               - profile_nickname
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://api.checkmo.co.kr/login/oauth2/code/kakao"
             authorization-grant-type: authorization_code
 
           naver:
@@ -33,7 +33,7 @@ spring:
             scope:
               - name
               - email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://api.checkmo.co.kr/login/oauth2/code/naver"
             authorization-grant-type: authorization_code
             client-name: Naver
 
