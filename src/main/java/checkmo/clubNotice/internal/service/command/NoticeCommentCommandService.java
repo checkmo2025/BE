@@ -1,6 +1,7 @@
 package checkmo.clubNotice.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubNotice.internal.converter.ClubNoticeConverter;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.entity.NoticeComment;
@@ -21,8 +22,7 @@ public class NoticeCommentCommandService {
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
 
-    public void createNoticeComment(
-            Long clubId, Long noticeId, String memberId, ClubNoticeRequestDTO.CreateClubNoticeComment request) {
+    public void createNoticeComment(Long clubId, Long noticeId, String memberId, ClubNoticeRequestDTO.CreateClubNoticeComment request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
@@ -35,10 +35,13 @@ public class NoticeCommentCommandService {
             ClubNoticeRequestDTO.CreateClubNoticeComment request
     ) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        if (!clubMembership.isActive()) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.CLUB_MEMBER_INACTIVE);
+        }
         clubNoticeQueryService.validateNotice(clubId, noticeId);
         NoticeComment noticeComment = noticeCommentQueryService.validateNoticeComment(noticeId, commentId);
-        if (!noticeComment.isAuthor(clubMemberId)) {
+        if (!noticeComment.isAuthor(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_COMMENT_UNAUTHORIZED);
         }
         noticeComment.updateContent(request.getContent());
@@ -46,12 +49,14 @@ public class NoticeCommentCommandService {
 
     public void deleteNoticeComment(Long clubId, Long noticeId, Long commentId, String memberId) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        if (!clubMembership.isActive()) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.CLUB_MEMBER_INACTIVE);
+        }
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         NoticeComment noticeComment = noticeCommentQueryService.validateNoticeComment(noticeId, commentId);
-        if (!noticeComment.isAuthor(clubMemberId)) {
+        if (!noticeComment.isAuthor(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_COMMENT_UNAUTHORIZED);
-            // TODO: 운영진, 작성자 검증
         }
         notice.removeComment(noticeComment);
     }

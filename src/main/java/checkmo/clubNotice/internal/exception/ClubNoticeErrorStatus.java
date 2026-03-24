@@ -14,6 +14,7 @@ public enum ClubNoticeErrorStatus implements BaseErrorCode {
     MEETING_NOT_IN_CLUB(HttpStatus.BAD_REQUEST, "NOTICE_401", "공지사항의 모임이 해당 동아리에 속해있지 않습니다."),
     PINNED_NOTICE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "NOTICE_402", "고정 공지사항은 최대 5개까지 설정할 수 있습니다."),
     NOTICE_EMPTY(HttpStatus.NOT_FOUND, "NOTICE_403", "공지사항이 존재하지 않습니다."),
+    CLUB_MEMBER_INACTIVE(HttpStatus.FORBIDDEN, "NOTICE_404", "동아리 회원이 활동 상태가 아닙니다."),
 
     // 투표
     INSUFFICIENT_VOTE_ITEMS(HttpStatus.BAD_REQUEST, "VOTE_400", "투표 항목이 2개 미만입니다."),
