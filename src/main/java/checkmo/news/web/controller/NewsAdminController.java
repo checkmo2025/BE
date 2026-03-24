@@ -33,15 +33,17 @@ public class NewsAdminController {
 
     @Operation(summary = "소식 목록 조회 (관리자)", description = "모든 소식 목록을 조회합니다. (게시 기간 관계없이, 페이지당 12개)")
     @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", required = false, example = "0")
+    @Parameter(name = "keyword", description = "소식 제목 검색어", required = false, example = "한강공원")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "관리자 권한이 필요합니다.")
     })
     @GetMapping
     public ApiResponse<NewsResponseDTO.AdminNewsList> getNewsListForAdmin(
-            @RequestParam(defaultValue = "0") int page
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String keyword
     ) {
-        NewsResponseDTO.AdminNewsList newsList = newsQueryFacade.fetchNewsListForAdmin(page);
+        NewsResponseDTO.AdminNewsList newsList = newsQueryFacade.fetchNewsListForAdmin(keyword, page);
         return ApiResponse.onSuccess(newsList);
     }
 
