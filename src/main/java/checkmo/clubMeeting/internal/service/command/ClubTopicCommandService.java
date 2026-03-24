@@ -1,6 +1,7 @@
 package checkmo.clubMeeting.internal.service.command;
 
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Team;
@@ -49,11 +50,14 @@ public class ClubTopicCommandService {
 
     public void updateTopic(Long clubId, Long meetingId, Long topicId, String memberId, TopicCreate request) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        if (!clubMembership.isActive()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
+        }
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
-        if (!topic.isOwnedBy(clubMemberId)) {
+        if (!topic.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_FORBIDDEN);
         }
 
@@ -64,11 +68,14 @@ public class ClubTopicCommandService {
 
     public void deleteTopic(Long clubId, Long meetingId, Long topicId, String memberId) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        if (!clubMembership.isActive()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
+        }
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
-        if (!topic.isOwnedBy(clubMemberId)) {
+        if (!topic.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_FORBIDDEN);
         }
 

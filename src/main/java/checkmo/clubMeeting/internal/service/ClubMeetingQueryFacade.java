@@ -62,7 +62,7 @@ public class ClubMeetingQueryFacade {
     ) {
         MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
         if (!clubMembership.isActive()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
 
         CursorResult<Meeting> meetingCursorResult = CursorPagingHelper.getPage(
@@ -143,7 +143,7 @@ public class ClubMeetingQueryFacade {
     ) {
         MembershipInfo membershipInfo = validateClubAndReturnClubMembership(clubId, memberId);
         if (!membershipInfo.isActive()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
@@ -184,7 +184,7 @@ public class ClubMeetingQueryFacade {
     ) {
         MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
         if (!clubMembership.isActive()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
         boolean staff = clubMembership.isStaff();
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
@@ -273,7 +273,7 @@ public class ClubMeetingQueryFacade {
     ) {
         MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
         if (!clubMembership.isActive()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.INACTIVE_CLUB_MEMBER);
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
 
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
