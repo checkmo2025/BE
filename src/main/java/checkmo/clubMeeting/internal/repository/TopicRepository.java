@@ -15,7 +15,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     @Query("SELECT t FROM Topic t "
             + "WHERE t.meeting.id = :meetingId "
-            + "AND (:cursorId IS NULL OR t.id > :cursorId) "
-            + "ORDER BY t.id ASC")
+            + "AND (:cursorId IS NULL OR t.id < :cursorId) "
+            + "ORDER BY t.id DESC, t.createdAt DESC ")
     List<Topic> findByMeetingIdWithCursor(Long meetingId, Long cursorId, Pageable pageable);
 }

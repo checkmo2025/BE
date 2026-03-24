@@ -222,8 +222,7 @@ public class ClubController {
             @RequestParam(required = false) Long cursorId,
             @CurrentId String memberId
     ) {
-        return ApiResponse.onSuccess(
-                clubManagementQueryFacade.retrieveClubMemberList(clubId, memberId, status, cursorId));
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubMemberList(clubId, memberId, status, cursorId));
     }
 
     @Operation(summary = "[운영진] 독서 모임 회원 등급 수정", description = "독서 모임 회원의 등급을 수정합니다.")

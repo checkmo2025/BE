@@ -155,8 +155,7 @@ public class ClubManagementQueryFacade {
         }
 
         CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
-                size -> clubMemberQueryService.retrieveClubMembers(clubId, statusFilter.toClubMemberStatusesOrNull(),
-                        cursorId, size),
+                size -> clubMemberQueryService.retrieveClubMembers(clubId, statusFilter.toClubMemberStatusesOrNull(), cursorId, size),
                 ClubMember::getId,
                 DEFAULT_PAGE_SIZE
         );
