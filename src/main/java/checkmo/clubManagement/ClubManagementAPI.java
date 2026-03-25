@@ -1,12 +1,13 @@
 package checkmo.clubManagement;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
-
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
 public interface ClubManagementAPI {
 
@@ -37,9 +38,18 @@ public interface ClubManagementAPI {
      * 특정 클럽에 속한 ACTIVE한 회원 ID 목록을 조회합니다.
      *
      * @param clubId 클럽 ID
-     * @return 클럽에 속한 회원 ID 목록 (MEMBER 또는 STAFF 상태인 회원만)
+     * @return 클럽에 속한 회원 ID 목록
      */
     List<String> fetchActiveMemberIds(Long clubId);
+
+    /**
+     * 특정 모임의 특정 회원이 STAFF 상태인지 여부를 조회
+     *
+     * @param clubId   모임 ID
+     * @param memberId 회원 ID
+     * @return true (STAFF 상태인 경우), false (STAFF 상태가 아닌 경우)
+     */
+    boolean isStaffClubMember(Long clubId, String memberId);
 
     /**
      * 특정 모임의 특정 회원이 STAFF 상태인지 검증
@@ -60,13 +70,22 @@ public interface ClubManagementAPI {
     void validateActiveClubMembers(Long clubId, Set<Long> clubMemberIds) throws ClubManagementException;
 
     /**
+     * 특정 모임의 특정 회원이 ACTIVE 상태인 경우, 해당 멤버십 ID를 조회
+     *
+     * @param clubId   모임 ID
+     * @param memberId 회원 ID
+     * @return 멤버십 ID (ACTIVE 상태인 경우), null (ACTIVE 상태가 아닌 경우)
+     */
+    Long fetchActiveClubMemberId(Long clubId, String memberId);
+
+    /**
      * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증
      *
      * @param clubId   모임 ID
      * @param memberId 회원 ID
      * @return ClubMemberId
      */
-    Long fetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException;
+    Long validateAndFetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException;
 
     /**
      * 특정 모임의 특정 회원의 멤버십 정보를 조회

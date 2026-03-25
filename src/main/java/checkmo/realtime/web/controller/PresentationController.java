@@ -29,6 +29,6 @@ public class PresentationController {
         if (principal == null) {
             throw new RealtimeException(RealtimeErrorStatus.UNAUTHENTICATED);
         }
-        presentationService.toggleAndPublish(clubId, meetingId, teamId, payload.getTopicId(), payload.getIsSelected(), principal.getName());
+        presentationService.toggleAndPublish(clubId, meetingId, teamId, payload.getTopicId(), payload.getIsSelected());
     }
 }

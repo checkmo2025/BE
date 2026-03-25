@@ -4,11 +4,13 @@ import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubMeetingQueryService {
 
     private final MeetingRepository meetingRepository;
+
+    public Optional<Meeting> retrieveMeeting(Long meetingId) {
+        return meetingRepository.findById(meetingId);
+    }
 
     public List<Meeting> retrieveMeetings(Long clubId, Long cursorId, Integer size) {
         return meetingRepository.findAllByClubIdAndCursorDesc(clubId, cursorId, size);

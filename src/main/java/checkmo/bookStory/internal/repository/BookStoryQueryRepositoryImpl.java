@@ -1,19 +1,20 @@
 package checkmo.bookStory.internal.repository;
 
-import static checkmo.bookStory.internal.entity.QBookStory.bookStory;
-
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.member.MemberAPI;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+import static checkmo.bookStory.internal.entity.QBookStory.bookStory;
 
 @RequiredArgsConstructor
 @Repository
@@ -181,7 +182,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private void validateClubMember(String memberId, Long clubId) {
-        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
     }
 
     private List<String> getFollowingMemberIds(String memberId) {

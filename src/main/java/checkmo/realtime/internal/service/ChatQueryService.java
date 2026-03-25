@@ -32,7 +32,7 @@ public class ChatQueryService {
             Long clubId, Long meetingId, Long teamId, Long cursorId
     ) {
         CursorResult<TeamChatMessage> page = CursorPagingHelper.getPage(
-                (size) -> getDesc(clubId, meetingId, teamId, cursorId, size),
+                (size) -> getDescTeamChatMessage(clubId, meetingId, teamId, cursorId, size),
                 TeamChatMessage::getId,
                 PAGE_SIZE
         );
@@ -62,7 +62,7 @@ public class ChatQueryService {
                 .build();
     }
 
-    private List<TeamChatMessage> getDesc(
+    private List<TeamChatMessage> getDescTeamChatMessage(
             Long clubId, Long meetingId, Long teamId, Long cursorId, int size
     ) {
         PageRequest pageable = PageRequest.of(0, size);

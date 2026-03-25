@@ -2,9 +2,9 @@ package checkmo.realtime.internal.service;
 
 import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.realtime.internal.entity.TeamChatMessage;
-import checkmo.realtime.internal.event.RealtimeEvent;
 import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
+import checkmo.realtime.internal.listener.event.RealtimeEvent;
 import checkmo.realtime.internal.repository.TeamChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;

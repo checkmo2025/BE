@@ -39,7 +39,7 @@ public class ClubTopicCommandService {
 
     public void createTopic(Long clubId, Long meetingId, String memberId, TopicCreate request) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = ClubMeetingConverter.toTopic(request, memberId, clubMemberId);
@@ -84,17 +84,11 @@ public class ClubTopicCommandService {
     }
 
     public boolean toggleTopic(
-            Long clubId,
             Long meetingId,
             Long teamId,
             Long topicId,
-            boolean selected,
-            String memberId
+            boolean selected
     ) {
-        clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
-        clubMeetingQueryService.validateMeeting(clubId, meetingId);
-
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamId);
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
 

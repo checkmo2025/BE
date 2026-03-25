@@ -1,7 +1,5 @@
 package checkmo.clubManagement.internal;
 
-import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
-
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -11,13 +9,16 @@ import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.service.command.ClubManagementCommandService;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +53,13 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
+    public boolean isStaffClubMember(Long clubId, String memberId) {
+        return clubMemberQueryService.findClubMember(clubId, memberId)
+                .map(ClubMember::isStaff)
+                .orElse(false);
+    }
+
+    @Override
     public void validateStaffClubMember(Long clubId, String memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
@@ -83,7 +91,22 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public Long fetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException {
+    public Long fetchActiveClubMemberId(Long clubId, String memberId) {
+        try {
+            ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
+
+            if (!clubMember.isActive()) {
+                return null;
+            }
+
+            return clubMember.getId();
+        } catch (ClubManagementException e) {
+            return null; // 클럽 또는 멤버가 존재하지 않거나, ACTIVE 상태가 아닌 경우 null 반환
+        }
+    }
+
+    @Override
+    public Long validateAndFetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         if (!clubMember.isActive()) {

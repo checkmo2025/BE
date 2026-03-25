@@ -16,12 +16,13 @@ import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubNotice;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.CreateClubVote;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.UpdateClubNotice;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO.VoteResult;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -135,7 +136,7 @@ public class ClubNoticeCommandService {
 
     public Long haveVote(Long clubId, Long noticeId, Long voteId, String memberId, VoteResult request) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
 
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         Vote vote = notice.getVote();

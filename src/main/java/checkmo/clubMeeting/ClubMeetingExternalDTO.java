@@ -23,4 +23,16 @@ public class ClubMeetingExternalDTO {
         private BookExternalDTO.BasicInfo bookInfo;
     }
 
+    public record ToggleTopicResult(boolean isSelected, Failure failure) {
+        public boolean isSuccess() {
+            return failure == Failure.NONE;
+        }
+
+        public enum Failure {
+            NONE,
+            TEAM_NOT_FOUND,
+            TOPIC_NOT_FOUND,
+            INTERNAL_ERROR
+        }
+    }
 }

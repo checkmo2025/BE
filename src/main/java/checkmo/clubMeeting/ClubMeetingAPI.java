@@ -39,14 +39,13 @@ public interface ClubMeetingAPI {
     /**
      * 팀의 발제를 선택 또는 해제합니다.
      *
-     * @param clubId    동아리 ID
      * @param meetingId 모임 ID
      * @param teamId    팀 ID
      * @param topicId   발제 ID
      * @param selected  선택 여부 (true: 선택, false: 해제)
      * @return true: 발제 선택, false: 발제 해제
      */
-    boolean toggleTopic(Long clubId, Long meetingId, Long teamId, Long topicId, boolean selected, String memberId);
+    ClubMeetingExternalDTO.ToggleTopicResult toggleTopic(Long meetingId, Long teamId, Long topicId, boolean selected);
 
     /**
      * 특정 모임에서 채팅이 불가능한지 확인합니다.
@@ -54,5 +53,5 @@ public interface ClubMeetingAPI {
      * @param meetingId 모임 ID
      * @return true: 채팅 불가능, false: 채팅 가능
      */
-    public boolean isChatDisabled(Long meetingId);
+    boolean isChatDisabled(Long meetingId);
 }

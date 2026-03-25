@@ -315,7 +315,7 @@ public class ClubMeetingQueryFacade {
 
     private void validateClubAndClubMembershipActive(Long clubId, String memberId) {
         clubManagementAPI.validateClub(clubId);
-        clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
     }
 
     private Map<Long, Long> retrieveClubMemberIdToTeamIdMap(List<Team> teams) {

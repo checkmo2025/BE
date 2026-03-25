@@ -39,7 +39,7 @@ public class ClubBookReviewCommandService {
     )
     public void createBookReview(Long clubId, Long meetingId, String memberId, BookReviewCreate request) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);

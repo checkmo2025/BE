@@ -2,7 +2,9 @@ package checkmo.clubMeeting.internal;
 
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
+import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubMeeting.ClubMeetingAPI;
+import checkmo.clubMeeting.ClubMeetingExternalDTO;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
@@ -15,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+
+import static checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus.TEAM_NOT_FOUND;
+import static checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus.TOPIC_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -59,26 +64,39 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
 
     @Override
     @Transactional
-    public boolean toggleTopic(
-            Long clubId, Long meetingId, Long teamId,
-            Long topicId, boolean selected, String memberId
+    public ClubMeetingExternalDTO.ToggleTopicResult toggleTopic(
+            Long meetingId, Long teamId, Long topicId, boolean selected
     ) {
-        return clubTopicCommandService.toggleTopic(clubId, meetingId, teamId, topicId, selected, memberId);
+        try {
+            boolean result = clubTopicCommandService.toggleTopic(meetingId, teamId, topicId, selected);
+            return new ClubMeetingExternalDTO.ToggleTopicResult(result, ClubMeetingExternalDTO.ToggleTopicResult.Failure.NONE);
+        } catch (ClubManagementException e) {
+            switch (e.getErrorCode()) {
+                case TEAM_NOT_FOUND -> {
+                    return new ClubMeetingExternalDTO.ToggleTopicResult(selected, ClubMeetingExternalDTO.ToggleTopicResult.Failure.TEAM_NOT_FOUND);
+                }
+                case TOPIC_NOT_FOUND -> {
+                    return new ClubMeetingExternalDTO.ToggleTopicResult(selected, ClubMeetingExternalDTO.ToggleTopicResult.Failure.TOPIC_NOT_FOUND);
+                }
+                default -> {
+                    return new ClubMeetingExternalDTO.ToggleTopicResult(selected, ClubMeetingExternalDTO.ToggleTopicResult.Failure.INTERNAL_ERROR);
+                }
+            }
+        } catch (Exception e) {
+            return new ClubMeetingExternalDTO.ToggleTopicResult(selected, ClubMeetingExternalDTO.ToggleTopicResult.Failure.INTERNAL_ERROR);
+        }
     }
 
     @Override
     public boolean isChatDisabled(Long meetingId) {
-        try {
-            Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-            if (meeting.getMeetingTime() == null) {
-                return true; // 모임 시간이 설정되지 않은 경우 채팅 불가능
-            }
-            LocalDateTime deadline = meeting.getChatDeadline();
-            return LocalDateTime.now().isAfter(deadline); // 모임 날짜로부터 3일이 지났으면 채팅 불가능
-        } catch (ClubMeetingException e) {
-            // 모임이 존재하지 않는 경우에도 채팅 불가능 처리
-            return true;
-        }
+        return clubMeetingQueryService.retrieveMeeting(meetingId)
+                .map(meeting -> {
+                    if (meeting.getMeetingTime() == null) {
+                        return true;
+                    }
+                    return LocalDateTime.now().isAfter(meeting.getChatDeadline());
+                })
+                .orElse(true); // 모임이 존재하지 않는 경우에도 채팅 불가능 처리
     }
 
 }

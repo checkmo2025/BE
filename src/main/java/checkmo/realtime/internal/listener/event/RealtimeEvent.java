@@ -1,4 +1,4 @@
-package checkmo.realtime.internal.event;
+package checkmo.realtime.internal.listener.event;
 
 import checkmo.realtime.web.dto.message.PresentationResponseMessage;
 import lombok.Builder;

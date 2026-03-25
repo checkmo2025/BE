@@ -24,7 +24,7 @@ public class NoticeCommentCommandService {
 
     public void createNoticeComment(Long clubId, Long noticeId, String memberId, ClubNoticeRequestDTO.CreateClubNoticeComment request) {
         clubManagementAPI.validateClub(clubId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         NoticeComment noticeComment = ClubNoticeConverter.toNoticeComment(request, clubMemberId);
         notice.addComment(noticeComment);
