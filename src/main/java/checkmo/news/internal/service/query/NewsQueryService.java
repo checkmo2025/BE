@@ -32,9 +32,14 @@ public class NewsQueryService {
         return newsRepository.searchMyNews(requesterEmail, cursorId, pageSize);
     }
 
-    public Page<News> retrieveNewsPageForAdmin(int page, int size) {
+    public Page<News> retrieveNewsPageForAdmin(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        return newsRepository.findAll(pageable);
+
+        if (keyword == null || keyword.isBlank()) {
+            return newsRepository.findAll(pageable);
+        }
+
+        return newsRepository.findByTitleContainingIgnoreCase(keyword, pageable);
     }
 
     public News retrieveNews(Long newsId) {

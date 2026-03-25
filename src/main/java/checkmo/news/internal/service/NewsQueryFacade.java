@@ -79,8 +79,8 @@ public class NewsQueryFacade {
                 .build();
     }
 
-    public NewsResponseDTO.AdminNewsList fetchNewsListForAdmin(int page) {
-        Page<News> newsPage = newsQueryService.retrieveNewsPageForAdmin(page, ADMIN_PAGE_SIZE);
+    public NewsResponseDTO.AdminNewsList fetchNewsListForAdmin(String keyword, int page) {
+        Page<News> newsPage = newsQueryService.retrieveNewsPageForAdmin(keyword, page, ADMIN_PAGE_SIZE);
 
         List<NewsResponseDTO.AdminBasicInfo> basicInfoList = newsPage.getContent().stream()
                 .map(NewsConverter::toAdminBasicInfo)
