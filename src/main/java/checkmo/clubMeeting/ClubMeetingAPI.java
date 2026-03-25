@@ -48,4 +48,11 @@ public interface ClubMeetingAPI {
      */
     boolean toggleTopic(Long clubId, Long meetingId, Long teamId, Long topicId, boolean selected, String memberId);
 
+    /**
+     * 특정 모임에서 채팅이 불가능한지 확인합니다.
+     *
+     * @param meetingId 모임 ID
+     * @return true: 채팅 불가능, false: 채팅 가능
+     */
+    public boolean isChatDisabled(Long meetingId);
 }

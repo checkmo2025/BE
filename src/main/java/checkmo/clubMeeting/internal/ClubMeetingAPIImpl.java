@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -62,6 +64,21 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
             Long topicId, boolean selected, String memberId
     ) {
         return clubTopicCommandService.toggleTopic(clubId, meetingId, teamId, topicId, selected, memberId);
+    }
+
+    @Override
+    public boolean isChatDisabled(Long meetingId) {
+        try {
+            Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
+            if (meeting.getMeetingTime() == null) {
+                return true; // 모임 시간이 설정되지 않은 경우 채팅 불가능
+            }
+            LocalDateTime deadline = meeting.getChatDeadline();
+            return LocalDateTime.now().isAfter(deadline); // 모임 날짜로부터 3일이 지났으면 채팅 불가능
+        } catch (ClubMeetingException e) {
+            // 모임이 존재하지 않는 경우에도 채팅 불가능 처리
+            return true;
+        }
     }
 
 }

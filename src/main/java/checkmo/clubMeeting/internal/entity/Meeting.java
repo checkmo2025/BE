@@ -1,22 +1,12 @@
 package checkmo.clubMeeting.internal.entity;
 
 import checkmo.common.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 
 @Getter
@@ -95,6 +85,10 @@ public class Meeting extends BaseEntity {
 
     public double calculateAverageRate() {
         return this.bookReviews.isEmpty() ? 0 : this.sumRate / this.bookReviews.size();
+    }
+
+    public LocalDateTime getChatDeadline() {
+        return this.getMeetingTime().plusDays(3);
     }
 
     // ========= 연관관계 메서드 =========

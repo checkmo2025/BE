@@ -17,7 +17,8 @@ public enum RealtimeErrorStatus {
     INVALID_DESTINATION("RTM_006", "유효하지 않은 목적지입니다."),
     MISSING_DESTINATION("RTM_007", "목적지가 누락되었습니다."),
 
-    MESSAGE_NOT_FOUND("RTM_008", "메시지를 찾을 수 없습니다.");
+    MESSAGE_NOT_FOUND("CHAT_001", "채팅 메시지를 찾을 수 없습니다."),
+    CHAT_DISABLED("CHAT_002", "현재 모임에서는 채팅이 불가능합니다.");
 
     private final String code;
     private final String message;
