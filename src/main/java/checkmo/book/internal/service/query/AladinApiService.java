@@ -127,7 +127,7 @@ public class AladinApiService {
                 .toUriString();
     }
 
-    private BookResponseDTO.BookList applyLikedByMe(BookResponseDTO.BookList bookList, String memberId) {
+    public BookResponseDTO.BookList applyLikedByMe(BookResponseDTO.BookList bookList, String memberId) {
         if (bookList == null || bookList.getDetailInfoList() == null || bookList.getDetailInfoList().isEmpty()) {
             return bookList;
         }

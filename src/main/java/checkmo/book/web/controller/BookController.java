@@ -72,8 +72,8 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
     })
     @GetMapping("/recommend")
-    public ApiResponse<BookResponseDTO.BookList> recommendBooks() {
-        BookResponseDTO.BookList result = bookRecommendationService.retrieveRecommendedBooks();
+    public ApiResponse<BookResponseDTO.BookList> recommendBooks(@CurrentId String memberId) {
+        BookResponseDTO.BookList result = bookRecommendationService.retrieveRecommendedBooks(memberId);
         return ApiResponse.onSuccess(result);
     }
 

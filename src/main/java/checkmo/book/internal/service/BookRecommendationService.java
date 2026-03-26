@@ -23,19 +23,19 @@ public class BookRecommendationService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final AladinApiService aladinApiService;
 
-    public BookResponseDTO.BookList retrieveRecommendedBooks() {
+    public BookResponseDTO.BookList retrieveRecommendedBooks(String memberId) {
         try {
             Object cachedData = redisTemplate.opsForValue().get(REDIS_KEY);
 
             if (cachedData instanceof BookResponseDTO.BookList recommendedBooks && !isRecommendedBooksStale()) {
-                return recommendedBooks;
+                return aladinApiService.applyLikedByMe(recommendedBooks, memberId);
             }
 
-            return refreshDailyRecommendedBooks();
+            return aladinApiService.applyLikedByMe(refreshDailyRecommendedBooks(), memberId);
 
         } catch (Exception e) {
             log.error("Redis에서 추천 책 조회 중 오류 발생. API에서 데이터를 가져오기.", e);
-            return refreshDailyRecommendedBooks();
+            return aladinApiService.applyLikedByMe(refreshDailyRecommendedBooks(), memberId);
         }
     }
 
