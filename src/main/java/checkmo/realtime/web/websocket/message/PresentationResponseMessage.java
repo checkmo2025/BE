@@ -1,4 +1,4 @@
-package checkmo.realtime.web.dto.message;
+package checkmo.realtime.web.websocket.message;
 
 import lombok.Builder;
 

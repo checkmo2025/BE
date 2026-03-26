@@ -1,11 +1,9 @@
-package checkmo.realtime.internal.config;
+package checkmo.realtime.web.websocket.error;
 
-import checkmo.realtime.internal.exception.RealtimeErrorMessage;
 import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
-import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.NestedExceptionUtils;
@@ -15,6 +13,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
+
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component

@@ -2,7 +2,6 @@ package checkmo.clubMeeting.internal;
 
 import checkmo.book.BookAPI;
 import checkmo.book.BookExternalDTO;
-import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.ClubMeetingExternalDTO;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
@@ -70,7 +69,7 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
         try {
             boolean result = clubTopicCommandService.toggleTopic(meetingId, teamId, topicId, selected);
             return new ClubMeetingExternalDTO.ToggleTopicResult(result, ClubMeetingExternalDTO.ToggleTopicResult.Failure.NONE);
-        } catch (ClubManagementException e) {
+        } catch (ClubMeetingException e) {
             switch (e.getErrorCode()) {
                 case TEAM_NOT_FOUND -> {
                     return new ClubMeetingExternalDTO.ToggleTopicResult(selected, ClubMeetingExternalDTO.ToggleTopicResult.Failure.TEAM_NOT_FOUND);

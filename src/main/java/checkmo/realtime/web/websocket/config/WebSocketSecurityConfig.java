@@ -1,4 +1,4 @@
-package checkmo.realtime.internal.config;
+package checkmo.realtime.web.websocket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

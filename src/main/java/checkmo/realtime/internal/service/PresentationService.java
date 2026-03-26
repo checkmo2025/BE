@@ -5,7 +5,7 @@ import checkmo.clubMeeting.ClubMeetingExternalDTO;
 import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
 import checkmo.realtime.internal.listener.event.RealtimeEvent;
-import checkmo.realtime.web.dto.message.PresentationResponseMessage;
+import checkmo.realtime.web.websocket.message.PresentationResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

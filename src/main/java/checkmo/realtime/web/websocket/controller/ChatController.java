@@ -1,9 +1,9 @@
-package checkmo.realtime.web.controller;
+package checkmo.realtime.web.websocket.controller;
 
 import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
-import checkmo.realtime.internal.service.PresentationService;
-import checkmo.realtime.web.dto.message.PresentationRequestMessage;
+import checkmo.realtime.internal.service.ChatCommandService;
+import checkmo.realtime.web.websocket.message.ChatRequestMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -18,17 +18,18 @@ import java.security.Principal;
 @Controller
 @MessageMapping("/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}")
 @RequiredArgsConstructor
-public class PresentationController {
-    private final PresentationService presentationService;
+public class ChatController {
 
-    @MessageMapping("/presentation")
-    public void togglePresentation(
+    private final ChatCommandService chatCommandService;
+
+    @MessageMapping("/chat/message")
+    public void sendMessageToTeamChatRoom(
             @DestinationVariable Long clubId, @DestinationVariable Long meetingId, @DestinationVariable Long teamId,
-            @Valid PresentationRequestMessage payload, Principal principal
+            @Valid ChatRequestMessage payload, Principal principal
     ) {
         if (principal == null) {
             throw new RealtimeException(RealtimeErrorStatus.UNAUTHENTICATED);
         }
-        presentationService.toggleAndPublish(clubId, meetingId, teamId, payload.getTopicId(), payload.getIsSelected());
+        chatCommandService.saveTeamChatMessage(clubId, meetingId, teamId, principal.getName(), payload.getContent());
     }
 }

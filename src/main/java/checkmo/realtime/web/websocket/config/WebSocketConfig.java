@@ -1,7 +1,8 @@
-package checkmo.realtime.internal.config;
+package checkmo.realtime.web.websocket.config;
 
-import checkmo.realtime.internal.config.properties.WebSocketProperties;
-import checkmo.realtime.internal.interceptor.TeamAuthorizationInterceptor;
+import checkmo.realtime.web.websocket.config.properties.WebSocketProperties;
+import checkmo.realtime.web.websocket.error.CustomStompErrorHandler;
+import checkmo.realtime.web.websocket.interceptor.TeamAuthorizationInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

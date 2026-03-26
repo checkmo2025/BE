@@ -7,7 +7,7 @@ import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
 import checkmo.realtime.internal.listener.event.RealtimeEvent;
 import checkmo.realtime.internal.repository.TeamChatMessageRepository;
-import checkmo.realtime.web.dto.message.ChatResponseMessage;
+import checkmo.realtime.web.websocket.message.ChatResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;

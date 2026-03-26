@@ -1,10 +1,8 @@
-package checkmo.realtime.internal.interceptor;
+package checkmo.realtime.web.websocket.interceptor;
 
 import checkmo.realtime.internal.exception.RealtimeErrorStatus;
 import checkmo.realtime.internal.exception.RealtimeException;
 import checkmo.realtime.internal.service.AuthorizationService;
-import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.PathContainer;
@@ -19,6 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
+
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 팀 웹소켓 SUBSCRIBE/SEND 메시지에 대한 권한 체크 인터셉터

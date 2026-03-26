@@ -1,6 +1,6 @@
 package checkmo.realtime.internal.listener.event;
 
-import checkmo.realtime.web.dto.message.PresentationResponseMessage;
+import checkmo.realtime.web.websocket.message.PresentationResponseMessage;
 import lombok.Builder;
 
 public class RealtimeEvent {

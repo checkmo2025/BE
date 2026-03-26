@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum RealtimeErrorStatus {
-    // 공통 오류 - Authorization
+    // 공통 오류
     INTERNAL_SERVER_ERROR("RTM_000", "서버 내부 오류가 발생했습니다."),
 
     MEETING_NOT_IN_CLUB("RTM_001", "모임이 클럽에 속하지 않습니다."),
@@ -17,6 +17,9 @@ public enum RealtimeErrorStatus {
     UNAUTHENTICATED("RTM_005", "인증되지 않은 사용자입니다."),
     INVALID_DESTINATION("RTM_006", "유효하지 않은 목적지입니다."),
     MISSING_DESTINATION("RTM_007", "목적지가 누락되었습니다."),
+    INVALID_PAYLOAD("RTM_008", "유효하지 않은 페이로드입니다."),
+    INVALID_REQUEST("RTM_009", "유효하지 않은 요청값입니다."),
+    INVALID_JSON("RTM_010", "유효하지 않은 메시지 형식(JSON)입니다."),
 
     // 채팅 관련 오류
     MESSAGE_NOT_FOUND("CHAT_001", "채팅 메시지를 찾을 수 없습니다."),

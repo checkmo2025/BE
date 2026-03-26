@@ -1,7 +1,8 @@
-package checkmo.realtime.internal.config.properties;
+package checkmo.realtime.web.websocket.config.properties;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "realtime.websocket")
 public record WebSocketProperties(
