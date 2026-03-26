@@ -271,17 +271,10 @@ public class ClubMeetingQueryFacade {
     public MeetingResponseDTO.TeamTopic retrieveSelectableTopics(
             Long clubId, Long meetingId, Long teamId, String memberId
     ) {
-        MembershipInfo clubMembership = validateClubAndReturnClubMembership(clubId, memberId);
-        if (!clubMembership.isActive()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
-        }
+        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
 
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
         Team team = clubMeetingTeamQueryService.validateTeam(meetingId, teamId);
-
-        if (!clubMembership.isStaff() && !clubMeetingTeamQueryService.isTeamMember(teamId, clubMembership.getClubMemberId())) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.NOT_TEAM_MEMBER_OR_STAFF);
-        }
 
         List<Team> teams = clubMeetingTeamQueryService.retrieveTeams(meetingId);
         List<Topic> topics = clubTopicQueryService.retrieveTopics(meetingId);
