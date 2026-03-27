@@ -16,4 +16,5 @@ public class HealthCheckController {
     public String home() {
         return "헬스체크 확인용 입니다. ";
     }
+
 }
