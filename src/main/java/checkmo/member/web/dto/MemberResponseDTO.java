@@ -57,6 +57,7 @@ public class MemberResponseDTO {
     @Builder
     public static class DetailInfo {
         private String nickname;
+        private String name;
         private String description;
         private String profileImageUrl;
         private String phoneNumber;

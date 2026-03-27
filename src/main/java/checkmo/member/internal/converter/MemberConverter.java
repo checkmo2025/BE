@@ -27,6 +27,7 @@ public class MemberConverter {
     public static DetailInfo toMemberProfileWithCategory(Member member) {
         return DetailInfo.builder()
                 .nickname(member.getNickName())
+                .name(member.getName())
                 .description(member.getDescription())
                 .profileImageUrl(member.getImgUrl())
                 .phoneNumber(member.getPhoneNumber())
