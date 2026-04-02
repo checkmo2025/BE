@@ -15,17 +15,20 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 
     private final AuthUser user;
     private final Map<String, Object> attributes;
+    private final boolean newSocialSignUp;
 
     // 이건 이메일 로그인 시 사용하는 생성자
     public PrincipalDetails(AuthUser user) {
         this.user = user;
         this.attributes = null;
+        this.newSocialSignUp = false;
     }
 
     // 이건 OAuth2 로그인 시 사용하는 생성자
-    public PrincipalDetails(AuthUser user, Map<String, Object> attributes) {
+    public PrincipalDetails(AuthUser user, Map<String, Object> attributes, boolean newSocialSignUp) {
         this.user = user;
         this.attributes = attributes;
+        this.newSocialSignUp = newSocialSignUp;
     }
 
     @Override

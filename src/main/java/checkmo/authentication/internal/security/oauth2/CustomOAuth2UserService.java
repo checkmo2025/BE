@@ -43,9 +43,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // 기존 회원인지 확인, 신규 회원이면 생성
-        AuthUser user = authRepository.findByEmail(email)
-                .orElseGet(() -> registerNewMember(attributes, registrationId));
-        return new PrincipalDetails(user, oAuth2User.getAttributes());
+
+        AuthUser user = authRepository.findByEmail(email).orElse(null);
+
+        boolean newSocialSignUp = false;
+
+        if (user == null) {
+            user = registerNewMember(attributes, registrationId);
+            newSocialSignUp = true;
+        }
+
+        return new PrincipalDetails(user, oAuth2User.getAttributes(), newSocialSignUp);
     }
 
     private AuthUser registerNewMember(OAuth2Attributes attributes, String registrationId) {

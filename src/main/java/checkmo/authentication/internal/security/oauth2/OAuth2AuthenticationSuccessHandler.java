@@ -39,12 +39,20 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         AuthUser user = principalDetails.getUser();
 
-        String path = user.isProfileCompleted() ? "/" : "/signup/terms";
+        String targetUrl;
 
-        // 기본 리다이렉트 URI
-        String targetUrl = UriComponentsBuilder.fromUriString(baseUri)
-                .pathSegment(path)
-                .build().toUriString();
+        if (user.isProfileCompleted()) {
+            targetUrl = UriComponentsBuilder.fromUriString(baseUri)
+                    .path("/")
+                    .build()
+                    .toUriString();
+        } else {
+            targetUrl = UriComponentsBuilder.fromUriString(baseUri)
+                    .path("/signup/terms")
+                    .queryParam("isSocial", principalDetails.isNewSocialSignUp())
+                    .build()
+                    .toUriString();
+        }
 
         // 성공 후 리다이렉트 URL 설정
         clearAuthenticationAttributes(request);
