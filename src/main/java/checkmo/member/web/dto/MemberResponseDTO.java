@@ -2,13 +2,14 @@ package checkmo.member.web.dto;
 
 import checkmo.member.internal.entity.MemberInterestCategory;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 public class MemberResponseDTO {
 
@@ -148,7 +149,7 @@ public class MemberResponseDTO {
         private boolean hasNext;
         private Long nextCursor;
     }
-  
+
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -156,6 +157,7 @@ public class MemberResponseDTO {
     public static class LoginStatus {
         private String provider;
         private String email;
+        private boolean admin;
     }
 
     @Getter

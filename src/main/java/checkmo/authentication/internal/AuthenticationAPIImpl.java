@@ -1,6 +1,9 @@
 package checkmo.authentication.internal;
 
 import checkmo.authentication.AuthenticationAPI;
+import checkmo.authentication.internal.entity.AuthUser;
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.internal.security.jwt.TokenCacheService;
 import checkmo.authentication.internal.service.command.AuthSessionCommandService;
@@ -49,5 +52,12 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     @Override
     public void updateNickname(String memberId, String nickname) {
         authUserCommandService.updateNickname(memberId, nickname);
+    }
+
+    @Override
+    public boolean canAccessAdmin(String memberId) {
+        AuthUser authUser = authRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+        return authUser.isAdmin();
     }
 }

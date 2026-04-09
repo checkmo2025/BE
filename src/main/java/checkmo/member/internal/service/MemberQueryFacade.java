@@ -1,5 +1,6 @@
 package checkmo.member.internal.service;
 
+import checkmo.authentication.AuthenticationAPI;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
@@ -14,17 +15,9 @@ import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.internal.service.query.MemberReportQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
-import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
-import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
-import checkmo.member.web.dto.MemberResponseDTO.MyReportInfo;
-import checkmo.member.web.dto.MemberResponseDTO.MyReportList;
-import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
-import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
-import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
-import checkmo.member.web.dto.MemberResponseDTO.ReportList;
-import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
-import org.springframework.data.domain.Page;
+import checkmo.member.web.dto.MemberResponseDTO.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -41,6 +34,8 @@ public class MemberQueryFacade {
     private static final int DEFAULT_PAGE_SIZE = 20;
     private static final int RECOMMENDED_MEMBER_LIMIT = 4;
     private static final int ADMIN_PAGE_SIZE = 12;
+
+    private final AuthenticationAPI authenticationAPI;
 
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
@@ -183,8 +178,8 @@ public class MemberQueryFacade {
         String email = memberQueryService.retrieveMemberEmail(request);
         String maskedEmail = maskEmail(email);
         return MemberResponseDTO.FindEmailResult.builder()
-                 .email(maskedEmail)
-                 .build();
+                .email(maskedEmail)
+                .build();
     }
 
     private String maskEmail(String email) {
@@ -247,16 +242,18 @@ public class MemberQueryFacade {
         Member member = memberQueryService.retrieveMember(memberId);
 
         String prefix = member.getId().split("_")[0];
-
         String provider = switch (prefix) {
             case "LOCAL", "KAKAO", "GOOGLE", "NAVER" -> prefix;
             default -> "SOCIAL";
         };
 
+        boolean isAdmin = authenticationAPI.canAccessAdmin(memberId);
+
         return MemberResponseDTO.LoginStatus.builder()
-                                            .provider(provider)
-                                            .email(member.getEmail())
-                                            .build();
+                .provider(provider)
+                .email(member.getEmail())
+                .admin(isAdmin)
+                .build();
     }
 
     public MemberResponseDTO.MemberEmailList retrieveActiveEmailsForAdmin(String keyword, int limit) {

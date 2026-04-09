@@ -24,19 +24,27 @@ public interface AuthenticationAPI {
 
     /**
      * 추가정보 입력 시 특정 회원의 닉네임을 저장합니다.
-     * @param memberId
-     * @param nickname
      */
     void updateNickname(String memberId, String nickname);
 
     /**
+     * 비밀번호를 변경합니다. authUser가 없거나 기존 비밀번호와 일치하면 에러 반환.
      *
-     * @param memberId 현재 로그인 중인 memberId
+     * @param memberId        현재 로그인 중인 memberId
      * @param currentPassword 기존 비밀번호
-     * @param newPassword 새 비밀번호
+     * @param newPassword     새 비밀번호
      * @return 비밀번호 변경 성공 여부
      */
     boolean updatePassword(String memberId, String currentPassword, String newPassword);
 
+
+    /**
+     * 이메일을 변강합니다.
+     */
     void updateEmail(String memberId, String currentEmail, String newEmail, String verificationCode);
+
+    /**
+     * 관리자 페이지 접근 권한 여부를 반환합니다.
+     */
+    boolean canAccessAdmin(String memberId);
 }

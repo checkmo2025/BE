@@ -3,6 +3,7 @@ package checkmo.authentication.internal.entity;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -45,10 +46,6 @@ public class AuthUser extends BaseEntity {
         this.profileCompleted = true;
     }
 
-    public void changePassword(String newPassword) {
-        this.password = newPassword;
-    }
-
     public boolean isActive() {
         return deactivatedAt == null;
     }
@@ -67,5 +64,9 @@ public class AuthUser extends BaseEntity {
 
     public void updateNickname(String nickName) {
         this.nickName = nickName != null ? nickName : "";
+    }
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 }
