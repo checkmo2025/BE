@@ -56,7 +56,7 @@ public class BookStoryCommandService {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
-        return bookStory.updateDescription(request.getDescription());
+        return bookStory.update(request.getTitle(), request.getDescription());
     }
 
     /**

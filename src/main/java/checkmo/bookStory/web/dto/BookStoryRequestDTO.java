@@ -28,6 +28,9 @@ public class BookStoryRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class BookStoryUpdate {
+        @NotBlank(message = "책 이야기에 수정할 제목을 입력해주세요.")
+        private String title;
+
         @NotBlank(message = "책 이야기에 수정할 내용을 입력해주세요.")
         private String description;
     }
