@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationQueryFacade {
 
     public static final int DEFAULT_PAGE_SIZE = 20;
+    public static final int DEFAULT_PREVIEW_SIZE = 5;
 
     // Domain level 2
     private final MemberAPI memberAPI;
@@ -33,8 +34,8 @@ public class NotificationQueryFacade {
     private final NotificationSettingQueryService notificationSettingQueryService;
 
     @Cacheable(value = "notifications", key = "#memberId")
-    public BasicInfoPreviewList retrieveNotificationPreviews(String memberId, int size) {
-        List<Notification> notifications = notificationQueryService.retrieveUnreadNotifications(memberId, size);
+    public BasicInfoPreviewList retrieveNotificationPreviews(String memberId) {
+        List<Notification> notifications = notificationQueryService.retrieveUnreadNotifications(memberId, DEFAULT_PREVIEW_SIZE);
 
         Map<String, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
         Map<Long, String> clubNameMap = fetchClubNameMap(notifications);

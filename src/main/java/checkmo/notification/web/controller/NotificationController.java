@@ -49,7 +49,6 @@ public class NotificationController {
     }
 
     @Operation(summary = "읽지 않은 알림 5개 조회", description = "홈화면에서 보여줄 읽지 않은 알림을 조회합니다. Redis 캐시를 사용합니다.")
-    @Parameter(name = "size", description = "조회할 알림 개수(필수 아님!!)", required = false, example = "5")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
@@ -58,11 +57,10 @@ public class NotificationController {
     })
     @GetMapping("/preview")
     public ApiResponse<BasicInfoPreviewList> getUnreadNotifications(
-            @CurrentId String memberId,
-            @RequestParam(required = false, defaultValue = "5") int size
+            @CurrentId String memberId
     ) {
         // Facade를 통해 QueryService의 캐시된 메서드 호출
-        var notifications = notificationQueryFacade.retrieveNotificationPreviews(memberId, size);
+        var notifications = notificationQueryFacade.retrieveNotificationPreviews(memberId);
         return ApiResponse.onSuccess(notifications);
     }
 
