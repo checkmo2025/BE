@@ -1,5 +1,6 @@
 package checkmo.bookStory.internal.service.command;
 
+import checkmo.bookStory.BookStoryEvent;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
@@ -8,6 +9,7 @@ import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ public class BookStoryCommentCommandService {
 
     private final BookStoryQueryService bookStoryQueryService;
     private final CommentRepository commentRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 댓글/대댓글 작성
@@ -69,7 +72,22 @@ public class BookStoryCommentCommandService {
         // 6. 댓글 저장
         commentRepository.save(comment);
 
-        // 7. 댓글 작성된 책이야기 ID 반환
+        // 7. 댓글 작성자가 책이야기 작성자와 다를 때만 알림 이벤트 발행
+        String receiverId = parentComment != null
+                ? parentComment.getMemberId()
+                : bookStory.getMemberId();
+        if (!memberId.equals(receiverId)) {
+            eventPublisher.publishEvent(
+                    BookStoryEvent.BookStoryComment.builder()
+                            .eventId(comment.getId())
+                            .senderId(memberId)
+                            .receiverId(receiverId)
+                            .bookStoryId(bookStoryId)
+                            .build()
+            );
+        }
+
+        // 8. 댓글 작성된 책이야기 ID 반환
         return bookStoryId;
     }
 
