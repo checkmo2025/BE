@@ -3,6 +3,7 @@ package checkmo.bookStory.internal.service.command;
 import checkmo.book.BookAPI;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
@@ -33,9 +34,12 @@ public class BookStoryCommandService {
      * @param request  책이야기 요청 DTO
      */
     public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreate request) {
+        BookStoryStatus status = resolveStatus(request.getStatus());
+        validateDescriptionForPublished(status, request.getDescription());
+
         String bookId = bookAPI.fetchOrCreateBook(request.getIsbn());
 
-        BookStory bookStory = BookStoryConverter.toBookStory(request, memberId, bookId);
+        BookStory bookStory = BookStoryConverter.toBookStory(request, memberId, bookId, status);
         BookStory savedBookStory = bookStoryRepository.save(bookStory);
 
         return savedBookStory.getId();
@@ -56,7 +60,19 @@ public class BookStoryCommandService {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_AUTHORIZED);
         }
 
-        return bookStory.update(request.getTitle(), request.getDescription());
+        boolean wasDraft = bookStory.isDraft();
+        BookStoryStatus requestedStatus = resolveStatus(request.getStatus());
+        validateStatusTransition(bookStory, requestedStatus);
+        validateDescriptionForPublished(requestedStatus, request.getDescription());
+
+        String bookId = request.getIsbn() == null ? null : bookAPI.fetchOrCreateBook(request.getIsbn());
+        Long updatedBookStoryId = bookStory.update(request.getTitle(), request.getDescription(), bookId, requestedStatus);
+
+        if (requestedStatus == BookStoryStatus.DRAFT || wasDraft && requestedStatus == BookStoryStatus.PUBLISHED) {
+            bookStoryRepository.updateCreatedAtToNow(bookStoryId);
+        }
+
+        return updatedBookStoryId;
     }
 
     /**
@@ -102,5 +118,21 @@ public class BookStoryCommandService {
      */
     public void softDeleteAllByMemberId(String memberId) {
         bookStoryRepository.softDeleteAllByMemberId(memberId);
+    }
+
+    private BookStoryStatus resolveStatus(BookStoryStatus status) {
+        return status == null ? BookStoryStatus.PUBLISHED : status;
+    }
+
+    private void validateStatusTransition(BookStory bookStory, BookStoryStatus requestedStatus) {
+        if (bookStory.isPublished() && requestedStatus == BookStoryStatus.DRAFT) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_INVALID_STATUS);
+        }
+    }
+
+    private void validateDescriptionForPublished(BookStoryStatus status, String description) {
+        if (status == BookStoryStatus.PUBLISHED && (description == null || description.isBlank())) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_DESCRIPTION_REQUIRED);
+        }
     }
 }

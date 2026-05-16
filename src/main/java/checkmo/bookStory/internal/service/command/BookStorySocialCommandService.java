@@ -35,6 +35,10 @@ public class BookStorySocialCommandService {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
+        if (bookStory.isDeleted() || bookStory.isDraft()) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND);
+        }
+
         return bookStoryLikedRepository.findByBookStoryAndMember(bookStoryId, memberId)
                 .map(bookStoryLiked -> {
                     // 좋아요가 이미 있다면 제거하고 false 반환

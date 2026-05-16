@@ -1,18 +1,19 @@
 package checkmo.bookStory.internal.repository;
 
 import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.member.MemberAPI;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 import static checkmo.bookStory.internal.entity.QBookStory.bookStory;
 
@@ -48,10 +49,11 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
-                        createCursorExp(cursorId),
+                        published(),
+                        createPublicCursorExp(cursorId),
                         bookStory.bookId.eq(bookId)
                 )
-                .orderBy(bookStory.id.desc())
+                .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
     }
@@ -62,9 +64,10 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
+                        published(),
                         containsTitle(keyword)
                 )
-                .orderBy(bookStory.id.desc())
+                .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -74,6 +77,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .from(bookStory)
                 .where(
                         notDeleted(),
+                        published(),
                         containsTitle(keyword)
                 )
                 .fetchOne();
@@ -86,9 +90,10 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
-                        createCursorExp(cursorId)
+                        published(),
+                        createPublicCursorExp(cursorId)
                 )
-                .orderBy(bookStory.id.desc())
+                .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
     }
@@ -104,10 +109,11 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
-                        createCursorExp(cursorId),
+                        published(),
+                        createPublicCursorExp(cursorId),
                         bookStory.memberId.in(followingMemberIds)
                 )
-                .orderBy(bookStory.id.desc())
+                .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
     }
@@ -117,10 +123,10 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
-                        createCursorExp(cursorId),
+                        createMyCursorExp(cursorId),
                         bookStory.memberId.eq(memberId)
                 )
-                .orderBy(bookStory.id.desc())
+                .orderBy(bookStory.status.asc(), bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
     }
@@ -141,10 +147,11 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
-                        createCursorExp(cursorId),
+                        published(),
+                        createPublicCursorExp(cursorId),
                         bookStory.memberId.in(clubMemberIds)
                 )
-                .orderBy(bookStory.id.desc())
+                .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
     }
@@ -158,10 +165,11 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
-                        createCursorExp(cursorId),
+                        published(),
+                        createPublicCursorExp(cursorId),
                         bookStory.memberId.eq(targetMemberId)
                 )
-                .orderBy(bookStory.id.desc())
+                .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
     }
@@ -170,8 +178,49 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return bookStory.deleted.eq(false);
     }
 
-    private BooleanExpression createCursorExp(Long cursorId) {
-        return cursorId != null ? bookStory.id.lt(cursorId) : null;
+    private BooleanExpression published() {
+        return bookStory.status.eq(BookStoryStatus.PUBLISHED);
+    }
+
+    private BooleanExpression createPublicCursorExp(Long cursorId) {
+        BookStory cursor = findCursor(cursorId);
+        if (cursor == null) {
+            return null;
+        }
+
+        return olderThanCursor(cursor.getCreatedAt(), cursor.getId());
+    }
+
+    private BooleanExpression createMyCursorExp(Long cursorId) {
+        BookStory cursor = findCursor(cursorId);
+        if (cursor == null) {
+            return null;
+        }
+
+        BooleanExpression olderInSameStatus = bookStory.status.eq(cursor.getStatus())
+                .and(olderThanCursor(cursor.getCreatedAt(), cursor.getId()));
+
+        if (cursor.getStatus() == BookStoryStatus.DRAFT) {
+            return olderInSameStatus.or(bookStory.status.eq(BookStoryStatus.PUBLISHED));
+        }
+
+        return olderInSameStatus;
+    }
+
+    private BooleanExpression olderThanCursor(LocalDateTime createdAt, Long id) {
+        return bookStory.createdAt.lt(createdAt)
+                .or(bookStory.createdAt.eq(createdAt).and(bookStory.id.lt(id)));
+    }
+
+    private BookStory findCursor(Long cursorId) {
+        if (cursorId == null) {
+            return null;
+        }
+
+        return queryFactory
+                .selectFrom(bookStory)
+                .where(bookStory.id.eq(cursorId))
+                .fetchOne();
     }
 
     private BooleanExpression containsTitle(String keyword) {

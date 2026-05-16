@@ -1,6 +1,7 @@
 package checkmo.bookStory.internal.service.query;
 
 import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
@@ -73,8 +74,24 @@ public class BookStoryQueryService {
      * @return 조회된 책 이야기 엔티티
      */
     public BookStory retrieveBookStory(Long bookStoryId) {
-        return bookStoryRepository.findByIdAndDeletedFalse(bookStoryId)
+        BookStory bookStory = bookStoryRepository.findByIdAndDeletedFalse(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
+        if (!bookStory.isPublished()) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND);
+        }
+
+        return bookStory;
+    }
+
+    public BookStory retrieveAccessibleBookStory(String memberId, Long bookStoryId) {
+        BookStory bookStory = bookStoryRepository.findByIdAndDeletedFalse(bookStoryId)
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
+
+        if (bookStory.isDraft() && !bookStory.verifyOwner(memberId)) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND);
+        }
+
+        return bookStory;
     }
 
     /**
@@ -126,6 +143,6 @@ public class BookStoryQueryService {
     }
 
     public BookStoryPrevNextProjection retrievePrevNextBookStoryId(String memberId, Long bookStoryId) {
-        return bookStoryRepository.findPrevNextBookStoryId(memberId, bookStoryId);
+        return bookStoryRepository.findPrevNextBookStoryId(memberId, bookStoryId, BookStoryStatus.PUBLISHED);
     }
 }

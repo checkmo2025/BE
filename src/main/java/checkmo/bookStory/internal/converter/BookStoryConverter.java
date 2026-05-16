@@ -18,11 +18,13 @@ public class BookStoryConverter {
     public static BookStory toBookStory(
             BookStoryRequestDTO.BookStoryCreate request,
             String memberId,
-            String bookId
+            String bookId,
+            checkmo.bookStory.internal.entity.BookStoryStatus status
     ) {
         return checkmo.bookStory.internal.entity.BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
+                .status(status)
                 .memberId(memberId)
                 .bookId(bookId)
                 .build();
@@ -42,6 +44,8 @@ public class BookStoryConverter {
                 .bookStoryTitle(bookStory.getTitle())
                 .description(bookStory.getDescription())
                 .likes(bookStory.getLikes())
+                .status(bookStory.getStatus())
+                .canContinue(bookStory.isDraft() && bookStory.getMemberId().equals(currentMemberId))
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
@@ -66,14 +70,16 @@ public class BookStoryConverter {
                 .bookStoryTitle(bookStory.getTitle())
                 .description(bookStory.getDescription())
                 .likes(bookStory.getLikes())
+                .status(bookStory.getStatus())
+                .canContinue(bookStory.isDraft() && bookStory.getMemberId().equals(currentMemberId))
                 .likedByMe(isLiked)
                 .createdAt(bookStory.getCreatedAt())
                 .writtenByMe(bookStory.getMemberId().equals(currentMemberId))
                 .viewCount(bookStory.getViewCount())
                 .commentCount(bookStory.getCommentsCount())
                 .comments(commentList)
-                .prevBookStoryId(bookStoryPrevNextProjection.getPrevId())
-                .nextBookStoryId(bookStoryPrevNextProjection.getNextId())
+                .prevBookStoryId(bookStoryPrevNextProjection == null ? null : bookStoryPrevNextProjection.getPrevId())
+                .nextBookStoryId(bookStoryPrevNextProjection == null ? null : bookStoryPrevNextProjection.getNextId())
                 .build();
     }
 
