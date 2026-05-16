@@ -1,0 +1,6 @@
+ALTER TABLE book_story
+    ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'PUBLISHED';
+
+UPDATE book_story
+SET status = 'PUBLISHED'
+WHERE status IS NULL;

@@ -1,6 +1,7 @@
 package checkmo.bookStory.web.dto;
 
 import checkmo.book.BookExternalDTO;
+import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -35,6 +36,8 @@ public class BookStoryResponseDTO {
         private String bookStoryTitle;
         private String description;
         private int likes;
+        private BookStoryStatus status;
+        private boolean canContinue;
 
         private boolean likedByMe; // 내가 좋아요를 눌렀는지 여부 (true: 눌렀음, false: 안누름)
 
@@ -57,6 +60,8 @@ public class BookStoryResponseDTO {
         private String bookStoryTitle;
         private String description;
         private int likes;
+        private BookStoryStatus status;
+        private boolean canContinue;
 
         private boolean likedByMe; // 내가 좋아요를 눌렀는지 여부 (true: 눌렀음, false: 안누름)
 

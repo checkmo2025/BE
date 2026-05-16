@@ -58,10 +58,10 @@ public class BookStoryQueryFacade {
 
     private DetailInfo fetchBookStoryDetailInfoInternal(String memberId, Long bookStoryId, boolean increaseViewCount) {
         // 1. Service에서 BookStory 엔티티 조회
-        BookStory bookStory = bookStoryQueryService.retrieveBookStory(bookStoryId);
+        BookStory bookStory = bookStoryQueryService.retrieveAccessibleBookStory(memberId, bookStoryId);
 
         // 2. 사용자 상세 조회에서만 조회 수 카운트 증가
-        if (increaseViewCount) {
+        if (increaseViewCount && bookStory.isPublished()) {
             viewCacheService.incrementViewCount(bookStoryId, memberId);
         }
 
@@ -98,8 +98,9 @@ public class BookStoryQueryFacade {
                 BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap);
 
         // 9. 책이야기 작성자의 이전, 다음 책이야기 아이디 조회
-        var bookStoryPrevNextProjection
-                = bookStoryQueryService.retrievePrevNextBookStoryId(bookStory.getMemberId(), bookStoryId);
+        var bookStoryPrevNextProjection = bookStory.isPublished()
+                ? bookStoryQueryService.retrievePrevNextBookStoryId(bookStory.getMemberId(), bookStoryId)
+                : null;
 
         // 10. DTO 변환
         return BookStoryConverter.toBookStoryDetailWithComment(

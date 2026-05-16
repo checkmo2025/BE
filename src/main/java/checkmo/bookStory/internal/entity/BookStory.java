@@ -4,6 +4,8 @@ import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -50,6 +52,11 @@ public class BookStory extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private BookStoryStatus status = BookStoryStatus.PUBLISHED;
+
     @Column(name = "member_id", nullable = false)
     private String memberId;
 
@@ -64,10 +71,22 @@ public class BookStory extends BaseEntity {
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL)
     private List<BookStoryLiked> bookStoryLikedList = new ArrayList<>();
 
-    public Long update(String title, String description) {
+    public Long update(String title, String description, String bookId, BookStoryStatus status) {
         this.title = title;
         this.description = description;
+        if (bookId != null) {
+            this.bookId = bookId;
+        }
+        this.status = status;
         return this.id;
+    }
+
+    public boolean isDraft() {
+        return this.status == BookStoryStatus.DRAFT;
+    }
+
+    public boolean isPublished() {
+        return this.status == BookStoryStatus.PUBLISHED;
     }
 
     public void addCommentToList(Comment comment) {

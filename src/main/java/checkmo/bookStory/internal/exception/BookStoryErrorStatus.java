@@ -12,6 +12,8 @@ public enum BookStoryErrorStatus implements BaseErrorCode {
     //책이야기
     BOOK_STORY_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOK_STORY_404", "책 이야기를 찾을 수 없습니다."),
     BOOK_STORY_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "BOOK_STORY_405", "책 이야기 수정/삭제 권한이 없습니다."),
+    BOOK_STORY_INVALID_STATUS(HttpStatus.BAD_REQUEST, "BOOK_STORY_406", "책 이야기 상태 변경 요청이 올바르지 않습니다."),
+    BOOK_STORY_DESCRIPTION_REQUIRED(HttpStatus.BAD_REQUEST, "BOOK_STORY_407", "책 이야기에 내용을 입력해주세요."),
 
     // 책 이야기 댓글
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_404", "댓글을 찾을 수 없습니다."),
