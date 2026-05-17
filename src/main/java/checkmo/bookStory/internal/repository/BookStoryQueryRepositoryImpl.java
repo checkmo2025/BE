@@ -35,7 +35,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             int pageSize
     ) {
         return switch (scope) {
-            case ALL -> findAllBookStories(cursorId, pageSize);
+            case ALL -> findAllBookStories(memberId, cursorId, pageSize);
             case MY -> findMyBookStories(memberId, cursorId, pageSize);
             case FOLLOWING -> findFollowBookStories(memberId, cursorId, pageSize);
             case CLUB -> findClubBookStories(memberId, clubId, cursorId, pageSize);
@@ -44,13 +44,14 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     @Override
-    public List<BookStory> searchBookStories(String bookId, Long cursorId, int pageSize) {
+    public List<BookStory> searchBookStories(String memberId, String bookId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
                         published(),
                         createPublicCursorExp(cursorId),
+                        notInBlockRelatedMemberIds(memberId),
                         bookStory.bookId.eq(bookId)
                 )
                 .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
@@ -85,13 +86,14 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return new PageImpl<>(content, pageable, total == null ? 0L : total);
     }
 
-    private List<BookStory> findAllBookStories(Long cursorId, int pageSize) {
+    private List<BookStory> findAllBookStories(String memberId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
                         published(),
-                        createPublicCursorExp(cursorId)
+                        createPublicCursorExp(cursorId),
+                        notInBlockRelatedMemberIds(memberId)
                 )
                 .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
@@ -111,7 +113,8 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                         notDeleted(),
                         published(),
                         createPublicCursorExp(cursorId),
-                        bookStory.memberId.in(followingMemberIds)
+                        bookStory.memberId.in(followingMemberIds),
+                        notInBlockRelatedMemberIds(memberId)
                 )
                 .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
@@ -228,6 +231,11 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             return null;
         }
         return bookStory.title.containsIgnoreCase(keyword.trim());
+    }
+
+    private BooleanExpression notInBlockRelatedMemberIds(String memberId) {
+        List<String> blockRelatedMemberIds = memberAPI.fetchBlockRelatedMemberIds(memberId);
+        return blockRelatedMemberIds.isEmpty() ? null : bookStory.memberId.notIn(blockRelatedMemberIds);
     }
 
     private void validateClubMember(String memberId, Long clubId) {

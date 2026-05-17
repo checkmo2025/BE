@@ -49,16 +49,25 @@ public class BookStoryQueryFacade {
      * @return 조회된 책 이야기 상세 정보 DTO
      */
     public DetailInfo fetchBookStoryDetailInfo(String memberId, Long bookStoryId) {
-        return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, true);
+        return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, true, true);
     }
 
     public DetailInfo fetchBookStoryDetailInfoForAdmin(String memberId, Long bookStoryId) {
-        return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, false);
+        return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, false, false);
     }
 
-    private DetailInfo fetchBookStoryDetailInfoInternal(String memberId, Long bookStoryId, boolean increaseViewCount) {
+    private DetailInfo fetchBookStoryDetailInfoInternal(
+            String memberId,
+            Long bookStoryId,
+            boolean increaseViewCount,
+            boolean validateBlockRelation
+    ) {
         // 1. Service에서 BookStory 엔티티 조회
         BookStory bookStory = bookStoryQueryService.retrieveAccessibleBookStory(memberId, bookStoryId);
+
+        if (validateBlockRelation) {
+            memberAPI.validateProfileAccessible(memberId, bookStory.getMemberId());
+        }
 
         // 2. 사용자 상세 조회에서만 조회 수 카운트 증가
         if (increaseViewCount && bookStory.isPublished()) {
@@ -94,8 +103,9 @@ public class BookStoryQueryFacade {
                         memberAPI.fetchMemberBasicInfoByMemberIds(new ArrayList<>(commentMemberIds));
 
         // 8. 댓글 DTO 변환
+        Set<String> blockedMemberIds = Set.copyOf(memberAPI.fetchBlockRelatedMemberIds(memberId));
         List<CommentInfo> commentDTOList =
-                BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap);
+                BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap, blockedMemberIds);
 
         // 9. 책이야기 작성자의 이전, 다음 책이야기 아이디 조회
         var bookStoryPrevNextProjection = bookStory.isPublished()
@@ -144,6 +154,7 @@ public class BookStoryQueryFacade {
             Long cursorId
     ) {
         String targetMemberId = memberAPI.fetchMemberId(targetNickname);
+        memberAPI.validateProfileAccessible(memberId, targetMemberId);
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.TARGET, null, targetMemberId, cursorId);
     }
 
@@ -276,7 +287,7 @@ public class BookStoryQueryFacade {
         // 1. BookStory 리스트 조회
         CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
                 (pageSize) -> bookStoryQueryService.retrieveBookStories(
-                        bookId, cursorId, pageSize
+                        memberId, bookId, cursorId, pageSize
                 ),
                 BookStory::getId,
                 DEFAULT_PAGE_SIZE

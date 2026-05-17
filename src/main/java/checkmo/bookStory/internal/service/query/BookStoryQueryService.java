@@ -55,11 +55,12 @@ public class BookStoryQueryService {
     }
 
     public List<BookStory> retrieveBookStories(
+            String memberId,
             String bookId,
             Long cursorId,
             int pageSize
     ) {
-        return bookStoryRepository.searchBookStories(bookId, cursorId, pageSize);
+        return bookStoryRepository.searchBookStories(memberId, bookId, cursorId, pageSize);
     }
 
     public Page<BookStory> retrieveBookStoriesForAdmin(String keyword, int page, int size) {

@@ -32,6 +32,7 @@ public class BookLikeQueryService {
 
     public BookResponseDTO.LikedBookList retrieveMemberLikedBooks(String memberNickname, String currentMemberId, Long cursorId) {
         String targetMemberId = memberAPI.fetchMemberId(memberNickname);
+        memberAPI.validateProfileAccessible(currentMemberId, targetMemberId);
         return retrieveLikedBooksByMemberId(targetMemberId, currentMemberId, cursorId);
     }
 

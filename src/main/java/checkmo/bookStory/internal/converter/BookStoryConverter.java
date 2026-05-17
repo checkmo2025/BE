@@ -9,11 +9,14 @@ import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookStoryConverter {
+
+    private static final String BLOCKED_USER_MESSAGE = "차단된 사용자입니다";
 
     public static BookStory toBookStory(
             BookStoryRequestDTO.BookStoryCreate request,
@@ -101,7 +104,8 @@ public class BookStoryConverter {
     public static List<BookStoryResponseDTO.CommentInfo> toCommentDetailList(
             List<Comment> comments,
             String currentMemberId,
-            java.util.Map<String, MemberExternalDTO.BasicInfo> memberInfoMap
+            java.util.Map<String, MemberExternalDTO.BasicInfo> memberInfoMap,
+            Set<String> blockedMemberIds
     ) {
         return comments.stream()
                 .map(comment -> {
@@ -111,6 +115,7 @@ public class BookStoryConverter {
                                     reply,
                                     currentMemberId,
                                     memberInfoMap.get(reply.getMemberId()),
+                                    isBlocked(reply.getMemberId(), blockedMemberIds),
                                     List.of() // 대댓글의 대댓글은 없으므로 빈 리스트
                             )).toList();
 
@@ -119,6 +124,7 @@ public class BookStoryConverter {
                             comment,
                             currentMemberId,
                             memberInfoMap.get(comment.getMemberId()),
+                            isBlocked(comment.getMemberId(), blockedMemberIds),
                             replies
                     );
                 }).toList();
@@ -128,6 +134,7 @@ public class BookStoryConverter {
             Comment comment,
             String currentMemberId,
             MemberExternalDTO.BasicInfo authorInfo,
+            boolean blocked,
             List<BookStoryResponseDTO.CommentInfo> replies
     ) {
         if (comment.isDeleted()) {
@@ -142,14 +149,28 @@ public class BookStoryConverter {
                     .build();
         }
 
+        MemberExternalDTO.BasicInfo displayAuthorInfo = blocked ? blockedBasicInfo() : authorInfo;
+        String displayContent = blocked ? BLOCKED_USER_MESSAGE : comment.getContent();
+
         return BookStoryResponseDTO.CommentInfo.builder()
                 .commentId(comment.getId())
-                .content(comment.getContent())
-                .authorInfo(authorInfo)
+                .content(displayContent)
+                .authorInfo(displayAuthorInfo)
                 .createdAt(comment.getCreatedAt())
                 .writtenByMe(comment.getMemberId().equals(currentMemberId))
                 .deleted(false)
                 .replies(replies)
+                .build();
+    }
+
+    private static boolean isBlocked(String memberId, Set<String> blockedMemberIds) {
+        return memberId != null && blockedMemberIds != null && blockedMemberIds.contains(memberId);
+    }
+
+    private static MemberExternalDTO.BasicInfo blockedBasicInfo() {
+        return MemberExternalDTO.BasicInfo.builder()
+                .nickname(BLOCKED_USER_MESSAGE)
+                .profileImageUrl(null)
                 .build();
     }
 }
