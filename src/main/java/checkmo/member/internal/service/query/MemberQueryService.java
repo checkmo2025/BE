@@ -122,9 +122,10 @@ public class MemberQueryService {
     public List<Member> retrieveRecommendedMembers(
             String memberId,
             List<MemberInterestCategory> myInterests,
+            List<String> excludedMemberIds,
             int limit
     ) {
-        return memberRepository.findRecommendMembers(memberId, myInterests, limit);
+        return memberRepository.findRecommendMembers(memberId, myInterests, excludedMemberIds, limit);
     }
 
     public List<String> retrieveActiveEmailsByKeyword(String keyword, int limit) {

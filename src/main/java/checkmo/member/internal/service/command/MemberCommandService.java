@@ -7,6 +7,7 @@ import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.FollowRepository;
+import checkmo.member.internal.repository.MemberBlockRepository;
 import checkmo.member.internal.repository.MemberReportRepository;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
@@ -28,6 +29,7 @@ public class MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
+    private final MemberBlockRepository memberBlockRepository;
     private final MemberReportRepository memberReportRepository;
 
     private final ApplicationEventPublisher eventPublisher;
@@ -172,6 +174,7 @@ public class MemberCommandService {
         }
 
         memberReportRepository.deleteAllByMemberId(memberId);
+        memberBlockRepository.deleteAllByMemberId(memberId);
         followRepository.deleteAllByMemberId(memberId);
         memberRepository.delete(member);
         authenticationAPI.deleteAuthData(memberId);

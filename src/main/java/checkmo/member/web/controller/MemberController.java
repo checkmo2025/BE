@@ -3,6 +3,7 @@ package checkmo.member.web.controller;
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.internal.service.MemberQueryFacade;
+import checkmo.member.internal.service.command.MemberBlockCommandService;
 import checkmo.member.internal.service.command.MemberCommandService;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
 import checkmo.member.internal.service.command.MemberReportCommandService;
@@ -35,6 +36,7 @@ public class MemberController {
     private final MemberQueryFacade memberQueryFacade;
 
     private final MemberFollowCommandService memberFollowCommandService;
+    private final MemberBlockCommandService memberBlockCommandService;
     private final MemberCommandService memberCommandService;
     private final MemberReportCommandService memberReportCommandService;
 
@@ -126,6 +128,26 @@ public class MemberController {
         return ApiResponse.onSuccess(memberNickname + "님을 팔로워 목록에서 제거하였습니다.");
     }
 
+    @Operation(summary = "회원 차단 API", description = "특정 회원을 차단합니다. 기존 양방향 팔로우 관계는 모두 삭제됩니다.")
+    @PostMapping("/{memberNickname}/block")
+    public ApiResponse<String> blockMember(
+            @CurrentId String memberId,
+            @PathVariable String memberNickname
+    ) {
+        memberBlockCommandService.block(memberId, memberNickname);
+        return ApiResponse.onSuccess(memberNickname + "님을 차단했습니다.");
+    }
+
+    @Operation(summary = "회원 차단 해제 API", description = "특정 회원에 대한 차단을 해제합니다.")
+    @DeleteMapping("/{memberNickname}/block")
+    public ApiResponse<String> unblockMember(
+            @CurrentId String memberId,
+            @PathVariable String memberNickname
+    ) {
+        memberBlockCommandService.unblock(memberId, memberNickname);
+        return ApiResponse.onSuccess(memberNickname + "님 차단을 해제했습니다.");
+    }
+
     @Operation(summary = "팔로잉 목록 조회 API", description = "특정 회원의 팔로잉 목록을 조회합니다.")
     @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
     @ApiResponses({
@@ -156,6 +178,16 @@ public class MemberController {
     ) {
         var followerList = memberQueryFacade.retrieveFollowers(memberId, cursorId);
         return ApiResponse.onSuccess(followerList);
+    }
+
+    @Operation(summary = "내 차단 목록 조회 API", description = "현재 로그인한 회원이 차단한 회원 목록을 최신순으로 조회합니다.")
+    @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
+    @GetMapping("/me/blocks")
+    public ApiResponse<MemberResponseDTO.BlockedMemberList> getBlockedMemberList(
+            @CurrentId String memberId,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveBlockedMembers(memberId, cursorId));
     }
 
     @Operation(summary = "다른 사람 팔로잉 목록 조회 API", description = "특정 회원의 팔로잉 목록을 조회합니다.")

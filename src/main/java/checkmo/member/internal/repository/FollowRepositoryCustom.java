@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface FollowRepositoryCustom {
 
-    List<Follow> findFollowers(String followingId, Long cursorId, int pageSize);
+    List<Follow> findFollowers(String followingId, Long cursorId, int pageSize, List<String> excludedMemberIds);
 
-    List<Follow> findFollowings(String followerId, Long cursorId, int pageSize);
+    List<Follow> findFollowings(String followerId, Long cursorId, int pageSize, List<String> excludedMemberIds);
 }

@@ -7,6 +7,7 @@ import checkmo.member.MemberExternalDTO.InterestCategoryInfo;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
+import checkmo.member.internal.service.query.MemberBlockQueryService;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class MemberAPIImpl implements MemberAPI {
 
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
+    private final MemberBlockQueryService memberBlockQueryService;
 
     @Override
     public String fetchMemberId(String nickname) {
@@ -156,6 +158,31 @@ public class MemberAPIImpl implements MemberAPI {
     @Override
     public List<String> fetchFollowingIds(String memberId) {
         return memberFollowQueryService.retrieveFollowingIds(memberId);
+    }
+
+    @Override
+    public List<String> fetchBlockedMemberIds(String blockerId) {
+        return memberBlockQueryService.retrieveBlockedMemberIds(blockerId);
+    }
+
+    @Override
+    public List<String> fetchBlockRelatedMemberIds(String memberId) {
+        return memberBlockQueryService.retrieveBlockRelatedMemberIds(memberId);
+    }
+
+    @Override
+    public boolean hasBlockBetween(String memberId1, String memberId2) {
+        return memberBlockQueryService.hasBlockBetween(memberId1, memberId2);
+    }
+
+    @Override
+    public boolean hasBlocked(String blockerId, String blockedId) {
+        return memberBlockQueryService.hasBlocked(blockerId, blockedId);
+    }
+
+    @Override
+    public void validateProfileAccessible(String viewerId, String targetMemberId) {
+        memberBlockQueryService.validateProfileAccessible(viewerId, targetMemberId);
     }
 
     @Override

@@ -16,12 +16,13 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Follow> findFollowers(String followingId, Long cursorId, int pageSize) {
+    public List<Follow> findFollowers(String followingId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
         return queryFactory
                 .selectFrom(follow)
                 .join(follow.follower).fetchJoin()
                 .where(
                         follow.following.id.eq(followingId),
+                        notInFollowerIds(excludedMemberIds),
                         cursorCondition(cursorId)
                 )
                 .orderBy(follow.id.desc())
@@ -30,12 +31,13 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     }
 
     @Override
-    public List<Follow> findFollowings(String followerId, Long cursorId, int pageSize) {
+    public List<Follow> findFollowings(String followerId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
         return queryFactory
                 .selectFrom(follow)
                 .join(follow.following).fetchJoin()
                 .where(
                         follow.follower.id.eq(followerId),
+                        notInFollowingIds(excludedMemberIds),
                         cursorCondition(cursorId)
                 )
                 .orderBy(follow.id.desc())
@@ -45,5 +47,13 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
 
     private BooleanExpression cursorCondition(Long cursorId) {
         return cursorId != null ? follow.id.lt(cursorId) : null;
+    }
+
+    private BooleanExpression notInFollowerIds(List<String> excludedMemberIds) {
+        return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : follow.follower.id.notIn(excludedMemberIds);
+    }
+
+    private BooleanExpression notInFollowingIds(List<String> excludedMemberIds) {
+        return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : follow.following.id.notIn(excludedMemberIds);
     }
 }
