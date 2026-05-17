@@ -23,6 +23,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     public List<Member> findRecommendMembers(
             String currentMemberId,
             List<MemberInterestCategory> myInterests,
+            List<String> excludedMemberIds,
             int limit
     ) {
         // 1. 이미 팔로우한 사람들의 ID 조회
@@ -39,7 +40,8 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                     .from(member)
                     .where(
                             member.id.ne(currentMemberId),
-                            notInFollowingIds(followingIds)
+                            notInFollowingIds(followingIds),
+                            notInExcludedIds(excludedMemberIds)
                     )
                     .limit(limit)
                     .fetch();
@@ -56,6 +58,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .where(
                         member.id.ne(currentMemberId),
                         notInFollowingIds(followingIds),
+                        notInExcludedIds(excludedMemberIds),
                         interest.in(myInterests)
                 )
                 .groupBy(member.id)
@@ -66,5 +69,9 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 
     private BooleanExpression notInFollowingIds(List<String> followingIds) {
         return followingIds.isEmpty() ? null : member.id.notIn(followingIds);
+    }
+
+    private BooleanExpression notInExcludedIds(List<String> excludedMemberIds) {
+        return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : member.id.notIn(excludedMemberIds);
     }
 }

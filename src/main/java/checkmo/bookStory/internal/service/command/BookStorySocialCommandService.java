@@ -7,6 +7,7 @@ import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
+import checkmo.member.MemberAPI;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,6 +22,7 @@ public class BookStorySocialCommandService {
 
     private final BookStoryRepository bookStoryRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
+    private final MemberAPI memberAPI;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -46,6 +48,8 @@ public class BookStorySocialCommandService {
                     return false;
                 })
                 .orElseGet(() -> {
+                    validateNotBlockedByAuthor(bookStory, memberId);
+
                     // 사전 체크: 대부분의 중복을 사전 차단 (race condition 최소화)
                     if (bookStoryLikedRepository.existsByMemberIdAndBookStoryId(memberId, bookStoryId)) {
                         return true; // 이미 좋아요 존재
@@ -68,6 +72,12 @@ public class BookStorySocialCommandService {
                     });
                     return true; // 생성되었거나 중복이거나, 최종적으로 좋아요 존재
                 });
+    }
+
+    private void validateNotBlockedByAuthor(BookStory bookStory, String memberId) {
+        if (!memberId.equals(bookStory.getMemberId()) && memberAPI.hasBlockBetween(bookStory.getMemberId(), memberId)) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_LIKE_BLOCKED);
+        }
     }
 
     private void deleteBookStoryLiked(BookStory bookStory, BookStoryLiked bookStoryLiked) {

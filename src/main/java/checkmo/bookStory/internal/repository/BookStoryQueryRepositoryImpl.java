@@ -4,7 +4,6 @@ import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.member.MemberAPI;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
@@ -23,11 +22,12 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
 
     private final JPAQueryFactory queryFactory;
     private final ClubManagementAPI clubManagementAPI;
-    private final MemberAPI memberAPI;
 
     @Override
     public List<BookStory> searchBookStories(
             String memberId,
+            List<String> excludedMemberIds,
+            List<String> followingMemberIds,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId,
             String targetMemberId,
@@ -35,22 +35,23 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
             int pageSize
     ) {
         return switch (scope) {
-            case ALL -> findAllBookStories(cursorId, pageSize);
+            case ALL -> findAllBookStories(excludedMemberIds, cursorId, pageSize);
             case MY -> findMyBookStories(memberId, cursorId, pageSize);
-            case FOLLOWING -> findFollowBookStories(memberId, cursorId, pageSize);
+            case FOLLOWING -> findFollowBookStories(followingMemberIds, excludedMemberIds, cursorId, pageSize);
             case CLUB -> findClubBookStories(memberId, clubId, cursorId, pageSize);
             case TARGET -> findTargetMemberBookStories(targetMemberId, cursorId, pageSize);
         };
     }
 
     @Override
-    public List<BookStory> searchBookStories(String bookId, Long cursorId, int pageSize) {
+    public List<BookStory> searchBookStories(String bookId, List<String> excludedMemberIds, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
                         published(),
                         createPublicCursorExp(cursorId),
+                        notInExcludedMemberIds(excludedMemberIds),
                         bookStory.bookId.eq(bookId)
                 )
                 .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
@@ -85,23 +86,27 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return new PageImpl<>(content, pageable, total == null ? 0L : total);
     }
 
-    private List<BookStory> findAllBookStories(Long cursorId, int pageSize) {
+    private List<BookStory> findAllBookStories(List<String> excludedMemberIds, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
                         notDeleted(),
                         published(),
-                        createPublicCursorExp(cursorId)
+                        createPublicCursorExp(cursorId),
+                        notInExcludedMemberIds(excludedMemberIds)
                 )
                 .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
                 .fetch();
     }
 
-    private List<BookStory> findFollowBookStories(String memberId, Long cursorId, int pageSize) {
-        List<String> followingMemberIds = getFollowingMemberIds(memberId);
-
-        if (followingMemberIds.isEmpty()) {
+    private List<BookStory> findFollowBookStories(
+            List<String> followingMemberIds,
+            List<String> excludedMemberIds,
+            Long cursorId,
+            int pageSize
+    ) {
+        if (followingMemberIds == null || followingMemberIds.isEmpty()) {
             return List.of();
         }
 
@@ -111,7 +116,8 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                         notDeleted(),
                         published(),
                         createPublicCursorExp(cursorId),
-                        bookStory.memberId.in(followingMemberIds)
+                        bookStory.memberId.in(followingMemberIds),
+                        notInExcludedMemberIds(excludedMemberIds)
                 )
                 .orderBy(bookStory.createdAt.desc(), bookStory.id.desc())
                 .limit(pageSize)
@@ -230,12 +236,12 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return bookStory.title.containsIgnoreCase(keyword.trim());
     }
 
-    private void validateClubMember(String memberId, Long clubId) {
-        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
+    private BooleanExpression notInExcludedMemberIds(List<String> excludedMemberIds) {
+        return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : bookStory.memberId.notIn(excludedMemberIds);
     }
 
-    private List<String> getFollowingMemberIds(String memberId) {
-        return memberAPI.fetchFollowingIds(memberId);
+    private void validateClubMember(String memberId, Long clubId) {
+        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
     }
 
     private List<String> getClubMemberIds(Long clubId) {

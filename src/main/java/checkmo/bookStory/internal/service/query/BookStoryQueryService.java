@@ -45,21 +45,26 @@ public class BookStoryQueryService {
      */
     public List<BookStory> retrieveBookStories(
             String memberId,
+            List<String> excludedMemberIds,
+            List<String> followingMemberIds,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId,
             String targetMemberId,
             Long cursorId,
             int pageSize
     ) {
-        return bookStoryRepository.searchBookStories(memberId, scope, clubId, targetMemberId, cursorId, pageSize);
+        return bookStoryRepository.searchBookStories(
+                memberId, excludedMemberIds, followingMemberIds, scope, clubId, targetMemberId, cursorId, pageSize
+        );
     }
 
     public List<BookStory> retrieveBookStories(
             String bookId,
+            List<String> excludedMemberIds,
             Long cursorId,
             int pageSize
     ) {
-        return bookStoryRepository.searchBookStories(bookId, cursorId, pageSize);
+        return bookStoryRepository.searchBookStories(bookId, excludedMemberIds, cursorId, pageSize);
     }
 
     public Page<BookStory> retrieveBookStoriesForAdmin(String keyword, int page, int size) {

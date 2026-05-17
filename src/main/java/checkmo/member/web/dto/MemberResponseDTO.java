@@ -107,6 +107,26 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class BlockedMember {
+        private String memberId;
+        private String nickname;
+        private String profileImageUrl;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BlockedMemberList {
+        private List<BlockedMember> blocks;
+        private boolean hasNext;
+        private Long nextCursor;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class ReportInfo {
         private Long reportId;
         private String reportedMemberNickname;

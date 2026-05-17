@@ -21,6 +21,14 @@ public interface FollowRepository extends JpaRepository<Follow, Long>, FollowRep
     void deleteByFollow(String followerId, String followingId);
 
     @Modifying
+    @Query("""
+            DELETE FROM Follow f
+            WHERE (f.follower.id = :memberId1 AND f.following.id = :memberId2)
+               OR (f.follower.id = :memberId2 AND f.following.id = :memberId1)
+            """)
+    void deleteBetweenMembers(String memberId1, String memberId2);
+
+    @Modifying
     @Query("DELETE FROM Follow f WHERE f.follower.id = :memberId OR f.following.id = :memberId")
     void deleteAllByMemberId(String memberId);
 

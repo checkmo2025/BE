@@ -6,9 +6,11 @@ import checkmo.member.internal.repository.projection.MemberIdAndNicknameProjecti
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,6 +34,10 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberR
 
     @Query("select m.id as id, m.nickName as nickName, m.imgUrl as imgUrl from Member m where m.id in :memberIds and m.deactivatedAt is null")
     List<MemberBasicInfoProjection> findActiveIdNicknameAndImgUrlByIdIn(@Param("memberIds") List<String> memberIds);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select m from Member m where m.id in :memberIds and m.deactivatedAt is null order by m.id asc")
+    List<Member> lockActiveMembersByIdIn(@Param("memberIds") List<String> memberIds);
 
     // 생성일시가 특정 시간 이전이고, 추가정보(nickname)가 아직 입력되지 않은(프로필 미완료) 회원 조회
     @Query("SELECT m FROM Member m WHERE m.createdAt < :threshold AND (m.nickName IS NULL OR m.nickName = '')")

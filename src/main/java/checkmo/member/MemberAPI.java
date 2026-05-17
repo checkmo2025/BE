@@ -92,6 +92,48 @@ public interface MemberAPI {
     List<String> fetchFollowingIds(String memberId);
 
     /**
+     * 특정 회원이 차단한 회원 ID 목록을 조회합니다.
+     *
+     * @param blockerId 차단 주체 회원 ID
+     * @return 차단당한 회원 ID 목록
+     */
+    List<String> fetchBlockedMemberIds(String blockerId);
+
+    /**
+     * 특정 회원과 차단 관계가 있는 모든 회원 ID 목록을 조회합니다.
+     *
+     * @param memberId 회원 ID
+     * @return 내가 차단했거나 나를 차단한 회원 ID 목록
+     */
+    List<String> fetchBlockRelatedMemberIds(String memberId);
+
+    /**
+     * 두 회원 사이에 어느 방향이든 차단 관계가 있는지 조회합니다.
+     *
+     * @param memberId1 회원 ID
+     * @param memberId2 회원 ID
+     * @return 차단 관계 존재 여부
+     */
+    boolean hasBlockBetween(String memberId1, String memberId2);
+
+    /**
+     * 차단 주체가 특정 회원을 차단했는지 조회합니다.
+     *
+     * @param blockerId 차단 주체 회원 ID
+     * @param blockedId 피차단 회원 ID
+     * @return 차단 여부
+     */
+    boolean hasBlocked(String blockerId, String blockedId);
+
+    /**
+     * 공개 프로필/서재/책이야기 직접 조회 가능 여부를 검증합니다.
+     *
+     * @param viewerId 조회하는 회원 ID
+     * @param targetMemberId 조회 대상 회원 ID
+     */
+    void validateProfileAccessible(String viewerId, String targetMemberId);
+
+    /**
      * 회원의 관심 카테고리 정보를 조회합니다.
      *
      * @param memberId 회원 ID

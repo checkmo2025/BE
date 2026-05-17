@@ -7,6 +7,8 @@ import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.FollowRepository;
 import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.internal.service.query.MemberBlockQueryService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,6 +23,7 @@ public class MemberFollowCommandService {
 
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
+    private final MemberBlockQueryService memberBlockQueryService;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -38,14 +41,20 @@ public class MemberFollowCommandService {
         // 자기 자신을 팔로우할 수 없음
         following.verifyNotSelf(memberId);
 
+        // 회원 조회
+        Member follower = memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+
+        lockMemberPair(follower.getId(), following.getId());
+
+        if (memberBlockQueryService.hasBlockBetween(memberId, following.getId())) {
+            throw new MemberException(MemberErrorStatus.MEMBER_BLOCKED_RELATION);
+        }
+
         // 이미 팔로잉 중인지 확인
         if (followRepository.existsByFollow(memberId, following.getId())) {
             throw new MemberException(MemberErrorStatus.MEMBER_ALREADY_FOLLOWING);
         }
-
-        // 회원 조회
-        Member follower = memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로잉 관계 생성
         Follow follow = Follow.builder()
@@ -56,6 +65,13 @@ public class MemberFollowCommandService {
 
         // 팔로잉 이벤트 발행
         eventPublisher.publishEvent(new MemberEvent.Follow(follow.getId(), memberId, following.getId()));
+    }
+
+    private void lockMemberPair(String memberId1, String memberId2) {
+        List<String> memberIds = List.of(memberId1, memberId2).stream()
+                .sorted()
+                .toList();
+        memberRepository.lockActiveMembersByIdIn(memberIds);
     }
 
     /**

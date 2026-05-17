@@ -7,9 +7,11 @@ import checkmo.common.template.ExtractHelper;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberBlock;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.entity.MemberReport;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
+import checkmo.member.internal.service.query.MemberBlockQueryService;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.internal.service.query.MemberReportQueryService;
@@ -39,6 +41,7 @@ public class MemberQueryFacade {
 
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
+    private final MemberBlockQueryService memberBlockQueryService;
     private final MemberReportQueryService memberReportQueryService;
 
     public DetailInfo retrieveMemberDetailInfo(String memberId) {
@@ -59,6 +62,8 @@ public class MemberQueryFacade {
 
     public othersDetailInfo retrieveOthersDetailInfo(String targetMemberNickname, String memberId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        memberBlockQueryService.validateProfileAccessible(memberId, targetMember.getId());
+
         boolean isFollowing = memberFollowQueryService.isFollowing(memberId, targetMember.getId());
         long followerCount = memberFollowQueryService.countFollowers(targetMember.getId());
         long followingCount = memberFollowQueryService.countFollowings(targetMember.getId());
@@ -77,12 +82,14 @@ public class MemberQueryFacade {
 
     public MemberResponseDTO.FollowList retrieveOtherFollowers(String targetMemberNickname, String currentMemberId, Long cursorId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        memberBlockQueryService.validateProfileAccessible(currentMemberId, targetMember.getId());
         return retrieveFollowers(targetMember.getId(), currentMemberId, cursorId);
     }
 
     private MemberResponseDTO.FollowList retrieveFollowers(String targetMemberId, String currentMemberId, Long cursorId) {
+        List<String> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(currentMemberId);
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
-                size -> memberFollowQueryService.retrieveFollowers(targetMemberId, cursorId, size),
+                size -> memberFollowQueryService.retrieveFollowers(targetMemberId, cursorId, size, blockRelatedMemberIds),
                 Follow::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -105,12 +112,14 @@ public class MemberQueryFacade {
 
     public MemberResponseDTO.FollowList retrieveOtherFollowings(String targetMemberNickname, String currentMemberId, Long cursorId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        memberBlockQueryService.validateProfileAccessible(currentMemberId, targetMember.getId());
         return retrieveFollowings(targetMember.getId(), currentMemberId, cursorId);
     }
 
     private MemberResponseDTO.FollowList retrieveFollowings(String targetMemberId, String currentMemberId, Long cursorId) {
+        List<String> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(currentMemberId);
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
-                size -> memberFollowQueryService.retrieveFollowingIds(targetMemberId, cursorId, size),
+                size -> memberFollowQueryService.retrieveFollowingIds(targetMemberId, cursorId, size, blockRelatedMemberIds),
                 Follow::getId,
                 DEFAULT_PAGE_SIZE
         );
@@ -194,9 +203,10 @@ public class MemberQueryFacade {
     public RecommendedMemberList retrieveRecommendedMembers(String memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
         List<MemberInterestCategory> myInterests = List.copyOf(member.getInterestCategories());
+        List<String> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(memberId);
 
         List<Member> recommendedMembers = memberQueryService.retrieveRecommendedMembers(
-                memberId, myInterests, RECOMMENDED_MEMBER_LIMIT
+                memberId, myInterests, blockRelatedMemberIds, RECOMMENDED_MEMBER_LIMIT
         );
 
         List<RecommendedMember> friends = recommendedMembers.stream()
@@ -205,6 +215,24 @@ public class MemberQueryFacade {
 
         return RecommendedMemberList.builder()
                 .friends(friends)
+                .build();
+    }
+
+    public BlockedMemberList retrieveBlockedMembers(String memberId, Long cursorId) {
+        CursorResult<MemberBlock> blockCursorResult = CursorPagingHelper.getPage(
+                size -> memberBlockQueryService.retrieveBlocks(memberId, cursorId, size),
+                MemberBlock::getId,
+                DEFAULT_PAGE_SIZE
+        );
+
+        List<BlockedMember> blocks = blockCursorResult.content().stream()
+                .map(MemberConverter::toBlockedMember)
+                .toList();
+
+        return BlockedMemberList.builder()
+                .blocks(blocks)
+                .hasNext(blockCursorResult.hasNext())
+                .nextCursor(blockCursorResult.nextCursor())
                 .build();
     }
 

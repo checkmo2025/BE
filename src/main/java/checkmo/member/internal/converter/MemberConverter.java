@@ -2,7 +2,9 @@ package checkmo.member.internal.converter;
 
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.MemberBlock;
 import checkmo.member.internal.entity.MemberReport;
+import checkmo.member.web.dto.MemberResponseDTO.BlockedMember;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
 import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
@@ -65,6 +67,15 @@ public class MemberConverter {
         return RecommendedMember.builder()
                 .nickname(member.getNickName())
                 .profileImageUrl(member.getImgUrl())
+                .build();
+    }
+
+    public static BlockedMember toBlockedMember(MemberBlock memberBlock) {
+        Member blocked = memberBlock.getBlocked();
+        return BlockedMember.builder()
+                .memberId(blocked.getId())
+                .nickname(blocked.getNickName())
+                .profileImageUrl(blocked.getImgUrl())
                 .build();
     }
 

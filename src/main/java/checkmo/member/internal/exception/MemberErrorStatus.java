@@ -23,6 +23,14 @@ public enum MemberErrorStatus implements BaseErrorCode {
     MEMBER_NOT_FOLLOWER(HttpStatus.BAD_REQUEST, "FOLLOW_403", "팔로워가 아닌 회원입니다."),
     MULTIPLE_ACCOUNTS_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_409", "해당 정보로 가입된 계정이 여러 개입니다. 관리자에게 문의해주세요."),
 
+    // 차단
+    MEMBER_CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "BLOCK_400", "자기 자신을 차단할 수 없습니다."),
+    MEMBER_ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, "BLOCK_401", "이미 차단한 회원입니다."),
+    MEMBER_BLOCK_NOT_FOUND(HttpStatus.BAD_REQUEST, "BLOCK_402", "차단한 회원이 아닙니다."),
+    MEMBER_BLOCKED_RELATION(HttpStatus.BAD_REQUEST, "BLOCK_403", "차단 관계가 있는 회원은 팔로우할 수 없습니다."),
+    MEMBER_BLOCKED_BY_ME(HttpStatus.FORBIDDEN, "BLOCK_404", "차단한 사용자입니다."),
+    MEMBER_BLOCKED_ME(HttpStatus.FORBIDDEN, "BLOCK_405", "조회가 불가능한 프로필 입니다."),
+
     // 신고
     CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "REPORT_400", "자기 자신을 신고할 수 없습니다.");
 

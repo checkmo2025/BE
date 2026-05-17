@@ -8,6 +8,7 @@ import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.member.MemberAPI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class BookStoryCommentCommandService {
 
     private final BookStoryQueryService bookStoryQueryService;
     private final CommentRepository commentRepository;
+    private final MemberAPI memberAPI;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -52,6 +54,8 @@ public class BookStoryCommentCommandService {
             // 대댓글의 대댓글은 금지! (2단계까지만 허용)
             parentComment.verifyNotChildComment();
         }
+
+        validateNotBlockedByCommentTarget(bookStory, parentComment, memberId);
 
         // 3. 댓글 생성
         Comment comment = Comment.builder()
@@ -89,6 +93,18 @@ public class BookStoryCommentCommandService {
 
         // 8. 댓글 작성된 책이야기 ID 반환
         return bookStoryId;
+    }
+
+    private void validateNotBlockedByCommentTarget(BookStory bookStory, Comment parentComment, String memberId) {
+        if (!memberId.equals(bookStory.getMemberId()) && memberAPI.hasBlockBetween(bookStory.getMemberId(), memberId)) {
+            throw new BookStoryException(BookStoryErrorStatus.COMMENT_BLOCKED);
+        }
+
+        if (parentComment != null
+                && !memberId.equals(parentComment.getMemberId())
+                && memberAPI.hasBlockBetween(parentComment.getMemberId(), memberId)) {
+            throw new BookStoryException(BookStoryErrorStatus.COMMENT_BLOCKED);
+        }
     }
 
     /**

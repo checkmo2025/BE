@@ -26,8 +26,8 @@ public class MemberFollowQueryService {
      * @param pageSize 페이지 크기
      * @return 팔로워 목록
      */
-    public List<Follow> retrieveFollowers(String memberId, Long cursorId, int pageSize) {
-        return followRepository.findFollowers(memberId, cursorId, pageSize);
+    public List<Follow> retrieveFollowers(String memberId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
+        return followRepository.findFollowers(memberId, cursorId, pageSize, excludedMemberIds);
     }
 
     /**
@@ -38,8 +38,8 @@ public class MemberFollowQueryService {
      * @param pageSize 페이지 크기
      * @return 팔로잉 목록
      */
-    public List<Follow> retrieveFollowingIds(String memberId, Long cursorId, int pageSize) {
-        return followRepository.findFollowings(memberId, cursorId, pageSize);
+    public List<Follow> retrieveFollowingIds(String memberId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
+        return followRepository.findFollowings(memberId, cursorId, pageSize, excludedMemberIds);
     }
 
     /**
