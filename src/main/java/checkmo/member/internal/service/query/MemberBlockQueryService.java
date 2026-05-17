@@ -17,6 +17,10 @@ public class MemberBlockQueryService {
     private final MemberBlockRepository memberBlockRepository;
 
     public List<MemberBlock> retrieveBlocks(String blockerId, Long cursorId, int pageSize) {
+        if (blockerId == null) {
+            return List.of();
+        }
+
         return memberBlockRepository.findBlocks(blockerId, cursorId, pageSize);
     }
 
@@ -57,12 +61,13 @@ public class MemberBlockQueryService {
             return;
         }
 
-        if (hasBlocked(viewerId, targetMemberId)) {
-            throw new MemberException(MemberErrorStatus.MEMBER_BLOCKED_BY_ME);
-        }
+        memberBlockRepository.findBetween(viewerId, targetMemberId)
+                .ifPresent(memberBlock -> {
+                    if (viewerId.equals(memberBlock.getBlocker().getId())) {
+                        throw new MemberException(MemberErrorStatus.MEMBER_BLOCKED_BY_ME);
+                    }
 
-        if (hasBlocked(targetMemberId, viewerId)) {
-            throw new MemberException(MemberErrorStatus.MEMBER_BLOCKED_ME);
-        }
+                    throw new MemberException(MemberErrorStatus.MEMBER_BLOCKED_ME);
+                });
     }
 }

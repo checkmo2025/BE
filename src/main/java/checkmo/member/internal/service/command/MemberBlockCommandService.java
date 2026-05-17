@@ -7,7 +7,9 @@ import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.FollowRepository;
 import checkmo.member.internal.repository.MemberBlockRepository;
 import checkmo.member.internal.repository.MemberRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,14 +32,20 @@ public class MemberBlockCommandService {
             throw new MemberException(MemberErrorStatus.MEMBER_CANNOT_BLOCK_SELF);
         }
 
+        lockMemberPair(blocker.getId(), blocked.getId());
+
         if (memberBlockRepository.existsByBlocker_IdAndBlocked_Id(blocker.getId(), blocked.getId())) {
             throw new MemberException(MemberErrorStatus.MEMBER_ALREADY_BLOCKED);
         }
 
-        memberBlockRepository.save(MemberBlock.builder()
-                .blocker(blocker)
-                .blocked(blocked)
-                .build());
+        try {
+            memberBlockRepository.saveAndFlush(MemberBlock.builder()
+                    .blocker(blocker)
+                    .blocked(blocked)
+                    .build());
+        } catch (DataIntegrityViolationException e) {
+            throw new MemberException(MemberErrorStatus.MEMBER_ALREADY_BLOCKED);
+        }
         followRepository.deleteBetweenMembers(blocker.getId(), blocked.getId());
     }
 
@@ -49,5 +57,12 @@ public class MemberBlockCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_BLOCK_NOT_FOUND));
 
         memberBlockRepository.delete(memberBlock);
+    }
+
+    private void lockMemberPair(String memberId1, String memberId2) {
+        List<String> memberIds = List.of(memberId1, memberId2).stream()
+                .sorted()
+                .toList();
+        memberRepository.lockActiveMembersByIdIn(memberIds);
     }
 }

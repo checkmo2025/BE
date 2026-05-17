@@ -186,10 +186,17 @@ public class BookStoryQueryFacade {
             String targetMemberId,
             Long cursorId
     ) {
+        List<String> excludedMemberIds = requiresBlockFilter(scope)
+                ? memberAPI.fetchBlockRelatedMemberIds(memberId)
+                : List.of();
+        List<String> followingMemberIds = scope == BookStoryRequestDTO.BookStoryScope.FOLLOWING
+                ? memberAPI.fetchFollowingIds(memberId)
+                : List.of();
+
         // 1. BookStory 리스트 조회
         CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
                 (pageSize) -> bookStoryQueryService.retrieveBookStories(
-                        memberId, scope, clubId, targetMemberId, cursorId, pageSize
+                        memberId, excludedMemberIds, followingMemberIds, scope, clubId, targetMemberId, cursorId, pageSize
                 ),
                 BookStory::getId,
                 DEFAULT_PAGE_SIZE
@@ -215,6 +222,11 @@ public class BookStoryQueryFacade {
                 .nextCursor(bookStoryCursorResult.nextCursor())
                 .pageSize(DEFAULT_PAGE_SIZE)
                 .build();
+    }
+
+    private boolean requiresBlockFilter(BookStoryRequestDTO.BookStoryScope scope) {
+        return scope == BookStoryRequestDTO.BookStoryScope.ALL
+                || scope == BookStoryRequestDTO.BookStoryScope.FOLLOWING;
     }
 
     /**
@@ -285,9 +297,10 @@ public class BookStoryQueryFacade {
     ) {
 
         // 1. BookStory 리스트 조회
+        List<String> excludedMemberIds = memberAPI.fetchBlockRelatedMemberIds(memberId);
         CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
                 (pageSize) -> bookStoryQueryService.retrieveBookStories(
-                        memberId, bookId, cursorId, pageSize
+                        bookId, excludedMemberIds, cursorId, pageSize
                 ),
                 BookStory::getId,
                 DEFAULT_PAGE_SIZE

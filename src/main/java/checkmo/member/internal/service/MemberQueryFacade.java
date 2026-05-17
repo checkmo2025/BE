@@ -82,6 +82,7 @@ public class MemberQueryFacade {
 
     public MemberResponseDTO.FollowList retrieveOtherFollowers(String targetMemberNickname, String currentMemberId, Long cursorId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        memberBlockQueryService.validateProfileAccessible(currentMemberId, targetMember.getId());
         return retrieveFollowers(targetMember.getId(), currentMemberId, cursorId);
     }
 
@@ -111,6 +112,7 @@ public class MemberQueryFacade {
 
     public MemberResponseDTO.FollowList retrieveOtherFollowings(String targetMemberNickname, String currentMemberId, Long cursorId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
+        memberBlockQueryService.validateProfileAccessible(currentMemberId, targetMember.getId());
         return retrieveFollowings(targetMember.getId(), currentMemberId, cursorId);
     }
 
