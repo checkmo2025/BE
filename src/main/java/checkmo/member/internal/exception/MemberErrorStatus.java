@@ -30,9 +30,7 @@ public enum MemberErrorStatus implements BaseErrorCode {
     MEMBER_BLOCKED_RELATION(HttpStatus.BAD_REQUEST, "BLOCK_403", "차단 관계가 있는 회원은 팔로우할 수 없습니다."),
     MEMBER_BLOCKED_BY_ME(HttpStatus.FORBIDDEN, "BLOCK_404", "차단한 사용자입니다."),
     MEMBER_BLOCKED_ME(HttpStatus.FORBIDDEN, "BLOCK_405", "조회가 불가능한 프로필 입니다."),
-
-    // 신고
-    CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "REPORT_400", "자기 자신을 신고할 수 없습니다.");
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

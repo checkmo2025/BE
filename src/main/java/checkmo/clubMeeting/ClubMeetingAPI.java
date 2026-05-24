@@ -54,4 +54,8 @@ public interface ClubMeetingAPI {
      * @return true: 채팅 불가능, false: 채팅 가능
      */
     boolean isChatDisabled(Long meetingId);
+
+    ClubMeetingExternalDTO.TopicReportInfo fetchTopicReportInfo(Long topicId);
+
+    ClubMeetingExternalDTO.BookReviewReportInfo fetchBookReviewReportInfo(Long bookReviewId);
 }

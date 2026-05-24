@@ -4,10 +4,11 @@ import checkmo.clubNotice.internal.entity.NoticeComment;
 import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
 import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.repository.NoticeCommentRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,11 @@ public class NoticeCommentQueryService {
 
     public List<NoticeComment> retrieveNoticeComments(Long noticeId, Long cursorId, Integer size) {
         return noticeCommentRepository.findAllByNoticeIdAndCursorPaging(noticeId, cursorId, size);
+    }
+
+    public NoticeComment validateNoticeComment(Long commentId) {
+        return noticeCommentRepository.findById(commentId)
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_COMMENT_NOT_FOUND));
     }
 
     public NoticeComment validateNoticeComment(Long noticeId, Long commentId) {

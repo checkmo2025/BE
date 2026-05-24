@@ -23,6 +23,26 @@ public class ClubMeetingExternalDTO {
         private BookExternalDTO.BasicInfo bookInfo;
     }
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TopicReportInfo {
+        private Long topicId;
+        private Long clubId;
+        private Long meetingId;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookReviewReportInfo {
+        private Long bookReviewId;
+        private Long clubId;
+        private Long meetingId;
+    }
+
     public record ToggleTopicResult(boolean isSelected, Failure failure) {
         public boolean isSuccess() {
             return failure == Failure.NONE;

@@ -6,11 +6,15 @@ import checkmo.clubMeeting.ClubMeetingAPI;
 import checkmo.clubMeeting.ClubMeetingExternalDTO;
 import checkmo.clubMeeting.ClubMeetingExternalDTO.DetailInfo;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
+import checkmo.clubMeeting.internal.entity.BookReview;
 import checkmo.clubMeeting.internal.entity.Meeting;
+import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.clubMeeting.internal.service.command.ClubTopicCommandService;
+import checkmo.clubMeeting.internal.service.query.ClubBookReviewQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingTeamQueryService;
+import checkmo.clubMeeting.internal.service.query.ClubTopicQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +32,8 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     private final BookAPI bookAPI; // TODO: Meeting 내부에 Book 스냅샷 저장 예정이라 나중에는 Meeting에서 직접 조회해서 필요없을 예정
     private final ClubMeetingQueryService clubMeetingQueryService;
     private final ClubMeetingTeamQueryService clubMeetingTeamQueryService;
+    private final ClubTopicQueryService clubTopicQueryService;
+    private final ClubBookReviewQueryService clubBookReviewQueryService;
     private final ClubTopicCommandService clubTopicCommandService;
 
     @Override
@@ -98,4 +104,27 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
                 .orElse(true); // 모임이 존재하지 않는 경우에도 채팅 불가능 처리
     }
 
+    @Override
+    public ClubMeetingExternalDTO.TopicReportInfo fetchTopicReportInfo(Long topicId) {
+        Topic topic = clubTopicQueryService.validateTopic(topicId);
+        Meeting meeting = topic.getMeeting();
+
+        return ClubMeetingExternalDTO.TopicReportInfo.builder()
+                .topicId(topic.getId())
+                .clubId(meeting.getClubId())
+                .meetingId(meeting.getId())
+                .build();
+    }
+
+    @Override
+    public ClubMeetingExternalDTO.BookReviewReportInfo fetchBookReviewReportInfo(Long bookReviewId) {
+        BookReview bookReview = clubBookReviewQueryService.validateBookReview(bookReviewId);
+        Meeting meeting = bookReview.getMeeting();
+
+        return ClubMeetingExternalDTO.BookReviewReportInfo.builder()
+                .bookReviewId(bookReview.getId())
+                .clubId(meeting.getClubId())
+                .meetingId(meeting.getId())
+                .build();
+    }
 }

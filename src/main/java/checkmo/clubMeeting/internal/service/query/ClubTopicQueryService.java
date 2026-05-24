@@ -26,6 +26,11 @@ public class ClubTopicQueryService {
         return topicRepository.findByMeetingIdWithCursor(meetingId, cursorId, PageRequest.of(0, size));
     }
 
+    public Topic validateTopic(Long topicId) throws ClubMeetingException {
+        return topicRepository.findById(topicId)
+                .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_NOT_FOUND));
+    }
+
     public Topic validateTopic(Long topicId, Long meetingId) throws ClubMeetingException {
         return topicRepository.findByIdAndMeetingId(topicId, meetingId)
                 .orElseThrow(() -> new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_NOT_FOUND));

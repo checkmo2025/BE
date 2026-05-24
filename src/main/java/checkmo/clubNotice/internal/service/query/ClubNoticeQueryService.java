@@ -4,14 +4,15 @@ import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.exception.ClubNoticeErrorStatus;
 import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,11 @@ public class ClubNoticeQueryService {
 
     public Page<Notice> retrieveNormalNotices(Long clubId, Pageable pageable) {
         return noticeRepository.findAllByClubIdAndPinned(clubId, false, pageable);
+    }
+
+    public Notice validateNotice(Long noticeId) throws ClubNoticeException {
+        return noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_NOT_FOUND));
     }
 
     public Notice validateNotice(Long clubId, Long noticeId) throws ClubNoticeException {

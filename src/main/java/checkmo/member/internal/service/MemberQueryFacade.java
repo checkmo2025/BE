@@ -9,12 +9,10 @@ import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberBlock;
 import checkmo.member.internal.entity.MemberInterestCategory;
-import checkmo.member.internal.entity.MemberReport;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberBlockQueryService;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
-import checkmo.member.internal.service.query.MemberReportQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.*;
@@ -42,7 +40,6 @@ public class MemberQueryFacade {
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
     private final MemberBlockQueryService memberBlockQueryService;
-    private final MemberReportQueryService memberReportQueryService;
 
     public DetailInfo retrieveMemberDetailInfo(String memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
@@ -233,36 +230,6 @@ public class MemberQueryFacade {
                 .blocks(blocks)
                 .hasNext(blockCursorResult.hasNext())
                 .nextCursor(blockCursorResult.nextCursor())
-                .build();
-    }
-
-    public ReportList retrieveReportsByMemberNickname(String nickname) {
-        var reports = memberReportQueryService.retrieveReportsByReportedMemberNickname(nickname);
-
-        List<ReportInfo> reportInfos = reports.stream()
-                .map(MemberConverter::toReportInfo)
-                .toList();
-
-        return ReportList.builder()
-                .reports(reportInfos)
-                .build();
-    }
-
-    public MyReportList retrieveMyReports(String memberId, Long cursorId) {
-        CursorResult<MemberReport> reportCursorResult = CursorPagingHelper.getPage(
-                size -> memberReportQueryService.retrieveMyReports(memberId, cursorId, size),
-                MemberReport::getId,
-                DEFAULT_PAGE_SIZE
-        );
-
-        List<MyReportInfo> reportInfos = reportCursorResult.content().stream()
-                .map(MemberConverter::toMyReportInfo)
-                .toList();
-
-        return MyReportList.builder()
-                .reports(reportInfos)
-                .hasNext(reportCursorResult.hasNext())
-                .nextCursor(reportCursorResult.nextCursor())
                 .build();
     }
 

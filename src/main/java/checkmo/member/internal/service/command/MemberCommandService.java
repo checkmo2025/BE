@@ -8,17 +8,17 @@ import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.FollowRepository;
 import checkmo.member.internal.repository.MemberBlockRepository;
-import checkmo.member.internal.repository.MemberReportRepository;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
 
 @RequiredArgsConstructor
 @Transactional
@@ -30,7 +30,6 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
     private final MemberBlockRepository memberBlockRepository;
-    private final MemberReportRepository memberReportRepository;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -67,8 +66,8 @@ public class MemberCommandService {
         );
 
         member.updateImageAndInterestCategories(
-            request.getImgUrl(),
-            new HashSet<>(request.getCategories())
+                request.getImgUrl(),
+                new HashSet<>(request.getCategories())
         );
 
         authenticationAPI.updateNickname(memberId, request.getNickname());
@@ -173,7 +172,6 @@ public class MemberCommandService {
             return;
         }
 
-        memberReportRepository.deleteAllByMemberId(memberId);
         memberBlockRepository.deleteAllByMemberId(memberId);
         followRepository.deleteAllByMemberId(memberId);
         memberRepository.delete(member);
@@ -182,6 +180,7 @@ public class MemberCommandService {
 
     /**
      * 이메일 변경
+     *
      * @param memberId
      * @param request
      */

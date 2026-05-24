@@ -3,15 +3,7 @@ package checkmo.member.internal.converter;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberBlock;
-import checkmo.member.internal.entity.MemberReport;
-import checkmo.member.web.dto.MemberResponseDTO.BlockedMember;
-import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithDescription;
-import checkmo.member.web.dto.MemberResponseDTO.BasicInfoWithFollow;
-import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
-import checkmo.member.web.dto.MemberResponseDTO.MyReportInfo;
-import checkmo.member.web.dto.MemberResponseDTO.RecommendedMember;
-import checkmo.member.web.dto.MemberResponseDTO.ReportInfo;
-import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
+import checkmo.member.web.dto.MemberResponseDTO.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -79,24 +71,4 @@ public class MemberConverter {
                 .build();
     }
 
-    public static ReportInfo toReportInfo(MemberReport report) {
-        return ReportInfo.builder()
-                .reportId(report.getId())
-                .reportedMemberNickname(report.getReportedMember().getNickName())
-                .reportedMemberProfileImageUrl(report.getReportedMember().getImgUrl())
-                .reportType(report.getReportType().getDescription())
-                .content(report.getContent())
-                .createdAt(report.getCreatedAt())
-                .build();
-    }
-
-    public static MyReportInfo toMyReportInfo(MemberReport report) {
-        return MyReportInfo.builder()
-                .reportedMemberNickname(report.getReportedMember().getNickName())
-                .reportedMemberProfileImageUrl(report.getReportedMember().getImgUrl())
-                .reportType(report.getReportType().name())
-                .content(report.getContent())
-                .reportDate(report.getCreatedAt())
-                .build();
-    }
 }

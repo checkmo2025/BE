@@ -1,13 +1,11 @@
 package checkmo.member.web.dto;
 
 import checkmo.member.internal.entity.MemberInterestCategory;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -119,53 +117,6 @@ public class MemberResponseDTO {
     @Builder
     public static class BlockedMemberList {
         private List<BlockedMember> blocks;
-        private boolean hasNext;
-        private Long nextCursor;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class ReportInfo {
-        private Long reportId;
-        private String reportedMemberNickname;
-        private String reportedMemberProfileImageUrl;
-        private String reportType;
-        private String content;
-
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-        private LocalDateTime createdAt;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class ReportList {
-        private List<ReportInfo> reports;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MyReportInfo {
-        private String reportedMemberNickname;
-        private String reportedMemberProfileImageUrl;
-        private String reportType;
-        private String content;
-
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-        private LocalDateTime reportDate;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class MyReportList {
-        private List<MyReportInfo> reports;
         private boolean hasNext;
         private Long nextCursor;
     }

@@ -10,17 +10,18 @@ import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.repository.projection.BookStoryPrevNextProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -149,5 +150,10 @@ public class BookStoryQueryService {
 
     public BookStoryPrevNextProjection retrievePrevNextBookStoryId(String memberId, Long bookStoryId) {
         return bookStoryRepository.findPrevNextBookStoryId(memberId, bookStoryId, BookStoryStatus.PUBLISHED);
+    }
+
+    public Comment retrieveBookStoryComment(Long bookStoryCommentId) {
+        return commentRepository.findById(bookStoryCommentId)
+                .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.COMMENT_NOT_FOUND));
     }
 }
