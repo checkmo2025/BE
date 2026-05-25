@@ -121,4 +121,20 @@ public interface ClubManagementAPI {
      * @param lastActivityTime 마지막 활동 시간
      */
     void touchLastActivity(Long clubId, LocalDateTime lastActivityTime);
+
+    /**
+     * 특정 모임의 기본 정보를 조회합니다.
+     *
+     * @param clubId 모임 ID
+     * @return 모임 이름, 이미지 URL
+     */
+    ClubManagementExternalDTO.DisplayInfo fetchDisplayInfo(Long clubId);
+
+    /**
+     * 여러 모임의 기본 정보를 배치 조회합니다.
+     *
+     * @param clubIds 모임 ID 목록
+     * @return 모임 ID를 키로 하는 기본 정보 맵
+     */
+    Map<Long, ClubManagementExternalDTO.DisplayInfo> fetchDisplayInfoByClubIds(List<Long> clubIds);
 }

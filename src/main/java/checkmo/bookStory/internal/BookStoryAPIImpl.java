@@ -1,6 +1,7 @@
 package checkmo.bookStory.internal;
 
 import checkmo.bookStory.BookStoryAPI;
+import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +23,17 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     public Long fetchBookStoryIdByBookStoryCommentId(Long bookStoryCommentId) {
         Comment comment = bookStoryQueryService.retrieveBookStoryComment(bookStoryCommentId);
         return comment.getBookStory().getId();
+    }
+
+    @Override
+    public String fetchBookStoryAuthorId(Long bookStoryId) {
+        BookStory bookStory = bookStoryQueryService.retrieveBookStory(bookStoryId);
+        return bookStory.getMemberId();
+    }
+
+    @Override
+    public String fetchBookStoryCommentAuthorId(Long commentId) {
+        Comment comment = bookStoryQueryService.retrieveBookStoryComment(commentId);
+        return comment.getMemberId();
     }
 }

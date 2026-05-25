@@ -1,5 +1,6 @@
 package checkmo.clubNotice.internal;
 
+import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubNotice.ClubNoticeAPI;
 import checkmo.clubNotice.ClubNoticeExternalDTO;
 import checkmo.clubNotice.internal.entity.Notice;
@@ -10,11 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ClubNoticeAPIImpl implements ClubNoticeAPI {
 
+    private final ClubManagementAPI clubManagementAPI;
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
 
@@ -37,5 +41,14 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
                 .noticeId(notice.getId())
                 .clubId(notice.getClubId())
                 .build();
+    }
+
+    @Override
+    public String fetchNoticeCommentAuthorId(Long noticeCommentId) {
+        NoticeComment noticeComment = noticeCommentQueryService.validateNoticeComment(noticeCommentId);
+
+        return clubManagementAPI.fetchMembershipInfoByClubMemberIds(Set.of(noticeComment.getClubMemberId()))
+                .get(noticeComment.getClubMemberId())
+                .getMemberId();
     }
 }

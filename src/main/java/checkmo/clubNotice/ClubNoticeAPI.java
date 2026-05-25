@@ -5,4 +5,6 @@ public interface ClubNoticeAPI {
     ClubNoticeExternalDTO.NoticeReportInfo fetchNoticeReportInfo(Long noticeId);
 
     ClubNoticeExternalDTO.NoticeCommentReportInfo fetchNoticeCommentReportInfo(Long noticeCommentId);
+
+    String fetchNoticeCommentAuthorId(Long noticeCommentId);
 }

@@ -1,7 +1,9 @@
 package checkmo.clubManagement.internal;
 
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubManagement.internal.converter.ClubManagementConverter;
+import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
 
@@ -151,5 +154,33 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     @Transactional
     public void touchLastActivity(Long clubId, LocalDateTime lastActivityTime) {
         clubManagementCommandService.updateLastActivityTime(clubId, lastActivityTime);
+    }
+
+    @Override
+    public ClubManagementExternalDTO.DisplayInfo fetchDisplayInfo(Long clubId) throws ClubManagementException {
+        Club club = clubManagementQueryService.validateClub(clubId);
+
+        return ClubManagementExternalDTO.DisplayInfo.builder()
+                .clubId(club.getId())
+                .clubName(club.getName())
+                .clubImageUrl(club.getProfileImgUrl())
+                .build();
+    }
+
+    @Override
+    public Map<Long, ClubManagementExternalDTO.DisplayInfo> fetchDisplayInfoByClubIds(List<Long> clubIds) {
+        if (clubIds == null || clubIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return clubManagementQueryService.retrieveClubs(clubIds).stream()
+                .collect(Collectors.toMap(
+                        Club::getId,
+                        club -> ClubManagementExternalDTO.DisplayInfo.builder()
+                                .clubId(club.getId())
+                                .clubName(club.getName())
+                                .clubImageUrl(club.getProfileImgUrl())
+                                .build()
+                ));
     }
 }

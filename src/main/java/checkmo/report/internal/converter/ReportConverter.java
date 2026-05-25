@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReportConverter {
 
-    public static ReportResponseDTO.ReportInfo toReportInfo(Report report) {
+    public static ReportResponseDTO.ReportInfo toReportInfo(
+            Report report,
+            String displayName,
+            String displayImageUrl
+    ) {
         return ReportResponseDTO.ReportInfo.builder()
                 .reportId(report.getId())
                 .targetType(report.getReportTargetType().name())
@@ -19,6 +23,8 @@ public class ReportConverter {
                 .reasonDescription(report.getReportReason().getDescription())
                 .content(report.getContent())
                 .redirectUrl(report.getRedirectUrl())
+                .displayName(displayName)
+                .displayImageUrl(displayImageUrl)
                 .reportedAt(report.getCreatedAt())
                 .build();
     }

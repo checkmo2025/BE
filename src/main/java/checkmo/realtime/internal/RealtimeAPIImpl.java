@@ -3,8 +3,8 @@ package checkmo.realtime.internal;
 import checkmo.realtime.RealtimeAPI;
 import checkmo.realtime.RealtimeExternalDTO;
 import checkmo.realtime.internal.entity.TeamChatMessage;
-import checkmo.realtime.internal.exception.RealtimeErrorStatus;
-import checkmo.realtime.internal.exception.RealtimeException;
+import checkmo.realtime.internal.exception.general.RealtimeGeneralErrorStatus;
+import checkmo.realtime.internal.exception.general.RealtimeGeneralException;
 import checkmo.realtime.internal.repository.TeamChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class RealtimeAPIImpl implements RealtimeAPI {
     @Override
     public RealtimeExternalDTO.TeamChatReportInfo fetchTeamChatReportInfo(Long chatMessageId) {
         TeamChatMessage message = teamChatMessageRepository.findById(chatMessageId)
-                .orElseThrow(() -> new RealtimeException(RealtimeErrorStatus.MESSAGE_NOT_FOUND));
+                .orElseThrow(() -> new RealtimeGeneralException(RealtimeGeneralErrorStatus.MESSAGE_NOT_FOUND));
 
         return RealtimeExternalDTO.TeamChatReportInfo.builder()
                 .chatMessageId(message.getId())
@@ -28,5 +28,13 @@ public class RealtimeAPIImpl implements RealtimeAPI {
                 .meetingId(message.getMeetingId())
                 .teamId(message.getTeamId())
                 .build();
+    }
+
+    @Override
+    public String fetchChatSenderMemberId(Long chatMessageId) {
+        TeamChatMessage message = teamChatMessageRepository.findById(chatMessageId)
+                .orElseThrow(() -> new RealtimeGeneralException(RealtimeGeneralErrorStatus.MESSAGE_NOT_FOUND));
+
+        return message.getSenderMemberId();
     }
 }

@@ -1,5 +1,6 @@
 package checkmo.report.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,10 @@ public class ReportResponseDTO {
 
         private String content;
         private String redirectUrl;
+
+        @Schema(description = "독서모임과 독서모임 공지사항은 독서모임 이름 + 독서모임 이미지 제공, 이외는 신고 대상의 작성자 이름 + 작성자 이미지 제공")
+        private String displayName;
+        private String displayImageUrl;
 
         private LocalDateTime reportedAt;
     }

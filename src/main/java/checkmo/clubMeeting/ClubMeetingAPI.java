@@ -58,4 +58,8 @@ public interface ClubMeetingAPI {
     ClubMeetingExternalDTO.TopicReportInfo fetchTopicReportInfo(Long topicId);
 
     ClubMeetingExternalDTO.BookReviewReportInfo fetchBookReviewReportInfo(Long bookReviewId);
+
+    String fetchTopicAuthorId(Long topicId);
+
+    String fetchBookReviewAuthorId(Long bookReviewId);
 }
