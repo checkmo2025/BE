@@ -14,7 +14,7 @@ public class HealthCheckController {
 
     @GetMapping("/health")
     public String home() {
-        return "헬스체크 확인용 입니다. ";
+        return "헬스체크 확인용 입니다.";
     }
 
 }
