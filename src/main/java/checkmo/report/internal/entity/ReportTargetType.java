@@ -1,5 +1,7 @@
 package checkmo.report.internal.entity;
 
+import checkmo.report.internal.exception.ReportErrorStatus;
+import checkmo.report.internal.exception.ReportException;
 import lombok.Getter;
 
 import java.util.Map;
@@ -10,63 +12,82 @@ public enum ReportTargetType {
     MEMBER("사용자") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/members/" + targetId;
+            return "/profile/" + targetId;
         }
     },
 
     CLUB("독서모임") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/clubs/" + targetId + "/home";
+            return "/groups/" + targetId;
         }
     },
 
     BOOK_STORY("책 이야기") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/book-stories/" + targetId;
+            return "/stories/" + targetId;
         }
     },
 
     BOOK_STORY_COMMENT("책 이야기 댓글") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/book-stories/" + context.get("bookStoryId");
+            return "/stories/"
+                    + require(context, "bookStoryId")
+                    + "?commentId="
+                    + targetId;
         }
     },
 
     CLUB_NOTICE("독서모임 공지사항") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/clubs/" + context.get("clubId") + "/notices/" + targetId;
+            return "/groups/"
+                    + require(context, "clubId")
+                    + "/notices/"
+                    + targetId;
         }
     },
 
-    CLUB_NOTICE_COMMENT("독서모임 공지사항 댓글") {
+    CLUB_NOTICE_COMMENT("공지사항 댓글") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/clubs/" + context.get("clubId") + "/notices/" + context.get("noticeId");
+            return "/groups/"
+                    + require(context, "clubId")
+                    + "/notices/"
+                    + require(context, "noticeId")
+                    + "?commentId="
+                    + targetId;
         }
     },
 
     CLUB_TOPIC("독서모임 발제") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/clubs/" + context.get("clubId") + "/bookshelves/" + context.get("meetingId");
+            return "/groups/"
+                    + require(context, "clubId")
+                    + "/topics/"
+                    + targetId;
         }
     },
 
     CLUB_BOOK_REVIEW("독서모임 한줄평") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/clubs/" + context.get("clubId") + "/bookshelves/" + context.get("meetingId");
+            return "/groups/"
+                    + require(context, "clubId")
+                    + "/reviews/"
+                    + targetId;
         }
     },
 
-    CHAT("채팅") {
+    CHAT("채팅방") {
         @Override
         public String createRedirectUrl(String targetId, Map<String, String> context) {
-            return "/api/clubs/" + context.get("clubId") + "/bookshelves/" + context.get("meetingId");
+            return "/groups/"
+                    + require(context, "clubId")
+                    + "/chat";
         }
     };
 
@@ -74,6 +95,14 @@ public enum ReportTargetType {
 
     ReportTargetType(String description) {
         this.description = description;
+    }
+
+    private static String require(Map<String, String> context, String key) {
+        if (context == null || !context.containsKey(key) || context.get(key) == null || context.get(key).isBlank()) {
+            throw new ReportException(ReportErrorStatus.INVALID_REPORT_TARGET_ID);
+        }
+
+        return context.get(key);
     }
 
     public abstract String createRedirectUrl(String targetId, Map<String, String> context);

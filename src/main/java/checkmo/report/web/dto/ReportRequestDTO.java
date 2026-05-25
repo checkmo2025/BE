@@ -68,7 +68,7 @@ public class ReportRequestDTO {
                         - INAPPROPRIATE_CONTENT: 음란/부적절
                         - SPAM: 홍보/도배
                         """,
-                example = "ABUSE"
+                example = "INSULT"
         )
         private ReportReason reason;
 
