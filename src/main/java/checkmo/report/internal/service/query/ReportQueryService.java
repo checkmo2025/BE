@@ -64,6 +64,24 @@ public class ReportQueryService {
                 .build();
     }
 
+    public ReportResponseDTO.AdminMemberReportList retrieveMemberReportsForAdmin(String memberNickname) {
+        String reporterId = memberAPI.fetchMemberId(memberNickname);
+        var reporterInfo = memberAPI.fetchMemberBasicInfo(reporterId);
+
+        List<ReportResponseDTO.AdminMemberReportInfo> reports = reportRepository.findReportsByReporterId(reporterId)
+                .stream()
+                .map(report -> ReportConverter.toAdminMemberReportInfo(
+                        report,
+                        reporterInfo.getNickname(),
+                        reporterInfo.getProfileImageUrl()
+                ))
+                .toList();
+
+        return ReportResponseDTO.AdminMemberReportList.builder()
+                .reports(reports)
+                .build();
+    }
+
     private DisplayInfo resolveDisplayInfo(ReportTargetType targetType, String targetId) {
         return switch (targetType) {
             case CLUB -> resolveClubDisplayInfo(Long.valueOf(targetId));

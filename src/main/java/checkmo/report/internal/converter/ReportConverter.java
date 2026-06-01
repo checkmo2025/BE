@@ -28,4 +28,20 @@ public class ReportConverter {
                 .reportedAt(report.getCreatedAt())
                 .build();
     }
+
+    public static ReportResponseDTO.AdminMemberReportInfo toAdminMemberReportInfo(
+            Report report,
+            String reporterNickname,
+            String reporterProfileImageUrl
+    ) {
+        return ReportResponseDTO.AdminMemberReportInfo.builder()
+                .reportId(report.getId())
+                .reportedMemberNickname(reporterNickname)
+                .reportedMemberProfileImageUrl(reporterProfileImageUrl)
+                .reportType(report.getReportReason().getDescription())
+                .content(report.getContent())
+                .redirectUrl(report.getRedirectUrl())
+                .createdAt(report.getCreatedAt())
+                .build();
+    }
 }

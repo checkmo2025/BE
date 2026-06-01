@@ -5,6 +5,8 @@ import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.web.dto.MemberResponseDTO.AdminMemberDetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.AdminMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.MemberEmailList;
+import checkmo.report.internal.service.query.ReportQueryService;
+import checkmo.report.web.dto.ReportResponseDTO.AdminMemberReportList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberAdminController {
 
     private final MemberQueryFacade memberQueryFacade;
+    private final ReportQueryService reportQueryService;
 
     @Operation(summary = "회원 이메일 검색", description = "관리자 전용 자동완성용 이메일 검색 API입니다.")
     @Parameter(name = "keyword", description = "이메일 부분 검색어", required = false, example = "gmail")
@@ -69,5 +72,22 @@ public class MemberAdminController {
             @PathVariable String memberNickName
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberDetailInfoForAdmin(memberNickName));
+    }
+
+    @Operation(
+            summary = "특정 회원 신고 목록 조회 (관리자)",
+            description = "관리자가 특정 회원이 제출한 신고 목록을 전체 조회합니다."
+    )
+    @Parameter(name = "nickname", description = "조회할 회원 닉네임", required = true, example = "hy_0716")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "관리자 권한이 필요합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    @GetMapping("/{nickname}/reports")
+    public ApiResponse<AdminMemberReportList> getMemberReportsForAdmin(
+            @PathVariable String nickname
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.retrieveMemberReportsForAdmin(nickname));
     }
 }

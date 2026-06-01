@@ -7,4 +7,6 @@ import java.util.List;
 public interface ReportRepositoryCustom {
 
     List<Report> findMyReports(String reporterId, Long cursorId, int pageSize);
+
+    List<Report> findReportsByReporterId(String reporterId);
 }

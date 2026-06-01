@@ -29,6 +29,15 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Report> findReportsByReporterId(String reporterId) {
+        return queryFactory
+                .selectFrom(report)
+                .where(report.reporterId.eq(reporterId))
+                .orderBy(report.id.desc())
+                .fetch();
+    }
+
     private BooleanExpression cursorCondition(Long cursorId) {
         return cursorId != null ? report.id.lt(cursorId) : null;
     }
