@@ -37,7 +37,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setErrorHandler(customStompErrorHandler)
                 .addEndpoint("/ws-stomp")
                 .addInterceptors(securityContextHandshakeInterceptor)
-                .setAllowedOrigins("*");
+                .setAllowedOrigins(allowedOrigins);
         // TODO: SockJS 설정
     }
 
