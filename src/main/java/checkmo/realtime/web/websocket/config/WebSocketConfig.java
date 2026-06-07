@@ -14,7 +14,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
-import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
+import checkmo.realtime.web.websocket.interceptor.SecurityContextHandshakeInterceptor;
 
 /**
  * 웹소켓 관련 설정(하트비트 스케줄러, stomp 엔드포인트, simple broker, 메시지 크기 제한 등)
@@ -28,6 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final WebSocketProperties webSocketProperties;
     private final TeamAuthorizationInterceptor teamAuthorizationInterceptor;
     private final CustomStompErrorHandler customStompErrorHandler;
+    private final SecurityContextHandshakeInterceptor securityContextHandshakeInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -35,8 +36,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 클라이언트가 WebSocket 연결을 시도할 때 사용할 엔드포인트를 등록합니다.
         registry.setErrorHandler(customStompErrorHandler)
                 .addEndpoint("/ws-stomp")
-                .addInterceptors(httpSessionHandshakeInterceptor())
-                .setAllowedOrigins("*");
+                .addInterceptors(securityContextHandshakeInterceptor)
+                .setAllowedOrigins(allowedOrigins);
         // TODO: SockJS 설정
     }
 
@@ -77,8 +78,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         return scheduler;
     }
 
-    @Bean
-    HttpSessionHandshakeInterceptor httpSessionHandshakeInterceptor() {
-        return new HttpSessionHandshakeInterceptor();
-    }
 }
