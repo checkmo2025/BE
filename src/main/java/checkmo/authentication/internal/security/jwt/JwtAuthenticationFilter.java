@@ -123,8 +123,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Access Token이 만료된 경우, Refresh Token을 사용해 재발급
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키에서 Refresh Token 추출
+        // 쿠키에서 Refresh Token 추출 (웹), 없으면 헤더에서 추출 (앱)
         String refreshToken = jwtCookieUtil.resolveToken(request, "refreshToken");
+        if (!StringUtils.hasText(refreshToken)) {
+            refreshToken = request.getHeader("X-Refresh-Token");
+        }
         log.info("[재발급] Refresh Token 존재 여부 확인: {}", refreshToken != null);
 
         if (!StringUtils.hasText(refreshToken)) {
