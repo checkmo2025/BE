@@ -13,6 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +34,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
 
-        return handleExceptionInternalConstraint(e, ErrorStatus.valueOf(errorMessage), HttpHeaders.EMPTY, request);
+        return handleExceptionInternalArgs(
+                e,
+                HttpHeaders.EMPTY,
+                ErrorStatus._BAD_REQUEST,
+                request,
+                Map.of("constraint", errorMessage)
+        );
     }
 
     @Override
@@ -57,10 +65,22 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
-        e.printStackTrace();
+        log.error("Unhandled exception while processing API request", e);
 
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY,
                 ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(), request, e.getMessage());
+    }
+
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<Object> accessDenied(Exception e, WebRequest request) {
+        return handleExceptionInternalFalse(
+                e,
+                ErrorStatus._FORBIDDEN,
+                HttpHeaders.EMPTY,
+                ErrorStatus._FORBIDDEN.getHttpStatus(),
+                request,
+                null
+        );
     }
 
     @ExceptionHandler(value = GeneralException.class)

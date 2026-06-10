@@ -8,7 +8,6 @@ import checkmo.authentication.web.dto.AuthResponseDTO;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthConverter {
@@ -30,6 +29,7 @@ public class AuthConverter {
                 .role(Role.USER)
                 .deactivatedAt(null)
                 .profileCompleted(false)
+                .nickName("")
                 .build();
     }
 
@@ -44,6 +44,7 @@ public class AuthConverter {
                 .role(Role.USER)
                 .deactivatedAt(null)
                 .profileCompleted(false)
+                .nickName("")
                 .build();
     }
 }
