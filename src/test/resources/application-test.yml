@@ -1,0 +1,108 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:checkmo_test_${random.uuid};MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: false
+
+  flyway:
+    enabled: false
+
+  sql:
+    init:
+      mode: never
+
+  cache:
+    type: simple
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-google-client-id
+            client-secret: test-google-client-secret
+            scope:
+              - email
+              - profile
+            redirect-uri: "http://localhost/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+events:
+  retry:
+    enabled: false
+
+app:
+  oauth2:
+    redirect:
+      base-uri: http://localhost:3000
+
+jwt:
+  secret: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+  token-validity:
+    access-token: 7200000
+    refresh-token: 1209600000
+
+mail:
+  smtp:
+    host: localhost
+    port: 2525
+    timeout: 1000
+    connection-timeout: 1000
+    write-timeout: 1000
+    starttls-enable: false
+  auth:
+    username: test@example.com
+    password: test-password
+    enable: false
+
+aladin:
+  api:
+    url:
+      base: http://localhost
+      item-search: /ItemSearch.aspx
+      item-lookup: /ItemLookUp.aspx
+      item-list: /ItemList.aspx
+    auth:
+      ttb-key: test-ttb-key
+      version: 20131101
+    search:
+      search-query-type: Keyword
+      recommend-query-type: BlogBest
+      search-target: Book
+      output: xml
+      max-results: 10
+      item-id-type: ISBN13
+      timeout-ms: 1000
+
+cloud:
+  aws:
+    region:
+      name: ap-northeast-2
+    credentials:
+      accessKey: test-access-key
+      secretKey: test-secret-key
+    s3:
+      bucket: test-bucket
+      presigned-url-expiration: 10m
