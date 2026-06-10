@@ -24,7 +24,7 @@ class PublicMemberApiTest extends ApiTestSupport {
     }
 
     @Test
-    void checkNicknameRejectsInvalidNickname() {
+    void checkNicknameRejectsHangulNickname() {
         given()
                 .queryParam("nickname", "한글닉네임")
                 .when()

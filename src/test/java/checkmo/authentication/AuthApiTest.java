@@ -70,6 +70,22 @@ class AuthApiTest extends ApiTestSupport {
     }
 
     @Test
+    void confirmEmailVerificationRejectsExpiredCode() {
+        String email = "expired-code@example.com";
+        when(redisHashOperations.get("verification:" + email, "code")).thenReturn(null);
+        when(redisHashOperations.get("verification:" + email, "verified")).thenReturn(null);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("email", email, "verificationCode", "123456"))
+                .when()
+                .post("/api/auth/email-verification/confirm")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false));
+    }
+
+    @Test
     void signUpSucceedsAfterEmailVerificationAndSetsJwtCookies() {
         String email = "signup-success@example.com";
         when(redisHashOperations.get("verification:" + email, "verified")).thenReturn(true);
@@ -171,8 +187,8 @@ class AuthApiTest extends ApiTestSupport {
                 .extract();
 
         assertThat(response.headers().getValues("Set-Cookie"))
-                .anyMatch(header -> header.startsWith("accessToken="))
-                .anyMatch(header -> header.startsWith("refreshToken="));
+                .anyMatch(header -> header.startsWith("accessToken=") && header.contains("Max-Age=0"))
+                .anyMatch(header -> header.startsWith("refreshToken=") && header.contains("Max-Age=0"));
     }
 
     @Test

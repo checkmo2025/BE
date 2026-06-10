@@ -1,6 +1,7 @@
 package checkmo.admin;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
@@ -189,7 +190,7 @@ class AdminApiTest extends ApiTestSupport {
                 .when().delete("/api/admin/news/{newsId}", newsId)
                 .then().statusCode(200);
 
-        org.assertj.core.api.Assertions.assertThat(newsRepository.findById(newsId.longValue())).isEmpty();
+        assertThat(newsRepository.findById(newsId.longValue())).isEmpty();
     }
 
     @Test
@@ -230,10 +231,12 @@ class AdminApiTest extends ApiTestSupport {
                 .when().delete("/api/admin/book-stories/{bookStoryId}/comments/{commentId}", story.getId(), comment.getId())
                 .then().statusCode(200)
                 .body("result", equalTo(comment.getId().intValue()));
+        assertThat(commentRepository.findById(comment.getId()).orElseThrow().isDeleted()).isTrue();
 
         given().cookie(accessTokenCookie(admin))
                 .when().delete("/api/admin/book-stories/{bookStoryId}", story.getId())
                 .then().statusCode(200);
+        assertThat(bookStoryRepository.findById(story.getId())).isEmpty();
 
         given().cookie(accessTokenCookie(admin))
                 .when().get("/api/admin/book-stories/{bookStoryId}", 999999)

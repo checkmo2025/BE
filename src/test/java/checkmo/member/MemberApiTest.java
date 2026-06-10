@@ -185,21 +185,29 @@ class MemberApiTest extends ApiTestSupport {
                 .when()
                 .get("/api/members/{memberNickname}", target.nickName())
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("result.nickname", equalTo(target.nickName()))
+                .body("result.following", equalTo(false))
+                .body("result.followerCount", equalTo(0))
+                .body("result.followingCount", equalTo(0));
 
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
                 .get("/api/members/{memberNickname}/followings", target.nickName())
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("result.followList.size()", equalTo(0))
+                .body("result.hasNext", equalTo(false));
 
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
                 .get("/api/members/{memberNickname}/followers", target.nickName())
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("result.followList.size()", equalTo(0))
+                .body("result.hasNext", equalTo(false));
     }
 
     @Test
@@ -273,14 +281,17 @@ class MemberApiTest extends ApiTestSupport {
                 .when()
                 .get("/api/members/me/recommend")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("result.friends.size()", equalTo(0));
 
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
                 .get("/api/members/me/follow-count")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("result.followerCount", equalTo(0))
+                .body("result.followingCount", equalTo(0));
 
         given()
                 .cookie(accessTokenCookie(user))

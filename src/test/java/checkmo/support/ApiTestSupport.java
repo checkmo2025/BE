@@ -169,11 +169,20 @@ public abstract class ApiTestSupport {
         RestAssured.reset();
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
         jdbcTemplate.queryForList(
-                        "select table_name from information_schema.tables where lower(table_schema) = 'public'",
+                        """
+                                select table_name
+                                from information_schema.tables
+                                where lower(table_schema) = 'public'
+                                  and table_type in ('BASE TABLE', 'TABLE')
+                                """,
                         String.class
                 )
-                .forEach(tableName -> jdbcTemplate.execute("delete from " + tableName));
+                .forEach(tableName -> jdbcTemplate.execute("delete from " + quoteIdentifier(tableName)));
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+    }
+
+    private String quoteIdentifier(String identifier) {
+        return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     protected TestUser createUser() {

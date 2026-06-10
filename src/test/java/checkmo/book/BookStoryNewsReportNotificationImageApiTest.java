@@ -1,6 +1,7 @@
 package checkmo.book;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -254,7 +255,12 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(accessTokenCookie(author))
-                .body(Map.of("isbn", "bad", "title", "검증 실패", "status", "PUBLISHED"))
+                .body(Map.of(
+                        "isbn", "bad",
+                        "title", "검증 실패",
+                        "description", "ISBN 검증 실패를 확인할 설명입니다.",
+                        "status", "PUBLISHED"
+                ))
                 .when()
                 .post("/api/book-stories")
                 .then()
@@ -333,7 +339,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         given().when().get("/api/reports/me")
                 .then().statusCode(401);
 
-        org.assertj.core.api.Assertions.assertThat(reportRepository.findAll()).hasSize(1);
+        assertThat(reportRepository.findAll()).hasSize(1);
     }
 
     @Test

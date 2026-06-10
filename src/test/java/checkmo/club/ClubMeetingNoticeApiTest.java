@@ -27,7 +27,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 class ClubMeetingNoticeApiTest extends ApiTestSupport {
 
@@ -58,14 +57,11 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     @Autowired
     TeamChatMessageRepository teamChatMessageRepository;
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
     @Test
     void clubManagementFlowCoversClubEndpoints() {
         TestUser owner = createUser();
         TestUser member = createUser();
-        Club club = createClub(owner, "club" + owner.id().substring(owner.id().length() - 4).toLowerCase());
+        Club club = createClub(owner, "club" + uniqueSuffix(owner));
 
         given().cookie(accessTokenCookie(owner))
                 .queryParam("clubName", club.getName())
@@ -136,7 +132,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     @Test
     void bookshelfMeetingTopicReviewAndChatFlowCoversRestEndpoints() {
         TestUser owner = createUser();
-        Club club = createClub(owner, "bookshelf" + owner.id().substring(owner.id().length() - 4).toLowerCase());
+        Club club = createClub(owner, "bookshelf" + uniqueSuffix(owner));
         Meeting meeting = createMeeting(owner, club.getId());
         ClubMember ownerClubMember = clubMemberRepository.findByClubIdAndMemberId(club.getId(), owner.id()).orElseThrow();
 
@@ -250,15 +246,18 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     @Test
     void noticeVoteAndCommentFlowCoversNoticeEndpoints() {
         TestUser owner = createUser();
-        Club club = createClub(owner, "notice" + owner.id().substring(owner.id().length() - 4).toLowerCase());
+        Club club = createClub(owner, "notice" + uniqueSuffix(owner));
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(noticePayload())
                 .when().post("/api/clubs/{clubId}/notices", club.getId())
                 .then().statusCode(200);
-        Notice notice = noticeRepository.findAll().getFirst();
-        Long voteId = jdbcTemplate.queryForObject("select vote_id from notice where id = ?", Long.class, notice.getId());
+        Notice notice = noticeRepository.findTop1ByClubIdOrderByCreatedAtDescIdDesc(club.getId()).orElseThrow();
+        Long voteId = noticeRepository.findWithVoteAndClubMemberVotesByIdAndClubId(notice.getId(), club.getId())
+                .orElseThrow()
+                .getVote()
+                .getId();
 
         given().when().get("/api/clubs/{clubId}/notices/latest", club.getId())
                 .then().statusCode(200);
@@ -319,7 +318,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     void nonMemberCannotAccessMemberOnlyClubResources() {
         TestUser owner = createUser();
         TestUser outsider = createUser();
-        Club club = createClub(owner, "forbidden" + owner.id().substring(owner.id().length() - 4).toLowerCase());
+        Club club = createClub(owner, "forbidden" + uniqueSuffix(owner));
 
         given().cookie(accessTokenCookie(outsider))
                 .when().get("/api/clubs/{clubId}/bookshelves", club.getId())
@@ -340,14 +339,18 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .body(clubDetailPayload(name))
                 .when().post("/api/clubs")
                 .then().statusCode(200);
-        return clubRepository.findAll().getFirst();
+        return clubRepository.findAll().stream()
+                .filter(club -> club.getName().equals(name))
+                .findFirst()
+                .orElseThrow();
     }
 
     private Meeting createMeeting(TestUser owner, Long clubId) {
+        String title = "첫책장-" + uniqueSuffix(owner);
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of(
-                        "title", "첫책장",
+                        "title", title,
                         "meetingTime", LocalDateTime.now().plusDays(1).toString(),
                         "location", "온라인",
                         "generation", 1,
@@ -356,7 +359,14 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 ))
                 .when().post("/api/clubs/{clubId}/bookshelves", clubId)
                 .then().statusCode(200);
-        return meetingRepository.findAllByClubId(clubId).getFirst();
+        return meetingRepository.findAllByClubId(clubId).stream()
+                .filter(meeting -> meeting.getTitle().equals(title))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private String uniqueSuffix(TestUser user) {
+        return user.id().substring(user.id().length() - 4).toLowerCase();
     }
 
     private Map<String, Object> clubDetailPayload(String name) {
