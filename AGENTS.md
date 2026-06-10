@@ -1,8 +1,6 @@
 # PROJECT KNOWLEDGE BASE
 
-Generated: 2026-06-10 14:05:27 KST
-Commit: cc0a6df9
-Branch: chore/220/lazycodex
+Initialized for issue #220.
 
 ## OVERVIEW
 
@@ -82,7 +80,6 @@ checkmo/
 
 ## NOTES
 
-- Current local branch for this setup work is `chore/220/lazycodex`.
 - `.env` exists at the repository root and is ignored by git.
 - `.github/workflows/release.yml` deploys on push to `develop` through ECR + SCP/SSH, despite the workflow name mentioning CodeDeploy.
 - CodeDeploy files also exist (`appspec.yml`, `scripts/codedeploy/*`) and use a different deployment directory than the GitHub Actions SSH path.
