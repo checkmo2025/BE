@@ -155,19 +155,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Refresh Token이 유효한 경우, 해당 memberId로 인증 정보 가져오기
         Authentication authentication = jwtTokenProvider.getAuthenticationFromMemberId(memberId);
 
-        // 그리고 새로운 Access Token 생성
+        // Access Token + Refresh Token 동시 재발급 (Rotation)
         JwtToken newJwtToken = jwtTokenProvider.generateToken(authentication);
 
-        // 이제 새로운 Access Token을 쿠키에 담기
-        String newAccessToken = newJwtToken.getAccessToken();
-
         int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
-        jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken,
-                accessTokenMaxAge); // 2시간 유효
+        int refreshTokenMaxAge = (int) (jwtTokenProvider.getRefreshTokenExpirationTime() / 1000L);
+
+        jwtCookieUtil.addTokenToCookie(response, "accessToken", newJwtToken.getAccessToken(), accessTokenMaxAge);
+        jwtCookieUtil.addTokenToCookie(response, "refreshToken", newJwtToken.getRefreshToken(), refreshTokenMaxAge);
+
+        // Redis Refresh Token 교체 (기존 토큰 무효화)
+        tokenCacheService.saveRefreshToken(memberId, newJwtToken.getRefreshToken());
 
         // SecurityContext에 새로운 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("Access Token 재발급 성공: 새로운 Access Token 생성 (memberId={})", memberId);
+        log.info("Access Token + Refresh Token 재발급 성공 (Rotation, memberId={})", memberId);
     }
 
     private void sendErrorResponse(HttpServletResponse response, AuthErrorStatus status) throws IOException {

@@ -33,11 +33,11 @@ public class AuthFacade {
         return AuthConverter.toSignUpDTO(user);
     }
 
-    public void login(AuthRequestDTO.Login request, HttpServletResponse response) {
+    public String login(AuthRequestDTO.Login request, HttpServletResponse response) {
         Authentication authentication = authSessionCommandService.login(request);
 
-        // JWT 토큰 생성 및 쿠키 설정
-        jwtLoginProcessor.processLogin(response, authentication);
+        // JWT 토큰 생성 및 쿠키 설정, Refresh Token 반환
+        return jwtLoginProcessor.processLogin(response, authentication);
     }
 
     public void logout(HttpServletRequest request, HttpServletResponse response) {

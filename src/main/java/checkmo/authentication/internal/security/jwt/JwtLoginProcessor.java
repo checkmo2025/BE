@@ -16,8 +16,8 @@ public class JwtLoginProcessor {
     private final TokenCacheService tokenCacheService;
     private final AuthReactivationCommandService authReactivationCommandService;
 
-    // 로그인 성공 시 JWT 토큰 생성 및 쿠키 설정
-    public void processLogin(HttpServletResponse response, Authentication authentication) {
+    // 로그인 성공 시 JWT 토큰 생성 및 쿠키 설정, Refresh Token 반환
+    public String processLogin(HttpServletResponse response, Authentication authentication) {
         String userId = ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
 
         // 인증 성공 시점에만 계정 자동 복구
@@ -34,5 +34,7 @@ public class JwtLoginProcessor {
 
         // RefreshToken Redis에 저장
         tokenCacheService.saveRefreshToken(userId, jwtToken.getRefreshToken());
+
+        return jwtToken.getRefreshToken();
     }
 }
