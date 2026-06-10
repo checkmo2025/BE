@@ -1,6 +1,7 @@
 package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
+import checkmo.authentication.web.dto.AuthResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;
@@ -310,10 +311,11 @@ public class MemberController {
         return ApiResponse.onSuccess("이메일이 성공적으로 변경되었습니다.");
     }
 
-    @Operation(summary = "토큰 갱신 API", description = "앱 전용. Refresh Token 쿠키로 Access Token을 갱신합니다. JwtAuthenticationFilter가 자동 처리합니다.")
+    @Operation(summary = "토큰 갱신 API", description = "앱 전용. Refresh Token 쿠키로 Access Token을 갱신하고 새 Refresh Token을 반환합니다.")
     @PostMapping("/me/refresh")
-    public ApiResponse<Void> refreshToken() {
-        return ApiResponse.onSuccess(null);
+    public ApiResponse<AuthResponseDTO.Login> refreshToken(HttpServletRequest request) {
+        String newRefreshToken = (String) request.getAttribute("newRefreshToken");
+        return ApiResponse.onSuccess(AuthResponseDTO.Login.builder().refreshToken(newRefreshToken).build());
     }
 
     @Operation(summary = "소셜 로그인 연동 관리", description = "현재 로그인된 계정의 가입 수단과 이메일 정보를 조회합니다.")

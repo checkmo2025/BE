@@ -167,6 +167,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Redis Refresh Token 교체 (기존 토큰 무효화)
         tokenCacheService.saveRefreshToken(memberId, newJwtToken.getRefreshToken());
 
+        // 앱 silent refresh 시 컨트롤러가 새 Refresh Token을 응답 바디로 반환할 수 있도록 저장
+        request.setAttribute("newRefreshToken", newJwtToken.getRefreshToken());
+
         // SecurityContext에 새로운 인증 정보 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("Access Token + Refresh Token 재발급 성공 (Rotation, memberId={})", memberId);
