@@ -1,8 +1,9 @@
 package checkmo.authentication.internal.security.jwt;
 
+import checkmo.authentication.internal.config.properties.JwtProperties;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -12,24 +13,31 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TokenCacheService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String REFRESH_TOKEN_PREFIX = "refreshToken::";
+    private static final String BLACKLIST_PREFIX = "blacklist::";
 
-    @CachePut(value = "refreshToken", key = "#userId")
-    public String saveRefreshToken(String userId, String refreshToken) {
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final JwtProperties jwtProperties;
+
+    public void saveRefreshToken(String userId, String refreshToken) {
         log.info("리프레시 토큰 저장 - userId={}", userId);
-        return refreshToken;
+        long ttlMs = jwtProperties.getTokenValidity().getRefreshToken();
+        redisTemplate.opsForValue().set(
+                REFRESH_TOKEN_PREFIX + userId,
+                refreshToken,
+                ttlMs,
+                TimeUnit.MILLISECONDS
+        );
     }
 
-    // 이건 Redis에서 직접 조회하는 메서드로, @Cacheable을 사용하지 않고 RedisTemplate을 통해 조회
     public String getRefreshToken(String userId) {
         log.info("리프레시 토큰 조회 - userId={}", userId);
-        return (String) redisTemplate.opsForValue().get("refreshToken::" + userId);
+        return (String) redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + userId);
     }
 
-    // Redis에서 리프레시 토큰 삭제
-    @CacheEvict(value = "refreshToken", key = "#userId")
     public void deleteRefreshToken(String userId) {
         log.info("리프레시 토큰 삭제 - userId={}", userId);
+        redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
     }
 
     // 블랙리스트 토큰 저장
@@ -42,6 +50,6 @@ public class TokenCacheService {
     // 블랙리스트 토큰 조회
     public boolean isAccessTokenBlacklisted(String accessToken) {
         log.info("블랙리스트 토큰 조회");
-        return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist::" + accessToken));
+        return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken));
     }
 }
