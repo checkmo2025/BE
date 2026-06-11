@@ -41,12 +41,14 @@ jobs:
       - name: Create .env file
         run: |
           printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
-          awk '!/^(SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE|SENTRY_AUTH_TOKEN)=/' .env > .env.tmp
+          awk '!/^(SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE|SENTRY_AUTH_TOKEN|SENTRY_TRACES_SAMPLE_RATE)=/' .env > .env.tmp
           mv .env.tmp .env
           printf 'SENTRY_ENABLED=%s\n' "${{ secrets.SENTRY_ENABLED }}" >> .env
           printf 'SENTRY_DSN=%s\n' "${{ secrets.SENTRY_DSN }}" >> .env
           printf 'SENTRY_ENVIRONMENT=%s\n' "${{ secrets.SENTRY_ENVIRONMENT }}" >> .env
           printf 'SENTRY_RELEASE=checkmo-backend@%s\n' "${GITHUB_SHA}" >> .env
+          SENTRY_TRACES_SAMPLE_RATE="${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}"
+          printf 'SENTRY_TRACES_SAMPLE_RATE=%s\n' "${SENTRY_TRACES_SAMPLE_RATE:-0.0}" >> .env
 
       # 5. 설정 파일 전송 (SCP)
       - name: Copy files to EC2

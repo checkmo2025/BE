@@ -1,7 +1,6 @@
 spring:
   autoconfigure:
     exclude:
-      - io.sentry.spring.boot.jakarta.SentryAutoConfiguration
       - io.sentry.spring.boot.jakarta.SentryProfilerAutoConfiguration
       - io.sentry.spring.boot.jakarta.SentryLogbackAppenderAutoConfiguration
       - io.sentry.spring.boot.jakarta.SentryWebfluxAutoConfiguration
@@ -30,11 +29,13 @@ checkmo:
     dsn: ${SENTRY_DSN:}
     environment: ${SENTRY_ENVIRONMENT:local}
     release: ${SENTRY_RELEASE:local}
+    traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.0}
 
 sentry:
   enabled: ${SENTRY_ENABLED:false}
   environment: ${SENTRY_ENVIRONMENT:local}
   release: ${SENTRY_RELEASE:local}
+  traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.0}
   send-default-pii: false
   max-request-body-size: none
   logging:
