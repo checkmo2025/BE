@@ -14,6 +14,15 @@ public class SentryPrivacyPolicy {
             "x-access-token",
             "x-refresh-token"
     );
+    private static final Set<String> BLOCKED_HEADER_KEYWORDS = Set.of(
+            "authorization",
+            "cookie",
+            "jwt",
+            "token",
+            "refresh",
+            "password",
+            "verification"
+    );
     private static final Set<String> BLOCKED_QUERY_KEYWORDS = Set.of(
             "authorization",
             "cookie",
@@ -21,8 +30,7 @@ public class SentryPrivacyPolicy {
             "token",
             "refresh",
             "password",
-            "verification",
-            "code"
+            "verification"
     );
 
     public boolean sendDefaultPii() {
@@ -41,7 +49,9 @@ public class SentryPrivacyPolicy {
         if (headerName == null || headerName.isBlank()) {
             return false;
         }
-        return !BLOCKED_HEADERS.contains(headerName.toLowerCase(Locale.ROOT));
+        String normalized = headerName.toLowerCase(Locale.ROOT);
+        return !BLOCKED_HEADERS.contains(normalized)
+                && BLOCKED_HEADER_KEYWORDS.stream().noneMatch(normalized::contains);
     }
 
     public boolean shouldSendQueryParameter(String parameterName) {

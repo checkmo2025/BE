@@ -38,7 +38,13 @@ class SentryPrivacyConfigurationTest {
         assertThat(privacyPolicy.shouldSendHeader("Authorization")).isFalse();
         assertThat(privacyPolicy.shouldSendHeader("AUTHORIZATION")).isFalse();
         assertThat(privacyPolicy.shouldSendHeader("Cookie")).isFalse();
+        assertThat(privacyPolicy.shouldSendHeader("RefreshToken")).isFalse();
+        assertThat(privacyPolicy.shouldSendHeader("X-Refresh-Token")).isFalse();
+        assertThat(privacyPolicy.shouldSendHeader("X-JWT")).isFalse();
+        assertThat(privacyPolicy.shouldSendHeader("Verification-Code")).isFalse();
         assertThat(privacyPolicy.shouldSendHeader("X-Request-Id")).isTrue();
+        assertThat(privacyPolicy.shouldSendHeader("X-Status-Code")).isTrue();
+        assertThat(privacyPolicy.shouldSendHeader("X-Error-Code")).isTrue();
     }
 
     @Test
@@ -49,7 +55,10 @@ class SentryPrivacyConfigurationTest {
         assertThat(privacyPolicy.shouldSendQueryParameter("password")).isFalse();
         assertThat(privacyPolicy.shouldSendQueryParameter("verificationCode")).isFalse();
         assertThat(privacyPolicy.shouldSendQueryParameter("verification-code")).isFalse();
+        assertThat(privacyPolicy.shouldSendQueryParameter("jwt")).isFalse();
         assertThat(privacyPolicy.shouldSendQueryParameter("page")).isTrue();
+        assertThat(privacyPolicy.shouldSendQueryParameter("categoryCode")).isTrue();
+        assertThat(privacyPolicy.shouldSendQueryParameter("productCode")).isTrue();
     }
 
     @Test
@@ -61,14 +70,18 @@ class SentryPrivacyConfigurationTest {
     void beforeSendRemovesSensitiveRequestDataAndUserContext() {
         SentryEvent event = new SentryEvent(new RuntimeException("unexpected"));
         Request request = new Request();
-        request.setData("raw-body");
+        request.setData("password=secret&verification-code=123456");
         request.setCookies("SESSION=secret");
-        request.setQueryString("page=1&refreshToken=secret");
-        request.setUrl("https://api.checkmo.kr/books?refreshToken=secret&page=1");
+        request.setQueryString("page=1&refreshToken=secret&jwt=secret");
+        request.setUrl("https://api.checkmo.kr/books?refreshToken=secret&page=1&jwt=secret");
         request.setHeaders(Map.of(
                 "Authorization", "Bearer secret",
+                "RefreshToken", "secret",
+                "X-JWT", "secret",
+                "Verification-Code", "123456",
                 "Cookie", "SESSION=secret",
-                "X-Request-Id", "request-id"
+                "X-Request-Id", "request-id",
+                "X-Status-Code", "500"
         ));
         event.setRequest(request);
 
@@ -85,7 +98,8 @@ class SentryPrivacyConfigurationTest {
         assertThat(sanitized.getRequest().getUrl()).isEqualTo("https://api.checkmo.kr/books");
         assertThat(sanitized.getRequest().getHeaders())
                 .containsEntry("X-Request-Id", "request-id")
-                .doesNotContainKeys("Authorization", "Cookie");
+                .containsEntry("X-Status-Code", "500")
+                .doesNotContainKeys("Authorization", "RefreshToken", "X-JWT", "Verification-Code", "Cookie");
     }
 
     @Test
