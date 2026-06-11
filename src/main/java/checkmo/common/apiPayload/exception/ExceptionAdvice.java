@@ -3,11 +3,13 @@ package checkmo.common.apiPayload.exception;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.common.apiPayload.code.ErrorReasonDTO;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
+import checkmo.common.monitoring.SentryCaptureClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,7 +27,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
+@RequiredArgsConstructor
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
+
+    private final SentryCaptureClient sentryCaptureClient;
 
     @ExceptionHandler
     public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
@@ -66,9 +71,10 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
         log.error("Unhandled exception while processing API request", e);
+        sentryCaptureClient.captureException(e);
 
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY,
-                ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(), request, e.getMessage());
+                ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(), request, null);
     }
 
     @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
