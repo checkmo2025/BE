@@ -21,8 +21,7 @@ public class SentryPrivacyPolicy {
             "token",
             "refresh",
             "password",
-            "verification",
-            "code"
+            "verification"
     );
     private static final Set<String> BLOCKED_QUERY_KEYWORDS = Set.of(
             "authorization",
@@ -31,8 +30,7 @@ public class SentryPrivacyPolicy {
             "token",
             "refresh",
             "password",
-            "verification",
-            "code"
+            "verification"
     );
 
     public boolean sendDefaultPii() {

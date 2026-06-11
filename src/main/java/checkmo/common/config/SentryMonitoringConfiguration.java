@@ -41,8 +41,13 @@ public class SentryMonitoringConfiguration {
         if (transactionName == null) {
             return false;
         }
-        return transactionName.contains("/health")
+        return isHealthCheckTransaction(transactionName)
                 || transactionName.contains("/swagger-ui")
                 || transactionName.contains("/v3/api-docs");
+    }
+
+    private boolean isHealthCheckTransaction(String transactionName) {
+        return transactionName.equals("/health")
+                || transactionName.endsWith(" /health");
     }
 }

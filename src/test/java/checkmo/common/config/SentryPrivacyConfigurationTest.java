@@ -43,6 +43,8 @@ class SentryPrivacyConfigurationTest {
         assertThat(privacyPolicy.shouldSendHeader("X-JWT")).isFalse();
         assertThat(privacyPolicy.shouldSendHeader("Verification-Code")).isFalse();
         assertThat(privacyPolicy.shouldSendHeader("X-Request-Id")).isTrue();
+        assertThat(privacyPolicy.shouldSendHeader("X-Status-Code")).isTrue();
+        assertThat(privacyPolicy.shouldSendHeader("X-Error-Code")).isTrue();
     }
 
     @Test
@@ -55,6 +57,8 @@ class SentryPrivacyConfigurationTest {
         assertThat(privacyPolicy.shouldSendQueryParameter("verification-code")).isFalse();
         assertThat(privacyPolicy.shouldSendQueryParameter("jwt")).isFalse();
         assertThat(privacyPolicy.shouldSendQueryParameter("page")).isTrue();
+        assertThat(privacyPolicy.shouldSendQueryParameter("categoryCode")).isTrue();
+        assertThat(privacyPolicy.shouldSendQueryParameter("productCode")).isTrue();
     }
 
     @Test
@@ -76,7 +80,8 @@ class SentryPrivacyConfigurationTest {
                 "X-JWT", "secret",
                 "Verification-Code", "123456",
                 "Cookie", "SESSION=secret",
-                "X-Request-Id", "request-id"
+                "X-Request-Id", "request-id",
+                "X-Status-Code", "500"
         ));
         event.setRequest(request);
 
@@ -93,6 +98,7 @@ class SentryPrivacyConfigurationTest {
         assertThat(sanitized.getRequest().getUrl()).isEqualTo("https://api.checkmo.kr/books");
         assertThat(sanitized.getRequest().getHeaders())
                 .containsEntry("X-Request-Id", "request-id")
+                .containsEntry("X-Status-Code", "500")
                 .doesNotContainKeys("Authorization", "RefreshToken", "X-JWT", "Verification-Code", "Cookie");
     }
 

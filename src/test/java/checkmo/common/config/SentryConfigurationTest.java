@@ -105,6 +105,7 @@ class SentryConfigurationTest {
         assertThat(enabledSampler.sample(samplingContext("GET /health"))).isZero();
         assertThat(enabledSampler.sample(samplingContext("GET /swagger-ui/index.html"))).isZero();
         assertThat(enabledSampler.sample(samplingContext("GET /v3/api-docs"))).isZero();
+        assertThat(enabledSampler.sample(samplingContext("GET /api/v1/user/health"))).isEqualTo(0.1);
         assertThat(enabledSampler.sample(samplingContext("GET /api/books"))).isEqualTo(0.1);
     }
 
