@@ -39,8 +39,11 @@ jobs:
       - name: Create .env file
         run: |
           printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
-          awk '!/^SENTRY_RELEASE=/' .env > .env.tmp
+          awk '!/^(SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE)=/' .env > .env.tmp
           mv .env.tmp .env
+          printf 'SENTRY_ENABLED=%s\n' "${{ secrets.SENTRY_ENABLED }}" >> .env
+          printf 'SENTRY_DSN=%s\n' "${{ secrets.SENTRY_DSN }}" >> .env
+          printf 'SENTRY_ENVIRONMENT=%s\n' "${{ secrets.SENTRY_ENVIRONMENT }}" >> .env
           printf 'SENTRY_RELEASE=checkmo-backend@%s\n' "${GITHUB_SHA}" >> .env
 
       # 5. 설정 파일 전송 (SCP)
