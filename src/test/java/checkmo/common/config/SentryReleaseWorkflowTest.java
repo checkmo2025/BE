@@ -56,4 +56,13 @@ class SentryReleaseWorkflowTest {
         assertThat(workflow).doesNotContain("Client Secret");
         assertThat(workflow).doesNotContain("SENTRY_AUTH_TOKEN=");
     }
+
+    @Test
+    void releaseWorkflowStripsCiOnlySentryAuthTokenFromRuntimeEnvFile() throws IOException {
+        String workflow = Files.readString(RELEASE_WORKFLOW);
+
+        assertThat(workflow)
+                .contains("SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE|SENTRY_AUTH_TOKEN");
+        assertThat(workflow).doesNotContain("printf 'SENTRY_AUTH_TOKEN=");
+    }
 }
