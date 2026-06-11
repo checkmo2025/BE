@@ -60,6 +60,47 @@ checkmo/
 - New Spring config belongs in `application-<profile>.yml` and must be included deliberately from `application.yml`.
 - QueryDSL generated-source wiring is non-standard in `build.gradle`; inspect before changing generated source paths.
 
+## COMMIT MESSAGE STYLE
+
+Use the repository's existing commit message style.
+
+Default format:
+- Use Conventional Commit style: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`, `ci:`, `hotfix:`.
+- Prefer a Korean summary after the type.
+- Add a scope when it improves clarity, especially for module or infrastructure-specific changes:
+  - `feat(report): 신고 모듈 분리 및 공통 신고 기능 추가`
+  - `fix(websocket): allowedOrigins 설정 와일드카드 하드코딩 제거`
+  - `docs: API 테스트 문서 추가`
+
+For simple changes, a single-line commit message is enough:
+
+```text
+fix: 프로필 조회시 이름 반환 추가
+```
+
+For larger, review-driven, operational, or architecture-sensitive changes, include a concise body that explains why the change was made and what was verified. Prefer these trailers when they add useful decision context:
+
+```text
+<type>(<optional-scope>): <Korean summary>
+
+<short body explaining intent and important constraints>
+
+Constraint: <external constraint or issue/review context>
+Rejected: <alternative considered> | <reason>
+Confidence: <low|medium|high>
+Scope-risk: <narrow|moderate|broad>
+Directive: <future maintenance warning>
+Tested: <commands or checks run>
+Not-tested: <known verification gaps>
+```
+
+Rules:
+- The subject should describe the intent clearly, not just list files.
+- Do not invent verification. `Tested:` must match commands actually run.
+- Use `Not-tested:` for honest gaps.
+- Do not include secrets, `.env` values, DSNs, tokens, or raw production payloads in commit messages.
+- Merge commits may keep GitHub's generated merge title.
+
 ## ANTI-PATTERNS
 
 - Do not read, print, commit, or summarize `.env` or secret-bearing files. Existence checks are enough.
