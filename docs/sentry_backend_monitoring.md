@@ -68,6 +68,8 @@ The release name in Sentry must match the runtime SDK release value:
 checkmo-backend@<github sha>
 ```
 
+The deployment workflow pins every third-party GitHub Action to a full commit SHA. When updating an action version, first resolve the intended upstream tag or branch to its current commit SHA, update the `uses:` line to that SHA, then rerun `SentryReleaseWorkflowTest`. Do not switch new or existing workflow actions back to mutable tags such as `@v3` or branches such as `@master`.
+
 ## Privacy Rules
 
 The backend must not send these values to Sentry:
