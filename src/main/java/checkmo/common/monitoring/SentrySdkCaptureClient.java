@@ -22,14 +22,6 @@ public class SentrySdkCaptureClient implements SentryCaptureClient {
 
     @Override
     public void captureException(Throwable exception) {
-        Sentry.captureException(sanitize(exception));
-    }
-
-    static Throwable sanitize(Throwable exception) {
-        RuntimeException sanitized = new RuntimeException("Unexpected backend exception");
-        if (exception != null) {
-            sanitized.setStackTrace(exception.getStackTrace());
-        }
-        return sanitized;
+        Sentry.captureException(exception);
     }
 }

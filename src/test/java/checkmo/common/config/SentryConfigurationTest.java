@@ -5,9 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import checkmo.common.monitoring.SentryCaptureClient;
 import checkmo.common.monitoring.SentrySdkCaptureClient;
 import checkmo.support.SpringTest;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 
 @SpringTest
@@ -56,14 +59,17 @@ class SentryConfigurationTest {
 
     @Test
     void sentryStarterAutoConfigurationIsExcluded() {
-        assertThat(environment.getProperty("spring.autoconfigure.exclude[0]"))
-                .isEqualTo("io.sentry.spring.boot.jakarta.SentryAutoConfiguration");
-        assertThat(environment.getProperty("spring.autoconfigure.exclude[1]"))
-                .isEqualTo("io.sentry.spring.boot.jakarta.SentryProfilerAutoConfiguration");
-        assertThat(environment.getProperty("spring.autoconfigure.exclude[2]"))
-                .isEqualTo("io.sentry.spring.boot.jakarta.SentryLogbackAppenderAutoConfiguration");
-        assertThat(environment.getProperty("spring.autoconfigure.exclude[3]"))
-                .isEqualTo("io.sentry.spring.boot.jakarta.SentryWebfluxAutoConfiguration");
+        List<String> excludes = Binder.get(environment)
+                .bind("spring.autoconfigure.exclude", Bindable.listOf(String.class))
+                .orElse(List.of());
+
+        assertThat(excludes)
+                .contains(
+                        "io.sentry.spring.boot.jakarta.SentryAutoConfiguration",
+                        "io.sentry.spring.boot.jakarta.SentryProfilerAutoConfiguration",
+                        "io.sentry.spring.boot.jakarta.SentryLogbackAppenderAutoConfiguration",
+                        "io.sentry.spring.boot.jakarta.SentryWebfluxAutoConfiguration"
+                );
         assertThat(beanFactory.containsBean("sentryHub")).isFalse();
     }
 

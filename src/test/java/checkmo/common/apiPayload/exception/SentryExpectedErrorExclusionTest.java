@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -73,6 +74,19 @@ class SentryExpectedErrorExclusionTest {
 
         advice.accessDenied(
                 new AccessDeniedException("denied"),
+                new ServletWebRequest(new MockHttpServletRequest())
+        );
+
+        assertThat(captureClient.count()).isZero();
+    }
+
+    @Test
+    void doesNotCaptureAuthenticationException() {
+        RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
+        ExceptionAdvice advice = new ExceptionAdvice(captureClient);
+
+        advice.authentication(
+                new AuthenticationCredentialsNotFoundException("unauthenticated"),
                 new ServletWebRequest(new MockHttpServletRequest())
         );
 

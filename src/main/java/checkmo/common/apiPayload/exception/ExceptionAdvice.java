@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -84,6 +85,18 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 ErrorStatus._FORBIDDEN,
                 HttpHeaders.EMPTY,
                 ErrorStatus._FORBIDDEN.getHttpStatus(),
+                request,
+                null
+        );
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> authentication(AuthenticationException e, WebRequest request) {
+        return handleExceptionInternalFalse(
+                e,
+                ErrorStatus._UNAUTHORIZED,
+                HttpHeaders.EMPTY,
+                ErrorStatus._UNAUTHORIZED.getHttpStatus(),
                 request,
                 null
         );
