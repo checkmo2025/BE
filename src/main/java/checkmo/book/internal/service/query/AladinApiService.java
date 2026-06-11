@@ -11,17 +11,21 @@ import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AladinApiService {
 
     private static final int RECOMMENDED_MAX_RESULTS = 28;
+    private static final int LOG_BODY_MAX_LENGTH = 500;
 
     private final RestTemplate restTemplate;
 
@@ -29,10 +33,8 @@ public class AladinApiService {
     private final BookLikedRepository bookLikedRepository;
 
     public BookResponseDTO.BookList searchBooks(String keyword, int page, String memberId) {
+        String url = buildHttpUrl(keyword, page);
         try {
-
-            String url = buildHttpUrl(keyword, page);
-
             var response = restTemplate.getForObject(
                     url,
                     AladinApiResponseDTO.BookList.class
@@ -42,14 +44,14 @@ public class AladinApiService {
             return applyLikedByMe(bookList, memberId);
 
         } catch (Exception e) {
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            logAladinFailure("searchBooks", url, e);
+            throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
         }
     }
 
     public DetailInfo retrieveBookDetailInfo(String isbn) {
+        String url = buildHttpUrl(isbn);
         try {
-            String url = buildHttpUrl(isbn);
-
             var response = restTemplate.getForObject(
                     url,
                     AladinApiResponseDTO.BookList.class
@@ -62,16 +64,17 @@ public class AladinApiService {
             return BookConverter.toBookInfoDetail(response);
 
         } catch (BookException e) {
-            throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);
+            logAladinFailure("retrieveBookDetailInfo", url, e);
+            throw new BookException(BookErrorStatus.BOOK_NOT_FOUND, e);
         } catch (Exception e) {
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            logAladinFailure("retrieveBookDetailInfo", url, e);
+            throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
         }
     }
 
     public BookResponseDTO.BookList retrieveRecommendedBooks() {
+        String url = buildHttpUrl();
         try {
-            String url = buildHttpUrl();
-
             var response = restTemplate.getForObject(
                     url,
                     AladinApiResponseDTO.BookList.class
@@ -84,7 +87,8 @@ public class AladinApiService {
             return BookConverter.toBookList(response, 1);
 
         } catch (Exception e) {
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            logAladinFailure("retrieveRecommendedBooks", url, e);
+            throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
         }
     }
 
@@ -125,6 +129,53 @@ public class AladinApiService {
                 .queryParam("Version", aladinProperties.getAuth().getVersion())
                 .build()
                 .toUriString();
+    }
+
+    private void logAladinFailure(String operation, String url, Exception exception) {
+        log.error(
+                "Aladin API request failed. operation={}, url={}, exceptionType={}, message={}",
+                operation,
+                maskTtbKey(url),
+                exception.getClass().getName(),
+                sanitize(exception.getMessage())
+        );
+
+        Throwable cause = exception.getCause();
+        if (cause != null) {
+            log.error(
+                    "Aladin API failure cause. operation={}, causeType={}, causeMessage={}",
+                    operation,
+                    cause.getClass().getName(),
+                    sanitize(cause.getMessage())
+            );
+        }
+
+        if (exception instanceof RestClientResponseException responseException) {
+            log.error(
+                    "Aladin API response failure. operation={}, statusCode={}, responseBody={}",
+                    operation,
+                    responseException.getStatusCode(),
+                    trimForLog(sanitize(responseException.getResponseBodyAsString()))
+            );
+        }
+    }
+
+    private String maskTtbKey(String value) {
+        return sanitize(value);
+    }
+
+    private String sanitize(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replaceAll("(?i)(ttbkey=)[^&\\s]+", "$1***");
+    }
+
+    private String trimForLog(String value) {
+        if (value == null || value.length() <= LOG_BODY_MAX_LENGTH) {
+            return value;
+        }
+        return value.substring(0, LOG_BODY_MAX_LENGTH) + "...";
     }
 
     public BookResponseDTO.BookList applyLikedByMe(BookResponseDTO.BookList bookList, String memberId) {
