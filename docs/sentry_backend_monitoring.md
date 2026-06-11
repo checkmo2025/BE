@@ -38,6 +38,38 @@ The application binds these values through `checkmo.sentry.*` properties and ini
 
 In the current deployment flow, `.github/workflows/release.yml` creates `.env` from `secrets.ENV_FILE`, removes any stale `SENTRY_RELEASE`, appends `SENTRY_RELEASE=checkmo-backend@${GITHUB_SHA}`, and copies it to EC2 with `compose.yml`. Operators must update the GitHub `ENV_FILE` secret with `SENTRY_ENABLED`, `SENTRY_DSN`, and `SENTRY_ENVIRONMENT`; `SENTRY_RELEASE` is deployment-generated and should not be maintained manually in the secret. Do not edit, print, or commit the local `.env` file.
 
+## Release and Deploy Tracking
+
+Issue #232 adds CI-side Sentry release/deploy automation for the backend project. The GitHub Actions workflow creates a Sentry release named `checkmo-backend@<github sha>` after the EC2 deployment succeeds, then records a `prod` deploy for that release.
+
+This automation uses `getsentry/action-release@v3` and requires this GitHub Actions secret:
+
+```text
+SENTRY_AUTH_TOKEN=<Sentry Internal Integration token>
+```
+
+`SENTRY_AUTH_TOKEN` is different from `SENTRY_DSN`:
+- `SENTRY_DSN` is used by the running Spring Boot app to send events.
+- `SENTRY_AUTH_TOKEN` is used only by GitHub Actions to create releases and deploy records through the Sentry API.
+- Sentry `Client Secret` is not the CI auth token.
+
+Do not add `SENTRY_AUTH_TOKEN` to `.env`, `ENV_FILE`, `compose.yml`, Spring configuration, or application runtime environment. Store it only as a GitHub Actions repository secret. The current token was created from a Sentry Internal Integration with release/CI-oriented scopes (`org:ci`, `org:read`, `project:read`, `project:releases`).
+
+The Sentry organization and project slugs are non-secret workflow constants:
+
+```text
+SENTRY_ORG=checkmo
+SENTRY_PROJECT=checkmo-spring-boot
+```
+
+The release name in Sentry must match the runtime SDK release value:
+
+```text
+checkmo-backend@<github sha>
+```
+
+The deployment workflow pins every third-party GitHub Action to a full commit SHA. When updating an action version, first resolve the intended upstream tag or branch to its current commit SHA, update the `uses:` line to that SHA, then rerun `SentryReleaseWorkflowTest`. Do not switch new or existing workflow actions back to mutable tags such as `@v3` or branches such as `@master`.
+
 ## Privacy Rules
 
 The backend must not send these values to Sentry:
@@ -96,8 +128,10 @@ Proceed only after non-prod verification passes.
 
 2. Deploy during a low-risk window. The workflow appends `SENTRY_RELEASE=checkmo-backend@<github sha>` automatically.
 3. Watch `/health`, application logs, and Sentry issue volume.
-4. Confirm expected 400/401/403 traffic does not create issue noise.
-5. Confirm unexpected 500 events are grouped and actionable.
+4. Confirm the GitHub Actions Sentry release step succeeds after the EC2 deploy step.
+5. In Sentry, open the `checkmo-spring-boot` project and confirm release `checkmo-backend@<github sha>` appears with a `prod` deploy.
+6. Confirm expected 400/401/403 traffic does not create issue noise.
+7. Confirm unexpected 500 events are grouped and actionable.
 
 ## Rollback
 
@@ -118,3 +152,8 @@ Sentry can be disabled without code changes.
 
 3. Confirm `/health` is still healthy.
 4. If the code itself must be reverted, revert the commits for issue #222 and redeploy.
+
+Release/deploy automation can be rolled back independently of runtime event sending:
+- Revert the workflow change that adds `getsentry/action-release@v3`.
+- Remove or rotate GitHub `SENTRY_AUTH_TOKEN`.
+- Revoke the Sentry Internal Integration token if it is no longer needed.
