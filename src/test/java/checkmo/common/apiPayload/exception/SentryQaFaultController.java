@@ -33,6 +33,11 @@ public class SentryQaFaultController {
         throw new GeneralException(ErrorStatus._BAD_REQUEST);
     }
 
+    @GetMapping("/domain-server-error")
+    public void domainServerError() {
+        throw new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR);
+    }
+
     @GetMapping("/captures/count")
     public String captureCount() {
         return String.valueOf(captureState.count());

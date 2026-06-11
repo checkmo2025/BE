@@ -4,8 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
+import checkmo.book.internal.exception.BookErrorStatus;
+import checkmo.book.internal.exception.BookException;
 import checkmo.common.apiPayload.code.status.ErrorStatus;
 import checkmo.common.monitoring.RecordingSentryCaptureClient;
+import checkmo.infra.s3.internal.exception.S3ErrorStatus;
+import checkmo.infra.s3.internal.exception.S3InfraException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.lang.reflect.Method;
@@ -23,13 +29,42 @@ import org.springframework.web.context.request.ServletWebRequest;
 class SentryExpectedErrorExclusionTest {
 
     @Test
-    void doesNotCaptureGeneralException() {
+    void doesNotCaptureExpected4xxGeneralException() {
         RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
         ExceptionAdvice advice = new ExceptionAdvice(captureClient);
 
         advice.onThrowException(new GeneralException(ErrorStatus._BAD_REQUEST), new MockHttpServletRequest());
 
         assertThat(captureClient.count()).isZero();
+    }
+
+    @Test
+    void capturesCommon5xxGeneralException() {
+        RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
+        ExceptionAdvice advice = new ExceptionAdvice(captureClient);
+        GeneralException exception = new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR);
+
+        advice.onThrowException(exception, new MockHttpServletRequest());
+
+        assertThat(captureClient.captured()).containsExactly(exception);
+    }
+
+    @Test
+    void capturesRepresentativeModule5xxGeneralExceptions() {
+        RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
+        ExceptionAdvice advice = new ExceptionAdvice(captureClient);
+        AuthException authException = new AuthException(AuthErrorStatus.INTERNAL_SERVER_ERROR);
+        BookException bookException = new BookException(BookErrorStatus.ALADIN_API_ERROR);
+        S3InfraException s3DeleteException = new S3InfraException(S3ErrorStatus.S3_FILE_DELETE_FAILED);
+        S3InfraException s3PresignedUrlException = new S3InfraException(S3ErrorStatus.S3_PRESIGNED_URL_GENERATION_FAILED);
+
+        advice.onThrowException(authException, new MockHttpServletRequest());
+        advice.onThrowException(bookException, new MockHttpServletRequest());
+        advice.onThrowException(s3DeleteException, new MockHttpServletRequest());
+        advice.onThrowException(s3PresignedUrlException, new MockHttpServletRequest());
+
+        assertThat(captureClient.captured())
+                .containsExactly(authException, bookException, s3DeleteException, s3PresignedUrlException);
     }
 
     @Test

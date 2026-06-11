@@ -1,6 +1,7 @@
 package checkmo.member.internal.scheduler;
 
 import checkmo.authentication.AuthenticationAPI;
+import checkmo.common.monitoring.SentryCaptureClient;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.service.command.MemberCommandService;
@@ -20,6 +21,7 @@ public class MemberCleanupScheduler {
     private final MemberRepository memberRepository;
     private final AuthenticationAPI authenticationAPI;
     private final MemberCommandService memberCommandService;
+    private final SentryCaptureClient sentryCaptureClient;
 
     /**
      * 프로필 미완료(유령) 회원 삭제 스케줄러
@@ -75,6 +77,7 @@ public class MemberCleanupScheduler {
                 memberCommandService.deleteMember(memberId);
             } catch (Exception e) {
                 log.error("탈퇴 1년 경과 회원 삭제 실패. memberId={}", memberId, e);
+                sentryCaptureClient.captureException(e);
             }
         }
 
