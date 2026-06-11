@@ -12,6 +12,8 @@ jobs:
       # 1. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 2. AWS 자격 증명 설정
       - name: Configure AWS credentials
@@ -80,3 +82,13 @@ jobs:
 
             # 미사용 이미지 정리
             docker image prune -f
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: checkmo
+          SENTRY_PROJECT: checkmo-spring-boot
+        with:
+          environment: prod
+          release: checkmo-backend@${{ github.sha }}
