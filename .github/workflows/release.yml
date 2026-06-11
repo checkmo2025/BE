@@ -38,7 +38,10 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
+          awk '!/^SENTRY_RELEASE=/' .env > .env.tmp
+          mv .env.tmp .env
+          printf 'SENTRY_RELEASE=checkmo-backend@%s\n' "${GITHUB_SHA}" >> .env
 
       # 5. 설정 파일 전송 (SCP)
       - name: Copy files to EC2

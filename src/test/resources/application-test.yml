@@ -1,4 +1,11 @@
 spring:
+  autoconfigure:
+    exclude:
+      - io.sentry.spring.boot.jakarta.SentryAutoConfiguration
+      - io.sentry.spring.boot.jakarta.SentryProfilerAutoConfiguration
+      - io.sentry.spring.boot.jakarta.SentryLogbackAppenderAutoConfiguration
+      - io.sentry.spring.boot.jakarta.SentryWebfluxAutoConfiguration
+
   datasource:
     url: jdbc:h2:mem:checkmo_test_${random.uuid};MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
@@ -106,3 +113,19 @@ cloud:
     s3:
       bucket: test-bucket
       presigned-url-expiration: 10m
+
+checkmo:
+  sentry:
+    enabled: false
+    dsn:
+    environment: test
+    release: local-test
+
+sentry:
+  enabled: false
+  environment: test
+  release: local-test
+  send-default-pii: false
+  max-request-body-size: none
+  logging:
+    enabled: false
