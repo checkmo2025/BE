@@ -48,7 +48,24 @@ class SentryBackgroundCaptureTest {
     }
 
     @Test
-    void capturesRecommendationSchedulerFailureWithoutThrowing() {
+    void doesNotCaptureRecommendationSchedulerFallbackEmptyList() {
+        BookRecommendationService recommendationService = mock(BookRecommendationService.class);
+        RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
+        BookRecommendationScheduler scheduler = new BookRecommendationScheduler(recommendationService, captureClient);
+        BookResponseDTO.BookList emptyFallback = BookResponseDTO.BookList.builder()
+                .detailInfoList(List.of())
+                .hasNext(false)
+                .currentPage(null)
+                .build();
+        when(recommendationService.refreshDailyRecommendedBooks()).thenReturn(emptyFallback);
+
+        assertDoesNotThrow(scheduler::updateDailyRecommendedBooks);
+
+        assertThat(captureClient.captured()).isEmpty();
+    }
+
+    @Test
+    void capturesUnexpectedRecommendationSchedulerFailureWithoutThrowing() {
         BookRecommendationService recommendationService = mock(BookRecommendationService.class);
         RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
         BookRecommendationScheduler scheduler = new BookRecommendationScheduler(recommendationService, captureClient);
@@ -61,7 +78,7 @@ class SentryBackgroundCaptureTest {
     }
 
     @Test
-    void capturesExpiredMemberCleanupFailureAndContinuesWithRemainingMembers() {
+    void capturesExpiredMemberCleanupFailuresOnceAndContinuesWithRemainingMembers() {
         MemberRepository memberRepository = mock(MemberRepository.class);
         AuthenticationAPI authenticationAPI = mock(AuthenticationAPI.class);
         MemberCommandService memberCommandService = mock(MemberCommandService.class);
@@ -72,18 +89,21 @@ class SentryBackgroundCaptureTest {
                 memberCommandService,
                 captureClient
         );
-        RuntimeException failure = new RuntimeException("delete failed");
+        RuntimeException firstFailure = new RuntimeException("delete failed first");
+        RuntimeException secondFailure = new RuntimeException("delete failed second");
         Member first = Member.builder().id("member-1").build();
         Member second = Member.builder().id("member-2").build();
         when(memberRepository.findAllByDeactivatedAtBefore(any(LocalDateTime.class)))
                 .thenReturn(List.of(first, second));
-        doThrow(failure).when(memberCommandService).deleteMember("member-1");
+        doThrow(firstFailure).when(memberCommandService).deleteMember("member-1");
+        doThrow(secondFailure).when(memberCommandService).deleteMember("member-2");
 
         assertDoesNotThrow(scheduler::cleanupExpiredDeactivatedMembers);
 
         verify(memberCommandService).deleteMember("member-1");
         verify(memberCommandService).deleteMember("member-2");
-        assertThat(captureClient.captured()).containsExactly(failure);
+        assertThat(captureClient.captured()).containsExactly(firstFailure);
+        assertThat(firstFailure.getSuppressed()).containsExactly(secondFailure);
     }
 
     @Test
