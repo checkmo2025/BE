@@ -1,6 +1,9 @@
 package checkmo.book.internal.scheduler;
 
 import checkmo.book.internal.service.BookRecommendationService;
+import checkmo.book.web.dto.BookResponseDTO;
+import checkmo.common.monitoring.SentryCaptureClient;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class BookRecommendationScheduler {
 
     private final BookRecommendationService recommendationService;
+    private final SentryCaptureClient sentryCaptureClient;
 
     @Scheduled(cron = "0 0 0 * * ?", zone = "Asia/Seoul")
     public void updateDailyRecommendedBooks() {
@@ -34,10 +38,25 @@ public class BookRecommendationScheduler {
 
     private void retrieveAndSaveRecommendedBooks() {
         try {
-            recommendationService.refreshDailyRecommendedBooks();
+            BookResponseDTO.BookList refreshedBooks = recommendationService.refreshDailyRecommendedBooks();
+            if (isEmpty(refreshedBooks)) {
+                log.warn("추천 책 갱신 결과가 비어있어 기존 캐시 상태를 유지합니다.");
+                return;
+            }
+
             log.info("추천 책 갱신 완료");
         } catch (Exception e) {
-            log.error("추천 책 갱신 중 오류 발생", e);
+            log.error("추천 책 갱신 중 예기치 못한 오류 발생", e);
+            sentryCaptureClient.captureException(e);
         }
+    }
+
+    private boolean isEmpty(BookResponseDTO.BookList bookList) {
+        if (bookList == null) {
+            return true;
+        }
+
+        List<BookResponseDTO.DetailInfo> books = bookList.getDetailInfoList();
+        return books == null || books.isEmpty();
     }
 }

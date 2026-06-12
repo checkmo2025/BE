@@ -4,6 +4,7 @@ import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import checkmo.common.monitoring.SentryCaptureClient;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,7 @@ public class BookRecommendationService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final AladinApiService aladinApiService;
+    private final SentryCaptureClient sentryCaptureClient;
 
     public BookResponseDTO.BookList retrieveRecommendedBooks(String memberId) {
         try {
@@ -69,6 +71,7 @@ public class BookRecommendationService {
 
         } catch (Exception e) {
             log.error("API에서 추천 책 가져오기 중 오류", e);
+            sentryCaptureClient.captureException(e);
             return createEmptyBookList();
         }
     }
@@ -90,6 +93,7 @@ public class BookRecommendationService {
             redisTemplate.opsForValue().set(REDIS_UPDATED_AT_KEY, LocalDate.now().toString());
         } catch (Exception e) {
             log.error("Redis에 추천 책 저장 중 오류 발생", e);
+            sentryCaptureClient.captureException(e);
         }
     }
 

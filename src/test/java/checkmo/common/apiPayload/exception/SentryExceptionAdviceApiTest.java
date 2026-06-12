@@ -54,4 +54,37 @@ class SentryExceptionAdviceApiTest extends ApiTestSupport {
                 .statusCode(200);
     }
 
+    @Test
+    void captures5xxDomainExceptionWithoutChangingResponseShape() {
+        String before = given()
+                .when()
+                .get("/api/test/sentry/captures/count")
+                .then()
+                .statusCode(200)
+                .extract()
+                .asString();
+
+        String body = given()
+                .when()
+                .get("/api/test/sentry/domain-server-error")
+                .then()
+                .statusCode(500)
+                .extract()
+                .asString();
+
+        String after = given()
+                .when()
+                .get("/api/test/sentry/captures/count")
+                .then()
+                .statusCode(200)
+                .extract()
+                .asString();
+
+        assertThat(body)
+                .contains("\"isSuccess\":false")
+                .contains("\"code\":\"COMMON_500\"")
+                .contains("\"message\":\"서버 에러, 관리자에게 문의 바랍니다.\"");
+        assertThat(Integer.parseInt(after)).isEqualTo(Integer.parseInt(before) + 1);
+    }
+
 }

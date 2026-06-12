@@ -105,6 +105,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = GeneralException.class)
     public ResponseEntity onThrowException(GeneralException generalException, HttpServletRequest request) {
         ErrorReasonDTO errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
+        captureIfServerError(generalException, errorReasonHttpStatus);
         return handleExceptionInternal(generalException, errorReasonHttpStatus, null, request);
     }
 
@@ -171,6 +172,12 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 errorCommonStatus.getHttpStatus(),
                 request
         );
+    }
+
+    private void captureIfServerError(GeneralException exception, ErrorReasonDTO reason) {
+        if (reason != null && reason.getHttpStatus() != null && reason.getHttpStatus().is5xxServerError()) {
+            sentryCaptureClient.captureException(exception);
+        }
     }
 
     private ResponseEntity<Object> handleExceptionInternalConstraint(

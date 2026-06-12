@@ -2,6 +2,7 @@ package checkmo.infra.s3.internal.listener;
 
 import checkmo.clubManagement.ClubManagementEvent.DeleteClubImageEvent;
 import checkmo.clubNotice.ClubNoticeEvent;
+import checkmo.common.monitoring.SentryCaptureClient;
 import checkmo.infra.s3.internal.service.S3Service;
 import checkmo.member.MemberEvent;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class S3EventListener {
 
     private final S3Service s3Service;
+    private final SentryCaptureClient sentryCaptureClient;
 
     @ApplicationModuleListener
     public void handleDeleteProfileImageEvent(MemberEvent.DeleteProfileImage event) {
@@ -50,6 +52,7 @@ public class S3EventListener {
             s3Service.deleteImage(imageKey);
         } catch (Exception e) {
             log.error("{} 삭제 실패, url={}, event={}", label, imageUrl, event, e);
+            sentryCaptureClient.captureException(e);
         }
     }
 }
