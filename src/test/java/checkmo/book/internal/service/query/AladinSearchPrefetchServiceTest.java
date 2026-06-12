@@ -1,6 +1,8 @@
 package checkmo.book.internal.service.query;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -58,6 +60,7 @@ class AladinSearchPrefetchServiceTest {
         aladinSearchPrefetchService.prefetchNextPage("java", 1);
 
         verify(aladinSearchClient, never()).fetchSearchBooks("java", 2);
+        verify(bookSearchCacheService, never()).save(eq("java"), eq(10), eq(2), any());
     }
 
     @Test

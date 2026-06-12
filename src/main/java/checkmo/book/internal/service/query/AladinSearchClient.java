@@ -6,6 +6,8 @@ import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -17,12 +19,29 @@ public class AladinSearchClient {
     private final AladinProperties aladinProperties;
 
     public BookResponseDTO.BookList fetchSearchBooks(String keyword, int page) {
-        var response = restTemplate.getForObject(
-                buildHttpUrl(keyword, page),
-                AladinApiResponseDTO.BookList.class
-        );
+        AladinApiResponseDTO.BookList response;
+        try {
+            response = restTemplate.getForObject(
+                    buildHttpUrl(keyword, page),
+                    AladinApiResponseDTO.BookList.class
+            );
+        } catch (RestClientException e) {
+            throw new IllegalStateException(sanitizedFailureMessage(e));
+        }
 
         return BookConverter.toBookList(response, page);
+    }
+
+    private String sanitizedFailureMessage(RestClientException exception) {
+        if (exception instanceof RestClientResponseException responseException) {
+            return "Aladin API request failed for search books. exceptionType=%s, statusCode=%s".formatted(
+                    exception.getClass().getName(),
+                    responseException.getStatusCode()
+            );
+        }
+        return "Aladin API request failed for search books. exceptionType=%s".formatted(
+                exception.getClass().getName()
+        );
     }
 
     private String buildHttpUrl(String keyword, int page) {

@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import checkmo.book.internal.config.properties.AladinProperties;
@@ -82,6 +83,23 @@ class AladinApiServiceTest {
         assertThat(response.getDetailInfoList()).singleElement()
                 .extracting(DetailInfo::isLikedByMe)
                 .isEqualTo(true);
+    }
+
+    @Test
+    void searchBooksReturnsEmptyResultWhenKeywordIsBlank() {
+        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("   ", 1, "member-1");
+
+        assertThat(response.getTotalResults()).isZero();
+        assertThat(response.getCurrentPage()).isEqualTo(1);
+        assertThat(response.isHasNext()).isFalse();
+        assertThat(response.getDetailInfoList()).isEmpty();
+        verifyNoInteractions(
+                bookLikedRepository,
+                bookSearchCacheService,
+                aladinSearchClient,
+                aladinSearchPrefetchService,
+                sentryCaptureClient
+        );
     }
 
     @Test

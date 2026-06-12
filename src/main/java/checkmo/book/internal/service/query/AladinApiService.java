@@ -38,6 +38,10 @@ public class AladinApiService {
     private final SentryCaptureClient sentryCaptureClient;
 
     public BookResponseDTO.BookList retrieveSearchBooks(String keyword, int page, String memberId) {
+        if (keyword == null || keyword.isBlank()) {
+            return emptySearchResult(page);
+        }
+
         int maxResults = aladinProperties.getSearch().getMaxResults();
 
         var cachedBookList = bookSearchCacheService.retrieve(keyword, maxResults, page);
@@ -61,6 +65,15 @@ public class AladinApiService {
             }
             throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
         }
+    }
+
+    private BookResponseDTO.BookList emptySearchResult(int page) {
+        return BookResponseDTO.BookList.builder()
+                .detailInfoList(List.of())
+                .hasNext(false)
+                .currentPage(page)
+                .totalResults(0)
+                .build();
     }
 
     private void prefetchNextPageIfNeeded(String keyword, int page, BookResponseDTO.BookList bookList) {
