@@ -31,6 +31,7 @@ public class BookResponseDTO {
         private List<DetailInfo> detailInfoList;
         private boolean hasNext;
         private Integer currentPage;
+        private int totalResults;
     }
 
     @Getter

@@ -76,9 +76,10 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .detailInfoList(List.of(detail))
                 .currentPage(1)
                 .hasNext(false)
+                .totalResults(123)
                 .build();
 
-        when(aladinApiService.searchBooks(eq("자바"), eq(1), anyString())).thenReturn(oneBookList);
+        when(aladinApiService.retrieveSearchBooks(eq("자바"), eq(1), anyString())).thenReturn(oneBookList);
         when(aladinApiService.retrieveBookDetailInfo(ISBN)).thenReturn(detail);
         when(aladinApiService.retrieveRecommendedBooks()).thenReturn(BookResponseDTO.BookList.builder()
                 .detailInfoList(IntStream.rangeClosed(1, 28)
@@ -112,7 +113,8 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .get("/api/books/search")
                 .then()
                 .statusCode(200)
-                .body("result.detailInfoList[0].isbn", equalTo(ISBN));
+                .body("result.detailInfoList[0].isbn", equalTo(ISBN))
+                .body("result.totalResults", equalTo(123));
 
         given()
                 .when()

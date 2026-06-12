@@ -117,6 +117,20 @@ class SentryPrivacyConfigurationTest {
     }
 
     @Test
+    void beforeSendRemovesBookSearchKeywordAndQueryString() {
+        SentryEvent event = new SentryEvent(new RuntimeException("aladin unavailable"));
+        Request request = new Request();
+        request.setQueryString("keyword=자바&page=1&refreshToken=secret");
+        request.setUrl("https://api.checkmo.kr/api/books/search?keyword=%EC%9E%90%EB%B0%94&page=1&refreshToken=secret");
+        event.setRequest(request);
+
+        SentryEvent sanitized = beforeSendCallback.execute(event, null);
+
+        assertThat(sanitized.getRequest().getQueryString()).isNull();
+        assertThat(sanitized.getRequest().getUrl()).isEqualTo("https://api.checkmo.kr/api/books/search");
+    }
+
+    @Test
     void beforeSendIgnoresHeadersWithNullNamesOrValues() {
         SentryEvent event = new SentryEvent(new RuntimeException("unexpected"));
         Request request = new Request();
