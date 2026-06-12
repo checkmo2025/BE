@@ -88,6 +88,7 @@ public class BookConverter {
                 .detailInfoList(books)
                 .hasNext(hasNext)
                 .currentPage(page)
+                .totalResults(bookList.getTotalResults())
                 .build();
     }
 
@@ -116,6 +117,7 @@ public class BookConverter {
                 .detailInfoList(List.of())
                 .hasNext(false)
                 .currentPage(null)
+                .totalResults(0)
                 .build();
     }
 

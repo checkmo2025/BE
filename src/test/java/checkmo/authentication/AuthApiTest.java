@@ -105,6 +105,42 @@ class AuthApiTest extends ApiTestSupport {
     }
 
     @Test
+    void signUpAllowsMultipleIncompleteUsersWithoutNicknameConflicts() {
+        String firstEmail = "signup-null-nickname-1@example.com";
+        String secondEmail = "signup-null-nickname-2@example.com";
+        when(redisHashOperations.get("verification:" + firstEmail, "verified")).thenReturn(true);
+        when(redisHashOperations.get("verification:" + secondEmail, "verified")).thenReturn(true);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("email", firstEmail, "password", "Pass123!"))
+                .when()
+                .post("/api/auth/signup")
+                .then()
+                .statusCode(200);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("email", secondEmail, "password", "Pass123!"))
+                .when()
+                .post("/api/auth/signup")
+                .then()
+                .statusCode(200);
+
+        var firstUser = authRepository.findByEmail(firstEmail).orElseThrow();
+        var secondUser = authRepository.findByEmail(secondEmail).orElseThrow();
+        var firstMember = memberRepository.findById(firstUser.getId()).orElseThrow();
+        var secondMember = memberRepository.findById(secondUser.getId()).orElseThrow();
+
+        assertThat(firstUser.getNickName()).isNull();
+        assertThat(secondUser.getNickName()).isNull();
+        assertThat(firstMember.getNickName()).isNull();
+        assertThat(secondMember.getNickName()).isNull();
+        assertThat(firstUser.isProfileCompleted()).isFalse();
+        assertThat(secondUser.isProfileCompleted()).isFalse();
+    }
+
+    @Test
     void signUpRejectsUnverifiedEmail() {
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Transactional
@@ -119,6 +120,10 @@ public class AuthUserCommandService {
     }
 
     public void updateNickname(String memberId, String nickname) {
+        if (!StringUtils.hasText(nickname)) {
+            throw new AuthException(AuthErrorStatus.NICKNAME_REQUIRED);
+        }
+
         AuthUser authUser = authRepository.findById(memberId)
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 

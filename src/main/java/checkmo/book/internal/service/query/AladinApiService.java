@@ -8,6 +8,7 @@ import checkmo.book.internal.repository.BookLikedRepository;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import checkmo.common.monitoring.SentryCaptureClient;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -31,21 +32,60 @@ public class AladinApiService {
 
     private final AladinProperties aladinProperties;
     private final BookLikedRepository bookLikedRepository;
+    private final BookSearchCacheService bookSearchCacheService;
+    private final AladinSearchClient aladinSearchClient;
+    private final AladinSearchPrefetchService aladinSearchPrefetchService;
+    private final SentryCaptureClient sentryCaptureClient;
 
-    public BookResponseDTO.BookList searchBooks(String keyword, int page, String memberId) {
-        String url = buildHttpUrl(keyword, page);
+    public BookResponseDTO.BookList retrieveSearchBooks(String keyword, int page, String memberId) {
+        if (keyword == null || keyword.isBlank()) {
+            return emptySearchResult(page);
+        }
+
+        int maxResults = aladinProperties.getSearch().getMaxResults();
+
+        var cachedBookList = bookSearchCacheService.retrieve(keyword, maxResults, page);
+        if (cachedBookList.isPresent()) {
+            return applyLikedByMe(cachedBookList.get(), memberId);
+        }
+
         try {
-            var response = restTemplate.getForObject(
-                    url,
-                    AladinApiResponseDTO.BookList.class
-            );
+            BookResponseDTO.BookList bookList = aladinSearchClient.fetchSearchBooks(keyword, page);
+            bookSearchCacheService.save(keyword, maxResults, page, bookList);
 
-            BookResponseDTO.BookList bookList = BookConverter.toBookList(response, page);
+            prefetchNextPageIfNeeded(keyword, page, bookList);
             return applyLikedByMe(bookList, memberId);
 
         } catch (Exception e) {
-            logAladinFailure("searchBooks", url, e);
+            logAladinSearchFailure(e);
+            var fallbackBookList = bookSearchCacheService.retrieve(keyword, maxResults, page);
+            if (fallbackBookList.isPresent()) {
+                sentryCaptureClient.captureException(e);
+                return applyLikedByMe(fallbackBookList.get(), memberId);
+            }
             throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
+        }
+    }
+
+    private BookResponseDTO.BookList emptySearchResult(int page) {
+        return BookResponseDTO.BookList.builder()
+                .detailInfoList(List.of())
+                .hasNext(false)
+                .currentPage(page)
+                .totalResults(0)
+                .build();
+    }
+
+    private void prefetchNextPageIfNeeded(String keyword, int page, BookResponseDTO.BookList bookList) {
+        if (bookList == null || !bookList.isHasNext()) {
+            return;
+        }
+
+        try {
+            aladinSearchPrefetchService.prefetchNextPage(keyword, page);
+        } catch (Exception e) {
+            log.warn("알라딘 검색 다음 페이지 prefetch 요청 실패. page={}", page + 1, e);
+            sentryCaptureClient.captureException(e);
         }
     }
 
@@ -105,20 +145,6 @@ public class AladinApiService {
                 .toUriString();
     }
 
-    private String buildHttpUrl(String keyword, int page) {
-        return UriComponentsBuilder
-                .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemSearch())
-                .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
-                .queryParam("Query", keyword)
-                .queryParam("QueryType", aladinProperties.getSearch().getSearchQueryType())
-                .queryParam("MaxResults", aladinProperties.getSearch().getMaxResults())
-                .queryParam("start", page)
-                .queryParam("output", aladinProperties.getSearch().getOutput())
-                .queryParam("Version", aladinProperties.getAuth().getVersion())
-                .build()
-                .toUriString();
-    }
-
     private String buildHttpUrl(String isbn) {
         return UriComponentsBuilder
                 .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemLookup())
@@ -160,6 +186,34 @@ public class AladinApiService {
         }
     }
 
+    private void logAladinSearchFailure(Exception exception) {
+        log.error(
+                "Aladin API request failed. operation={}, exceptionType={}, message={}",
+                "retrieveSearchBooks",
+                exception.getClass().getName(),
+                sanitize(exception.getMessage())
+        );
+
+        Throwable cause = exception.getCause();
+        if (cause != null) {
+            log.error(
+                    "Aladin API failure cause. operation={}, causeType={}, causeMessage={}",
+                    "retrieveSearchBooks",
+                    cause.getClass().getName(),
+                    sanitize(cause.getMessage())
+            );
+        }
+
+        if (exception instanceof RestClientResponseException responseException) {
+            log.error(
+                    "Aladin API response failure. operation={}, statusCode={}, responseBody={}",
+                    "retrieveSearchBooks",
+                    responseException.getStatusCode(),
+                    trimForLog(sanitize(responseException.getResponseBodyAsString()))
+            );
+        }
+    }
+
     private String maskTtbKey(String value) {
         return sanitize(value);
     }
@@ -168,7 +222,7 @@ public class AladinApiService {
         if (value == null) {
             return null;
         }
-        return value.replaceAll("(?i)(ttbkey=)[^&\\s]+", "$1***");
+        return value.replaceAll("(?i)((?:ttbkey|query|keyword|authorization|cookie|jwt|accessToken|refreshToken|password|verification[-_]?code)=)[^&\\s]+", "$1***");
     }
 
     private String trimForLog(String value) {
@@ -205,6 +259,7 @@ public class AladinApiService {
                 .detailInfoList(updatedDetails)
                 .hasNext(bookList.isHasNext())
                 .currentPage(bookList.getCurrentPage())
+                .totalResults(bookList.getTotalResults())
                 .build();
     }
 }

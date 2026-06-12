@@ -217,7 +217,7 @@ public abstract class ApiTestSupport {
                 .password(passwordEncoder.encode(rawPassword))
                 .role(role)
                 .profileCompleted(profileCompleted)
-                .nickName(nickName)
+                .nickName(profileCompleted ? nickName : null)
                 .build();
         authRepository.save(authUser);
 
@@ -226,7 +226,7 @@ public abstract class ApiTestSupport {
                 .email(email)
                 .name("테스트")
                 .phoneNumber("01012345678")
-                .nickName(profileCompleted ? nickName : "")
+                .nickName(profileCompleted ? nickName : null)
                 .description("api test fixture")
                 .build();
         memberRepository.save(member);

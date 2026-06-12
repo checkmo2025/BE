@@ -50,7 +50,7 @@ public class BookController {
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
             int page
     ) {
-        BookResponseDTO.BookList result = aladinApiService.searchBooks(keyword, page, memberId);
+        BookResponseDTO.BookList result = aladinApiService.retrieveSearchBooks(keyword, page, memberId);
         return ApiResponse.onSuccess(result);
     }
 
