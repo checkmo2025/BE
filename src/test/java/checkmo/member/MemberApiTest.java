@@ -1,10 +1,13 @@
 package checkmo.member;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 import checkmo.support.ApiTestSupport;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,45 @@ class MemberApiTest extends ApiTestSupport {
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
+    }
+
+    @Test
+    void additionalInfoPersistsNicknameForSignupCreatedIncompleteUser() {
+        String email = "additional-info-null-nickname@example.com";
+        String nickname = "completeinfo";
+        when(redisHashOperations.get("verification:" + email, "verified")).thenReturn(true);
+
+        ExtractableResponse<Response> signUpResponse = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("email", email, "password", "Pass123!"))
+                .when()
+                .post("/api/auth/signup")
+                .then()
+                .statusCode(200)
+                .extract();
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie("accessToken", signUpResponse.cookie("accessToken"))
+                .body(Map.of(
+                        "nickname", nickname,
+                        "name", "완료",
+                        "phoneNumber", "010-1234-5678",
+                        "description", "소개",
+                        "categories", List.of("COMPUTER_IT")
+                ))
+                .when()
+                .post("/api/members/additional-info")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true));
+
+        var authUser = authRepository.findByEmail(email).orElseThrow();
+        var member = memberRepository.findById(authUser.getId()).orElseThrow();
+
+        assertThat(authUser.getNickName()).isEqualTo(nickname);
+        assertThat(member.getNickName()).isEqualTo(nickname);
+        assertThat(authUser.isProfileCompleted()).isTrue();
     }
 
     @Test

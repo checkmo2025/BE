@@ -40,7 +40,7 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberR
     List<Member> lockActiveMembersByIdIn(@Param("memberIds") List<String> memberIds);
 
     // 생성일시가 특정 시간 이전이고, 추가정보(nickname)가 아직 입력되지 않은(프로필 미완료) 회원 조회
-    @Query("SELECT m FROM Member m WHERE m.createdAt < :threshold AND (m.nickName IS NULL OR m.nickName = '')")
+    @Query("SELECT m FROM Member m WHERE m.createdAt < :threshold AND m.nickName IS NULL")
     List<Member> findAllGhostMembers(@Param("threshold") LocalDateTime threshold);
 
     List<Member> findAllByDeactivatedAtBefore(LocalDateTime threshold);

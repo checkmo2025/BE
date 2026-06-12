@@ -52,7 +52,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 20)
     private String nickName;
 
     @Column(length = 40)
@@ -85,7 +85,7 @@ public class Member extends BaseEntity {
     private Set<MemberInterestCategory> interestCategories = new HashSet<>();
 
     public void updateAdditionalInfo(String nickName, String name, String phoneNumber, String description) {
-        this.nickName = nickName != null ? nickName : "";
+        this.nickName = nickName;
         this.name = name != null ? name : "";
         this.phoneNumber = phoneNumber != null ? phoneNumber : "";
         this.description = description;

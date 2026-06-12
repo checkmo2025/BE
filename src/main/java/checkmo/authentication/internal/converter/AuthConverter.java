@@ -29,7 +29,6 @@ public class AuthConverter {
                 .role(Role.USER)
                 .deactivatedAt(null)
                 .profileCompleted(false)
-                .nickName("")
                 .build();
     }
 
@@ -44,7 +43,6 @@ public class AuthConverter {
                 .role(Role.USER)
                 .deactivatedAt(null)
                 .profileCompleted(false)
-                .nickName("")
                 .build();
     }
 }
