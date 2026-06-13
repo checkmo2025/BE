@@ -31,7 +31,7 @@ public class MemberCleanupScheduler {
     @Transactional
     public void cleanupGhostMembers() {
         // 현재 시간으로부터 15분 전 시점 계산
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(110);
 
         // 15분 전에 생성되었으나 아직 닉네임이 없는(가입 절차를 마치지 않은) 유저 조회
         List<Member> ghostMembers = memberRepository.findAllGhostMembers(threshold);

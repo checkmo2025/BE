@@ -33,9 +33,12 @@ public class AuthUserCommandService {
         // TODO: Member 모듈의 API를 통해 필수 약관 동의 여부 체크
         
         // 이메일 중복 확인
-        if (authRepository.existsByEmail(request.getEmail())) {
+        authRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
+            if (existing.getNickname() == null) {
+                throw new AuthException(AuthErrorStatus.SIGNUP_INCOMPLETE);
+            }
             throw new AuthException(AuthErrorStatus.MEMBER_ALREADY_EXISTS);
-        }
+        });
 
         // 이메일 인증 여부 확인
         String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();

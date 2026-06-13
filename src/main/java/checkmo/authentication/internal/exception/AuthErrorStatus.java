@@ -24,12 +24,13 @@ public enum AuthErrorStatus implements BaseErrorCode {
     MEMBER_PROFILE_NOT_COMPLETED(HttpStatus.FORBIDDEN, "AUTH_403", "프로필이 완성되지 않은 회원입니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "AUTH_404", "이메일 또는 비밀번호가 일치하지 않습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_500", "서버 내부 오류입니다. 관리자에게 문의 바랍니다."),
-    GHOST_MEMBER_CLEANED_UP(HttpStatus.UNAUTHORIZED, "AUTH_405", "추가정보 입력 제한 시간(15분)이 초과되어 초기화되었습니다. 다시 가입해주세요."),
+    GHOST_MEMBER_CLEANED_UP(HttpStatus.UNAUTHORIZED, "AUTH_405", "추가정보 입력 제한 시간이 초과되어 초기화되었습니다. 다시 가입해주세요."),
     TOKEN_BLACKLISTED(HttpStatus.UNAUTHORIZED, "AUTH_406", "로그아웃된 토큰입니다. 다시 로그인해주세요."),
     SOCIAL_MEMBER_CANNOT_CHANGE_EMAIL(HttpStatus.BAD_REQUEST, "AUTH_407", "소셜 로그인 회원은 이메일을 변경할 수 없습니다."),
     CURRENT_EMAIL_INCORRECT(HttpStatus.BAD_REQUEST, "AUTH_408", "입력하신 기존 이메일 정보가 정확하지 않습니다."),
     PASSWORD_SAME_AS_OLD(HttpStatus.BAD_REQUEST, "AUTH_409", "새 비밀번호가 기존 비밀번호와 동일합니다."),
-    NICKNAME_REQUIRED(HttpStatus.BAD_REQUEST, "AUTH_410", "닉네임은 필수입니다.")
+    NICKNAME_REQUIRED(HttpStatus.BAD_REQUEST, "AUTH_410", "닉네임은 필수입니다."),
+    SIGNUP_INCOMPLETE(HttpStatus.CONFLICT, "AUTH_411", "이미 가입 진행 중인 이메일입니다. 로그인 후 프로필을 완성해주세요.")
     ;
 
     private final HttpStatus httpStatus;
