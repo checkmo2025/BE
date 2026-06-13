@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -21,11 +20,7 @@ public class S3Config {
 
     @Bean
     public AwsCredentialsProvider awsCredentialsProvider() {
-        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(
-                s3Properties.getCredentials().getAccessKey(),
-                s3Properties.getCredentials().getSecretKey()
-        );
-        return StaticCredentialsProvider.create(awsCredentials);
+        return DefaultCredentialsProvider.create();
     }
 
     @Bean
