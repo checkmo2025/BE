@@ -2,18 +2,21 @@ package checkmo.member.web.dto;
 
 import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
     public static class MemberProfileUpdate {
-        @Size(max = 20, message = "소개는 20자 이하여야 합니다")
+        @Size(max = 40, message = "소개는 40자 이하여야 합니다")
         private String description;
 
         private String imgUrl;
