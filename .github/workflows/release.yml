@@ -39,7 +39,7 @@ jobs:
           IMAGE_TAG: latest
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
+            --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             --push .
 
