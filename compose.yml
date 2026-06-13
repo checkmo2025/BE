@@ -1,6 +1,6 @@
 services:
   app:
-    image: 958533309301.dkr.ecr.ap-northeast-2.amazonaws.com/checkmo
+    image: 364660315242.dkr.ecr.ap-northeast-2.amazonaws.com/checkmo
     container_name: checkmo-app
     env_file:
       - .env
