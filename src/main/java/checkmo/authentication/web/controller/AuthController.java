@@ -70,8 +70,11 @@ public class AuthController {
             @Valid @RequestBody AuthRequestDTO.SignUp request,
             HttpServletResponse response
     ) {
-        var signUpResponse = authFacade.signUp(request, response);
-        return ApiResponse.onSuccess(signUpResponse);
+        var signUpResult = authFacade.signUp(request, response);
+        return ApiResponse.onSuccess(AuthResponseDTO.SignUp.builder()
+                .email(signUpResult.getEmail())
+                .isProfileCompleted(signUpResult.isProfileCompleted())
+                .build());
     }
 
     @Operation(summary = "이메일/아이디 로그인", description = "이메일/아이디와 비밀번호로 로그인합니다.")
@@ -81,12 +84,56 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호가 일치하지 않습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류입니다. 관리자에게 문의 바랍니다.")
     })
-    public ApiResponse<AuthResponseDTO.Login> login(
+    public ApiResponse<String> login(
+            @Valid @RequestBody AuthRequestDTO.Login request,
+            HttpServletResponse response
+    ) {
+        authFacade.login(request, response);
+        return ApiResponse.onSuccess("로그인에 성공했습니다.");
+    }
+
+    @Operation(summary = "앱 이메일/아이디 로그인", description = "앱에서 이메일/아이디와 비밀번호로 로그인합니다.")
+    @PostMapping("/app/login")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호가 일치하지 않습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 내부 오류입니다. 관리자에게 문의 바랍니다.")
+    })
+    public ApiResponse<AuthResponseDTO.Login> appLogin(
             @Valid @RequestBody AuthRequestDTO.Login request,
             HttpServletResponse response
     ) {
         String refreshToken = authFacade.login(request, response);
         return ApiResponse.onSuccess(AuthResponseDTO.Login.builder().refreshToken(refreshToken).build());
+    }
+
+    @Operation(summary = "앱 토큰 재발급", description = "앱에서 리프레시 토큰을 회전하고 새 토큰을 발급받습니다.")
+    @PostMapping("/app/refresh")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "유효하지 않은 리프레시 토큰입니다.")
+    })
+    public ApiResponse<AuthResponseDTO.Login> appRefresh(
+            @RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        String newRefreshToken = authFacade.refreshAppToken(refreshToken, response);
+        return ApiResponse.onSuccess(AuthResponseDTO.Login.builder().refreshToken(newRefreshToken).build());
+    }
+
+    @Operation(summary = "앱 로그아웃", description = "앱에서 리프레시 토큰을 삭제하고 로그아웃합니다.")
+    @PostMapping("/app/logout")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "유효하지 않은 리프레시 토큰입니다.")
+    })
+    public ApiResponse<Void> appLogout(
+            @RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        authFacade.logoutApp(refreshToken, request, response);
+        return ApiResponse.onSuccess(null);
     }
 
     @Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")

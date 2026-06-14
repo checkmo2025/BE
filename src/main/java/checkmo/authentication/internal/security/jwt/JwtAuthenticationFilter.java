@@ -3,6 +3,8 @@ package checkmo.authentication.internal.security.jwt;
 import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
+import checkmo.authentication.internal.service.command.AuthTokenRotationService;
+import checkmo.authentication.internal.service.result.AuthTokenRotationResult;
 import checkmo.common.apiPayload.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -38,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
     private final AuthRepository authRepository;
+    private final AuthTokenRotationService authTokenRotationService;
     private final ObjectMapper objectMapper;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -123,11 +126,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Access Token이 만료된 경우, Refresh Token을 사용해 재발급
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키에서 Refresh Token 추출 (웹), 없으면 헤더에서 추출 (앱)
+        // 쿠키에서 Refresh Token 추출 (웹)
         String refreshToken = jwtCookieUtil.resolveToken(request, "refreshToken");
-        if (!StringUtils.hasText(refreshToken)) {
-            refreshToken = request.getHeader("X-Refresh-Token");
-        }
         log.info("[재발급] Refresh Token 존재 여부 확인: {}", refreshToken != null);
 
         if (!StringUtils.hasText(refreshToken)) {
@@ -135,47 +135,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (!jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
-            log.warn("재발급 실패: 유효하지 않은 Refresh Token");
-            return;
+        try {
+            AuthTokenRotationResult rotationResult = authTokenRotationService.rotateRefreshToken(refreshToken);
+            authTokenRotationService.writeTokenCookies(response, rotationResult.getJwtToken());
+            SecurityContextHolder.getContext().setAuthentication(rotationResult.getAuthentication());
+            log.info("Access Token + Refresh Token 재발급 성공 (Rotation, memberId={})", rotationResult.getMemberId());
+        } catch (AuthException e) {
+            log.warn("재발급 실패: {}", e.getMessage());
         }
-
-        String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        if (!StringUtils.hasText(memberId)) {
-            log.warn("재발급 실패: Refresh Token에서 memberId 추출 실패");
-            return;
-        }
-
-        // Redis에 저장된 Refresh Token과 비교
-        String storedRefreshToken = tokenCacheService.getRefreshToken(memberId);
-        log.info("[재발급] Redis에 저장된 Refresh Token과 비교");
-
-        if (!refreshToken.equals(storedRefreshToken)) {
-            log.warn("재발급 실패: 저장된 Refresh Token과 일치하지 않음 (memberId={})", memberId);
-            return;
-        }
-
-        // Refresh Token이 유효한 경우, 해당 memberId로 인증 정보 가져오기
-        Authentication authentication = jwtTokenProvider.getAuthenticationFromMemberId(memberId);
-
-        // Access Token + Refresh Token 동시 재발급 (Rotation)
-        JwtToken newJwtToken = jwtTokenProvider.generateToken(authentication);
-
-        int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
-        int refreshTokenMaxAge = (int) (jwtTokenProvider.getRefreshTokenExpirationTime() / 1000L);
-
-        jwtCookieUtil.addTokenToCookie(response, "accessToken", newJwtToken.getAccessToken(), accessTokenMaxAge);
-        jwtCookieUtil.addTokenToCookie(response, "refreshToken", newJwtToken.getRefreshToken(), refreshTokenMaxAge);
-
-        // Redis Refresh Token 교체 (기존 토큰 무효화)
-        tokenCacheService.saveRefreshToken(memberId, newJwtToken.getRefreshToken());
-
-        // 앱 silent refresh 시 컨트롤러가 새 Refresh Token을 응답 바디로 반환할 수 있도록 저장
-        request.setAttribute("newRefreshToken", newJwtToken.getRefreshToken());
-
-        // SecurityContext에 새로운 인증 정보 설정
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("Access Token + Refresh Token 재발급 성공 (Rotation, memberId={})", memberId);
     }
 
     private void sendErrorResponse(HttpServletResponse response, AuthErrorStatus status) throws IOException {
