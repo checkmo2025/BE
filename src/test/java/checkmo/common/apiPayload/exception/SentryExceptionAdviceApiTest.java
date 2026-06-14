@@ -14,7 +14,7 @@ class SentryExceptionAdviceApiTest extends ApiTestSupport {
     void returnsExistingApiErrorShapeWhenUnhandledExceptionIsCaptured() {
         String before = given()
                 .when()
-                .get("/api/test/sentry/captures/count")
+                .get("/api/v1/test/sentry/captures/count")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -23,7 +23,7 @@ class SentryExceptionAdviceApiTest extends ApiTestSupport {
         String body = given()
                 .queryParam("message", "secret-refresh-token")
                 .when()
-                .get("/api/test/sentry/unexpected")
+                .get("/api/v1/test/sentry/unexpected")
                 .then()
                 .statusCode(500)
                 .extract()
@@ -31,7 +31,7 @@ class SentryExceptionAdviceApiTest extends ApiTestSupport {
 
         String after = given()
                 .when()
-                .get("/api/test/sentry/captures/count")
+                .get("/api/v1/test/sentry/captures/count")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -58,7 +58,7 @@ class SentryExceptionAdviceApiTest extends ApiTestSupport {
     void captures5xxDomainExceptionWithoutChangingResponseShape() {
         String before = given()
                 .when()
-                .get("/api/test/sentry/captures/count")
+                .get("/api/v1/test/sentry/captures/count")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -66,7 +66,7 @@ class SentryExceptionAdviceApiTest extends ApiTestSupport {
 
         String body = given()
                 .when()
-                .get("/api/test/sentry/domain-server-error")
+                .get("/api/v1/test/sentry/domain-server-error")
                 .then()
                 .statusCode(500)
                 .extract()
@@ -74,7 +74,7 @@ class SentryExceptionAdviceApiTest extends ApiTestSupport {
 
         String after = given()
                 .when()
-                .get("/api/test/sentry/captures/count")
+                .get("/api/v1/test/sentry/captures/count")
                 .then()
                 .statusCode(200)
                 .extract()

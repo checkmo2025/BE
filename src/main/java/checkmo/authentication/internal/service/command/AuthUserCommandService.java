@@ -34,7 +34,7 @@ public class AuthUserCommandService {
         
         // 이메일 중복 확인
         authRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
-            if (existing.getNickname() == null) {
+            if (existing.getNickName() == null) {
                 throw new AuthException(AuthErrorStatus.SIGNUP_INCOMPLETE);
             }
             throw new AuthException(AuthErrorStatus.MEMBER_ALREADY_EXISTS);

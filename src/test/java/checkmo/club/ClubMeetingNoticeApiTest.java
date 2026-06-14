@@ -65,67 +65,67 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
 
         given().cookie(accessTokenCookie(owner))
                 .queryParam("clubName", club.getName())
-                .when().get("/api/clubs/check-name")
+                .when().get("/api/v1/clubs/check-name")
                 .then().statusCode(200).body("result", equalTo(true));
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/search")
+                .when().get("/api/v1/clubs/search")
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/recommendations")
+                .when().get("/api/v1/clubs/recommendations")
                 .then().statusCode(200);
 
-        given().when().get("/api/clubs/{clubId}/home", club.getId())
+        given().when().get("/api/v1/clubs/{clubId}/home", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}", club.getId())
+                .when().get("/api/v1/clubs/{clubId}", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(member))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("joinMessage", "함께 읽고 싶습니다."))
-                .when().post("/api/clubs/{clubId}/join", club.getId())
+                .when().post("/api/v1/clubs/{clubId}/join", club.getId())
                 .then().statusCode(200);
 
         ClubMember joinedMember = clubMemberRepository.findByClubIdAndMemberId(club.getId(), member.id()).orElseThrow();
 
         given().cookie(accessTokenCookie(owner))
                 .queryParam("status", "ACTIVE")
-                .when().get("/api/clubs/{clubId}/members", club.getId())
+                .when().get("/api/v1/clubs/{clubId}/members", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("command", "CHANGE_ROLE", "status", "STAFF"))
-                .when().patch("/api/clubs/{clubId}/members/{clubMemberId}", club.getId(), joinedMember.getId())
+                .when().patch("/api/v1/clubs/{clubId}/members/{clubMemberId}", club.getId(), joinedMember.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(member))
-                .when().get("/api/clubs/{clubId}/me", club.getId())
+                .when().get("/api/v1/clubs/{clubId}/me", club.getId())
                 .then().statusCode(200);
 
         given().queryParam("memberNickname", member.nickName())
-                .when().get("/api/clubs")
+                .when().get("/api/v1/clubs")
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(member))
-                .when().get("/api/me/clubs")
+                .when().get("/api/v1/me/clubs")
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(clubDetailPayload(club.getName() + "-edit"))
-                .when().put("/api/clubs/{clubId}", club.getId())
+                .when().put("/api/v1/clubs/{clubId}", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().delete("/api/clubs/{clubId}/leave", club.getId())
+                .when().delete("/api/v1/clubs/{clubId}/leave", club.getId())
                 .then().statusCode(403);
 
         given().cookie(accessTokenCookie(owner))
-                .when().delete("/api/clubs/{clubId}", club.getId())
+                .when().delete("/api/v1/clubs/{clubId}", club.getId())
                 .then().statusCode(200);
     }
 
@@ -137,15 +137,15 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
         ClubMember ownerClubMember = clubMemberRepository.findByClubIdAndMemberId(club.getId(), owner.id()).orElseThrow();
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/bookshelves", club.getId())
+                .when().get("/api/v1/clubs/{clubId}/bookshelves", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/bookshelves/{meetingId}", club.getId(), meeting.getId())
+                .when().get("/api/v1/clubs/{clubId}/bookshelves/{meetingId}", club.getId(), meeting.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/bookshelves/{meetingId}/edit", club.getId(), meeting.getId())
+                .when().get("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/edit", club.getId(), meeting.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
@@ -157,64 +157,64 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                         "generation", 2,
                         "tag", "수정"
                 ))
-                .when().patch("/api/clubs/{clubId}/bookshelves/{meetingId}", club.getId(), meeting.getId())
+                .when().patch("/api/v1/clubs/{clubId}/bookshelves/{meetingId}", club.getId(), meeting.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/meetings/next", club.getId())
+                .when().get("/api/v1/clubs/{clubId}/meetings/next", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/meetings/{meetingId}", club.getId(), meeting.getId())
+                .when().get("/api/v1/clubs/{clubId}/meetings/{meetingId}", club.getId(), meeting.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("description", "첫 번째 발제"))
-                .when().post("/api/clubs/{clubId}/bookshelves/{meetingId}/topics", club.getId(), meeting.getId())
+                .when().post("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/topics", club.getId(), meeting.getId())
                 .then().statusCode(200);
         Topic topic = topicRepository.findAllByMeetingIdOrderByIdDesc(meeting.getId()).getFirst();
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/bookshelves/{meetingId}/topics", club.getId(), meeting.getId())
+                .when().get("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/topics", club.getId(), meeting.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("description", "수정된 발제"))
-                .when().patch("/api/clubs/{clubId}/bookshelves/{meetingId}/topics/{topicId}", club.getId(), meeting.getId(), topic.getId())
+                .when().patch("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/topics/{topicId}", club.getId(), meeting.getId(), topic.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("description", "좋았습니다", "rate", 4.5))
-                .when().post("/api/clubs/{clubId}/bookshelves/{meetingId}/reviews", club.getId(), meeting.getId())
+                .when().post("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/reviews", club.getId(), meeting.getId())
                 .then().statusCode(200);
         BookReview review = bookReviewRepository.findAll().getFirst();
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/bookshelves/{meetingId}/reviews", club.getId(), meeting.getId())
+                .when().get("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/reviews", club.getId(), meeting.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("description", "수정 한줄평", "rate", 5.0))
-                .when().patch("/api/clubs/{clubId}/bookshelves/{meetingId}/reviews/{reviewId}", club.getId(), meeting.getId(), review.getId())
+                .when().patch("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/reviews/{reviewId}", club.getId(), meeting.getId(), review.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/meetings/{meetingId}/members", club.getId(), meeting.getId())
+                .when().get("/api/v1/clubs/{clubId}/meetings/{meetingId}/members", club.getId(), meeting.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("teamMemberList", List.of(Map.of("teamNumber", 1, "clubMemberIds", List.of(ownerClubMember.getId())))))
-                .when().put("/api/clubs/{clubId}/meetings/{meetingId}/teams", club.getId(), meeting.getId())
+                .when().put("/api/v1/clubs/{clubId}/meetings/{meetingId}/teams", club.getId(), meeting.getId())
                 .then().statusCode(200);
         Team team = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meeting.getId()).getFirst();
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}/topics", club.getId(), meeting.getId(), team.getId())
+                .when().get("/api/v1/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}/topics", club.getId(), meeting.getId(), team.getId())
                 .then().statusCode(200);
 
         teamChatMessageRepository.save(TeamChatMessage.builder()
@@ -227,19 +227,19 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .build());
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}/chat/messages", club.getId(), meeting.getId(), team.getId())
+                .when().get("/api/v1/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}/chat/messages", club.getId(), meeting.getId(), team.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().delete("/api/clubs/{clubId}/bookshelves/{meetingId}/reviews/{reviewId}", club.getId(), meeting.getId(), review.getId())
+                .when().delete("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/reviews/{reviewId}", club.getId(), meeting.getId(), review.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().delete("/api/clubs/{clubId}/bookshelves/{meetingId}/topics/{topicId}", club.getId(), meeting.getId(), topic.getId())
+                .when().delete("/api/v1/clubs/{clubId}/bookshelves/{meetingId}/topics/{topicId}", club.getId(), meeting.getId(), topic.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().delete("/api/clubs/{clubId}/bookshelves/{meetingId}", club.getId(), meeting.getId())
+                .when().delete("/api/v1/clubs/{clubId}/bookshelves/{meetingId}", club.getId(), meeting.getId())
                 .then().statusCode(200);
     }
 
@@ -251,7 +251,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(noticePayload())
-                .when().post("/api/clubs/{clubId}/notices", club.getId())
+                .when().post("/api/v1/clubs/{clubId}/notices", club.getId())
                 .then().statusCode(200);
         Notice notice = noticeRepository.findTop1ByClubIdOrderByCreatedAtDescIdDesc(club.getId()).orElseThrow();
         Long voteId = noticeRepository.findWithVoteAndClubMemberVotesByIdAndClubId(notice.getId(), club.getId())
@@ -259,38 +259,38 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .getVote()
                 .getId();
 
-        given().when().get("/api/clubs/{clubId}/notices/latest", club.getId())
+        given().when().get("/api/v1/clubs/{clubId}/notices/latest", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/notices", club.getId())
+                .when().get("/api/v1/clubs/{clubId}/notices", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/notices/{noticeId}", club.getId(), notice.getId())
+                .when().get("/api/v1/clubs/{clubId}/notices/{noticeId}", club.getId(), notice.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("selectedItemNumbers", List.of(1)))
-                .when().post("/api/clubs/{clubId}/notices/{noticeId}/votes/{voteId}", club.getId(), notice.getId(), voteId)
+                .when().post("/api/v1/clubs/{clubId}/notices/{noticeId}/votes/{voteId}", club.getId(), notice.getId(), voteId)
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("content", "댓글"))
-                .when().post("/api/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
+                .when().post("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
                 .then().statusCode(200);
         Long commentId = noticeCommentRepository.findAll().getFirst().getId();
 
         given().cookie(accessTokenCookie(owner))
-                .when().get("/api/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
+                .when().get("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("content", "수정댓글"))
-                .when().patch("/api/clubs/{clubId}/notices/{noticeId}/comments/{commentId}", club.getId(), notice.getId(), commentId)
+                .when().patch("/api/v1/clubs/{clubId}/notices/{noticeId}/comments/{commentId}", club.getId(), notice.getId(), commentId)
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
@@ -302,15 +302,15 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                         "imageUrls", List.of(),
                         "vote", Map.of("deadline", LocalDateTime.now().plusDays(2).toString())
                 ))
-                .when().patch("/api/clubs/{clubId}/notices/{noticeId}", club.getId(), notice.getId())
+                .when().patch("/api/v1/clubs/{clubId}/notices/{noticeId}", club.getId(), notice.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().delete("/api/clubs/{clubId}/notices/{noticeId}/comments/{commentId}", club.getId(), notice.getId(), commentId)
+                .when().delete("/api/v1/clubs/{clubId}/notices/{noticeId}/comments/{commentId}", club.getId(), notice.getId(), commentId)
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(owner))
-                .when().delete("/api/clubs/{clubId}/notices/{noticeId}", club.getId(), notice.getId())
+                .when().delete("/api/v1/clubs/{clubId}/notices/{noticeId}", club.getId(), notice.getId())
                 .then().statusCode(200);
     }
 
@@ -321,7 +321,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
         Club club = createClub(owner, "forbidden" + uniqueSuffix(owner));
 
         given().cookie(accessTokenCookie(outsider))
-                .when().get("/api/clubs/{clubId}/bookshelves", club.getId())
+                .when().get("/api/v1/clubs/{clubId}/bookshelves", club.getId())
                 .then().statusCode(404);
     }
 
@@ -329,7 +329,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     void authenticatedClubEndpointRequiresCookie() {
         given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(clubDetailPayload("no-auth-club"))
-                .when().post("/api/clubs")
+                .when().post("/api/v1/clubs")
                 .then().statusCode(401);
     }
 
@@ -337,7 +337,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(clubDetailPayload(name))
-                .when().post("/api/clubs")
+                .when().post("/api/v1/clubs")
                 .then().statusCode(200);
         return clubRepository.findAll().stream()
                 .filter(club -> club.getName().equals(name))
@@ -357,7 +357,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                         "tag", "소설",
                         "isbn", "9781234567890"
                 ))
-                .when().post("/api/clubs/{clubId}/bookshelves", clubId)
+                .when().post("/api/v1/clubs/{clubId}/bookshelves", clubId)
                 .then().statusCode(200);
         return meetingRepository.findAllByClubId(clubId).stream()
                 .filter(meeting -> meeting.getTitle().equals(title))

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin/news")
+@RequestMapping("/api/v1/admin/news")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "소식 (관리자)", description = "소식 등록, 수정, 삭제 API (관리자 전용)")

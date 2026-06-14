@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/clubs")
+@RequestMapping("/api/v1/admin/clubs")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "모임 (관리자)", description = "모임 관리 API (관리자 전용)")

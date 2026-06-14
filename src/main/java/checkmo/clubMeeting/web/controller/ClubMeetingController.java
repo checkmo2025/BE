@@ -20,7 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/clubs/{clubId}/meetings")
+@RequestMapping("/api/v1/clubs/{clubId}/meetings")
 @RequiredArgsConstructor
 @Tag(name = "정기모임", description = "정기모임 토론 조/팀 발제 관리 API")
 @Validated

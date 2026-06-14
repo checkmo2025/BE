@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @Tag(name = "채팅", description = "채팅 내역 조회 API")
-@RequestMapping("/api/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}/chat")
+@RequestMapping("/api/v1/clubs/{clubId}/meetings/{meetingId}/teams/{teamId}/chat")
 @RestController
 public class ChatHistoryController {
     private final ChatQueryService chatQueryService;

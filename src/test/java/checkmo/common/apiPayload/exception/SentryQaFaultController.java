@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Profile("sentry-qa")
 @RestController
-@RequestMapping("/api/test/sentry")
+@RequestMapping("/api/v1/test/sentry")
 public class SentryQaFaultController {
 
     private final SentryQaCaptureState captureState;

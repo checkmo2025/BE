@@ -1,10 +1,18 @@
 package checkmo.authentication.internal.security.jwt;
 
+import checkmo.authentication.internal.config.properties.JwtProperties;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.data.redis.connection.ReturnType;
+import org.springframework.data.redis.connection.RedisStringCommands.SetOption;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.types.Expiration;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -12,24 +20,125 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TokenCacheService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String REFRESH_TOKEN_PREFIX = "refreshToken::";
+    private static final String BLACKLIST_PREFIX = "blacklist::";
+    private static final String COMPARE_AND_ROTATE_REFRESH_TOKEN_SCRIPT = """
+            local current = redis.call('GET', KEYS[1])
+            if current == ARGV[1] or current == ARGV[2] then
+                redis.call('SET', KEYS[1], ARGV[3], 'PX', ARGV[4])
+                return 1
+            end
+            return 0
+            """;
+    private static final String DELETE_REFRESH_TOKEN_IF_MATCHES_SCRIPT = """
+            local current = redis.call('GET', KEYS[1])
+            if current == ARGV[1] or current == ARGV[2] then
+                redis.call('DEL', KEYS[1])
+                return 1
+            end
+            return 0
+            """;
+    private static final StringRedisSerializer STRING_SERIALIZER = new StringRedisSerializer();
 
-    @CachePut(value = "refreshToken", key = "#userId")
-    public String saveRefreshToken(String userId, String refreshToken) {
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final JwtProperties jwtProperties;
+
+    public void saveRefreshToken(String userId, String refreshToken) {
         log.info("리프레시 토큰 저장 - userId={}", userId);
-        return refreshToken;
+        long ttlMs = jwtProperties.getTokenValidity().getRefreshToken();
+        byte[] key = serialize(REFRESH_TOKEN_PREFIX + userId);
+        byte[] value = serialize(refreshToken);
+        redisTemplate.execute((RedisCallback<Boolean>) connection ->
+                connection.stringCommands().set(
+                        key,
+                        value,
+                        Expiration.milliseconds(ttlMs),
+                        SetOption.upsert()
+                )
+        );
     }
 
-    // 이건 Redis에서 직접 조회하는 메서드로, @Cacheable을 사용하지 않고 RedisTemplate을 통해 조회
     public String getRefreshToken(String userId) {
         log.info("리프레시 토큰 조회 - userId={}", userId);
-        return (String) redisTemplate.opsForValue().get("refreshToken::" + userId);
+        byte[] key = serialize(REFRESH_TOKEN_PREFIX + userId);
+        byte[] value = redisTemplate.execute((RedisCallback<byte[]>) connection ->
+                connection.stringCommands().get(key)
+        );
+        return value == null ? null : deserializeRefreshToken(value);
     }
 
-    // Redis에서 리프레시 토큰 삭제
-    @CacheEvict(value = "refreshToken", key = "#userId")
+    public boolean compareAndRotateRefreshToken(
+            String userId,
+            String expectedRefreshToken,
+            String newRefreshToken,
+            Duration ttl
+    ) {
+        log.info("리프레시 토큰 원자적 회전 - userId={}", userId);
+        byte[] key = serialize(REFRESH_TOKEN_PREFIX + userId);
+        byte[] expected = serialize(expectedRefreshToken);
+        byte[] legacyExpected = serializeLegacyValue(expectedRefreshToken);
+        byte[] next = serialize(newRefreshToken);
+        byte[] ttlMs = serialize(String.valueOf(ttl.toMillis()));
+        return executeBooleanScript(COMPARE_AND_ROTATE_REFRESH_TOKEN_SCRIPT, key, expected, legacyExpected, next, ttlMs);
+    }
+
     public void deleteRefreshToken(String userId) {
         log.info("리프레시 토큰 삭제 - userId={}", userId);
+        redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
+    }
+
+    public boolean deleteRefreshTokenIfMatches(String userId, String expectedRefreshToken) {
+        log.info("리프레시 토큰 일치 시 삭제 - userId={}", userId);
+        byte[] key = serialize(REFRESH_TOKEN_PREFIX + userId);
+        byte[] expected = serialize(expectedRefreshToken);
+        byte[] legacyExpected = serializeLegacyValue(expectedRefreshToken);
+        return executeBooleanScript(DELETE_REFRESH_TOKEN_IF_MATCHES_SCRIPT, key, expected, legacyExpected);
+    }
+
+    private boolean executeBooleanScript(String script, byte[] key, byte[]... args) {
+        byte[][] keysAndArgs = new byte[args.length + 1][];
+        keysAndArgs[0] = key;
+        System.arraycopy(args, 0, keysAndArgs, 1, args.length);
+
+        Long result = redisTemplate.execute((RedisCallback<Long>) connection ->
+                connection.scriptingCommands().eval(
+                        script.getBytes(StandardCharsets.UTF_8),
+                        ReturnType.INTEGER,
+                        1,
+                        keysAndArgs
+                )
+        );
+        return Long.valueOf(1L).equals(result);
+    }
+
+    private byte[] serialize(String value) {
+        return STRING_SERIALIZER.serialize(value);
+    }
+
+    private String deserializeRefreshToken(byte[] value) {
+        Object legacyValue = deserializeLegacyValue(value);
+        if (legacyValue instanceof String refreshToken) {
+            return refreshToken;
+        }
+        return STRING_SERIALIZER.deserialize(value);
+    }
+
+    private Object deserializeLegacyValue(byte[] value) {
+        RedisSerializer<?> valueSerializer = redisTemplate.getValueSerializer();
+        if (valueSerializer == null) {
+            return null;
+        }
+        try {
+            return valueSerializer.deserialize(value);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private byte[] serializeLegacyValue(String value) {
+        RedisSerializer<Object> valueSerializer = (RedisSerializer<Object>) redisTemplate.getValueSerializer();
+        return valueSerializer == null ? serialize(value) : valueSerializer.serialize(value);
     }
 
     // 블랙리스트 토큰 저장
@@ -42,6 +151,6 @@ public class TokenCacheService {
     // 블랙리스트 토큰 조회
     public boolean isAccessTokenBlacklisted(String accessToken) {
         log.info("블랙리스트 토큰 조회");
-        return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist::" + accessToken));
+        return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken));
     }
 }

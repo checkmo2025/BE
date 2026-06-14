@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/clubs/{clubId}/notices")
+@RequestMapping("/api/v1/clubs/{clubId}/notices")
 @RequiredArgsConstructor
 @Tag(name = "모임 공지사항", description = "독서 모임 공지사항, 투표 생성 및 관리 API")
 public class ClubNoticeController {

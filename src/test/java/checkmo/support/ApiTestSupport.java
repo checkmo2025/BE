@@ -1,10 +1,11 @@
 package checkmo.support;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import checkmo.authentication.internal.config.properties.JwtProperties;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.entity.Role;
 import checkmo.authentication.internal.repository.AuthRepository;
@@ -20,13 +21,19 @@ import checkmo.infra.s3.internal.service.S3Service;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.scheduler.MemberCleanupScheduler;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
+import java.security.Key;
 import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +65,9 @@ public abstract class ApiTestSupport {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private JwtProperties jwtProperties;
 
     @Autowired
     protected PasswordEncoder passwordEncoder;
@@ -102,6 +112,7 @@ public abstract class ApiTestSupport {
     protected HashOperations<String, Object, Object> redisHashOperations;
     protected ValueOperations<String, String> stringRedisValueOperations;
     private final Map<String, Cache> testCaches = new ConcurrentHashMap<>();
+    private final Map<String, String> refreshTokensByUserId = new ConcurrentHashMap<>();
 
     @BeforeEach
     void setUpApiTestSupport() {
@@ -111,6 +122,7 @@ public abstract class ApiTestSupport {
         redisValueOperations = mock();
         redisHashOperations = mock();
         stringRedisValueOperations = mock();
+        refreshTokensByUserId.clear();
 
         when(redisTemplate.opsForValue()).thenReturn(redisValueOperations);
         when(redisTemplate.opsForHash()).thenReturn(redisHashOperations);
@@ -158,10 +170,42 @@ public abstract class ApiTestSupport {
         });
 
         when(tokenCacheService.isAccessTokenBlacklisted(anyString())).thenReturn(false);
-        when(tokenCacheService.getRefreshToken(anyString())).thenReturn(null);
-        when(tokenCacheService.saveRefreshToken(anyString(), anyString())).thenAnswer(invocation -> invocation.getArgument(1));
+        when(tokenCacheService.getRefreshToken(anyString()))
+                .thenAnswer(invocation -> refreshTokensByUserId.get(invocation.getArgument(0)));
+        doAnswer(invocation -> {
+            refreshTokensByUserId.put(invocation.getArgument(0), invocation.getArgument(1));
+            return null;
+        }).when(tokenCacheService).saveRefreshToken(anyString(), anyString());
+        when(tokenCacheService.compareAndRotateRefreshToken(
+                anyString(),
+                anyString(),
+                anyString(),
+                org.mockito.ArgumentMatchers.any(Duration.class)
+        ))
+                .thenAnswer(invocation -> rotateRefreshTokenIfCurrent(
+                        invocation.getArgument(0),
+                        invocation.getArgument(1),
+                        invocation.getArgument(2)
+                ));
         when(tokenCacheService.saveBlacklistToken(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
-        doNothing().when(tokenCacheService).deleteRefreshToken(anyString());
+        doAnswer(invocation -> {
+            refreshTokensByUserId.remove(invocation.getArgument(0));
+            return null;
+        }).when(tokenCacheService).deleteRefreshToken(anyString());
+        when(tokenCacheService.deleteRefreshTokenIfMatches(anyString(), anyString()))
+                .thenAnswer(invocation -> {
+                    String userId = invocation.getArgument(0);
+                    String expectedRefreshToken = invocation.getArgument(1);
+                    AtomicBoolean deleted = new AtomicBoolean(false);
+                    refreshTokensByUserId.compute(userId, (ignored, currentRefreshToken) -> {
+                        if (expectedRefreshToken.equals(currentRefreshToken)) {
+                            deleted.set(true);
+                            return null;
+                        }
+                        return currentRefreshToken;
+                    });
+                    return deleted.get();
+                });
     }
 
     @AfterEach
@@ -245,6 +289,39 @@ public abstract class ApiTestSupport {
         return new Cookie.Builder("refreshToken", user.refreshToken())
                 .setPath("/")
                 .build();
+    }
+
+    protected String expiredSignedRefreshToken(TestUser user) {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
+        Key key = Keys.hmacShaKeyFor(keyBytes);
+        long now = System.currentTimeMillis();
+
+        return Jwts.builder()
+                .id(UUID.randomUUID().toString())
+                .subject(user.id())
+                .expiration(new Date(now - 1_000L))
+                .signWith(key)
+                .compact();
+    }
+
+    protected void saveRefreshTokenInCacheFake(String userId, String refreshToken) {
+        refreshTokensByUserId.put(userId, refreshToken);
+    }
+
+    protected boolean rotateRefreshTokenIfCurrent(
+            String userId,
+            String expectedRefreshToken,
+            String newRefreshToken
+    ) {
+        AtomicBoolean rotated = new AtomicBoolean(false);
+        refreshTokensByUserId.compute(userId, (ignored, currentRefreshToken) -> {
+            if (expectedRefreshToken.equals(currentRefreshToken)) {
+                rotated.set(true);
+                return newRefreshToken;
+            }
+            return currentRefreshToken;
+        });
+        return rotated.get();
     }
 
     protected record TestUser(

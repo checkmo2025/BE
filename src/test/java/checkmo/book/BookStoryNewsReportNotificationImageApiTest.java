@@ -110,7 +110,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .queryParam("keyword", "자바")
                 .queryParam("page", 1)
                 .when()
-                .get("/api/books/search")
+                .get("/api/v1/books/search")
                 .then()
                 .statusCode(200)
                 .body("result.detailInfoList[0].isbn", equalTo(ISBN))
@@ -118,7 +118,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
 
         given()
                 .when()
-                .get("/api/books/{isbn}", ISBN)
+                .get("/api/v1/books/{isbn}", ISBN)
                 .then()
                 .statusCode(200)
                 .body("result.isbn", equalTo(ISBN));
@@ -126,7 +126,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/books/recommend")
+                .get("/api/v1/books/recommend")
                 .then()
                 .statusCode(200)
                 .body("result.detailInfoList.size()", equalTo(4));
@@ -134,7 +134,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .post("/api/books/{isbn}/like", ISBN)
+                .post("/api/v1/books/{isbn}/like", ISBN)
                 .then()
                 .statusCode(200)
                 .body("result.liked", equalTo(true));
@@ -142,7 +142,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/books/me/likes")
+                .get("/api/v1/books/me/likes")
                 .then()
                 .statusCode(200)
                 .body("result.books[0].isbn", equalTo(ISBN));
@@ -150,14 +150,14 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/books/{memberNickname}/likes", user.nickName())
+                .get("/api/v1/books/{memberNickname}/likes", user.nickName())
                 .then()
                 .statusCode(200)
                 .body("result.books[0].likedByMe", equalTo(true));
 
         given()
                 .when()
-                .post("/api/books/{isbn}/like", ISBN)
+                .post("/api/v1/books/{isbn}/like", ISBN)
                 .then()
                 .statusCode(401);
     }
@@ -180,29 +180,29 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                         "status", "PUBLISHED"
                 ))
                 .when()
-                .post("/api/book-stories")
+                .post("/api/v1/book-stories")
                 .then()
                 .statusCode(200)
                 .extract()
                 .path("result");
         Long storyId = storyIdNumber.longValue();
 
-        given().when().get("/api/book-stories")
+        given().when().get("/api/v1/book-stories")
                 .then().statusCode(200).body("result.basicInfoList.size()", greaterThanOrEqualTo(1));
-        given().cookie(accessTokenCookie(author)).when().get("/api/book-stories/me")
+        given().cookie(accessTokenCookie(author)).when().get("/api/v1/book-stories/me")
                 .then().statusCode(200).body("result.basicInfoList.size()", equalTo(1));
-        given().cookie(accessTokenCookie(author)).when().get("/api/book-stories/following")
+        given().cookie(accessTokenCookie(author)).when().get("/api/v1/book-stories/following")
                 .then().statusCode(200);
-        given().cookie(accessTokenCookie(author)).when().get("/api/book-stories/members/{nickname}", author.nickName())
+        given().cookie(accessTokenCookie(author)).when().get("/api/v1/book-stories/members/{nickname}", author.nickName())
                 .then().statusCode(200).body("result.basicInfoList.size()", equalTo(1));
-        given().cookie(accessTokenCookie(author)).when().get("/api/book-stories/clubs/{clubId}", clubId)
+        given().cookie(accessTokenCookie(author)).when().get("/api/v1/book-stories/clubs/{clubId}", clubId)
                 .then().statusCode(200).body("result.basicInfoList.size()", equalTo(1));
-        given().cookie(accessTokenCookie(author)).when().get("/api/book-stories/search/{bookId}", ISBN)
+        given().cookie(accessTokenCookie(author)).when().get("/api/v1/book-stories/search/{bookId}", ISBN)
                 .then().statusCode(200).body("result.basicInfoList.size()", equalTo(1));
-        given().cookie(accessTokenCookie(author)).when().get("/api/book-stories/{bookStoryId}", storyId)
+        given().cookie(accessTokenCookie(author)).when().get("/api/v1/book-stories/{bookStoryId}", storyId)
                 .then().statusCode(200).body("result.bookStoryId", equalTo(storyId.intValue()));
 
-        given().cookie(accessTokenCookie(other)).when().post("/api/book-stories/{bookStoryId}/like", storyId)
+        given().cookie(accessTokenCookie(other)).when().post("/api/v1/book-stories/{bookStoryId}/like", storyId)
                 .then().statusCode(200).body("message", equalTo("좋아요가 추가되었습니다."));
 
         given()
@@ -210,7 +210,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(other))
                 .body(Map.of("content", "좋은 글입니다."))
                 .when()
-                .post("/api/book-stories/{bookStoryId}/comments", storyId)
+                .post("/api/v1/book-stories/{bookStoryId}/comments", storyId)
                 .then()
                 .statusCode(200);
         Long commentId = commentRepository.findAll().getFirst().getId();
@@ -220,7 +220,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(other))
                 .body(Map.of("content", "수정 댓글입니다."))
                 .when()
-                .patch("/api/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
+                .patch("/api/v1/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
                 .then()
                 .statusCode(200);
 
@@ -234,7 +234,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                         "status", "PUBLISHED"
                 ))
                 .when()
-                .patch("/api/book-stories/{bookStoryId}", storyId)
+                .patch("/api/v1/book-stories/{bookStoryId}", storyId)
                 .then()
                 .statusCode(200);
 
@@ -243,15 +243,15 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(other))
                 .body(Map.of("title", "권한 없음", "description", "권한 없음", "status", "PUBLISHED"))
                 .when()
-                .patch("/api/book-stories/{bookStoryId}", storyId)
+                .patch("/api/v1/book-stories/{bookStoryId}", storyId)
                 .then()
                 .statusCode(403);
 
         given().cookie(accessTokenCookie(other))
-                .when().delete("/api/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
+                .when().delete("/api/v1/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
                 .then().statusCode(200);
         given().cookie(accessTokenCookie(author))
-                .when().delete("/api/book-stories/{bookStoryId}", storyId)
+                .when().delete("/api/v1/book-stories/{bookStoryId}", storyId)
                 .then().statusCode(200);
 
         given()
@@ -264,7 +264,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                         "status", "PUBLISHED"
                 ))
                 .when()
-                .post("/api/book-stories")
+                .post("/api/v1/book-stories")
                 .then()
                 .statusCode(400);
     }
@@ -285,13 +285,13 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         news.replaceImages(List.of("https://example.com/news-1.png"));
         newsRepository.save(news);
 
-        given().when().get("/api/news")
+        given().when().get("/api/v1/news")
                 .then().statusCode(200).body("result.basicInfoList[0].newsId", equalTo(news.getId().intValue()));
-        given().cookie(accessTokenCookie(user)).when().get("/api/news/me")
+        given().cookie(accessTokenCookie(user)).when().get("/api/v1/news/me")
                 .then().statusCode(200).body("result.basicInfoList[0].newsId", equalTo(news.getId().intValue()));
-        given().when().get("/api/news/{newsId}", news.getId())
+        given().when().get("/api/v1/news/{newsId}", news.getId())
                 .then().statusCode(200).body("result.title", equalTo("서비스 소식"));
-        given().when().get("/api/news/{newsId}", 999999)
+        given().when().get("/api/v1/news/{newsId}", 999999)
                 .then().statusCode(404);
     }
 
@@ -310,13 +310,13 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                         "content", "부적절한 표현이 있습니다."
                 ))
                 .when()
-                .post("/api/reports")
+                .post("/api/v1/reports")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
 
         given().cookie(accessTokenCookie(reporter))
-                .when().get("/api/reports/me")
+                .when().get("/api/v1/reports/me")
                 .then().statusCode(200)
                 .body("result.reports[0].targetId", equalTo(target.nickName()));
 
@@ -325,7 +325,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(reporter))
                 .body(Map.of("targetType", "MEMBER", "targetId", reporter.nickName(), "reason", "GENERAL"))
                 .when()
-                .post("/api/reports")
+                .post("/api/v1/reports")
                 .then()
                 .statusCode(400);
 
@@ -334,11 +334,11 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(reporter))
                 .body(Map.of("targetType", "MEMBER", "targetId", target.nickName()))
                 .when()
-                .post("/api/reports")
+                .post("/api/v1/reports")
                 .then()
                 .statusCode(400);
 
-        given().when().get("/api/reports/me")
+        given().when().get("/api/v1/reports/me")
                 .then().statusCode(401);
 
         assertThat(reportRepository.findAll()).hasSize(1);
@@ -359,28 +359,28 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .build());
 
         given().cookie(accessTokenCookie(receiver))
-                .when().get("/api/notifications")
+                .when().get("/api/v1/notifications")
                 .then().statusCode(200)
                 .body("result.notifications[0].notificationId", equalTo(notification.getId().intValue()));
         given().cookie(accessTokenCookie(receiver))
-                .when().get("/api/notifications/preview")
+                .when().get("/api/v1/notifications/preview")
                 .then().statusCode(200)
                 .body("result.notifications[0].read", equalTo(false));
         given().cookie(accessTokenCookie(receiver))
-                .when().patch("/api/notifications/{notificationId}/read", notification.getId())
+                .when().patch("/api/v1/notifications/{notificationId}/read", notification.getId())
                 .then().statusCode(200);
         given().cookie(accessTokenCookie(receiver))
-                .when().get("/api/notifications/settings")
+                .when().get("/api/v1/notifications/settings")
                 .then().statusCode(200)
                 .body("result.newFollower", equalTo(true));
         given().cookie(accessTokenCookie(receiver))
-                .when().patch("/api/notifications/settings/{settingType}", "NEW_FOLLOWER")
+                .when().patch("/api/v1/notifications/settings/{settingType}", "NEW_FOLLOWER")
                 .then().statusCode(200);
         given().cookie(accessTokenCookie(receiver))
-                .when().patch("/api/notifications/settings/{settingType}", "UNKNOWN")
+                .when().patch("/api/v1/notifications/settings/{settingType}", "UNKNOWN")
                 .then().statusCode(400);
 
-        given().when().get("/api/notifications")
+        given().when().get("/api/v1/notifications")
                 .then().statusCode(401);
     }
 
@@ -394,7 +394,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(user))
                 .body(Map.of("originalFileName", "profile.png", "contentType", "image/png"))
                 .when()
-                .post("/api/image/{type}/upload-url", "PROFILE")
+                .post("/api/v1/image/{type}/upload-url", "PROFILE")
                 .then()
                 .statusCode(200)
                 .body("result.imageUrl", equalTo("https://cdn.example.com/profile.png"));
@@ -404,7 +404,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(user))
                 .body(Map.of("originalFileName", "profile.txt", "contentType", "text/plain"))
                 .when()
-                .post("/api/image/{type}/upload-url", "PROFILE")
+                .post("/api/v1/image/{type}/upload-url", "PROFILE")
                 .then()
                 .statusCode(400);
 
@@ -412,7 +412,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("originalFileName", "profile.png", "contentType", "image/png"))
                 .when()
-                .post("/api/image/{type}/upload-url", "PROFILE")
+                .post("/api/v1/image/{type}/upload-url", "PROFILE")
                 .then()
                 .statusCode(401);
 
@@ -421,7 +421,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(incomplete))
                 .body(Map.of("originalFileName", "profile.png", "contentType", "image/png"))
                 .when()
-                .post("/api/image/{type}/upload-url", "PROFILE")
+                .post("/api/v1/image/{type}/upload-url", "PROFILE")
                 .then()
                 .statusCode(403);
     }

@@ -54,30 +54,30 @@ class AdminApiTest extends ApiTestSupport {
         given().cookie(accessTokenCookie(admin))
                 .queryParam("keyword", user.email().substring(0, 8))
                 .queryParam("limit", 10)
-                .when().get("/api/admin/members/emails")
+                .when().get("/api/v1/admin/members/emails")
                 .then().statusCode(200)
                 .body("result.emails.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
                 .queryParam("keyword", user.email())
-                .when().get("/api/admin/members")
+                .when().get("/api/v1/admin/members")
                 .then().statusCode(200)
                 .body("result.memberList.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/members/{memberNickName}", user.nickName())
+                .when().get("/api/v1/admin/members/{memberNickName}", user.nickName())
                 .then().statusCode(200)
                 .body("result.email", equalTo(user.email()));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/members/{memberNickName}", "unknown-member")
+                .when().get("/api/v1/admin/members/{memberNickName}", "unknown-member")
                 .then().statusCode(404);
 
         given().cookie(accessTokenCookie(nonAdmin))
-                .when().get("/api/admin/members")
+                .when().get("/api/v1/admin/members")
                 .then().statusCode(403);
 
-        given().when().get("/api/admin/members")
+        given().when().get("/api/v1/admin/members")
                 .then().statusCode(401);
     }
 
@@ -91,46 +91,46 @@ class AdminApiTest extends ApiTestSupport {
         given().cookie(accessTokenCookie(admin))
                 .queryParam("keyword", "admin-club")
                 .queryParam("page", 1)
-                .when().get("/api/admin/clubs")
+                .when().get("/api/v1/admin/clubs")
                 .then().statusCode(200)
                 .body("result.clubs.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/clubs/{clubId}", club.getId())
+                .when().get("/api/v1/admin/clubs/{clubId}", club.getId())
                 .then().statusCode(200)
                 .body("result.name", equalTo(club.getName()));
 
         given().cookie(accessTokenCookie(admin))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(clubPayload(club.getName() + "-edit"))
-                .when().put("/api/admin/clubs/{clubId}", club.getId())
+                .when().put("/api/v1/admin/clubs/{clubId}", club.getId())
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/clubs/{clubId}/active-members", club.getId())
+                .when().get("/api/v1/admin/clubs/{clubId}/active-members", club.getId())
                 .then().statusCode(200)
                 .body("result.members.size()", equalTo(1));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/clubs/members/{memberNickname}", owner.nickName())
+                .when().get("/api/v1/admin/clubs/members/{memberNickname}", owner.nickName())
                 .then().statusCode(200)
                 .body("result.clubList.size()", equalTo(1));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/clubs/{clubId}", 999999)
+                .when().get("/api/v1/admin/clubs/{clubId}", 999999)
                 .then().statusCode(404);
 
         given().cookie(accessTokenCookie(admin))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("name", ""))
-                .when().put("/api/admin/clubs/{clubId}", club.getId())
+                .when().put("/api/v1/admin/clubs/{clubId}", club.getId())
                 .then().statusCode(400);
 
         given().cookie(accessTokenCookie(nonAdmin))
-                .when().get("/api/admin/clubs")
+                .when().get("/api/v1/admin/clubs")
                 .then().statusCode(403);
 
-        given().when().get("/api/admin/clubs")
+        given().when().get("/api/v1/admin/clubs")
                 .then().statusCode(401);
     }
 
@@ -144,50 +144,50 @@ class AdminApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(accessTokenCookie(admin))
                 .body(newsPayload("관리자 소식", requester.email()))
-                .when().post("/api/admin/news")
+                .when().post("/api/v1/admin/news")
                 .then().statusCode(200)
                 .extract().path("result");
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/news")
+                .when().get("/api/v1/admin/news")
                 .then().statusCode(200)
                 .body("result.basicInfoList.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/news/{newsId}", newsId)
+                .when().get("/api/v1/admin/news/{newsId}", newsId)
                 .then().statusCode(200)
                 .body("result.title", equalTo("관리자 소식"));
 
         given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(accessTokenCookie(admin))
                 .body(newsPayload("수정된 소식", requester.email()))
-                .when().patch("/api/admin/news/{newsId}", newsId)
+                .when().patch("/api/v1/admin/news/{newsId}", newsId)
                 .then().statusCode(200);
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/news/members/{memberNickname}", requester.nickName())
+                .when().get("/api/v1/admin/news/members/{memberNickname}", requester.nickName())
                 .then().statusCode(200)
                 .body("result.basicInfoList.size()", greaterThanOrEqualTo(1));
 
         given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(accessTokenCookie(admin))
                 .body(Map.of("title", ""))
-                .when().post("/api/admin/news")
+                .when().post("/api/v1/admin/news")
                 .then().statusCode(400);
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/news/{newsId}", 999999)
+                .when().get("/api/v1/admin/news/{newsId}", 999999)
                 .then().statusCode(404);
 
         given().cookie(accessTokenCookie(nonAdmin))
-                .when().get("/api/admin/news")
+                .when().get("/api/v1/admin/news")
                 .then().statusCode(403);
 
-        given().when().get("/api/admin/news")
+        given().when().get("/api/v1/admin/news")
                 .then().statusCode(401);
 
         given().cookie(accessTokenCookie(admin))
-                .when().delete("/api/admin/news/{newsId}", newsId)
+                .when().delete("/api/v1/admin/news/{newsId}", newsId)
                 .then().statusCode(200);
 
         assertThat(newsRepository.findById(newsId.longValue())).isEmpty();
@@ -213,40 +213,40 @@ class AdminApiTest extends ApiTestSupport {
 
         given().cookie(accessTokenCookie(admin))
                 .queryParam("keyword", "관리자")
-                .when().get("/api/admin/book-stories")
+                .when().get("/api/v1/admin/book-stories")
                 .then().statusCode(200)
                 .body("result.basicInfoList.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/book-stories/{bookStoryId}", story.getId())
+                .when().get("/api/v1/admin/book-stories/{bookStoryId}", story.getId())
                 .then().statusCode(200)
                 .body("result.bookStoryId", equalTo(story.getId().intValue()));
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/book-stories/members/{memberNickname}", author.nickName())
+                .when().get("/api/v1/admin/book-stories/members/{memberNickname}", author.nickName())
                 .then().statusCode(200)
                 .body("result.basicInfoList.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
-                .when().delete("/api/admin/book-stories/{bookStoryId}/comments/{commentId}", story.getId(), comment.getId())
+                .when().delete("/api/v1/admin/book-stories/{bookStoryId}/comments/{commentId}", story.getId(), comment.getId())
                 .then().statusCode(200)
                 .body("result", equalTo(comment.getId().intValue()));
         assertThat(commentRepository.findById(comment.getId()).orElseThrow().isDeleted()).isTrue();
 
         given().cookie(accessTokenCookie(admin))
-                .when().delete("/api/admin/book-stories/{bookStoryId}", story.getId())
+                .when().delete("/api/v1/admin/book-stories/{bookStoryId}", story.getId())
                 .then().statusCode(200);
         assertThat(bookStoryRepository.findById(story.getId())).isEmpty();
 
         given().cookie(accessTokenCookie(admin))
-                .when().get("/api/admin/book-stories/{bookStoryId}", 999999)
+                .when().get("/api/v1/admin/book-stories/{bookStoryId}", 999999)
                 .then().statusCode(404);
 
         given().cookie(accessTokenCookie(nonAdmin))
-                .when().get("/api/admin/book-stories")
+                .when().get("/api/v1/admin/book-stories")
                 .then().statusCode(403);
 
-        given().when().get("/api/admin/book-stories")
+        given().when().get("/api/v1/admin/book-stories")
                 .then().statusCode(401);
     }
 
