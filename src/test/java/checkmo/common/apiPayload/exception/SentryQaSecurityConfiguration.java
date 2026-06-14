@@ -17,7 +17,7 @@ public class SentryQaSecurityConfiguration {
     @Order(0)
     public SecurityFilterChain sentryQaSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/test/sentry/**")
+                .securityMatcher("/api/v1/test/sentry/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

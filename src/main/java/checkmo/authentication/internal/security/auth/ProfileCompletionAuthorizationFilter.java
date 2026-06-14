@@ -24,11 +24,11 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private final List<String> excludedPaths = List.of(
-            "/api/auth/logout",
-            "/api/members/additional-info",
-            "/api/auth/redirect/oauth2",
-            "/api/members/check-nickname",
-            "/api/s3/image/upload-url",
+            "/api/v1/auth/logout",
+            "/api/v1/members/additional-info",
+            "/api/v1/auth/redirect/oauth2",
+            "/api/v1/members/check-nickname",
+            "/api/v1/s3/image/upload-url",
             "/swagger-ui/**",
             "/v3/api-docs/**"
     );

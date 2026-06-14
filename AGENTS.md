@@ -60,6 +60,16 @@ checkmo/
 - New Spring config belongs in `application-<profile>.yml` and must be included deliberately from `application.yml`.
 - QueryDSL generated-source wiring is non-standard in `build.gradle`; inspect before changing generated source paths.
 
+## API VERSIONING
+
+- All external client-facing HTTP APIs must use the `/api/v1/...` prefix.
+- Do not add new unversioned `/api/...` endpoints.
+- Before public users exist, migrate existing `/api/...` endpoints destructively to `/api/v1/...`; do not keep compatibility aliases unless explicitly requested.
+- Keep non-client operational endpoints such as `/health`, `/swagger-ui/**`, `/v3/api-docs/**`, OAuth callback paths, and websocket broker paths outside this versioning rule unless they become external client API contracts.
+- Within `v1`, allow only non-breaking API changes such as optional fields, new endpoints, and backward-compatible enum additions.
+- Treat endpoint removal or path changes, required request field additions, response field removal/rename/semantic changes, status/error code contract changes, and authentication/token delivery changes as breaking changes that require evaluating a new major prefix such as `/api/v2/...`.
+- When changing API paths, update controller mappings, Spring Security matchers, JWT/profile filter path rules, Swagger/OpenAPI descriptions, API tests, and API docs together.
+
 ## COMMIT MESSAGE STYLE
 
 Use the repository's existing commit message style.

@@ -44,7 +44,7 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/members/me/follow-count")
+                .get("/api/v1/members/me/follow-count")
                 .then()
                 .statusCode(200);
     }
@@ -53,7 +53,7 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
     void anonymousRequestToAuthenticatedApiReturnsUnauthorized() {
         given()
                 .when()
-                .get("/api/members/me/follow-count")
+                .get("/api/v1/members/me/follow-count")
                 .then()
                 .statusCode(401);
     }
@@ -65,7 +65,7 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/members/me/follow-count")
+                .get("/api/v1/members/me/follow-count")
                 .then()
                 .statusCode(403);
     }

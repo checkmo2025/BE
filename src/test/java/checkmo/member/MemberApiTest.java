@@ -30,7 +30,7 @@ class MemberApiTest extends ApiTestSupport {
                         "categories", List.of("COMPUTER_IT")
                 ))
                 .when()
-                .post("/api/members/additional-info")
+                .post("/api/v1/members/additional-info")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
@@ -46,7 +46,7 @@ class MemberApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", email, "password", "Pass123!"))
                 .when()
-                .post("/api/auth/signup")
+                .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -62,7 +62,7 @@ class MemberApiTest extends ApiTestSupport {
                         "categories", List.of("COMPUTER_IT")
                 ))
                 .when()
-                .post("/api/members/additional-info")
+                .post("/api/v1/members/additional-info")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
@@ -82,7 +82,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/members/me")
+                .get("/api/v1/members/me")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
@@ -96,7 +96,7 @@ class MemberApiTest extends ApiTestSupport {
                         "categories", List.of("COMPUTER_IT", "ESSAY")
                 ))
                 .when()
-                .patch("/api/members/me")
+                .patch("/api/v1/members/me")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
@@ -109,14 +109,14 @@ class MemberApiTest extends ApiTestSupport {
         ExtractableResponse<Response> response = given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .post("/api/members/me/refresh")
+                .post("/api/v1/members/me/refresh")
                 .then()
                 .extract();
 
         assertThat(response.statusCode()).isIn(400, 404, 405);
         if (response.statusCode() == 400) {
             assertThat(response.jsonPath().getString("message"))
-                    .contains("No static resource api/members/me/refresh");
+                    .contains("No static resource api/v1/members/me/refresh");
         }
         assertThat(response.jsonPath().getString("result.refreshToken")).isNull();
     }
@@ -128,7 +128,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/members/me")
+                .get("/api/v1/members/me")
                 .then()
                 .statusCode(403)
                 .body("isSuccess", equalTo(false));
@@ -142,14 +142,14 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .post("/api/members/{memberNickname}/following", target.nickName())
+                .post("/api/v1/members/{memberNickname}/following", target.nickName())
                 .then()
                 .statusCode(200);
 
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .get("/api/members/me/following")
+                .get("/api/v1/members/me/following")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
@@ -157,7 +157,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .delete("/api/members/{memberNickname}/following", target.nickName())
+                .delete("/api/v1/members/{memberNickname}/following", target.nickName())
                 .then()
                 .statusCode(200);
     }
@@ -169,7 +169,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .post("/api/members/{memberNickname}/following", user.nickName())
+                .post("/api/v1/members/{memberNickname}/following", user.nickName())
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -183,14 +183,14 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(follower))
                 .when()
-                .post("/api/members/{memberNickname}/following", me.nickName())
+                .post("/api/v1/members/{memberNickname}/following", me.nickName())
                 .then()
                 .statusCode(200);
 
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .delete("/api/members/{memberNickname}/follower", follower.nickName())
+                .delete("/api/v1/members/{memberNickname}/follower", follower.nickName())
                 .then()
                 .statusCode(200);
     }
@@ -203,14 +203,14 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .post("/api/members/{memberNickname}/block", target.nickName())
+                .post("/api/v1/members/{memberNickname}/block", target.nickName())
                 .then()
                 .statusCode(200);
 
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .get("/api/members/me/blocks")
+                .get("/api/v1/members/me/blocks")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
@@ -218,7 +218,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .delete("/api/members/{memberNickname}/block", target.nickName())
+                .delete("/api/v1/members/{memberNickname}/block", target.nickName())
                 .then()
                 .statusCode(200);
     }
@@ -230,7 +230,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .post("/api/members/{memberNickname}/block", user.nickName())
+                .post("/api/v1/members/{memberNickname}/block", user.nickName())
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -244,7 +244,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .get("/api/members/{memberNickname}", target.nickName())
+                .get("/api/v1/members/{memberNickname}", target.nickName())
                 .then()
                 .statusCode(200)
                 .body("result.nickname", equalTo(target.nickName()))
@@ -255,7 +255,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .get("/api/members/{memberNickname}/followings", target.nickName())
+                .get("/api/v1/members/{memberNickname}/followings", target.nickName())
                 .then()
                 .statusCode(200)
                 .body("result.followList.size()", equalTo(0))
@@ -264,7 +264,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(me))
                 .when()
-                .get("/api/members/{memberNickname}/followers", target.nickName())
+                .get("/api/v1/members/{memberNickname}/followers", target.nickName())
                 .then()
                 .statusCode(200)
                 .body("result.followList.size()", equalTo(0))
@@ -284,7 +284,7 @@ class MemberApiTest extends ApiTestSupport {
                         "confirmPassword", "Next123!"
                 ))
                 .when()
-                .patch("/api/members/me/update-password")
+                .patch("/api/v1/members/me/update-password")
                 .then()
                 .statusCode(200);
 
@@ -297,7 +297,7 @@ class MemberApiTest extends ApiTestSupport {
                         "confirmPassword", "Other123!"
                 ))
                 .when()
-                .patch("/api/members/me/update-password")
+                .patch("/api/v1/members/me/update-password")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -319,7 +319,7 @@ class MemberApiTest extends ApiTestSupport {
                         "verificationCode", "123456"
                 ))
                 .when()
-                .patch("/api/members/me/update-email")
+                .patch("/api/v1/members/me/update-email")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true));
@@ -332,7 +332,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/members/me/login-status")
+                .get("/api/v1/members/me/login-status")
                 .then()
                 .statusCode(200)
                 .body("result.provider", equalTo("LOCAL"));
@@ -340,7 +340,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/members/me/recommend")
+                .get("/api/v1/members/me/recommend")
                 .then()
                 .statusCode(200)
                 .body("result.friends.size()", equalTo(0));
@@ -348,7 +348,7 @@ class MemberApiTest extends ApiTestSupport {
         given()
                 .cookie(accessTokenCookie(user))
                 .when()
-                .get("/api/members/me/follow-count")
+                .get("/api/v1/members/me/follow-count")
                 .then()
                 .statusCode(200)
                 .body("result.followerCount", equalTo(0))
@@ -358,7 +358,7 @@ class MemberApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(user))
                 .cookie(refreshTokenCookie(user))
                 .when()
-                .post("/api/members/withdrawal")
+                .post("/api/v1/members/withdrawal")
                 .then()
                 .statusCode(200);
     }

@@ -31,7 +31,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .queryParam("email", "new-user@example.com")
                 .when()
-                .post("/api/auth/email-verification")
+                .post("/api/v1/auth/email-verification")
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true))
@@ -43,7 +43,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .queryParam("email", "not-an-email")
                 .when()
-                .post("/api/auth/email-verification")
+                .post("/api/v1/auth/email-verification")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -59,7 +59,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", email, "verificationCode", "123456"))
                 .when()
-                .post("/api/auth/email-verification/confirm")
+                .post("/api/v1/auth/email-verification/confirm")
                 .then()
                 .statusCode(200)
                 .body("result", equalTo(true));
@@ -75,7 +75,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", email, "verificationCode", "999999"))
                 .when()
-                .post("/api/auth/email-verification/confirm")
+                .post("/api/v1/auth/email-verification/confirm")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -91,7 +91,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", email, "verificationCode", "123456"))
                 .when()
-                .post("/api/auth/email-verification/confirm")
+                .post("/api/v1/auth/email-verification/confirm")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -106,7 +106,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", email, "password", "Pass123!"))
                 .when()
-                .post("/api/auth/signup")
+                .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(200)
                 .body("result.email", equalTo(email))
@@ -127,7 +127,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", firstEmail, "password", "Pass123!"))
                 .when()
-                .post("/api/auth/signup")
+                .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(200);
 
@@ -135,7 +135,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", secondEmail, "password", "Pass123!"))
                 .when()
-                .post("/api/auth/signup")
+                .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(200);
 
@@ -158,7 +158,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", "not-verified@example.com", "password", "Pass123!"))
                 .when()
-                .post("/api/auth/signup")
+                .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -172,7 +172,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", existing.email(), "password", "Pass123!"))
                 .when()
-                .post("/api/auth/signup")
+                .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -184,7 +184,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("email", "bad-email", "password", "short"))
                 .when()
-                .post("/api/auth/signup")
+                .post("/api/v1/auth/signup")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -198,7 +198,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Pass123!"))
                 .when()
-                .post("/api/auth/login")
+                .post("/api/v1/auth/login")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -216,7 +216,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Pass123!"))
                 .when()
-                .post("/api/auth/app/login")
+                .post("/api/v1/auth/app/login")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -232,7 +232,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Pass123!"))
                 .when()
-                .post("/api/auth/app/login")
+                .post("/api/v1/auth/app/login")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -241,7 +241,7 @@ class AuthApiTest extends ApiTestSupport {
         ExtractableResponse<Response> refreshResponse = given()
                 .header("X-Refresh-Token", oldRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -254,7 +254,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", oldRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
@@ -267,7 +267,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Pass123!"))
                 .when()
-                .post("/api/auth/app/login")
+                .post("/api/v1/auth/app/login")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -312,7 +312,7 @@ class AuthApiTest extends ApiTestSupport {
     void appRefreshRejectsMissingRefreshToken() {
         given()
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
@@ -323,7 +323,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", "invalid-refresh-token")
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
@@ -338,7 +338,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", expiredRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false))
@@ -354,7 +354,7 @@ class AuthApiTest extends ApiTestSupport {
         ExtractableResponse<Response> protectedResponse = given()
                 .header("X-Refresh-Token", refreshToken)
                 .when()
-                .get("/api/members/me")
+                .get("/api/v1/members/me")
                 .then()
                 .extract();
 
@@ -366,7 +366,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", refreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(200);
     }
@@ -379,7 +379,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Wrong1!"))
                 .when()
-                .post("/api/auth/login")
+                .post("/api/v1/auth/login")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
@@ -393,7 +393,7 @@ class AuthApiTest extends ApiTestSupport {
                 .cookie(accessTokenCookie(user))
                 .cookie(refreshTokenCookie(user))
                 .when()
-                .post("/api/auth/logout")
+                .post("/api/v1/auth/logout")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -410,7 +410,7 @@ class AuthApiTest extends ApiTestSupport {
         String currentRefreshToken = given()
                 .header("X-Refresh-Token", staleRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -422,7 +422,7 @@ class AuthApiTest extends ApiTestSupport {
                         .setPath("/")
                         .build())
                 .when()
-                .post("/api/auth/logout")
+                .post("/api/v1/auth/logout")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -434,7 +434,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", currentRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(200);
     }
@@ -446,7 +446,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Pass123!"))
                 .when()
-                .post("/api/auth/app/login")
+                .post("/api/v1/auth/app/login")
                 .then()
                 .statusCode(200)
                 .extract();
@@ -455,14 +455,14 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", refreshToken)
                 .when()
-                .post("/api/auth/app/logout")
+                .post("/api/v1/auth/app/logout")
                 .then()
                 .statusCode(200);
 
         given()
                 .header("X-Refresh-Token", refreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
@@ -481,14 +481,14 @@ class AuthApiTest extends ApiTestSupport {
                         .setPath("/")
                         .build())
                 .when()
-                .post("/api/auth/app/logout")
+                .post("/api/v1/auth/app/logout")
                 .then()
                 .statusCode(200);
 
         given()
                 .header("X-Refresh-Token", headerRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
@@ -496,7 +496,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", cookieRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(200);
     }
@@ -508,7 +508,7 @@ class AuthApiTest extends ApiTestSupport {
         String currentRefreshToken = given()
                 .header("X-Refresh-Token", staleRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -518,7 +518,7 @@ class AuthApiTest extends ApiTestSupport {
         ExtractableResponse<Response> response = given()
                 .header("X-Refresh-Token", staleRefreshToken)
                 .when()
-                .post("/api/auth/app/logout")
+                .post("/api/v1/auth/app/logout")
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false))
@@ -532,7 +532,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .header("X-Refresh-Token", currentRefreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .statusCode(200);
     }
@@ -544,7 +544,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .queryParam("email", user.email())
                 .when()
-                .post("/api/auth/temp-password")
+                .post("/api/v1/auth/temp-password")
                 .then()
                 .statusCode(200)
                 .body("result", equalTo("임시 비밀번호가 이메일로 발송되었습니다."));
@@ -555,7 +555,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .queryParam("email", "missing@example.com")
                 .when()
-                .post("/api/auth/temp-password")
+                .post("/api/v1/auth/temp-password")
                 .then()
                 .statusCode(404)
                 .body("isSuccess", equalTo(false));
@@ -566,7 +566,7 @@ class AuthApiTest extends ApiTestSupport {
         given()
                 .queryParam("email", "missing")
                 .when()
-                .post("/api/auth/temp-password")
+                .post("/api/v1/auth/temp-password")
                 .then()
                 .statusCode(400)
                 .body("isSuccess", equalTo(false));
@@ -583,7 +583,7 @@ class AuthApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Pass123!"))
                 .when()
-                .post("/api/auth/app/login")
+                .post("/api/v1/auth/app/login")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -595,7 +595,7 @@ class AuthApiTest extends ApiTestSupport {
         return given()
                 .header("X-Refresh-Token", refreshToken)
                 .when()
-                .post("/api/auth/app/refresh")
+                .post("/api/v1/auth/app/refresh")
                 .then()
                 .extract()
                 .statusCode();
