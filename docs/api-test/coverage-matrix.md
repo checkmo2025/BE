@@ -21,7 +21,10 @@
 | AuthController | POST | `/api/auth/email-verification/confirm` | 완료 | 인증 코드 일치, 만료, 불일치 상태를 검증한다. |
 | AuthController | POST | `/api/auth/signup` | 완료 | 가입 성공, 중복 이메일/닉네임, 검증 실패 payload를 검증한다. |
 | AuthController | POST | `/api/auth/login` | 완료 | 쿠키 발급 성공과 잘못된 자격 증명 실패를 검증한다. |
+| AuthController | POST | `/api/auth/app/login` | 완료 | `AuthApiTest`에서 `POST /api/auth/app/login` 앱 전용 로그인 성공, 쿠키 발급, body refresh token 반환 계약을 검증한다. |
+| AuthController | POST | `/api/auth/app/refresh` | 완료 | `AuthApiTest`에서 `POST /api/auth/app/refresh`의 `X-Refresh-Token` 기반 앱 토큰 재발급, refresh token 회전, 재사용 실패를 검증한다. |
 | AuthController | POST | `/api/auth/logout` | 완료 | JWT 쿠키 기반 로그아웃과 인증 누락 처리를 검증한다. |
+| AuthController | POST | `/api/auth/app/logout` | 완료 | `AuthApiTest`에서 `POST /api/auth/app/logout`의 `X-Refresh-Token` 기반 앱 로그아웃과 이후 refresh token 무효화를 검증한다. |
 | AuthController | POST | `/api/auth/temp-password` | 완료 | 임시 비밀번호 발급, 미존재 이메일, 메일 경계 더블을 검증한다. |
 | BookController | GET | `/api/books/search` | 완료 | 알라딘 검색 경계의 deterministic 응답과 공개 조회 계약을 검증한다. |
 | BookController | GET | `/api/books/{isbn}` | 완료 | 도서 상세 조회 성공과 외부 조회 실패를 검증한다. |
