@@ -103,6 +103,25 @@ class MemberApiTest extends ApiTestSupport {
     }
 
     @Test
+    void removedMemberRefreshEndpointIsUnavailableForAuthenticatedUser() {
+        TestUser user = createUser();
+
+        ExtractableResponse<Response> response = given()
+                .cookie(accessTokenCookie(user))
+                .when()
+                .post("/api/members/me/refresh")
+                .then()
+                .extract();
+
+        assertThat(response.statusCode()).isIn(400, 404, 405);
+        if (response.statusCode() == 400) {
+            assertThat(response.jsonPath().getString("message"))
+                    .contains("No static resource api/members/me/refresh");
+        }
+        assertThat(response.jsonPath().getString("result.refreshToken")).isNull();
+    }
+
+    @Test
     void incompleteProfileCannotReadProtectedProfile() {
         TestUser user = createIncompleteUser();
 
