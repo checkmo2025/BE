@@ -42,3 +42,10 @@ out/
 /src/main/generated/
 
 .claude
+
+### OMO runtime artifacts ###
+.omo/boulder.json
+.omo/drafts/
+.omo/evidence/
+.omo/plans/
+.omo/start-work/

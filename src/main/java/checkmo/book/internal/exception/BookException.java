@@ -6,4 +6,8 @@ public class BookException extends GeneralException {
     public BookException(BookErrorStatus status) {
         super(status);
     }
+
+    public BookException(BookErrorStatus status, Throwable cause) {
+        super(status, cause);
+    }
 }

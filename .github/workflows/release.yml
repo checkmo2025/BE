@@ -11,11 +11,13 @@ jobs:
     steps:
       # 1. 코드 체크아웃
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
 
       # 2. AWS 자격 증명 설정
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -24,7 +26,10 @@ jobs:
       # 3. ECR 로그인
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       # 4. Docker 이미지 빌드 및 ECR 푸시 (여기서 빌드가 일어납니다)
       - name: Build and push Docker image
@@ -33,16 +38,26 @@ jobs:
           ECR_REPOSITORY: checkmo
           IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker buildx build \
+            --platform linux/arm64 \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --push .
 
       - name: Create .env file
         run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
+          awk '!/^(SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE|SENTRY_AUTH_TOKEN|SENTRY_TRACES_SAMPLE_RATE)=/' .env > .env.tmp
+          mv .env.tmp .env
+          printf 'SENTRY_ENABLED=%s\n' "${{ secrets.SENTRY_ENABLED }}" >> .env
+          printf 'SENTRY_DSN=%s\n' "${{ secrets.SENTRY_DSN }}" >> .env
+          printf 'SENTRY_ENVIRONMENT=%s\n' "${{ secrets.SENTRY_ENVIRONMENT }}" >> .env
+          printf 'SENTRY_RELEASE=checkmo-backend@%s\n' "${GITHUB_SHA}" >> .env
+          SENTRY_TRACES_SAMPLE_RATE="${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}"
+          printf 'SENTRY_TRACES_SAMPLE_RATE=%s\n' "${SENTRY_TRACES_SAMPLE_RATE:-0.0}" >> .env
 
       # 5. 설정 파일 전송 (SCP)
       - name: Copy files to EC2
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@a6e43c3aaf4e8e6b0b15bf34e19d71118f6b1ca7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
@@ -52,7 +67,7 @@ jobs:
 
       # 6. EC2 접속 및 배포 실행 (SSH)
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@1530429296e979861824d74fb800013190b5dee0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
@@ -74,3 +89,13 @@ jobs:
 
             # 미사용 이미지 정리
             docker image prune -f
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@ff07929a6537bac57790c3451cf4d364aca38528
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: checkmo
+          SENTRY_PROJECT: checkmo-spring-boot
+        with:
+          environment: prod
+          release: checkmo-backend@${{ github.sha }}

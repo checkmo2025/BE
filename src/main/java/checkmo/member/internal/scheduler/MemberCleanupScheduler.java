@@ -1,6 +1,7 @@
 package checkmo.member.internal.scheduler;
 
 import checkmo.authentication.AuthenticationAPI;
+import checkmo.common.monitoring.SentryCaptureClient;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.service.command.MemberCommandService;
@@ -20,6 +21,7 @@ public class MemberCleanupScheduler {
     private final MemberRepository memberRepository;
     private final AuthenticationAPI authenticationAPI;
     private final MemberCommandService memberCommandService;
+    private final SentryCaptureClient sentryCaptureClient;
 
     /**
      * 프로필 미완료(유령) 회원 삭제 스케줄러
@@ -29,7 +31,7 @@ public class MemberCleanupScheduler {
     @Transactional
     public void cleanupGhostMembers() {
         // 현재 시간으로부터 15분 전 시점 계산
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(110);
 
         // 15분 전에 생성되었으나 아직 닉네임이 없는(가입 절차를 마치지 않은) 유저 조회
         List<Member> ghostMembers = memberRepository.findAllGhostMembers(threshold);
@@ -70,14 +72,29 @@ public class MemberCleanupScheduler {
                 .map(Member::getId)
                 .toList();
 
+        Exception firstFailure = null;
         for (String memberId : expiredMemberIds) {
             try {
                 memberCommandService.deleteMember(memberId);
             } catch (Exception e) {
                 log.error("탈퇴 1년 경과 회원 삭제 실패. memberId={}", memberId, e);
+                firstFailure = collectFailure(firstFailure, e);
             }
         }
 
+        if (firstFailure != null) {
+            sentryCaptureClient.captureException(firstFailure);
+        }
+
         log.info("탈퇴 1년 경과 회원 삭제 완료");
+    }
+
+    private Exception collectFailure(Exception firstFailure, Exception failure) {
+        if (firstFailure == null) {
+            return failure;
+        }
+
+        firstFailure.addSuppressed(failure);
+        return firstFailure;
     }
 }

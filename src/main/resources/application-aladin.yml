@@ -1,7 +1,7 @@
 aladin:
   api:
     url:
-      base: http://www.aladin.co.kr/ttb/api
+      base: https://www.aladin.co.kr/ttb/api
       item-search: /ItemSearch.aspx
       item-lookup: /ItemLookUp.aspx
       item-list: /ItemList.aspx

@@ -1,4 +1,9 @@
 spring:
+  autoconfigure:
+    exclude:
+      - io.sentry.spring.boot.jakarta.SentryProfilerAutoConfiguration
+      - io.sentry.spring.boot.jakarta.SentryLogbackAppenderAutoConfiguration
+      - io.sentry.spring.boot.jakarta.SentryWebfluxAutoConfiguration
   profiles:
     include:
       - prod
@@ -17,6 +22,24 @@ server:
 
 springdoc:
   use-fqn: true
+
+checkmo:
+  sentry:
+    enabled: ${SENTRY_ENABLED:false}
+    dsn: ${SENTRY_DSN:}
+    environment: ${SENTRY_ENVIRONMENT:local}
+    release: ${SENTRY_RELEASE:local}
+    traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.0}
+
+sentry:
+  enabled: ${SENTRY_ENABLED:false}
+  environment: ${SENTRY_ENVIRONMENT:local}
+  release: ${SENTRY_RELEASE:local}
+  traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.0}
+  send-default-pii: false
+  max-request-body-size: none
+  logging:
+    enabled: false
 
 realtime:
   websocket:
