@@ -66,8 +66,10 @@ checkmo/
 - Do not add new unversioned `/api/...` endpoints.
 - Before public users exist, migrate existing `/api/...` endpoints destructively to `/api/v1/...`; do not keep compatibility aliases unless explicitly requested.
 - Keep non-client operational endpoints such as `/health`, `/swagger-ui/**`, `/v3/api-docs/**`, OAuth callback paths, and websocket broker paths outside this versioning rule unless they become external client API contracts.
-- Within `v1`, allow only non-breaking API changes such as optional fields, new endpoints, and backward-compatible enum additions.
-- Treat endpoint removal or path changes, required request field additions, response field removal/rename/semantic changes, status/error code contract changes, and authentication/token delivery changes as breaking changes that require evaluating a new major prefix such as `/api/v2/...`.
+- Within the current major version, allow only non-breaking API changes such as optional fields, new endpoints, and backward-compatible enum additions.
+- Treat endpoint removal or path changes, required request field additions, response field removal/rename/semantic changes, status/error code contract changes, and authentication/token delivery changes as breaking changes that require a new major prefix such as `/api/v2/...` or `/api/v3/...`.
+- When adding a new major API version, keep existing major-version endpoints such as `/api/v1/...` available until an explicit deprecation and removal plan is approved.
+- Do not silently repoint existing versioned endpoints to incompatible behavior; expose the incompatible contract under the new major prefix and keep the old contract stable.
 - When changing API paths, update controller mappings, Spring Security matchers, JWT/profile filter path rules, Swagger/OpenAPI descriptions, API tests, and API docs together.
 
 ## COMMIT MESSAGE STYLE
