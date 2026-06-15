@@ -79,7 +79,7 @@ public class RedisConfig {
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = Map.of(
                 "emailVerification", defaultConfig.entryTtl(Duration.ofMinutes(10)),
-                "refreshToken", defaultConfig.entryTtl(Duration.ofDays(14)),
+                "refreshToken", defaultConfig.entryTtl(Duration.ofDays(30)),
                 "blacklist", defaultConfig.entryTtl(Duration.ofHours(2)),
                 "notifications", defaultConfig.entryTtl(Duration.ofHours(6))  // 읽지 않은 알림 캐시
         );
