@@ -28,7 +28,7 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
             "/api/v1/members/additional-info",
             "/api/v1/auth/redirect/oauth2",
             "/api/v1/members/check-nickname",
-            "/api/v1/s3/image/upload-url",
+            "/api/v1/image/PROFILE/upload-url",
             "/swagger-ui/**",
             "/v3/api-docs/**"
     );
