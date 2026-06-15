@@ -423,6 +423,16 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .when()
                 .post("/api/v1/image/{type}/upload-url", "PROFILE")
                 .then()
+                .statusCode(200)
+                .body("result.imageUrl", equalTo("https://cdn.example.com/profile.png"));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(incomplete))
+                .body(Map.of("originalFileName", "club.png", "contentType", "image/png"))
+                .when()
+                .post("/api/v1/image/{type}/upload-url", "CLUB")
+                .then()
                 .statusCode(403);
     }
 
