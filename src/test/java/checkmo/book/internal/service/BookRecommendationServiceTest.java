@@ -23,7 +23,9 @@ import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.common.monitoring.RecordingSentryCaptureClient;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -95,7 +98,45 @@ class BookRecommendationServiceTest {
         verify(aladinApiService, times(3)).retrieveRecommendedBooks();
         verify(valueOperations).set(eq(REDIS_KEY), any(BookResponseDTO.BookList.class));
         verify(valueOperations).set(REDIS_UPDATED_AT_KEY, LocalDate.now().toString());
+        verify(valueOperations, never()).set(eq(REDIS_KEY), any(BookResponseDTO.BookList.class), any(Duration.class));
+        verify(valueOperations, never()).set(eq(REDIS_UPDATED_AT_KEY), any(String.class), any(Duration.class));
         assertThat(captureClient.count()).isZero();
+    }
+
+    @Test
+    void retrieveRecommendedBooksCopiesTodayRecommendationSliceBeforeSavingAndReturning() {
+        int startIndex = DayOfWeekUtils.calculateStartIndexByDayOfWeek();
+        List<DetailInfo> upstreamBooks = mutableDetailInfoList(todayRequiredBookCount());
+        DetailInfo originalFirstRecommendation = upstreamBooks.get(startIndex);
+        DetailInfo replacementBook = detailInfo("mutated-isbn", "변경된 책");
+        BookResponseDTO.BookList aladinBooks = BookResponseDTO.BookList.builder()
+                .detailInfoList(upstreamBooks)
+                .hasNext(false)
+                .currentPage(null)
+                .totalResults(upstreamBooks.size())
+                .build();
+        ArgumentCaptor<BookResponseDTO.BookList> savedBookListCaptor =
+                ArgumentCaptor.forClass(BookResponseDTO.BookList.class);
+        when(valueOperations.get(REDIS_KEY)).thenReturn(null);
+        when(aladinApiService.retrieveRecommendedBooks()).thenReturn(aladinBooks);
+        when(aladinApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
+        upstreamBooks.set(startIndex, replacementBook);
+
+        verify(valueOperations).set(eq(REDIS_KEY), savedBookListCaptor.capture());
+        BookResponseDTO.BookList savedBookList = savedBookListCaptor.getValue();
+        assertThat(response.getDetailInfoList())
+                .hasSize(4)
+                .first()
+                .isSameAs(originalFirstRecommendation);
+        assertThat(savedBookList.getDetailInfoList())
+                .hasSize(4)
+                .first()
+                .isSameAs(originalFirstRecommendation);
+        assertThat(response.getDetailInfoList()).doesNotContain(replacementBook);
+        assertThat(savedBookList.getDetailInfoList()).doesNotContain(replacementBook);
     }
 
     @Test
@@ -355,15 +396,7 @@ class BookRecommendationServiceTest {
 
     private static BookResponseDTO.BookList bookListOfSize(int size) {
         List<DetailInfo> books = java.util.stream.IntStream.range(0, size)
-                .mapToObj(index -> DetailInfo.builder()
-                        .isbn("isbn-" + index)
-                        .title("테스트 책 " + index)
-                        .author("테스트 저자")
-                        .imgUrl("https://example.com/book-" + index + ".jpg")
-                        .publisher("테스트 출판사")
-                        .description("테스트 설명")
-                        .link("https://example.com/book-" + index)
-                        .build())
+                .mapToObj(index -> detailInfo("isbn-" + index, "테스트 책 " + index))
                 .toList();
 
         return BookResponseDTO.BookList.builder()
@@ -371,6 +404,26 @@ class BookRecommendationServiceTest {
                 .hasNext(false)
                 .currentPage(null)
                 .totalResults(size)
+                .build();
+    }
+
+    private static List<DetailInfo> mutableDetailInfoList(int size) {
+        List<DetailInfo> books = new ArrayList<>();
+        for (int index = 0; index < size; index++) {
+            books.add(detailInfo("isbn-" + index, "테스트 책 " + index));
+        }
+        return books;
+    }
+
+    private static DetailInfo detailInfo(String isbn, String title) {
+        return DetailInfo.builder()
+                .isbn(isbn)
+                .title(title)
+                .author("테스트 저자")
+                .imgUrl("https://example.com/book-" + isbn + ".jpg")
+                .publisher("테스트 출판사")
+                .description("테스트 설명")
+                .link("https://example.com/book-" + isbn)
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package checkmo.book.internal.config.properties;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -101,12 +102,13 @@ public class AladinProperties {
     @Setter
     public static class Retry {
         @Min(value = 1, message = "추천 책 갱신 재시도 횟수는 1 이상이어야 합니다")
+        @Max(value = 10, message = "추천 책 갱신 재시도 횟수는 10 이하여야 합니다")
         private int attempts = 3;
 
         @DurationMin(millis = 1, message = "추천 책 갱신 초기 backoff는 양수여야 합니다")
         private Duration initialBackoff = Duration.ofSeconds(1);
 
-        @Positive(message = "추천 책 갱신 backoff 배수는 양수여야 합니다")
+        @DecimalMin(value = "1.0", inclusive = true, message = "추천 책 갱신 backoff 배수는 1 이상이어야 합니다")
         private double multiplier = 2;
 
         @DurationMin(millis = 1, message = "추천 책 갱신 최대 backoff는 양수여야 합니다")

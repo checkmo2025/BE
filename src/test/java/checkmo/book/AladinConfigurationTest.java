@@ -2,55 +2,96 @@ package checkmo.book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import checkmo.book.internal.config.properties.AladinProperties;
+import jakarta.validation.Validation;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.Yaml;
 
 class AladinConfigurationTest {
 
     @Test
     void aladinApiBaseUrlUsesHttps() throws IOException {
-        String configuration = Files.readString(Path.of("src/main/resources/application-aladin.yml"));
+        Map<String, Object> api = aladinApiConfiguration();
+        Map<String, Object> url = nestedMap(api, "url");
 
-        assertThat(configuration)
-                .contains("base: https://www.aladin.co.kr/ttb/api")
-                .doesNotContain("base: http://www.aladin.co.kr/ttb/api");
+        assertThat(url.get("base"))
+                .isEqualTo("https://www.aladin.co.kr/ttb/api");
     }
 
     @Test
     void recommendationRefreshImmediateRetryDefaultsAreBoundedAndNonSecret() throws IOException {
-        String configuration = Files.readString(Path.of("src/main/resources/application-aladin.yml"));
+        Map<String, Object> retry = recommendationRetryConfiguration();
 
-        assertThat(configuration)
-                .contains("recommendation:")
-                .contains("refresh:")
-                .contains("retry:")
-                .contains("attempts: 3")
-                .contains("initial-backoff: 1s")
-                .contains("multiplier: 2")
-                .contains("max-backoff: 5s");
+        assertThat(retry)
+                .containsEntry("attempts", 3)
+                .containsEntry("initial-backoff", "1s")
+                .containsEntry("multiplier", 2)
+                .containsEntry("max-backoff", "5s");
     }
 
     @Test
     void recommendationRefreshBackgroundRetryUsesFiveMinuteFixedDelay() throws IOException {
-        String configuration = Files.readString(Path.of("src/main/resources/application-aladin.yml"));
+        Map<String, Object> api = aladinApiConfiguration();
+        Map<String, Object> recommendation = nestedMap(api, "recommendation");
+        Map<String, Object> refresh = nestedMap(recommendation, "refresh");
+        Map<String, Object> background = nestedMap(refresh, "background");
 
-        assertThat(configuration)
-                .contains("background:")
-                .contains("fixed-delay: 5m");
+        assertThat(background)
+                .containsEntry("fixed-delay", "5m");
     }
 
     @Test
-    void recommendationCacheSaveDoesNotUseRedisTtl() throws IOException {
-        String service = Files.readString(
-                Path.of("src/main/java/checkmo/book/internal/service/BookRecommendationService.java"));
+    void recommendationRefreshRetryAttemptsRejectsValuesAboveTen() {
+        var retry = new AladinProperties.Retry();
+        retry.setAttempts(11);
 
-        assertThat(service)
-                .contains("book:recommendations:daily")
-                .contains("redisTemplate.opsForValue().set(REDIS_KEY, bookList);")
-                .contains("redisTemplate.opsForValue().set(REDIS_UPDATED_AT_KEY, LocalDate.now().toString());")
-                .doesNotContain("redisTemplate.opsForValue().set(REDIS_KEY, bookList,")
-                .doesNotContain("Duration.of");
+        var violations = Validation.buildDefaultValidatorFactory()
+                .getValidator()
+                .validate(retry);
+
+        assertThat(violations)
+                .anySatisfy(violation -> {
+                    assertThat(violation.getPropertyPath().toString()).isEqualTo("attempts");
+                    assertThat(violation.getMessage()).isEqualTo("추천 책 갱신 재시도 횟수는 10 이하여야 합니다");
+                });
+    }
+
+    @Test
+    void recommendationRefreshRetryMultiplierRejectsValuesBelowOne() {
+        var retry = new AladinProperties.Retry();
+        retry.setMultiplier(0.5);
+
+        var violations = Validation.buildDefaultValidatorFactory()
+                .getValidator()
+                .validate(retry);
+
+        assertThat(violations)
+                .anySatisfy(violation -> {
+                    assertThat(violation.getPropertyPath().toString()).isEqualTo("multiplier");
+                    assertThat(violation.getMessage()).isEqualTo("추천 책 갱신 backoff 배수는 1 이상이어야 합니다");
+                });
+    }
+
+    private Map<String, Object> recommendationRetryConfiguration() throws IOException {
+        Map<String, Object> api = aladinApiConfiguration();
+        Map<String, Object> recommendation = nestedMap(api, "recommendation");
+        Map<String, Object> refresh = nestedMap(recommendation, "refresh");
+        return nestedMap(refresh, "retry");
+    }
+
+    private Map<String, Object> aladinApiConfiguration() throws IOException {
+        try (var input = new FileInputStream("src/main/resources/application-aladin.yml")) {
+            Map<String, Object> configuration = new Yaml().load(input);
+            Map<String, Object> aladin = nestedMap(configuration, "aladin");
+            return nestedMap(aladin, "api");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> nestedMap(Map<String, Object> source, String key) {
+        return (Map<String, Object>) source.get(key);
     }
 }

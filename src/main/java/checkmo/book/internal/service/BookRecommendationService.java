@@ -104,7 +104,7 @@ public class BookRecommendationService {
             throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
         }
 
-        var booksForToday = allBooks.subList(startIndex, startIndex + 4);
+        List<DetailInfo> booksForToday = List.copyOf(allBooks.subList(startIndex, startIndex + 4));
         saveRecommendedBooks(booksForToday);
 
         return BookResponseDTO.BookList.builder()
