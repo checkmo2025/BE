@@ -17,9 +17,11 @@ import ch.qos.logback.core.read.ListAppender;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.common.monitoring.RecordingSentryCaptureClient;
+import java.lang.reflect.Method;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.slf4j.LoggerFactory;
 
 class BookRecommendationSchedulerTest {
@@ -72,7 +74,16 @@ class BookRecommendationSchedulerTest {
     }
 
     @Test
-    void startupMidnightAndRetryEntrypointsShareSingleFlightGuard() {
+    void updateDailyRecommendedBooksRunsAtSixAmInSeoul() throws NoSuchMethodException {
+        Method method = BookRecommendationScheduler.class.getMethod("updateDailyRecommendedBooks");
+        Scheduled scheduled = method.getAnnotation(Scheduled.class);
+
+        assertThat(scheduled.cron()).isEqualTo("0 0 6 * * ?");
+        assertThat(scheduled.zone()).isEqualTo("Asia/Seoul");
+    }
+
+    @Test
+    void startupDailyAndRetryEntrypointsShareSingleFlightGuard() {
         when(recommendationService.hasRecommendedBooks()).thenReturn(false);
         doAnswer(invocation -> {
             scheduler.updateDailyRecommendedBooks();

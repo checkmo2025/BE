@@ -22,7 +22,7 @@ public class BookRecommendationScheduler {
     private final SentryCaptureClient sentryCaptureClient;
     private final AtomicBoolean refreshInProgress = new AtomicBoolean(false);
 
-    @Scheduled(cron = "0 0 0 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 6 * * ?", zone = "Asia/Seoul")
     public void updateDailyRecommendedBooks() {
         log.info("일일 추천 책 갱신 시작");
         guardedRefreshRecommendedBooks();
