@@ -16,3 +16,12 @@ aladin:
       max-results: 10
       item-id-type: ISBN13
       timeout-ms: 5000
+    recommendation:
+      refresh:
+        retry:
+          attempts: 3
+          initial-backoff: 1s
+          multiplier: 2
+          max-backoff: 5s
+        background:
+          fixed-delay: 5m

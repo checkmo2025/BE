@@ -2,6 +2,7 @@ package checkmo.common.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import checkmo.book.internal.service.AladinRecommendationRefreshClient;
 import checkmo.support.SpringTest;
 import io.sentry.SentryEvent;
 import io.sentry.SentryOptions;
@@ -13,8 +14,11 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringTest
+@TestPropertySource(properties = "aladin.api.recommendation.refresh.background.fixed-delay=5m")
 class SentryPrivacyConfigurationTest {
 
     @Autowired
@@ -22,6 +26,14 @@ class SentryPrivacyConfigurationTest {
 
     @Autowired
     private SentryOptions.BeforeSendCallback beforeSendCallback;
+
+    @MockitoBean
+    private AladinRecommendationRefreshClient aladinRecommendationRefreshClient;
+
+    @Test
+    void sentrySanitizerIsRegisteredAsBeforeSendCallbackBean() {
+        assertThat(beforeSendCallback).isInstanceOf(SentrySanitizingBeforeSendCallback.class);
+    }
 
     @Test
     void sendDefaultPiiIsDisabled() {
