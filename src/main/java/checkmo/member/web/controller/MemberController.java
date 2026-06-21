@@ -24,11 +24,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/members")
+@RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "회원", description = "마이페이지, 프로필 관리, 팔로우, 모임 관리, 알림 설정 관련 API")
 public class MemberController {
 
@@ -262,8 +264,8 @@ public class MemberController {
 
     @Operation(summary = "다른 사람 프로필 조회 API", description =
             "다른 사람의 프로필 정보를 조회합니다. 프로필 이미지, 닉네임, 소개, 팔로우 상태, 팔로워/팔로잉 수를 포함합니다.\n" +
-                    "책 이야기 목록은 별도 API(GET /api/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.\n" +
-                    "모임 목록은 별도 API(GET /api/clubs?memberNickname={닉네임})를 통해 조회해야 합니다.")
+                    "책 이야기 목록은 별도 API(GET /api/v1/book-stories?scope=TARGET&targetMemberNickname={닉네임})를 통해 조회해야 합니다.\n" +
+                    "모임 목록은 별도 API(GET /api/v1/clubs?memberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
     public ApiResponse<othersDetailInfo> getOtherProfile(
             @CurrentId String memberId,

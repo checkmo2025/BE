@@ -1,7 +1,7 @@
 aladin:
   api:
     url:
-      base: http://www.aladin.co.kr/ttb/api
+      base: https://www.aladin.co.kr/ttb/api
       item-search: /ItemSearch.aspx
       item-lookup: /ItemLookUp.aspx
       item-list: /ItemList.aspx
@@ -15,4 +15,13 @@ aladin:
       output: xml
       max-results: 10
       item-id-type: ISBN13
-      timeout-ms: 5000
+      timeout-ms: 15000
+    recommendation:
+      refresh:
+        retry:
+          attempts: 3
+          initial-backoff: 1s
+          multiplier: 2
+          max-backoff: 5s
+        background:
+          fixed-delay: 5m

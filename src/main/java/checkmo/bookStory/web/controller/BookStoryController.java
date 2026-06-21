@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/book-stories")
+@RequestMapping("/api/v1/book-stories")
 @RequiredArgsConstructor
 @Tag(name = "책 이야기", description = "책 이야기 업로드, 조회, 좋아요, 수정, 삭제 관련 API")
 public class BookStoryController {

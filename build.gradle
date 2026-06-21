@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.43.1'
 
     // ============= 개발 도구 =============
     compileOnly 'org.projectlombok:lombok'
@@ -47,6 +48,8 @@ dependencies {
     // ============= 테스트 =============
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'io.rest-assured:rest-assured'
+    testRuntimeOnly 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // ============= 환경 변수 관리 =============

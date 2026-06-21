@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
 @Tag(name = "책 검색", description = "알라딘 API를 이용한 책 검색 API")
 public class BookController {
@@ -50,7 +50,7 @@ public class BookController {
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
             int page
     ) {
-        BookResponseDTO.BookList result = aladinApiService.searchBooks(keyword, page, memberId);
+        BookResponseDTO.BookList result = aladinApiService.retrieveSearchBooks(keyword, page, memberId);
         return ApiResponse.onSuccess(result);
     }
 

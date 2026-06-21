@@ -2,18 +2,21 @@ package checkmo.member.web.dto;
 
 import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 public class MemberRequestDTO {
 
     @Getter
     @NoArgsConstructor
     public static class MemberProfileUpdate {
-        @Size(max = 20, message = "소개는 20자 이하여야 합니다")
+        @Size(max = 40, message = "소개는 40자 이하여야 합니다")
         private String description;
 
         private String imgUrl;
@@ -31,7 +34,7 @@ public class MemberRequestDTO {
         private String currentPassword;
 
         @NotBlank(message = "새 비밀번호는 필수입니다")
-        @Size(min = 6, max = 12, message = "비밀번호는 6-12자여야 합니다")
+        @Size(min = 6, max = 24, message = "비밀번호는 6-24자여야 합니다")
         @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$", message = "비밀번호는 영어 및 특수문자를 포함해야 합니다")
         private String newPassword;
 

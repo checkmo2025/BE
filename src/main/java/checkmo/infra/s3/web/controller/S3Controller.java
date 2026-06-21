@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/image")
+@RequestMapping("/api/v1/image")
 @RequiredArgsConstructor
 @Tag(name = "S3 Image", description = "S3에 저장할 이미지에 대해서 presigned URL을 발급하는 API")
 public class S3Controller {

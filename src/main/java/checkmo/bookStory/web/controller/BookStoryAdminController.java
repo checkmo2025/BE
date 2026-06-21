@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin/book-stories")
+@RequestMapping("/api/v1/admin/book-stories")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "책 이야기 (관리자)", description = "책 이야기 관리 API (관리자 전용)")

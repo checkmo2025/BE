@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/clubs/{clubId}/bookshelves")
+@RequestMapping("/api/v1/clubs/{clubId}/bookshelves")
 @RequiredArgsConstructor
 @Tag(name = "책장", description = "독서 모임 책장, 한줄평 관리, 발제 관리 API")
 public class ClubBookshelfController {

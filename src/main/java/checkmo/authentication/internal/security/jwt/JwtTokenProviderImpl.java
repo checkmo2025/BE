@@ -11,6 +11,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         // 액세스 토큰 생성
         String accessToken = Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(authentication.getName())
                 .claim("role", authorities)
                 .expiration(new Date(now + accessTokenValidity))
@@ -63,6 +65,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
         // 리프레시 토큰 생성
         String refreshToken = Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(authentication.getName())
                 .expiration(new Date(now + refreshTokenValidity))
                 .signWith(key)

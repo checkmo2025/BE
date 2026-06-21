@@ -75,10 +75,46 @@ public class AuthSessionCommandService {
         // 4. redis에 저장된 Refresh Token을 redis에서 삭제
         if (StringUtils.hasText(refreshToken)) {
             try {
-                String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-                tokenCacheService.deleteRefreshToken(memberId);
+                if (jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
+                    String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+                    tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken);
+                }
             } catch (Exception e) {
                 log.error("[로그아웃] RefreshToken 삭제 실패", e);
+            }
+        }
+    }
+
+    public void logoutApp(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
+        if (!StringUtils.hasText(refreshToken) || !jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
+            throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
+        }
+
+        try {
+            String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+            if (!StringUtils.hasText(memberId)) {
+                throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
+            }
+            if (!tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken)) {
+                throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
+            }
+        } catch (AuthException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[앱 로그아웃] RefreshToken 삭제 실패", e);
+            throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
+        }
+
+        String accessToken = jwtCookieUtil.resolveToken(request, "accessToken");
+
+        jwtCookieUtil.deleteTokenFromCookie(response, "accessToken");
+        jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
+
+        if (StringUtils.hasText(accessToken)) {
+            try {
+                tokenCacheService.saveBlacklistToken(accessToken);
+            } catch (Exception e) {
+                log.error("[앱 로그아웃] AccessToken 블랙리스트 저장 실패", e);
             }
         }
     }
@@ -87,4 +123,3 @@ public class AuthSessionCommandService {
         // TODO: 계정 복구 로직 구현
     }
 }
-

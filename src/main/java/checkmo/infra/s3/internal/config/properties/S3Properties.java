@@ -19,23 +19,10 @@ import java.time.Duration;
 public class S3Properties {
 
     @Valid
-    private Credentials credentials = new Credentials();
-
-    @Valid
     private Region region = new Region();
 
     @Valid
     private S3 s3 = new S3();
-
-    @Getter
-    @Setter
-    public static class Credentials {
-        @NotBlank(message = "S3 Access Key는 필수입니다")
-        private String accessKey;
-
-        @NotBlank(message = "S3 Secret Key는 필수입니다")
-        private String secretKey;
-    }
 
     @Getter
     @Setter

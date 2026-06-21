@@ -23,10 +23,11 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 public class S3Service {
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
-            "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
+            "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif",
+            "image/heic", "image/heif"
     );
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
-            ".jpg", ".jpeg", ".png", ".webp", ".gif"
+            ".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"
     );
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;

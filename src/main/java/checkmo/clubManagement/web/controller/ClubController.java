@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
-@RequestMapping("/api/clubs")
+@RequestMapping("/api/v1/clubs")
 @RequiredArgsConstructor
 @Tag(name = "독서 모임", description = "독서 모임 생성/수정/검색 API")
 public class ClubController {

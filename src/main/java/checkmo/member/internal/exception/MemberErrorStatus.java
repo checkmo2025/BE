@@ -15,6 +15,7 @@ public enum MemberErrorStatus implements BaseErrorCode {
     CURRENT_PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_412", "기존 비밀번호가 올바르지 않습니다. 다시 시도해주세요."),
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_413", "이미 사용 중인 이메일입니다."),
     CURRENT_EMAIL_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_414", "입력하신 기존 이메일 정보가 정확하지 않습니다."),
+    NICKNAME_REQUIRED(HttpStatus.BAD_REQUEST, "MEMBER_415", "닉네임은 필수입니다."),
 
     // 팔로우
     MEMBER_CANNOT_FOLLOW_SELF(HttpStatus.BAD_REQUEST, "FOLLOW_400", "자기 자신을 팔로잉할 수 없습니다."),

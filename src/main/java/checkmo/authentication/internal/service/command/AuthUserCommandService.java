@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Transactional
@@ -32,9 +33,12 @@ public class AuthUserCommandService {
         // TODO: Member 모듈의 API를 통해 필수 약관 동의 여부 체크
         
         // 이메일 중복 확인
-        if (authRepository.existsByEmail(request.getEmail())) {
+        authRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
+            if (existing.getNickName() == null) {
+                throw new AuthException(AuthErrorStatus.SIGNUP_INCOMPLETE);
+            }
             throw new AuthException(AuthErrorStatus.MEMBER_ALREADY_EXISTS);
-        }
+        });
 
         // 이메일 인증 여부 확인
         String redisKey = EMAIL_VERIFICATION_PREFIX + request.getEmail();
@@ -119,6 +123,10 @@ public class AuthUserCommandService {
     }
 
     public void updateNickname(String memberId, String nickname) {
+        if (!StringUtils.hasText(nickname)) {
+            throw new AuthException(AuthErrorStatus.NICKNAME_REQUIRED);
+        }
+
         AuthUser authUser = authRepository.findById(memberId)
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 

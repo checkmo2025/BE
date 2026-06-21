@@ -3,6 +3,8 @@ package checkmo.authentication.internal.security.jwt;
 import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
+import checkmo.authentication.internal.service.command.AuthTokenRotationService;
+import checkmo.authentication.internal.service.result.AuthTokenRotationResult;
 import checkmo.common.apiPayload.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -38,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenCacheService tokenCacheService;
     private final JwtCookieUtil jwtCookieUtil;
     private final AuthRepository authRepository;
+    private final AuthTokenRotationService authTokenRotationService;
     private final ObjectMapper objectMapper;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -45,9 +48,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final List<String> excludedPaths = List.of(
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/api/auth/**",
-            "/api/members/check-nickname",
-            "/api/members/find-email",
+            "/api/v1/auth/**",
+            "/api/v1/members/check-nickname",
+            "/api/v1/members/find-email",
             "/health"
     );
 
@@ -123,7 +126,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Access Token이 만료된 경우, Refresh Token을 사용해 재발급
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키에서 Refresh Token 추출
+        // 쿠키에서 Refresh Token 추출 (웹)
         String refreshToken = jwtCookieUtil.resolveToken(request, "refreshToken");
         log.info("[재발급] Refresh Token 존재 여부 확인: {}", refreshToken != null);
 
@@ -132,42 +135,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (!jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
-            log.warn("재발급 실패: 유효하지 않은 Refresh Token");
-            return;
+        try {
+            AuthTokenRotationResult rotationResult = authTokenRotationService.rotateRefreshToken(refreshToken);
+            authTokenRotationService.writeTokenCookies(response, rotationResult.getJwtToken());
+            SecurityContextHolder.getContext().setAuthentication(rotationResult.getAuthentication());
+            log.info("Access Token + Refresh Token 재발급 성공 (Rotation, memberId={})", rotationResult.getMemberId());
+        } catch (AuthException e) {
+            log.warn("재발급 실패: {}", e.getMessage());
         }
-
-        String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        if (!StringUtils.hasText(memberId)) {
-            log.warn("재발급 실패: Refresh Token에서 memberId 추출 실패");
-            return;
-        }
-
-        // Redis에 저장된 Refresh Token과 비교
-        String storedRefreshToken = tokenCacheService.getRefreshToken(memberId);
-        log.info("[재발급] Redis에 저장된 Refresh Token과 비교");
-
-        if (!refreshToken.equals(storedRefreshToken)) {
-            log.warn("재발급 실패: 저장된 Refresh Token과 일치하지 않음 (memberId={})", memberId);
-            return;
-        }
-
-        // Refresh Token이 유효한 경우, 해당 memberId로 인증 정보 가져오기
-        Authentication authentication = jwtTokenProvider.getAuthenticationFromMemberId(memberId);
-
-        // 그리고 새로운 Access Token 생성
-        JwtToken newJwtToken = jwtTokenProvider.generateToken(authentication);
-
-        // 이제 새로운 Access Token을 쿠키에 담기
-        String newAccessToken = newJwtToken.getAccessToken();
-
-        int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
-        jwtCookieUtil.addTokenToCookie(response, "accessToken", newAccessToken,
-                accessTokenMaxAge); // 2시간 유효
-
-        // SecurityContext에 새로운 인증 정보 설정
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("Access Token 재발급 성공: 새로운 Access Token 생성 (memberId={})", memberId);
     }
 
     private void sendErrorResponse(HttpServletResponse response, AuthErrorStatus status) throws IOException {

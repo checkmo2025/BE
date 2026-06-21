@@ -29,7 +29,7 @@ public class AuthUser extends BaseEntity {
     @Column(nullable = false)
     private boolean profileCompleted;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 20)
     private String nickName;
 
     private LocalDateTime deactivatedAt;
@@ -63,7 +63,7 @@ public class AuthUser extends BaseEntity {
     }
 
     public void updateNickname(String nickName) {
-        this.nickName = nickName != null ? nickName : "";
+        this.nickName = nickName;
     }
 
     public boolean isAdmin() {

@@ -3,21 +3,17 @@ package checkmo.authentication.internal.converter;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.entity.Role;
 import checkmo.authentication.internal.security.oauth2.OAuth2Attributes;
+import checkmo.authentication.internal.service.result.AuthSignUpResult;
 import checkmo.authentication.web.dto.AuthRequestDTO;
-import checkmo.authentication.web.dto.AuthResponseDTO;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthConverter {
 
-    public static AuthResponseDTO.SignUp toSignUpDTO(AuthUser user) {
-        return AuthResponseDTO.SignUp.builder()
-                .email(user.getEmail())
-                .isProfileCompleted(user.isProfileCompleted())
-                .build();
+    public static AuthSignUpResult toSignUpResult(AuthUser user) {
+        return new AuthSignUpResult(user.getEmail(), user.isProfileCompleted());
     }
 
     public static AuthUser toOAuth2User(OAuth2Attributes attributes, String registrationId) {

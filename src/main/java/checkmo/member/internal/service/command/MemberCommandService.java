@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 
@@ -37,7 +38,6 @@ public class MemberCommandService {
         Member member = Member.builder()
                 .id(memberId)
                 .email(email)
-                .nickName("")
                 .name("")
                 .phoneNumber("")
                 .description("")
@@ -57,6 +57,10 @@ public class MemberCommandService {
      */
     public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
         Member member = findActiveMember(memberId);
+
+        if (!StringUtils.hasText(request.getNickname())) {
+            throw new MemberException(MemberErrorStatus.NICKNAME_REQUIRED);
+        }
 
         member.updateAdditionalInfo(
                 request.getNickname(),
