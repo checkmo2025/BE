@@ -318,7 +318,8 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         given().cookie(accessTokenCookie(reporter))
                 .when().get("/api/v1/reports/me")
                 .then().statusCode(200)
-                .body("result.reports[0].targetId", equalTo(target.nickName()));
+                .body("result.reports[0].targetId", equalTo(target.nickName()))
+                .body("result.reports[0].targetSummary", equalTo(target.nickName()));
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

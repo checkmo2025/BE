@@ -1,6 +1,5 @@
 package checkmo.report.internal.converter;
 
-
 import checkmo.report.internal.entity.Report;
 import checkmo.report.web.dto.ReportResponseDTO;
 import lombok.AccessLevel;
@@ -19,6 +18,7 @@ public class ReportConverter {
                 .targetType(report.getReportTargetType().name())
                 .targetTypeDescription(report.getReportTargetType().getDescription())
                 .targetId(report.getTargetId())
+                .targetSummary(displayName)
                 .reason(report.getReportReason().name())
                 .reasonDescription(report.getReportReason().getDescription())
                 .content(report.getContent())
@@ -31,17 +31,22 @@ public class ReportConverter {
 
     public static ReportResponseDTO.AdminMemberReportInfo toAdminMemberReportInfo(
             Report report,
-            String reporterNickname,
-            String reporterProfileImageUrl
+            String targetLabel,
+            String targetUrl,
+            boolean targetAvailable
     ) {
         return ReportResponseDTO.AdminMemberReportInfo.builder()
                 .reportId(report.getId())
-                .reportedMemberNickname(reporterNickname)
-                .reportedMemberProfileImageUrl(reporterProfileImageUrl)
-                .reportType(report.getReportReason().getDescription())
+                .reason(report.getReportReason().name())
+                .reasonDescription(report.getReportReason().getDescription())
                 .content(report.getContent())
-                .redirectUrl(report.getRedirectUrl())
-                .createdAt(report.getCreatedAt())
+                .targetType(report.getReportTargetType().name())
+                .targetTypeDescription(report.getReportTargetType().getDescription())
+                .targetId(report.getTargetId())
+                .targetLabel(targetLabel)
+                .targetAvailable(targetAvailable)
+                .targetUrl(targetUrl)
+                .reportedAt(report.getCreatedAt())
                 .build();
     }
 }
