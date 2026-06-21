@@ -15,7 +15,7 @@ aladin:
       output: xml
       max-results: 10
       item-id-type: ISBN13
-      timeout-ms: 5000
+      timeout-ms: 15000
     recommendation:
       refresh:
         retry:
