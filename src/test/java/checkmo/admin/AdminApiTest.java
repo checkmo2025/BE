@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.nullValue;
 
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.BookStoryStatus;
@@ -17,7 +18,12 @@ import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.news.internal.repository.NewsRepository;
+import checkmo.report.internal.entity.Report;
+import checkmo.report.internal.entity.ReportReason;
+import checkmo.report.internal.entity.ReportTargetType;
+import checkmo.report.internal.repository.ReportRepository;
 import checkmo.support.ApiTestSupport;
+import io.restassured.response.Response;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,6 +50,9 @@ class AdminApiTest extends ApiTestSupport {
 
     @Autowired
     NewsRepository newsRepository;
+
+    @Autowired
+    ReportRepository reportRepository;
 
     @Test
     void memberAdminEndpointsRequireAdminAndReturnMemberData() {
@@ -79,6 +88,93 @@ class AdminApiTest extends ApiTestSupport {
 
         given().when().get("/api/v1/admin/members")
                 .then().statusCode(401);
+    }
+
+    @Test
+    void memberReportAdminEndpointReturnsReporterReportsWithCursorAndRequiresAdmin() {
+        TestUser admin = createAdmin();
+        TestUser reporter = createUser();
+        TestUser target = createUser();
+        TestUser otherReporter = createUser();
+        TestUser nonAdmin = createUser();
+
+        for (int index = 0; index < 21; index++) {
+            reportRepository.save(Report.builder()
+                    .reporterId(reporter.id())
+                    .reportTargetType(ReportTargetType.MEMBER)
+                    .targetId(target.nickName())
+                    .reportReason(ReportReason.GENERAL)
+                    .content("관리자 신고 조회 " + index)
+                    .redirectUrl("/profile/" + target.nickName())
+                    .build());
+        }
+        reportRepository.save(Report.builder()
+                .reporterId(otherReporter.id())
+                .reportTargetType(ReportTargetType.MEMBER)
+                .targetId(target.nickName())
+                .reportReason(ReportReason.SPAM)
+                .content("다른 회원 신고")
+                .redirectUrl("/profile/" + target.nickName())
+                .build());
+
+        Response firstPage = given().cookie(accessTokenCookie(admin))
+                .when().get("/api/v1/admin/members/{nickname}/reports", reporter.nickName());
+
+        firstPage.then().statusCode(200)
+                .body("result.reports.size()", equalTo(20))
+                .body("result.reports[0].content", equalTo("관리자 신고 조회 20"))
+                .body("result.reports[0].reason", equalTo("GENERAL"))
+                .body("result.reports[0].targetLabel", equalTo(target.nickName()))
+                .body("result.reports[0].targetAvailable", equalTo(true))
+                .body("result.reports[0].targetUrl", equalTo("/profile/" + target.nickName()))
+                .body("result.hasNext", equalTo(true));
+
+        Number nextCursor = firstPage.path("result.nextCursor");
+        given().cookie(accessTokenCookie(admin))
+                .queryParam("cursorId", nextCursor.longValue())
+                .when().get("/api/v1/admin/members/{nickname}/reports", reporter.nickName())
+                .then().statusCode(200)
+                .body("result.reports.size()", equalTo(1))
+                .body("result.reports[0].content", equalTo("관리자 신고 조회 0"))
+                .body("result.hasNext", equalTo(false))
+                .body("result.nextCursor", nullValue());
+
+        given().cookie(accessTokenCookie(admin))
+                .when().get("/api/v1/admin/members/{nickname}/reports", "unknown-member")
+                .then().statusCode(404);
+
+        given().cookie(accessTokenCookie(nonAdmin))
+                .when().get("/api/v1/admin/members/{nickname}/reports", reporter.nickName())
+                .then().statusCode(403);
+
+        given().when().get("/api/v1/admin/members/{nickname}/reports", reporter.nickName())
+                .then().statusCode(401);
+    }
+
+    @Test
+    void memberReportAdminEndpointKeepsReportWhenTargetIsUnavailable() {
+        TestUser admin = createAdmin();
+        TestUser reporter = createUser();
+
+        reportRepository.save(Report.builder()
+                .reporterId(reporter.id())
+                .reportTargetType(ReportTargetType.BOOK_STORY)
+                .targetId("999999")
+                .reportReason(ReportReason.INSULT)
+                .content(null)
+                .redirectUrl("/stories/999999")
+                .build());
+
+        given().cookie(accessTokenCookie(admin))
+                .when().get("/api/v1/admin/members/{nickname}/reports", reporter.nickName())
+                .then().statusCode(200)
+                .body("result.reports.size()", equalTo(1))
+                .body("result.reports[0].content", nullValue())
+                .body("result.reports[0].targetType", equalTo("BOOK_STORY"))
+                .body("result.reports[0].targetId", equalTo("999999"))
+                .body("result.reports[0].targetLabel", equalTo("삭제되었거나 확인할 수 없는 대상"))
+                .body("result.reports[0].targetAvailable", equalTo(false))
+                .body("result.reports[0].targetUrl", nullValue());
     }
 
     @Test

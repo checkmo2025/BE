@@ -154,7 +154,10 @@ public class ReportCommandService {
 
         return ReportTargetType.CLUB_TOPIC.createRedirectUrl(
                 String.valueOf(info.getTopicId()),
-                Map.of("clubId", String.valueOf(info.getClubId()))
+                Map.of(
+                        "clubId", String.valueOf(info.getClubId()),
+                        "meetingId", String.valueOf(info.getMeetingId())
+                )
         );
     }
 
@@ -165,7 +168,10 @@ public class ReportCommandService {
 
         return ReportTargetType.CLUB_BOOK_REVIEW.createRedirectUrl(
                 String.valueOf(info.getBookReviewId()),
-                Map.of("clubId", String.valueOf(info.getClubId()))
+                Map.of(
+                        "clubId", String.valueOf(info.getClubId()),
+                        "meetingId", String.valueOf(info.getMeetingId())
+                )
         );
     }
 
@@ -176,7 +182,11 @@ public class ReportCommandService {
 
         return ReportTargetType.CHAT.createRedirectUrl(
                 String.valueOf(info.getChatMessageId()),
-                Map.of("clubId", String.valueOf(info.getClubId()))
+                Map.of(
+                        "clubId", String.valueOf(info.getClubId()),
+                        "meetingId", String.valueOf(info.getMeetingId()),
+                        "teamId", String.valueOf(info.getTeamId())
+                )
         );
     }
 }

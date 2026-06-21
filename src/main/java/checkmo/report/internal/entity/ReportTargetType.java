@@ -45,7 +45,7 @@ public enum ReportTargetType {
         public String createRedirectUrl(String targetId, Map<String, String> context) {
             return "/groups/"
                     + require(context, "clubId")
-                    + "/notices/"
+                    + "/notice/"
                     + targetId;
         }
     },
@@ -55,7 +55,7 @@ public enum ReportTargetType {
         public String createRedirectUrl(String targetId, Map<String, String> context) {
             return "/groups/"
                     + require(context, "clubId")
-                    + "/notices/"
+                    + "/notice/"
                     + require(context, "noticeId")
                     + "?commentId="
                     + targetId;
@@ -67,7 +67,9 @@ public enum ReportTargetType {
         public String createRedirectUrl(String targetId, Map<String, String> context) {
             return "/groups/"
                     + require(context, "clubId")
-                    + "/topics/"
+                    + "/bookcase/"
+                    + require(context, "meetingId")
+                    + "?tab=topic&topicId="
                     + targetId;
         }
     },
@@ -77,7 +79,9 @@ public enum ReportTargetType {
         public String createRedirectUrl(String targetId, Map<String, String> context) {
             return "/groups/"
                     + require(context, "clubId")
-                    + "/reviews/"
+                    + "/bookcase/"
+                    + require(context, "meetingId")
+                    + "?tab=review&reviewId="
                     + targetId;
         }
     },
@@ -87,7 +91,12 @@ public enum ReportTargetType {
         public String createRedirectUrl(String targetId, Map<String, String> context) {
             return "/groups/"
                     + require(context, "clubId")
-                    + "/chat";
+                    + "/bookcase/"
+                    + require(context, "meetingId")
+                    + "/meeting?teamId="
+                    + require(context, "teamId")
+                    + "&messageId="
+                    + targetId;
         }
     };
 

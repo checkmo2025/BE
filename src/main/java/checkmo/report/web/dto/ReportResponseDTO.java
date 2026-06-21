@@ -46,4 +46,32 @@ public class ReportResponseDTO {
         private Long nextCursor;
     }
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AdminMemberReportInfo {
+        private Long reportId;
+        private String reason;
+        private String reasonDescription;
+        private String content;
+        private String targetType;
+        private String targetTypeDescription;
+        private String targetId;
+        private String targetLabel;
+        private boolean targetAvailable;
+        private String targetUrl;
+        private LocalDateTime reportedAt;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AdminMemberReportList {
+        private List<AdminMemberReportInfo> reports;
+        private boolean hasNext;
+        private Long nextCursor;
+    }
+
 }
