@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import checkmo.book.internal.config.properties.AladinProperties;
 import jakarta.validation.Validation;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -83,7 +82,8 @@ class AladinConfigurationTest {
     }
 
     private Map<String, Object> aladinApiConfiguration() throws IOException {
-        try (var input = new FileInputStream("src/main/resources/application-aladin.yml")) {
+        try (var input = getClass().getClassLoader().getResourceAsStream("application-aladin.yml")) {
+            assertThat(input).isNotNull();
             Map<String, Object> configuration = new Yaml().load(input);
             Map<String, Object> aladin = nestedMap(configuration, "aladin");
             return nestedMap(aladin, "api");
