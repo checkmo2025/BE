@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import checkmo.authentication.AuthenticationAPI;
+import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.service.AladinRecommendationRefreshClient;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.scheduler.BookRecommendationScheduler;
@@ -20,30 +22,56 @@ import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.scheduler.MemberCleanupScheduler;
 import checkmo.member.internal.service.command.MemberCommandService;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 class SentryBackgroundCaptureTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void capturesRecommendationRefreshFailureWhileReturningFallbackEmptyList() {
+    void capturesRecommendationRefreshFailureWhileReturningStaleFallback() {
         RedisTemplate<String, Object> redisTemplate = mock(RedisTemplate.class);
+        ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
         AladinApiService aladinApiService = mock(AladinApiService.class);
         RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
         RuntimeException failure = new RuntimeException("aladin unavailable");
+        BookResponseDTO.BookList staleCache = BookResponseDTO.BookList.builder()
+                .detailInfoList(List.of(BookResponseDTO.DetailInfo.builder()
+                        .isbn("9791169213882")
+                        .title("테스트 책")
+                        .build()))
+                .hasNext(false)
+                .currentPage(null)
+                .build();
+        BookResponseDTO.BookList likedStaleCache = BookResponseDTO.BookList.builder()
+                .detailInfoList(List.of(BookResponseDTO.DetailInfo.builder()
+                        .isbn("9791169213882")
+                        .title("테스트 책")
+                        .likedByMe(true)
+                        .build()))
+                .hasNext(false)
+                .currentPage(null)
+                .build();
         BookRecommendationService service = new BookRecommendationService(
                 redisTemplate,
                 aladinApiService,
+                new AladinRecommendationRefreshClient(aladinApiService, new AladinProperties()),
                 captureClient
         );
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("book:recommendations:daily")).thenReturn(staleCache);
+        when(valueOperations.get("book:recommendations:daily:updated_at"))
+                .thenReturn(LocalDate.now().minusDays(1).toString());
         when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(aladinApiService.applyLikedByMe(staleCache, "member-1")).thenReturn(likedStaleCache);
 
-        BookResponseDTO.BookList response = service.refreshDailyRecommendedBooks();
+        BookResponseDTO.BookList response = service.retrieveRecommendedBooks("member-1");
 
-        assertThat(response.getDetailInfoList()).isEmpty();
+        assertThat(response).isSameAs(likedStaleCache);
         assertThat(captureClient.captured()).containsExactly(failure);
     }
 

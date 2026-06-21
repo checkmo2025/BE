@@ -2,6 +2,7 @@ package checkmo.common.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import checkmo.book.internal.service.AladinRecommendationRefreshClient;
 import checkmo.common.monitoring.SentryCaptureClient;
 import checkmo.common.monitoring.SentrySdkCaptureClient;
 import checkmo.support.SpringTest;
@@ -16,8 +17,11 @@ import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringTest
+@TestPropertySource(properties = "aladin.api.recommendation.refresh.background.fixed-delay=5m")
 class SentryConfigurationTest {
 
     @Autowired
@@ -31,6 +35,9 @@ class SentryConfigurationTest {
 
     @Autowired
     private ListableBeanFactory beanFactory;
+
+    @MockitoBean
+    private AladinRecommendationRefreshClient aladinRecommendationRefreshClient;
 
     @Test
     void contextStartsWhenSentryDsnIsMissing() {
