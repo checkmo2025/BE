@@ -5,12 +5,15 @@ import checkmo.book.internal.converter.BookConverter;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AladinSearchClient {
@@ -19,17 +22,30 @@ public class AladinSearchClient {
     private final AladinProperties aladinProperties;
 
     public BookResponseDTO.BookList fetchSearchBooks(String keyword, int page) {
+        long totalStartNanos = System.nanoTime();
         AladinApiResponseDTO.BookList response;
         try {
+            long httpStartNanos = System.nanoTime();
             response = restTemplate.getForObject(
                     buildHttpUrl(keyword, page),
                     AladinApiResponseDTO.BookList.class
             );
+            log.info("book-search-timing stage=aladinHttp traceId={} page={} rawItemCount={} rawTotalResults={} elapsedMs={}",
+                    traceId(), page, rawItemCount(response), rawTotalResults(response), elapsedMillis(httpStartNanos));
         } catch (RestClientException e) {
+            log.info("book-search-timing stage=aladinHttpFailure traceId={} page={} elapsedMs={} exceptionType={}",
+                    traceId(), page, elapsedMillis(totalStartNanos), e.getClass().getName());
             throw new IllegalStateException(sanitizedFailureMessage(e));
         }
 
-        return BookConverter.toBookList(response, page);
+        long convertStartNanos = System.nanoTime();
+        BookResponseDTO.BookList bookList = BookConverter.toBookList(response, page);
+        log.info("book-search-timing stage=aladinConvert traceId={} page={} itemCount={} hasNext={} totalResults={} elapsedMs={}",
+                traceId(), page, detailCount(bookList), bookList.isHasNext(), bookList.getTotalResults(),
+                elapsedMillis(convertStartNanos));
+        log.info("book-search-timing stage=aladinFetchTotal traceId={} page={} elapsedMs={}",
+                traceId(), page, elapsedMillis(totalStartNanos));
+        return bookList;
     }
 
     private String sanitizedFailureMessage(RestClientException exception) {
@@ -56,5 +72,34 @@ public class AladinSearchClient {
                 .queryParam("Version", aladinProperties.getAuth().getVersion())
                 .build()
                 .toUriString();
+    }
+
+    private String traceId() {
+        return MDC.get(AladinApiService.BOOK_SEARCH_TRACE_ID);
+    }
+
+    private int rawItemCount(AladinApiResponseDTO.BookList response) {
+        if (response == null || response.getItems() == null) {
+            return 0;
+        }
+        return response.getItems().size();
+    }
+
+    private int rawTotalResults(AladinApiResponseDTO.BookList response) {
+        if (response == null) {
+            return 0;
+        }
+        return response.getTotalResults();
+    }
+
+    private int detailCount(BookResponseDTO.BookList bookList) {
+        if (bookList == null || bookList.getDetailInfoList() == null) {
+            return 0;
+        }
+        return bookList.getDetailInfoList().size();
+    }
+
+    private long elapsedMillis(long startNanos) {
+        return (System.nanoTime() - startNanos) / 1_000_000;
     }
 }
