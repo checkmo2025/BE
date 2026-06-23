@@ -98,6 +98,7 @@ checkmo/
   - remaining risk
   - recommended commit message
 - Wait for the user's confirmation before committing that stage, then continue to the next stage.
+- Do not implement multiple future commit stages ahead of user confirmation. Finish one stage, stop, report, wait for confirmation, commit, then start the next stage.
 - Keep commits as close to one stage per commit as practical.
 - Prefer small commits, but do not create commits that leave the project uncompilable or contain meaningless micro-changes.
 - Each commit should be understandable as a standalone review unit.
