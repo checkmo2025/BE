@@ -100,7 +100,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
 
         given().cookie(accessTokenCookie(owner))
                 .when().get("/api/v1/groups/sitemap")
-                .then().statusCode(not(200));
+                .then().statusCode(400);
     }
 
     @Test
