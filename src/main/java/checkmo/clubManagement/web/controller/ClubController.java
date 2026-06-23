@@ -10,7 +10,6 @@ import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberStatusFilter;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubPreviewList;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.sitemap.SitemapResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -90,7 +89,7 @@ public class ClubController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
     })
     @GetMapping("/sitemap")
-    public ApiResponse<SitemapResponseDTO.Page> getClubSitemap(
+    public ApiResponse<ClubResponseDTO.SitemapPage> getClubSitemap(
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false) @Min(1) Integer limit
     ) {

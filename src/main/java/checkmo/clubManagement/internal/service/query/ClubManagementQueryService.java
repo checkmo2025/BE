@@ -8,7 +8,7 @@ import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
-import checkmo.common.sitemap.SitemapResponseDTO;
+import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +32,7 @@ public class ClubManagementQueryService {
         return clubRepository.searchClubs(filter, cursorId, pageSize);
     }
 
-    public List<SitemapResponseDTO.Item> retrieveClubSitemapItems(Long cursorId, int pageSize) {
+    public List<ClubResponseDTO.SitemapItem> retrieveClubSitemapItems(Long cursorId, int pageSize) {
         return clubRepository.findOpenClubSitemapItems(cursorId, pageSize);
     }
 

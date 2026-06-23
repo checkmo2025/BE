@@ -17,7 +17,6 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.*;
 import checkmo.clubManagement.web.dto.admin.ClubAdminResponseDTO;
 import checkmo.clubManagement.web.dto.myClub.MyClubResponseDTO;
-import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.common.template.*;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
@@ -35,6 +34,8 @@ public class ClubManagementQueryFacade {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int ADMIN_PAGE_SIZE = 20;
+    private static final int DEFAULT_SITEMAP_LIMIT = 1000;
+    private static final int MAX_SITEMAP_LIMIT = 5000;
 
     private final MemberAPI memberAPI;
 
@@ -87,15 +88,30 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public SitemapResponseDTO.Page retrieveClubSitemap(Long cursorId, Integer limit) {
-        int pageSize = SitemapResponseDTO.normalizeLimit(limit);
-        CursorResult<SitemapResponseDTO.Item> cursorResult = CursorPagingHelper.getPage(
+    public ClubResponseDTO.SitemapPage retrieveClubSitemap(Long cursorId, Integer limit) {
+        int pageSize = normalizeSitemapLimit(limit);
+        CursorResult<SitemapItem> cursorResult = CursorPagingHelper.getPage(
                 size -> clubManagementQueryService.retrieveClubSitemapItems(cursorId, size),
-                SitemapResponseDTO.Item::id,
+                SitemapItem::getId,
                 pageSize
         );
 
-        return SitemapResponseDTO.Page.from(cursorResult, pageSize);
+        return ClubResponseDTO.SitemapPage.builder()
+                .items(cursorResult.content())
+                .hasNext(cursorResult.hasNext())
+                .nextCursor(cursorResult.nextCursor())
+                .pageSize(pageSize)
+                .build();
+    }
+
+    private int normalizeSitemapLimit(Integer limit) {
+        if (limit == null) {
+            return DEFAULT_SITEMAP_LIMIT;
+        }
+        if (limit < 1) {
+            throw new IllegalArgumentException("Sitemap limit must be at least 1.");
+        }
+        return Math.min(limit, MAX_SITEMAP_LIMIT);
     }
 
     private ClubDetailWithMyStatus toClubDetailWithMyStatusDTO(
