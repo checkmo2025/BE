@@ -40,7 +40,7 @@ public class NotificationQueryFacade {
         Map<String, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
         Map<Long, String> clubNameMap = fetchClubNameMap(notifications);
 
-        return NotificationConverter.convertToPreviewListDTO(notifications, senderNicknameMap, clubNameMap);
+        return NotificationConverter.toPreviewListDTO(notifications, senderNicknameMap, clubNameMap);
     }
 
     public BasicInfoList retrieveNotifications(String memberId, Long cursorId) {
@@ -54,7 +54,7 @@ public class NotificationQueryFacade {
         Map<String, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
         Map<Long, String> clubNameMap = fetchClubNameMap(notifications);
 
-        return NotificationConverter.convertToNotificationListDTO(
+        return NotificationConverter.toNotificationListDTO(
                 notifications,
                 senderNicknameMap,
                 clubNameMap,
