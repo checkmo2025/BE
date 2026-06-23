@@ -1,7 +1,7 @@
 package checkmo.news.internal.repository;
 
 import checkmo.news.internal.entity.News;
-import checkmo.news.web.dto.NewsResponseDTO;
+import checkmo.news.internal.repository.projection.NewsSitemapProjection;
 import java.util.List;
 
 public interface NewsQueryRepository {
@@ -11,5 +11,5 @@ public interface NewsQueryRepository {
 
     List<News> searchMyNews(String requesterEmail, Long cursorId, int pageSize);
 
-    List<NewsResponseDTO.SitemapItem> findPromotionSitemapItems(Long cursorId, int pageSize);
+    List<NewsSitemapProjection> findPromotionSitemapItems(Long cursorId, int pageSize);
 }

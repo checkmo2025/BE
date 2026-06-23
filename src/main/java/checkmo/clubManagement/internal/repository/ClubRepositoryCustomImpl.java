@@ -9,9 +9,9 @@ import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
 import checkmo.clubManagement.internal.entity.QClubMember;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
+import checkmo.clubManagement.internal.repository.projection.ClubSitemapProjection;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubSearchOutputFilter;
-import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
@@ -51,7 +51,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
     }
 
     @Override
-    public List<ClubResponseDTO.SitemapItem> findOpenClubSitemapItems(Long cursorId, Integer size) {
+    public List<ClubSitemapProjection> findOpenClubSitemapItems(Long cursorId, Integer size) {
         BooleanBuilder builder = new BooleanBuilder().and(isOpen());
 
         if (cursorId != null) {
@@ -60,7 +60,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
         return queryFactory
                 .select(Projections.constructor(
-                        ClubResponseDTO.SitemapItem.class,
+                        ClubSitemapProjection.class,
                         club.id,
                         club.updatedAt
                 ))

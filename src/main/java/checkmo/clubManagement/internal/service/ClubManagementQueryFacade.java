@@ -9,6 +9,7 @@ import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
+import checkmo.clubManagement.internal.repository.projection.ClubSitemapProjection;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
@@ -90,17 +91,26 @@ public class ClubManagementQueryFacade {
 
     public ClubResponseDTO.SitemapPage retrieveClubSitemap(Long cursorId, Integer limit) {
         int pageSize = normalizeSitemapLimit(limit);
-        CursorResult<SitemapItem> cursorResult = CursorPagingHelper.getPage(
+        CursorResult<ClubSitemapProjection> cursorResult = CursorPagingHelper.getPage(
                 size -> clubManagementQueryService.retrieveClubSitemapItems(cursorId, size),
-                SitemapItem::getId,
+                ClubSitemapProjection::getId,
                 pageSize
         );
 
         return ClubResponseDTO.SitemapPage.builder()
-                .items(cursorResult.content())
+                .items(cursorResult.content().stream()
+                        .map(this::toSitemapItem)
+                        .toList())
                 .hasNext(cursorResult.hasNext())
                 .nextCursor(cursorResult.nextCursor())
                 .pageSize(pageSize)
+                .build();
+    }
+
+    private ClubResponseDTO.SitemapItem toSitemapItem(ClubSitemapProjection projection) {
+        return ClubResponseDTO.SitemapItem.builder()
+                .id(projection.getId())
+                .updatedAt(projection.getUpdatedAt())
                 .build();
     }
 

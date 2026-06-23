@@ -5,13 +5,13 @@ import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.repository.projection.BookStorySitemapProjection;
 import checkmo.bookStory.internal.service.query.BookStoryViewCacheService;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.CommentInfo;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.DetailInfo;
-import checkmo.bookStory.web.dto.BookStoryResponseDTO.SitemapItem;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -174,17 +174,26 @@ public class BookStoryQueryFacade {
 
     public BookStoryResponseDTO.SitemapPage fetchBookStorySitemap(Long cursorId, Integer limit) {
         int pageSize = normalizeSitemapLimit(limit);
-        CursorResult<SitemapItem> sitemapCursorResult = CursorPagingHelper.getPage(
+        CursorResult<BookStorySitemapProjection> sitemapCursorResult = CursorPagingHelper.getPage(
                 requestedPageSize -> bookStoryQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
-                SitemapItem::getId,
+                BookStorySitemapProjection::getId,
                 pageSize
         );
 
         return BookStoryResponseDTO.SitemapPage.builder()
-                .items(sitemapCursorResult.content())
+                .items(sitemapCursorResult.content().stream()
+                        .map(this::toSitemapItem)
+                        .toList())
                 .hasNext(sitemapCursorResult.hasNext())
                 .nextCursor(sitemapCursorResult.nextCursor())
                 .pageSize(pageSize)
+                .build();
+    }
+
+    private BookStoryResponseDTO.SitemapItem toSitemapItem(BookStorySitemapProjection projection) {
+        return BookStoryResponseDTO.SitemapItem.builder()
+                .id(projection.getId())
+                .updatedAt(projection.getUpdatedAt())
                 .build();
     }
 

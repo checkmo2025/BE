@@ -7,6 +7,7 @@ import checkmo.news.internal.converter.NewsConverter;
 import checkmo.news.internal.entity.News;
 import checkmo.news.internal.exception.NewsErrorStatus;
 import checkmo.news.internal.exception.NewsException;
+import checkmo.news.internal.repository.projection.NewsSitemapProjection;
 import checkmo.news.internal.service.query.NewsQueryService;
 import checkmo.news.web.dto.NewsResponseDTO;
 import java.time.LocalDate;
@@ -83,17 +84,26 @@ public class NewsQueryFacade {
 
     public NewsResponseDTO.SitemapPage fetchNewsSitemap(Long cursorId, Integer limit) {
         int pageSize = normalizeSitemapLimit(limit);
-        CursorResult<NewsResponseDTO.SitemapItem> sitemapCursorResult = CursorPagingHelper.getPage(
+        CursorResult<NewsSitemapProjection> sitemapCursorResult = CursorPagingHelper.getPage(
                 requestedPageSize -> newsQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
-                NewsResponseDTO.SitemapItem::getId,
+                NewsSitemapProjection::getId,
                 pageSize
         );
 
         return NewsResponseDTO.SitemapPage.builder()
-                .items(sitemapCursorResult.content())
+                .items(sitemapCursorResult.content().stream()
+                        .map(this::toSitemapItem)
+                        .toList())
                 .hasNext(sitemapCursorResult.hasNext())
                 .nextCursor(sitemapCursorResult.nextCursor())
                 .pageSize(pageSize)
+                .build();
+    }
+
+    private NewsResponseDTO.SitemapItem toSitemapItem(NewsSitemapProjection projection) {
+        return NewsResponseDTO.SitemapItem.builder()
+                .id(projection.getId())
+                .updatedAt(projection.getUpdatedAt())
                 .build();
     }
 

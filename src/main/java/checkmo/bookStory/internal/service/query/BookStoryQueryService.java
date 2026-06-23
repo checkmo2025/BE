@@ -9,8 +9,8 @@ import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.repository.projection.BookStoryPrevNextProjection;
+import checkmo.bookStory.internal.repository.projection.BookStorySitemapProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
-import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -74,7 +74,7 @@ public class BookStoryQueryService {
         return bookStoryRepository.searchBookStoriesForAdmin(keyword, pageable);
     }
 
-    public List<BookStoryResponseDTO.SitemapItem> retrieveSitemapItems(Long cursorId, int pageSize) {
+    public List<BookStorySitemapProjection> retrieveSitemapItems(Long cursorId, int pageSize) {
         return bookStoryRepository.findPublishedSitemapItems(cursorId, pageSize);
     }
 

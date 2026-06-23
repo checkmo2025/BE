@@ -4,7 +4,7 @@ import static checkmo.news.internal.entity.QNews.news;
 
 import checkmo.news.internal.entity.News;
 import checkmo.news.internal.entity.NewsCarousel;
-import checkmo.news.web.dto.NewsResponseDTO;
+import checkmo.news.internal.repository.projection.NewsSitemapProjection;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -59,12 +59,12 @@ public class NewsQueryRepositoryImpl implements NewsQueryRepository {
     }
 
     @Override
-    public List<NewsResponseDTO.SitemapItem> findPromotionSitemapItems(Long cursorId, int pageSize) {
+    public List<NewsSitemapProjection> findPromotionSitemapItems(Long cursorId, int pageSize) {
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
         return queryFactory
                 .select(Projections.constructor(
-                        NewsResponseDTO.SitemapItem.class,
+                        NewsSitemapProjection.class,
                         news.id,
                         news.updatedAt
                 ))
