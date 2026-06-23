@@ -60,6 +60,70 @@ checkmo/
 - New Spring config belongs in `application-<profile>.yml` and must be included deliberately from `application.yml`.
 - QueryDSL generated-source wiring is non-standard in `build.gradle`; inspect before changing generated source paths.
 
+## WORKFLOW RULES
+
+### Java Imports And Type Names
+
+- Do not reference standard Java collection types with fully qualified names in code bodies, such as `java.util.List`.
+- Import the type and use the short form, such as `List`, `Map`, or `Set`.
+- Do not create new classes, records, DTOs, or nested types whose names collide with standard Java collection names.
+- If a naming conflict appears, rename the project type instead of forcing fully qualified collection references.
+
+### Branch Naming
+
+- For GitHub issue-based work, use a branch name that starts with the work type:
+  - `feat/{issue-number}/{work-summary}`
+  - `refactor/{issue-number}/{work-summary}`
+  - `fix/{issue-number}/{work-summary}`
+  - `test/{issue-number}/{work-summary}`
+  - `docs/{issue-number}/{work-summary}`
+- Write `{work-summary}` in short English kebab-case.
+- Example: `feat/247/sitemap-metadata-apis`.
+
+### DTO And Mapper Decisions
+
+- When adding a DTO, inspect the owning module's existing converter/mapper pattern first.
+- If the module already uses a converter or mapper for similar response construction, prefer adding the new DTO mapping there instead of spreading DTO assembly through controllers or services.
+- Do not add a mapper only for ceremony when a simple repository projection or existing local pattern is clearer.
+
+### Stage-Based Work And Commits
+
+- Split work into the smallest practical stages so the user can keep understanding the code as it changes.
+- Each stage should have one clear purpose, such as a shared DTO, one module endpoint, one focused test change, or one documentation update.
+- Avoid changing multiple modules in the same stage when the work can be split by module.
+- After completing each stage, report:
+  - changed files
+  - summary of changes
+  - verification result
+  - remaining risk
+  - recommended commit message
+- Wait for the user's confirmation before committing that stage, then continue to the next stage.
+- Keep commits as close to one stage per commit as practical.
+- Prefer small commits, but do not create commits that leave the project uncompilable or contain meaningless micro-changes.
+- Each commit should be understandable as a standalone review unit.
+- Use Conventional Commit style with a Korean summary unless the user requests otherwise.
+
+### Local Server Runtime Configuration
+
+- Only for local server runs, apply these temporary config changes:
+  - In `application.yml`, change the active runtime profile from `prod` to `db`.
+  - In `application-redis.yml`, uncomment the section marked for the local development environment.
+  - In `application-redis.yml`, comment out `host: ${REDIS_ENDPOINT}` while using the local Redis container.
+  - Start MySQL and Redis with Docker before running the app locally.
+- Never commit these temporary runtime config changes.
+- Before finishing, restore the original config:
+  - active runtime profile uses `prod`
+  - the local development Redis section is commented again
+  - `host: ${REDIS_ENDPOINT}` is active again
+- Do not read, print, or summarize `.env` or any secret-bearing file while doing local runtime setup.
+
+### Build Artifact Cleanup
+
+- Delete obvious build artifacts or temporary duplicate outputs whose names end with a space and a number.
+- Examples: `build 2`, `generated 3`, `SomeFile 2.class`.
+- Apply this aggressively inside build output or generated-output areas such as `build`, `out`, `target`, `.gradle`, or generated source output.
+- Do not silently delete source, documentation, or configuration files only because their names end with a space and a number; report those first.
+
 ## API VERSIONING
 
 - All external client-facing HTTP APIs must use the `/api/v1/...` prefix.
