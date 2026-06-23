@@ -3,6 +3,9 @@ package checkmo.news.internal.repository;
 import static checkmo.news.internal.entity.QNews.news;
 
 import checkmo.news.internal.entity.News;
+import checkmo.news.internal.entity.NewsCarousel;
+import checkmo.news.internal.repository.projection.NewsSitemapProjection;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -48,6 +51,27 @@ public class NewsQueryRepositoryImpl implements NewsQueryRepository {
                 .selectFrom(news)
                 .where(
                         news.requesterEmail.eq(requesterEmail),
+                        createCursorExp(cursorId)
+                )
+                .orderBy(news.id.desc())
+                .limit(pageSize)
+                .fetch();
+    }
+
+    @Override
+    public List<NewsSitemapProjection> findPromotionSitemapItems(Long cursorId, int pageSize) {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+
+        return queryFactory
+                .select(Projections.constructor(
+                        NewsSitemapProjection.class,
+                        news.id,
+                        news.updatedAt
+                ))
+                .from(news)
+                .where(
+                        isPublished(today),
+                        news.carousel.eq(NewsCarousel.PROMOTION),
                         createCursorExp(cursorId)
                 )
                 .orderBy(news.id.desc())

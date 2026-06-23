@@ -4,6 +4,7 @@ import checkmo.news.internal.entity.News;
 import checkmo.news.internal.exception.NewsErrorStatus;
 import checkmo.news.internal.exception.NewsException;
 import checkmo.news.internal.repository.NewsRepository;
+import checkmo.news.internal.repository.projection.NewsSitemapProjection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,10 @@ public class NewsQueryService {
 
     public List<News> retrieveMyNewsList(String requesterEmail, Long cursorId, int pageSize) {
         return newsRepository.searchMyNews(requesterEmail, cursorId, pageSize);
+    }
+
+    public List<NewsSitemapProjection> retrieveSitemapItems(Long cursorId, int pageSize) {
+        return newsRepository.findPromotionSitemapItems(cursorId, pageSize);
     }
 
     public Page<News> retrieveNewsPageForAdmin(String keyword, int page, int size) {

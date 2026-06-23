@@ -1,6 +1,7 @@
 package checkmo.bookStory.internal.repository;
 
 import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.repository.projection.BookStorySitemapProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -26,4 +27,6 @@ public interface BookStoryQueryRepository {
     );
 
     Page<BookStory> searchBookStoriesForAdmin(String keyword, Pageable pageable);
+
+    List<BookStorySitemapProjection> findPublishedSitemapItems(Long cursorId, int pageSize);
 }

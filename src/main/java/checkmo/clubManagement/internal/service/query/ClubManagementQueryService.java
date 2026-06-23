@@ -7,6 +7,7 @@ import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.repository.projection.ClubIdAndName;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
+import checkmo.clubManagement.internal.repository.projection.ClubSitemapProjection;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,10 @@ public class ClubManagementQueryService {
 
     public List<Club> retrieveClubs(ClubRequestDTO.ClubSearchFilter filter, Long cursorId, int pageSize) {
         return clubRepository.searchClubs(filter, cursorId, pageSize);
+    }
+
+    public List<ClubSitemapProjection> retrieveClubSitemapItems(Long cursorId, int pageSize) {
+        return clubRepository.findOpenClubSitemapItems(cursorId, pageSize);
     }
 
     public List<Club> retrieveClubs(List<Long> clubIds) {

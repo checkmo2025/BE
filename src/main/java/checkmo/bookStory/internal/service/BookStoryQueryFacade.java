@@ -5,6 +5,7 @@ import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.Comment;
+import checkmo.bookStory.internal.repository.projection.BookStorySitemapProjection;
 import checkmo.bookStory.internal.service.query.BookStoryViewCacheService;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
@@ -34,6 +35,8 @@ public class BookStoryQueryFacade {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
     public static final int ADMIN_PAGE_SIZE = 12;
+    private static final int DEFAULT_SITEMAP_LIMIT = 1000;
+    private static final int MAX_SITEMAP_LIMIT = 5000;
 
     private final MemberAPI memberAPI;
     private final BookAPI bookAPI;
@@ -167,6 +170,41 @@ public class BookStoryQueryFacade {
             Long cursorId
     ) {
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.CLUB, clubId, null, cursorId);
+    }
+
+    public BookStoryResponseDTO.SitemapPage fetchBookStorySitemap(Long cursorId, Integer limit) {
+        int pageSize = normalizeSitemapLimit(limit);
+        CursorResult<BookStorySitemapProjection> sitemapCursorResult = CursorPagingHelper.getPage(
+                requestedPageSize -> bookStoryQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
+                BookStorySitemapProjection::getId,
+                pageSize
+        );
+
+        return BookStoryResponseDTO.SitemapPage.builder()
+                .items(sitemapCursorResult.content().stream()
+                        .map(this::toSitemapItem)
+                        .toList())
+                .hasNext(sitemapCursorResult.hasNext())
+                .nextCursor(sitemapCursorResult.nextCursor())
+                .pageSize(pageSize)
+                .build();
+    }
+
+    private BookStoryResponseDTO.SitemapItem toSitemapItem(BookStorySitemapProjection projection) {
+        return BookStoryResponseDTO.SitemapItem.builder()
+                .id(projection.getId())
+                .updatedAt(projection.getUpdatedAt())
+                .build();
+    }
+
+    private int normalizeSitemapLimit(Integer limit) {
+        if (limit == null) {
+            return DEFAULT_SITEMAP_LIMIT;
+        }
+        if (limit < 1) {
+            throw new IllegalArgumentException("Sitemap limit must be at least 1.");
+        }
+        return Math.min(limit, MAX_SITEMAP_LIMIT);
     }
 
     /**

@@ -16,6 +16,26 @@ import java.util.List;
 
 public class ClubResponseDTO {
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SitemapPage {
+        private List<SitemapItem> items;
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SitemapItem {
+        private Long id;
+        private LocalDateTime updatedAt;
+    }
+
     public enum MyClubMemberStatus {
         NONE,
         PENDING,

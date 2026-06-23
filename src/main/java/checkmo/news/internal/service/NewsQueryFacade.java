@@ -7,6 +7,7 @@ import checkmo.news.internal.converter.NewsConverter;
 import checkmo.news.internal.entity.News;
 import checkmo.news.internal.exception.NewsErrorStatus;
 import checkmo.news.internal.exception.NewsException;
+import checkmo.news.internal.repository.projection.NewsSitemapProjection;
 import checkmo.news.internal.service.query.NewsQueryService;
 import checkmo.news.web.dto.NewsResponseDTO;
 import java.time.LocalDate;
@@ -24,6 +25,8 @@ public class NewsQueryFacade {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
     public static final int ADMIN_PAGE_SIZE = 12;
+    private static final int DEFAULT_SITEMAP_LIMIT = 1000;
+    private static final int MAX_SITEMAP_LIMIT = 5000;
 
     private final NewsQueryService newsQueryService;
     private final MemberAPI memberAPI;
@@ -77,6 +80,41 @@ public class NewsQueryFacade {
                 .nextCursor(newsCursorResult.nextCursor())
                 .pageSize(DEFAULT_PAGE_SIZE)
                 .build();
+    }
+
+    public NewsResponseDTO.SitemapPage fetchNewsSitemap(Long cursorId, Integer limit) {
+        int pageSize = normalizeSitemapLimit(limit);
+        CursorResult<NewsSitemapProjection> sitemapCursorResult = CursorPagingHelper.getPage(
+                requestedPageSize -> newsQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
+                NewsSitemapProjection::getId,
+                pageSize
+        );
+
+        return NewsResponseDTO.SitemapPage.builder()
+                .items(sitemapCursorResult.content().stream()
+                        .map(this::toSitemapItem)
+                        .toList())
+                .hasNext(sitemapCursorResult.hasNext())
+                .nextCursor(sitemapCursorResult.nextCursor())
+                .pageSize(pageSize)
+                .build();
+    }
+
+    private NewsResponseDTO.SitemapItem toSitemapItem(NewsSitemapProjection projection) {
+        return NewsResponseDTO.SitemapItem.builder()
+                .id(projection.getId())
+                .updatedAt(projection.getUpdatedAt())
+                .build();
+    }
+
+    private int normalizeSitemapLimit(Integer limit) {
+        if (limit == null) {
+            return DEFAULT_SITEMAP_LIMIT;
+        }
+        if (limit < 1) {
+            throw new IllegalArgumentException("Sitemap limit must be at least 1.");
+        }
+        return Math.min(limit, MAX_SITEMAP_LIMIT);
     }
 
     public NewsResponseDTO.AdminNewsList fetchNewsListForAdmin(String keyword, int page) {
