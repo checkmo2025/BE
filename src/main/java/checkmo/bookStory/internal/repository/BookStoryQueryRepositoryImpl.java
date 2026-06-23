@@ -3,8 +3,8 @@ package checkmo.bookStory.internal.repository;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.common.sitemap.SitemapResponseDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -89,10 +89,10 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     @Override
-    public List<SitemapResponseDTO.Item> findPublishedSitemapItems(Long cursorId, int pageSize) {
+    public List<BookStoryResponseDTO.SitemapItem> findPublishedSitemapItems(Long cursorId, int pageSize) {
         return queryFactory
                 .select(Projections.constructor(
-                        SitemapResponseDTO.Item.class,
+                        BookStoryResponseDTO.SitemapItem.class,
                         bookStory.id,
                         bookStory.updatedAt
                 ))

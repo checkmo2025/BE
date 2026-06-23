@@ -8,7 +8,6 @@ import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.sitemap.SitemapResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -149,7 +148,7 @@ public class BookStoryController {
             @Parameter(name = "limit", description = "조회 개수 (기본 1000, 최대 5000)", required = false, example = "1000")
     })
     @GetMapping("/sitemap")
-    public ApiResponse<SitemapResponseDTO.Page> getBookStorySitemap(
+    public ApiResponse<BookStoryResponseDTO.SitemapPage> getBookStorySitemap(
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false) @Min(1) Integer limit
     ) {

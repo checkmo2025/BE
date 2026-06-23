@@ -11,7 +11,7 @@ import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.CommentInfo;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.DetailInfo;
-import checkmo.common.sitemap.SitemapResponseDTO;
+import checkmo.bookStory.web.dto.BookStoryResponseDTO.SitemapItem;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -35,6 +35,8 @@ public class BookStoryQueryFacade {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
     public static final int ADMIN_PAGE_SIZE = 12;
+    private static final int DEFAULT_SITEMAP_LIMIT = 1000;
+    private static final int MAX_SITEMAP_LIMIT = 5000;
 
     private final MemberAPI memberAPI;
     private final BookAPI bookAPI;
@@ -170,15 +172,30 @@ public class BookStoryQueryFacade {
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.CLUB, clubId, null, cursorId);
     }
 
-    public SitemapResponseDTO.Page fetchBookStorySitemap(Long cursorId, Integer limit) {
-        int pageSize = SitemapResponseDTO.normalizeLimit(limit);
-        CursorResult<SitemapResponseDTO.Item> sitemapCursorResult = CursorPagingHelper.getPage(
+    public BookStoryResponseDTO.SitemapPage fetchBookStorySitemap(Long cursorId, Integer limit) {
+        int pageSize = normalizeSitemapLimit(limit);
+        CursorResult<SitemapItem> sitemapCursorResult = CursorPagingHelper.getPage(
                 requestedPageSize -> bookStoryQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
-                SitemapResponseDTO.Item::id,
+                SitemapItem::getId,
                 pageSize
         );
 
-        return SitemapResponseDTO.Page.from(sitemapCursorResult, pageSize);
+        return BookStoryResponseDTO.SitemapPage.builder()
+                .items(sitemapCursorResult.content())
+                .hasNext(sitemapCursorResult.hasNext())
+                .nextCursor(sitemapCursorResult.nextCursor())
+                .pageSize(pageSize)
+                .build();
+    }
+
+    private int normalizeSitemapLimit(Integer limit) {
+        if (limit == null) {
+            return DEFAULT_SITEMAP_LIMIT;
+        }
+        if (limit < 1) {
+            throw new IllegalArgumentException("Sitemap limit must be at least 1.");
+        }
+        return Math.min(limit, MAX_SITEMAP_LIMIT);
     }
 
     /**
