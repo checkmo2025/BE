@@ -10,12 +10,14 @@ import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubMemberStatusFilter;
 import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.ClubPreviewList;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.common.sitemap.SitemapResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -80,6 +82,19 @@ public class ClubController {
     ) {
         clubManagementCommandService.updateClub(clubId, memberId, request);
         return ApiResponse.onSuccess("독서모임이 정상적으로 수정되었습니다.");
+    }
+
+    @Operation(summary = "[비회원 가능] 독서 모임 사이트맵 메타데이터", description = "공개 독서 모임의 사이트맵 생성용 ID와 수정 시각을 반환합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+    })
+    @GetMapping("/sitemap")
+    public ApiResponse<SitemapResponseDTO.Page> getClubSitemap(
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false) @Min(1) Integer limit
+    ) {
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubSitemap(cursorId, limit));
     }
 
     @Operation(summary = "[운영진] 독서 모임 상세 조회", description = "지정한 클럽의 상세 정보를 반환합니다.")

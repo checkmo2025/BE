@@ -17,6 +17,7 @@ import checkmo.clubManagement.web.dto.ClubResponseDTO;
 import checkmo.clubManagement.web.dto.ClubResponseDTO.*;
 import checkmo.clubManagement.web.dto.admin.ClubAdminResponseDTO;
 import checkmo.clubManagement.web.dto.myClub.MyClubResponseDTO;
+import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.common.template.*;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO;
@@ -84,6 +85,17 @@ public class ClubManagementQueryFacade {
                 .hasNext(clubCursorResult.hasNext())
                 .nextCursor(clubCursorResult.nextCursor())
                 .build();
+    }
+
+    public SitemapResponseDTO.Page retrieveClubSitemap(Long cursorId, Integer limit) {
+        int pageSize = SitemapResponseDTO.normalizeLimit(limit);
+        CursorResult<SitemapResponseDTO.Item> cursorResult = CursorPagingHelper.getPage(
+                size -> clubManagementQueryService.retrieveClubSitemapItems(cursorId, size),
+                SitemapResponseDTO.Item::id,
+                pageSize
+        );
+
+        return SitemapResponseDTO.Page.from(cursorResult, pageSize);
     }
 
     private ClubDetailWithMyStatus toClubDetailWithMyStatusDTO(

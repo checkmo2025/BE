@@ -1,7 +1,9 @@
 package checkmo.club;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
@@ -21,6 +23,7 @@ import checkmo.clubNotice.internal.repository.NoticeRepository;
 import checkmo.realtime.internal.entity.TeamChatMessage;
 import checkmo.realtime.internal.repository.TeamChatMessageRepository;
 import checkmo.support.ApiTestSupport;
+import io.restassured.response.Response;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,49 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
 
     @Autowired
     TeamChatMessageRepository teamChatMessageRepository;
+
+    @Test
+    void clubSitemapReturnsOpenClubMetadataOnly() {
+        TestUser owner = createUser();
+        Club openClub = createClub(owner, "sitemap-open-" + uniqueSuffix(owner));
+        Club secondOpenClub = createClub(owner, "sitemap-open-second-" + uniqueSuffix(owner));
+        Club closedClub = createClub(owner, "sitemap-closed-" + uniqueSuffix(owner), false);
+
+        Response response = given()
+                .when().get("/api/v1/clubs/sitemap")
+                .then().statusCode(200)
+                .extract().response();
+
+        List<Long> clubIds = response.jsonPath().getList("result.items.id", Long.class);
+        assertThat(clubIds).contains(openClub.getId(), secondOpenClub.getId());
+        assertThat(clubIds).doesNotContain(closedClub.getId());
+
+        List<Map<String, Object>> items = response.jsonPath().getList("result.items");
+        assertThat(items).isNotEmpty();
+        assertThat(items).allSatisfy(item ->
+                assertThat(item.keySet()).containsExactly("id", "updatedAt")
+        );
+
+        given().queryParam("limit", 1)
+                .when().get("/api/v1/clubs/sitemap")
+                .then().statusCode(200)
+                .body("result.pageSize", equalTo(1))
+                .body("result.hasNext", equalTo(true))
+                .body("result.nextCursor", not(equalTo(null)));
+
+        given().queryParam("limit", 999999)
+                .when().get("/api/v1/clubs/sitemap")
+                .then().statusCode(200)
+                .body("result.pageSize", equalTo(5000));
+
+        given().queryParam("limit", 0)
+                .when().get("/api/v1/clubs/sitemap")
+                .then().statusCode(400);
+
+        given().cookie(accessTokenCookie(owner))
+                .when().get("/api/v1/groups/sitemap")
+                .then().statusCode(not(200));
+    }
 
     @Test
     void clubManagementFlowCoversClubEndpoints() {
@@ -334,9 +380,13 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     }
 
     private Club createClub(TestUser owner, String name) {
+        return createClub(owner, name, true);
+    }
+
+    private Club createClub(TestUser owner, String name, boolean open) {
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(clubDetailPayload(name))
+                .body(clubDetailPayload(name, open))
                 .when().post("/api/v1/clubs")
                 .then().statusCode(200);
         return clubRepository.findAll().stream()
@@ -370,10 +420,14 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     }
 
     private Map<String, Object> clubDetailPayload(String name) {
+        return clubDetailPayload(name, true);
+    }
+
+    private Map<String, Object> clubDetailPayload(String name, boolean open) {
         return Map.of(
                 "name", name,
                 "description", "테스트 독서 모임",
-                "open", true,
+                "open", open,
                 "region", "서울",
                 "category", List.of("COMPUTER_IT"),
                 "participantTypes", List.of("ONLINE")

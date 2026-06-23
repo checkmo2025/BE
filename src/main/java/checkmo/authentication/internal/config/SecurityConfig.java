@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/members/find-email").permitAll()
                         .requestMatchers("/api/v1/members/additional-info").authenticated()
                         .requestMatchers("/api/v1/auth/**", "/api/v1/members/check-nickname").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/clubs", "/api/v1/clubs/*/home", "/api/v1/clubs/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/clubs", "/api/v1/clubs/sitemap", "/api/v1/clubs/*/home", "/api/v1/clubs/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/clubs/*/notices/latest").permitAll()
                         .anyRequest().authenticated()
                 )

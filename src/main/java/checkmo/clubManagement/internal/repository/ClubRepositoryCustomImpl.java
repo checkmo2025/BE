@@ -11,6 +11,7 @@ import checkmo.clubManagement.internal.entity.QClubMember;
 import checkmo.clubManagement.internal.repository.projection.ClubRecommendation;
 import checkmo.clubManagement.web.dto.ClubRequestDTO;
 import checkmo.clubManagement.web.dto.ClubRequestDTO.ClubSearchOutputFilter;
+import checkmo.common.sitemap.SitemapResponseDTO;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
@@ -43,6 +44,27 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
 
         return queryFactory
                 .selectFrom(club)
+                .where(builder)
+                .orderBy(club.id.desc())
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
+    public List<SitemapResponseDTO.Item> findOpenClubSitemapItems(Long cursorId, Integer size) {
+        BooleanBuilder builder = new BooleanBuilder().and(isOpen());
+
+        if (cursorId != null) {
+            builder.and(club.id.lt(cursorId));
+        }
+
+        return queryFactory
+                .select(Projections.constructor(
+                        SitemapResponseDTO.Item.class,
+                        club.id,
+                        club.updatedAt
+                ))
+                .from(club)
                 .where(builder)
                 .orderBy(club.id.desc())
                 .limit(size)
