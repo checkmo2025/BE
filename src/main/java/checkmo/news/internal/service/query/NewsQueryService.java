@@ -1,5 +1,6 @@
 package checkmo.news.internal.service.query;
 
+import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.news.internal.entity.News;
 import checkmo.news.internal.exception.NewsErrorStatus;
 import checkmo.news.internal.exception.NewsException;
@@ -30,6 +31,10 @@ public class NewsQueryService {
 
     public List<News> retrieveMyNewsList(String requesterEmail, Long cursorId, int pageSize) {
         return newsRepository.searchMyNews(requesterEmail, cursorId, pageSize);
+    }
+
+    public List<SitemapResponseDTO.Item> retrieveSitemapItems(Long cursorId, int pageSize) {
+        return newsRepository.findPromotionSitemapItems(cursorId, pageSize);
     }
 
     public Page<News> retrieveNewsPageForAdmin(String keyword, int page, int size) {

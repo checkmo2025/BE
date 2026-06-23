@@ -4,6 +4,8 @@ import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.clubManagement.ClubManagementAPI;
+import checkmo.common.sitemap.SitemapResponseDTO;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
@@ -84,6 +86,25 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total == null ? 0L : total);
+    }
+
+    @Override
+    public List<SitemapResponseDTO.Item> findPublishedSitemapItems(Long cursorId, int pageSize) {
+        return queryFactory
+                .select(Projections.constructor(
+                        SitemapResponseDTO.Item.class,
+                        bookStory.id,
+                        bookStory.updatedAt
+                ))
+                .from(bookStory)
+                .where(
+                        notDeleted(),
+                        published(),
+                        createSitemapCursorExp(cursorId)
+                )
+                .orderBy(bookStory.id.desc())
+                .limit(pageSize)
+                .fetch();
     }
 
     private List<BookStory> findAllBookStories(List<String> excludedMemberIds, Long cursorId, int pageSize) {
@@ -211,6 +232,10 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         }
 
         return olderInSameStatus;
+    }
+
+    private BooleanExpression createSitemapCursorExp(Long cursorId) {
+        return cursorId == null ? null : bookStory.id.lt(cursorId);
     }
 
     private BooleanExpression olderThanCursor(LocalDateTime createdAt, Long id) {

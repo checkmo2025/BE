@@ -11,6 +11,7 @@ import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.CommentInfo;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO.DetailInfo;
+import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -167,6 +168,17 @@ public class BookStoryQueryFacade {
             Long cursorId
     ) {
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.CLUB, clubId, null, cursorId);
+    }
+
+    public SitemapResponseDTO.Page fetchBookStorySitemap(Long cursorId, Integer limit) {
+        int pageSize = SitemapResponseDTO.normalizeLimit(limit);
+        CursorResult<SitemapResponseDTO.Item> sitemapCursorResult = CursorPagingHelper.getPage(
+                requestedPageSize -> bookStoryQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
+                SitemapResponseDTO.Item::id,
+                pageSize
+        );
+
+        return SitemapResponseDTO.Page.from(sitemapCursorResult, pageSize);
     }
 
     /**

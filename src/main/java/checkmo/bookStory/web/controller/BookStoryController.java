@@ -8,13 +8,16 @@ import checkmo.bookStory.internal.service.command.BookStorySocialCommandService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.common.sitemap.SitemapResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/book-stories")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "책 이야기", description = "책 이야기 업로드, 조회, 좋아요, 수정, 삭제 관련 API")
 public class BookStoryController {
 
@@ -137,6 +141,20 @@ public class BookStoryController {
     ) {
         var bookStories = bookStoryQueryFacade.fetchClubBookStories(memberId, clubId, cursorId);
         return ApiResponse.onSuccess(bookStories);
+    }
+
+    @Operation(summary = "책 이야기 사이트맵 메타데이터 조회 API", description = "공개된 책 이야기의 사이트맵 메타데이터를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10"),
+            @Parameter(name = "limit", description = "조회 개수 (기본 1000, 최대 5000)", required = false, example = "1000")
+    })
+    @GetMapping("/sitemap")
+    public ApiResponse<SitemapResponseDTO.Page> getBookStorySitemap(
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false) @Min(1) Integer limit
+    ) {
+        var sitemap = bookStoryQueryFacade.fetchBookStorySitemap(cursorId, limit);
+        return ApiResponse.onSuccess(sitemap);
     }
 
     @Operation(summary = "책 이야기 상세 조회 API", description = "특정 책 이야기의 상세 정보를 조회합니다.")

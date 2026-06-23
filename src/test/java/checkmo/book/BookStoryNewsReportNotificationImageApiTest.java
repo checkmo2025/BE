@@ -13,8 +13,6 @@ import static org.mockito.Mockito.when;
 import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
-import checkmo.bookStory.internal.entity.BookStoryStatus;
-import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.infra.s3.internal.entity.FileUploadType;
@@ -32,6 +30,7 @@ import checkmo.notification.internal.repository.NotificationSettingRepository;
 import checkmo.report.internal.repository.ReportRepository;
 import checkmo.support.ApiTestSupport;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -50,9 +49,6 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
 
     @MockitoBean
     ClubManagementAPI clubManagementAPI;
-
-    @Autowired
-    BookStoryRepository bookStoryRepository;
 
     @Autowired
     CommentRepository commentRepository;
@@ -270,6 +266,81 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
     }
 
     @Test
+    void bookStorySitemapReturnsPublishedMetadataOnly() {
+        TestUser author = createUser();
+        Long olderPublishedId = createBookStory(author, "공개 책 이야기 1", "사이트맵에 포함될 공개 책 이야기입니다.", "PUBLISHED");
+        Long newerPublishedId = createBookStory(author, "공개 책 이야기 2", "사이트맵에 포함될 더 최신 공개 책 이야기입니다.", "PUBLISHED");
+        createBookStory(author, "임시 저장 책 이야기", "초안은 사이트맵에서 제외됩니다.", "DRAFT");
+        Long deletedId = createBookStory(author, "삭제된 책 이야기", "삭제된 글은 사이트맵에서 제외됩니다.", "PUBLISHED");
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .delete("/api/v1/book-stories/{bookStoryId}", deletedId)
+                .then()
+                .statusCode(200);
+
+        List<Map<String, Object>> items = given()
+                .when()
+                .get("/api/v1/book-stories/sitemap")
+                .then()
+                .statusCode(200)
+                .body("result.pageSize", equalTo(1000))
+                .body("result.hasNext", equalTo(false))
+                .extract()
+                .path("result.items");
+
+        assertThat(items).hasSize(2);
+        assertThat(items.get(0).keySet()).containsExactly("id", "updatedAt");
+        assertThat(items).extracting(item -> ((Number) item.get("id")).longValue())
+                .containsExactly(newerPublishedId, olderPublishedId);
+
+        given()
+                .queryParam("limit", 1)
+                .when()
+                .get("/api/v1/book-stories/sitemap")
+                .then()
+                .statusCode(200)
+                .body("result.items.size()", equalTo(1))
+                .body("result.pageSize", equalTo(1))
+                .body("result.hasNext", equalTo(true))
+                .body("result.nextCursor", equalTo(newerPublishedId.intValue()));
+
+        given()
+                .queryParam("limit", 999999)
+                .when()
+                .get("/api/v1/book-stories/sitemap")
+                .then()
+                .statusCode(200)
+                .body("result.pageSize", equalTo(5000));
+
+        given()
+                .queryParam("limit", 0)
+                .when()
+                .get("/api/v1/book-stories/sitemap")
+                .then()
+                .statusCode(400);
+    }
+
+    private Long createBookStory(TestUser author, String title, String description, String status) {
+        Number storyId = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "isbn", ISBN,
+                        "title", title,
+                        "description", description,
+                        "status", status
+                ))
+                .when()
+                .post("/api/v1/book-stories")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("result");
+        return storyId.longValue();
+    }
+
+    @Test
     void newsListMyListAndDetailUseH2Rows() {
         TestUser user = createUser();
         News news = newsRepository.save(News.builder()
@@ -293,6 +364,92 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .then().statusCode(200).body("result.title", equalTo("서비스 소식"));
         given().when().get("/api/v1/news/{newsId}", 999999)
                 .then().statusCode(404);
+    }
+
+    @Test
+    void newsSitemapReturnsPublishedPromotionMetadataOnly() {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        News olderPromotion = newsRepository.save(News.builder()
+                .title("현재 프로모션 소식 1")
+                .requesterEmail("requester-1@example.com")
+                .content("사이트맵에 포함될 현재 프로모션 소식입니다.")
+                .publishStartAt(today.minusDays(1))
+                .publishEndAt(today.plusDays(1))
+                .carousel(NewsCarousel.PROMOTION)
+                .build());
+        News newerPromotion = newsRepository.save(News.builder()
+                .title("현재 프로모션 소식 2")
+                .requesterEmail("requester-2@example.com")
+                .content("사이트맵에 포함될 더 최신 현재 프로모션 소식입니다.")
+                .publishStartAt(today.minusDays(1))
+                .publishEndAt(today.plusDays(1))
+                .carousel(NewsCarousel.PROMOTION)
+                .build());
+        newsRepository.save(News.builder()
+                .title("현재 일반 소식")
+                .requesterEmail("requester-3@example.com")
+                .content("일반 소식은 사이트맵에서 제외됩니다.")
+                .publishStartAt(today.minusDays(1))
+                .publishEndAt(today.plusDays(1))
+                .carousel(NewsCarousel.GENERAL)
+                .build());
+        newsRepository.save(News.builder()
+                .title("만료된 프로모션 소식")
+                .requesterEmail("requester-4@example.com")
+                .content("만료된 프로모션은 사이트맵에서 제외됩니다.")
+                .publishStartAt(today.minusDays(3))
+                .publishEndAt(today.minusDays(1))
+                .carousel(NewsCarousel.PROMOTION)
+                .build());
+        newsRepository.save(News.builder()
+                .title("미래 프로모션 소식")
+                .requesterEmail("requester-5@example.com")
+                .content("미래 프로모션은 사이트맵에서 제외됩니다.")
+                .publishStartAt(today.plusDays(1))
+                .publishEndAt(today.plusDays(3))
+                .carousel(NewsCarousel.PROMOTION)
+                .build());
+
+        List<Map<String, Object>> items = given()
+                .when()
+                .get("/api/v1/news/sitemap")
+                .then()
+                .statusCode(200)
+                .body("result.pageSize", equalTo(1000))
+                .body("result.hasNext", equalTo(false))
+                .extract()
+                .path("result.items");
+
+        assertThat(items).hasSize(2);
+        assertThat(items.get(0).keySet()).containsExactly("id", "updatedAt");
+        assertThat(items).extracting(item -> ((Number) item.get("id")).longValue())
+                .containsExactly(newerPromotion.getId(), olderPromotion.getId());
+
+        given()
+                .queryParam("limit", 1)
+                .when()
+                .get("/api/v1/news/sitemap")
+                .then()
+                .statusCode(200)
+                .body("result.items.size()", equalTo(1))
+                .body("result.pageSize", equalTo(1))
+                .body("result.hasNext", equalTo(true))
+                .body("result.nextCursor", equalTo(newerPromotion.getId().intValue()));
+
+        given()
+                .queryParam("limit", 999999)
+                .when()
+                .get("/api/v1/news/sitemap")
+                .then()
+                .statusCode(200)
+                .body("result.pageSize", equalTo(5000));
+
+        given()
+                .queryParam("limit", 0)
+                .when()
+                .get("/api/v1/news/sitemap")
+                .then()
+                .statusCode(400);
     }
 
     @Test

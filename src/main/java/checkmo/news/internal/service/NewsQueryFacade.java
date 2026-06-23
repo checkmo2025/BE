@@ -1,5 +1,6 @@
 package checkmo.news.internal.service;
 
+import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -77,6 +78,17 @@ public class NewsQueryFacade {
                 .nextCursor(newsCursorResult.nextCursor())
                 .pageSize(DEFAULT_PAGE_SIZE)
                 .build();
+    }
+
+    public SitemapResponseDTO.Page fetchNewsSitemap(Long cursorId, Integer limit) {
+        int pageSize = SitemapResponseDTO.normalizeLimit(limit);
+        CursorResult<SitemapResponseDTO.Item> sitemapCursorResult = CursorPagingHelper.getPage(
+                requestedPageSize -> newsQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
+                SitemapResponseDTO.Item::id,
+                pageSize
+        );
+
+        return SitemapResponseDTO.Page.from(sitemapCursorResult, pageSize);
     }
 
     public NewsResponseDTO.AdminNewsList fetchNewsListForAdmin(String keyword, int page) {
