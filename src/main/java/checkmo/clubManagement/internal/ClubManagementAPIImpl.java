@@ -137,7 +137,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
         if (clubMembers.size() != clubMemberIds.size()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND);
         }
-        return ClubManagementConverter.toMembereshipDTOMap(clubMembers);
+        return ClubManagementConverter.toMembershipDTOMap(clubMembers);
     }
 
     @Override
