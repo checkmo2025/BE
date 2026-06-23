@@ -1,10 +1,10 @@
 package checkmo.news.internal.service.query;
 
-import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.news.internal.entity.News;
 import checkmo.news.internal.exception.NewsErrorStatus;
 import checkmo.news.internal.exception.NewsException;
 import checkmo.news.internal.repository.NewsRepository;
+import checkmo.news.web.dto.NewsResponseDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,7 +33,7 @@ public class NewsQueryService {
         return newsRepository.searchMyNews(requesterEmail, cursorId, pageSize);
     }
 
-    public List<SitemapResponseDTO.Item> retrieveSitemapItems(Long cursorId, int pageSize) {
+    public List<NewsResponseDTO.SitemapItem> retrieveSitemapItems(Long cursorId, int pageSize) {
         return newsRepository.findPromotionSitemapItems(cursorId, pageSize);
     }
 

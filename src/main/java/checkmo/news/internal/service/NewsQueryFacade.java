@@ -1,6 +1,5 @@
 package checkmo.news.internal.service;
 
-import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.member.MemberAPI;
@@ -25,6 +24,8 @@ public class NewsQueryFacade {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
     public static final int ADMIN_PAGE_SIZE = 12;
+    private static final int DEFAULT_SITEMAP_LIMIT = 1000;
+    private static final int MAX_SITEMAP_LIMIT = 5000;
 
     private final NewsQueryService newsQueryService;
     private final MemberAPI memberAPI;
@@ -80,15 +81,30 @@ public class NewsQueryFacade {
                 .build();
     }
 
-    public SitemapResponseDTO.Page fetchNewsSitemap(Long cursorId, Integer limit) {
-        int pageSize = SitemapResponseDTO.normalizeLimit(limit);
-        CursorResult<SitemapResponseDTO.Item> sitemapCursorResult = CursorPagingHelper.getPage(
+    public NewsResponseDTO.SitemapPage fetchNewsSitemap(Long cursorId, Integer limit) {
+        int pageSize = normalizeSitemapLimit(limit);
+        CursorResult<NewsResponseDTO.SitemapItem> sitemapCursorResult = CursorPagingHelper.getPage(
                 requestedPageSize -> newsQueryService.retrieveSitemapItems(cursorId, requestedPageSize),
-                SitemapResponseDTO.Item::id,
+                NewsResponseDTO.SitemapItem::getId,
                 pageSize
         );
 
-        return SitemapResponseDTO.Page.from(sitemapCursorResult, pageSize);
+        return NewsResponseDTO.SitemapPage.builder()
+                .items(sitemapCursorResult.content())
+                .hasNext(sitemapCursorResult.hasNext())
+                .nextCursor(sitemapCursorResult.nextCursor())
+                .pageSize(pageSize)
+                .build();
+    }
+
+    private int normalizeSitemapLimit(Integer limit) {
+        if (limit == null) {
+            return DEFAULT_SITEMAP_LIMIT;
+        }
+        if (limit < 1) {
+            throw new IllegalArgumentException("Sitemap limit must be at least 1.");
+        }
+        return Math.min(limit, MAX_SITEMAP_LIMIT);
     }
 
     public NewsResponseDTO.AdminNewsList fetchNewsListForAdmin(String keyword, int page) {

@@ -2,7 +2,6 @@ package checkmo.news.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.sitemap.SitemapResponseDTO;
 import checkmo.news.internal.service.NewsQueryFacade;
 import checkmo.news.web.dto.NewsResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,7 +66,7 @@ public class NewsController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
     })
     @GetMapping("/sitemap")
-    public ApiResponse<SitemapResponseDTO.Page> getNewsSitemap(
+    public ApiResponse<NewsResponseDTO.SitemapPage> getNewsSitemap(
             @RequestParam(required = false) Long cursorId,
             @RequestParam(required = false) @Min(1) Integer limit
     ) {

@@ -3,6 +3,7 @@ package checkmo.news.web.dto;
 import checkmo.news.internal.entity.NewsCarousel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class NewsResponseDTO {
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SitemapPage {
+        private List<SitemapItem> items;
+        private boolean hasNext;
+        private Long nextCursor;
+        private int pageSize;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SitemapItem {
+        private Long id;
+        private LocalDateTime updatedAt;
+    }
 
     @Getter
     @NoArgsConstructor
