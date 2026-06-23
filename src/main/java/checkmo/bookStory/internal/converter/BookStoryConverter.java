@@ -2,6 +2,7 @@ package checkmo.bookStory.internal.converter;
 
 import checkmo.book.BookExternalDTO;
 import checkmo.bookStory.internal.entity.BookStory;
+import checkmo.bookStory.internal.entity.BookStoryStatus;
 import checkmo.bookStory.internal.entity.Comment;
 import checkmo.bookStory.internal.repository.projection.BookStoryPrevNextProjection;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
@@ -9,6 +10,7 @@ import checkmo.bookStory.web.dto.BookStoryResponseDTO;
 import checkmo.member.MemberExternalDTO;
 import checkmo.member.MemberExternalDTO.BasicInfoWithFollow;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -22,9 +24,9 @@ public class BookStoryConverter {
             BookStoryRequestDTO.BookStoryCreate request,
             String memberId,
             String bookId,
-            checkmo.bookStory.internal.entity.BookStoryStatus status
+            BookStoryStatus status
     ) {
-        return checkmo.bookStory.internal.entity.BookStory.builder()
+        return BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .status(status)
@@ -104,7 +106,7 @@ public class BookStoryConverter {
     public static List<BookStoryResponseDTO.CommentInfo> toCommentDetailList(
             List<Comment> comments,
             String currentMemberId,
-            java.util.Map<String, MemberExternalDTO.BasicInfo> memberInfoMap,
+            Map<String, MemberExternalDTO.BasicInfo> memberInfoMap,
             Set<String> blockedMemberIds
     ) {
         return comments.stream()
