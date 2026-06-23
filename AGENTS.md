@@ -90,6 +90,8 @@ checkmo/
 
 - Split work into the smallest practical stages so the user can keep understanding the code as it changes.
 - Each stage should have one clear purpose, such as a shared DTO, one module endpoint, one focused test change, or one documentation update.
+- Keep stage scope intentionally small: prefer one module, one file group, one behavior, or one cleanup category per stage.
+- If two changes can be reviewed, verified, or reverted independently, split them into separate stages instead of grouping them for convenience.
 - Avoid changing multiple modules in the same stage when the work can be split by module.
 - After completing each stage, report:
   - changed files
