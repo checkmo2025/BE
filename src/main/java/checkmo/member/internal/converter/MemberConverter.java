@@ -1,6 +1,5 @@
 package checkmo.member.internal.converter;
 
-import checkmo.member.MemberExternalDTO;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberBlock;
 import checkmo.member.web.dto.MemberResponseDTO.*;
@@ -9,14 +8,6 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberConverter {
-
-    public static BasicInfoWithDescription toMemberProfileWithProfileImage(Member member) {
-        return BasicInfoWithDescription.builder()
-                .nickname(member.getNickName())
-                .description(member.getDescription())
-                .profileImageUrl(member.getImgUrl())
-                .build();
-    }
 
     public static DetailInfo toMemberProfileWithCategory(Member member) {
         return DetailInfo.builder()
@@ -42,16 +33,6 @@ public class MemberConverter {
                 .following(isFollowing)
                 .followerCount(followerCount)
                 .followingCount(followingCount)
-                .build();
-    }
-
-    public static MemberExternalDTO.BasicInfoWithFollow toMemberProfileWithFollowStatus(
-            BasicInfoWithFollow profile
-    ) {
-        return MemberExternalDTO.BasicInfoWithFollow.builder()
-                .nickname(profile.getNickname())
-                .profileImageUrl(profile.getProfileImageUrl())
-                .following(profile.isFollowing())
                 .build();
     }
 
