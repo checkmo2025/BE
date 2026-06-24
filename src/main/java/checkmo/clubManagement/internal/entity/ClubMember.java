@@ -131,11 +131,21 @@ public class ClubMember extends BaseEntity {
         }
     }
 
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     *
+     * 클럽 멤버 자기 자신 여부 확인 전용 메서드
+     */
     boolean isSameMember(ClubMember other) {
         return this == other || (this.id != null && this.id.equals(other.getId()));
     }
 
-    public void updateStatus(ClubMemberStatus newStatus) {
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     *
+     * 클럽 내부 권한 변경 전용 상태 변경 메서드
+     */
+    void updateStatus(ClubMemberStatus newStatus) {
         this.clubMemberStatus = newStatus;
     }
 
