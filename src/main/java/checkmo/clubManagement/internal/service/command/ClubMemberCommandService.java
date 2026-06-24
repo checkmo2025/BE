@@ -64,7 +64,7 @@ public class ClubMemberCommandService {
         switch (request.getCommand()) {
             case APPROVE -> approveJoin(club, target, now);
             case REJECT -> rejectJoin(club, target);
-            case CHANGE_ROLE -> changeRole(actor, target, request.getStatus());
+            case CHANGE_ROLE -> target.changeRoleBy(actor, request.getStatus());
             case TRANSFER_OWNER -> transferOwner(club, actor, target);
             case KICK -> kickMember(club, actor, target, now);
         }
@@ -86,19 +86,6 @@ public class ClubMemberCommandService {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
         club.removeMember(target);
-    }
-
-    private void changeRole(ClubMember actor, ClubMember target, ClubMemberStatus newStatus) {
-        if (actor.getId().equals(target.getId())) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE);
-        }
-        if (!target.isActive()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
-        if (target.isOwner()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED);
-        }
-        target.updateStatus(newStatus);
     }
 
     private void transferOwner(Club club, ClubMember actor, ClubMember target) {

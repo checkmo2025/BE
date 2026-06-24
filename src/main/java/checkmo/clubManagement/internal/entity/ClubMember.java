@@ -117,6 +117,23 @@ public class ClubMember extends BaseEntity {
         this.endedAt = now;
     }
 
+    public void changeRoleBy(ClubMember actor, ClubMemberStatus newStatus) {
+        if (isSameMember(actor)) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE);
+        }
+        if (!this.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+        }
+        if (this.isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED);
+        }
+        this.clubMemberStatus = newStatus;
+    }
+
+    private boolean isSameMember(ClubMember other) {
+        return this == other || (this.id != null && this.id.equals(other.getId()));
+    }
+
     public void updateStatus(ClubMemberStatus newStatus) {
         this.clubMemberStatus = newStatus;
     }
