@@ -120,63 +120,6 @@ class ClubMemberTest {
                 );
     }
 
-    @Test
-    void 자신의_역할은_변경할_수_없다() {
-        ClubMember actor = clubMember(1L, ClubMemberStatus.STAFF);
-
-        assertThatThrownBy(() -> actor.changeRoleBy(actor, ClubMemberStatus.MEMBER))
-                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
-                        assertThat(exception.getErrorCode())
-                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE)
-                );
-    }
-
-    @Test
-    void 비활성_회원의_역할은_변경할_수_없다() {
-        ClubMember actor = clubMember(1L, ClubMemberStatus.STAFF);
-        ClubMember target = clubMember(2L, ClubMemberStatus.WITHDRAWN);
-
-        assertThatThrownBy(() -> target.changeRoleBy(actor, ClubMemberStatus.STAFF))
-                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
-                        assertThat(exception.getErrorCode())
-                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE)
-                );
-    }
-
-    @Test
-    void 비운영진은_회원_역할을_변경할_수_없다() {
-        ClubMember actor = clubMember(1L, ClubMemberStatus.MEMBER);
-        ClubMember target = clubMember(2L, ClubMemberStatus.WITHDRAWN);
-
-        assertThatThrownBy(() -> target.changeRoleBy(actor, ClubMemberStatus.STAFF))
-                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
-                        assertThat(exception.getErrorCode())
-                                .isEqualTo(ClubManagementErrorStatus.CLUB_STAFF_ONLY)
-                );
-    }
-
-    @Test
-    void 클럽장의_역할은_변경할_수_없다() {
-        ClubMember actor = clubMember(1L, ClubMemberStatus.STAFF);
-        ClubMember target = clubMember(2L, ClubMemberStatus.OWNER);
-
-        assertThatThrownBy(() -> target.changeRoleBy(actor, ClubMemberStatus.STAFF))
-                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
-                        assertThat(exception.getErrorCode())
-                                .isEqualTo(ClubManagementErrorStatus.CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED)
-                );
-    }
-
-    @Test
-    void 활성_회원의_역할을_변경할_수_있다() {
-        ClubMember actor = clubMember(1L, ClubMemberStatus.STAFF);
-        ClubMember target = clubMember(2L, ClubMemberStatus.MEMBER);
-
-        target.changeRoleBy(actor, ClubMemberStatus.STAFF);
-
-        assertThat(target.getClubMemberStatus()).isEqualTo(ClubMemberStatus.STAFF);
-    }
-
     private ClubMember clubMember(Long id, ClubMemberStatus status) {
         return ClubMember.builder()
                 .id(id)

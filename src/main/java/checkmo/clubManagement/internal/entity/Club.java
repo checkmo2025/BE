@@ -157,6 +157,24 @@ public class Club extends BaseEntity {
         return transferOwnerIfNeeded(actor, target);
     }
 
+    public void changeMemberRoleBy(ClubMember actor, ClubMember target, ClubMemberStatus newStatus) {
+        validateStaffMemberInClub(actor);
+        validateMemberInClub(target);
+        if (newStatus != ClubMemberStatus.MEMBER && newStatus != ClubMemberStatus.STAFF) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+        if (target.isSameMember(actor)) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE);
+        }
+        if (!target.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+        }
+        if (target.isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED);
+        }
+        target.updateStatus(newStatus);
+    }
+
     private boolean transferOwnerIfNeeded(ClubMember actor, ClubMember target) {
         if (target.isOwner()) {
             return false;

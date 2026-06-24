@@ -118,6 +118,126 @@ class ClubTest {
     }
 
     @Test
+    void 자신의_역할은_변경할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
+
+        assertThatThrownBy(() -> club.changeMemberRoleBy(actor, actor, ClubMemberStatus.MEMBER))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE)
+                );
+    }
+
+    @Test
+    void 비활성_회원의_역할은_변경할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.WITHDRAWN);
+
+        assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.STAFF))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE)
+                );
+    }
+
+    @Test
+    void 비운영진은_회원_역할을_변경할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.MEMBER);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
+
+        assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.STAFF))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_STAFF_ONLY)
+                );
+    }
+
+    @Test
+    void 클럽장의_역할은_변경할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.OWNER);
+
+        assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.STAFF))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED)
+                );
+    }
+
+    @Test
+    void 역할_변경으로_일반회원과_운영진_외의_상태는_지정할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
+
+        assertSoftly(softly -> {
+            softly.assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.OWNER))
+                    .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                            assertThat(exception.getErrorCode())
+                                    .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
+                    );
+            softly.assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.PENDING))
+                    .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                            assertThat(exception.getErrorCode())
+                                    .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
+                    );
+            softly.assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.WITHDRAWN))
+                    .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                            assertThat(exception.getErrorCode())
+                                    .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
+                    );
+            softly.assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.KICKED))
+                    .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                            assertThat(exception.getErrorCode())
+                                    .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
+                    );
+        });
+    }
+
+    @Test
+    void 다른_클럽의_운영진은_회원_역할을_변경할_수_없다() {
+        Club club = club(1L, true);
+        Club anotherClub = club(2L, true);
+        ClubMember actor = clubMember(anotherClub, 1L, ClubMemberStatus.STAFF);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
+
+        assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.STAFF))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB)
+                );
+    }
+
+    @Test
+    void 다른_클럽의_회원_역할은_변경할_수_없다() {
+        Club club = club(1L, true);
+        Club anotherClub = club(2L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
+        ClubMember target = clubMember(anotherClub, 2L, ClubMemberStatus.MEMBER);
+
+        assertThatThrownBy(() -> club.changeMemberRoleBy(actor, target, ClubMemberStatus.STAFF))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB)
+                );
+    }
+
+    @Test
+    void 활성_회원의_역할을_변경할_수_있다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
+
+        club.changeMemberRoleBy(actor, target, ClubMemberStatus.STAFF);
+
+        assertThat(target.getClubMemberStatus()).isEqualTo(ClubMemberStatus.STAFF);
+    }
+
+    @Test
     void 운영진이어도_클럽장이_아니면_소유권을_이전할_수_없다() {
         Club club = club(1L, true);
         ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);

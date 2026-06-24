@@ -57,7 +57,7 @@ public class ClubMemberCommandService {
         switch (request.getCommand()) {
             case APPROVE -> approveJoin(club, actor, target, now);
             case REJECT -> rejectJoin(club, actor, target);
-            case CHANGE_ROLE -> target.changeRoleBy(actor, request.getStatus());
+            case CHANGE_ROLE -> club.changeMemberRoleBy(actor, target, request.getStatus());
             case TRANSFER_OWNER -> transferOwner(club, actor, target);
             case KICK -> kickMember(club, actor, target, now);
         }
