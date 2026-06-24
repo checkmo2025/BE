@@ -90,6 +90,8 @@ checkmo/
 
 - Split work into the smallest practical stages so the user can keep understanding the code as it changes.
 - Each stage should have one clear purpose, such as a shared DTO, one module endpoint, one focused test change, or one documentation update.
+- Keep stage scope intentionally small: prefer one module, one file group, one behavior, or one cleanup category per stage.
+- If two changes can be reviewed, verified, or reverted independently, split them into separate stages instead of grouping them for convenience.
 - Avoid changing multiple modules in the same stage when the work can be split by module.
 - After completing each stage, report:
   - changed files
@@ -97,8 +99,11 @@ checkmo/
   - verification result
   - remaining risk
   - recommended commit message
-- Wait for the user's confirmation before committing that stage, then continue to the next stage.
-- Do not implement multiple future commit stages ahead of user confirmation. Finish one stage, stop, report, wait for confirmation, commit, then start the next stage.
+- Default workflow is stage-by-stage report, user commit, then wait for the user's explicit request to continue to the next stage.
+- Do not batch all stages into one final commit unless the user explicitly overrides this rule for the current task.
+- After reporting a stage, stop. The user owns committing that stage by default; do not continue into the next stage until the user says they committed or explicitly asks to continue.
+- If the user explicitly asks the agent to commit a stage, commit only that completed stage after confirmation, then stop again and wait for the next-stage request.
+- Do not implement multiple future commit stages ahead of user confirmation. Finish one stage, stop, report, wait for the user's commit or explicit commit instruction, then start the next stage only when requested.
 - Keep commits as close to one stage per commit as practical.
 - Prefer small commits, but do not create commits that leave the project uncompilable or contain meaningless micro-changes.
 - Each commit should be understandable as a standalone review unit.

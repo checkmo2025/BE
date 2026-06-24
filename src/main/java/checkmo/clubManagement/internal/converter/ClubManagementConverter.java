@@ -59,7 +59,7 @@ public class ClubManagementConverter {
                 .build();
     }
 
-    public static Map<Long, MembershipInfo> toMembereshipDTOMap(
+    public static Map<Long, MembershipInfo> toMembershipDTOMap(
             List<ClubMember> clubMembers
     ) {
         return clubMembers.stream()
@@ -81,15 +81,15 @@ public class ClubManagementConverter {
             ClubMember clubMember,
             MemberExternalDTO.DetailInfo memberInfo
     ) {
-        ClubMemberStatus staus = clubMember.getClubMemberStatus();
+        ClubMemberStatus status = clubMember.getClubMemberStatus();
         ClubMemberBuilder builder = ClubResponseDTO.ClubMember.builder()
                 .clubMemberId(clubMember.getId())
                 .detailInfo(memberInfo)
-                .clubMemberStatus(staus.name());
-        if (staus.isJoinInProgress()) {
+                .clubMemberStatus(status.name());
+        if (status.isJoinInProgress()) {
             builder.joinMessage(clubMember.getJoinMessage())
                     .appliedAt(clubMember.getAppliedAt());
-        } else if (staus.isActive()) {
+        } else if (status.isActive()) {
             builder.joinedAt(clubMember.getJoinedAt());
         }
         return builder.build();

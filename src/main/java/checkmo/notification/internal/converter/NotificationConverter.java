@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NotificationConverter {
 
-    public static BasicInfoPreviewList convertToPreviewListDTO(
+    public static BasicInfoPreviewList toPreviewListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
             Map<Long, String> clubNameMap
     ) {
         List<BasicInfo> previewList = notifications.stream()
-                .map(notification -> convertToBasicInfo(notification, senderNicknameMap, clubNameMap))
+                .map(notification -> toBasicInfo(notification, senderNicknameMap, clubNameMap))
                 .toList();
 
         return BasicInfoPreviewList.builder()
@@ -27,7 +27,7 @@ public class NotificationConverter {
                 .build();
     }
 
-    public static BasicInfoList convertToNotificationListDTO(
+    public static BasicInfoList toNotificationListDTO(
             List<Notification> notifications,
             Map<String, String> senderNicknameMap,
             Map<Long, String> clubNameMap,
@@ -35,7 +35,7 @@ public class NotificationConverter {
             int pageSize
     ) {
         var notificationList = notifications.stream()
-                .map(notification -> convertToBasicInfo(notification, senderNicknameMap, clubNameMap))
+                .map(notification -> toBasicInfo(notification, senderNicknameMap, clubNameMap))
                 .toList();
 
         return BasicInfoList.builder()
@@ -46,7 +46,7 @@ public class NotificationConverter {
                 .build();
     }
 
-    private static BasicInfo convertToBasicInfo(
+    private static BasicInfo toBasicInfo(
             Notification notification,
             Map<String, String> senderNicknameMap,
             Map<Long, String> clubNameMap

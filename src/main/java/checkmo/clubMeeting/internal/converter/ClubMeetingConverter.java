@@ -27,7 +27,7 @@ import java.util.Set;
 public class ClubMeetingConverter {
 
     // =====================================================
-    // ?? -> 엔티티 변환
+    // BookShelf 요청 DTO -> 엔티티 변환
     // =====================================================
 
     public static Meeting toMeeting(BookShelfCreate request, Long clubId, String bookId) {
@@ -68,7 +68,7 @@ public class ClubMeetingConverter {
     }
 
     // =====================================================
-    // ?? -> BookshelfDTO 변환
+    // 엔티티/외부 정보 -> Bookshelf 응답 DTO 변환
     // =====================================================
 
     public static BookShelfResponseDTO.TopicDetail toTopicDetailDTO(
@@ -130,7 +130,7 @@ public class ClubMeetingConverter {
     }
 
     // =====================================================
-    // ?? -> MeetingResponseDTO 변환
+    // 엔티티/모임 구성 정보 -> MeetingResponseDTO 변환
     // =====================================================
 
     public static MeetingResponseDTO.Topic toTopicDTO(
@@ -230,7 +230,7 @@ public class ClubMeetingConverter {
     }
 
     // =====================================================
-    // ?? -> ClubMeetingExternalDTO 변환
+    // 엔티티/도서 정보 -> ClubMeetingExternalDTO 변환
     // =====================================================
     public static DetailInfo toMeetingInfoExternalDTO(
             Meeting meeting,
