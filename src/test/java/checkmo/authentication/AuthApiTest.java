@@ -2,6 +2,7 @@ package checkmo.authentication;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -222,7 +223,11 @@ class AuthApiTest extends ApiTestSupport {
                 .extract();
 
         assertJwtCookiesWereSet(response);
-        assertThat(response.jsonPath().getString("result.refreshToken")).isNotBlank();
+        String responseRefreshToken = response.jsonPath().getString("result.refreshToken");
+        assertSoftly(softly -> {
+            softly.assertThat(responseRefreshToken).isNotBlank();
+            softly.assertThat(response.cookie("refreshToken")).isEqualTo(responseRefreshToken);
+        });
     }
 
     @Test
