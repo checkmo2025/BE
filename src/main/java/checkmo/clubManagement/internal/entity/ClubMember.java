@@ -90,6 +90,7 @@ public class ClubMember extends BaseEntity {
         this.joinMessage = message;
         this.appliedAt = now;
         this.joinedAt = (status == ClubMemberStatus.MEMBER) ? now : null;
+        this.endedAt = null;
     }
 
     public void approveJoinBy(ClubMember actor, LocalDateTime now) {

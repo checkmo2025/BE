@@ -26,6 +26,22 @@ class ClubMemberTest {
     }
 
     @Test
+    void 탈퇴한_회원이_재신청하면_종료일을_초기화한다() {
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.MEMBER);
+        clubMember.leave(CHANGED_AT);
+
+        clubMember.reApply(ClubMemberStatus.PENDING, "again", CHANGED_AT.plusDays(1));
+
+        assertSoftly(softly -> {
+            softly.assertThat(clubMember.getClubMemberStatus()).isEqualTo(ClubMemberStatus.PENDING);
+            softly.assertThat(clubMember.getJoinMessage()).isEqualTo("again");
+            softly.assertThat(clubMember.getAppliedAt()).isEqualTo(CHANGED_AT.plusDays(1));
+            softly.assertThat(clubMember.getJoinedAt()).isNull();
+            softly.assertThat(clubMember.getEndedAt()).isNull();
+        });
+    }
+
+    @Test
     void 대기_회원은_가입_승인시_활성_회원이_된다() {
         ClubMember actor = clubMember(99L, ClubMemberStatus.STAFF);
         ClubMember clubMember = clubMember(1L, ClubMemberStatus.PENDING);
