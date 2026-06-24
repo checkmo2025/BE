@@ -37,7 +37,7 @@ public class ClubMemberCommandService {
 
         clubMemberRepository.findByClubIdAndMemberId(club.getId(), memberId)
                 .ifPresentOrElse(existing -> { // 이미 가입 이력이 있는 경우, 재가입
-                            club.reapplyMember(existing, request.getJoinMessage(), now);
+                            club.reApplyMember(existing, request.getJoinMessage(), now);
                             if (club.isOpen() && existing.isActive()) {
                                 publishJoinClubEvent(memberId, club, existing);
                             }

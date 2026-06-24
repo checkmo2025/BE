@@ -74,7 +74,7 @@ public class ClubMember extends BaseEntity {
     }
 
     // 재가입 전용 메서드
-    public void reapply(ClubMemberStatus status, String message, LocalDateTime now) {
+    public void reApply(ClubMemberStatus status, String message, LocalDateTime now) {
         if (this.isActive()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_ALREADY_JOINED);
         }

@@ -143,12 +143,12 @@ public class Club extends BaseEntity {
         return clubMember;
     }
 
-    public void reapplyMember(ClubMember existing, String message, LocalDateTime now) {
+    public void reApplyMember(ClubMember existing, String message, LocalDateTime now) {
         if (existing.getClub() == null || !this.id.equals(existing.getClub().getId())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
         }
         ClubMemberStatus status = decideInitialStatus();
-        existing.reapply(status, message, now);
+        existing.reApply(status, message, now);
     }
 
     public void removeMember(ClubMember clubMember) {
