@@ -37,7 +37,9 @@ Primary modules in this repo:
 ## Service And Facade Roles
 
 - Services are concrete classes; avoid service interfaces unless the project already has a clear local reason.
-- Services keep entity lookup and business rules.
+- Entities own local state transitions and invariants for data they already hold.
+- Services own entity lookup, repository-driven uniqueness/existence checks, transactions, persistence orchestration, event publication, logging, cross-module API calls, and application flow composition.
+- Services may coordinate business use cases, but they should not keep procedural branches for rules that naturally belong to the loaded domain object.
 - Facades compose services, public APIs, converters, paging, filtering, and DTO assembly.
 - Converters keep DTO/entity mapping out of services.
 
