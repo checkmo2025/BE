@@ -216,6 +216,50 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
+    public ClubResponseDTO.ClubParticipantList retrieveClubParticipantList(
+            Long clubId,
+            String requesterId,
+            Long cursorId
+    ) {
+        Club club = clubManagementQueryService.validateClub(clubId);
+        validateClubParticipantListAccess(club, clubId, requesterId);
+
+        CursorResult<ClubMember> clubMemberCursorResult = CursorPagingHelper.getPage(
+                size -> clubMemberQueryService.retrieveClubMembers(clubId, ClubMemberStatus.activeStatuses(), cursorId, size),
+                ClubMember::getId,
+                DEFAULT_PAGE_SIZE
+        );
+        List<ClubMember> clubMembers = clubMemberCursorResult.content();
+        List<String> memberIds = ExtractHelper.extractDistinctList(clubMembers, ClubMember::getMemberId);
+
+        Map<String, MemberExternalDTO.BasicInfoWithFollow> memberInfoMap =
+                memberAPI.fetchMemberBasicInfoWithFollowByMemberId(memberIds, requesterId);
+
+        List<ClubResponseDTO.ClubParticipant> dtoList = clubMembers.stream()
+                .map(cm -> ClubManagementConverter.toClubParticipantDTO(cm, memberInfoMap.get(cm.getMemberId())))
+                .toList();
+
+        return ClubResponseDTO.ClubParticipantList.builder()
+                .clubMembers(dtoList)
+                .totalCount(clubMemberQueryService.countActiveClubMembers(clubId))
+                .hasNext(clubMemberCursorResult.hasNext())
+                .nextCursor(clubMemberCursorResult.nextCursor())
+                .build();
+    }
+
+    private void validateClubParticipantListAccess(Club club, Long clubId, String requesterId) {
+        if (club.isOpen()) {
+            return;
+        }
+
+        boolean activeMember = clubMemberQueryService.findClubMember(clubId, requesterId)
+                .map(ClubMember::isActive)
+                .orElse(false);
+        if (!activeMember) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_PARTICIPANTS_JOIN_REQUIRED);
+        }
+    }
+
     public ClubRecommendationList recommend(String memberId) {
         List<String> memberInterestCategories = memberAPI.fetchInterestCategory(memberId).getCategories();
         EnumSet<ClubInterestCategory> interestCategories = mapToClubInterestCategories(memberInterestCategories);

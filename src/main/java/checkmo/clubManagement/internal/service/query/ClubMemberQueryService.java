@@ -75,6 +75,10 @@ public class ClubMemberQueryService {
         return clubMemberRepository.findByClubIdAndStatuses(clubId, statuses, null, Pageable.unpaged());
     }
 
+    public long countActiveClubMembers(Long clubId) {
+        return clubMemberRepository.countByClubIdAndClubMemberStatusIn(clubId, ClubMemberStatus.activeStatuses());
+    }
+
     public List<String> retrieveActiveMemberIds(Long clubId) {
         return clubMemberRepository.findByClubIdAndStatuses(clubId, ClubMemberStatus.activeStatuses(), null,
                         Pageable.unpaged())

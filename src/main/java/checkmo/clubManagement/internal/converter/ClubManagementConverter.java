@@ -95,6 +95,20 @@ public class ClubManagementConverter {
         return builder.build();
     }
 
+    public static ClubResponseDTO.ClubParticipant toClubParticipantDTO(
+            ClubMember clubMember,
+            MemberExternalDTO.BasicInfoWithFollow memberInfo
+    ) {
+        return ClubResponseDTO.ClubParticipant.builder()
+                .clubMemberId(clubMember.getId())
+                .nickname(memberInfo == null ? null : memberInfo.getNickname())
+                .profileImageUrl(memberInfo == null ? null : memberInfo.getProfileImageUrl())
+                .following(memberInfo != null && memberInfo.isFollowing())
+                .clubMemberStatus(clubMember.getClubMemberStatus().name())
+                .staff(clubMember.isStaff())
+                .build();
+    }
+
     public static ClubResponseDTO.ClubDetail toClubDetailDTO(Club club, boolean isDetail) {
         ClubDetailBuilder builder = ClubResponseDTO.ClubDetail.builder()
                 .clubId(club.getId())

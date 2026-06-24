@@ -38,4 +38,6 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
     List<ClubMember> findByClubIdAndStatuses(Long clubId, EnumSet<ClubMemberStatus> statuses, Long cursorId, Pageable pageable);
 
     List<ClubMember> findAllByMemberIdAndClubIdIn(String memberId, List<Long> clubIds);
+
+    long countByClubIdAndClubMemberStatusIn(Long clubId, EnumSet<ClubMemberStatus> statuses);
 }

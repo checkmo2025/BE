@@ -239,6 +239,26 @@ public class ClubController {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubMemberList(clubId, memberId, status, cursorId));
     }
 
+    @Operation(summary = "독서 모임 참여자 목록 조회", description = "공개 모임은 로그인 회원이 조회할 수 있고, 비공개 모임은 가입한 모임 회원만 조회할 수 있습니다.")
+    @Parameters({
+            @Parameter(name = "clubId", description = "조회할 독서 모임 ID", required = true, example = "1"),
+            @Parameter(name = "cursorId", description = "커서 기반 페이지네이션을 위한 마지막 독서 모임 회원 ID", required = false, example = "10"),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요합니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "비공개 모임의 회원 목록은 가입 후 조회할 수 있습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 독서 모임입니다."),
+    })
+    @GetMapping("/{clubId}/participants")
+    public ApiResponse<ClubResponseDTO.ClubParticipantList> getClubParticipants(
+            @PathVariable Long clubId,
+            @RequestParam(required = false) Long cursorId,
+            @CurrentId String memberId
+    ) {
+        return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubParticipantList(clubId, memberId, cursorId));
+    }
+
     @Operation(summary = "[운영진] 독서 모임 회원 등급 수정", description = "독서 모임 회원의 등급을 수정합니다.")
     @Parameters({
             @Parameter(name = "clubId", description = "수정할 독서 모임 ID", required = true, example = "1"),

@@ -186,6 +186,30 @@ public class ClubResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class ClubParticipantList {
+        private List<ClubParticipant> clubMembers;
+        private long totalCount;
+        private boolean hasNext;
+        private Long nextCursor;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ClubParticipant {
+        private Long clubMemberId;
+        private String nickname;
+        private String profileImageUrl;
+        private boolean following;
+        private String clubMemberStatus;
+        private boolean staff;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class ClubRecommendationList {
         private List<ClubRecommendation> recommendations;
     }
