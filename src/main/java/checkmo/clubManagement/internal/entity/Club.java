@@ -3,7 +3,6 @@ package checkmo.clubManagement.internal.entity;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.common.BaseEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -15,7 +14,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,11 +72,12 @@ public class Club extends BaseEntity {
     @CollectionTable(name = "club_contacts", joinColumns = @JoinColumn(name = "club_id"))
     private List<ClubContact> links = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ClubMember> clubMembers = new ArrayList<>();
+    public void initializeForCreation(Set<ClubInterestCategory> categories, LocalDateTime now) {
+        initializeLastActivityAt(now);
+        updateInterestCategories(categories);
+    }
 
-    public void initializeLastActivityAt(LocalDateTime now) {
+    private void initializeLastActivityAt(LocalDateTime now) {
         if (this.lastActivityAt == null) {
             this.lastActivityAt = now;
         }
@@ -129,34 +128,91 @@ public class Club extends BaseEntity {
     }
 
     // ============= 클럽 멤버 관련 메서드 ==============
-    public void addOwner(String memberId, LocalDateTime now) {
-        ClubMember clubMember = ClubMember.ownerOf(memberId, now);
-        this.clubMembers.add(clubMember);
-        clubMember.setClub(this);
+    public ClubMember createOwnerMember(String memberId, LocalDateTime now) {
+        return ClubMember.ownerOf(this, memberId, now);
     }
 
-    public ClubMember applyMember(String memberId, String joinMessage, LocalDateTime now) {
+    public ClubMember applyForMembership(String memberId, String joinMessage, LocalDateTime now) {
         ClubMemberStatus status = decideInitialStatus();
-        ClubMember clubMember = ClubMember.apply(memberId, status, joinMessage, now);
-        this.clubMembers.add(clubMember);
-        clubMember.setClub(this);
-        return clubMember;
+        return ClubMember.applyTo(this, memberId, status, joinMessage, now);
     }
 
-    public void reapplyMember(ClubMember existing, String message, LocalDateTime now) {
-        if (existing.getClub() == null || !this.id.equals(existing.getClub().getId())) {
+    public void reApplyMember(ClubMember existing, String message, LocalDateTime now) {
+        validateMemberInClub(existing);
+        ClubMemberStatus status = decideInitialStatus();
+        existing.reApply(status, message, now);
+    }
+
+    public void validateJoinRejection(ClubMember actor, ClubMember target) {
+        validateStaffMemberInClub(actor);
+        validateMemberInClub(target);
+        if (!target.isJoinInProgress()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+    }
+
+    public boolean transferOwnerBy(ClubMember actor, ClubMember target) {
+        validateOwnerMemberInClub(actor);
+        validateActiveMemberInClub(target);
+        return transferOwnerIfNeeded(actor, target);
+    }
+
+    public void changeMemberRoleBy(ClubMember actor, ClubMember target, ClubMemberStatus newStatus) {
+        validateStaffMemberInClub(actor);
+        validateMemberInClub(target);
+        if (newStatus != ClubMemberStatus.MEMBER && newStatus != ClubMemberStatus.STAFF) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+        if (target.isSameMember(actor)) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE);
+        }
+        if (!target.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+        }
+        if (target.isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED);
+        }
+        target.updateStatus(newStatus);
+    }
+
+    private boolean transferOwnerIfNeeded(ClubMember actor, ClubMember target) {
+        if (target.isOwner()) {
+            return false;
+        }
+        actor.updateStatus(ClubMemberStatus.STAFF);
+        target.updateStatus(ClubMemberStatus.OWNER);
+        return true;
+    }
+
+    private void validateStaffMemberInClub(ClubMember actor) {
+        validateMemberInClub(actor);
+        if (!actor.isStaff()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
+        }
+    }
+
+    private void validateOwnerMemberInClub(ClubMember actor) {
+        validateMemberInClub(actor);
+        if (!actor.isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ONLY);
+        }
+    }
+
+    private void validateActiveMemberInClub(ClubMember target) {
+        validateMemberInClub(target);
+        if (!target.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+        }
+    }
+
+    private void validateMemberInClub(ClubMember clubMember) {
+        if (clubMember.getClub() == null || !isSameClub(clubMember.getClub())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
         }
-        ClubMemberStatus status = decideInitialStatus();
-        existing.reapply(status, message, now);
     }
 
-    public void removeMember(ClubMember clubMember) {
-        if (clubMember.getClub() == null || !this.id.equals(clubMember.getClub().getId())) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
-        }
-        this.clubMembers.remove(clubMember);
-        clubMember.setClub(null);
+    private boolean isSameClub(Club other) {
+        return this == other || (this.id != null && this.id.equals(other.getId()));
     }
 
     private ClubMemberStatus decideInitialStatus() {

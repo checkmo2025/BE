@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.not;
 
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
+import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubMeeting.internal.entity.BookReview;
@@ -147,6 +148,8 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .body(Map.of("command", "CHANGE_ROLE", "status", "STAFF"))
                 .when().patch("/api/v1/clubs/{clubId}/members/{clubMemberId}", club.getId(), joinedMember.getId())
                 .then().statusCode(200);
+        assertThat(clubMemberRepository.findById(joinedMember.getId()).orElseThrow().getClubMemberStatus())
+                .isEqualTo(ClubMemberStatus.STAFF);
 
         given().cookie(accessTokenCookie(member))
                 .when().get("/api/v1/clubs/{clubId}/me", club.getId())
@@ -168,7 +171,8 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
 
         given().cookie(accessTokenCookie(owner))
                 .when().delete("/api/v1/clubs/{clubId}/leave", club.getId())
-                .then().statusCode(403);
+                .then().statusCode(403)
+                .body("code", equalTo("CLUB_MEMBER_405"));
 
         given().cookie(accessTokenCookie(owner))
                 .when().delete("/api/v1/clubs/{clubId}", club.getId())

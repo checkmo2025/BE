@@ -19,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Builder
@@ -46,15 +45,19 @@ public class ClubMember extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
-    @Setter
     private Club club;
 
     @Column(name = "member_id", nullable = false)
     private String memberId;
 
-    // 정적 팩토리 메서드 - 클럽장 전용 메서드
-    public static ClubMember ownerOf(String memberId, LocalDateTime now) {
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     *
+     * 클럽장 전용 메서드
+     */
+    static ClubMember ownerOf(Club club, String memberId, LocalDateTime now) {
         return ClubMember.builder()
+                .club(club)
                 .memberId(memberId)
                 .clubMemberStatus(ClubMemberStatus.OWNER)
                 .appliedAt(now)
@@ -62,9 +65,14 @@ public class ClubMember extends BaseEntity {
                 .build();
     }
 
-    // 정적 팩토리 메서드 - 신규 가입 신청 전용 메서드
-    public static ClubMember apply(String memberId, ClubMemberStatus status, String message, LocalDateTime now) {
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     *
+     * 신규 가입 신청 전용 메서드
+     */
+    static ClubMember applyTo(Club club, String memberId, ClubMemberStatus status, String message, LocalDateTime now) {
         return ClubMember.builder()
+                .club(club)
                 .memberId(memberId)
                 .clubMemberStatus(status)
                 .joinMessage(message)
@@ -74,7 +82,7 @@ public class ClubMember extends BaseEntity {
     }
 
     // 재가입 전용 메서드
-    public void reapply(ClubMemberStatus status, String message, LocalDateTime now) {
+    public void reApply(ClubMemberStatus status, String message, LocalDateTime now) {
         if (this.isActive()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_ALREADY_JOINED);
         }
@@ -82,10 +90,11 @@ public class ClubMember extends BaseEntity {
         this.joinMessage = message;
         this.appliedAt = now;
         this.joinedAt = (status == ClubMemberStatus.MEMBER) ? now : null;
+        this.endedAt = null;
     }
 
-    // 가입 승인 전용 메서드
-    public void join(LocalDateTime now) {
+    public void approveJoinBy(ClubMember actor, LocalDateTime now) {
+        validateStaff(actor);
         if (!this.getClubMemberStatus().isJoinInProgress()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
@@ -105,8 +114,8 @@ public class ClubMember extends BaseEntity {
         this.endedAt = now;
     }
 
-    // 강퇴 전용 메서드
-    public void kick(LocalDateTime now) {
+    public void kickBy(ClubMember actor, LocalDateTime now) {
+        validateStaff(actor);
         if (this.getClubMemberStatus().isOwner()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_CANNOT_BE_KICKED);
         }
@@ -117,7 +126,38 @@ public class ClubMember extends BaseEntity {
         this.endedAt = now;
     }
 
-    public void updateStatus(ClubMemberStatus newStatus) {
+    private void validateStaff(ClubMember actor) {
+        if (!isSameClub(actor)) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
+        }
+        if (!actor.isStaff()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
+        }
+    }
+
+    private boolean isSameClub(ClubMember other) {
+        if (other == null || this.club == null || other.getClub() == null) {
+            return false;
+        }
+        return this.club == other.getClub()
+                || (this.club.getId() != null && this.club.getId().equals(other.getClub().getId()));
+    }
+
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     *
+     * 클럽 멤버 자기 자신 여부 확인 전용 메서드
+     */
+    boolean isSameMember(ClubMember other) {
+        return this == other || (this.id != null && this.id.equals(other.getId()));
+    }
+
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     *
+     * 클럽 내부 권한 변경 전용 상태 변경 메서드
+     */
+    void updateStatus(ClubMemberStatus newStatus) {
         this.clubMemberStatus = newStatus;
     }
 

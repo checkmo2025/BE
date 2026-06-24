@@ -7,6 +7,7 @@ import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
+import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
@@ -31,6 +32,8 @@ public class ClubManagementCommandService {
 
     private final ClubRepository clubRepository;
 
+    private final ClubMemberRepository clubMemberRepository;
+
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public void createClub(String memberId, ClubDetail request) {
@@ -38,12 +41,13 @@ public class ClubManagementCommandService {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
         }
 
+        LocalDateTime now = LocalDateTime.now();
         Club club = ClubManagementConverter.toClub(request);
-        club.initializeLastActivityAt(LocalDateTime.now());
-        club.updateInterestCategories(new HashSet<>(request.getCategory()));
-        club.addOwner(memberId, LocalDateTime.now());
+        club.initializeForCreation(new HashSet<>(request.getCategory()), now);
 
         clubRepository.save(club);
+        ClubMember owner = club.createOwnerMember(memberId, now);
+        clubMemberRepository.save(owner);
     }
 
     public void updateClub(Long clubId, String memberId, ClubDetail request) {
@@ -83,10 +87,8 @@ public class ClubManagementCommandService {
 
         log.info("클럽 삭제 시작: clubId={}, memberId={}, deletedAt={}", clubId, memberId, LocalDateTime.now());
         publishDeletedClubEvent(club.getId());
+        clubMemberRepository.deleteByClubId(clubId);
         clubRepository.delete(club);
-        // Club을 삭제함으로써 Cascade.REMOVE가 동작되어 ClubManagement 모듈 내 모든 엔티티(클럽 멤버, 책 추천, 클럽 카테고리) 제거
-        // Meeting을 삭제함으로써 Cascade.REMOVE가 동작되어 ClubMeeting 모듈 내 모든 엔티티(토픽, 팀, 팀 토픽, 멤터 팀, 한줄평) 제거
-        // Notice를 삭제함으로써 Cascade.REMOVE가 동작되어 ClubNotice 모듈 내 모든 엔티티(투표, 회원 투표) 제거 (단, 비즈니스 요구사항 변경에 따라 Notice와 Vote는 연관관계 수정되어야 함 -2025.11.12 기준-)
     }
 
     private void publishDeletedClubEvent(Long clubId) {
