@@ -3,8 +3,6 @@ package checkmo.clubManagement.internal.service.command;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
-import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.service.query.ClubManagementQueryService;
 import checkmo.clubManagement.internal.service.query.ClubMemberQueryService;
@@ -53,16 +51,12 @@ public class ClubMemberCommandService {
     public void updateClubMemberStatus(Long clubId, String actorId, Long targetId, ClubMemberStatusAction request) {
         Club club = clubManagementQueryService.validateClub(clubId);
         ClubMember actor = clubMemberQueryService.validateClubMember(clubId, actorId);
-        if (!actor.isStaff()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
-        }
-
         ClubMember target = clubMemberQueryService.validateClubMember(clubId, targetId);
         LocalDateTime now = LocalDateTime.now();
 
         switch (request.getCommand()) {
-            case APPROVE -> approveJoin(club, target, now);
-            case REJECT -> rejectJoin(club, target);
+            case APPROVE -> approveJoin(club, actor, target, now);
+            case REJECT -> rejectJoin(club, actor, target);
             case CHANGE_ROLE -> target.changeRoleBy(actor, request.getStatus());
             case TRANSFER_OWNER -> transferOwner(club, actor, target);
             case KICK -> kickMember(club, actor, target, now);
@@ -75,25 +69,25 @@ public class ClubMemberCommandService {
         clubMember.leave(LocalDateTime.now());
     }
 
-    private void approveJoin(Club club, ClubMember target, LocalDateTime now) {
-        target.approveJoin(now);
+    private void approveJoin(Club club, ClubMember actor, ClubMember target, LocalDateTime now) {
+        target.approveJoinBy(actor, now);
         publishJoinClubEvent(target.getMemberId(), club, target);
     }
 
-    private void rejectJoin(Club club, ClubMember target) {
-        club.rejectJoin(target);
+    private void rejectJoin(Club club, ClubMember actor, ClubMember target) {
+        club.validateJoinRejection(actor, target);
         clubMemberRepository.delete(target);
     }
 
     private void transferOwner(Club club, ClubMember actor, ClubMember target) {
-        if (club.transferOwner(actor, target)) {
+        if (club.transferOwnerBy(actor, target)) {
             log.info("{} Club 개설자 권한 이전: originalOwnerId={}, newOwnerId={}",
                     club.getName(), actor.getId(), target.getId());
         }
     }
 
     private void kickMember(Club club, ClubMember actor, ClubMember target, LocalDateTime now) {
-        target.kick(now);
+        target.kickBy(actor, now);
         log.info("{} Club 멤버 강제 탈퇴: actorId={}, targetId={}", club.getName(), actor.getId(), target.getId());
     }
 

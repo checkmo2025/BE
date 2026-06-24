@@ -52,7 +52,7 @@ public class ClubMember extends BaseEntity {
 
     /**
      * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
-     * <p>
+     *
      * 클럽장 전용 메서드
      */
     static ClubMember ownerOf(Club club, String memberId, LocalDateTime now) {
@@ -67,7 +67,7 @@ public class ClubMember extends BaseEntity {
 
     /**
      * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
-     * <p>
+     *
      * 신규 가입 신청 전용 메서드
      */
     static ClubMember applyTo(Club club, String memberId, ClubMemberStatus status, String message, LocalDateTime now) {
@@ -92,8 +92,8 @@ public class ClubMember extends BaseEntity {
         this.joinedAt = (status == ClubMemberStatus.MEMBER) ? now : null;
     }
 
-    // 가입 승인 전용 메서드
-    public void approveJoin(LocalDateTime now) {
+    public void approveJoinBy(ClubMember actor, LocalDateTime now) {
+        validateStaff(actor);
         if (!this.getClubMemberStatus().isJoinInProgress()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
@@ -113,8 +113,8 @@ public class ClubMember extends BaseEntity {
         this.endedAt = now;
     }
 
-    // 강퇴 전용 메서드
-    public void kick(LocalDateTime now) {
+    public void kickBy(ClubMember actor, LocalDateTime now) {
+        validateStaff(actor);
         if (this.getClubMemberStatus().isOwner()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_CANNOT_BE_KICKED);
         }
@@ -126,6 +126,7 @@ public class ClubMember extends BaseEntity {
     }
 
     public void changeRoleBy(ClubMember actor, ClubMemberStatus newStatus) {
+        validateStaff(actor);
         if (isSameMember(actor)) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE);
         }
@@ -136,6 +137,12 @@ public class ClubMember extends BaseEntity {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED);
         }
         this.clubMemberStatus = newStatus;
+    }
+
+    private void validateStaff(ClubMember actor) {
+        if (!actor.isStaff()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
+        }
     }
 
     private boolean isSameMember(ClubMember other) {

@@ -27,9 +27,10 @@ class ClubMemberTest {
 
     @Test
     void 대기_회원은_가입_승인시_활성_회원이_된다() {
+        ClubMember actor = clubMember(99L, ClubMemberStatus.STAFF);
         ClubMember clubMember = clubMember(1L, ClubMemberStatus.PENDING);
 
-        clubMember.approveJoin(CHANGED_AT);
+        clubMember.approveJoinBy(actor, CHANGED_AT);
 
         assertSoftly(softly -> {
             softly.assertThat(clubMember.getClubMemberStatus()).isEqualTo(ClubMemberStatus.MEMBER);
@@ -39,12 +40,25 @@ class ClubMemberTest {
 
     @Test
     void 대기_상태가_아닌_회원은_가입_승인할_수_없다() {
+        ClubMember actor = clubMember(99L, ClubMemberStatus.STAFF);
         ClubMember clubMember = clubMember(1L, ClubMemberStatus.MEMBER);
 
-        assertThatThrownBy(() -> clubMember.approveJoin(CHANGED_AT))
+        assertThatThrownBy(() -> clubMember.approveJoinBy(actor, CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
+                );
+    }
+
+    @Test
+    void 비운영진은_가입을_승인할_수_없다() {
+        ClubMember actor = clubMember(99L, ClubMemberStatus.MEMBER);
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.MEMBER);
+
+        assertThatThrownBy(() -> clubMember.approveJoinBy(actor, CHANGED_AT))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_STAFF_ONLY)
                 );
     }
 
@@ -72,9 +86,10 @@ class ClubMemberTest {
 
     @Test
     void 클럽장은_강퇴할_수_없다() {
+        ClubMember actor = clubMember(99L, ClubMemberStatus.STAFF);
         ClubMember clubMember = clubMember(1L, ClubMemberStatus.OWNER);
 
-        assertThatThrownBy(() -> clubMember.kick(CHANGED_AT))
+        assertThatThrownBy(() -> clubMember.kickBy(actor, CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_OWNER_CANNOT_BE_KICKED)
@@ -83,12 +98,25 @@ class ClubMemberTest {
 
     @Test
     void 비활성_회원은_강퇴할_수_없다() {
+        ClubMember actor = clubMember(99L, ClubMemberStatus.STAFF);
         ClubMember clubMember = clubMember(1L, ClubMemberStatus.KICKED);
 
-        assertThatThrownBy(() -> clubMember.kick(CHANGED_AT))
+        assertThatThrownBy(() -> clubMember.kickBy(actor, CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
+                );
+    }
+
+    @Test
+    void 비운영진은_회원을_강퇴할_수_없다() {
+        ClubMember actor = clubMember(99L, ClubMemberStatus.MEMBER);
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.OWNER);
+
+        assertThatThrownBy(() -> clubMember.kickBy(actor, CHANGED_AT))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_STAFF_ONLY)
                 );
     }
 
@@ -112,6 +140,18 @@ class ClubMemberTest {
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE)
+                );
+    }
+
+    @Test
+    void 비운영진은_회원_역할을_변경할_수_없다() {
+        ClubMember actor = clubMember(1L, ClubMemberStatus.MEMBER);
+        ClubMember target = clubMember(2L, ClubMemberStatus.WITHDRAWN);
+
+        assertThatThrownBy(() -> target.changeRoleBy(actor, ClubMemberStatus.STAFF))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_STAFF_ONLY)
                 );
     }
 

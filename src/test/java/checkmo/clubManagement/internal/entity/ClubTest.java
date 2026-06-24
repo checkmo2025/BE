@@ -56,18 +56,20 @@ class ClubTest {
     @Test
     void 대기_회원의_가입을_거절할_수_있다() {
         Club club = club(1L, false);
+        ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
         ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
 
-        assertThatCode(() -> club.rejectJoin(clubMember))
+        assertThatCode(() -> club.validateJoinRejection(actor, clubMember))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void 이미_가입된_회원은_가입을_거절할_수_없다() {
         Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
         ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
 
-        assertThatThrownBy(() -> club.rejectJoin(clubMember))
+        assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
@@ -75,12 +77,26 @@ class ClubTest {
     }
 
     @Test
+    void 비운영진은_가입을_거절할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 99L, ClubMemberStatus.MEMBER);
+        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+
+        assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_STAFF_ONLY)
+                );
+    }
+
+    @Test
     void 다른_클럽의_가입_요청은_거절할_수_없다() {
         Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
         Club anotherClub = club(2L, false);
         ClubMember clubMember = anotherClub.applyForMembership("member-1", "join", APPLIED_AT);
 
-        assertThatThrownBy(() -> club.rejectJoin(clubMember))
+        assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB)
@@ -102,12 +118,25 @@ class ClubTest {
     }
 
     @Test
-    void 클럽장이_아니면_소유권을_이전할_수_없다() {
+    void 운영진이어도_클럽장이_아니면_소유권을_이전할_수_없다() {
         Club club = club(1L, true);
         ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
         ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
 
-        assertThatThrownBy(() -> club.transferOwner(actor, target))
+        assertThatThrownBy(() -> club.transferOwnerBy(actor, target))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_OWNER_ONLY)
+                );
+    }
+
+    @Test
+    void 클럽장이_아닌_회원은_소유권을_이전할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.MEMBER);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.WITHDRAWN);
+
+        assertThatThrownBy(() -> club.transferOwnerBy(actor, target))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_OWNER_ONLY)
@@ -120,7 +149,7 @@ class ClubTest {
         ClubMember actor = clubMember(club, 1L, ClubMemberStatus.OWNER);
         ClubMember target = clubMember(club, 2L, ClubMemberStatus.WITHDRAWN);
 
-        assertThatThrownBy(() -> club.transferOwner(actor, target))
+        assertThatThrownBy(() -> club.transferOwnerBy(actor, target))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE)
@@ -133,7 +162,7 @@ class ClubTest {
         ClubMember actor = clubMember(club, 1L, ClubMemberStatus.OWNER);
         ClubMember target = clubMember(club, 2L, ClubMemberStatus.OWNER);
 
-        boolean transferred = club.transferOwner(actor, target);
+        boolean transferred = club.transferOwnerBy(actor, target);
 
         assertSoftly(softly -> {
             softly.assertThat(transferred).isFalse();
@@ -148,7 +177,7 @@ class ClubTest {
         ClubMember actor = clubMember(club, 1L, ClubMemberStatus.OWNER);
         ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
 
-        boolean transferred = club.transferOwner(actor, target);
+        boolean transferred = club.transferOwnerBy(actor, target);
 
         assertSoftly(softly -> {
             softly.assertThat(transferred).isTrue();

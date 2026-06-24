@@ -138,28 +138,48 @@ public class Club extends BaseEntity {
         existing.reApply(status, message, now);
     }
 
-    public void rejectJoin(ClubMember clubMember) {
-        validateMemberInClub(clubMember);
-        if (!clubMember.isJoinInProgress()) {
+    public void validateJoinRejection(ClubMember actor, ClubMember target) {
+        validateStaffMemberInClub(actor);
+        validateMemberInClub(target);
+        if (!target.isJoinInProgress()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
     }
 
-    public boolean transferOwner(ClubMember actor, ClubMember target) {
-        validateMemberInClub(actor);
-        validateMemberInClub(target);
-        if (!actor.isOwner()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ONLY);
-        }
-        if (!target.isActive()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
+    public boolean transferOwnerBy(ClubMember actor, ClubMember target) {
+        validateOwnerMemberInClub(actor);
+        validateActiveMemberInClub(target);
+        return transferOwnerIfNeeded(actor, target);
+    }
+
+    private boolean transferOwnerIfNeeded(ClubMember actor, ClubMember target) {
         if (target.isOwner()) {
             return false;
         }
         actor.updateStatus(ClubMemberStatus.STAFF);
         target.updateStatus(ClubMemberStatus.OWNER);
         return true;
+    }
+
+    private void validateStaffMemberInClub(ClubMember actor) {
+        validateMemberInClub(actor);
+        if (!actor.isStaff()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
+        }
+    }
+
+    private void validateOwnerMemberInClub(ClubMember actor) {
+        validateMemberInClub(actor);
+        if (!actor.isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ONLY);
+        }
+    }
+
+    private void validateActiveMemberInClub(ClubMember target) {
+        validateMemberInClub(target);
+        if (!target.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+        }
     }
 
     private void validateMemberInClub(ClubMember clubMember) {
