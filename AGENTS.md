@@ -60,6 +60,22 @@ checkmo/
 - New Spring config belongs in `application-<profile>.yml` and must be included deliberately from `application.yml`.
 - QueryDSL generated-source wiring is non-standard in `build.gradle`; inspect before changing generated source paths.
 
+### Domain Model Responsibility
+
+- Keep business rules inside the domain object that owns the rule whenever practical.
+- Keep services focused on orchestration: loading, saving, deleting, event publication, logging, and transaction boundaries.
+- Domain object public methods should use use-case language whenever possible. Prefer names that expose business actions, such as `approveJoin`, `transferOwnerBy`, or `leave`, over names that read like simple setters.
+- Domain objects must not know repositories directly. Saving, deleting, and querying belong to services or repositories; domain objects own rule decisions and state changes.
+- Do not distort domain model responsibility for JPA mapping convenience. Use bidirectional associations, setters, and owned collections only when real domain navigation or invariant management requires them.
+- Do not extract private methods mechanically. Extract only when the name exposes a real domain concept, removes meaningful duplication, or separates a distinct invariant.
+- Keep simple rules inline when extraction would make the code harder to read.
+- Validate the exact condition required by the command. If the rule is "owner only", validate "owner in this club" directly instead of checking a broader role first and then checking owner.
+- Method names must match actual responsibility. A validation-only method must not read like it saves, deletes, or changes state.
+- Before moving service prechecks into domain methods, pin command-specific error precedence with tests.
+- If existing domain logic looks wrong, unclear, or inconsistent with other rules, do not change its meaning unilaterally. Confirm with the user first.
+- When asking for confirmation, summarize "how the current code behaves", "what seems wrong or conflicting", and "how I intend to change it" briefly.
+- Do not change policy semantics without user confirmation unless the issue is a typo or an obvious compile-time error.
+
 ## WORKFLOW RULES
 
 ### Java Imports And Type Names
