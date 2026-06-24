@@ -40,6 +40,7 @@ Primary modules in this repo:
 - Entities own local state transitions and invariants for data they already hold.
 - Services own entity lookup, repository-driven uniqueness/existence checks, transactions, persistence orchestration, event publication, logging, cross-module API calls, and application flow composition.
 - Services may coordinate business use cases, but they should not keep procedural branches for rules that naturally belong to the loaded domain object.
+- If a service must call multiple domain methods in a specific order to complete one business action, move that sequence behind a single intention-revealing domain method when the domain object has the required data.
 - Facades compose services, public APIs, converters, paging, filtering, and DTO assembly.
 - Converters keep DTO/entity mapping out of services.
 

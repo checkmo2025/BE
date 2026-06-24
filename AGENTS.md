@@ -64,6 +64,7 @@ checkmo/
 
 - Keep business rules inside the domain object that owns the rule whenever practical.
 - Keep services focused on orchestration: loading, saving, deleting, event publication, logging, and transaction boundaries.
+- Avoid making services know the internal sequence of domain operations. If a service must call multiple domain methods in a specific order to complete one business action, prefer a single intention-revealing domain method that owns that sequence.
 - Domain object public methods should use use-case language whenever possible. Prefer names that expose business actions, such as `approveJoin`, `transferOwnerBy`, or `leave`, over names that read like simple setters.
 - Domain objects must not know repositories directly. Saving, deleting, and querying belong to services or repositories; domain objects own rule decisions and state changes.
 - Do not distort domain model responsibility for JPA mapping convenience. Use bidirectional associations, setters, and owned collections only when real domain navigation or invariant management requires them.
