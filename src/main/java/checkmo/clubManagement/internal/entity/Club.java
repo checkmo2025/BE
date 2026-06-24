@@ -206,9 +206,13 @@ public class Club extends BaseEntity {
     }
 
     private void validateMemberInClub(ClubMember clubMember) {
-        if (clubMember.getClub() == null || !this.id.equals(clubMember.getClub().getId())) {
+        if (clubMember.getClub() == null || !isSameClub(clubMember.getClub())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
         }
+    }
+
+    private boolean isSameClub(Club other) {
+        return this == other || (this.id != null && this.id.equals(other.getId()));
     }
 
     private ClubMemberStatus decideInitialStatus() {

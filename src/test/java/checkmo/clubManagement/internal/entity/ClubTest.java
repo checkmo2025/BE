@@ -104,6 +104,30 @@ class ClubTest {
     }
 
     @Test
+    void 식별자가_없는_클럽도_자신의_가입_요청을_검증할_수_있다() {
+        Club club = club(null, false);
+        ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
+        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+
+        assertThatCode(() -> club.validateJoinRejection(actor, clubMember))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 식별자가_없는_다른_클럽의_가입_요청은_거절할_수_없다() {
+        Club club = club(null, true);
+        ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
+        Club anotherClub = club(null, false);
+        ClubMember clubMember = anotherClub.applyForMembership("member-1", "join", APPLIED_AT);
+
+        assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB)
+                );
+    }
+
+    @Test
     void 다른_클럽의_회원은_재신청할_수_없다() {
         Club club = club(1L, true);
         Club anotherClub = club(2L, true);
