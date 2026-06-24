@@ -14,8 +14,9 @@ import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubContact;
 import checkmo.clubManagement.internal.entity.ClubInterestCategory;
-import checkmo.clubManagement.internal.entity.ClubMemberStatus;
+import checkmo.clubManagement.internal.entity.ClubMember;
 import checkmo.clubManagement.internal.entity.ClubParticipantType;
+import checkmo.clubManagement.internal.repository.ClubMemberRepository;
 import checkmo.clubManagement.internal.repository.ClubRepository;
 import checkmo.news.internal.repository.NewsRepository;
 import checkmo.report.internal.entity.Report;
@@ -41,6 +42,9 @@ class AdminApiTest extends ApiTestSupport {
 
     @Autowired
     ClubRepository clubRepository;
+
+    @Autowired
+    ClubMemberRepository clubMemberRepository;
 
     @Autowired
     BookStoryRepository bookStoryRepository;
@@ -360,9 +364,9 @@ class AdminApiTest extends ApiTestSupport {
                         .label("홈")
                         .build())))
                 .build();
-        club.addOwner(owner.id(), LocalDateTime.now());
         Club saved = clubRepository.save(club);
-        saved.getClubMembers().forEach(member -> member.updateStatus(ClubMemberStatus.OWNER));
+        ClubMember clubOwner = saved.createOwnerMember(owner.id(), LocalDateTime.now());
+        clubMemberRepository.save(clubOwner);
         return saved;
     }
 

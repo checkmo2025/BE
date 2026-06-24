@@ -17,6 +17,8 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
 
     Optional<ClubMember> findByIdAndClubId(Long id, Long clubId);
 
+    void deleteByClubId(Long clubId);
+
     @Query("SELECT c.id AS id, c.name AS name "
             + "FROM ClubMember cm JOIN cm.club c "
             + "WHERE cm.memberId = :memberId "

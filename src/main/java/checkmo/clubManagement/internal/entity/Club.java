@@ -3,7 +3,6 @@ package checkmo.clubManagement.internal.entity;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.common.BaseEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -15,7 +14,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,10 +72,6 @@ public class Club extends BaseEntity {
     @CollectionTable(name = "club_contacts", joinColumns = @JoinColumn(name = "club_id"))
     private List<ClubContact> links = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ClubMember> clubMembers = new ArrayList<>();
-
     public void initializeLastActivityAt(LocalDateTime now) {
         if (this.lastActivityAt == null) {
             this.lastActivityAt = now;
@@ -129,18 +123,13 @@ public class Club extends BaseEntity {
     }
 
     // ============= 클럽 멤버 관련 메서드 ==============
-    public void addOwner(String memberId, LocalDateTime now) {
-        ClubMember clubMember = ClubMember.ownerOf(memberId, now);
-        this.clubMembers.add(clubMember);
-        clubMember.setClub(this);
+    public ClubMember createOwnerMember(String memberId, LocalDateTime now) {
+        return ClubMember.ownerOf(this, memberId, now);
     }
 
-    public ClubMember applyMember(String memberId, String joinMessage, LocalDateTime now) {
+    public ClubMember applyForMembership(String memberId, String joinMessage, LocalDateTime now) {
         ClubMemberStatus status = decideInitialStatus();
-        ClubMember clubMember = ClubMember.apply(memberId, status, joinMessage, now);
-        this.clubMembers.add(clubMember);
-        clubMember.setClub(this);
-        return clubMember;
+        return ClubMember.applyTo(this, memberId, status, joinMessage, now);
     }
 
     public void reApplyMember(ClubMember existing, String message, LocalDateTime now) {
@@ -155,8 +144,6 @@ public class Club extends BaseEntity {
         if (clubMember.getClub() == null || !this.id.equals(clubMember.getClub().getId())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
         }
-        this.clubMembers.remove(clubMember);
-        clubMember.setClub(null);
     }
 
     private ClubMemberStatus decideInitialStatus() {

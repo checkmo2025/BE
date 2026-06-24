@@ -43,7 +43,7 @@ public class ClubMemberCommandService {
                             }
                         },
                         () -> {
-                            ClubMember created = club.applyMember(memberId, request.getJoinMessage(), now);
+                            ClubMember created = club.applyForMembership(memberId, request.getJoinMessage(), now);
                             clubMemberRepository.save(created);
                             if (club.isOpen() && created.isActive()) {
                                 publishJoinClubEvent(memberId, club, created);
@@ -77,7 +77,7 @@ public class ClubMemberCommandService {
     }
 
     private void approveJoin(Club club, ClubMember target, LocalDateTime now) {
-        target.join(now);
+        target.approveJoin(now);
         publishJoinClubEvent(target.getMemberId(), club, target);
     }
 
@@ -86,6 +86,7 @@ public class ClubMemberCommandService {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }
         club.removeMember(target);
+        clubMemberRepository.delete(target);
     }
 
     private void transferOwner(Club club, ClubMember actor, ClubMember target) {

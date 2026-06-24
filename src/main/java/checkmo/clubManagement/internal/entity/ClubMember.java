@@ -19,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Builder
@@ -46,15 +45,19 @@ public class ClubMember extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id")
-    @Setter
     private Club club;
 
     @Column(name = "member_id", nullable = false)
     private String memberId;
 
-    // 정적 팩토리 메서드 - 클럽장 전용 메서드
-    public static ClubMember ownerOf(String memberId, LocalDateTime now) {
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     * <p>
+     * 클럽장 전용 메서드
+     */
+    static ClubMember ownerOf(Club club, String memberId, LocalDateTime now) {
         return ClubMember.builder()
+                .club(club)
                 .memberId(memberId)
                 .clubMemberStatus(ClubMemberStatus.OWNER)
                 .appliedAt(now)
@@ -62,9 +65,14 @@ public class ClubMember extends BaseEntity {
                 .build();
     }
 
-    // 정적 팩토리 메서드 - 신규 가입 신청 전용 메서드
-    public static ClubMember apply(String memberId, ClubMemberStatus status, String message, LocalDateTime now) {
+    /**
+     * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
+     * <p>
+     * 신규 가입 신청 전용 메서드
+     */
+    static ClubMember applyTo(Club club, String memberId, ClubMemberStatus status, String message, LocalDateTime now) {
         return ClubMember.builder()
+                .club(club)
                 .memberId(memberId)
                 .clubMemberStatus(status)
                 .joinMessage(message)
@@ -85,7 +93,7 @@ public class ClubMember extends BaseEntity {
     }
 
     // 가입 승인 전용 메서드
-    public void join(LocalDateTime now) {
+    public void approveJoin(LocalDateTime now) {
         if (!this.getClubMemberStatus().isJoinInProgress()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
         }

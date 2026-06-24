@@ -16,12 +16,7 @@ class ClubMemberTest {
 
     @Test
     void 이미_가입한_회원은_재신청할_수_없다() {
-        ClubMember clubMember = ClubMember.apply(
-                "member-1",
-                ClubMemberStatus.MEMBER,
-                "join",
-                APPLIED_AT
-        );
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.MEMBER);
 
         assertThatThrownBy(() -> clubMember.reApply(ClubMemberStatus.MEMBER, "again", CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -32,14 +27,9 @@ class ClubMemberTest {
 
     @Test
     void 대기_회원은_가입_승인시_활성_회원이_된다() {
-        ClubMember clubMember = ClubMember.apply(
-                "member-1",
-                ClubMemberStatus.PENDING,
-                "join",
-                APPLIED_AT
-        );
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.PENDING);
 
-        clubMember.join(CHANGED_AT);
+        clubMember.approveJoin(CHANGED_AT);
 
         assertSoftly(softly -> {
             softly.assertThat(clubMember.getClubMemberStatus()).isEqualTo(ClubMemberStatus.MEMBER);
@@ -49,14 +39,9 @@ class ClubMemberTest {
 
     @Test
     void 대기_상태가_아닌_회원은_가입_승인할_수_없다() {
-        ClubMember clubMember = ClubMember.apply(
-                "member-1",
-                ClubMemberStatus.MEMBER,
-                "join",
-                APPLIED_AT
-        );
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.MEMBER);
 
-        assertThatThrownBy(() -> clubMember.join(CHANGED_AT))
+        assertThatThrownBy(() -> clubMember.approveJoin(CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
@@ -65,7 +50,7 @@ class ClubMemberTest {
 
     @Test
     void 클럽장은_탈퇴할_수_없다() {
-        ClubMember clubMember = ClubMember.ownerOf("owner-1", APPLIED_AT);
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.OWNER);
 
         assertThatThrownBy(() -> clubMember.leave(CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -76,12 +61,7 @@ class ClubMemberTest {
 
     @Test
     void 비활성_회원은_탈퇴할_수_없다() {
-        ClubMember clubMember = ClubMember.apply(
-                "member-1",
-                ClubMemberStatus.WITHDRAWN,
-                "join",
-                APPLIED_AT
-        );
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.WITHDRAWN);
 
         assertThatThrownBy(() -> clubMember.leave(CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -92,7 +72,7 @@ class ClubMemberTest {
 
     @Test
     void 클럽장은_강퇴할_수_없다() {
-        ClubMember clubMember = ClubMember.ownerOf("owner-1", APPLIED_AT);
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.OWNER);
 
         assertThatThrownBy(() -> clubMember.kick(CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -103,12 +83,7 @@ class ClubMemberTest {
 
     @Test
     void 비활성_회원은_강퇴할_수_없다() {
-        ClubMember clubMember = ClubMember.apply(
-                "member-1",
-                ClubMemberStatus.KICKED,
-                "join",
-                APPLIED_AT
-        );
+        ClubMember clubMember = clubMember(1L, ClubMemberStatus.KICKED);
 
         assertThatThrownBy(() -> clubMember.kick(CHANGED_AT))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -166,9 +141,17 @@ class ClubMemberTest {
         return ClubMember.builder()
                 .id(id)
                 .memberId("member-" + id)
+                .club(club(1L))
                 .clubMemberStatus(status)
                 .appliedAt(APPLIED_AT)
                 .joinedAt(status.isActive() ? APPLIED_AT : null)
+                .build();
+    }
+
+    private Club club(Long id) {
+        return Club.builder()
+                .id(id)
+                .name("club-" + id)
                 .build();
     }
 }
