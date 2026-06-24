@@ -1,6 +1,7 @@
 package checkmo.clubManagement.internal.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -53,12 +54,33 @@ class ClubTest {
     }
 
     @Test
-    void 다른_클럽의_회원은_제거할_수_없다() {
+    void 대기_회원의_가입을_거절할_수_있다() {
+        Club club = club(1L, false);
+        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+
+        assertThatCode(() -> club.rejectJoin(clubMember))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 이미_가입된_회원은_가입을_거절할_수_없다() {
         Club club = club(1L, true);
-        Club anotherClub = club(2L, true);
+        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+
+        assertThatThrownBy(() -> club.rejectJoin(clubMember))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS)
+                );
+    }
+
+    @Test
+    void 다른_클럽의_가입_요청은_거절할_수_없다() {
+        Club club = club(1L, true);
+        Club anotherClub = club(2L, false);
         ClubMember clubMember = anotherClub.applyForMembership("member-1", "join", APPLIED_AT);
 
-        assertThatThrownBy(() -> club.removeMember(clubMember))
+        assertThatThrownBy(() -> club.rejectJoin(clubMember))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB)
@@ -79,11 +101,78 @@ class ClubTest {
                 );
     }
 
+    @Test
+    void 클럽장이_아니면_소유권을_이전할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.STAFF);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
+
+        assertThatThrownBy(() -> club.transferOwner(actor, target))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_OWNER_ONLY)
+                );
+    }
+
+    @Test
+    void 비활성_회원에게_소유권을_이전할_수_없다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.OWNER);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.WITHDRAWN);
+
+        assertThatThrownBy(() -> club.transferOwner(actor, target))
+                .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE)
+                );
+    }
+
+    @Test
+    void 대상이_이미_클럽장이면_소유권_이전은_아무것도_하지_않는다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.OWNER);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.OWNER);
+
+        boolean transferred = club.transferOwner(actor, target);
+
+        assertSoftly(softly -> {
+            softly.assertThat(transferred).isFalse();
+            softly.assertThat(actor.getClubMemberStatus()).isEqualTo(ClubMemberStatus.OWNER);
+            softly.assertThat(target.getClubMemberStatus()).isEqualTo(ClubMemberStatus.OWNER);
+        });
+    }
+
+    @Test
+    void 클럽장이_활성_회원에게_소유권을_이전할_수_있다() {
+        Club club = club(1L, true);
+        ClubMember actor = clubMember(club, 1L, ClubMemberStatus.OWNER);
+        ClubMember target = clubMember(club, 2L, ClubMemberStatus.MEMBER);
+
+        boolean transferred = club.transferOwner(actor, target);
+
+        assertSoftly(softly -> {
+            softly.assertThat(transferred).isTrue();
+            softly.assertThat(actor.getClubMemberStatus()).isEqualTo(ClubMemberStatus.STAFF);
+            softly.assertThat(target.getClubMemberStatus()).isEqualTo(ClubMemberStatus.OWNER);
+        });
+    }
+
     private Club club(Long id, boolean open) {
         return Club.builder()
                 .id(id)
                 .name("club-" + id)
                 .isOpen(open)
+                .build();
+    }
+
+    private ClubMember clubMember(Club club, Long id, ClubMemberStatus status) {
+        return ClubMember.builder()
+                .id(id)
+                .club(club)
+                .memberId("member-" + id)
+                .clubMemberStatus(status)
+                .appliedAt(APPLIED_AT)
+                .joinedAt(status.isActive() ? APPLIED_AT : null)
                 .build();
     }
 }

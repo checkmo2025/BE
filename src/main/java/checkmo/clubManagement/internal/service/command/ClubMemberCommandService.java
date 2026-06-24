@@ -3,7 +3,6 @@ package checkmo.clubManagement.internal.service.command;
 import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.clubManagement.internal.entity.Club;
 import checkmo.clubManagement.internal.entity.ClubMember;
-import checkmo.clubManagement.internal.entity.ClubMemberStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementErrorStatus;
 import checkmo.clubManagement.internal.excepetion.ClubManagementException;
 import checkmo.clubManagement.internal.repository.ClubMemberRepository;
@@ -82,27 +81,15 @@ public class ClubMemberCommandService {
     }
 
     private void rejectJoin(Club club, ClubMember target) {
-        if (!target.getClubMemberStatus().isJoinInProgress()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
-        }
-        club.removeMember(target);
+        club.rejectJoin(target);
         clubMemberRepository.delete(target);
     }
 
     private void transferOwner(Club club, ClubMember actor, ClubMember target) {
-        if (!actor.isOwner()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ONLY);
+        if (club.transferOwner(actor, target)) {
+            log.info("{} Club 개설자 권한 이전: originalOwnerId={}, newOwnerId={}",
+                    club.getName(), actor.getId(), target.getId());
         }
-        if (!target.isActive()) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
-        }
-        if (target.isOwner()) {
-            return;
-        }
-        actor.updateStatus(ClubMemberStatus.STAFF);
-        target.updateStatus(ClubMemberStatus.OWNER);
-        log.info("{} Club 개설자 권한 이전: originalOwnerId={}, newOwnerId={}",
-                club.getName(), actor.getId(), target.getId());
     }
 
     private void kickMember(Club club, ClubMember actor, ClubMember target, LocalDateTime now) {

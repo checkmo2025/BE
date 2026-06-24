@@ -133,14 +133,36 @@ public class Club extends BaseEntity {
     }
 
     public void reApplyMember(ClubMember existing, String message, LocalDateTime now) {
-        if (existing.getClub() == null || !this.id.equals(existing.getClub().getId())) {
-            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
-        }
+        validateMemberInClub(existing);
         ClubMemberStatus status = decideInitialStatus();
         existing.reApply(status, message, now);
     }
 
-    public void removeMember(ClubMember clubMember) {
+    public void rejectJoin(ClubMember clubMember) {
+        validateMemberInClub(clubMember);
+        if (!clubMember.isJoinInProgress()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_INVALID_STATUS);
+        }
+    }
+
+    public boolean transferOwner(ClubMember actor, ClubMember target) {
+        validateMemberInClub(actor);
+        validateMemberInClub(target);
+        if (!actor.isOwner()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_ONLY);
+        }
+        if (!target.isActive()) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_IS_NOT_ACTIVE);
+        }
+        if (target.isOwner()) {
+            return false;
+        }
+        actor.updateStatus(ClubMemberStatus.STAFF);
+        target.updateStatus(ClubMemberStatus.OWNER);
+        return true;
+    }
+
+    private void validateMemberInClub(ClubMember clubMember) {
         if (clubMember.getClub() == null || !this.id.equals(clubMember.getClub().getId())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
         }
