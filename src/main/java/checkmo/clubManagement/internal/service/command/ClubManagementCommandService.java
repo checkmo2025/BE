@@ -43,8 +43,7 @@ public class ClubManagementCommandService {
 
         LocalDateTime now = LocalDateTime.now();
         Club club = ClubManagementConverter.toClub(request);
-        club.initializeLastActivityAt(now);
-        club.updateInterestCategories(new HashSet<>(request.getCategory()));
+        club.initializeForCreation(new HashSet<>(request.getCategory()), now);
 
         clubRepository.save(club);
         ClubMember owner = club.createOwnerMember(memberId, now);

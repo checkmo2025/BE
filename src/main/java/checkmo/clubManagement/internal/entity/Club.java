@@ -72,7 +72,12 @@ public class Club extends BaseEntity {
     @CollectionTable(name = "club_contacts", joinColumns = @JoinColumn(name = "club_id"))
     private List<ClubContact> links = new ArrayList<>();
 
-    public void initializeLastActivityAt(LocalDateTime now) {
+    public void initializeForCreation(Set<ClubInterestCategory> categories, LocalDateTime now) {
+        initializeLastActivityAt(now);
+        updateInterestCategories(categories);
+    }
+
+    private void initializeLastActivityAt(LocalDateTime now) {
         if (this.lastActivityAt == null) {
             this.lastActivityAt = now;
         }
