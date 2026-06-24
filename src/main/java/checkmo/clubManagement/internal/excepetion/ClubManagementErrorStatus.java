@@ -27,6 +27,7 @@ public enum ClubManagementErrorStatus implements BaseErrorCode {
     CLUB_MEMBER_CANNOT_CHANGE_OWN_ROLE(HttpStatus.FORBIDDEN, "CLUB_MEMBER_409", "본인의 클럽 내 역할을 변경할 수 없습니다."),
     CLUB_OWNER_ROLE_CHANGE_NOT_ALLOWED(HttpStatus.FORBIDDEN, "CLUB_MEMBER_410", "개설자의 역할은 변경할 수 없습니다. 개설자 위임을 사용하세요."),
     CLUB_OWNER_NOT_FOUND(HttpStatus.NOT_FOUND, "CLUB_MEMBER_411", "독서 모임 개설자를 찾을 수 없습니다."),
+    CLUB_PARTICIPANTS_JOIN_REQUIRED(HttpStatus.FORBIDDEN, "CLUB_MEMBER_412", "모임 회원은 가입 후에 조회 가능합니다"),
     ;
 
     private final HttpStatus httpStatus;

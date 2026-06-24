@@ -180,6 +180,81 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     }
 
     @Test
+    void publicClubParticipantsCanBeViewedByLoggedInNonMemberWithFollowStatus() {
+        TestUser owner = createUser();
+        TestUser member = createUser();
+        TestUser viewer = createUser();
+        Club club = createClub(owner, "participants-open-" + uniqueSuffix(owner));
+        joinClub(member, club.getId());
+
+        given().cookie(accessTokenCookie(viewer))
+                .when().post("/api/v1/members/{memberNickname}/following", member.nickName())
+                .then().statusCode(200);
+
+        Response response = given().cookie(accessTokenCookie(viewer))
+                .when().get("/api/v1/clubs/{clubId}/participants", club.getId())
+                .then().statusCode(200)
+                .body("result.totalCount", equalTo(2))
+                .body("result.hasNext", equalTo(false))
+                .extract().response();
+
+        List<Map<String, Object>> participants = response.jsonPath().getList("result.clubMembers");
+        assertThat(participants).hasSize(2);
+        assertThat(participants).allSatisfy(participant ->
+                assertThat(participant.keySet()).contains(
+                        "clubMemberId",
+                        "nickname",
+                        "profileImageUrl",
+                        "following",
+                        "clubMemberStatus",
+                        "staff"
+                )
+        );
+        assertThat(participants).anySatisfy(participant -> {
+            assertThat(participant).containsEntry("nickname", owner.nickName());
+            assertThat(participant).containsEntry("following", false);
+            assertThat(participant).containsEntry("clubMemberStatus", "OWNER");
+            assertThat(participant).containsEntry("staff", true);
+        });
+        assertThat(participants).anySatisfy(participant -> {
+            assertThat(participant).containsEntry("nickname", member.nickName());
+            assertThat(participant).containsEntry("following", true);
+            assertThat(participant).containsEntry("clubMemberStatus", "MEMBER");
+            assertThat(participant).containsEntry("staff", false);
+        });
+
+        given().cookie(accessTokenCookie(member))
+                .queryParam("status", "ACTIVE")
+                .when().get("/api/v1/clubs/{clubId}/members", club.getId())
+                .then().statusCode(403);
+    }
+
+    @Test
+    void privateClubParticipantsRequireActiveClubMember() {
+        TestUser owner = createUser();
+        TestUser pendingMember = createUser();
+        TestUser outsider = createUser();
+        Club club = createClub(owner, "participants-private-" + uniqueSuffix(owner), false);
+        joinClub(pendingMember, club.getId());
+
+        Response response = given().cookie(accessTokenCookie(owner))
+                .when().get("/api/v1/clubs/{clubId}/participants", club.getId())
+                .then().statusCode(200)
+                .body("result.totalCount", equalTo(1))
+                .extract().response();
+
+        List<Map<String, Object>> participants = response.jsonPath().getList("result.clubMembers");
+        assertThat(participants).hasSize(1);
+        assertThat(participants.getFirst())
+                .containsEntry("nickname", owner.nickName())
+                .containsEntry("clubMemberStatus", "OWNER")
+                .containsEntry("staff", true);
+
+        assertParticipantsJoinRequired(pendingMember, club.getId());
+        assertParticipantsJoinRequired(outsider, club.getId());
+    }
+
+    @Test
     void bookshelfMeetingTopicReviewAndChatFlowCoversRestEndpoints() {
         TestUser owner = createUser();
         Club club = createClub(owner, "bookshelf" + uniqueSuffix(owner));
@@ -397,6 +472,21 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .filter(club -> club.getName().equals(name))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    private void joinClub(TestUser user, Long clubId) {
+        given().cookie(accessTokenCookie(user))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("joinMessage", "함께 읽고 싶습니다."))
+                .when().post("/api/v1/clubs/{clubId}/join", clubId)
+                .then().statusCode(200);
+    }
+
+    private void assertParticipantsJoinRequired(TestUser user, Long clubId) {
+        given().cookie(accessTokenCookie(user))
+                .when().get("/api/v1/clubs/{clubId}/participants", clubId)
+                .then().statusCode(403)
+                .body("message", equalTo("모임 회원은 가입 후에 조회 가능합니다"));
     }
 
     private Meeting createMeeting(TestUser owner, Long clubId) {
