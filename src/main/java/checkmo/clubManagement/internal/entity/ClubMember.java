@@ -127,9 +127,20 @@ public class ClubMember extends BaseEntity {
     }
 
     private void validateStaff(ClubMember actor) {
+        if (!isSameClub(actor)) {
+            throw new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB);
+        }
         if (!actor.isStaff()) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_STAFF_ONLY);
         }
+    }
+
+    private boolean isSameClub(ClubMember other) {
+        if (other == null || this.club == null || other.getClub() == null) {
+            return false;
+        }
+        return this.club == other.getClub()
+                || (this.club.getId() != null && this.club.getId().equals(other.getClub().getId()));
     }
 
     /**

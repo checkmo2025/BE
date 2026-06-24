@@ -79,6 +79,28 @@ class ClubMemberTest {
     }
 
     @Test
+    void 다른_클럽의_운영진은_가입을_승인하거나_회원을_강퇴할_수_없다() {
+        Club club = club(1L);
+        Club anotherClub = club(2L);
+        ClubMember actor = clubMember(anotherClub, 99L, ClubMemberStatus.STAFF);
+        ClubMember pendingMember = clubMember(club, 1L, ClubMemberStatus.PENDING);
+        ClubMember activeMember = clubMember(club, 2L, ClubMemberStatus.MEMBER);
+
+        assertSoftly(softly -> {
+            softly.assertThatThrownBy(() -> pendingMember.approveJoinBy(actor, CHANGED_AT))
+                    .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                            assertThat(exception.getErrorCode())
+                                    .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB)
+                    );
+            softly.assertThatThrownBy(() -> activeMember.kickBy(actor, CHANGED_AT))
+                    .isInstanceOfSatisfying(ClubManagementException.class, exception ->
+                            assertThat(exception.getErrorCode())
+                                    .isEqualTo(ClubManagementErrorStatus.CLUB_MEMBER_NOT_IN_CLUB)
+                    );
+        });
+    }
+
+    @Test
     void 클럽장은_탈퇴할_수_없다() {
         ClubMember clubMember = clubMember(1L, ClubMemberStatus.OWNER);
 
@@ -137,10 +159,14 @@ class ClubMemberTest {
     }
 
     private ClubMember clubMember(Long id, ClubMemberStatus status) {
+        return clubMember(club(1L), id, status);
+    }
+
+    private ClubMember clubMember(Club club, Long id, ClubMemberStatus status) {
         return ClubMember.builder()
                 .id(id)
                 .memberId("member-" + id)
-                .club(club(1L))
+                .club(club)
                 .clubMemberStatus(status)
                 .appliedAt(APPLIED_AT)
                 .joinedAt(status.isActive() ? APPLIED_AT : null)
