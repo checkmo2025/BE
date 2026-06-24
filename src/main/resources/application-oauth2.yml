@@ -2,6 +2,13 @@ app:
   oauth2:
     redirect:
       base-uri: ${FRONTEND_BASE_URI}
+    apple:
+      team-id: ${APPLE_TEAM_ID:}
+      key-id: ${APPLE_KEY_ID:}
+      web-client-id: ${APPLE_WEB_CLIENT_ID:}
+      ios-client-id: ${APPLE_IOS_CLIENT_ID:}
+      private-key-base64: ${APPLE_PRIVATE_KEY_BASE64:}
+      web-redirect-uri: ${APPLE_WEB_REDIRECT_URI:https://api.checkmo.co.kr/login/oauth2/code/apple}
 
 spring:
   security:
