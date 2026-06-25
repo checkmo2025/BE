@@ -39,7 +39,7 @@ public class MemberTermsQueryService {
         }
 
         Map<Long, MemberTerms> latestTermsByTermsId = new LinkedHashMap<>();
-        memberTermsRepository.findLatestCandidates(memberId, termsIds)
+        memberTermsRepository.findLatestByMemberIdAndTermsIdIn(memberId, termsIds)
                 .forEach(memberTerms -> latestTermsByTermsId.putIfAbsent(
                         memberTerms.getTerms().getId(),
                         memberTerms

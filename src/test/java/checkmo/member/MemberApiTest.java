@@ -268,7 +268,7 @@ class MemberApiTest extends ApiTestSupport {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.jsonPath().getList("result.terms.agreed", Boolean.class))
                     .containsExactly(true);
-            softly.assertThat(memberTermsRepository.countByMemberIdAndTermsId(user.id(), marketing.getId()))
+            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(user.id(), marketing.getId()))
                     .isEqualTo(3);
         });
     }

@@ -8,8 +8,8 @@ import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.repository.MemberTermsRepository;
 import checkmo.member.internal.repository.TermsRepository;
-import checkmo.member.internal.service.query.MemberTermsQueryService;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,9 +27,8 @@ public class MemberTermsCommandService {
     private final MemberRepository memberRepository;
     private final TermsRepository termsRepository;
     private final MemberTermsRepository memberTermsRepository;
-    private final MemberTermsQueryService memberTermsQueryService;
 
-    public void saveAgreements(String memberId, List<TermsAgreementCommand> commands) {
+    public void updateAgreements(String memberId, List<TermsAgreementCommand> commands) {
         saveAgreements(memberId, commands, false);
     }
 
@@ -55,7 +54,7 @@ public class MemberTermsCommandService {
 
         Member member = memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
+        List<Terms> activeTerms = termsRepository.findAllByActiveTrue();
         Map<Long, Terms> activeTermsById = activeTerms.stream()
                 .collect(Collectors.toMap(Terms::getId, Function.identity()));
 
@@ -68,22 +67,18 @@ public class MemberTermsCommandService {
         });
         validateRequiredTermsSubmitted(activeTerms, commands, requireRequiredAgreement);
 
-        commands.forEach(command -> saveAgreement(
+        Map<Long, MemberTerms> latestTermsByTermsId = retrieveLatestMemberTermsByTermsId(
+                memberId,
+                commands.stream()
+                        .map(TermsAgreementCommand::termsId)
+                        .toList()
+        );
+        commands.forEach(command -> saveAgreementIfChanged(
                 member,
                 activeTermsById.get(command.termsId()),
-                command.agreed()
+                command.agreed(),
+                latestTermsByTermsId.get(command.termsId())
         ));
-    }
-
-    public boolean saveAgreement(String memberId, TermsAgreementCommand command) {
-        Member member = memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        Terms terms = termsRepository.findByIdAndActiveTrue(command.termsId())
-                .orElseThrow(() -> new MemberException(MemberErrorStatus.TERMS_NOT_FOUND));
-
-        terms.validateAgreementSubmission(command.agreed());
-
-        return saveAgreement(member, terms, command.agreed());
     }
 
     private void validateCommands(List<TermsAgreementCommand> commands) {
@@ -118,15 +113,23 @@ public class MemberTermsCommandService {
         }
     }
 
-    private boolean saveAgreement(Member member, Terms terms, boolean agreed) {
-        boolean hasSameLatestState = memberTermsRepository.findLatestCandidates(member.getId(), terms.getId())
-                .stream()
-                .findFirst()
-                .map(MemberTerms::isAgreed)
-                .filter(latestAgreed -> latestAgreed == agreed)
-                .isPresent();
-        if (hasSameLatestState) {
-            return false;
+    private Map<Long, MemberTerms> retrieveLatestMemberTermsByTermsId(String memberId, List<Long> termsIds) {
+        if (termsIds == null || termsIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<Long, MemberTerms> latestTermsByTermsId = new LinkedHashMap<>();
+        memberTermsRepository.findLatestByMemberIdAndTermsIdIn(memberId, termsIds)
+                .forEach(memberTerms -> latestTermsByTermsId.putIfAbsent(
+                        memberTerms.getTerms().getId(),
+                        memberTerms
+                ));
+        return latestTermsByTermsId;
+    }
+
+    private void saveAgreementIfChanged(Member member, Terms terms, boolean agreed, MemberTerms latestMemberTerms) {
+        if (latestMemberTerms != null && latestMemberTerms.isAgreed() == agreed) {
+            return;
         }
 
         memberTermsRepository.save(MemberTerms.builder()
@@ -134,6 +137,5 @@ public class MemberTermsCommandService {
                 .terms(terms)
                 .agreed(agreed)
                 .build());
-        return true;
     }
 }

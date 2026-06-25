@@ -107,7 +107,7 @@ public class MemberController {
             @CurrentId String memberId,
             @Valid @RequestBody TermsRequestDTO.SaveAgreements request
     ) {
-        memberTermsCommandService.saveAgreements(
+        memberTermsCommandService.updateAgreements(
                 memberId,
                 request.getAgreements()
                         .stream()

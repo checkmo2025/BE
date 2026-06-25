@@ -133,12 +133,12 @@ class TermsDomainServiceTest {
         Member member = saveMember();
         Terms requiredTerms = saveTerms(TermsType.SERVICE_TERMS, "서비스", true, true);
 
-        assertThatThrownBy(() -> memberTermsCommandService.saveAgreement(
+        assertThatThrownBy(() -> memberTermsCommandService.updateAgreements(
                 member.getId(),
-                new TermsAgreementCommand(requiredTerms.getId(), false)
+                List.of(new TermsAgreementCommand(requiredTerms.getId(), false))
         )).isInstanceOf(MemberException.class);
 
-        assertThat(memberTermsRepository.countByMemberIdAndTermsId(member.getId(), requiredTerms.getId()))
+        assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(member.getId(), requiredTerms.getId()))
                 .isZero();
     }
 
@@ -147,17 +147,17 @@ class TermsDomainServiceTest {
         Member member = saveMember();
         Terms optionalTerms = saveTerms(TermsType.MARKETING, "마케팅", true, false);
 
-        boolean firstSaved = memberTermsCommandService.saveAgreement(
+        memberTermsCommandService.updateAgreements(
                 member.getId(),
-                new TermsAgreementCommand(optionalTerms.getId(), true)
+                List.of(new TermsAgreementCommand(optionalTerms.getId(), true))
         );
-        boolean revokeSaved = memberTermsCommandService.saveAgreement(
+        memberTermsCommandService.updateAgreements(
                 member.getId(),
-                new TermsAgreementCommand(optionalTerms.getId(), false)
+                List.of(new TermsAgreementCommand(optionalTerms.getId(), false))
         );
-        boolean reAgreeSaved = memberTermsCommandService.saveAgreement(
+        memberTermsCommandService.updateAgreements(
                 member.getId(),
-                new TermsAgreementCommand(optionalTerms.getId(), true)
+                List.of(new TermsAgreementCommand(optionalTerms.getId(), true))
         );
         Map<Long, MemberTerms> latestTermsByTermsId = memberTermsQueryService.retrieveLatestMemberTermsByTermsId(
                 member.getId(),
@@ -165,10 +165,7 @@ class TermsDomainServiceTest {
         );
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(firstSaved).isTrue();
-            softly.assertThat(revokeSaved).isTrue();
-            softly.assertThat(reAgreeSaved).isTrue();
-            softly.assertThat(memberTermsRepository.countByMemberIdAndTermsId(member.getId(), optionalTerms.getId()))
+            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(member.getId(), optionalTerms.getId()))
                     .isEqualTo(3);
             softly.assertThat(latestTermsByTermsId.get(optionalTerms.getId()).isAgreed()).isTrue();
         });
@@ -179,19 +176,17 @@ class TermsDomainServiceTest {
         Member member = saveMember();
         Terms optionalTerms = saveTerms(TermsType.MARKETING, "마케팅", true, false);
 
-        boolean firstSaved = memberTermsCommandService.saveAgreement(
+        memberTermsCommandService.updateAgreements(
                 member.getId(),
-                new TermsAgreementCommand(optionalTerms.getId(), true)
+                List.of(new TermsAgreementCommand(optionalTerms.getId(), true))
         );
-        boolean idempotentSaved = memberTermsCommandService.saveAgreement(
+        memberTermsCommandService.updateAgreements(
                 member.getId(),
-                new TermsAgreementCommand(optionalTerms.getId(), true)
+                List.of(new TermsAgreementCommand(optionalTerms.getId(), true))
         );
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(firstSaved).isTrue();
-            softly.assertThat(idempotentSaved).isFalse();
-            softly.assertThat(memberTermsRepository.countByMemberIdAndTermsId(member.getId(), optionalTerms.getId()))
+            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(member.getId(), optionalTerms.getId()))
                     .isOne();
         });
     }

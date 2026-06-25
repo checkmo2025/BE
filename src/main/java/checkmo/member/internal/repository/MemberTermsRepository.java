@@ -14,34 +14,21 @@ public interface MemberTermsRepository extends JpaRepository<MemberTerms, Long> 
             join fetch mt.terms t
             where mt.member.id = :memberId
               and t.id in :termsIds
-            order by mt.createdAt desc, mt.id desc
+              and not exists (
+                  select 1
+                  from MemberTerms newer
+                  where newer.member.id = mt.member.id
+                    and newer.terms.id = mt.terms.id
+                    and (
+                        newer.createdAt > mt.createdAt
+                        or (newer.createdAt = mt.createdAt and newer.id > mt.id)
+                    )
+              )
             """)
-    List<MemberTerms> findLatestCandidates(
+    List<MemberTerms> findLatestByMemberIdAndTermsIdIn(
             @Param("memberId") String memberId,
             @Param("termsIds") List<Long> termsIds
     );
 
-    @Query("""
-            select mt
-            from MemberTerms mt
-            join fetch mt.terms t
-            where mt.member.id = :memberId
-              and t.id = :termsId
-            order by mt.createdAt desc, mt.id desc
-            """)
-    List<MemberTerms> findLatestCandidates(
-            @Param("memberId") String memberId,
-            @Param("termsId") Long termsId
-    );
-
-    @Query("""
-            select count(mt)
-            from MemberTerms mt
-            where mt.member.id = :memberId
-              and mt.terms.id = :termsId
-            """)
-    long countByMemberIdAndTermsId(
-            @Param("memberId") String memberId,
-            @Param("termsId") Long termsId
-    );
+    long countByMember_IdAndTerms_Id(String memberId, Long termsId);
 }

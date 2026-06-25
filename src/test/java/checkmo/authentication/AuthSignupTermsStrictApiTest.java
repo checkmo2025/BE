@@ -79,8 +79,8 @@ class AuthSignupTermsStrictApiTest extends ApiTestSupport {
         String memberId = authRepository.findByEmail(email).orElseThrow().getId();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(memberRepository.existsById(memberId)).isTrue();
-            softly.assertThat(memberTermsRepository.countByMemberIdAndTermsId(memberId, service.getId())).isOne();
-            softly.assertThat(memberTermsRepository.countByMemberIdAndTermsId(memberId, marketing.getId())).isOne();
+            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(memberId, service.getId())).isOne();
+            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(memberId, marketing.getId())).isOne();
         });
     }
 
