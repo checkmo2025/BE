@@ -7,7 +7,7 @@ import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.repository.MemberTermsRepository;
-import checkmo.member.internal.repository.TermsRepository;
+import checkmo.member.internal.service.query.MemberTermsQueryService;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,8 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberTermsCommandService {
 
     private final MemberRepository memberRepository;
-    private final TermsRepository termsRepository;
     private final MemberTermsRepository memberTermsRepository;
+
+    private final MemberTermsQueryService memberTermsQueryService;
 
     public void updateAgreements(String memberId, List<TermsAgreementCommand> commands) {
         saveAgreements(memberId, commands, false);
@@ -54,7 +55,7 @@ public class MemberTermsCommandService {
 
         Member member = memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        List<Terms> activeTerms = termsRepository.findAllByActiveTrue();
+        List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
         Map<Long, Terms> activeTermsById = activeTerms.stream()
                 .collect(Collectors.toMap(Terms::getId, Function.identity()));
 

@@ -106,6 +106,18 @@ class TermsDomainServiceTest {
     }
 
     @Test
+    void 약관_동의_수정도_활성_약관_종류가_중복되면_서버_불변식_위반으로_실패한다() {
+        Member member = saveMember();
+        Terms service = saveTerms(TermsType.SERVICE_TERMS, "서비스 v1", true, true);
+        saveTerms(TermsType.SERVICE_TERMS, "서비스 v2", true, true);
+
+        assertThatThrownBy(() -> memberTermsCommandService.updateAgreements(
+                member.getId(),
+                List.of(new TermsAgreementCommand(service.getId(), true))
+        )).isInstanceOf(MemberException.class);
+    }
+
+    @Test
     void 회원_약관_상태는_생성일시와_id_내림차순의_최신_이력으로_계산한다() {
         Member member = saveMember();
         Terms terms = saveTerms(TermsType.MARKETING, "마케팅", true, false);
