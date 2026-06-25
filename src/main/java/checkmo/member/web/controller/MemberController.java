@@ -2,17 +2,24 @@ package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.member.internal.converter.TermsConverter;
+import checkmo.member.internal.entity.Terms;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;
 import checkmo.member.internal.service.command.MemberCommandService;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
+import checkmo.member.internal.service.command.MemberTermsCommandService;
+import checkmo.member.internal.service.command.TermsAgreementCommand;
 import checkmo.member.internal.service.query.MemberQueryService;
+import checkmo.member.internal.service.query.MemberTermsQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.FindEmailResult;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
+import checkmo.member.web.dto.TermsRequestDTO;
+import checkmo.member.web.dto.TermsResponseDTO.MemberTermsStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,6 +30,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +47,10 @@ public class MemberController {
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberBlockCommandService memberBlockCommandService;
     private final MemberCommandService memberCommandService;
+    private final MemberTermsCommandService memberTermsCommandService;
 
     private final MemberQueryService memberQueryService;
+    private final MemberTermsQueryService memberTermsQueryService;
 
     @Operation(summary = "회원 추가 정보 입력", description = "회원 추가 정보를 입력합니다.")
     @PostMapping("/additional-info")
@@ -73,6 +83,40 @@ public class MemberController {
     ) {
         boolean isDuplicated = memberQueryService.isNicknameDuplicated(nickname);
         return ApiResponse.onSuccess(isDuplicated);
+    }
+
+    @Operation(summary = "내 약관 동의 상태 조회", description = "현재 회원의 활성 약관별 최신 동의 상태를 조회합니다.")
+    @GetMapping("/me/terms")
+    public ApiResponse<MemberTermsStatus> getMyTermsStatus(@CurrentId String memberId) {
+        List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
+        return ApiResponse.onSuccess(TermsConverter.toMemberTermsStatus(
+                activeTerms,
+                memberTermsQueryService.retrieveLatestMemberTermsByTermsId(
+                        memberId,
+                        activeTerms.stream()
+                                .map(Terms::getId)
+                                .toList()
+                )
+        ));
+    }
+
+    @Operation(summary = "내 약관 동의 저장", description = "현재 회원의 약관 동의 상태를 저장합니다.")
+    @PostMapping("/me/terms")
+    public ApiResponse<Void> saveMyTermsAgreements(
+            @CurrentId String memberId,
+            @Valid @RequestBody TermsRequestDTO.SaveAgreements request
+    ) {
+        memberTermsCommandService.saveAgreements(
+                memberId,
+                request.getAgreements()
+                        .stream()
+                        .map(agreement -> new TermsAgreementCommand(
+                                agreement.getTermsId(),
+                                agreement.getAgreed()
+                        ))
+                        .toList()
+        );
+        return ApiResponse.onSuccess(null);
     }
 
     @Operation(summary = "회원 팔로잉 API", description = "특정 회원을 팔로잉합니다.")
