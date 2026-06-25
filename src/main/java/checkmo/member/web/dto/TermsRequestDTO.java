@@ -12,10 +12,10 @@ public class TermsRequestDTO {
 
     @Getter
     @NoArgsConstructor
-    @Schema(description = "약관 동의 저장 요청")
-    public static class SaveAgreements {
+    @Schema(description = "약관 동의 수정 요청")
+    public static class UpdateAgreements {
         @NotEmpty(message = "약관 동의 항목은 최소 1개 이상이어야 합니다.")
-        @Schema(description = "저장할 약관 동의 목록. 최소 1개 이상 필요하며 같은 termsId는 중복 제출할 수 없습니다.")
+        @Schema(description = "수정할 약관 동의 목록. 최소 1개 이상 필요하며 같은 termsId는 중복 제출할 수 없습니다.")
         private List<@NotNull @Valid Agreement> agreements;
     }
 
