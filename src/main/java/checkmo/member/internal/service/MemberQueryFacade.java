@@ -5,17 +5,21 @@ import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
 import checkmo.common.template.ExtractHelper;
 import checkmo.member.internal.converter.MemberConverter;
+import checkmo.member.internal.converter.TermsConverter;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberBlock;
 import checkmo.member.internal.entity.MemberInterestCategory;
+import checkmo.member.internal.entity.Terms;
 import checkmo.member.internal.repository.projection.MemberBasicInfoProjection;
 import checkmo.member.internal.service.query.MemberBlockQueryService;
 import checkmo.member.internal.service.query.MemberFollowQueryService;
 import checkmo.member.internal.service.query.MemberQueryService;
+import checkmo.member.internal.service.query.MemberTermsQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.*;
+import checkmo.member.web.dto.TermsResponseDTO.MemberTermsStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -40,11 +44,26 @@ public class MemberQueryFacade {
     private final MemberQueryService memberQueryService;
     private final MemberFollowQueryService memberFollowQueryService;
     private final MemberBlockQueryService memberBlockQueryService;
+    private final MemberTermsQueryService memberTermsQueryService;
 
     public DetailInfo retrieveMemberDetailInfo(String memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
 
         return MemberConverter.toMemberProfileWithCategory(member);
+    }
+
+    public MemberTermsStatus retrieveMemberTermsStatus(String memberId) {
+        List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
+
+        return TermsConverter.toMemberTermsStatus(
+                activeTerms,
+                memberTermsQueryService.retrieveLatestMemberTermsByTermsId(
+                        memberId,
+                        activeTerms.stream()
+                                .map(Terms::getId)
+                                .toList()
+                )
+        );
     }
 
     public MemberResponseDTO.FollowCount retrieveMyFollowCount(String memberId) {

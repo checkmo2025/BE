@@ -64,7 +64,7 @@ public class MemberTermsCommandService {
             if (terms == null) {
                 throw new MemberException(MemberErrorStatus.TERMS_NOT_FOUND);
             }
-            validateRequiredAgreement(terms, command.agreed());
+            terms.validateAgreementSubmission(command.agreed());
         });
         validateRequiredTermsSubmitted(activeTerms, commands, requireRequiredAgreement);
 
@@ -81,7 +81,7 @@ public class MemberTermsCommandService {
         Terms terms = termsRepository.findByIdAndActiveTrue(command.termsId())
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.TERMS_NOT_FOUND));
 
-        validateRequiredAgreement(terms, command.agreed());
+        terms.validateAgreementSubmission(command.agreed());
 
         return saveAgreement(member, terms, command.agreed());
     }
@@ -115,12 +115,6 @@ public class MemberTermsCommandService {
                 .anyMatch(requiredTermsId -> !agreedTermsIds.contains(requiredTermsId));
         if (hasMissingRequiredTerms) {
             throw new MemberException(MemberErrorStatus.REQUIRED_TERMS_NOT_AGREED);
-        }
-    }
-
-    private void validateRequiredAgreement(Terms terms, boolean agreed) {
-        if (terms.isRequired() && !agreed) {
-            throw new MemberException(MemberErrorStatus.REQUIRED_TERMS_CANNOT_BE_DISAGREED);
         }
     }
 

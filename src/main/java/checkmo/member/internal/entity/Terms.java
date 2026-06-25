@@ -1,6 +1,8 @@
 package checkmo.member.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.member.internal.exception.MemberErrorStatus;
+import checkmo.member.internal.exception.MemberException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -47,4 +49,10 @@ public class Terms extends BaseEntity {
 
     @Column(name = "is_required", nullable = false)
     private boolean required;
+
+    public void validateAgreementSubmission(boolean agreed) {
+        if (required && !agreed) {
+            throw new MemberException(MemberErrorStatus.REQUIRED_TERMS_CANNOT_BE_DISAGREED);
+        }
+    }
 }

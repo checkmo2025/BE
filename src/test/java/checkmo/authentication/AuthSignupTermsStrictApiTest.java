@@ -10,6 +10,7 @@ import checkmo.member.internal.entity.Terms;
 import checkmo.member.internal.entity.TermsType;
 import checkmo.member.internal.repository.MemberTermsRepository;
 import checkmo.member.internal.repository.TermsRepository;
+import checkmo.support.ApiTest;
 import checkmo.support.ApiTestSupport;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 
+@ApiTest
 @TestPropertySource(properties = "checkmo.terms.enforcement-enabled=true")
 class AuthSignupTermsStrictApiTest extends ApiTestSupport {
 

@@ -2,8 +2,6 @@ package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.member.internal.converter.TermsConverter;
-import checkmo.member.internal.entity.Terms;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;
 import checkmo.member.internal.service.command.MemberCommandService;
@@ -11,7 +9,6 @@ import checkmo.member.internal.service.command.MemberFollowCommandService;
 import checkmo.member.internal.service.command.MemberTermsCommandService;
 import checkmo.member.internal.service.command.TermsAgreementCommand;
 import checkmo.member.internal.service.query.MemberQueryService;
-import checkmo.member.internal.service.query.MemberTermsQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
@@ -30,7 +27,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +46,6 @@ public class MemberController {
     private final MemberTermsCommandService memberTermsCommandService;
 
     private final MemberQueryService memberQueryService;
-    private final MemberTermsQueryService memberTermsQueryService;
 
     @Operation(
             summary = "회원 추가 정보 입력",
@@ -97,16 +92,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "활성 약관 종류 중복 시 TERMS_500")
     })
     public ApiResponse<MemberTermsStatus> getMyTermsStatus(@CurrentId String memberId) {
-        List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
-        return ApiResponse.onSuccess(TermsConverter.toMemberTermsStatus(
-                activeTerms,
-                memberTermsQueryService.retrieveLatestMemberTermsByTermsId(
-                        memberId,
-                        activeTerms.stream()
-                                .map(Terms::getId)
-                                .toList()
-                )
-        ));
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberTermsStatus(memberId));
     }
 
     @Operation(summary = "내 약관 동의 저장", description = "현재 회원의 약관 동의 상태를 저장합니다.")
