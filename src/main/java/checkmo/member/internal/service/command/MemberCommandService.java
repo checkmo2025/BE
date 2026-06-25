@@ -9,6 +9,7 @@ import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.FollowRepository;
 import checkmo.member.internal.repository.MemberBlockRepository;
 import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.internal.service.query.MemberTermsQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +34,7 @@ public class MemberCommandService {
     private final FollowRepository followRepository;
     private final MemberBlockRepository memberBlockRepository;
     private final MemberTermsCommandService memberTermsCommandService;
+    private final MemberTermsQueryService memberTermsQueryService;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -66,6 +68,7 @@ public class MemberCommandService {
      */
     public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
         Member member = findActiveMember(memberId);
+        validateRequiredTermsBeforeProfileCompletion(memberId);
 
         if (!StringUtils.hasText(request.getNickname())) {
             throw new MemberException(MemberErrorStatus.NICKNAME_REQUIRED);
@@ -93,6 +96,16 @@ public class MemberCommandService {
                 MemberEvent.MemberRegistrationCompleted.builder()
                         .memberId(memberId)
                         .build());
+    }
+
+    private void validateRequiredTermsBeforeProfileCompletion(String memberId) {
+        if (!termsEnforcementEnabled) {
+            return;
+        }
+
+        if (!memberTermsQueryService.hasAgreedAllRequiredActiveTerms(memberId)) {
+            throw new MemberException(MemberErrorStatus.REQUIRED_TERMS_NOT_AGREED);
+        }
     }
 
     /**

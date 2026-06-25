@@ -47,6 +47,24 @@ public class MemberTermsQueryService {
         return latestTermsByTermsId;
     }
 
+    public boolean hasAgreedAllRequiredActiveTerms(String memberId) {
+        List<Terms> requiredTerms = retrieveActiveTerms().stream()
+                .filter(Terms::isRequired)
+                .toList();
+        Map<Long, MemberTerms> latestTermsByTermsId = retrieveLatestMemberTermsByTermsId(
+                memberId,
+                requiredTerms.stream()
+                        .map(Terms::getId)
+                        .toList()
+        );
+
+        return requiredTerms.stream()
+                .allMatch(requiredTerm -> {
+                    MemberTerms latestTerms = latestTermsByTermsId.get(requiredTerm.getId());
+                    return latestTerms != null && latestTerms.isAgreed();
+                });
+    }
+
     private void validateActiveTermsTypeUnique(List<Terms> activeTerms) {
         Map<TermsType, Long> countByTermsType = new EnumMap<>(TermsType.class);
         activeTerms.forEach(terms -> countByTermsType.merge(terms.getTermsType(), 1L, Long::sum));
