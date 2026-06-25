@@ -1,10 +1,15 @@
 package checkmo.member.internal.entity;
 
+import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,14 +21,30 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Terms {
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "UK_terms_type_version", columnNames = {"terms_type", "version"})
+})
+public class Terms extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String termUrl; // 약관 파일 URL
+    @Enumerated(EnumType.STRING)
+    @Column(name = "terms_type", nullable = false, length = 50)
+    private TermsType termsType;
 
     @Column(nullable = false)
-    private boolean isRequired; // 필수/선택
+    private String title;
+
+    @Column(nullable = false)
+    private String termUrl;
+
+    @Column(nullable = false)
+    private int version;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean active;
+
+    @Column(name = "is_required", nullable = false)
+    private boolean required;
 }
