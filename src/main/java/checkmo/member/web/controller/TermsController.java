@@ -21,6 +21,10 @@ public class TermsController {
 
     @Operation(summary = "활성 약관 목록 조회", description = "현재 활성화된 약관을 표시 순서대로 조회합니다.")
     @GetMapping
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "활성 약관 종류 중복 시 TERMS_500")
+    })
     public ApiResponse<PublicTermsList> getActiveTerms() {
         return ApiResponse.onSuccess(TermsConverter.toPublicTermsList(
                 memberTermsQueryService.retrieveActiveTerms()

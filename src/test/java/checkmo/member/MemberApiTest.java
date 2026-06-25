@@ -152,7 +152,8 @@ class MemberApiTest extends ApiTestSupport {
                 .post("/api/v1/members/me/terms")
                 .then()
                 .statusCode(400)
-                .body("isSuccess", equalTo(false));
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_402"));
 
         assertThat(memberTermsRepository.count()).isZero();
     }
@@ -171,7 +172,8 @@ class MemberApiTest extends ApiTestSupport {
                 .post("/api/v1/members/me/terms")
                 .then()
                 .statusCode(400)
-                .body("isSuccess", equalTo(false));
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_400"));
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -181,7 +183,8 @@ class MemberApiTest extends ApiTestSupport {
                 .post("/api/v1/members/me/terms")
                 .then()
                 .statusCode(400)
-                .body("isSuccess", equalTo(false));
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_400"));
 
         assertThat(memberTermsRepository.count()).isZero();
     }
@@ -199,7 +202,8 @@ class MemberApiTest extends ApiTestSupport {
                 .post("/api/v1/members/me/terms")
                 .then()
                 .statusCode(400)
-                .body("isSuccess", equalTo(false));
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_401"));
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

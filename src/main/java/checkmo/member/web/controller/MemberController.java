@@ -52,11 +52,14 @@ public class MemberController {
     private final MemberQueryService memberQueryService;
     private final MemberTermsQueryService memberTermsQueryService;
 
-    @Operation(summary = "회원 추가 정보 입력", description = "회원 추가 정보를 입력합니다.")
+    @Operation(
+            summary = "회원 추가 정보 입력",
+            description = "회원 추가 정보를 입력합니다. strict mode에서는 소셜 회원가입 완료 전 활성 필수 약관 동의가 필요합니다."
+    )
     @PostMapping("/additional-info")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다. strict mode에서 필수 약관 미동의 시 TERMS_403"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
@@ -87,6 +90,12 @@ public class MemberController {
 
     @Operation(summary = "내 약관 동의 상태 조회", description = "현재 회원의 활성 약관별 최신 동의 상태를 조회합니다.")
     @GetMapping("/me/terms")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 회원입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "활성 약관 종류 중복 시 TERMS_500")
+    })
     public ApiResponse<MemberTermsStatus> getMyTermsStatus(@CurrentId String memberId) {
         List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
         return ApiResponse.onSuccess(TermsConverter.toMemberTermsStatus(
@@ -102,6 +111,12 @@ public class MemberController {
 
     @Operation(summary = "내 약관 동의 저장", description = "현재 회원의 약관 동의 상태를 저장합니다.")
     @PostMapping("/me/terms")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "검증 오류, TERMS_400, TERMS_401, TERMS_402"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 회원입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
     public ApiResponse<Void> saveMyTermsAgreements(
             @CurrentId String memberId,
             @Valid @RequestBody TermsRequestDTO.SaveAgreements request
