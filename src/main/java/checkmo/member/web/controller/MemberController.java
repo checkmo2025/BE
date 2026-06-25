@@ -2,10 +2,13 @@ package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.member.internal.service.MemberFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;
 import checkmo.member.internal.service.command.MemberCommandService;
 import checkmo.member.internal.service.command.MemberFollowCommandService;
+import checkmo.member.internal.service.command.MemberTermsCommandService;
+import checkmo.member.internal.service.command.TermsAgreementCommand;
 import checkmo.member.internal.service.query.MemberQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO;
@@ -13,6 +16,8 @@ import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import checkmo.member.web.dto.MemberResponseDTO.FindEmailResult;
 import checkmo.member.web.dto.MemberResponseDTO.RecommendedMemberList;
 import checkmo.member.web.dto.MemberResponseDTO.othersDetailInfo;
+import checkmo.member.web.dto.TermsRequestDTO;
+import checkmo.member.web.dto.TermsResponseDTO.MemberTermsStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -35,18 +40,23 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberQueryFacade memberQueryFacade;
+    private final MemberFacade memberFacade;
 
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberBlockCommandService memberBlockCommandService;
     private final MemberCommandService memberCommandService;
+    private final MemberTermsCommandService memberTermsCommandService;
 
     private final MemberQueryService memberQueryService;
 
-    @Operation(summary = "회원 추가 정보 입력", description = "회원 추가 정보를 입력합니다.")
+    @Operation(
+            summary = "회원 추가 정보 입력",
+            description = "회원 추가 정보를 입력합니다. strict mode에서는 소셜 회원가입 완료 전 활성 필수 약관 동의가 필요합니다."
+    )
     @PostMapping("/additional-info")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다. strict mode에서 필수 약관 미동의 시 TERMS_403"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
@@ -54,7 +64,7 @@ public class MemberController {
             @CurrentId String memberId,
             @Valid @RequestBody MemberRequestDTO.AdditionalInfo request
     ) {
-        memberCommandService.addAdditionalInfo(memberId, request);
+        memberFacade.addAdditionalInfo(memberId, request);
         return ApiResponse.onSuccess(null);
     }
 
@@ -73,6 +83,43 @@ public class MemberController {
     ) {
         boolean isDuplicated = memberQueryService.isNicknameDuplicated(nickname);
         return ApiResponse.onSuccess(isDuplicated);
+    }
+
+    @Operation(summary = "내 약관 동의 상태 조회", description = "현재 회원의 활성 약관별 최신 동의 상태를 조회합니다.")
+    @GetMapping("/me/terms")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 회원입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "활성 약관 종류 중복 시 TERMS_500")
+    })
+    public ApiResponse<MemberTermsStatus> getMyTermsStatus(@CurrentId String memberId) {
+        return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberTermsStatus(memberId));
+    }
+
+    @Operation(summary = "내 약관 동의 수정", description = "현재 회원의 약관 동의 상태를 수정합니다.")
+    @PostMapping("/me/terms")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "검증 오류, TERMS_400, TERMS_401, TERMS_402"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증되지 않은 회원입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
+    })
+    public ApiResponse<Void> updateMyTermsAgreements(
+            @CurrentId String memberId,
+            @Valid @RequestBody TermsRequestDTO.UpdateAgreements request
+    ) {
+        memberTermsCommandService.updateAgreements(
+                memberId,
+                request.getAgreements()
+                        .stream()
+                        .map(agreement -> new TermsAgreementCommand(
+                                agreement.getTermsId(),
+                                agreement.getAgreed()
+                        ))
+                        .toList()
+        );
+        return ApiResponse.onSuccess(null);
     }
 
     @Operation(summary = "회원 팔로잉 API", description = "특정 회원을 팔로잉합니다.")

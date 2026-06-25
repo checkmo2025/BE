@@ -1,5 +1,6 @@
 package checkmo.member.internal.entity;
 
+import checkmo.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,19 +20,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class MemberTerms {
+public class MemberTerms extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "terms_id")
+    @JoinColumn(name = "terms_id", nullable = false)
     private Terms terms;
 
-    @Column(nullable = false)
-    private boolean isAgreed; // 동의 여부
+    @Column(name = "is_agreed", nullable = false)
+    private boolean agreed;
 }

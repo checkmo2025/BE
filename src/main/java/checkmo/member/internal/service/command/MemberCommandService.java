@@ -13,13 +13,12 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.HashSet;
 
 @RequiredArgsConstructor
 @Transactional
@@ -45,8 +44,6 @@ public class MemberCommandService {
                 .build();
 
         memberRepository.save(member);
-
-        // TODO: 여기서 약관 내역 DB에 저장 (멤버 생성 후)
     }
 
     /**

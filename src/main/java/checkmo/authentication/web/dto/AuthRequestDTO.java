@@ -1,10 +1,13 @@
 package checkmo.authentication.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +27,21 @@ public class AuthRequestDTO {
         @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$", message = "비밀번호는 영어 및 특수문자를 포함해야 합니다")
         @Schema(description = "비밀번호(영어+특수문자 포함 6~24자)", example = "pass123!")
         private String password;
+
+        @Schema(description = "약관 동의 목록. compatibility mode에서는 생략 가능합니다.")
+        private List<@NotNull @Valid Agreement> agreements = List.of();
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class Agreement {
+        @NotNull(message = "약관 ID는 필수입니다.")
+        @Schema(description = "약관 ID", example = "1")
+        private Long termsId;
+
+        @NotNull(message = "약관 동의 여부는 필수입니다.")
+        @Schema(description = "동의 여부", example = "true")
+        private Boolean agreed;
     }
 
     @Getter

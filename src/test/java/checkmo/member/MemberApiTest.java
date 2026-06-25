@@ -5,15 +5,273 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
+import checkmo.member.internal.entity.MemberTerms;
+import checkmo.member.internal.entity.Terms;
+import checkmo.member.internal.entity.TermsType;
+import checkmo.member.internal.repository.MemberTermsRepository;
+import checkmo.member.internal.repository.TermsRepository;
 import checkmo.support.ApiTestSupport;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class MemberApiTest extends ApiTestSupport {
+
+    @Autowired
+    TermsRepository termsRepository;
+
+    @Autowired
+    MemberTermsRepository memberTermsRepository;
+
+    @Test
+    void 활성_약관_목록은_공개로_표시_순서대로_조회된다() {
+        Terms marketing = saveTerms(TermsType.MARKETING, "마케팅", true, false);
+        Terms privacy = saveTerms(TermsType.PRIVACY_COLLECTION, "개인정보", true, true);
+        Terms service = saveTerms(TermsType.SERVICE_TERMS, "서비스", true, true);
+        Terms thirdParty = saveTerms(TermsType.THIRD_PARTY_PROVISION, "제3자", true, false);
+        saveTerms(TermsType.SERVICE_TERMS, "비활성 서비스", false, true);
+
+        ExtractableResponse<Response> response = given()
+                .when()
+                .get("/api/v1/terms")
+                .then()
+                .statusCode(200)
+                .extract();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.jsonPath().getList("result.terms.termsType", String.class))
+                    .containsExactly(
+                            "SERVICE_TERMS",
+                            "PRIVACY_COLLECTION",
+                            "THIRD_PARTY_PROVISION",
+                            "MARKETING"
+                    );
+            softly.assertThat(response.jsonPath().getList("result.terms.id", Long.class))
+                    .containsExactly(service.getId(), privacy.getId(), thirdParty.getId(), marketing.getId());
+            softly.assertThat(response.jsonPath().getList("result.terms.required", Boolean.class))
+                    .containsExactly(true, true, false, false);
+            softly.assertThat(response.jsonPath().getList("result.terms.termUrl", String.class))
+                    .allSatisfy(termUrl -> assertThat(termUrl).startsWith("https://example.com/"));
+        });
+    }
+
+    @Test
+    void 활성_약관_종류가_중복되면_공개_조회는_서버_오류로_실패한다() {
+        saveTerms(TermsType.SERVICE_TERMS, "서비스 v1", true, true);
+        saveTerms(TermsType.SERVICE_TERMS, "서비스 v2", true, true);
+
+        given()
+                .when()
+                .get("/api/v1/terms")
+                .then()
+                .statusCode(500)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_500"));
+    }
+
+    @Test
+    void 회원_약관_상태는_프로필_미완성_회원도_조회할_수_있다() {
+        TestUser user = createIncompleteUser();
+        Terms service = saveTerms(TermsType.SERVICE_TERMS, "서비스", true, true);
+        Terms marketing = saveTerms(TermsType.MARKETING, "마케팅", true, false);
+        saveMemberTerms(user.id(), marketing, true);
+
+        ExtractableResponse<Response> response = given()
+                .cookie(accessTokenCookie(user))
+                .when()
+                .get("/api/v1/members/me/terms")
+                .then()
+                .statusCode(200)
+                .extract();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.jsonPath().getBoolean("result.requiresRequiredAgreement")).isTrue();
+            softly.assertThat(response.jsonPath().getList("result.terms.id", Long.class))
+                    .containsExactly(service.getId(), marketing.getId());
+            softly.assertThat(response.jsonPath().getList("result.terms.agreed", Boolean.class))
+                    .containsExactly(false, true);
+        });
+    }
+
+    @Test
+    void 약관_동의_저장은_성공하고_최신_상태로_조회된다() {
+        TestUser user = createUser();
+        Terms service = saveTerms(TermsType.SERVICE_TERMS, "서비스", true, true);
+        Terms privacy = saveTerms(TermsType.PRIVACY_COLLECTION, "개인정보", true, true);
+        Terms marketing = saveTerms(TermsType.MARKETING, "마케팅", true, false);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of(
+                        Map.of("termsId", service.getId(), "agreed", true),
+                        Map.of("termsId", privacy.getId(), "agreed", true),
+                        Map.of("termsId", marketing.getId(), "agreed", true)
+                )))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true));
+
+        ExtractableResponse<Response> response = given()
+                .cookie(accessTokenCookie(user))
+                .when()
+                .get("/api/v1/members/me/terms")
+                .then()
+                .statusCode(200)
+                .extract();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.jsonPath().getBoolean("result.requiresRequiredAgreement")).isFalse();
+            softly.assertThat(response.jsonPath().getList("result.terms.agreed", Boolean.class))
+                    .containsExactly(true, true, true);
+            softly.assertThat(memberTermsRepository.count()).isEqualTo(3);
+        });
+    }
+
+    @Test
+    void 중복된_약관_id_제출은_거절된다() {
+        TestUser user = createUser();
+        Terms service = saveTerms(TermsType.SERVICE_TERMS, "서비스", true, true);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of(
+                        Map.of("termsId", service.getId(), "agreed", true),
+                        Map.of("termsId", service.getId(), "agreed", true)
+                )))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_402"));
+
+        assertThat(memberTermsRepository.count()).isZero();
+    }
+
+    @Test
+    void 비활성_약관과_존재하지_않는_약관_제출은_거절된다() {
+        TestUser user = createUser();
+        Terms inactive = saveTerms(TermsType.SERVICE_TERMS, "비활성 서비스", false, true);
+        saveTerms(TermsType.SERVICE_TERMS, "활성 서비스", true, true);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of(Map.of("termsId", inactive.getId(), "agreed", true))))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_400"));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of(Map.of("termsId", 999_999L, "agreed", true))))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_400"));
+
+        assertThat(memberTermsRepository.count()).isZero();
+    }
+
+    @Test
+    void 필수_약관_비동의와_빈_제출은_거절된다() {
+        TestUser user = createUser();
+        Terms service = saveTerms(TermsType.SERVICE_TERMS, "서비스", true, true);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of(Map.of("termsId", service.getId(), "agreed", false))))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("TERMS_401"));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of()))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body("{}")
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body("{\"agreements\":[null]}")
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of(Map.of("termsId", service.getId()))))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false));
+
+        assertThat(memberTermsRepository.count()).isZero();
+    }
+
+    @Test
+    void 선택_약관은_철회하고_다시_동의할_수_있다() {
+        TestUser user = createUser();
+        Terms marketing = saveTerms(TermsType.MARKETING, "마케팅", true, false);
+
+        postAgreement(user, marketing, true);
+        postAgreement(user, marketing, false);
+        postAgreement(user, marketing, true);
+
+        ExtractableResponse<Response> response = given()
+                .cookie(accessTokenCookie(user))
+                .when()
+                .get("/api/v1/members/me/terms")
+                .then()
+                .statusCode(200)
+                .extract();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.jsonPath().getList("result.terms.agreed", Boolean.class))
+                    .containsExactly(true);
+            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(user.id(), marketing.getId()))
+                    .isEqualTo(3);
+        });
+    }
 
     @Test
     void additionalInfoCompletesIncompleteProfile() {
@@ -361,5 +619,40 @@ class MemberApiTest extends ApiTestSupport {
                 .post("/api/v1/members/withdrawal")
                 .then()
                 .statusCode(200);
+    }
+
+    private void postAgreement(TestUser user, Terms terms, boolean agreed) {
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("agreements", List.of(Map.of(
+                        "termsId", terms.getId(),
+                        "agreed", agreed
+                ))))
+                .when()
+                .post("/api/v1/members/me/terms")
+                .then()
+                .statusCode(200);
+    }
+
+    private Terms saveTerms(TermsType termsType, String title, boolean active, boolean required) {
+        return termsRepository.save(Terms.builder()
+                .termsType(termsType)
+                .title(title)
+                .termUrl("https://example.com/" + UUID.randomUUID())
+                .version((int) termsRepository.count() + 1)
+                .active(active)
+                .required(required)
+                .build());
+    }
+
+    private void saveMemberTerms(String memberId, Terms terms, boolean agreed) {
+        memberRepository.findById(memberId)
+                .map(member -> MemberTerms.builder()
+                        .member(member)
+                        .terms(terms)
+                        .agreed(agreed)
+                        .build())
+                .ifPresent(memberTermsRepository::save);
     }
 }

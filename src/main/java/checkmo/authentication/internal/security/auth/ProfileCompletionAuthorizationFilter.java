@@ -25,6 +25,8 @@ public class ProfileCompletionAuthorizationFilter extends OncePerRequestFilter {
 
     private final List<String> excludedPaths = List.of(
             "/api/v1/auth/logout",
+            "/api/v1/terms",
+            "/api/v1/members/me/terms",
             "/api/v1/members/additional-info",
             "/api/v1/auth/redirect/oauth2",
             "/api/v1/members/check-nickname",
