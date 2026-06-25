@@ -1,6 +1,7 @@
 package checkmo.member.internal.listener;
 
 import checkmo.authentication.AuthenticationEvent;
+import checkmo.member.internal.service.MemberFacade;
 import checkmo.member.internal.service.command.MemberCommandService;
 import checkmo.member.internal.service.command.TermsAgreementCommand;
 import java.util.List;
@@ -15,11 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberEventListener {
 
     private final MemberCommandService memberCommandService;
+    private final MemberFacade memberFacade;
 
     @EventListener
     @Transactional(propagation = Propagation.MANDATORY)
     public void createMember(AuthenticationEvent.CreateMember event) {
-        memberCommandService.createMember(
+        memberFacade.createMember(
                 event.id(),
                 event.email(),
                 toTermsAgreementCommands(event.agreements())

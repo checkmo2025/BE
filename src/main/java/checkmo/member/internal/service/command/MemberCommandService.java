@@ -9,15 +9,12 @@ import checkmo.member.internal.exception.MemberException;
 import checkmo.member.internal.repository.FollowRepository;
 import checkmo.member.internal.repository.MemberBlockRepository;
 import checkmo.member.internal.repository.MemberRepository;
-import checkmo.member.internal.service.query.MemberTermsQueryService;
 import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashSet;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,15 +30,10 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
     private final MemberBlockRepository memberBlockRepository;
-    private final MemberTermsCommandService memberTermsCommandService;
-    private final MemberTermsQueryService memberTermsQueryService;
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @Value("${checkmo.terms.enforcement-enabled:false}")
-    private boolean termsEnforcementEnabled;
-
-    public void createMember(String memberId, String email, List<TermsAgreementCommand> termsAgreements) {
+    public void createMember(String memberId, String email) {
         Member member = Member.builder()
                 .id(memberId)
                 .email(email)
@@ -52,12 +44,6 @@ public class MemberCommandService {
                 .build();
 
         memberRepository.save(member);
-
-        memberTermsCommandService.saveSignupAgreements(
-                memberId,
-                termsAgreements,
-                termsEnforcementEnabled
-        );
     }
 
     /**
@@ -68,7 +54,6 @@ public class MemberCommandService {
      */
     public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
         Member member = findActiveMember(memberId);
-        validateRequiredTermsBeforeProfileCompletion(memberId);
 
         if (!StringUtils.hasText(request.getNickname())) {
             throw new MemberException(MemberErrorStatus.NICKNAME_REQUIRED);
@@ -96,16 +81,6 @@ public class MemberCommandService {
                 MemberEvent.MemberRegistrationCompleted.builder()
                         .memberId(memberId)
                         .build());
-    }
-
-    private void validateRequiredTermsBeforeProfileCompletion(String memberId) {
-        if (!termsEnforcementEnabled) {
-            return;
-        }
-
-        if (!memberTermsQueryService.hasAgreedAllRequiredActiveTerms(memberId)) {
-            throw new MemberException(MemberErrorStatus.REQUIRED_TERMS_NOT_AGREED);
-        }
     }
 
     /**

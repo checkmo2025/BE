@@ -2,6 +2,7 @@ package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.member.internal.service.MemberFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;
 import checkmo.member.internal.service.command.MemberCommandService;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberQueryFacade memberQueryFacade;
+    private final MemberFacade memberFacade;
 
     private final MemberFollowCommandService memberFollowCommandService;
     private final MemberBlockCommandService memberBlockCommandService;
@@ -62,7 +64,7 @@ public class MemberController {
             @CurrentId String memberId,
             @Valid @RequestBody MemberRequestDTO.AdditionalInfo request
     ) {
-        memberCommandService.addAdditionalInfo(memberId, request);
+        memberFacade.addAdditionalInfo(memberId, request);
         return ApiResponse.onSuccess(null);
     }
 
