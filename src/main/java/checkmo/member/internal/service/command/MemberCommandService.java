@@ -13,13 +13,14 @@ import checkmo.member.web.dto.MemberRequestDTO;
 import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashSet;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.HashSet;
 
 @RequiredArgsConstructor
 @Transactional
@@ -31,10 +32,14 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
     private final MemberBlockRepository memberBlockRepository;
+    private final MemberTermsCommandService memberTermsCommandService;
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public void createMember(String memberId, String email) {
+    @Value("${checkmo.terms.enforcement-enabled:false}")
+    private boolean termsEnforcementEnabled;
+
+    public void createMember(String memberId, String email, List<TermsAgreementCommand> termsAgreements) {
         Member member = Member.builder()
                 .id(memberId)
                 .email(email)
@@ -46,7 +51,11 @@ public class MemberCommandService {
 
         memberRepository.save(member);
 
-        // TODO: 여기서 약관 내역 DB에 저장 (멤버 생성 후)
+        memberTermsCommandService.saveSignupAgreements(
+                memberId,
+                termsAgreements,
+                termsEnforcementEnabled
+        );
     }
 
     /**

@@ -24,6 +24,8 @@ springdoc:
   use-fqn: true
 
 checkmo:
+  terms:
+    enforcement-enabled: ${TERMS_ENFORCEMENT_ENABLED:false}
   sentry:
     enabled: ${SENTRY_ENABLED:false}
     dsn: ${SENTRY_DSN:}

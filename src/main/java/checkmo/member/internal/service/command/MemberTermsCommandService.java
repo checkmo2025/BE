@@ -30,12 +30,33 @@ public class MemberTermsCommandService {
     private final MemberTermsQueryService memberTermsQueryService;
 
     public void saveAgreements(String memberId, List<TermsAgreementCommand> commands) {
+        saveAgreements(memberId, commands, false);
+    }
+
+    public void saveSignupAgreements(
+            String memberId,
+            List<TermsAgreementCommand> commands,
+            boolean requireRequiredAgreement
+    ) {
+        List<TermsAgreementCommand> normalizedCommands = commands == null ? List.of() : commands;
+        if (normalizedCommands.isEmpty() && !requireRequiredAgreement) {
+            return;
+        }
+
+        saveAgreements(memberId, normalizedCommands, requireRequiredAgreement);
+    }
+
+    private void saveAgreements(
+            String memberId,
+            List<TermsAgreementCommand> commands,
+            boolean requireRequiredAgreement
+    ) {
         validateCommands(commands);
 
         Member member = memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        Map<Long, Terms> activeTermsById = memberTermsQueryService.retrieveActiveTerms()
-                .stream()
+        List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
+        Map<Long, Terms> activeTermsById = activeTerms.stream()
                 .collect(Collectors.toMap(Terms::getId, Function.identity()));
 
         commands.forEach(command -> {
@@ -45,6 +66,7 @@ public class MemberTermsCommandService {
             }
             validateRequiredAgreement(terms, command.agreed());
         });
+        validateRequiredTermsSubmitted(activeTerms, commands, requireRequiredAgreement);
 
         commands.forEach(command -> saveAgreement(
                 member,
@@ -71,6 +93,28 @@ public class MemberTermsCommandService {
                 .anyMatch(termsId -> !termsIds.add(termsId));
         if (hasDuplicate) {
             throw new MemberException(MemberErrorStatus.DUPLICATE_TERMS_AGREEMENT);
+        }
+    }
+
+    private void validateRequiredTermsSubmitted(
+            List<Terms> activeTerms,
+            List<TermsAgreementCommand> commands,
+            boolean requireRequiredAgreement
+    ) {
+        if (!requireRequiredAgreement) {
+            return;
+        }
+
+        Set<Long> agreedTermsIds = commands.stream()
+                .filter(TermsAgreementCommand::agreed)
+                .map(TermsAgreementCommand::termsId)
+                .collect(Collectors.toSet());
+        boolean hasMissingRequiredTerms = activeTerms.stream()
+                .filter(Terms::isRequired)
+                .map(Terms::getId)
+                .anyMatch(requiredTermsId -> !agreedTermsIds.contains(requiredTermsId));
+        if (hasMissingRequiredTerms) {
+            throw new MemberException(MemberErrorStatus.REQUIRED_TERMS_NOT_AGREED);
         }
     }
 

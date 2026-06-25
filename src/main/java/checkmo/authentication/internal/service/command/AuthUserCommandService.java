@@ -7,12 +7,15 @@ import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.web.dto.AuthRequestDTO;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
@@ -30,8 +33,6 @@ public class AuthUserCommandService {
     private final ApplicationEventPublisher eventPublisher;
 
     public AuthUser signUp(AuthRequestDTO.SignUp request) {
-        // TODO: Member 모듈의 API를 통해 필수 약관 동의 여부 체크
-        
         // 이메일 중복 확인
         authRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
             if (existing.getNickName() == null) {
@@ -52,16 +53,45 @@ public class AuthUserCommandService {
         AuthUser newUser = AuthConverter.toLocalUser(request, encodedPassword);
 
         AuthUser savedUser = authRepository.save(newUser);
-        redisTemplate.delete(redisKey); // 회원가입 후 인증 정보 삭제
 
         eventPublisher.publishEvent(
                 AuthenticationEvent.CreateMember.builder()
                         .id(savedUser.getId())
                         .email(savedUser.getEmail())
-                        // TODO: 동의한 약관 ID 리스트 보냄
+                        .agreements(toTermsAgreements(request))
                         .build());
 
+        deleteEmailVerificationAfterCommit(redisKey);
+
         return newUser;
+    }
+
+    private List<AuthenticationEvent.TermsAgreement> toTermsAgreements(AuthRequestDTO.SignUp request) {
+        if (request.getAgreements() == null) {
+            return List.of();
+        }
+
+        return request.getAgreements()
+                .stream()
+                .map(agreement -> new AuthenticationEvent.TermsAgreement(
+                        agreement.getTermsId(),
+                        agreement.getAgreed()
+                ))
+                .toList();
+    }
+
+    private void deleteEmailVerificationAfterCommit(String redisKey) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            redisTemplate.delete(redisKey);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                redisTemplate.delete(redisKey);
+            }
+        });
     }
 
     public void completeProfile(String userId) {
