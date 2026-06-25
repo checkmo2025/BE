@@ -32,10 +32,10 @@ WHERE updated_at IS NULL;
 
 INSERT INTO terms (terms_type, title, term_url, version, is_active, is_required, created_at, updated_at)
 VALUES
-    ('SERVICE_TERMS', '책모 이용약관 동의', 'https://www.checkmo.co.kr/support/terms/service/v1', 1, true, true, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)),
-    ('PRIVACY_COLLECTION', '서비스 이용을 위한 개인정보 수집·이용 동의', 'https://www.checkmo.co.kr/support/terms/privacy-collection/v1', 1, true, true, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)),
-    ('THIRD_PARTY_PROVISION', '개인정보 제3자 제공 동의', 'https://www.checkmo.co.kr/support/terms/third-party-provision/v1', 1, true, false, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)),
-    ('MARKETING', '마케팅 및 이벤트 정보 수신 동의', 'https://www.checkmo.co.kr/support/terms/marketing/v1', 1, true, false, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6));
+    ('SERVICE_TERMS', '책모 이용약관 동의', 'https://www.checkmo.co.kr/support/v1/terms', 1, true, true, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)),
+    ('PRIVACY_COLLECTION', '서비스 이용을 위한 개인정보 수집·이용 동의', 'https://www.checkmo.co.kr/support/v1/privacy', 1, true, true, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)),
+    ('THIRD_PARTY_PROVISION', '개인정보 제3자 제공 동의', 'https://www.checkmo.co.kr/support/v1/third-party-consent', 1, true, false, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6)),
+    ('MARKETING', '마케팅 및 이벤트 정보 수신 동의', 'https://www.checkmo.co.kr/support/v1/marketing-consent', 1, true, false, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6));
 
 ALTER TABLE terms
     MODIFY COLUMN terms_type VARCHAR(50) NOT NULL;
