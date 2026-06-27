@@ -16,6 +16,12 @@ public class MemberRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class MemberProfileUpdate {
+        @Size(max = 20, message = "닉네임은 최대 20자까지 가능합니다")
+        @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
+                message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")
+        @Schema(description = "변경할 닉네임(미전송/빈 값이면 변경 없음). 영어 소문자 및 특수문자 최대 20자", example = "new_nick")
+        private String nickname;
+
         @Size(max = 40, message = "소개는 40자 이하여야 합니다")
         private String description;
 

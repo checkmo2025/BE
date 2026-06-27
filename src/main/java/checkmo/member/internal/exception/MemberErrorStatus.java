@@ -16,6 +16,7 @@ public enum MemberErrorStatus implements BaseErrorCode {
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_413", "이미 사용 중인 이메일입니다."),
     CURRENT_EMAIL_INCORRECT(HttpStatus.BAD_REQUEST, "MEMBER_414", "입력하신 기존 이메일 정보가 정확하지 않습니다."),
     NICKNAME_REQUIRED(HttpStatus.BAD_REQUEST, "MEMBER_415", "닉네임은 필수입니다."),
+    NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBER_416", "이미 사용 중인 닉네임입니다."),
     TERMS_NOT_FOUND(HttpStatus.BAD_REQUEST, "TERMS_400", "해당 약관을 찾을 수 없습니다."),
     REQUIRED_TERMS_CANNOT_BE_DISAGREED(HttpStatus.BAD_REQUEST, "TERMS_401", "필수 약관은 동의가 필요합니다."),
     DUPLICATE_TERMS_AGREEMENT(HttpStatus.BAD_REQUEST, "TERMS_402", "동일한 약관을 중복 제출할 수 없습니다."),

@@ -87,7 +87,8 @@ public class MemberCommandService {
      * 회원 프로필 정보 수정
      *
      * @param memberId 수정할 회원의 ID
-     * @param request  수정할 프로필 정보 DTO - 프로필 이미지, 간단 소개, 관심 카테고리 (닉네임은 변경 불가!!)
+     * @param request  수정할 프로필 정보 DTO - 닉네임, 프로필 이미지, 간단 소개, 관심 카테고리
+     *                 (닉네임은 미전송/빈 값이면 변경 없음, 현재 닉네임과 같으면 스킵, 타인이 사용 중이면 NICKNAME_ALREADY_EXISTS)
      * @return 수정된 회원 프로필 정보 엔티티 - 이때는 관심 카테고리 정보 DTO에 포함 X , -> 반드시 CategoryQueryFacade를 통해 조회해야 함
      */
     public DetailInfo updateProfile(
@@ -96,6 +97,16 @@ public class MemberCommandService {
     ) {
         // 회원 조회
         Member member = findActiveMember(memberId);
+
+        // 닉네임 변경: 값이 있고 현재 닉네임과 다를 때만 처리(중복 검사 후 Member + AuthUser 동기 갱신)
+        String newNickname = request.getNickname();
+        if (StringUtils.hasText(newNickname) && !newNickname.equals(member.getNickName())) {
+            if (memberRepository.existsByNickNameAndDeactivatedAtIsNull(newNickname)) {
+                throw new MemberException(MemberErrorStatus.NICKNAME_ALREADY_EXISTS);
+            }
+            member.updateNickname(newNickname);
+            authenticationAPI.updateNickname(memberId, newNickname);
+        }
 
         String existingImageUrl = member.getImgUrl();
         String newImageUrl = request.getImgUrl();
