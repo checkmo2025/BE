@@ -271,11 +271,11 @@ public class MemberController {
         return ApiResponse.onSuccess(followerList);
     }
 
-    @Operation(summary = "내 프로필 편집 API", description = "내 프로필을 편집합니다. 프로필 이미지, 소개, 관심 카테고리를 수정할 수 있습니다.")
+    @Operation(summary = "내 프로필 편집 API", description = "내 프로필을 편집합니다. 닉네임, 프로필 이미지, 소개, 관심 카테고리를 수정할 수 있습니다. 닉네임은 미전송/빈 값이면 변경되지 않으며, 변경 시 중복이면 MEMBER_416을 반환합니다.")
     @PatchMapping("/me")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다. (닉네임 중복 시 MEMBER_416, 검증 오류 등)"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "프로필이 완성되지 않은 회원입니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")

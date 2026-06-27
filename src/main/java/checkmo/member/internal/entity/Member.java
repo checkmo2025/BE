@@ -91,6 +91,10 @@ public class Member extends BaseEntity {
         this.description = description;
     }
 
+    public void updateNickname(String nickName) {
+        this.nickName = nickName;
+    }
+
     public void updateProfile(String description, String imgUrl, String phoneNumber) {
         this.description = description != null ? description : "";
         this.imgUrl = imgUrl != null ? imgUrl : "";

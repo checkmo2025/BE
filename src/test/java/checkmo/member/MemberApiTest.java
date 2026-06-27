@@ -361,6 +361,67 @@ class MemberApiTest extends ApiTestSupport {
     }
 
     @Test
+    void 프로필_수정으로_닉네임을_변경하면_Member와_AuthUser가_함께_갱신된다() {
+        TestUser user = createUser();
+        String newNickname = "nn" + user.id().substring(user.id().length() - 8);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("nickname", newNickname))
+                .when()
+                .patch("/api/v1/members/me")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true))
+                .body("result.nickname", equalTo(newNickname));
+
+        var member = memberRepository.findById(user.id()).orElseThrow();
+        var authUser = authRepository.findById(user.id()).orElseThrow();
+        assertThat(member.getNickName()).isEqualTo(newNickname);
+        assertThat(authUser.getNickName()).isEqualTo(newNickname);
+    }
+
+    @Test
+    void 프로필_수정에서_타인이_사용중인_닉네임으로_변경하면_실패한다() {
+        TestUser me = createUser();
+        TestUser other = createUser();
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(me))
+                .body(Map.of("nickname", other.nickName()))
+                .when()
+                .patch("/api/v1/members/me")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("MEMBER_416"));
+
+        var member = memberRepository.findById(me.id()).orElseThrow();
+        assertThat(member.getNickName()).isEqualTo(me.nickName());
+    }
+
+    @Test
+    void 프로필_수정에서_현재_닉네임_그대로_보내면_변경없이_성공한다() {
+        TestUser user = createUser();
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of(
+                        "nickname", user.nickName(),
+                        "description", "그대로소개"
+                ))
+                .when()
+                .patch("/api/v1/members/me")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true))
+                .body("result.nickname", equalTo(user.nickName()));
+    }
+
+    @Test
     void removedMemberRefreshEndpointIsUnavailableForAuthenticatedUser() {
         TestUser user = createUser();
 
