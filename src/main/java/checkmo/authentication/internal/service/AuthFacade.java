@@ -3,6 +3,7 @@ package checkmo.authentication.internal.service;
 import checkmo.authentication.internal.converter.AuthConverter;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.security.jwt.JwtLoginProcessor;
+import checkmo.authentication.internal.security.oauth2.AppleAppLoginService;
 import checkmo.authentication.internal.service.command.AuthTokenRotationService;
 import checkmo.authentication.internal.service.result.AuthTokenRotationResult;
 import checkmo.authentication.internal.service.command.AuthSessionCommandService;
@@ -23,6 +24,7 @@ public class AuthFacade {
     private final AuthSessionCommandService authSessionCommandService;
     private final AuthTokenRotationService authTokenRotationService;
     private final JwtLoginProcessor jwtLoginProcessor;
+    private final AppleAppLoginService appleAppLoginService;
 
     public AuthSignUpResult signUp(AuthRequestDTO.SignUp request, HttpServletResponse response) {
         AuthUser user = authUserCommandService.signUp(request);
@@ -41,6 +43,10 @@ public class AuthFacade {
 
         // JWT 토큰 생성 및 쿠키 설정, Refresh Token 반환
         return jwtLoginProcessor.processLogin(response, authentication);
+    }
+
+    public String loginWithApple(AuthRequestDTO.AppleAppLogin request, HttpServletResponse response) {
+        return appleAppLoginService.login(request, response);
     }
 
     public void logout(HttpServletRequest request, HttpServletResponse response) {

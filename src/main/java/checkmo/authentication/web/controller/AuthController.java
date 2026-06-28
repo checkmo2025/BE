@@ -107,6 +107,22 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthResponseDTO.Login.builder().refreshToken(refreshToken).build());
     }
 
+    @Operation(summary = "앱 Apple 로그인", description = "앱에서 Apple identityToken과 rawNonce로 로그인합니다.")
+    @PostMapping("/app/apple/login")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "유효하지 않은 Apple 인증 정보입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 다른 계정으로 가입된 이메일입니다.")
+    })
+    public ApiResponse<AuthResponseDTO.Login> appAppleLogin(
+            @Valid @RequestBody AuthRequestDTO.AppleAppLogin request,
+            HttpServletResponse response
+    ) {
+        String refreshToken = authFacade.loginWithApple(request, response);
+        return ApiResponse.onSuccess(AuthResponseDTO.Login.builder().refreshToken(refreshToken).build());
+    }
+
     @Operation(summary = "앱 토큰 재발급", description = "앱에서 리프레시 토큰을 회전하고 새 토큰을 발급받습니다.")
     @PostMapping("/app/refresh")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
