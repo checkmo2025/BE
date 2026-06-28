@@ -5,7 +5,6 @@ import checkmo.authentication.internal.security.apple.AppleIdTokenVerifier;
 import checkmo.authentication.internal.security.apple.AppleIdentity;
 import checkmo.authentication.internal.security.apple.InvalidAppleIdentityTokenException;
 import checkmo.authentication.internal.security.auth.PrincipalDetails;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -23,8 +22,6 @@ import org.springframework.util.StringUtils;
 public class AppleOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private static final String INVALID_APPLE_ID_TOKEN = "invalid_apple_id_token";
-    private static final String EMAIL_VERIFIED = "email_verified";
-    private static final String PRIVATE_EMAIL = "is_private_email";
 
     private final AppleIdTokenVerifier appleIdTokenVerifier;
     private final SocialAccountResolver socialAccountResolver;
@@ -33,7 +30,7 @@ public class AppleOAuth2UserService implements OAuth2UserService<OAuth2UserReque
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         AppleIdentity identity = verifyIdentity(userRequest);
-        Map<String, Object> attributes = toAttributes(identity);
+        Map<String, Object> attributes = identity.toOAuth2Attributes();
         OAuth2Attributes oAuth2Attributes = OAuth2Attributes.of("apple", attributes);
 
         try {
@@ -62,16 +59,5 @@ public class AppleOAuth2UserService implements OAuth2UserService<OAuth2UserReque
     private OAuth2AuthenticationException invalidAppleIdToken(Throwable cause) {
         OAuth2Error error = new OAuth2Error(INVALID_APPLE_ID_TOKEN, "Invalid Apple identity token", null);
         return new OAuth2AuthenticationException(error, error.getDescription(), cause);
-    }
-
-    private Map<String, Object> toAttributes(AppleIdentity identity) {
-        Map<String, Object> attributes = new LinkedHashMap<>();
-        attributes.put("sub", identity.subject());
-        if (StringUtils.hasText(identity.email())) {
-            attributes.put("email", identity.email());
-        }
-        attributes.put(EMAIL_VERIFIED, identity.emailVerified());
-        attributes.put(PRIVATE_EMAIL, identity.privateEmail());
-        return Map.copyOf(attributes);
     }
 }
