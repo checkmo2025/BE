@@ -2,6 +2,7 @@ app:
   oauth2:
     redirect:
       base-uri: ${FRONTEND_BASE_URI}
+      app-uri: ${APP_OAUTH2_REDIRECT_URI:checkmo://oauth-callback}
 
 spring:
   security:

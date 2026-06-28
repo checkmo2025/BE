@@ -2,6 +2,7 @@ package checkmo.authentication.internal.config;
 
 import checkmo.authentication.internal.security.auth.ProfileCompletionAuthorizationFilter;
 import checkmo.authentication.internal.security.jwt.JwtAuthenticationFilter;
+import checkmo.authentication.internal.security.oauth2.AppAwareOAuth2AuthorizationRequestResolver;
 import checkmo.authentication.internal.security.oauth2.CustomOAuth2UserService;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationFailureHandler;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationSuccessHandler;
@@ -18,6 +19,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -34,7 +36,8 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+            ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화
@@ -76,6 +79,10 @@ public class SecurityConfig {
         // OAuth2 로그인 설정
         http
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .authorizationRequestResolver(
+                                        new AppAwareOAuth2AuthorizationRequestResolver(clientRegistrationRepository))
+                        )
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2AuthenticationSuccessHandler) // 로그인 성공 핸들러 설정
