@@ -127,6 +127,7 @@ public class ClubNoticeRequestDTO {
     @NoArgsConstructor
     public static class CreateClubNoticeComment {
         @NotBlank(message = "공지사항 댓글 내용은 필수입니다.")
+        @Size(max = 300, message = "공지사항 댓글은 300자 이하로 입력해주세요.")
         private String content;
     }
 }

@@ -35,6 +35,7 @@ public class ClubMember extends BaseEntity {
     @Column(nullable = false)
     private ClubMemberStatus clubMemberStatus;
 
+    @Column(length = 300)
     private String joinMessage;
 
     private LocalDateTime appliedAt; // 이번 가입 신청일
