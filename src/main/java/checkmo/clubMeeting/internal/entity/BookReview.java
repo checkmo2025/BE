@@ -28,6 +28,7 @@ public class BookReview extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 300, nullable = false)
     private String description;
 
     private double rate;
