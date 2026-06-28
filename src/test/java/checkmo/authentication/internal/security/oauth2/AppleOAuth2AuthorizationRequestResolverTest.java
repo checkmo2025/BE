@@ -34,6 +34,70 @@ class AppleOAuth2AuthorizationRequestResolverTest {
     }
 
     @Test
+    void storesAppClientTypeAndKeepsFormPostForAppleAppAuthorizationRequest() {
+        AppleOAuth2AuthorizationRequestResolver resolver = new AppleOAuth2AuthorizationRequestResolver(
+                new InMemoryClientRegistrationRepository(appleRegistration())
+        );
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/apple");
+        request.setParameter("client", "app");
+        request.setServerName("api.checkmo.co.kr");
+        request.setScheme("https");
+        request.setServerPort(443);
+
+        OAuth2AuthorizationRequest authorizationRequest = resolver.resolve(request);
+
+        assertSoftly(softly -> {
+            softly.assertThat(authorizationRequest.getAdditionalParameters())
+                    .containsEntry("response_mode", "form_post");
+            softly.assertThat(authorizationRequest.getAuthorizationRequestUri())
+                    .contains("response_mode=form_post")
+                    .contains("client_id=kr.co.checkmo.web");
+            softly.assertThat(request.getSession().getAttribute(
+                            AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE))
+                    .isEqualTo(AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP);
+        });
+    }
+
+    @Test
+    void storesAppClientTypeWithoutFormPostForNonAppleAppAuthorizationRequest() {
+        AppleOAuth2AuthorizationRequestResolver resolver = new AppleOAuth2AuthorizationRequestResolver(
+                new InMemoryClientRegistrationRepository(googleRegistration())
+        );
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/google");
+        request.setParameter("client", "app");
+
+        OAuth2AuthorizationRequest authorizationRequest = resolver.resolve(request);
+
+        assertSoftly(softly -> {
+            softly.assertThat(authorizationRequest.getAdditionalParameters()).doesNotContainKey("response_mode");
+            softly.assertThat(authorizationRequest.getAuthorizationRequestUri()).doesNotContain("response_mode");
+            softly.assertThat(request.getSession().getAttribute(
+                            AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE))
+                    .isEqualTo(AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP);
+        });
+    }
+
+    @Test
+    void clearsStaleAppClientTypeForWebAuthorizationRequest() {
+        AppleOAuth2AuthorizationRequestResolver resolver = new AppleOAuth2AuthorizationRequestResolver(
+                new InMemoryClientRegistrationRepository(googleRegistration())
+        );
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/google");
+        request.getSession().setAttribute(
+                AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE,
+                AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP
+        );
+
+        OAuth2AuthorizationRequest authorizationRequest = resolver.resolve(request);
+
+        assertSoftly(softly -> {
+            softly.assertThat(authorizationRequest.getAuthorizationRequestUri()).doesNotContain("response_mode");
+            softly.assertThat(request.getSession().getAttribute(
+                    AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE)).isNull();
+        });
+    }
+
+    @Test
     void keepsDefaultParametersForNonAppleAuthorizationRequest() {
         AppleOAuth2AuthorizationRequestResolver resolver = new AppleOAuth2AuthorizationRequestResolver(
                 new InMemoryClientRegistrationRepository(googleRegistration())
