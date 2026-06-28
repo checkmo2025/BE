@@ -77,9 +77,11 @@ class OAuth2AuthenticationSuccessHandlerTest {
             softly.assertThat(response.getHeaders("Set-Cookie"))
                     .anyMatch(header -> header.startsWith("accessToken=access-token")
                             && header.contains("HttpOnly")
+                            && header.contains("Secure")
                             && header.contains("SameSite=None"))
                     .anyMatch(header -> header.startsWith("refreshToken=refresh-token")
                             && header.contains("HttpOnly")
+                            && header.contains("Secure")
                             && header.contains("SameSite=None"));
         });
         verify(authReactivationCommandService).reactivateIfDeactivated("GOOGLE_google-sub");
@@ -104,8 +106,9 @@ class OAuth2AuthenticationSuccessHandlerTest {
         PrincipalDetails principal = new PrincipalDetails(user, Map.of("sub", "apple-sub"), true);
         TestingAuthenticationToken authentication = new TestingAuthenticationToken(principal, null);
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameter("state", "app-state");
         request.getSession().setAttribute(
-                AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE,
+                AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey("app-state"),
                 AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP
         );
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -128,7 +131,7 @@ class OAuth2AuthenticationSuccessHandlerTest {
                     .doesNotContain("access-token");
             softly.assertThat(response.getHeaders("Set-Cookie")).isEmpty();
             softly.assertThat(request.getSession().getAttribute(
-                    AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE)).isNull();
+                    AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey("app-state"))).isNull();
             softly.assertThat(codeCaptor.getValue()).isNotBlank();
         });
         verify(authReactivationCommandService).reactivateIfDeactivated("APPLE_apple-sub");

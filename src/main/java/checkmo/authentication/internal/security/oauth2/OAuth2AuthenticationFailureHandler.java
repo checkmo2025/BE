@@ -2,7 +2,6 @@ package checkmo.authentication.internal.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +29,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         log.error("소셜 로그인 인증 실패: {}", exception.getClass().getSimpleName());
 
-        if (isAppClient(request)) {
+        if (AppleOAuth2AuthorizationRequestResolver.consumeAppClientType(request)) {
             redirectAppFailure(request, response);
             return;
         }
@@ -39,19 +38,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         getRedirectStrategy().sendRedirect(request, response, "/login?error=true");
     }
 
-    private boolean isAppClient(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return session != null && AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP.equals(
-                session.getAttribute(AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE)
-        );
-    }
-
     private void redirectAppFailure(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.removeAttribute(AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE);
-        }
-
         String targetUrl = UriComponentsBuilder.fromUriString(appUri)
                 .queryParam("error", "login_failed")
                 .build()

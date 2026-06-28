@@ -7,6 +7,7 @@ import java.security.KeyPair;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 class AppleIdTokenVerifierTest {
@@ -71,10 +72,23 @@ class AppleIdTokenVerifierTest {
         KeyPair keyPair = rsaKeyPair();
         AppleIdTokenVerifier verifier = verifier(jwks(keyPair));
         String token = token(KEY_ID, keyPair, WEB_CLIENT_ID)
-                .expiration(Date.from(NOW.minusSeconds(1)))
+                .expiration(Date.from(NOW.minusSeconds(61)))
                 .compact();
 
         assertInvalidToken(() -> verifier.verifyWebToken(token));
+    }
+
+    @Test
+    void acceptsRecentlyExpiredTokenWithinClockSkew() throws Exception {
+        KeyPair keyPair = rsaKeyPair();
+        AppleIdTokenVerifier verifier = verifier(jwks(keyPair));
+        String token = token(KEY_ID, keyPair, WEB_CLIENT_ID)
+                .expiration(Date.from(NOW.minusSeconds(1)))
+                .compact();
+
+        AppleIdentity identity = verifier.verifyWebToken(token);
+
+        assertSoftly(softly -> softly.assertThat(identity.subject()).isEqualTo(SUBJECT));
     }
 
     @Test
@@ -106,35 +120,75 @@ class AppleIdTokenVerifierTest {
     }
 
     @Test
-    void refreshesOnceForUnknownKidAndSucceedsWhenRefreshedJwksContainsKey() throws Exception {
+    void refreshesOnlyOnceForUnknownKidWhenRefreshedJwksDoesNotContainKey() throws Exception {
         KeyPair keyPair = rsaKeyPair();
         FakeAppleJwksClient client = new FakeAppleJwksClient(
-                new AppleJwks(List.of()),
-                jwks(keyPair)
-        );
-        AppleIdTokenVerifier verifier = verifier(client);
-        String token = token(KEY_ID, keyPair, WEB_CLIENT_ID).compact();
-
-        AppleIdentity identity = verifier.verifyWebToken(token);
-
-        assertSoftly(softly -> {
-            softly.assertThat(identity.subject()).isEqualTo(SUBJECT);
-            softly.assertThat(client.fetchCount()).isEqualTo(2);
-        });
-    }
-
-    @Test
-    void refreshesOnceForUnknownKidAndFailsClosedWhenKeyStillMissing() throws Exception {
-        KeyPair keyPair = rsaKeyPair();
-        FakeAppleJwksClient client = new FakeAppleJwksClient(
-                new AppleJwks(List.of()),
                 new AppleJwks(List.of())
         );
         AppleIdTokenVerifier verifier = verifier(client);
         String token = token(KEY_ID, keyPair, WEB_CLIENT_ID).compact();
 
         assertInvalidToken(() -> verifier.verifyWebToken(token));
-        assertSoftly(softly -> softly.assertThat(client.fetchCount()).isEqualTo(2));
+        assertSoftly(softly -> softly.assertThat(client.fetchCount()).isEqualTo(1));
+    }
+
+    @Test
+    void refreshesOnceForUnknownKidAndFailsClosedWhenKeyStillMissing() throws Exception {
+        KeyPair keyPair = rsaKeyPair();
+        FakeAppleJwksClient client = new FakeAppleJwksClient(
+                new AppleJwks(List.of())
+        );
+        AppleIdTokenVerifier verifier = verifier(client);
+        String token = token(KEY_ID, keyPair, WEB_CLIENT_ID).compact();
+
+        assertInvalidToken(() -> verifier.verifyWebToken(token));
+        assertSoftly(softly -> softly.assertThat(client.fetchCount()).isEqualTo(1));
+    }
+
+    @Test
+    void keepsServingCachedKeyWhenRefreshFailsAfterCacheExpires() throws Exception {
+        KeyPair keyPair = rsaKeyPair();
+        MutableClock clock = new MutableClock(NOW);
+        AtomicInteger fetchCount = new AtomicInteger();
+        AppleJwksClient client = () -> {
+            if (fetchCount.incrementAndGet() == 1) {
+                return jwks(keyPair);
+            }
+            throw new RuntimeException("JWKS unavailable");
+        };
+        AppleIdTokenVerifier verifier = verifier(client, clock);
+        String token = token(KEY_ID, keyPair, WEB_CLIENT_ID)
+                .expiration(Date.from(NOW.plus(Duration.ofHours(7))))
+                .compact();
+
+        verifier.verifyWebToken(token);
+        clock.setInstant(NOW.plus(Duration.ofHours(6)));
+        AppleIdentity identity = verifier.verifyWebToken(token);
+
+        assertSoftly(softly -> {
+            softly.assertThat(identity.subject()).isEqualTo(SUBJECT);
+            softly.assertThat(fetchCount.get()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void skipsMalformedJwksKeyAndUsesOtherValidKey() throws Exception {
+        KeyPair keyPair = rsaKeyPair();
+        AppleJwk malformedKey = new AppleJwk(
+                "malformed-key",
+                "RSA",
+                "sig",
+                "RS256",
+                "not-base64",
+                "not-base64"
+        );
+        AppleJwks jwks = new AppleJwks(List.of(malformedKey, jwks(keyPair).keys().getFirst()));
+        AppleIdTokenVerifier verifier = verifier(jwks);
+        String token = token(KEY_ID, keyPair, WEB_CLIENT_ID).compact();
+
+        AppleIdentity identity = verifier.verifyWebToken(token);
+
+        assertSoftly(softly -> softly.assertThat(identity.subject()).isEqualTo(SUBJECT));
     }
 
     @Test

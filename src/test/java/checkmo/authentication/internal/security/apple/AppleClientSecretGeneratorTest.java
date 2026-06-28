@@ -118,6 +118,20 @@ class AppleClientSecretGeneratorTest {
     }
 
     @Test
+    void acceptsLineWrappedPrivateKeyBase64() throws Exception {
+        KeyPair keyPair = generateKeyPair();
+        AppleClientSecretGenerator generator = new AppleClientSecretGenerator(
+                appleProperties(encodeWrappedBase64(privateKeyPem(keyPair))),
+                Clock.fixed(NOW, ZoneId.of("UTC"))
+        );
+
+        String clientSecret = generator.generateClientSecret();
+
+        Claims claims = parseClaims(clientSecret, keyPair.getPublic());
+        assertSoftly(softly -> softly.assertThat(claims.getSubject()).isEqualTo(WEB_CLIENT_ID));
+    }
+
+    @Test
     void rejectsPrivateKeyBase64WithIgnoredInvalidCharacters() {
         String encodedPem = Base64.getEncoder().encodeToString("not a pem".getBytes(StandardCharsets.UTF_8));
         AppleOAuthProperties properties = appleProperties(encodedPem + "!!!!");
@@ -225,6 +239,11 @@ class AppleClientSecretGeneratorTest {
 
     private String encodeBase64(String value) {
         return Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String encodeWrappedBase64(String value) {
+        return Base64.getMimeEncoder(32, "\n".getBytes(StandardCharsets.UTF_8))
+                .encodeToString(value.getBytes(StandardCharsets.UTF_8));
     }
 
     private String beginMarker() {

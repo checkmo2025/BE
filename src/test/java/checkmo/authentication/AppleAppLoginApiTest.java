@@ -31,8 +31,7 @@ class AppleAppLoginApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of(
                         "identityToken", "valid-identity-token",
-                        "rawNonce", "raw-nonce",
-                        "authorizationCode", "unused-authorization-code"
+                        "rawNonce", "raw-nonce"
                 ))
                 .when()
                 .post("/api/v1/auth/app/apple/login")

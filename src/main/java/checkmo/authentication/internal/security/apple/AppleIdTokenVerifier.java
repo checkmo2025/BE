@@ -18,10 +18,12 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 @Component
 public class AppleIdTokenVerifier {
 
@@ -138,16 +140,20 @@ public class AppleIdTokenVerifier {
 
     private synchronized RSAPublicKey publicKey(String kid) {
         Instant now = clock.instant();
-        if (!now.isBefore(cacheExpiresAt)) {
-            refreshKeys(now);
-        }
-
         RSAPublicKey publicKey = cachedKeys.get(kid);
-        if (publicKey != null) {
+        if (publicKey != null && now.isBefore(cacheExpiresAt)) {
             return publicKey;
         }
 
-        refreshKeys(now);
+        try {
+            refreshKeys(now);
+        } catch (InvalidAppleIdentityTokenException e) {
+            if (publicKey != null) {
+                return publicKey;
+            }
+            throw e;
+        }
+
         publicKey = cachedKeys.get(kid);
         if (publicKey == null) {
             throw new InvalidAppleIdentityTokenException();
@@ -173,7 +179,11 @@ public class AppleIdTokenVerifier {
         Map<String, RSAPublicKey> keys = new HashMap<>();
         for (AppleJwk jwk : jwks.keys()) {
             if (isSignatureKey(jwk)) {
-                keys.put(jwk.kid(), toPublicKey(jwk));
+                try {
+                    keys.put(jwk.kid(), toPublicKey(jwk));
+                } catch (InvalidAppleIdentityTokenException e) {
+                    log.warn("Skipping malformed Apple JWKS key. kid={}", jwk.kid(), e);
+                }
             }
         }
         return Map.copyOf(keys);
@@ -226,7 +236,7 @@ public class AppleIdTokenVerifier {
             throw new InvalidAppleIdentityTokenException();
         }
         Instant expiresAt = epochSecondsClaim(claims, "exp");
-        if (!expiresAt.isAfter(now)) {
+        if (!expiresAt.plus(ALLOWED_CLOCK_SKEW).isAfter(now)) {
             throw new InvalidAppleIdentityTokenException();
         }
         Instant issuedAt = epochSecondsClaim(claims, "iat");

@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2Authorization
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.util.StringUtils;
 
 public class AppleOAuth2AuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
 
@@ -17,7 +18,7 @@ public class AppleOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
     private static final String RESPONSE_MODE = "response_mode";
     private static final String FORM_POST = "form_post";
     private static final String CLIENT_PARAM = "client";
-    public static final String SESSION_CLIENT_TYPE = "OAUTH2_CLIENT_TYPE";
+    private static final String SESSION_CLIENT_TYPE_PREFIX = "OAUTH2_CLIENT_TYPE:";
     public static final String CLIENT_TYPE_APP = "app";
 
     private final OAuth2AuthorizationRequestResolver delegate;
@@ -49,14 +50,28 @@ public class AppleOAuth2AuthorizationRequestResolver implements OAuth2Authorizat
         }
 
         if (CLIENT_TYPE_APP.equalsIgnoreCase(request.getParameter(CLIENT_PARAM))) {
-            request.getSession().setAttribute(SESSION_CLIENT_TYPE, CLIENT_TYPE_APP);
-            return;
+            String state = authorizationRequest.getState();
+            if (StringUtils.hasText(state)) {
+                request.getSession().setAttribute(sessionClientTypeKey(state), CLIENT_TYPE_APP);
+            }
+        }
+    }
+
+    static boolean consumeAppClientType(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        String state = request.getParameter(OAuth2ParameterNames.STATE);
+        if (session == null || !StringUtils.hasText(state)) {
+            return false;
         }
 
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.removeAttribute(SESSION_CLIENT_TYPE);
-        }
+        String attributeName = sessionClientTypeKey(state);
+        Object clientType = session.getAttribute(attributeName);
+        session.removeAttribute(attributeName);
+        return CLIENT_TYPE_APP.equals(clientType);
+    }
+
+    static String sessionClientTypeKey(String state) {
+        return SESSION_CLIENT_TYPE_PREFIX + state;
     }
 
     private OAuth2AuthorizationRequest customize(OAuth2AuthorizationRequest authorizationRequest) {

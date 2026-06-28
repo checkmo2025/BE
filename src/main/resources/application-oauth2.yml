@@ -6,7 +6,7 @@ app:
     apple:
       team-id: ${APPLE_TEAM_ID:}
       key-id: ${APPLE_KEY_ID:}
-      web-client-id: ${APPLE_WEB_CLIENT_ID:}
+      web-client-id: ${APPLE_WEB_CLIENT_ID:kr.co.checkmo.web}
       ios-client-id: ${APPLE_IOS_CLIENT_ID:}
       private-key-base64: ${APPLE_PRIVATE_KEY_BASE64:}
       web-redirect-uri: ${APPLE_WEB_REDIRECT_URI:https://api.checkmo.co.kr/login/oauth2/code/apple}
@@ -46,14 +46,14 @@ spring:
             client-name: Naver
 
           apple:
-            client-id: ${APPLE_WEB_CLIENT_ID:kr.co.checkmo.web}
+            client-id: ${app.oauth2.apple.web-client-id}
             client-secret: apple-client-secret-generated-at-runtime
             client-authentication-method: client_secret_post
             scope:
               - openid
               - email
               - name
-            redirect-uri: ${APPLE_WEB_REDIRECT_URI:https://api.checkmo.co.kr/login/oauth2/code/apple}
+            redirect-uri: ${app.oauth2.apple.web-redirect-uri}
             authorization-grant-type: authorization_code
             client-name: Apple
 

@@ -53,7 +53,8 @@ class AppleOAuth2AuthorizationRequestResolverTest {
                     .contains("response_mode=form_post")
                     .contains("client_id=kr.co.checkmo.web");
             softly.assertThat(request.getSession().getAttribute(
-                            AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE))
+                            AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey(
+                                    authorizationRequest.getState())))
                     .isEqualTo(AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP);
         });
     }
@@ -72,19 +73,20 @@ class AppleOAuth2AuthorizationRequestResolverTest {
             softly.assertThat(authorizationRequest.getAdditionalParameters()).doesNotContainKey("response_mode");
             softly.assertThat(authorizationRequest.getAuthorizationRequestUri()).doesNotContain("response_mode");
             softly.assertThat(request.getSession().getAttribute(
-                            AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE))
+                            AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey(
+                                    authorizationRequest.getState())))
                     .isEqualTo(AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP);
         });
     }
 
     @Test
-    void clearsStaleAppClientTypeForWebAuthorizationRequest() {
+    void doesNotClearOtherStateAppClientTypeForWebAuthorizationRequest() {
         AppleOAuth2AuthorizationRequestResolver resolver = new AppleOAuth2AuthorizationRequestResolver(
                 new InMemoryClientRegistrationRepository(googleRegistration())
         );
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/oauth2/authorization/google");
         request.getSession().setAttribute(
-                AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE,
+                AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey("other-state"),
                 AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP
         );
 
@@ -93,7 +95,11 @@ class AppleOAuth2AuthorizationRequestResolverTest {
         assertSoftly(softly -> {
             softly.assertThat(authorizationRequest.getAuthorizationRequestUri()).doesNotContain("response_mode");
             softly.assertThat(request.getSession().getAttribute(
-                    AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE)).isNull();
+                            AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey("other-state")))
+                    .isEqualTo(AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP);
+            softly.assertThat(request.getSession().getAttribute(
+                    AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey(
+                            authorizationRequest.getState()))).isNull();
         });
     }
 

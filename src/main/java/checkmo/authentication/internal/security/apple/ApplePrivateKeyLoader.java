@@ -44,7 +44,7 @@ final class ApplePrivateKeyLoader {
 
     private static byte[] decodeOuterBase64(String privateKeyBase64) {
         try {
-            return Base64.getDecoder().decode(privateKeyBase64.trim());
+            return Base64.getDecoder().decode(StringUtils.trimAllWhitespace(privateKeyBase64));
         } catch (IllegalArgumentException e) {
             throw new AppleClientSecretException("Apple private key base64 is invalid", e);
         }

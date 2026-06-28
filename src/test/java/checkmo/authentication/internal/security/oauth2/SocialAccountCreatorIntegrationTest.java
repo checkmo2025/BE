@@ -5,16 +5,57 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.entity.Role;
-import checkmo.support.ApiTestSupport;
+import checkmo.authentication.internal.repository.AuthRepository;
+import checkmo.book.internal.scheduler.BookRecommendationScheduler;
+import checkmo.bookStory.internal.scheduler.BookStoryViewScheduler;
+import checkmo.member.internal.scheduler.MemberCleanupScheduler;
+import checkmo.support.SpringTest;
 import jakarta.persistence.PersistenceException;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class SocialAccountCreatorIntegrationTest extends ApiTestSupport {
+@SpringTest
+@TestPropertySource(properties = "aladin.api.recommendation.refresh.background.fixed-delay=60000")
+class SocialAccountCreatorIntegrationTest {
 
     @Autowired
     private SocialAccountCreator socialAccountCreator;
+
+    @Autowired
+    private AuthRepository authRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @MockitoBean
+    private BookRecommendationScheduler bookRecommendationScheduler;
+
+    @MockitoBean
+    private BookStoryViewScheduler bookStoryViewScheduler;
+
+    @MockitoBean
+    private MemberCleanupScheduler memberCleanupScheduler;
+
+    @AfterEach
+    void tearDown() {
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+        jdbcTemplate.queryForList(
+                        """
+                                select table_name
+                                from information_schema.tables
+                                where lower(table_schema) = 'public'
+                                  and table_type in ('BASE TABLE', 'TABLE')
+                                """,
+                        String.class
+                )
+                .forEach(tableName -> jdbcTemplate.execute("delete from " + quoteIdentifier(tableName)));
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+    }
 
     @Test
     void persistsNewSocialUserWithAssignedProviderId() {
@@ -60,5 +101,9 @@ class SocialAccountCreatorIntegrationTest extends ApiTestSupport {
                 .role(Role.USER)
                 .profileCompleted(false)
                 .build();
+    }
+
+    private String quoteIdentifier(String identifier) {
+        return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 }

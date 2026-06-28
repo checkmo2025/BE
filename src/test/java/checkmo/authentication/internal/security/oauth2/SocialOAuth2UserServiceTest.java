@@ -1,6 +1,8 @@
 package checkmo.authentication.internal.security.oauth2;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,9 +28,11 @@ class SocialOAuth2UserServiceTest {
         OAuth2User oauth2User = mock(OAuth2User.class);
         when(appleOAuth2UserService.loadUser(userRequest)).thenReturn(oauth2User);
 
-        service.loadUser(userRequest);
+        OAuth2User result = service.loadUser(userRequest);
 
+        assertThat(result).isSameAs(oauth2User);
         verify(appleOAuth2UserService).loadUser(userRequest);
+        verify(defaultOAuth2UserService, never()).loadUser(userRequest);
     }
 
     @Test
@@ -41,9 +45,11 @@ class SocialOAuth2UserServiceTest {
         OAuth2User oauth2User = mock(OAuth2User.class);
         when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oauth2User);
 
-        service.loadUser(userRequest);
+        OAuth2User result = service.loadUser(userRequest);
 
+        assertThat(result).isSameAs(oauth2User);
         verify(defaultOAuth2UserService).loadUser(userRequest);
+        verify(appleOAuth2UserService, never()).loadUser(userRequest);
     }
 
     private OAuth2UserRequest userRequest(String registrationId) {

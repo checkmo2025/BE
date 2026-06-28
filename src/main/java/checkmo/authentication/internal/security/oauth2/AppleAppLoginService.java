@@ -7,7 +7,6 @@ import checkmo.authentication.internal.security.apple.AppleIdentity;
 import checkmo.authentication.internal.security.apple.InvalidAppleIdentityTokenException;
 import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import checkmo.authentication.internal.security.jwt.JwtLoginProcessor;
-import checkmo.authentication.web.dto.AuthRequestDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +27,8 @@ public class AppleAppLoginService {
     private final JwtLoginProcessor jwtLoginProcessor;
 
     @Transactional
-    public String login(AuthRequestDTO.AppleAppLogin request, HttpServletResponse response) {
-        AppleIdentity identity = verifyIdentity(request);
+    public String login(String identityToken, String rawNonce, HttpServletResponse response) {
+        AppleIdentity identity = verifyIdentity(identityToken, rawNonce);
         Map<String, Object> attributes = identity.toOAuth2Attributes();
         SocialAccountResolution result = socialAccountResolver.resolve(
                 OAuth2Attributes.of(REGISTRATION_ID, attributes),
@@ -50,9 +49,9 @@ public class AppleAppLoginService {
         return jwtLoginProcessor.processLogin(response, authentication);
     }
 
-    private AppleIdentity verifyIdentity(AuthRequestDTO.AppleAppLogin request) {
+    private AppleIdentity verifyIdentity(String identityToken, String rawNonce) {
         try {
-            return appleIdTokenVerifier.verifyIosToken(request.getIdentityToken(), request.getRawNonce());
+            return appleIdTokenVerifier.verifyIosToken(identityToken, rawNonce);
         } catch (InvalidAppleIdentityTokenException e) {
             throw new AuthException(AuthErrorStatus.APPLE_INVALID_TOKEN);
         }

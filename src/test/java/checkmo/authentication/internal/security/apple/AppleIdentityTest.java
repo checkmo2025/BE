@@ -48,4 +48,25 @@ class AppleIdentityTest {
             softly.assertThat(attributes.get("is_private_email")).isEqualTo(true);
         });
     }
+
+    @Test
+    void omitsEmailWhenEmailIsNull() {
+        AppleIdentity identity = new AppleIdentity(
+                "apple-sub",
+                "APPLE_apple-sub",
+                null,
+                false,
+                true,
+                "kr.co.checkmo.web"
+        );
+
+        Map<String, Object> attributes = identity.toOAuth2Attributes();
+
+        assertSoftly(softly -> {
+            softly.assertThat(attributes).doesNotContainKey("email");
+            softly.assertThat(attributes.get("sub")).isEqualTo("apple-sub");
+            softly.assertThat(attributes.get("email_verified")).isEqualTo(false);
+            softly.assertThat(attributes.get("is_private_email")).isEqualTo(true);
+        });
+    }
 }

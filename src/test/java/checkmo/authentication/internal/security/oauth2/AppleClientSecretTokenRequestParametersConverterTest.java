@@ -32,8 +32,8 @@ class AppleClientSecretTokenRequestParametersConverterTest {
 
         assertSoftly(softly -> {
             softly.assertThat(parameters.getFirst(OAuth2ParameterNames.CLIENT_ID)).isEqualTo("kr.co.checkmo.web");
-            softly.assertThat(parameters.getFirst(OAuth2ParameterNames.CLIENT_SECRET))
-                    .isEqualTo("generated-apple-client-secret");
+            softly.assertThat(parameters.get(OAuth2ParameterNames.CLIENT_SECRET))
+                    .containsExactly("generated-apple-client-secret");
             softly.assertThat(parameters.getFirst(OAuth2ParameterNames.CODE)).isEqualTo("authorization-code");
         });
         verify(generator).generateClientSecret();

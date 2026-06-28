@@ -65,8 +65,6 @@ public class AuthRequestDTO {
 
         @NotBlank(message = "Apple rawNonce는 필수입니다")
         private String rawNonce;
-
-        private String authorizationCode;
     }
 
     @Getter

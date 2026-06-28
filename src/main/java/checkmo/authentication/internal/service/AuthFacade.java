@@ -51,7 +51,7 @@ public class AuthFacade {
     }
 
     public String loginWithApple(AuthRequestDTO.AppleAppLogin request, HttpServletResponse response) {
-        return appleAppLoginService.login(request, response);
+        return appleAppLoginService.login(request.getIdentityToken(), request.getRawNonce(), response);
     }
 
     public AuthResponseDTO.AppOAuthLogin exchangeOAuthCode(AuthRequestDTO.OAuthExchange request) {

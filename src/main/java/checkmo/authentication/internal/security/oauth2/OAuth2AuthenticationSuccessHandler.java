@@ -6,7 +6,6 @@ import checkmo.authentication.internal.security.jwt.JwtLoginProcessor;
 import checkmo.authentication.internal.security.jwt.TokenCacheService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +42,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         AuthUser user = principalDetails.getUser();
 
-        if (isAppClient(request)) {
+        if (AppleOAuth2AuthorizationRequestResolver.consumeAppClientType(request)) {
             handleAppSuccess(request, response, authentication);
             return;
         }
@@ -71,13 +70,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    private boolean isAppClient(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return session != null && AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP.equals(
-                session.getAttribute(AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE)
-        );
-    }
-
     private void handleAppSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -89,10 +81,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String code = UUID.randomUUID().toString().replace("-", "");
         tokenCacheService.saveOAuthExchangeCode(code, user.isProfileCompleted() + "|" + refreshToken);
 
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.removeAttribute(AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE);
-        }
         clearAuthenticationAttributes(request);
 
         String targetUrl = UriComponentsBuilder.fromUriString(appUri)

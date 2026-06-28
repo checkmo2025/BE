@@ -33,8 +33,9 @@ class OAuth2AuthenticationFailureHandlerTest {
         OAuth2AuthenticationFailureHandler handler = new OAuth2AuthenticationFailureHandler();
         ReflectionTestUtils.setField(handler, "appUri", "checkmo://oauth-callback");
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setParameter("state", "app-state");
         request.getSession().setAttribute(
-                AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE,
+                AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey("app-state"),
                 AppleOAuth2AuthorizationRequestResolver.CLIENT_TYPE_APP
         );
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -50,7 +51,7 @@ class OAuth2AuthenticationFailureHandlerTest {
             softly.assertThat(response.getRedirectedUrl()).doesNotContain("secret-value");
             softly.assertThat(response.getRedirectedUrl()).doesNotContain("token=");
             softly.assertThat(request.getSession().getAttribute(
-                    AppleOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE)).isNull();
+                    AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey("app-state"))).isNull();
         });
     }
 }
