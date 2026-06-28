@@ -63,6 +63,7 @@ app:
   oauth2:
     redirect:
       base-uri: http://localhost:3000
+      app-uri: checkmo://oauth-callback
 
 jwt:
   secret: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=

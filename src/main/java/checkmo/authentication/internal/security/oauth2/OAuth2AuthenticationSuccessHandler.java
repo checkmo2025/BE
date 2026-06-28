@@ -3,9 +3,11 @@ package checkmo.authentication.internal.security.oauth2;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import checkmo.authentication.internal.security.jwt.JwtLoginProcessor;
+import checkmo.authentication.internal.security.jwt.TokenCacheService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -23,9 +25,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtLoginProcessor jwtLoginProcessor;
+    private final TokenCacheService tokenCacheService;
 
     @Value("${app.oauth2.redirect.base-uri}")
     private String baseUri;
+
+    @Value("${app.oauth2.redirect.app-uri}")
+    private String appUri;
 
     @Override
     public void onAuthenticationSuccess(
@@ -33,11 +39,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             Authentication authentication
     ) throws IOException {
 
-        // JWT 토큰 생성 및 쿠키 설정
-        jwtLoginProcessor.processLogin(response, authentication);
-
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         AuthUser user = principalDetails.getUser();
+
+        if (AppleOAuth2AuthorizationRequestResolver.consumeAppClientType(request)) {
+            handleAppSuccess(request, response, authentication);
+            return;
+        }
+
+        // JWT 토큰 생성 및 쿠키 설정
+        jwtLoginProcessor.processLogin(response, authentication);
 
         String targetUrl;
 
@@ -56,6 +67,27 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 성공 후 리다이렉트 URL 설정
         clearAuthenticationAttributes(request);
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    private void handleAppSuccess(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) throws IOException {
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        AuthUser user = principalDetails.getUser();
+        String refreshToken = jwtLoginProcessor.processLoginWithoutCookies(authentication);
+        String code = UUID.randomUUID().toString().replace("-", "");
+        tokenCacheService.saveOAuthExchangeCode(code, user.isProfileCompleted() + "|" + refreshToken);
+
+        clearAuthenticationAttributes(request);
+
+        String targetUrl = UriComponentsBuilder.fromUriString(appUri)
+                .queryParam("code", code)
+                .build()
+                .encode()
+                .toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

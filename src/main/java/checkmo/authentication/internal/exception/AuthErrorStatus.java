@@ -31,7 +31,11 @@ public enum AuthErrorStatus implements BaseErrorCode {
     PASSWORD_SAME_AS_OLD(HttpStatus.BAD_REQUEST, "AUTH_409", "새 비밀번호가 기존 비밀번호와 동일합니다."),
     NICKNAME_REQUIRED(HttpStatus.BAD_REQUEST, "AUTH_410", "닉네임은 필수입니다."),
     SIGNUP_INCOMPLETE(HttpStatus.CONFLICT, "AUTH_411", "이미 가입 진행 중인 이메일입니다. 로그인 후 프로필을 완성해주세요."),
-    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_412", "유효하지 않은 리프레시 토큰입니다. 다시 로그인해주세요.")
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_412", "유효하지 않은 리프레시 토큰입니다. 다시 로그인해주세요."),
+    APPLE_EMAIL_REQUIRED(HttpStatus.BAD_REQUEST, "AUTH_413", "Apple 최초 로그인에는 이메일 정보가 필요합니다."),
+    SOCIAL_ACCOUNT_EMAIL_CONFLICT(HttpStatus.CONFLICT, "AUTH_414", "이미 다른 계정으로 가입된 이메일입니다."),
+    APPLE_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_415", "유효하지 않은 Apple 인증 정보입니다."),
+    INVALID_OAUTH_CODE(HttpStatus.UNAUTHORIZED, "AUTH_416", "유효하지 않거나 만료된 인증 코드입니다. 다시 로그인해주세요.")
     ;
 
     private final HttpStatus httpStatus;

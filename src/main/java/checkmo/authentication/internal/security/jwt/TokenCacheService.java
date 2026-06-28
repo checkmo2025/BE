@@ -22,6 +22,8 @@ public class TokenCacheService {
 
     private static final String REFRESH_TOKEN_PREFIX = "refreshToken::";
     private static final String BLACKLIST_PREFIX = "blacklist::";
+    private static final String OAUTH_CODE_PREFIX = "oauthCode::";
+    private static final long OAUTH_CODE_TTL_MS = 120_000L;
     private static final String COMPARE_AND_ROTATE_REFRESH_TOKEN_SCRIPT = """
             local current = redis.call('GET', KEYS[1])
             if current == ARGV[1] or current == ARGV[2] then
@@ -37,6 +39,13 @@ public class TokenCacheService {
                 return 1
             end
             return 0
+            """;
+    private static final String CONSUME_OAUTH_CODE_SCRIPT = """
+            local value = redis.call('GET', KEYS[1])
+            if value then
+                redis.call('DEL', KEYS[1])
+            end
+            return value
             """;
     private static final StringRedisSerializer STRING_SERIALIZER = new StringRedisSerializer();
 
@@ -93,6 +102,32 @@ public class TokenCacheService {
         byte[] expected = serialize(expectedRefreshToken);
         byte[] legacyExpected = serializeLegacyValue(expectedRefreshToken);
         return executeBooleanScript(DELETE_REFRESH_TOKEN_IF_MATCHES_SCRIPT, key, expected, legacyExpected);
+    }
+
+    public void saveOAuthExchangeCode(String code, String value) {
+        byte[] key = serialize(OAUTH_CODE_PREFIX + code);
+        byte[] serializedValue = serialize(value);
+        redisTemplate.execute((RedisCallback<Boolean>) connection ->
+                connection.stringCommands().set(
+                        key,
+                        serializedValue,
+                        Expiration.milliseconds(OAUTH_CODE_TTL_MS),
+                        SetOption.upsert()
+                )
+        );
+    }
+
+    public String consumeOAuthExchangeCode(String code) {
+        byte[] key = serialize(OAUTH_CODE_PREFIX + code);
+        byte[] value = redisTemplate.execute((RedisCallback<byte[]>) connection ->
+                connection.scriptingCommands().eval(
+                        CONSUME_OAUTH_CODE_SCRIPT.getBytes(StandardCharsets.UTF_8),
+                        ReturnType.VALUE,
+                        1,
+                        key
+                )
+        );
+        return value == null ? null : STRING_SERIALIZER.deserialize(value);
     }
 
     private boolean executeBooleanScript(String script, byte[] key, byte[]... args) {

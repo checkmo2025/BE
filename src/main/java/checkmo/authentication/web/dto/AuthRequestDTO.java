@@ -59,6 +59,25 @@ public class AuthRequestDTO {
 
     @Getter
     @NoArgsConstructor
+    public static class AppleAppLogin {
+        @NotBlank(message = "Apple identityToken은 필수입니다")
+        private String identityToken;
+
+        @NotBlank(message = "Apple rawNonce는 필수입니다")
+        private String rawNonce;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OAuthExchange {
+        @NotBlank(message = "코드는 필수입니다")
+        @Schema(description = "딥링크로 전달받은 앱 OAuth 일회용 코드")
+        private String code;
+    }
+
+    @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class EmailVerification {
         @NotBlank(message = "이메일은 필수입니다")

@@ -17,7 +17,7 @@ public class AuthConverter {
     }
 
     public static AuthUser toOAuth2User(OAuth2Attributes attributes, String registrationId) {
-        String newMemberId = registrationId.toUpperCase() + "_" + attributes.getProviderId();
+        String newMemberId = toOAuth2MemberId(registrationId, attributes.getProviderId());
 
         return AuthUser.builder()
                 .id(newMemberId)
@@ -27,6 +27,10 @@ public class AuthConverter {
                 .deactivatedAt(null)
                 .profileCompleted(false)
                 .build();
+    }
+
+    public static String toOAuth2MemberId(String registrationId, String providerId) {
+        return registrationId.toUpperCase() + "_" + providerId;
     }
 
     public static AuthUser toLocalUser(AuthRequestDTO.SignUp request, String encodedPassword) {

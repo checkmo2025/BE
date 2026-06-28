@@ -1,6 +1,7 @@
 package checkmo.authentication.internal.security.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -232,6 +233,107 @@ class TokenCacheServiceTest {
         });
 
         tokenCacheService.saveRefreshToken("member-1", "refresh-token");
+    }
+
+    @Test
+    void saveOAuthExchangeCodeUsesRawStringValueWithTwoMinuteTtl() {
+        tokenCacheService = tokenCacheServiceWithRefreshTtl(5_678L);
+
+        when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
+            RedisCallback<?> callback = invocation.getArgument(0);
+            RedisConnection connection = mock(RedisConnection.class);
+            RedisStringCommands stringCommands = mock(RedisStringCommands.class, setInvocation -> {
+                if ("set".equals(setInvocation.getMethod().getName())) {
+                    return true;
+                }
+                return org.mockito.Mockito.RETURNS_DEFAULTS.answer(setInvocation);
+            });
+            when(connection.stringCommands()).thenReturn(stringCommands);
+
+            Object result = callback.doInRedis(connection);
+
+            ArgumentCaptor<byte[]> keyCaptor = ArgumentCaptor.forClass(byte[].class);
+            ArgumentCaptor<byte[]> valueCaptor = ArgumentCaptor.forClass(byte[].class);
+            ArgumentCaptor<Expiration> expirationCaptor = ArgumentCaptor.forClass(Expiration.class);
+            verify(stringCommands).set(
+                    keyCaptor.capture(),
+                    valueCaptor.capture(),
+                    expirationCaptor.capture(),
+                    org.mockito.ArgumentMatchers.eq(RedisStringCommands.SetOption.upsert())
+            );
+            assertSoftly(softly -> {
+                softly.assertThat(new String(keyCaptor.getValue(), StandardCharsets.UTF_8))
+                        .isEqualTo("oauthCode::exchange-code");
+                softly.assertThat(new String(valueCaptor.getValue(), StandardCharsets.UTF_8))
+                        .isEqualTo("true|refresh-token");
+                softly.assertThat(expirationCaptor.getValue().getExpirationTimeInMilliseconds())
+                        .isEqualTo(120_000L);
+            });
+            return result;
+        });
+
+        tokenCacheService.saveOAuthExchangeCode("exchange-code", "true|refresh-token");
+    }
+
+    @Test
+    void consumeOAuthExchangeCodeUsesLuaAndReturnsRawValue() {
+        tokenCacheService = tokenCacheServiceWithRefreshTtl(5_678L);
+
+        when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
+            RedisCallback<?> callback = invocation.getArgument(0);
+            RedisConnection connection = mock(RedisConnection.class);
+            RedisScriptingCommands scriptingCommands = mock(RedisScriptingCommands.class, evalInvocation -> {
+                if ("eval".equals(evalInvocation.getMethod().getName())) {
+                    return "true|refresh-token".getBytes(StandardCharsets.UTF_8);
+                }
+                return org.mockito.Mockito.RETURNS_DEFAULTS.answer(evalInvocation);
+            });
+            when(connection.scriptingCommands()).thenReturn(scriptingCommands);
+
+            Object result = callback.doInRedis(connection);
+
+            ArgumentCaptor<byte[][]> keysAndArgsCaptor = ArgumentCaptor.forClass(byte[][].class);
+            verify(scriptingCommands).eval(
+                    any(byte[].class),
+                    org.mockito.ArgumentMatchers.eq(ReturnType.VALUE),
+                    org.mockito.ArgumentMatchers.eq(1),
+                    keysAndArgsCaptor.capture()
+            );
+            assertSoftly(softly -> {
+                softly.assertThat(new String(keysAndArgsCaptor.getValue()[0], StandardCharsets.UTF_8))
+                        .isEqualTo("oauthCode::exchange-code");
+                softly.assertThat(new String((byte[]) result, StandardCharsets.UTF_8))
+                        .isEqualTo("true|refresh-token");
+            });
+            return result;
+        });
+
+        String value = tokenCacheService.consumeOAuthExchangeCode("exchange-code");
+
+        assertThat(value).isEqualTo("true|refresh-token");
+    }
+
+    @Test
+    void consumeOAuthExchangeCodeReturnsNullWhenCodeDoesNotExist() {
+        tokenCacheService = tokenCacheServiceWithRefreshTtl(5_678L);
+
+        when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
+            RedisCallback<?> callback = invocation.getArgument(0);
+            RedisConnection connection = mock(RedisConnection.class);
+            RedisScriptingCommands scriptingCommands = mock(RedisScriptingCommands.class, evalInvocation -> {
+                if ("eval".equals(evalInvocation.getMethod().getName())) {
+                    return null;
+                }
+                return org.mockito.Mockito.RETURNS_DEFAULTS.answer(evalInvocation);
+            });
+            when(connection.scriptingCommands()).thenReturn(scriptingCommands);
+
+            return callback.doInRedis(connection);
+        });
+
+        String value = tokenCacheService.consumeOAuthExchangeCode("missing-code");
+
+        assertThat(value).isNull();
     }
 
     private TokenCacheService tokenCacheServiceWithRefreshTtl(long refreshTtlMs) {
