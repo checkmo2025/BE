@@ -1,9 +1,11 @@
 package checkmo.authentication.internal.security.oauth2;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 
 class OAuth2AttributesTest {
 
@@ -34,5 +36,24 @@ class OAuth2AttributesTest {
             softly.assertThat(naver.getEmail()).isEqualTo("naver-user@example.com");
             softly.assertThat(naver.getProviderId()).isEqualTo("naver-id");
         });
+    }
+
+    @Test
+    void mapsApple() {
+        OAuth2Attributes apple = OAuth2Attributes.of("apple", Map.of(
+                "email", "apple-user@example.com",
+                "sub", "apple-sub"
+        ));
+
+        assertSoftly(softly -> {
+            softly.assertThat(apple.getEmail()).isEqualTo("apple-user@example.com");
+            softly.assertThat(apple.getProviderId()).isEqualTo("apple-sub");
+        });
+    }
+
+    @Test
+    void rejectsAppleWithoutSubject() {
+        assertThatThrownBy(() -> OAuth2Attributes.of("apple", Map.of("email", "apple-user@example.com")))
+                .isInstanceOf(OAuth2AuthenticationException.class);
     }
 }

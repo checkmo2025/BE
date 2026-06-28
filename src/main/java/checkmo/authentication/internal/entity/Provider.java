@@ -5,6 +5,7 @@ public abstract class Provider {
     public static final String GOOGLE = "google";
     public static final String KAKAO = "kakao";
     public static final String NAVER = "naver";
+    public static final String APPLE = "apple";
 
     public static abstract class Google {
         public static final String EMAIL = "email";
@@ -21,5 +22,10 @@ public abstract class Provider {
         public static final String RESPONSE = "response";
         public static final String EMAIL = "email";
         public static final String PROVIDER_ID = "id";
+    }
+
+    public static abstract class Apple {
+        public static final String EMAIL = "email";
+        public static final String PROVIDER_ID = "sub";
     }
 }
