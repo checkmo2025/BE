@@ -288,4 +288,10 @@ public class AppleIdTokenVerifier {
         return email != null && email.toLowerCase().endsWith(PRIVATE_RELAY_DOMAIN);
     }
 
+    private record AppleIdTokenParts(String header, String payload, String signature) {
+
+        String signingInput() {
+            return header + "." + payload;
+        }
+    }
 }
