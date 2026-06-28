@@ -72,6 +72,15 @@ public class AuthRequestDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class OAuthExchange {
+        @NotBlank(message = "코드는 필수입니다")
+        @Schema(description = "딥링크로 전달받은 앱 OAuth 일회용 코드")
+        private String code;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class EmailVerification {
         @NotBlank(message = "이메일은 필수입니다")
         @Email(message = "유효한 이메일 형식이 아닙니다")

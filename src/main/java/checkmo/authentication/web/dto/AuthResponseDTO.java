@@ -23,4 +23,13 @@ public class AuthResponseDTO {
     public static class Login {
         private String refreshToken;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AppOAuthLogin {
+        private String refreshToken;
+        private boolean isProfileCompleted;
+    }
 }

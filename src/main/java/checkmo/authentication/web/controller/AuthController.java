@@ -107,6 +107,19 @@ public class AuthController {
         return ApiResponse.onSuccess(AuthResponseDTO.Login.builder().refreshToken(refreshToken).build());
     }
 
+    @Operation(summary = "앱 소셜 로그인 코드 교환", description = "딥링크로 받은 일회용 코드를 refreshToken으로 교환합니다.")
+    @PostMapping("/app/oauth/exchange")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "유효하지 않거나 만료된 인증 코드입니다.")
+    })
+    public ApiResponse<AuthResponseDTO.AppOAuthLogin> appOAuthExchange(
+            @Valid @RequestBody AuthRequestDTO.OAuthExchange request
+    ) {
+        return ApiResponse.onSuccess(authFacade.exchangeOAuthCode(request));
+    }
+
     @Operation(summary = "앱 Apple 로그인", description = "앱에서 Apple identityToken과 rawNonce로 로그인합니다.")
     @PostMapping("/app/apple/login")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({

@@ -231,6 +231,85 @@ class AuthApiTest extends ApiTestSupport {
     }
 
     @Test
+    void appOAuthExchangeSucceedsWithRefreshTokenInResponse() {
+        when(tokenCacheService.consumeOAuthExchangeCode("oauth-code"))
+                .thenReturn("true|refresh-token");
+
+        ExtractableResponse<Response> response = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("code", "oauth-code"))
+                .when()
+                .post("/api/v1/auth/app/oauth/exchange")
+                .then()
+                .statusCode(200)
+                .extract();
+
+        assertSoftly(softly -> {
+            softly.assertThat(response.jsonPath().getString("result.refreshToken"))
+                    .isEqualTo("refresh-token");
+            softly.assertThat(response.jsonPath().getBoolean("result.profileCompleted"))
+                    .isTrue();
+            softly.assertThat(response.headers().getValues("Set-Cookie"))
+                    .noneMatch(header -> header.startsWith("accessToken="))
+                    .noneMatch(header -> header.startsWith("refreshToken="));
+        });
+    }
+
+    @Test
+    void appOAuthExchangeRejectsReusedCode() {
+        when(tokenCacheService.consumeOAuthExchangeCode("oauth-code"))
+                .thenReturn("false|refresh-token")
+                .thenReturn(null);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("code", "oauth-code"))
+                .when()
+                .post("/api/v1/auth/app/oauth/exchange")
+                .then()
+                .statusCode(200);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("code", "oauth-code"))
+                .when()
+                .post("/api/v1/auth/app/oauth/exchange")
+                .then()
+                .statusCode(401)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("AUTH_416"))
+                .body("message", equalTo("유효하지 않거나 만료된 인증 코드입니다. 다시 로그인해주세요."));
+    }
+
+    @Test
+    void appOAuthExchangeRejectsBlankCode() {
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("code", ""))
+                .when()
+                .post("/api/v1/auth/app/oauth/exchange")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false));
+    }
+
+    @Test
+    void appOAuthExchangeRejectsMalformedStoredValue() {
+        when(tokenCacheService.consumeOAuthExchangeCode("oauth-code"))
+                .thenReturn("malformed-value");
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("code", "oauth-code"))
+                .when()
+                .post("/api/v1/auth/app/oauth/exchange")
+                .then()
+                .statusCode(401)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("AUTH_416"));
+    }
+
+    @Test
     void appRefreshSucceedsWithHeaderOnlyRefreshTokenAndRejectsReplay() {
         TestUser user = createUserWithPassword("Pass123!");
         ExtractableResponse<Response> loginResponse = given()
