@@ -88,6 +88,24 @@ class AppleIdTokenVerifierTest {
     }
 
     @Test
+    void rejectsJwksKeyWithWrongKeyType() throws Exception {
+        KeyPair keyPair = rsaKeyPair();
+        AppleIdTokenVerifier verifier = verifier(jwks(KEY_ID, keyPair, "EC", "sig", "RS256"));
+        String token = token(KEY_ID, keyPair, WEB_CLIENT_ID).compact();
+
+        assertInvalidToken(() -> verifier.verifyWebToken(token));
+    }
+
+    @Test
+    void rejectsJwksKeyWithoutSignatureUse() throws Exception {
+        KeyPair keyPair = rsaKeyPair();
+        AppleIdTokenVerifier verifier = verifier(jwks(KEY_ID, keyPair, "RSA", "enc", "RS256"));
+        String token = token(KEY_ID, keyPair, WEB_CLIENT_ID).compact();
+
+        assertInvalidToken(() -> verifier.verifyWebToken(token));
+    }
+
+    @Test
     void refreshesOnceForUnknownKidAndSucceedsWhenRefreshedJwksContainsKey() throws Exception {
         KeyPair keyPair = rsaKeyPair();
         FakeAppleJwksClient client = new FakeAppleJwksClient(

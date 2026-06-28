@@ -62,10 +62,16 @@ final class AppleIdTokenTestFixtures {
     }
 
     static AppleJwks jwks(String kid, KeyPair keyPair) {
+        return jwks(kid, keyPair, "RSA", "sig", "RS256");
+    }
+
+    static AppleJwks jwks(String kid, KeyPair keyPair, String keyType, String keyUse, String algorithm) {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         return new AppleJwks(List.of(new AppleJwk(
                 kid,
-                "RS256",
+                keyType,
+                keyUse,
+                algorithm,
                 base64UrlUnsigned(publicKey.getModulus()),
                 base64UrlUnsigned(publicKey.getPublicExponent())
         )));

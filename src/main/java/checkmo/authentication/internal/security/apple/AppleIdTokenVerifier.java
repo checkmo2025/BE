@@ -27,6 +27,8 @@ public class AppleIdTokenVerifier {
 
     private static final String APPLE_ISSUER = "https://appleid.apple.com";
     private static final String APPLE_PROVIDER_PREFIX = "APPLE_";
+    private static final String EXPECTED_KEY_TYPE = "RSA";
+    private static final String EXPECTED_KEY_USE = "sig";
     private static final String EXPECTED_ALGORITHM = "RS256";
     private static final String PRIVATE_RELAY_DOMAIN = "privaterelay.appleid.com";
     private static final Duration JWKS_CACHE_TTL = Duration.ofHours(6);
@@ -170,11 +172,19 @@ public class AppleIdTokenVerifier {
 
         Map<String, RSAPublicKey> keys = new HashMap<>();
         for (AppleJwk jwk : jwks.keys()) {
-            if (jwk != null && StringUtils.hasText(jwk.kid()) && EXPECTED_ALGORITHM.equals(jwk.alg())) {
+            if (isSignatureKey(jwk)) {
                 keys.put(jwk.kid(), toPublicKey(jwk));
             }
         }
         return Map.copyOf(keys);
+    }
+
+    private boolean isSignatureKey(AppleJwk jwk) {
+        return jwk != null
+                && StringUtils.hasText(jwk.kid())
+                && EXPECTED_KEY_TYPE.equals(jwk.kty())
+                && EXPECTED_KEY_USE.equals(jwk.use())
+                && EXPECTED_ALGORITHM.equals(jwk.alg());
     }
 
     private RSAPublicKey toPublicKey(AppleJwk jwk) {
