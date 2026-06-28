@@ -3,10 +3,12 @@ package checkmo.authentication.internal.security.oauth2;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.security.auth.PrincipalDetails;
 import checkmo.authentication.internal.security.jwt.JwtLoginProcessor;
+import checkmo.authentication.internal.security.jwt.TokenCacheService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -26,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtLoginProcessor jwtLoginProcessor;
+    private final TokenCacheService tokenCacheService;
 
     @Value("${app.oauth2.redirect.base-uri}")
     private String baseUri;
@@ -51,12 +54,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         clearAuthenticationAttributes(request);
 
-        // 앱: 쿠키/웹 대신 딥링크로 토큰 전달
+        // 앱: 보안상 refreshToken을 딥링크에 직접 싣지 않고, 단기 일회용 코드만 전달한다.
+        // 앱은 이 코드를 POST /auth/app/oauth/exchange 로 보내 refreshToken(바디)으로 교환한다. (이메일 /app/login과 동일 구조)
         if (isApp) {
             session.removeAttribute(AppAwareOAuth2AuthorizationRequestResolver.SESSION_CLIENT_TYPE);
+            String oneTimeCode = UUID.randomUUID().toString().replace("-", "");
+            tokenCacheService.saveOAuthExchangeCode(oneTimeCode, user.isProfileCompleted() + "|" + refreshToken);
             String appTargetUrl = UriComponentsBuilder.fromUriString(appUri)
-                    .queryParam("refreshToken", refreshToken)
-                    .queryParam("isProfileCompleted", user.isProfileCompleted())
+                    .queryParam("code", oneTimeCode)
                     .build()
                     .encode()
                     .toUriString();

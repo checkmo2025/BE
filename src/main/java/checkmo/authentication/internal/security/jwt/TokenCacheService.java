@@ -22,6 +22,13 @@ public class TokenCacheService {
 
     private static final String REFRESH_TOKEN_PREFIX = "refreshToken::";
     private static final String BLACKLIST_PREFIX = "blacklist::";
+    private static final String OAUTH_CODE_PREFIX = "oauthCode::";
+    private static final long OAUTH_CODE_TTL_MS = 120_000L; // 앱 소셜 로그인 일회용 코드 2분
+    private static final String CONSUME_OAUTH_CODE_SCRIPT = """
+            local v = redis.call('GET', KEYS[1])
+            if v then redis.call('DEL', KEYS[1]) end
+            return v
+            """;
     private static final String COMPARE_AND_ROTATE_REFRESH_TOKEN_SCRIPT = """
             local current = redis.call('GET', KEYS[1])
             if current == ARGV[1] or current == ARGV[2] then
@@ -93,6 +100,33 @@ public class TokenCacheService {
         byte[] expected = serialize(expectedRefreshToken);
         byte[] legacyExpected = serializeLegacyValue(expectedRefreshToken);
         return executeBooleanScript(DELETE_REFRESH_TOKEN_IF_MATCHES_SCRIPT, key, expected, legacyExpected);
+    }
+
+    // 앱 소셜 로그인 일회용 코드 저장 (단기 TTL). value는 "isProfileCompleted|refreshToken" 형태.
+    public void saveOAuthExchangeCode(String code, String value) {
+        byte[] key = serialize(OAUTH_CODE_PREFIX + code);
+        redisTemplate.execute((RedisCallback<Boolean>) connection ->
+                connection.stringCommands().set(
+                        key,
+                        serialize(value),
+                        Expiration.milliseconds(OAUTH_CODE_TTL_MS),
+                        SetOption.upsert()
+                )
+        );
+    }
+
+    // 일회용 코드를 원자적으로 조회+삭제 (1회만 사용 가능). 없으면 null.
+    public String consumeOAuthExchangeCode(String code) {
+        byte[] key = serialize(OAUTH_CODE_PREFIX + code);
+        byte[] value = redisTemplate.execute((RedisCallback<byte[]>) connection ->
+                connection.scriptingCommands().eval(
+                        CONSUME_OAUTH_CODE_SCRIPT.getBytes(StandardCharsets.UTF_8),
+                        ReturnType.VALUE,
+                        1,
+                        key
+                )
+        );
+        return value == null ? null : STRING_SERIALIZER.deserialize(value);
     }
 
     private boolean executeBooleanScript(String script, byte[] key, byte[]... args) {

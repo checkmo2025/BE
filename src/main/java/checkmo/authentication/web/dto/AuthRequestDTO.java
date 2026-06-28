@@ -68,4 +68,13 @@ public class AuthRequestDTO {
         @NotBlank(message = "인증 코드는 필수입니다")
         private String verificationCode;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OAuthExchange {
+        @NotBlank(message = "코드는 필수입니다")
+        @Schema(description = "딥링크로 전달받은 일회용 코드")
+        private String code;
+    }
 }
