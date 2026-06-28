@@ -19,6 +19,13 @@ class AppleOAuthPropertiesTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withInitializer(loadOAuth2Yaml())
             .withPropertyValues(
+                    "FRONTEND_BASE_URI=https://web.checkmo.test",
+                    "GOOGLE_CLIENT_ID=test-google-client-id",
+                    "GOOGLE_CLIENT_SECRET=test-google-client-secret",
+                    "KAKAO_CLIENT_ID=test-kakao-client-id",
+                    "KAKAO_CLIENT_SECRET=test-kakao-client-secret",
+                    "NAVER_CLIENT_ID=test-naver-client-id",
+                    "NAVER_CLIENT_SECRET=test-naver-client-secret",
                     "APPLE_TEAM_ID=test-team-id",
                     "APPLE_KEY_ID=test-key-id",
                     "APPLE_WEB_CLIENT_ID=test-web-client-id",
@@ -40,6 +47,34 @@ class AppleOAuthPropertiesTest {
                 softly.assertThat(properties.getPrivateKeyBase64()).isEqualTo("test-key");
                 softly.assertThat(properties.getWebRedirectUri())
                         .isEqualTo("https://api.checkmo.co.kr/login/oauth2/code/apple");
+            });
+        });
+    }
+
+    @Test
+    void bindsAppleClientRegistrationFromOAuth2Profile() {
+        contextRunner.run(context -> {
+            var environment = context.getEnvironment();
+
+            assertSoftly(softly -> {
+                softly.assertThat(environment.getProperty(
+                        "spring.security.oauth2.client.registration.apple.client-id"
+                )).isEqualTo("test-web-client-id");
+                softly.assertThat(environment.getProperty(
+                        "spring.security.oauth2.client.registration.apple.client-secret"
+                )).isEqualTo("apple-client-secret-generated-at-runtime");
+                softly.assertThat(environment.getProperty(
+                        "spring.security.oauth2.client.registration.apple.client-authentication-method"
+                )).isEqualTo("client_secret_post");
+                softly.assertThat(environment.getProperty(
+                        "spring.security.oauth2.client.registration.apple.redirect-uri"
+                )).isEqualTo("https://api.checkmo.co.kr/login/oauth2/code/apple");
+                softly.assertThat(environment.getProperty(
+                        "spring.security.oauth2.client.provider.apple.authorization-uri"
+                )).isEqualTo("https://appleid.apple.com/auth/authorize");
+                softly.assertThat(environment.getProperty(
+                        "spring.security.oauth2.client.provider.apple.token-uri"
+                )).isEqualTo("https://appleid.apple.com/auth/token");
             });
         });
     }

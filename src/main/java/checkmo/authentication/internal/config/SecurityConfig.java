@@ -2,9 +2,12 @@ package checkmo.authentication.internal.config;
 
 import checkmo.authentication.internal.security.auth.ProfileCompletionAuthorizationFilter;
 import checkmo.authentication.internal.security.jwt.JwtAuthenticationFilter;
-import checkmo.authentication.internal.security.oauth2.CustomOAuth2UserService;
+import checkmo.authentication.internal.security.apple.AppleClientSecretGenerator;
+import checkmo.authentication.internal.security.oauth2.AppleClientSecretTokenRequestParametersConverter;
+import checkmo.authentication.internal.security.oauth2.AppleOAuth2AuthorizationRequestResolver;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationFailureHandler;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationSuccessHandler;
+import checkmo.authentication.internal.security.oauth2.SocialOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +19,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,12 +36,16 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ProfileCompletionAuthorizationFilter profileCompletionAuthorizationFilter;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final SocialOAuth2UserService socialOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient
+    ) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화
@@ -76,7 +87,15 @@ public class SecurityConfig {
         // OAuth2 로그인 설정
         http
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)
+                        .authorizationEndpoint(authorization -> authorization
+                                .authorizationRequestResolver(
+                                        new AppleOAuth2AuthorizationRequestResolver(clientRegistrationRepository)
+                                )
+                        )
+                        .tokenEndpoint(token -> token
+                                .accessTokenResponseClient(accessTokenResponseClient)
+                        )
+                        .userInfoEndpoint(userInfo -> userInfo.userService(socialOAuth2UserService)
                         )
                         .successHandler(oAuth2AuthenticationSuccessHandler) // 로그인 성공 핸들러 설정
                         .failureHandler(oAuth2AuthenticationFailureHandler) // 로그인 실패 핸들러 설정
@@ -88,6 +107,18 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(
+            AppleClientSecretGenerator appleClientSecretGenerator
+    ) {
+        RestClientAuthorizationCodeTokenResponseClient client =
+                new RestClientAuthorizationCodeTokenResponseClient();
+        client.setParametersConverter(
+                new AppleClientSecretTokenRequestParametersConverter(appleClientSecretGenerator)
+        );
+        return client;
     }
 
     @Bean
