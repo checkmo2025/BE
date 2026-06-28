@@ -15,6 +15,15 @@
 | `incompleteProfileFixtureIsBlockedBeforeProtectedApiExecution` | 프로필 미완료 사용자가 보호 API에서 403으로 차단되는 전역 필터 계약을 고정한다. |
 | `adminFixtureCanIssueJwtCookies` | 관리자 API 배치를 만들기 전에 `ROLE_ADMIN` JWT fixture가 정상 생성되는지 확인한다. |
 
+## AppVersionApiTest
+
+| 테스트 | 추가 이유 |
+| --- | --- |
+| `앱_버전_정책은_로그인_없이_플랫폼별로_조회된다` | 앱 부팅/로그인 전 호출되는 iOS 버전 정책 API가 인증 없이 공통 응답 계약으로 내려오는지 검증한다. |
+| `앱_버전_정책은_android_플랫폼도_조회된다` | Android 앱이 별도 스토어 URL과 버전 기준값을 받을 수 있는지 검증한다. |
+| `지원하지_않는_platform은_거절된다` | 클라이언트가 `ios/android` 외 platform을 보내면 정책 조회가 400으로 실패하는 계약을 고정한다. |
+| `활성_버전_정책이_없으면_404를_반환한다` | 운영 DB에 활성 정책이 없을 때 잘못된 기본값 대신 명시적 실패를 반환하는지 검증한다. |
+
 ## AuthApiTest
 
 | 테스트 | 추가 이유 |

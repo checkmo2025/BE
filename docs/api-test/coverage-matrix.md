@@ -17,6 +17,7 @@
 | 컨트롤러 | 메서드 | 경로 | 상태 | 테스트를 추가하는 이유 |
 | --- | --- | --- | --- | --- |
 | HealthCheckController | GET | `/health` | 완료 | 인증 없이 서비스 상태를 확인하는 기준점이다. |
+| AppVersionController | GET | `/api/v1/app/version` | 완료 | 앱 부팅/로그인 전 버전 정책 공개 조회, 플랫폼별 응답, 잘못된 platform, 정책 없음 실패를 검증한다. |
 | AuthController | POST | `/api/v1/auth/email-verification` | 완료 | 회원가입 전 이메일 인증 요청의 성공, 이메일 형식 오류, 중복 요청을 검증한다. |
 | AuthController | POST | `/api/v1/auth/email-verification/confirm` | 완료 | 인증 코드 일치, 만료, 불일치 상태를 검증한다. |
 | AuthController | POST | `/api/v1/auth/signup` | 완료 | 가입 성공, 중복 이메일/닉네임, 검증 실패 payload를 검증한다. |
