@@ -4,6 +4,7 @@ import checkmo.authentication.internal.security.auth.ProfileCompletionAuthorizat
 import checkmo.authentication.internal.security.jwt.JwtAuthenticationFilter;
 import checkmo.authentication.internal.security.apple.AppleClientSecretGenerator;
 import checkmo.authentication.internal.security.oauth2.AppleClientSecretTokenRequestParametersConverter;
+import checkmo.authentication.internal.security.oauth2.AppleOidcUserService;
 import checkmo.authentication.internal.security.oauth2.AppleOAuth2AuthorizationRequestResolver;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationFailureHandler;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationSuccessHandler;
@@ -37,6 +38,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ProfileCompletionAuthorizationFilter profileCompletionAuthorizationFilter;
     private final SocialOAuth2UserService socialOAuth2UserService;
+    private final AppleOidcUserService appleOidcUserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
@@ -96,7 +98,9 @@ public class SecurityConfig {
                         .tokenEndpoint(token -> token
                                 .accessTokenResponseClient(accessTokenResponseClient)
                         )
-                        .userInfoEndpoint(userInfo -> userInfo.userService(socialOAuth2UserService)
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(socialOAuth2UserService)
+                                .oidcUserService(appleOidcUserService)
                         )
                         .successHandler(oAuth2AuthenticationSuccessHandler) // 로그인 성공 핸들러 설정
                         .failureHandler(oAuth2AuthenticationFailureHandler) // 로그인 실패 핸들러 설정

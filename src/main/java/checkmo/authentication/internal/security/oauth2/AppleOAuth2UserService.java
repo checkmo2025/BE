@@ -9,6 +9,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
@@ -44,11 +45,19 @@ public class AppleOAuth2UserService implements OAuth2UserService<OAuth2UserReque
     }
 
     private AppleIdentity verifyIdentity(OAuth2UserRequest userRequest) {
+        if (userRequest instanceof OidcUserRequest oidcUserRequest) {
+            return verifyIdToken(oidcUserRequest.getIdToken().getTokenValue());
+        }
+
         Object idToken = userRequest.getAdditionalParameters().get(OidcParameterNames.ID_TOKEN);
         if (!(idToken instanceof String value) || !StringUtils.hasText(value)) {
             throw invalidAppleIdToken(null);
         }
 
+        return verifyIdToken(value);
+    }
+
+    private AppleIdentity verifyIdToken(String value) {
         try {
             return appleIdTokenVerifier.verifyWebToken(value);
         } catch (InvalidAppleIdentityTokenException e) {
