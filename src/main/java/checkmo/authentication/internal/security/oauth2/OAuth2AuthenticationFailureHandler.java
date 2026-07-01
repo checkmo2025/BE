@@ -6,6 +6,8 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,7 +29,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
             throws IOException {
 
-        log.error("소셜 로그인 인증 실패: {}", exception.getClass().getSimpleName());
+        logAuthenticationFailure(request, exception);
 
         if (AppleOAuth2AuthorizationRequestResolver.consumeAppClientType(request)) {
             redirectAppFailure(request, response);
@@ -36,6 +38,40 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         // 실패 시 리다이렉트 URL 설정
         getRedirectStrategy().sendRedirect(request, response, "/login?error=true");
+    }
+
+    private void logAuthenticationFailure(HttpServletRequest request, AuthenticationException exception) {
+        if (exception instanceof OAuth2AuthenticationException oauth2Exception) {
+            OAuth2Error error = oauth2Exception.getError();
+            log.error(
+                    "소셜 로그인 인증 실패: type={}, uri={}, errorCode={}, description={}, message={}",
+                    oauth2Exception.getClass().getSimpleName(),
+                    request.getRequestURI(),
+                    error.getErrorCode(),
+                    sanitize(error.getDescription()),
+                    sanitize(exception.getMessage()),
+                    exception
+            );
+            return;
+        }
+
+        log.error(
+                "소셜 로그인 인증 실패: type={}, uri={}, message={}",
+                exception.getClass().getSimpleName(),
+                request.getRequestURI(),
+                sanitize(exception.getMessage()),
+                exception
+        );
+    }
+
+    private String sanitize(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replaceAll(
+                "(?i)(client_secret|code|id_token|access_token|refresh_token|token)=([^\\s&]+)",
+                "$1=***"
+        );
     }
 
     private void redirectAppFailure(HttpServletRequest request, HttpServletResponse response) throws IOException {
