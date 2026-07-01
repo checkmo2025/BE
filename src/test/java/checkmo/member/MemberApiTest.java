@@ -454,6 +454,19 @@ class MemberApiTest extends ApiTestSupport {
     }
 
     @Test
+    void incompleteProfileCanReadLoginStatus() {
+        TestUser user = createIncompleteUser();
+
+        given()
+                .cookie(accessTokenCookie(user))
+                .when()
+                .get("/api/v1/members/me/login-status")
+                .then()
+                .statusCode(200)
+                .body("result.provider", equalTo("LOCAL"));
+    }
+
+    @Test
     void followListAndUnfollowFlowSucceeds() {
         TestUser me = createUser();
         TestUser target = createUser();
