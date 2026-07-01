@@ -73,3 +73,4 @@ spring:
           apple:
             authorization-uri: https://appleid.apple.com/auth/authorize
             token-uri: https://appleid.apple.com/auth/token
+            jwk-set-uri: https://appleid.apple.com/auth/keys
