@@ -75,6 +75,9 @@ class AppleOAuthPropertiesTest {
                 softly.assertThat(environment.getProperty(
                         "spring.security.oauth2.client.provider.apple.token-uri"
                 )).isEqualTo("https://appleid.apple.com/auth/token");
+                softly.assertThat(environment.getProperty(
+                        "spring.security.oauth2.client.provider.apple.jwk-set-uri"
+                )).isEqualTo("https://appleid.apple.com/auth/keys");
             });
         });
     }
