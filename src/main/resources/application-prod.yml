@@ -27,6 +27,13 @@ logging:
     org.hibernate.SQL: WARN
     checkmo: INFO
 
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
+
 events:
   retry:
     enabled: true
