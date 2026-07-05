@@ -344,7 +344,7 @@ class MemberApiTest extends ApiTestSupport {
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true))
-                .body("result.isSocial", equalTo(false));
+                .body("result.social", equalTo(false));
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -433,7 +433,7 @@ class MemberApiTest extends ApiTestSupport {
                 .then()
                 .statusCode(200)
                 .body("isSuccess", equalTo(true))
-                .body("result.isSocial", equalTo(true));
+                .body("result.social", equalTo(true));
     }
 
     @Test

@@ -1,6 +1,5 @@
 package checkmo.member.web.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +60,6 @@ public class MemberResponseDTO {
         private String profileImageUrl;
         private String phoneNumber;
         private Set<MemberInterestCategory> categories;
-        @JsonProperty("isSocial")
         private boolean social;
     }
 

@@ -148,4 +148,8 @@ public class Member extends BaseEntity {
     public boolean isActive() {
         return deactivatedAt == null;
     }
+
+    public boolean isSocial() {
+        return !id.startsWith("LOCAL_");
+    }
 }
