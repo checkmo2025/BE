@@ -1,15 +1,19 @@
-package checkmo.infra.push;
+package checkmo.infra.push.internal.service;
 
 import checkmo.infra.push.internal.config.properties.ExpoPushProperties;
+import checkmo.infra.push.internal.dto.ExpoMessage;
+import checkmo.infra.push.internal.dto.ExpoReceipt;
+import checkmo.infra.push.internal.dto.ExpoTicket;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -20,6 +24,14 @@ public class ExpoPushClient {
 
     private final RestClient expoPushRestClient;
     private final ExpoPushProperties properties;
+
+    private static <T> List<List<T>> partition(List<T> list, int size) {
+        List<List<T>> partitions = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            partitions.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+        return partitions;
+    }
 
     /**
      * 메시지 목록을 Expo Push Service에 발송한다.
@@ -83,20 +95,15 @@ public class ExpoPushClient {
         return response.data();
     }
 
-    private static <T> List<List<T>> partition(List<T> list, int size) {
-        List<List<T>> partitions = new ArrayList<>();
-        for (int i = 0; i < list.size(); i += size) {
-            partitions.add(list.subList(i, Math.min(i + size, list.size())));
-        }
-        return partitions;
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record ExpoSendResponse(List<ExpoTicket> data) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record ExpoSendResponse(List<ExpoTicket> data) {}
+    private record ReceiptRequest(List<String> ids) {
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record ReceiptRequest(List<String> ids) {}
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private record ReceiptResponse(Map<String, ExpoReceipt> data) {}
+    private record ReceiptResponse(Map<String, ExpoReceipt> data) {
+    }
 }

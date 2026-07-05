@@ -1,4 +1,4 @@
-package checkmo.infra.push;
+package checkmo.infra.push.internal.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -9,9 +9,6 @@ public record ExpoReceipt(
         String message,
         ExpoDetails details
 ) {
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record ExpoDetails(String error) {}
-
     public boolean isOk() {
         return "ok".equals(status);
     }
@@ -38,5 +35,9 @@ public record ExpoReceipt(
 
     public String errorCode() {
         return details != null ? details.error() : null;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record ExpoDetails(String error) {
     }
 }

@@ -1,4 +1,4 @@
-package checkmo.infra.push;
+package checkmo.infra.push.internal.dto;
 
 import java.util.Map;
 
@@ -10,4 +10,5 @@ public record ExpoMessage(
         String sound,
         String priority,
         String channelId
-) {}
+) {
+}

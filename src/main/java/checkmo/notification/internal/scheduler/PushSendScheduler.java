@@ -1,8 +1,8 @@
 package checkmo.notification.internal.scheduler;
 
-import checkmo.infra.push.ExpoMessage;
-import checkmo.infra.push.ExpoPushClient;
-import checkmo.infra.push.ExpoTicket;
+import checkmo.infra.PushAPI;
+import checkmo.infra.PushSendRequest;
+import checkmo.infra.PushSendResult;
 import checkmo.notification.internal.PushMessageFactory;
 import checkmo.notification.internal.entity.PushDelivery;
 import checkmo.notification.internal.repository.PushDeliveryRepository;
@@ -23,13 +23,12 @@ import java.util.List;
 public class PushSendScheduler {
 
     private static final int BATCH_SIZE = 100;
-    // 5회 시도 후 영구 실패: attemptCount가 이 값에 도달하면 PERMANENT_FAILED
     private static final int MAX_ATTEMPTS = 5;
 
     private final PushDeliveryRepository pushDeliveryRepository;
     private final PushDeviceRepository pushDeviceRepository;
     private final PushMessageFactory pushMessageFactory;
-    private final ExpoPushClient expoPushClient;
+    private final PushAPI pushAPI;
 
     @Scheduled(fixedDelay = 5_000)
     public void sendPendingDeliveries() {
@@ -39,20 +38,19 @@ public class PushSendScheduler {
             return;
         }
 
-        List<ExpoMessage> messages = buildMessages(batch);
-        List<ExpoTicket> tickets = expoPushClient.sendBatch(messages);
+        List<PushSendRequest> requests = buildRequests(batch);
+        List<PushSendResult> results = pushAPI.sendBatch(requests);
 
         for (int i = 0; i < batch.size(); i++) {
-            ExpoTicket ticket = (i < tickets.size()) ? tickets.get(i) : null;
+            PushSendResult result = (i < results.size()) ? results.get(i) : null;
             try {
-                applyTicketResult(batch.get(i), ticket);
+                applySendResult(batch.get(i), result);
             } catch (Exception e) {
                 log.error("push_delivery 상태 저장 실패: deliveryId={}", batch.get(i).getId(), e);
             }
         }
     }
 
-    // lease 10분 초과 PROCESSING을 RETRY_WAIT으로 복구
     @Scheduled(fixedDelay = 60_000)
     public void recoverStaleProcessing() {
         LocalDateTime leaseExpiry = LocalDateTime.now().minusMinutes(10);
@@ -68,33 +66,31 @@ public class PushSendScheduler {
         }
     }
 
-    private List<ExpoMessage> buildMessages(List<PushDelivery> batch) {
-        List<ExpoMessage> messages = new ArrayList<>(batch.size());
+    private List<PushSendRequest> buildRequests(List<PushDelivery> batch) {
+        List<PushSendRequest> requests = new ArrayList<>(batch.size());
         for (PushDelivery delivery : batch) {
             try {
-                messages.add(pushMessageFactory.build(delivery, delivery.getNotification()));
+                requests.add(pushMessageFactory.build(delivery, delivery.getNotification()));
             } catch (Exception e) {
                 log.error("push 메시지 조립 실패: deliveryId={}", delivery.getId(), e);
-                messages.add(null);
+                requests.add(null);
             }
         }
-        return messages;
+        return requests;
     }
 
-    private void applyTicketResult(PushDelivery delivery, ExpoTicket ticket) {
-        if (ticket == null) {
-            // 메시지 조립 실패 또는 HTTP 오류 → RETRY_WAIT
+    private void applySendResult(PushDelivery delivery, PushSendResult result) {
+        if (result == null) {
             handleRetryOrFail(delivery, "SEND_FAILED", "Expo API request failed or message build error");
-        } else if ("ok".equals(ticket.status())) {
-            delivery.markTicketAccepted(ticket.id());
-        } else if (ticket.isDeviceNotRegistered()) {
-            // device를 비활성화하고 delivery는 CANCELLED
+        } else if (result.ok()) {
+            delivery.markTicketAccepted(result.ticketId());
+        } else if (result.isDeviceNotRegistered()) {
             delivery.getPushDevice().deactivate();
             pushDeviceRepository.save(delivery.getPushDevice());
             delivery.markCancelled();
         } else {
-            String errorCode = ticket.details() != null ? ticket.details().error() : "UNKNOWN";
-            handleRetryOrFail(delivery, errorCode, ticket.message());
+            String errorCode = result.errorCode() != null ? result.errorCode() : "UNKNOWN";
+            handleRetryOrFail(delivery, errorCode, result.errorMessage());
         }
 
         pushDeliveryRepository.save(delivery);
@@ -108,7 +104,6 @@ public class PushSendScheduler {
         }
     }
 
-    // attemptCount는 markRetryWait 호출 전 값 (0-based)
     private LocalDateTime nextAttemptAt(int attemptCount) {
         Duration delay = switch (attemptCount) {
             case 0 -> Duration.ofMinutes(1);

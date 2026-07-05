@@ -1,7 +1,7 @@
 package checkmo.notification.internal;
 
 import checkmo.clubManagement.ClubManagementAPI;
-import checkmo.infra.push.ExpoMessage;
+import checkmo.infra.PushSendRequest;
 import checkmo.member.MemberAPI;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.entity.Notification.NotificationType;
@@ -26,9 +26,9 @@ public class PushMessageFactory {
     private final MemberAPI memberAPI;
     private final ClubManagementAPI clubManagementAPI;
 
-    public ExpoMessage build(PushDelivery delivery, Notification notification) {
+    public PushSendRequest build(PushDelivery delivery, Notification notification) {
         String displayName = resolveDisplayName(notification);
-        return new ExpoMessage(
+        return new PushSendRequest(
                 delivery.getPushDevice().getExpoPushToken(),
                 APP_TITLE,
                 buildBody(notification.getNotificationType(), displayName),
