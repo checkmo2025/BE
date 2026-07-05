@@ -48,3 +48,8 @@ realtime:
     allowed-origins:
       - ${FRONTEND_BASE_URL}
       - http://localhost:3000
+
+expo:
+  push:
+    access-token: ${EXPO_ACCESS_TOKEN:}
+    enabled: ${EXPO_PUSH_ENABLED:true}
