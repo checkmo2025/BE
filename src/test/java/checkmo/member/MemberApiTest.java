@@ -343,7 +343,8 @@ class MemberApiTest extends ApiTestSupport {
                 .get("/api/v1/members/me")
                 .then()
                 .statusCode(200)
-                .body("isSuccess", equalTo(true));
+                .body("isSuccess", equalTo(true))
+                .body("result.isSocial", equalTo(false));
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -419,6 +420,20 @@ class MemberApiTest extends ApiTestSupport {
                 .statusCode(200)
                 .body("isSuccess", equalTo(true))
                 .body("result.nickname", equalTo(user.nickName()));
+    }
+
+    @Test
+    void 소셜_회원_프로필_조회는_소셜_로그인_여부를_반환한다() {
+        TestUser user = createSocialUser();
+
+        given()
+                .cookie(accessTokenCookie(user))
+                .when()
+                .get("/api/v1/members/me")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true))
+                .body("result.isSocial", equalTo(true));
     }
 
     @Test

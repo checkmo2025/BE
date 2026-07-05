@@ -17,7 +17,12 @@ public class MemberConverter {
                 .profileImageUrl(member.getImgUrl())
                 .phoneNumber(member.getPhoneNumber())
                 .categories(member.getInterestCategories())
+                .social(isSocialMember(member))
                 .build();
+    }
+
+    private static boolean isSocialMember(Member member) {
+        return !member.getId().startsWith("LOCAL_");
     }
 
     public static othersDetailInfo toOtherProfile(

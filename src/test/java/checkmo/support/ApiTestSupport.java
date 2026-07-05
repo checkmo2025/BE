@@ -237,6 +237,10 @@ public abstract class ApiTestSupport {
         return createUser(Role.USER, false);
     }
 
+    protected TestUser createSocialUser() {
+        return createUser(Role.USER, true, "Pass123!", "KAKAO_");
+    }
+
     protected TestUser createAdmin() {
         return createUser(Role.ADMIN, true);
     }
@@ -252,8 +256,17 @@ public abstract class ApiTestSupport {
     private TestUser createUser(Role role, boolean profileCompleted, String rawPassword) {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         String id = role == Role.USER ? "LOCAL_" + suffix : role.name().toLowerCase() + "-" + suffix;
+        return createUserWithId(role, profileCompleted, rawPassword, id);
+    }
+
+    private TestUser createUser(Role role, boolean profileCompleted, String rawPassword, String idPrefix) {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return createUserWithId(role, profileCompleted, rawPassword, idPrefix + suffix);
+    }
+
+    private TestUser createUserWithId(Role role, boolean profileCompleted, String rawPassword, String id) {
         String email = id + "@example.com";
-        String nickName = role.name().toLowerCase() + suffix;
+        String nickName = role.name().toLowerCase() + id.substring(Math.max(0, id.length() - 8));
 
         AuthUser authUser = AuthUser.builder()
                 .id(id)
