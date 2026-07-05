@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,7 +42,6 @@ public class PushCleanupScheduler {
     }
 
     // FK 순서: delivery 먼저 삭제 후 device 삭제
-    @Transactional
     public void deleteExpiredDevices(LocalDateTime threshold) {
         int totalDeleted = 0;
         List<PushDevice> page;
@@ -65,7 +63,6 @@ public class PushCleanupScheduler {
         }
     }
 
-    @Transactional
     public void deleteTerminalDeliveries(LocalDateTime threshold) {
         int totalDeleted = 0;
         List<PushDelivery> page;
