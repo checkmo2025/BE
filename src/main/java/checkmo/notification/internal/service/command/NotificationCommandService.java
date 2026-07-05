@@ -6,20 +6,23 @@ import checkmo.clubManagement.ClubManagementEvent.JoinClubEvent;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
 import checkmo.clubNotice.ClubNoticeEvent.ClubNoticeCreated;
 import checkmo.member.MemberEvent;
-import java.util.List;
 import checkmo.notification.internal.entity.Notification;
 import checkmo.notification.internal.entity.Notification.NotificationType;
 import checkmo.notification.internal.exception.NotificationErrorStatus;
 import checkmo.notification.internal.exception.NotificationException;
+import checkmo.notification.internal.listener.event.NotificationCreatedForPush;
 import checkmo.notification.internal.repository.NotificationRepository;
 import checkmo.notification.internal.repository.NotificationSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class NotificationCommandService {
     private final NotificationSettingRepository notificationSettingRepository;
 
     private final CacheManager cacheManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 좋아요 알림 생성
@@ -52,7 +56,8 @@ public class NotificationCommandService {
                 .receiverId(event.receiverId())
                 .build();
         try {
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.receiverId()));
             evictNotificationCache(event.receiverId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
@@ -78,7 +83,8 @@ public class NotificationCommandService {
                 .receiverId(event.receiverId())
                 .build();
         try {
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.receiverId()));
             evictNotificationCache(event.receiverId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
@@ -105,7 +111,8 @@ public class NotificationCommandService {
                 .receiverId(event.followingId())
                 .build();
         try {
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.followingId()));
             evictNotificationCache(event.followingId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
@@ -131,7 +138,8 @@ public class NotificationCommandService {
                 .receiverId(event.memberId())
                 .build();
         try {
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.memberId()));
             evictNotificationCache(event.memberId());
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
@@ -182,7 +190,8 @@ public class NotificationCommandService {
                 .receiverId(receiverId)
                 .build();
         try {
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), receiverId));
             evictNotificationCache(receiverId);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
