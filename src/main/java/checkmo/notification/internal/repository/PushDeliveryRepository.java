@@ -44,6 +44,18 @@ public interface PushDeliveryRepository extends JpaRepository<PushDelivery, Long
             @Param("terminalStatuses") List<DeliveryStatus> terminalStatuses
     );
 
+    @Query("""
+            SELECT pd FROM PushDelivery pd
+            WHERE pd.status IN :statuses
+              AND pd.updatedAt <= :threshold
+            ORDER BY pd.updatedAt ASC
+            """)
+    List<PushDelivery> findTerminalDeliveriesOlderThan(
+            @Param("statuses") List<DeliveryStatus> statuses,
+            @Param("threshold") LocalDateTime threshold,
+            Pageable pageable
+    );
+
     void deleteAllByNotificationIdIn(List<Long> notificationIds);
 
     void deleteAllByPushDeviceIdIn(List<Long> pushDeviceIds);
