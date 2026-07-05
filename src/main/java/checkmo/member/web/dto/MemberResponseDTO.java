@@ -1,13 +1,12 @@
 package checkmo.member.web.dto;
 
 import checkmo.member.internal.entity.MemberInterestCategory;
+import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.Set;
 
 public class MemberResponseDTO {
 
@@ -61,6 +60,7 @@ public class MemberResponseDTO {
         private String profileImageUrl;
         private String phoneNumber;
         private Set<MemberInterestCategory> categories;
+        private boolean social;
     }
 
     @Getter

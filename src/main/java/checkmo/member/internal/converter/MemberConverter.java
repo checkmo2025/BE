@@ -17,6 +17,7 @@ public class MemberConverter {
                 .profileImageUrl(member.getImgUrl())
                 .phoneNumber(member.getPhoneNumber())
                 .categories(member.getInterestCategories())
+                .social(member.isSocial())
                 .build();
     }
 
