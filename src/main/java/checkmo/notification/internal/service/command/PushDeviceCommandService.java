@@ -67,8 +67,13 @@ public class PushDeviceCommandService {
     }
 
     private void deactivateTokenConflict(String token, String excludeInstallationId) {
+        // saveAndFlush로 즉시 UPDATE를 실행해 token=null을 DB에 반영한 뒤 새 device를 INSERT한다.
+        // 순서를 보장하지 않으면 Hibernate가 INSERT를 먼저 실행하여 UNIQUE 위반이 발생한다.
         pushDeviceRepository.findByExpoPushToken(token)
                 .filter(d -> !d.getInstallationId().equals(excludeInstallationId))
-                .ifPresent(PushDevice::deactivate);
+                .ifPresent(d -> {
+                    d.deactivate();
+                    pushDeviceRepository.saveAndFlush(d);
+                });
     }
 }

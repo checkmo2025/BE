@@ -3,7 +3,7 @@ CREATE TABLE push_device
     id                 BIGINT       NOT NULL AUTO_INCREMENT,
     member_id          VARCHAR(255) NOT NULL,
     installation_id    VARCHAR(36)  NOT NULL,
-    expo_push_token    VARCHAR(255) NOT NULL,
+    expo_push_token    VARCHAR(255),
     platform           VARCHAR(20)  NOT NULL,
     app_version        VARCHAR(32)  NOT NULL,
     build_number       VARCHAR(32)  NOT NULL,

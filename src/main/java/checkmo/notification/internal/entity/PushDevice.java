@@ -27,7 +27,8 @@ public class PushDevice extends BaseEntity {
     @Column(name = "installation_id", nullable = false, length = 36)
     private String installationId;
 
-    @Column(name = "expo_push_token", nullable = false, length = 255)
+    // 비활성화 시 null로 해제하여 동일 token의 재등록을 허용한다
+    @Column(name = "expo_push_token", length = 255)
     private String expoPushToken;
 
     @Enumerated(EnumType.STRING)
@@ -63,6 +64,7 @@ public class PushDevice extends BaseEntity {
 
     public void deactivate() {
         this.active = false;
+        this.expoPushToken = null;
         this.deactivatedAt = LocalDateTime.now();
     }
 
