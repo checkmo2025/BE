@@ -2,6 +2,8 @@ package checkmo.notification.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.notification.internal.converter.PushDeviceConverter;
+import checkmo.notification.internal.service.command.PushDeviceCommandService;
 import checkmo.notification.web.dto.NotificationSettingType;
 import checkmo.notification.internal.service.NotificationQueryFacade;
 import checkmo.notification.internal.service.command.NotificationCommandService;
@@ -9,14 +11,20 @@ import checkmo.notification.internal.service.command.NotificationSettingCommandS
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoList;
 import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList;
 import checkmo.notification.web.dto.NotificationResponseDTO.SettingInfo;
+import checkmo.notification.web.dto.PushDeviceRequestDTO;
+import checkmo.notification.web.dto.PushDeviceResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +38,38 @@ public class NotificationController {
     private final NotificationQueryFacade notificationQueryFacade;
     private final NotificationCommandService notificationCommandService;
     private final NotificationSettingCommandService notificationSettingCommandService;
+    private final PushDeviceCommandService pushDeviceCommandService;
+
+    @Operation(summary = "푸시 디바이스 등록·갱신",
+            description = "installationId 기준으로 upsert합니다. 같은 token이 다른 설치에 있으면 이전 설치를 비활성화합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "등록 또는 갱신 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @PutMapping("/push-devices")
+    public ApiResponse<PushDeviceResponseDTO> registerPushDevice(
+            @CurrentId String memberId,
+            @RequestBody @Valid PushDeviceRequestDTO request
+    ) {
+        var device = pushDeviceCommandService.upsert(memberId, request);
+        return ApiResponse.onSuccess(PushDeviceConverter.toResponse(device));
+    }
+
+    @Operation(summary = "푸시 디바이스 해제",
+            description = "해당 installationId의 디바이스를 비활성화합니다. 존재하지 않거나 이미 비활성인 경우에도 성공을 반환합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다.")
+    })
+    @DeleteMapping("/push-devices/{installationId}")
+    public ApiResponse<Void> deregisterPushDevice(
+            @CurrentId String memberId,
+            @PathVariable String installationId
+    ) {
+        pushDeviceCommandService.deactivate(memberId, installationId);
+        return ApiResponse.onSuccess(null);
+    }
 
     @Operation(summary = "알림 전체 조회", description = "특정 회원의 전체 알림을 조회합니다.")
     @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
