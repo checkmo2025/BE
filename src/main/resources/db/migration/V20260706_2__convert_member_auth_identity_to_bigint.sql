@@ -110,7 +110,9 @@ INSERT INTO identity_migration_failures (check_name, legacy_id, detail)
 SELECT 'notification.sender_id_orphan', r.sender_id, NULL
 FROM notification r
 LEFT JOIN member m ON m.id = r.sender_id
-WHERE r.sender_id IS NOT NULL AND m.id IS NULL
+WHERE r.sender_id IS NOT NULL
+  AND r.sender_id <> 'SYSTEM'
+  AND m.id IS NULL
 LIMIT 1;
 
 INSERT INTO identity_migration_failures (check_name, legacy_id, detail)
@@ -299,10 +301,17 @@ UPDATE notification r
 JOIN member_identity_map mim ON mim.old_member_identity = r.receiver_id
 SET r.receiver_id = CAST(mim.new_member_id AS CHAR);
 
+ALTER TABLE notification MODIFY COLUMN sender_id VARCHAR(255) NULL;
+
 UPDATE notification r
 JOIN member_identity_map mim ON mim.old_member_identity = r.sender_id
 SET r.sender_id = CAST(mim.new_member_id AS CHAR)
-WHERE r.sender_id IS NOT NULL;
+WHERE r.sender_id IS NOT NULL
+  AND r.sender_id <> 'SYSTEM';
+
+UPDATE notification
+SET sender_id = NULL
+WHERE sender_id = 'SYSTEM';
 
 UPDATE topic r
 JOIN member_identity_map mim ON mim.old_member_identity = r.member_id
@@ -368,7 +377,7 @@ ALTER TABLE comment MODIFY COLUMN member_id BIGINT NULL;
 ALTER TABLE follow MODIFY COLUMN follower_id BIGINT NULL;
 ALTER TABLE follow MODIFY COLUMN following_id BIGINT NULL;
 ALTER TABLE notification MODIFY COLUMN receiver_id BIGINT NOT NULL;
-ALTER TABLE notification MODIFY COLUMN sender_id BIGINT NOT NULL;
+ALTER TABLE notification MODIFY COLUMN sender_id BIGINT NULL;
 ALTER TABLE topic MODIFY COLUMN member_id BIGINT NOT NULL;
 ALTER TABLE notification_setting MODIFY COLUMN member_id BIGINT NOT NULL;
 ALTER TABLE member_terms MODIFY COLUMN member_id BIGINT NOT NULL;

@@ -77,7 +77,7 @@ LIMIT 50;
 
 ### orphan member reference checks
 
-모든 member reference column은 cutover 전에 `member.id`에 매칭되어야 한다. nullable column은 `NULL`을 orphan으로 보지 않는다.
+모든 member reference column은 cutover 전에 `member.id`에 매칭되어야 한다. nullable column은 `NULL`을 orphan으로 보지 않는다. `notification.sender_id = 'SYSTEM'`은 시스템 발신자를 뜻하므로 preflight orphan으로 보지 않고, cutover 후 `NULL`로 변환한다.
 
 ```sql
 SELECT 'member_interest_categories.member_id' AS reference_column, COUNT(*) AS orphan_count
@@ -128,7 +128,7 @@ UNION ALL
 SELECT 'notification.sender_id', COUNT(*)
 FROM notification r
 LEFT JOIN member m ON m.id = r.sender_id
-WHERE r.sender_id IS NOT NULL AND m.id IS NULL
+WHERE r.sender_id IS NOT NULL AND r.sender_id <> 'SYSTEM' AND m.id IS NULL
 UNION ALL
 SELECT 'topic.member_id', COUNT(*)
 FROM topic r
@@ -332,7 +332,7 @@ ORDER BY b.table_name;
 6. 새 Flyway migration과 애플리케이션 코드를 같은 배포 단위로 반영한다.
 7. migration은 `member_identity_map`을 생성해 old legacy id와 new bigint id 매핑을 고정해야 한다.
 8. migration은 `auth_user.legacy_id`, `member.legacy_id`, `auth_user.provider`, `auth_user.provider_user_id`를 채우고 `UNIQUE(provider, provider_user_id)`를 생성해야 한다.
-9. 모든 member reference column을 `member_identity_map`으로 `BIGINT`에 backfill한 뒤 FK와 unique index를 다시 검증한다.
+9. 모든 member reference column을 `member_identity_map`으로 `BIGINT`에 backfill한 뒤 FK와 unique index를 다시 검증한다. `notification.sender_id = 'SYSTEM'`은 nullable `BIGINT` 컬럼의 `NULL`로 변환한다.
 10. refresh token 저장소는 기존 문자열 subject 기반 key를 제거하거나 만료되도록 둔다. 재로그인 후 numeric subject 기반 token만 유효해야 한다.
 11. smoke test가 끝날 때까지 외부 트래픽을 재개하지 않는다.
 
@@ -400,6 +400,8 @@ WHERE table_schema = DATABASE()
   )
 ORDER BY table_name, column_name;
 ```
+
+`notification.receiver_id`는 `BIGINT NOT NULL`, `notification.sender_id`는 시스템 발신자를 표현하기 위해 `BIGINT NULL`이어야 한다.
 
 ### post-cutover FK validation
 
