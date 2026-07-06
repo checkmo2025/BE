@@ -352,7 +352,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .clubId(club.getId())
                 .meetingId(meeting.getId())
                 .teamId(team.getId())
-                .senderMemberId(owner.id())
+                .senderMemberId(Long.valueOf(owner.id()))
                 .content("안녕하세요")
                 .sentAt(LocalDateTime.now())
                 .build());

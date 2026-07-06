@@ -11,11 +11,11 @@ public interface PushDeviceRepository extends JpaRepository<PushDevice, Long> {
 
     Optional<PushDevice> findByInstallationId(String installationId);
 
-    Optional<PushDevice> findByInstallationIdAndMemberId(String installationId, String memberId);
+    Optional<PushDevice> findByInstallationIdAndMemberId(String installationId, Long memberId);
 
     Optional<PushDevice> findByExpoPushToken(String expoPushToken);
 
-    List<PushDevice> findAllByMemberIdAndActiveTrue(String memberId);
+    List<PushDevice> findAllByMemberIdAndActiveTrue(Long memberId);
 
     List<PushDevice> findAllByActiveFalseAndDeactivatedAtBefore(LocalDateTime threshold, Pageable pageable);
 }

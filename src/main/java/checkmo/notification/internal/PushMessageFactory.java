@@ -73,9 +73,9 @@ public class PushMessageFactory {
         return data;
     }
 
-    private String fetchNickname(String memberId) {
+    private String fetchNickname(Long memberId) {
         try {
-            return memberAPI.fetchNickname(memberId);
+            return memberAPI.fetchNickname(String.valueOf(memberId));
         } catch (Exception e) {
             log.debug("닉네임 조회 실패 (탈퇴한 회원): memberId={}", memberId);
             return "탈퇴한 회원";

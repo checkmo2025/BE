@@ -29,13 +29,13 @@ public class RealtimeMessagePublisher {
     public void publishChatAfterCommit(RealtimeEvent.TeamChatSavedEvent event) {
         TeamChatMessage teamChatMessage = teamChatMessageRepository.findById(event.meessageId())
                 .orElseThrow(() -> new RealtimeException(RealtimeErrorStatus.MESSAGE_NOT_FOUND));
-        MemberExternalDTO.BasicInfo basicInfo = memberAPI.fetchMemberBasicInfo(teamChatMessage.getSenderMemberId());
+        MemberExternalDTO.BasicInfo basicInfo = memberAPI.fetchMemberBasicInfo(String.valueOf(teamChatMessage.getSenderMemberId()));
         String dest = String.format(TEAM_CHAT_MESSAGE_DEST_TEMPLATE, event.clubId(), event.meetingId(), event.teamId());
         ChatResponseMessage message = ChatResponseMessage.builder()
                 .clubId(event.clubId())
                 .meetingId(event.meetingId())
                 .teamId(event.teamId())
-                .senderMemberId(teamChatMessage.getSenderMemberId())
+                .senderMemberId(String.valueOf(teamChatMessage.getSenderMemberId()))
                 .senderNickname(basicInfo.getNickname())
                 .senderProfileImageUrl(basicInfo.getProfileImageUrl())
                 .messageId(teamChatMessage.getId())

@@ -35,6 +35,6 @@ public class RealtimeAPIImpl implements RealtimeAPI {
         TeamChatMessage message = teamChatMessageRepository.findById(chatMessageId)
                 .orElseThrow(() -> new RealtimeGeneralException(RealtimeGeneralErrorStatus.MESSAGE_NOT_FOUND));
 
-        return message.getSenderMemberId();
+        return String.valueOf(message.getSenderMemberId());
     }
 }

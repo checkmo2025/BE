@@ -30,7 +30,7 @@ public class NotificationSetting extends BaseEntity {
     private Long id;
 
     @Column(name = "member_id", nullable = false)
-    private String memberId;
+    private Long memberId;
 
     @Column(name = "book_story_liked", nullable = false)
     @Builder.Default

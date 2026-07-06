@@ -508,13 +508,13 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         TestUser receiver = createUser();
         TestUser sender = createUser();
         notificationSettingRepository.save(NotificationSetting.builder()
-                .memberId(receiver.id())
+                .memberId(Long.valueOf(receiver.id()))
                 .build());
         Notification notification = notificationRepository.save(Notification.builder()
                 .notificationType(NotificationType.FOLLOW)
                 .sourceId(100L)
-                .receiverId(receiver.id())
-                .senderId(sender.id())
+                .receiverId(Long.valueOf(receiver.id()))
+                .senderId(Long.valueOf(sender.id()))
                 .build());
 
         given().cookie(accessTokenCookie(receiver))

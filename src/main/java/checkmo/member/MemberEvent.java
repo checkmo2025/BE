@@ -5,7 +5,7 @@ import lombok.Builder;
 public class MemberEvent {
 
     @Builder
-    public record Follow(Long eventId, String followerId, String followingId) {
+    public record Follow(Long eventId, Long followerId, Long followingId) {
     }
 
     @Builder
@@ -13,6 +13,6 @@ public class MemberEvent {
     }
 
     @Builder
-    public record MemberRegistrationCompleted(String memberId) {
+    public record MemberRegistrationCompleted(Long memberId) {
     }
 }

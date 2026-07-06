@@ -49,7 +49,7 @@ public class NewsController {
     })
     @GetMapping("/me")
     public ApiResponse<NewsResponseDTO.NewsList> getMyNewsList(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         NewsResponseDTO.NewsList newsList = newsQueryFacade.fetchMyNewsList(memberId, cursorId);

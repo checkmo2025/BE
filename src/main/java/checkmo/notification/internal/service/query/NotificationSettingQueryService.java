@@ -16,7 +16,7 @@ public class NotificationSettingQueryService {
 
     private final NotificationSettingRepository notificationSettingRepository;
 
-    public SettingInfo getNotificationSetting(String memberId) {
+    public SettingInfo getNotificationSetting(Long memberId) {
         NotificationSetting setting = notificationSettingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new NotificationException(NotificationErrorStatus.NOTIFICATION_SETTING_NOT_FOUND));
 

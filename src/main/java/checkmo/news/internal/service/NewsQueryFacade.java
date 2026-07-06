@@ -61,8 +61,8 @@ public class NewsQueryFacade {
         return NewsConverter.toDetailInfo(news);
     }
 
-    public NewsResponseDTO.NewsList fetchMyNewsList(String memberId, Long cursorId) {
-        String requesterEmail = memberAPI.fetchMemberEmail(memberId);
+    public NewsResponseDTO.NewsList fetchMyNewsList(Long memberId, Long cursorId) {
+        String requesterEmail = memberAPI.fetchMemberEmail(String.valueOf(memberId));
 
         CursorResult<News> newsCursorResult = CursorPagingHelper.getPage(
                 (pageSize) -> newsQueryService.retrieveMyNewsList(requesterEmail, cursorId, pageSize),
@@ -138,7 +138,7 @@ public class NewsQueryFacade {
     }
 
     public NewsResponseDTO.NewsList fetchMemberNewsListForAdmin(String memberNickname, Long cursorId) {
-        String memberId = memberAPI.fetchMemberId(memberNickname);
+        Long memberId = Long.valueOf(memberAPI.fetchMemberId(memberNickname));
         return fetchMyNewsList(memberId, cursorId);
     }
 }

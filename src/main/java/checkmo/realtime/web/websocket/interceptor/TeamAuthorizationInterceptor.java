@@ -69,7 +69,7 @@ public class TeamAuthorizationInterceptor implements ChannelInterceptor {
 
         DestinationVariables vars = extractVariables(destination);
 
-        authorizationService.authorizeTeamAccess(vars.clubId, vars.meetingId, vars.teamId, auth.getName());
+        authorizationService.authorizeTeamAccess(vars.clubId, vars.meetingId, vars.teamId, Long.valueOf(auth.getName()));
         return message;
     }
 

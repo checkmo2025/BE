@@ -80,7 +80,7 @@ public class MemberCommandService {
         // 회원 등록 완료 이벤트 발행
         eventPublisher.publishEvent(
                 MemberEvent.MemberRegistrationCompleted.builder()
-                        .memberId(String.valueOf(memberId))
+                        .memberId(memberId)
                         .build());
     }
 

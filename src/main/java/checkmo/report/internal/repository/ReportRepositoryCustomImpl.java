@@ -17,7 +17,7 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Report> findMyReports(String reporterId, Long cursorId, int pageSize) {
+    public List<Report> findMyReports(Long reporterId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(report)
                 .where(

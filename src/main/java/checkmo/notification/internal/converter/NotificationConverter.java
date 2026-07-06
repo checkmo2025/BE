@@ -15,7 +15,7 @@ public class NotificationConverter {
 
     public static BasicInfoPreviewList toPreviewListDTO(
             List<Notification> notifications,
-            Map<String, String> senderNicknameMap,
+            Map<Long, String> senderNicknameMap,
             Map<Long, String> clubNameMap
     ) {
         List<BasicInfo> previewList = notifications.stream()
@@ -29,7 +29,7 @@ public class NotificationConverter {
 
     public static BasicInfoList toNotificationListDTO(
             List<Notification> notifications,
-            Map<String, String> senderNicknameMap,
+            Map<Long, String> senderNicknameMap,
             Map<Long, String> clubNameMap,
             CursorResult<Notification> cursorResult,
             int pageSize
@@ -48,7 +48,7 @@ public class NotificationConverter {
 
     private static BasicInfo toBasicInfo(
             Notification notification,
-            Map<String, String> senderNicknameMap,
+            Map<Long, String> senderNicknameMap,
             Map<Long, String> clubNameMap
     ) {
         // 클럽 알림: clubName 사용,

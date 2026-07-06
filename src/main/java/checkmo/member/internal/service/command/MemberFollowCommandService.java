@@ -66,8 +66,8 @@ public class MemberFollowCommandService {
         // 팔로잉 이벤트 발행
         eventPublisher.publishEvent(new MemberEvent.Follow(
                 follow.getId(),
-                String.valueOf(memberId),
-                String.valueOf(following.getId())
+                memberId,
+                following.getId()
         ));
     }
 

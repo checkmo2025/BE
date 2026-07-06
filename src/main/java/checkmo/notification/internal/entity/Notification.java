@@ -46,10 +46,10 @@ public class Notification extends BaseEntity {
     private Long domainId; // 알림 대상 도메인의 ID (bookStoryId, clubId 등). FOLLOW의 경우 null
 
     @Column(name = "receiver_id", nullable = false)
-    private String receiverId;
+    private Long receiverId;
 
-    @Column(name = "sender_id", nullable = false)
-    private String senderId;
+    @Column(name = "sender_id")
+    private Long senderId;
 
     public void markAsRead() {
         this.isRead = true;

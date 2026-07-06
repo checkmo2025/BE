@@ -29,7 +29,7 @@ public class ChatHistoryController {
             @PathVariable Long meetingId,
             @PathVariable Long teamId,
             @RequestParam(required = false) Long cursorId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         authorizationService.authorizeTeamAccess(clubId, meetingId, teamId, memberId);
         return ApiResponse.onSuccess(chatQueryService.fetchHistory(clubId, meetingId, teamId, cursorId));

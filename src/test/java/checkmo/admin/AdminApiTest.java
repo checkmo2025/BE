@@ -104,7 +104,7 @@ class AdminApiTest extends ApiTestSupport {
 
         for (int index = 0; index < 21; index++) {
             reportRepository.save(Report.builder()
-                    .reporterId(reporter.id())
+                    .reporterId(Long.valueOf(reporter.id()))
                     .reportTargetType(ReportTargetType.MEMBER)
                     .targetId(target.nickName())
                     .reportReason(ReportReason.GENERAL)
@@ -113,7 +113,7 @@ class AdminApiTest extends ApiTestSupport {
                     .build());
         }
         reportRepository.save(Report.builder()
-                .reporterId(otherReporter.id())
+                .reporterId(Long.valueOf(otherReporter.id()))
                 .reportTargetType(ReportTargetType.MEMBER)
                 .targetId(target.nickName())
                 .reportReason(ReportReason.SPAM)
@@ -161,7 +161,7 @@ class AdminApiTest extends ApiTestSupport {
         TestUser reporter = createUser();
 
         reportRepository.save(Report.builder()
-                .reporterId(reporter.id())
+                .reporterId(Long.valueOf(reporter.id()))
                 .reportTargetType(ReportTargetType.BOOK_STORY)
                 .targetId("999999")
                 .reportReason(ReportReason.INSULT)

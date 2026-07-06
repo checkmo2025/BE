@@ -44,8 +44,8 @@ public class NotificationCommandService {
      */
     public void createNotification(BookStoryEvent.BookStoryLiked event) {
         NotificationType type = NotificationType.LIKE;
-        String senderId = String.valueOf(event.senderId());
-        String receiverId = String.valueOf(event.receiverId());
+        Long senderId = event.senderId();
+        Long receiverId = event.receiverId();
         if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
@@ -73,8 +73,8 @@ public class NotificationCommandService {
      */
     public void createNotification(BookStoryEvent.BookStoryComment event) {
         NotificationType type = NotificationType.COMMENT;
-        String senderId = String.valueOf(event.senderId());
-        String receiverId = String.valueOf(event.receiverId());
+        Long senderId = event.senderId();
+        Long receiverId = event.receiverId();
         if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
@@ -130,7 +130,7 @@ public class NotificationCommandService {
      */
     public void createNotification(JoinClubEvent event) {
         Notification.NotificationType type = Notification.NotificationType.JOIN_CLUB;
-        String receiverId = String.valueOf(event.memberId());
+        Long receiverId = event.memberId();
         if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
@@ -139,7 +139,7 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(event.eventId())
                 .domainId(event.clubId())
-                .senderId("SYSTEM")
+                .senderId(null)
                 .receiverId(receiverId)
                 .build();
         try {
@@ -162,7 +162,7 @@ public class NotificationCommandService {
 
         List<Long> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
         for (Long memberId : memberIds) {
-            createClubNotification(type, sourceId, event.clubId(), String.valueOf(memberId));
+            createClubNotification(type, sourceId, event.clubId(), memberId);
         }
     }
 
@@ -177,12 +177,12 @@ public class NotificationCommandService {
 
         List<Long> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
         for (Long memberId : memberIds) {
-            createClubNotification(type, sourceId, event.clubId(), String.valueOf(memberId));
+            createClubNotification(type, sourceId, event.clubId(), memberId);
         }
     }
 
     private void createClubNotification(NotificationType type, Long sourceId, Long clubId,
-                                        String receiverId) {
+                                        Long receiverId) {
         if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
@@ -191,7 +191,7 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(sourceId)
                 .domainId(clubId)
-                .senderId("SYSTEM")
+                .senderId(null)
                 .receiverId(receiverId)
                 .build();
         try {
@@ -203,14 +203,14 @@ public class NotificationCommandService {
         }
     }
 
-    private void evictNotificationCache(String memberId) {
+    private void evictNotificationCache(Long memberId) {
         Cache cache = cacheManager.getCache("notifications");
         if (cache != null) {
             cache.evict(memberId);
         }
     }
 
-    private boolean isNotificationEnabled(String receiverId, NotificationType type) {
+    private boolean isNotificationEnabled(Long receiverId, NotificationType type) {
         return notificationSettingRepository.findByMemberId(receiverId)
                 .map(setting -> setting.isEnabled(type))
                 .orElse(true);
@@ -223,7 +223,7 @@ public class NotificationCommandService {
      * @param memberId       읽음 처리할 회원 ID (receiverId)
      */
     @CacheEvict(value = "notifications", key = "#memberId")
-    public void markNotificationAsRead(Long notificationId, String memberId) {
+    public void markNotificationAsRead(Long notificationId, Long memberId) {
         Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, memberId)
                 .orElseThrow(() -> new NotificationException(NotificationErrorStatus.NOTIFICATION_NOT_FOUND));
 

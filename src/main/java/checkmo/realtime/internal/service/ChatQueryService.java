@@ -2,7 +2,6 @@ package checkmo.realtime.internal.service;
 
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
-import checkmo.common.template.ExtractHelper;
 import checkmo.member.MemberAPI;
 import checkmo.member.MemberExternalDTO.BasicInfo;
 import checkmo.realtime.internal.entity.TeamChatMessage;
@@ -17,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class ChatQueryService {
         List<TeamChatMessage> ascContent = new ArrayList<>(descContent);
         Collections.reverse(ascContent); // 과거 -> 최신으로 reverse
 
-        Map<String, BasicInfo> memberInfoMap = getMemberInfoMap(ascContent);
+        Map<Long, BasicInfo> memberInfoMap = getMemberInfoMap(ascContent);
 
         List<ChatResponseDTO.Chat> chats = ascContent.stream()
                 .map(m -> {
@@ -72,8 +72,21 @@ public class ChatQueryService {
         return teamChatMessageRepository.findByClubIdAndMeetingIdAndTeamIdAndIdLessThanOrderByIdDesc(clubId, meetingId, teamId, cursorId, pageable);
     }
 
-    private Map<String, BasicInfo> getMemberInfoMap(List<TeamChatMessage> teamChatMessages) {
-        List<String> memberIds = ExtractHelper.extractDistinctList(teamChatMessages, TeamChatMessage::getSenderMemberId);
-        return memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
+    private Map<Long, BasicInfo> getMemberInfoMap(List<TeamChatMessage> teamChatMessages) {
+        List<Long> memberIds = teamChatMessages.stream()
+                .map(TeamChatMessage::getSenderMemberId)
+                .distinct()
+                .toList();
+        return memberAPI.fetchMemberBasicInfoByMemberIds(toMemberApiIds(memberIds)).entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> Long.valueOf(entry.getKey()),
+                        Map.Entry::getValue
+                ));
+    }
+
+    private List<String> toMemberApiIds(List<Long> memberIds) {
+        return memberIds.stream()
+                .map(String::valueOf)
+                .toList();
     }
 }

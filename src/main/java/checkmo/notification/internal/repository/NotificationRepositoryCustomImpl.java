@@ -16,7 +16,7 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Notification> findNotificationPreviews(String receiverId, int pageSize) {
+    public List<Notification> findNotificationPreviews(Long receiverId, int pageSize) {
         return queryFactory
                 .selectFrom(notification)
                 .where(
@@ -29,7 +29,7 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
     }
 
     @Override
-    public List<Notification> findNotifications(String receiverId, Long cursorId, int pageSize) {
+    public List<Notification> findNotifications(Long receiverId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(notification)
                 .where(
