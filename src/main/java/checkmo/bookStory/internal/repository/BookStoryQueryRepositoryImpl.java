@@ -27,12 +27,12 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
 
     @Override
     public List<BookStory> searchBookStories(
-            String memberId,
-            List<String> excludedMemberIds,
-            List<String> followingMemberIds,
+            Long memberId,
+            List<Long> excludedMemberIds,
+            List<Long> followingMemberIds,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId,
-            String targetMemberId,
+            Long targetMemberId,
             Long cursorId,
             int pageSize
     ) {
@@ -46,7 +46,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     @Override
-    public List<BookStory> searchBookStories(String bookId, List<String> excludedMemberIds, Long cursorId, int pageSize) {
+    public List<BookStory> searchBookStories(String bookId, List<Long> excludedMemberIds, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
@@ -107,7 +107,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .fetch();
     }
 
-    private List<BookStory> findAllBookStories(List<String> excludedMemberIds, Long cursorId, int pageSize) {
+    private List<BookStory> findAllBookStories(List<Long> excludedMemberIds, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
@@ -122,8 +122,8 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private List<BookStory> findFollowBookStories(
-            List<String> followingMemberIds,
-            List<String> excludedMemberIds,
+            List<Long> followingMemberIds,
+            List<Long> excludedMemberIds,
             Long cursorId,
             int pageSize
     ) {
@@ -145,7 +145,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .fetch();
     }
 
-    private List<BookStory> findMyBookStories(String memberId, Long cursorId, int pageSize) {
+    private List<BookStory> findMyBookStories(Long memberId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(bookStory)
                 .where(
@@ -158,14 +158,14 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .fetch();
     }
 
-    private List<BookStory> findClubBookStories(String memberId, Long clubId, Long cursorId, int pageSize) {
+    private List<BookStory> findClubBookStories(Long memberId, Long clubId, Long cursorId, int pageSize) {
         if (clubId == null) {
             throw new IllegalArgumentException("scope가 club인 경우 clubId는 필수입니다.");
         }
 
         validateClubMember(memberId, clubId);
 
-        List<String> clubMemberIds = getClubMemberIds(clubId);
+        List<Long> clubMemberIds = getClubMemberIds(clubId);
         if (clubMemberIds.isEmpty()) {
             return List.of();
         }
@@ -183,7 +183,7 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
                 .fetch();
     }
 
-    private List<BookStory> findTargetMemberBookStories(String targetMemberId, Long cursorId, int pageSize) {
+    private List<BookStory> findTargetMemberBookStories(Long targetMemberId, Long cursorId, int pageSize) {
         if (targetMemberId == null) {
             throw new IllegalArgumentException("scope가 target인 경우 targetMemberId는 필수입니다.");
         }
@@ -261,17 +261,15 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
         return bookStory.title.containsIgnoreCase(keyword.trim());
     }
 
-    private BooleanExpression notInExcludedMemberIds(List<String> excludedMemberIds) {
+    private BooleanExpression notInExcludedMemberIds(List<Long> excludedMemberIds) {
         return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : bookStory.memberId.notIn(excludedMemberIds);
     }
 
-    private void validateClubMember(String memberId, Long clubId) {
-        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, Long.valueOf(memberId));
+    private void validateClubMember(Long memberId, Long clubId) {
+        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
     }
 
-    private List<String> getClubMemberIds(Long clubId) {
-        return clubManagementAPI.fetchActiveMemberIds(clubId).stream()
-                .map(String::valueOf)
-                .toList();
+    private List<Long> getClubMemberIds(Long clubId) {
+        return clubManagementAPI.fetchActiveMemberIds(clubId);
     }
 }

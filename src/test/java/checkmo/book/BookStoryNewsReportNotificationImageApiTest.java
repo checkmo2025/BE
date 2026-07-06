@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -75,7 +75,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .totalResults(123)
                 .build();
 
-        when(aladinApiService.retrieveSearchBooks(eq("자바"), eq(1), anyString())).thenReturn(oneBookList);
+        when(aladinApiService.retrieveSearchBooks(eq("자바"), eq(1), anyLong())).thenReturn(oneBookList);
         when(aladinApiService.retrieveBookDetailInfo(ISBN)).thenReturn(detail);
         when(aladinApiService.retrieveRecommendedBooks()).thenReturn(BookResponseDTO.BookList.builder()
                 .detailInfoList(IntStream.rangeClosed(1, 28)

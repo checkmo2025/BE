@@ -34,7 +34,7 @@ public class BookStoryCommentCommandService {
      * @return 작성된 책이야기 ID
      */
     public Long createComment(
-            String memberId,
+            Long memberId,
             Long bookStoryId,
             Long parentCommentId,
             BookStoryRequestDTO.CommentCreate request
@@ -77,7 +77,7 @@ public class BookStoryCommentCommandService {
         commentRepository.save(comment);
 
         // 7. 댓글 작성자가 책이야기 작성자와 다를 때만 알림 이벤트 발행
-        String receiverId = parentComment != null
+        Long receiverId = parentComment != null
                 ? parentComment.getMemberId()
                 : bookStory.getMemberId();
         if (!memberId.equals(receiverId)) {
@@ -95,16 +95,21 @@ public class BookStoryCommentCommandService {
         return bookStoryId;
     }
 
-    private void validateNotBlockedByCommentTarget(BookStory bookStory, Comment parentComment, String memberId) {
-        if (!memberId.equals(bookStory.getMemberId()) && memberAPI.hasBlockBetween(bookStory.getMemberId(), memberId)) {
+    private void validateNotBlockedByCommentTarget(BookStory bookStory, Comment parentComment, Long memberId) {
+        if (!memberId.equals(bookStory.getMemberId())
+                && memberAPI.hasBlockBetween(toMemberApiId(bookStory.getMemberId()), toMemberApiId(memberId))) {
             throw new BookStoryException(BookStoryErrorStatus.COMMENT_BLOCKED);
         }
 
         if (parentComment != null
                 && !memberId.equals(parentComment.getMemberId())
-                && memberAPI.hasBlockBetween(parentComment.getMemberId(), memberId)) {
+                && memberAPI.hasBlockBetween(toMemberApiId(parentComment.getMemberId()), toMemberApiId(memberId))) {
             throw new BookStoryException(BookStoryErrorStatus.COMMENT_BLOCKED);
         }
+    }
+
+    private String toMemberApiId(Long memberId) {
+        return String.valueOf(memberId);
     }
 
     /**
@@ -117,7 +122,7 @@ public class BookStoryCommentCommandService {
      * @return 수정된 댓글 ID
      */
     public Long updateComment(
-            String memberId,
+            Long memberId,
             Long bookStoryId,
             Long commentId,
             BookStoryRequestDTO.CommentUpdate request
@@ -151,7 +156,7 @@ public class BookStoryCommentCommandService {
      * @return 삭제된 댓글 ID
      */
     public Long deleteComment(
-            String memberId,
+            Long memberId,
             Long bookStoryId,
             Long commentId
     ) {
@@ -208,7 +213,7 @@ public class BookStoryCommentCommandService {
      *
      * @param memberId 탈퇴하는 회원의 ID
      */
-    public void softDeleteAllByMemberId(String memberId) {
+    public void softDeleteAllByMemberId(Long memberId) {
         commentRepository.softDeleteAllByMemberId(memberId);
     }
 }

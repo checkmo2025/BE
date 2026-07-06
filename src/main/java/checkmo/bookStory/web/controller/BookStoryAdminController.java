@@ -53,7 +53,7 @@ public class BookStoryAdminController {
     })
     @GetMapping("/{bookStoryId}")
     public ApiResponse<BookStoryResponseDTO.DetailInfo> getBookStoryForAdmin(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId
     ) {
         return ApiResponse.onSuccess(bookStoryQueryFacade.fetchBookStoryDetailInfoForAdmin(memberId, bookStoryId));
@@ -102,7 +102,7 @@ public class BookStoryAdminController {
     })
     @GetMapping("/members/{memberNickname}")
     public ApiResponse<BookStoryResponseDTO.BookStoryList> getMemberBookStoriesForAdmin(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname,
             @RequestParam(required = false) Long cursorId
     ) {

@@ -33,7 +33,7 @@ public class BookStoryCommandService {
      * @param memberId 책이야기를 작성하는 회원의 ID
      * @param request  책이야기 요청 DTO
      */
-    public Long createBookStory(String memberId, BookStoryRequestDTO.BookStoryCreate request) {
+    public Long createBookStory(Long memberId, BookStoryRequestDTO.BookStoryCreate request) {
         BookStoryStatus status = resolveStatus(request.getStatus());
         validateDescriptionForPublished(status, request.getDescription());
 
@@ -52,7 +52,7 @@ public class BookStoryCommandService {
      * @param bookStoryId 수정할 책 이야기의 ID
      * @param request     수정할 책 이야기 정보 DTO
      */
-    public Long updateBookStory(String memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdate request) {
+    public Long updateBookStory(Long memberId, Long bookStoryId, BookStoryRequestDTO.BookStoryUpdate request) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
@@ -80,7 +80,7 @@ public class BookStoryCommandService {
      *
      * @param bookStoryId 삭제할 책이야기의 ID
      */
-    public void deleteBookStory(String memberId, Long bookStoryId) {
+    public void deleteBookStory(Long memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
@@ -116,7 +116,7 @@ public class BookStoryCommandService {
      *
      * @param memberId 탈퇴하는 회원의 ID
      */
-    public void softDeleteAllByMemberId(String memberId) {
+    public void softDeleteAllByMemberId(Long memberId) {
         bookStoryRepository.softDeleteAllByMemberId(memberId);
     }
 

@@ -14,12 +14,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface BookLikedRepository extends JpaRepository<BookLiked, Long> {
 
-    Optional<BookLiked> findByBook_IdAndMemberId(String bookId, String memberId);
+    Optional<BookLiked> findByBook_IdAndMemberId(String bookId, Long memberId);
 
     @Query("SELECT bl.book.id FROM BookLiked bl WHERE bl.memberId = :memberId AND bl.book.id IN :bookIds")
-    List<String> findLikedBookIds(@Param("memberId") String memberId, @Param("bookIds") List<String> bookIds);
+    List<String> findLikedBookIds(@Param("memberId") Long memberId, @Param("bookIds") List<String> bookIds);
 
-    default Set<String> findLikedBookIdSet(String memberId, List<String> bookIds) {
+    default Set<String> findLikedBookIdSet(Long memberId, List<String> bookIds) {
         if (memberId == null || bookIds == null || bookIds.isEmpty()) {
             return Collections.emptySet();
         }
@@ -27,8 +27,8 @@ public interface BookLikedRepository extends JpaRepository<BookLiked, Long> {
     }
 
     @EntityGraph(attributePaths = "book")
-    List<BookLiked> findByMemberIdOrderByIdDesc(String memberId, Pageable pageable);
+    List<BookLiked> findByMemberIdOrderByIdDesc(Long memberId, Pageable pageable);
 
     @EntityGraph(attributePaths = "book")
-    List<BookLiked> findByMemberIdAndIdLessThanOrderByIdDesc(String memberId, Long cursorId, Pageable pageable);
+    List<BookLiked> findByMemberIdAndIdLessThanOrderByIdDesc(Long memberId, Long cursorId, Pageable pageable);
 }

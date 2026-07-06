@@ -299,14 +299,14 @@ class AdminApiTest extends ApiTestSupport {
         TestUser author = createUser();
         TestUser nonAdmin = createUser();
         BookStory story = bookStoryRepository.save(BookStory.builder()
-                .memberId(author.id())
+                .memberId(Long.valueOf(author.id()))
                 .bookId(ISBN)
                 .title("관리자 책 이야기")
                 .description("관리자 테스트용 책 이야기입니다.")
                 .status(BookStoryStatus.PUBLISHED)
                 .build());
         Comment comment = commentRepository.save(Comment.builder()
-                .memberId(author.id())
+                .memberId(Long.valueOf(author.id()))
                 .bookStory(story)
                 .content("관리자 삭제 대상 댓글")
                 .build());

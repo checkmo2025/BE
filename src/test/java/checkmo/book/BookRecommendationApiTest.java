@@ -37,7 +37,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
         when(redisValueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().minusDays(1).toString());
         when(recommendationRefreshClient.retrieveRecommendedBooks())
                 .thenThrow(new RuntimeException("aladin unavailable"));
-        when(aladinApiService.applyLikedByMe(staleCache, user.id())).thenReturn(staleCache);
+        when(aladinApiService.applyLikedByMe(staleCache, Long.valueOf(user.id()))).thenReturn(staleCache);
 
         given()
                 .cookie(accessTokenCookie(user))
@@ -77,7 +77,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
 
         when(redisValueOperations.get(REDIS_KEY)).thenReturn(freshCache);
         when(redisValueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().toString());
-        when(aladinApiService.applyLikedByMe(freshCache, user.id())).thenReturn(freshCache);
+        when(aladinApiService.applyLikedByMe(freshCache, Long.valueOf(user.id()))).thenReturn(freshCache);
 
         given()
                 .cookie(accessTokenCookie(user))

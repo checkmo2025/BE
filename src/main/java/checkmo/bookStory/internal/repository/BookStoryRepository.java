@@ -29,12 +29,12 @@ public interface BookStoryRepository extends JpaRepository<BookStory, Long>, Boo
                 WHERE b.id = :id
             """)
     BookStoryPrevNextProjection findPrevNextBookStoryId(
-            @Param("memberId") String memberId,
+            @Param("memberId") Long memberId,
             @Param("id") Long bookStoryId,
             @Param("status") BookStoryStatus status
     );
 
     @Modifying
     @Query("UPDATE BookStory b SET b.deleted = true, b.deletedAt = CURRENT_TIMESTAMP WHERE b.memberId = :memberId AND b.deleted = false")
-    void softDeleteAllByMemberId(@Param("memberId") String memberId);
+    void softDeleteAllByMemberId(@Param("memberId") Long memberId);
 }

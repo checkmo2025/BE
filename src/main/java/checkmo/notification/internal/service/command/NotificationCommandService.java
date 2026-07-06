@@ -44,7 +44,9 @@ public class NotificationCommandService {
      */
     public void createNotification(BookStoryEvent.BookStoryLiked event) {
         NotificationType type = NotificationType.LIKE;
-        if (!isNotificationEnabled(event.receiverId(), type)) {
+        String senderId = String.valueOf(event.senderId());
+        String receiverId = String.valueOf(event.receiverId());
+        if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
 
@@ -52,13 +54,13 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(event.eventId())
                 .domainId(event.bookStoryId())
-                .senderId(event.senderId())
-                .receiverId(event.receiverId())
+                .senderId(senderId)
+                .receiverId(receiverId)
                 .build();
         try {
             Notification saved = notificationRepository.save(notification);
-            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.receiverId()));
-            evictNotificationCache(event.receiverId());
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), receiverId));
+            evictNotificationCache(receiverId);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -71,7 +73,9 @@ public class NotificationCommandService {
      */
     public void createNotification(BookStoryEvent.BookStoryComment event) {
         NotificationType type = NotificationType.COMMENT;
-        if (!isNotificationEnabled(event.receiverId(), type)) {
+        String senderId = String.valueOf(event.senderId());
+        String receiverId = String.valueOf(event.receiverId());
+        if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
 
@@ -79,13 +83,13 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(event.eventId())
                 .domainId(event.bookStoryId())
-                .senderId(event.senderId())
-                .receiverId(event.receiverId())
+                .senderId(senderId)
+                .receiverId(receiverId)
                 .build();
         try {
             Notification saved = notificationRepository.save(notification);
-            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.receiverId()));
-            evictNotificationCache(event.receiverId());
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), receiverId));
+            evictNotificationCache(receiverId);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }

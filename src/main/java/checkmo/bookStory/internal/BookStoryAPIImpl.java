@@ -28,12 +28,12 @@ public class BookStoryAPIImpl implements BookStoryAPI {
     @Override
     public String fetchBookStoryAuthorId(Long bookStoryId) {
         BookStory bookStory = bookStoryQueryService.retrieveBookStory(bookStoryId);
-        return bookStory.getMemberId();
+        return String.valueOf(bookStory.getMemberId());
     }
 
     @Override
     public String fetchBookStoryCommentAuthorId(Long commentId) {
         Comment comment = bookStoryQueryService.retrieveBookStoryComment(commentId);
-        return comment.getMemberId();
+        return String.valueOf(comment.getMemberId());
     }
 }

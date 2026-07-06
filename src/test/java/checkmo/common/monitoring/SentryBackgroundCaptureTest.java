@@ -67,9 +67,9 @@ class SentryBackgroundCaptureTest {
         when(valueOperations.get("book:recommendations:daily:updated_at"))
                 .thenReturn(LocalDate.now().minusDays(1).toString());
         when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
-        when(aladinApiService.applyLikedByMe(staleCache, "member-1")).thenReturn(likedStaleCache);
+        when(aladinApiService.applyLikedByMe(staleCache, 1L)).thenReturn(likedStaleCache);
 
-        BookResponseDTO.BookList response = service.retrieveRecommendedBooks("member-1");
+        BookResponseDTO.BookList response = service.retrieveRecommendedBooks(1L);
 
         assertThat(response).isSameAs(likedStaleCache);
         assertThat(captureClient.captured()).containsExactly(failure);

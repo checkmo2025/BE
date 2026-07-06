@@ -37,7 +37,7 @@ public class Comment extends BaseEntity {
     private String content;
 
     @JoinColumn(name = "member_id", nullable = false)
-    private String memberId;
+    private Long memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_story_id")
@@ -73,7 +73,7 @@ public class Comment extends BaseEntity {
         }
     }
 
-    public void verifyOwner(String memberId) {
+    public void verifyOwner(Long memberId) {
         if (!this.memberId.equals(memberId)) {
             throw new BookStoryException(BookStoryErrorStatus.COMMENT_NOT_AUTHORIZED);
         }
