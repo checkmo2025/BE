@@ -56,15 +56,12 @@ public class SocialAccountResolver {
             AuthUser savedUser = socialAccountCreator.create(attributes, registrationId);
             return new SocialAccountResolution(savedUser, true);
         } catch (DataIntegrityViolationException | PersistenceException e) {
-            return refetchAppleAfterDuplicate(provider, attributes.getProviderId(), email);
+            return refetchAppleAfterDuplicate(provider, attributes.getProviderId());
         }
     }
 
-    private SocialAccountResolution refetchAppleAfterDuplicate(String provider, String providerUserId, String email) {
+    private SocialAccountResolution refetchAppleAfterDuplicate(String provider, String providerUserId) {
         AuthUser user = authRepository.findByProviderAndProviderUserId(provider, providerUserId)
-                .or(() -> authRepository.findByEmail(email)
-                        .filter(foundUser -> provider.equals(foundUser.getProvider())
-                                && providerUserId.equals(foundUser.getProviderUserId())))
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.SOCIAL_ACCOUNT_EMAIL_CONFLICT));
 
         return new SocialAccountResolution(user, false);
