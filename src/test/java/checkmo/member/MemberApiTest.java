@@ -560,7 +560,9 @@ class MemberApiTest extends ApiTestSupport {
                 .get("/api/v1/members/me/blocks")
                 .then()
                 .statusCode(200)
-                .body("isSuccess", equalTo(true));
+                .body("isSuccess", equalTo(true))
+                .body("result.blocks[0].memberId", equalTo(target.memberId().intValue()))
+                .body("result.blocks[0].nickname", equalTo(target.nickName()));
 
         given()
                 .cookie(accessTokenCookie(me))

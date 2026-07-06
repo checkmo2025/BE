@@ -292,7 +292,7 @@ public class MemberQueryFacade {
 
         List<MemberResponseDTO.AdminBasicInfo> memberList = memberPage.getContent().stream()
                 .map(member -> MemberResponseDTO.AdminBasicInfo.builder()
-                        .memberId(String.valueOf(member.getId()))
+                        .memberId(member.getId())
                         .nickname(member.getNickName())
                         .name(member.getName())
                         .email(member.getEmail())
@@ -318,7 +318,7 @@ public class MemberQueryFacade {
         Member member = memberQueryService.retrieveMemberByNickname(memberNickName);
 
         return MemberResponseDTO.AdminMemberDetailInfo.builder()
-                .memberId(String.valueOf(member.getId()))
+                .memberId(member.getId())
                 .nickname(member.getNickName())
                 .name(member.getName())
                 .email(member.getEmail())

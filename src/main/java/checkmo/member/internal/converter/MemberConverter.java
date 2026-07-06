@@ -47,7 +47,7 @@ public class MemberConverter {
     public static BlockedMember toBlockedMember(MemberBlock memberBlock) {
         Member blocked = memberBlock.getBlocked();
         return BlockedMember.builder()
-                .memberId(String.valueOf(blocked.getId()))
+                .memberId(blocked.getId())
                 .nickname(blocked.getNickName())
                 .profileImageUrl(blocked.getImgUrl())
                 .build();
