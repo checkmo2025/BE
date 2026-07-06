@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 @RequiredArgsConstructor
 public class AuthTokenRotationResult {
 
-    private final String memberId;
+    private final Long memberId;
     private final Authentication authentication;
     private final JwtToken jwtToken;
 }

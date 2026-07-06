@@ -16,7 +16,7 @@ public class MemberBlockQueryService {
 
     private final MemberBlockRepository memberBlockRepository;
 
-    public List<MemberBlock> retrieveBlocks(String blockerId, Long cursorId, int pageSize) {
+    public List<MemberBlock> retrieveBlocks(Long blockerId, Long cursorId, int pageSize) {
         if (blockerId == null) {
             return List.of();
         }
@@ -24,7 +24,7 @@ public class MemberBlockQueryService {
         return memberBlockRepository.findBlocks(blockerId, cursorId, pageSize);
     }
 
-    public List<String> retrieveBlockedMemberIds(String blockerId) {
+    public List<Long> retrieveBlockedMemberIds(Long blockerId) {
         if (blockerId == null) {
             return List.of();
         }
@@ -32,7 +32,7 @@ public class MemberBlockQueryService {
         return memberBlockRepository.findBlockedMemberIds(blockerId);
     }
 
-    public List<String> retrieveBlockRelatedMemberIds(String memberId) {
+    public List<Long> retrieveBlockRelatedMemberIds(Long memberId) {
         if (memberId == null) {
             return List.of();
         }
@@ -40,7 +40,7 @@ public class MemberBlockQueryService {
         return memberBlockRepository.findBlockRelatedMemberIds(memberId);
     }
 
-    public boolean hasBlockBetween(String memberId1, String memberId2) {
+    public boolean hasBlockBetween(Long memberId1, Long memberId2) {
         if (memberId1 == null || memberId2 == null) {
             return false;
         }
@@ -48,7 +48,7 @@ public class MemberBlockQueryService {
         return memberBlockRepository.existsBetween(memberId1, memberId2);
     }
 
-    public boolean hasBlocked(String blockerId, String blockedId) {
+    public boolean hasBlocked(Long blockerId, Long blockedId) {
         if (blockerId == null || blockedId == null) {
             return false;
         }
@@ -56,7 +56,7 @@ public class MemberBlockQueryService {
         return memberBlockRepository.existsByBlocker_IdAndBlocked_Id(blockerId, blockedId);
     }
 
-    public void validateProfileAccessible(String viewerId, String targetMemberId) {
+    public void validateProfileAccessible(Long viewerId, Long targetMemberId) {
         if (viewerId == null || targetMemberId == null || viewerId.equals(targetMemberId)) {
             return;
         }

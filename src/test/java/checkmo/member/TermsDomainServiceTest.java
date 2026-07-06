@@ -217,7 +217,8 @@ class TermsDomainServiceTest {
     private Member saveMember() {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         return memberRepository.save(Member.builder()
-                .id("LOCAL_" + suffix)
+                .id(Math.abs(UUID.randomUUID().getMostSignificantBits()))
+                .legacyId("LOCAL_" + suffix)
                 .email(suffix + "@example.com")
                 .name("테스트")
                 .phoneNumber("01000000000")

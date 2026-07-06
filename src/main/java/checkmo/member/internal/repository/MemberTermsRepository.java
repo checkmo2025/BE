@@ -26,9 +26,9 @@ public interface MemberTermsRepository extends JpaRepository<MemberTerms, Long> 
               )
             """)
     List<MemberTerms> findLatestByMemberIdAndTermsIdIn(
-            @Param("memberId") String memberId,
+            @Param("memberId") Long memberId,
             @Param("termsIds") List<Long> termsIds
     );
 
-    long countByMember_IdAndTerms_Id(String memberId, Long termsId);
+    long countByMember_IdAndTerms_Id(Long memberId, Long termsId);
 }

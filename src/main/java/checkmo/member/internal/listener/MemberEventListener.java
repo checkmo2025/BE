@@ -23,6 +23,7 @@ public class MemberEventListener {
     public void createMember(AuthenticationEvent.CreateMember event) {
         memberFacade.createMember(
                 event.id(),
+                event.legacyId(),
                 event.email(),
                 toTermsAgreementCommands(event.agreements())
         );

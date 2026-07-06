@@ -16,7 +16,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Follow> findFollowers(String followingId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
+    public List<Follow> findFollowers(Long followingId, Long cursorId, int pageSize, List<Long> excludedMemberIds) {
         return queryFactory
                 .selectFrom(follow)
                 .join(follow.follower).fetchJoin()
@@ -31,7 +31,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     }
 
     @Override
-    public List<Follow> findFollowings(String followerId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
+    public List<Follow> findFollowings(Long followerId, Long cursorId, int pageSize, List<Long> excludedMemberIds) {
         return queryFactory
                 .selectFrom(follow)
                 .join(follow.following).fetchJoin()
@@ -49,11 +49,11 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
         return cursorId != null ? follow.id.lt(cursorId) : null;
     }
 
-    private BooleanExpression notInFollowerIds(List<String> excludedMemberIds) {
+    private BooleanExpression notInFollowerIds(List<Long> excludedMemberIds) {
         return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : follow.follower.id.notIn(excludedMemberIds);
     }
 
-    private BooleanExpression notInFollowingIds(List<String> excludedMemberIds) {
+    private BooleanExpression notInFollowingIds(List<Long> excludedMemberIds) {
         return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : follow.following.id.notIn(excludedMemberIds);
     }
 }

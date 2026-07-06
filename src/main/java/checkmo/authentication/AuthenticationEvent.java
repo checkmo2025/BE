@@ -6,7 +6,7 @@ import lombok.Builder;
 public class AuthenticationEvent {
 
     @Builder
-    public record CreateMember(String id, String email, List<TermsAgreement> agreements) {
+    public record CreateMember(Long id, String legacyId, String email, List<TermsAgreement> agreements) {
     }
 
     public record TermsAgreement(Long termsId, boolean agreed) {
@@ -21,7 +21,7 @@ public class AuthenticationEvent {
     }
 
     @Builder
-    public record ReactivateMember(String id) {
+    public record ReactivateMember(Long id) {
     }
 
     public enum VerificationType {

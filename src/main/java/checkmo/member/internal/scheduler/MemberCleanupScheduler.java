@@ -39,11 +39,11 @@ public class MemberCleanupScheduler {
         if (!ghostMembers.isEmpty()) {
             log.info("유령 회원 삭제 시작: {}명", ghostMembers.size());
 
-            List<String> ghostMemberIds = ghostMembers.stream()
+            List<Long> ghostMemberIds = ghostMembers.stream()
                                                       .map(Member::getId)
                                                       .toList();
 
-            for (String id : ghostMemberIds) {
+            for (Long id : ghostMemberIds) {
                 authenticationAPI.deleteAuthData(id);
             }
 
@@ -68,12 +68,12 @@ public class MemberCleanupScheduler {
 
         log.info("탈퇴 1년 경과 회원 삭제 시작: {}명", expiredMembers.size());
 
-        List<String> expiredMemberIds = expiredMembers.stream()
+        List<Long> expiredMemberIds = expiredMembers.stream()
                 .map(Member::getId)
                 .toList();
 
         Exception firstFailure = null;
-        for (String memberId : expiredMemberIds) {
+        for (Long memberId : expiredMemberIds) {
             try {
                 memberCommandService.deleteMember(memberId);
             } catch (Exception e) {

@@ -33,7 +33,7 @@ public class MemberTermsQueryService {
                 .toList();
     }
 
-    public Map<Long, MemberTerms> retrieveLatestMemberTermsByTermsId(String memberId, List<Long> termsIds) {
+    public Map<Long, MemberTerms> retrieveLatestMemberTermsByTermsId(Long memberId, List<Long> termsIds) {
         if (termsIds == null || termsIds.isEmpty()) {
             return Map.of();
         }
@@ -47,7 +47,7 @@ public class MemberTermsQueryService {
         return latestTermsByTermsId;
     }
 
-    public boolean hasAgreedAllRequiredActiveTerms(String memberId) {
+    public boolean hasAgreedAllRequiredActiveTerms(Long memberId) {
         List<Terms> requiredTerms = retrieveActiveTerms().stream()
                 .filter(Terms::isRequired)
                 .toList();

@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface MemberRepositoryCustom {
     List<Member> findRecommendMembers(
-            String currentMemberId,
+            Long currentMemberId,
             List<MemberInterestCategory> myInterests,
-            List<String> excludedMemberIds,
+            List<Long> excludedMemberIds,
             int limit
     );
 }

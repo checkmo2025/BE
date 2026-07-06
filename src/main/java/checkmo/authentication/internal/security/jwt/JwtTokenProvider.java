@@ -17,11 +17,11 @@ public interface JwtTokenProvider {
 
     boolean validateToken(String token);
 
-    String getUserIdFromToken(String token);
+    Long getUserIdFromToken(String token);
 
     boolean isRefreshTokenValid(String refreshToken);
 
-    Authentication getAuthenticationFromMemberId(String memberId);
+    Authentication getAuthenticationFromMemberId(Long memberId);
 
     long getAccessTokenExpirationTime();
 

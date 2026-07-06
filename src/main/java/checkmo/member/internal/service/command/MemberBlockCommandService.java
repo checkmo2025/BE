@@ -22,7 +22,7 @@ public class MemberBlockCommandService {
     private final MemberBlockRepository memberBlockRepository;
     private final FollowRepository followRepository;
 
-    public void block(String blockerId, String blockedNickname) {
+    public void block(Long blockerId, String blockedNickname) {
         Member blocker = memberRepository.findByIdAndDeactivatedAtIsNull(blockerId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
         Member blocked = memberRepository.findByNickName(blockedNickname)
@@ -49,8 +49,8 @@ public class MemberBlockCommandService {
         followRepository.deleteBetweenMembers(blocker.getId(), blocked.getId());
     }
 
-    public void unblock(String blockerId, String blockedNickname) {
-        String blockedId = memberRepository.findIdByNickName(blockedNickname)
+    public void unblock(Long blockerId, String blockedNickname) {
+        Long blockedId = memberRepository.findIdByNickName(blockedNickname)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         MemberBlock memberBlock = memberBlockRepository.findByBlocker_IdAndBlocked_Id(blockerId, blockedId)
@@ -59,8 +59,8 @@ public class MemberBlockCommandService {
         memberBlockRepository.delete(memberBlock);
     }
 
-    private void lockMemberPair(String memberId1, String memberId2) {
-        List<String> memberIds = List.of(memberId1, memberId2).stream()
+    private void lockMemberPair(Long memberId1, Long memberId2) {
+        List<Long> memberIds = List.of(memberId1, memberId2).stream()
                 .sorted()
                 .toList();
         memberRepository.lockActiveMembersByIdIn(memberIds);

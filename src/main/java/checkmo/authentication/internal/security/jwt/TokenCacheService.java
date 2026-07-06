@@ -52,6 +52,10 @@ public class TokenCacheService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtProperties jwtProperties;
 
+    public void saveRefreshToken(Long userId, String refreshToken) {
+        saveRefreshToken(String.valueOf(userId), refreshToken);
+    }
+
     public void saveRefreshToken(String userId, String refreshToken) {
         log.info("리프레시 토큰 저장 - userId={}", userId);
         long ttlMs = jwtProperties.getTokenValidity().getRefreshToken();
@@ -67,6 +71,10 @@ public class TokenCacheService {
         );
     }
 
+    public String getRefreshToken(Long userId) {
+        return getRefreshToken(String.valueOf(userId));
+    }
+
     public String getRefreshToken(String userId) {
         log.info("리프레시 토큰 조회 - userId={}", userId);
         byte[] key = serialize(REFRESH_TOKEN_PREFIX + userId);
@@ -74,6 +82,15 @@ public class TokenCacheService {
                 connection.stringCommands().get(key)
         );
         return value == null ? null : deserializeRefreshToken(value);
+    }
+
+    public boolean compareAndRotateRefreshToken(
+            Long userId,
+            String expectedRefreshToken,
+            String newRefreshToken,
+            Duration ttl
+    ) {
+        return compareAndRotateRefreshToken(String.valueOf(userId), expectedRefreshToken, newRefreshToken, ttl);
     }
 
     public boolean compareAndRotateRefreshToken(
@@ -91,9 +108,17 @@ public class TokenCacheService {
         return executeBooleanScript(COMPARE_AND_ROTATE_REFRESH_TOKEN_SCRIPT, key, expected, legacyExpected, next, ttlMs);
     }
 
+    public void deleteRefreshToken(Long userId) {
+        deleteRefreshToken(String.valueOf(userId));
+    }
+
     public void deleteRefreshToken(String userId) {
         log.info("리프레시 토큰 삭제 - userId={}", userId);
         redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
+    }
+
+    public boolean deleteRefreshTokenIfMatches(Long userId, String expectedRefreshToken) {
+        return deleteRefreshTokenIfMatches(String.valueOf(userId), expectedRefreshToken);
     }
 
     public boolean deleteRefreshTokenIfMatches(String userId, String expectedRefreshToken) {

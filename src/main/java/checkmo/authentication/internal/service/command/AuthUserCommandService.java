@@ -57,6 +57,7 @@ public class AuthUserCommandService {
         eventPublisher.publishEvent(
                 AuthenticationEvent.CreateMember.builder()
                         .id(savedUser.getId())
+                        .legacyId(savedUser.getLegacyId())
                         .email(savedUser.getEmail())
                         .agreements(toTermsAgreements(request))
                         .build());
@@ -94,7 +95,7 @@ public class AuthUserCommandService {
         });
     }
 
-    public void completeProfile(String userId) {
+    public void completeProfile(Long userId) {
         AuthUser authUser = authRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 
@@ -105,7 +106,7 @@ public class AuthUserCommandService {
         authUser.completeProfile();
     }
 
-    public void deactivateMember(String memberId) {
+    public void deactivateMember(Long memberId) {
         AuthUser authUser = authRepository.findById(memberId)
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 
@@ -116,7 +117,7 @@ public class AuthUserCommandService {
         authUser.deactivate();
     }
 
-    public boolean updatePassword(String userId, String oldPassword, String newPassword) {
+    public boolean updatePassword(Long userId, String oldPassword, String newPassword) {
         AuthUser user = authRepository.findById(userId)
                                       .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 
@@ -132,12 +133,12 @@ public class AuthUserCommandService {
         return true;
     }
 
-    public void updateEmail(String memberId, String currentEmail, String newEmail, String verificationCode) {
+    public void updateEmail(Long memberId, String currentEmail, String newEmail, String verificationCode) {
         AuthUser authUser = authRepository.findById(memberId)
                                           .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 
         // 소셜 유저 차단
-        if (!authUser.getId().startsWith("LOCAL_")) {
+        if (!"LOCAL".equals(authUser.getProvider())) {
             throw new AuthException(AuthErrorStatus.SOCIAL_MEMBER_CANNOT_CHANGE_EMAIL);
         }
 
@@ -152,7 +153,7 @@ public class AuthUserCommandService {
         authUser.updateEmail(newEmail);
     }
 
-    public void updateNickname(String memberId, String nickname) {
+    public void updateNickname(Long memberId, String nickname) {
         if (!StringUtils.hasText(nickname)) {
             throw new AuthException(AuthErrorStatus.NICKNAME_REQUIRED);
         }

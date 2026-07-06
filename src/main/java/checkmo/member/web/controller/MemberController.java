@@ -61,7 +61,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Void> addAdditionalInfo(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @Valid @RequestBody MemberRequestDTO.AdditionalInfo request
     ) {
         memberFacade.addAdditionalInfo(memberId, request);
@@ -93,7 +93,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다."),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "활성 약관 종류 중복 시 TERMS_500")
     })
-    public ApiResponse<MemberTermsStatus> getMyTermsStatus(@CurrentId String memberId) {
+    public ApiResponse<MemberTermsStatus> getMyTermsStatus(@CurrentId Long memberId) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberTermsStatus(memberId));
     }
 
@@ -106,7 +106,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Void> updateMyTermsAgreements(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @Valid @RequestBody TermsRequestDTO.UpdateAgreements request
     ) {
         memberTermsCommandService.updateAgreements(
@@ -130,7 +130,7 @@ public class MemberController {
     })
     @PostMapping("/{memberNickname}/following")
     public ApiResponse<String> following(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname
     ) {
         memberFollowCommandService.following(memberId, memberNickname);
@@ -149,7 +149,7 @@ public class MemberController {
     })
     @DeleteMapping("/{memberNickname}/following")
     public ApiResponse<String> unfollowing(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname
     ) {
         memberFollowCommandService.unfollowing(memberId, memberNickname);
@@ -168,7 +168,7 @@ public class MemberController {
     })
     @DeleteMapping("/{memberNickname}/follower")
     public ApiResponse<String> deleteFollower(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname
     ) {
         memberFollowCommandService.deleteFollower(memberId, memberNickname);
@@ -178,7 +178,7 @@ public class MemberController {
     @Operation(summary = "회원 차단 API", description = "특정 회원을 차단합니다. 기존 양방향 팔로우 관계는 모두 삭제됩니다.")
     @PostMapping("/{memberNickname}/block")
     public ApiResponse<String> blockMember(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname
     ) {
         memberBlockCommandService.block(memberId, memberNickname);
@@ -188,7 +188,7 @@ public class MemberController {
     @Operation(summary = "회원 차단 해제 API", description = "특정 회원에 대한 차단을 해제합니다.")
     @DeleteMapping("/{memberNickname}/block")
     public ApiResponse<String> unblockMember(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname
     ) {
         memberBlockCommandService.unblock(memberId, memberNickname);
@@ -204,7 +204,7 @@ public class MemberController {
     })
     @GetMapping("/me/following")
     public ApiResponse<MemberResponseDTO.FollowList> getFollowingList(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         var followingList = memberQueryFacade.retrieveFollowings(memberId, cursorId);
@@ -220,7 +220,7 @@ public class MemberController {
     })
     @GetMapping("/me/follower")
     public ApiResponse<MemberResponseDTO.FollowList> getFollowerList(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         var followerList = memberQueryFacade.retrieveFollowers(memberId, cursorId);
@@ -231,7 +231,7 @@ public class MemberController {
     @Parameter(name = "cursorId", description = "커서 ID (페이징을 위한 커서, 처음에는 null)", required = false, example = "10")
     @GetMapping("/me/blocks")
     public ApiResponse<MemberResponseDTO.BlockedMemberList> getBlockedMemberList(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveBlockedMembers(memberId, cursorId));
@@ -246,7 +246,7 @@ public class MemberController {
     })
     @GetMapping("/{memberNickname}/followings")
     public ApiResponse<MemberResponseDTO.FollowList> getOtherFollowingList(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname,
             @RequestParam(required = false) Long cursorId
     ) {
@@ -263,7 +263,7 @@ public class MemberController {
     })
     @GetMapping("/{memberNickname}/followers")
     public ApiResponse<MemberResponseDTO.FollowList> getOtherFollowerList(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname,
             @RequestParam(required = false) Long cursorId
     ) {
@@ -281,7 +281,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<DetailInfo> updateMemberProfile(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @Valid @RequestBody MemberRequestDTO.MemberProfileUpdate request
     ) {
         return ApiResponse.onSuccess(memberCommandService.updateProfile(memberId, request));
@@ -296,7 +296,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<DetailInfo> getMemberProfile(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMemberDetailInfo(memberId));
     }
@@ -304,7 +304,7 @@ public class MemberController {
     @Operation(summary = "내 팔로워/팔로잉 수 조회 API", description = "현재 로그인한 회원의 팔로워 수와 팔로잉 수를 조회합니다.")
     @GetMapping("/me/follow-count")
     public ApiResponse<MemberResponseDTO.FollowCount> getMyFollowCount(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveMyFollowCount(memberId));
     }
@@ -315,7 +315,7 @@ public class MemberController {
                     "모임 목록은 별도 API(GET /api/v1/clubs?memberNickname={닉네임})를 통해 조회해야 합니다.")
     @GetMapping("/{memberNickname}")
     public ApiResponse<othersDetailInfo> getOtherProfile(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveOthersDetailInfo(memberNickname, memberId));
@@ -337,7 +337,7 @@ public class MemberController {
     @Operation(summary = "비밀번호 변경 API", description = "기존 비밀번호 확인 후 새로운 비밀번호로 변경합니다.")
     @PatchMapping("/me/update-password")
     public ApiResponse<String> updatePassword(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @Valid @RequestBody MemberRequestDTO.UpdatePassword request
     ) {
         memberCommandService.updatePassword(memberId, request);
@@ -352,7 +352,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스입니다.")
     })
     public ApiResponse<String> updateEmail(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @Valid @RequestBody MemberRequestDTO.UpdateEmail request
     ) {
         memberCommandService.updateEmail(memberId, request);
@@ -362,7 +362,7 @@ public class MemberController {
     @Operation(summary = "소셜 로그인 연동 관리", description = "현재 로그인된 계정의 가입 수단과 이메일 정보를 조회합니다.")
     @GetMapping("/me/login-status")
     public ApiResponse<MemberResponseDTO.LoginStatus> getLoginStatus(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveLoginStatus(memberId));
     }
@@ -375,7 +375,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<RecommendedMemberList> getRecommendedFriends(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(memberQueryFacade.retrieveRecommendedMembers(memberId));
     }
@@ -389,7 +389,7 @@ public class MemberController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다.")
     })
     public ApiResponse<Void> withdrawMember(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             HttpServletRequest request,
             HttpServletResponse response
     ) {

@@ -119,17 +119,17 @@ class SentryBackgroundCaptureTest {
         );
         RuntimeException firstFailure = new RuntimeException("delete failed first");
         RuntimeException secondFailure = new RuntimeException("delete failed second");
-        Member first = Member.builder().id("member-1").build();
-        Member second = Member.builder().id("member-2").build();
+        Member first = Member.builder().id(1L).build();
+        Member second = Member.builder().id(2L).build();
         when(memberRepository.findAllByDeactivatedAtBefore(any(LocalDateTime.class)))
                 .thenReturn(List.of(first, second));
-        doThrow(firstFailure).when(memberCommandService).deleteMember("member-1");
-        doThrow(secondFailure).when(memberCommandService).deleteMember("member-2");
+        doThrow(firstFailure).when(memberCommandService).deleteMember(1L);
+        doThrow(secondFailure).when(memberCommandService).deleteMember(2L);
 
         assertDoesNotThrow(scheduler::cleanupExpiredDeactivatedMembers);
 
-        verify(memberCommandService).deleteMember("member-1");
-        verify(memberCommandService).deleteMember("member-2");
+        verify(memberCommandService).deleteMember(1L);
+        verify(memberCommandService).deleteMember(2L);
         assertThat(captureClient.captured()).containsExactly(firstFailure);
         assertThat(firstFailure.getSuppressed()).containsExactly(secondFailure);
     }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberConverter {
 
-    public static DetailInfo toMemberProfileWithCategory(Member member) {
+    public static DetailInfo toMemberProfileWithCategory(Member member, boolean social) {
         return DetailInfo.builder()
                 .nickname(member.getNickName())
                 .name(member.getName())
@@ -17,7 +17,7 @@ public class MemberConverter {
                 .profileImageUrl(member.getImgUrl())
                 .phoneNumber(member.getPhoneNumber())
                 .categories(member.getInterestCategories())
-                .social(member.isSocial())
+                .social(social)
                 .build();
     }
 
@@ -47,7 +47,7 @@ public class MemberConverter {
     public static BlockedMember toBlockedMember(MemberBlock memberBlock) {
         Member blocked = memberBlock.getBlocked();
         return BlockedMember.builder()
-                .memberId(blocked.getId())
+                .memberId(String.valueOf(blocked.getId()))
                 .nickname(blocked.getNickName())
                 .profileImageUrl(blocked.getImgUrl())
                 .build();

@@ -46,13 +46,13 @@ public class MemberQueryFacade {
     private final MemberBlockQueryService memberBlockQueryService;
     private final MemberTermsQueryService memberTermsQueryService;
 
-    public DetailInfo retrieveMemberDetailInfo(String memberId) {
+    public DetailInfo retrieveMemberDetailInfo(Long memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
 
-        return MemberConverter.toMemberProfileWithCategory(member);
+        return MemberConverter.toMemberProfileWithCategory(member, isSocialMember(memberId));
     }
 
-    public MemberTermsStatus retrieveMemberTermsStatus(String memberId) {
+    public MemberTermsStatus retrieveMemberTermsStatus(Long memberId) {
         List<Terms> activeTerms = memberTermsQueryService.retrieveActiveTerms();
 
         return TermsConverter.toMemberTermsStatus(
@@ -66,7 +66,7 @@ public class MemberQueryFacade {
         );
     }
 
-    public MemberResponseDTO.FollowCount retrieveMyFollowCount(String memberId) {
+    public MemberResponseDTO.FollowCount retrieveMyFollowCount(Long memberId) {
         long followerCount = memberFollowQueryService.countFollowers(memberId);
         long followingCount = memberFollowQueryService.countFollowings(memberId);
 
@@ -76,7 +76,7 @@ public class MemberQueryFacade {
                 .build();
     }
 
-    public othersDetailInfo retrieveOthersDetailInfo(String targetMemberNickname, String memberId) {
+    public othersDetailInfo retrieveOthersDetailInfo(String targetMemberNickname, Long memberId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
         memberBlockQueryService.validateProfileAccessible(memberId, targetMember.getId());
 
@@ -92,25 +92,25 @@ public class MemberQueryFacade {
         );
     }
 
-    public MemberResponseDTO.FollowList retrieveFollowers(String memberId, Long cursorId) {
+    public MemberResponseDTO.FollowList retrieveFollowers(Long memberId, Long cursorId) {
         return retrieveFollowers(memberId, memberId, cursorId);
     }
 
-    public MemberResponseDTO.FollowList retrieveOtherFollowers(String targetMemberNickname, String currentMemberId, Long cursorId) {
+    public MemberResponseDTO.FollowList retrieveOtherFollowers(String targetMemberNickname, Long currentMemberId, Long cursorId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
         memberBlockQueryService.validateProfileAccessible(currentMemberId, targetMember.getId());
         return retrieveFollowers(targetMember.getId(), currentMemberId, cursorId);
     }
 
-    private MemberResponseDTO.FollowList retrieveFollowers(String targetMemberId, String currentMemberId, Long cursorId) {
-        List<String> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(currentMemberId);
+    private MemberResponseDTO.FollowList retrieveFollowers(Long targetMemberId, Long currentMemberId, Long cursorId) {
+        List<Long> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(currentMemberId);
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
                 size -> memberFollowQueryService.retrieveFollowers(targetMemberId, cursorId, size, blockRelatedMemberIds),
                 Follow::getId,
                 DEFAULT_PAGE_SIZE
         );
         List<Follow> followerList = followCursorResult.content();
-        List<String> followerIdList = ExtractHelper.extractDistinctList(followerList, follow -> follow.getFollower().getId());
+        List<Long> followerIdList = ExtractHelper.extractDistinctList(followerList, follow -> follow.getFollower().getId());
 
         // 배치 조회 (내부 DTO)
         List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followerIdList, currentMemberId);
@@ -122,18 +122,18 @@ public class MemberQueryFacade {
                 .build();
     }
 
-    public MemberResponseDTO.FollowList retrieveFollowings(String memberId, Long cursorId) {
+    public MemberResponseDTO.FollowList retrieveFollowings(Long memberId, Long cursorId) {
         return retrieveFollowings(memberId, memberId, cursorId);
     }
 
-    public MemberResponseDTO.FollowList retrieveOtherFollowings(String targetMemberNickname, String currentMemberId, Long cursorId) {
+    public MemberResponseDTO.FollowList retrieveOtherFollowings(String targetMemberNickname, Long currentMemberId, Long cursorId) {
         Member targetMember = memberQueryService.retrieveMemberByNickname(targetMemberNickname);
         memberBlockQueryService.validateProfileAccessible(currentMemberId, targetMember.getId());
         return retrieveFollowings(targetMember.getId(), currentMemberId, cursorId);
     }
 
-    private MemberResponseDTO.FollowList retrieveFollowings(String targetMemberId, String currentMemberId, Long cursorId) {
-        List<String> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(currentMemberId);
+    private MemberResponseDTO.FollowList retrieveFollowings(Long targetMemberId, Long currentMemberId, Long cursorId) {
+        List<Long> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(currentMemberId);
         CursorResult<Follow> followCursorResult = CursorPagingHelper.getPage(
                 size -> memberFollowQueryService.retrieveFollowingIds(targetMemberId, cursorId, size, blockRelatedMemberIds),
                 Follow::getId,
@@ -141,7 +141,7 @@ public class MemberQueryFacade {
         );
         List<Follow> followingList = followCursorResult.content();
 
-        List<String> followingIdList = ExtractHelper.extractDistinctList(followingList, follow -> follow.getFollowing().getId());
+        List<Long> followingIdList = ExtractHelper.extractDistinctList(followingList, follow -> follow.getFollowing().getId());
 
         // 배치 조회 (내부 DTO)
         List<BasicInfoWithFollow> profiles = retrieveMemberBasicInfoWithFollows(followingIdList, currentMemberId);
@@ -161,8 +161,8 @@ public class MemberQueryFacade {
      * @return 회원 프로필 목록 (내부 DTO)
      */
     public List<BasicInfoWithFollow> retrieveMemberBasicInfoWithFollows(
-            List<String> targetMemberIds,
-            String currentMemberId
+            List<Long> targetMemberIds,
+            Long currentMemberId
     ) {
 
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
@@ -174,15 +174,15 @@ public class MemberQueryFacade {
                 targetMemberIds);
 
         // 2. 팔로우 상태 배치 조회
-        Map<String, Boolean> followStatusMap = memberFollowQueryService
+        Map<Long, Boolean> followStatusMap = memberFollowQueryService
                 .checkFollowStatusByMemberId(currentMemberId, targetMemberIds);
 
         // 3. 내부 DTO로 변환
-        Map<String, BasicInfoWithFollow> profileMap = memberInfoList.stream()
+        Map<Long, BasicInfoWithFollow> profileMap = memberInfoList.stream()
                 .collect(Collectors.toMap(
                         MemberBasicInfoProjection::getId,
                         projection -> {
-                            String memberId = projection.getId();
+                            Long memberId = projection.getId();
                             boolean isFollowing = followStatusMap.getOrDefault(memberId, false);
                             return BasicInfoWithFollow.builder()
                                     .nickname(projection.getNickName())
@@ -216,10 +216,10 @@ public class MemberQueryFacade {
         return id.substring(0, id.length() - 4) + "****" + domain;
     }
 
-    public RecommendedMemberList retrieveRecommendedMembers(String memberId) {
+    public RecommendedMemberList retrieveRecommendedMembers(Long memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
         List<MemberInterestCategory> myInterests = List.copyOf(member.getInterestCategories());
-        List<String> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(memberId);
+        List<Long> blockRelatedMemberIds = memberBlockQueryService.retrieveBlockRelatedMemberIds(memberId);
 
         List<Member> recommendedMembers = memberQueryService.retrieveRecommendedMembers(
                 memberId, myInterests, blockRelatedMemberIds, RECOMMENDED_MEMBER_LIMIT
@@ -234,7 +234,7 @@ public class MemberQueryFacade {
                 .build();
     }
 
-    public BlockedMemberList retrieveBlockedMembers(String memberId, Long cursorId) {
+    public BlockedMemberList retrieveBlockedMembers(Long memberId, Long cursorId) {
         CursorResult<MemberBlock> blockCursorResult = CursorPagingHelper.getPage(
                 size -> memberBlockQueryService.retrieveBlocks(memberId, cursorId, size),
                 MemberBlock::getId,
@@ -252,12 +252,12 @@ public class MemberQueryFacade {
                 .build();
     }
 
-    public MemberResponseDTO.LoginStatus retrieveLoginStatus(String memberId) {
+    public MemberResponseDTO.LoginStatus retrieveLoginStatus(Long memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
 
-        String prefix = member.getId().split("_")[0];
-        String provider = switch (prefix) {
-            case "LOCAL", "KAKAO", "GOOGLE", "NAVER" -> prefix;
+        String authProvider = authenticationAPI.fetchProvider(memberId);
+        String provider = switch (authProvider) {
+            case "LOCAL", "KAKAO", "GOOGLE", "NAVER", "APPLE" -> authProvider;
             default -> "SOCIAL";
         };
 
@@ -292,7 +292,7 @@ public class MemberQueryFacade {
 
         List<MemberResponseDTO.AdminBasicInfo> memberList = memberPage.getContent().stream()
                 .map(member -> MemberResponseDTO.AdminBasicInfo.builder()
-                        .memberId(member.getId())
+                        .memberId(String.valueOf(member.getId()))
                         .nickname(member.getNickName())
                         .name(member.getName())
                         .email(member.getEmail())
@@ -318,7 +318,7 @@ public class MemberQueryFacade {
         Member member = memberQueryService.retrieveMemberByNickname(memberNickName);
 
         return MemberResponseDTO.AdminMemberDetailInfo.builder()
-                .memberId(member.getId())
+                .memberId(String.valueOf(member.getId()))
                 .nickname(member.getNickName())
                 .name(member.getName())
                 .email(member.getEmail())
@@ -328,5 +328,9 @@ public class MemberQueryFacade {
                 .categories(member.getInterestCategories())
                 .active(member.isActive())
                 .build();
+    }
+
+    private boolean isSocialMember(Long memberId) {
+        return !"LOCAL".equals(authenticationAPI.fetchProvider(memberId));
     }
 }

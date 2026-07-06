@@ -15,7 +15,7 @@ public class AuthReactivationCommandService {
     private final AuthRepository authRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    public void reactivateIfDeactivated(String memberId) {
+    public void reactivateIfDeactivated(Long memberId) {
         authRepository.findByIdAndDeactivatedAtIsNotNull(memberId)
                 .ifPresent(authUser -> {
                     authUser.reactivate();

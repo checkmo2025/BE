@@ -29,12 +29,12 @@ public class MemberTermsCommandService {
 
     private final MemberTermsQueryService memberTermsQueryService;
 
-    public void updateAgreements(String memberId, List<TermsAgreementCommand> commands) {
+    public void updateAgreements(Long memberId, List<TermsAgreementCommand> commands) {
         saveAgreements(memberId, commands, false);
     }
 
     public void saveSignupAgreements(
-            String memberId,
+            Long memberId,
             List<TermsAgreementCommand> commands,
             boolean requireRequiredAgreement
     ) {
@@ -47,7 +47,7 @@ public class MemberTermsCommandService {
     }
 
     private void saveAgreements(
-            String memberId,
+            Long memberId,
             List<TermsAgreementCommand> commands,
             boolean requireRequiredAgreement
     ) {
@@ -114,7 +114,7 @@ public class MemberTermsCommandService {
         }
     }
 
-    private Map<Long, MemberTerms> retrieveLatestMemberTermsByTermsId(String memberId, List<Long> termsIds) {
+    private Map<Long, MemberTerms> retrieveLatestMemberTermsByTermsId(Long memberId, List<Long> termsIds) {
         if (termsIds == null || termsIds.isEmpty()) {
             return Map.of();
         }

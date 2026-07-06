@@ -1,6 +1,5 @@
 package checkmo.authentication.internal.security.oauth2;
 
-import checkmo.authentication.internal.converter.AuthConverter;
 import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.entity.Provider;
 import checkmo.authentication.internal.exception.AuthErrorStatus;
@@ -32,17 +31,17 @@ public class SocialAccountResolver {
         if (!StringUtils.hasText(attributes.getProviderId())) {
             throw new OAuth2AuthenticationException("소셜 계정 식별자를 가져올 수 없습니다");
         }
-        String expectedUserId = AuthConverter.toOAuth2MemberId(registrationId, attributes.getProviderId());
+        String provider = registrationId.toUpperCase();
 
-        return authRepository.findById(expectedUserId)
+        return authRepository.findByProviderAndProviderUserId(provider, attributes.getProviderId())
                 .map(user -> new SocialAccountResolution(user, false))
-                .orElseGet(() -> createAppleUser(attributes, registrationId, expectedUserId));
+                .orElseGet(() -> createAppleUser(attributes, registrationId, provider));
     }
 
     private SocialAccountResolution createAppleUser(
             OAuth2Attributes attributes,
             String registrationId,
-            String expectedUserId
+            String provider
     ) {
         String email = attributes.getEmail();
         if (!StringUtils.hasText(email)) {
@@ -57,13 +56,15 @@ public class SocialAccountResolver {
             AuthUser savedUser = socialAccountCreator.create(attributes, registrationId);
             return new SocialAccountResolution(savedUser, true);
         } catch (DataIntegrityViolationException | PersistenceException e) {
-            return refetchAppleAfterDuplicate(expectedUserId, email);
+            return refetchAppleAfterDuplicate(provider, attributes.getProviderId(), email);
         }
     }
 
-    private SocialAccountResolution refetchAppleAfterDuplicate(String expectedUserId, String email) {
-        AuthUser user = authRepository.findById(expectedUserId)
-                .or(() -> authRepository.findByEmail(email).filter(foundUser -> foundUser.getId().equals(expectedUserId)))
+    private SocialAccountResolution refetchAppleAfterDuplicate(String provider, String providerUserId, String email) {
+        AuthUser user = authRepository.findByProviderAndProviderUserId(provider, providerUserId)
+                .or(() -> authRepository.findByEmail(email)
+                        .filter(foundUser -> provider.equals(foundUser.getProvider())
+                                && providerUserId.equals(foundUser.getProviderUserId())))
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.SOCIAL_ACCOUNT_EMAIL_CONFLICT));
 
         return new SocialAccountResolution(user, false);

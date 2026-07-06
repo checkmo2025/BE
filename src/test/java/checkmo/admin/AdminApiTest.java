@@ -186,7 +186,7 @@ class AdminApiTest extends ApiTestSupport {
         TestUser admin = createAdmin();
         TestUser owner = createUser();
         TestUser nonAdmin = createUser();
-        Club club = createClub(owner, "admin-club-" + owner.id().substring(owner.id().length() - 4).toLowerCase());
+        Club club = createClub(owner, "admin-club-" + owner.legacyId().substring(owner.legacyId().length() - 4).toLowerCase());
 
         given().cookie(accessTokenCookie(admin))
                 .queryParam("keyword", "admin-club")

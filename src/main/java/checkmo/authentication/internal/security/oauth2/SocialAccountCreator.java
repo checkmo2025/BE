@@ -26,6 +26,7 @@ class SocialAccountCreator {
         eventPublisher.publishEvent(
                 AuthenticationEvent.CreateMember.builder()
                         .id(newUser.getId())
+                        .legacyId(newUser.getLegacyId())
                         .email(newUser.getEmail())
                         .build());
 

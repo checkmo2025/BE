@@ -41,7 +41,10 @@ public class Member extends BaseEntity {
 
     @Id
     @Column(nullable = false, unique = true)
-    private String id;
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String legacyId;
 
     @Column(nullable = false)
     private String email;
@@ -119,11 +122,11 @@ public class Member extends BaseEntity {
         }
     }
 
-    public static boolean isSameMember(String memberId1, String memberId2) {
+    public static boolean isSameMember(Long memberId1, Long memberId2) {
         return memberId1.equals(memberId2);
     }
 
-    public void verifyNotSelf(String memberId) {
+    public void verifyNotSelf(Long memberId) {
         if (this.id.equals(memberId)) {
             throw new MemberException(MemberErrorStatus.MEMBER_CANNOT_FOLLOW_SELF);
         }
@@ -149,7 +152,4 @@ public class Member extends BaseEntity {
         return deactivatedAt == null;
     }
 
-    public boolean isSocial() {
-        return !id.startsWith("LOCAL_");
-    }
 }

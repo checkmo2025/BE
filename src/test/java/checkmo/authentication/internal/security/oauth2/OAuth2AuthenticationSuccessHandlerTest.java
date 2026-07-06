@@ -52,9 +52,12 @@ class OAuth2AuthenticationSuccessHandlerTest {
         );
         ReflectionTestUtils.setField(handler, "baseUri", "https://web.checkmo.test");
         AuthUser user = AuthUser.builder()
-                .id("GOOGLE_google-sub")
+                .id(1L)
+                .legacyId("GOOGLE_google-sub")
                 .email("social-user@example.com")
                 .password("")
+                .provider("GOOGLE")
+                .providerUserId("google-sub")
                 .role(Role.USER)
                 .profileCompleted(true)
                 .build();
@@ -84,8 +87,8 @@ class OAuth2AuthenticationSuccessHandlerTest {
                             && header.contains("Secure")
                             && header.contains("SameSite=None"));
         });
-        verify(authReactivationCommandService).reactivateIfDeactivated("GOOGLE_google-sub");
-        verify(tokenCacheService).saveRefreshToken("GOOGLE_google-sub", "refresh-token");
+        verify(authReactivationCommandService).reactivateIfDeactivated(1L);
+        verify(tokenCacheService).saveRefreshToken(1L, "refresh-token");
     }
 
     @Test
@@ -97,9 +100,12 @@ class OAuth2AuthenticationSuccessHandlerTest {
         ReflectionTestUtils.setField(handler, "baseUri", "https://web.checkmo.test");
         ReflectionTestUtils.setField(handler, "appUri", "checkmo://oauth-callback");
         AuthUser user = AuthUser.builder()
-                .id("APPLE_apple-sub")
+                .id(2L)
+                .legacyId("APPLE_apple-sub")
                 .email("apple-user@example.com")
                 .password("")
+                .provider("APPLE")
+                .providerUserId("apple-sub")
                 .role(Role.USER)
                 .profileCompleted(false)
                 .build();
@@ -134,7 +140,7 @@ class OAuth2AuthenticationSuccessHandlerTest {
                     AppleOAuth2AuthorizationRequestResolver.sessionClientTypeKey("app-state"))).isNull();
             softly.assertThat(codeCaptor.getValue()).isNotBlank();
         });
-        verify(authReactivationCommandService).reactivateIfDeactivated("APPLE_apple-sub");
-        verify(tokenCacheService).saveRefreshToken("APPLE_apple-sub", "refresh-token");
+        verify(authReactivationCommandService).reactivateIfDeactivated(2L);
+        verify(tokenCacheService).saveRefreshToken(2L, "refresh-token");
     }
 }

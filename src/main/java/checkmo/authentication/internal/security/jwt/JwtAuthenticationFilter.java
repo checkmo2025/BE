@@ -92,7 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
                 // 유령 회원(삭제된 회원) 여부 확인
-                String memberId = jwtTokenProvider.getUserIdFromToken(accessToken);
+                Long memberId = jwtTokenProvider.getUserIdFromToken(accessToken);
                 if (!authRepository.existsById(memberId)) {
                     log.warn("[JWT 필터] 존재하지 않는 계정(유령 회원) 감지: memberId={}", memberId);
                     tokenCacheService.saveBlacklistToken(accessToken);

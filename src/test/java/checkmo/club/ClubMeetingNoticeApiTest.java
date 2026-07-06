@@ -510,7 +510,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     }
 
     private String uniqueSuffix(TestUser user) {
-        return user.id().substring(user.id().length() - 4).toLowerCase();
+        return user.legacyId().substring(user.legacyId().length() - 4).toLowerCase();
     }
 
     private Map<String, Object> clubDetailPayload(String name) {

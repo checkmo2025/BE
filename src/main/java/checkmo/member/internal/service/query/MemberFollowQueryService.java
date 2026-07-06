@@ -26,7 +26,7 @@ public class MemberFollowQueryService {
      * @param pageSize 페이지 크기
      * @return 팔로워 목록
      */
-    public List<Follow> retrieveFollowers(String memberId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
+    public List<Follow> retrieveFollowers(Long memberId, Long cursorId, int pageSize, List<Long> excludedMemberIds) {
         return followRepository.findFollowers(memberId, cursorId, pageSize, excludedMemberIds);
     }
 
@@ -38,14 +38,14 @@ public class MemberFollowQueryService {
      * @param pageSize 페이지 크기
      * @return 팔로잉 목록
      */
-    public List<Follow> retrieveFollowingIds(String memberId, Long cursorId, int pageSize, List<String> excludedMemberIds) {
+    public List<Follow> retrieveFollowingIds(Long memberId, Long cursorId, int pageSize, List<Long> excludedMemberIds) {
         return followRepository.findFollowings(memberId, cursorId, pageSize, excludedMemberIds);
     }
 
     /**
      * 특정 회원의 팔로우 여부 확인
      */
-    public boolean isFollowing(String memberId, String targetMemberId) {
+    public boolean isFollowing(Long memberId, Long targetMemberId) {
         if (memberId == null || targetMemberId == null) {
             return false;
         }
@@ -65,7 +65,7 @@ public class MemberFollowQueryService {
      * @param targetMemberIds 확인할 대상 회원 ID 목록
      * @return 대상 회원 ID별 팔로우 여부 매핑
      */
-    public Map<String, Boolean> checkFollowStatusByMemberId(String currentMemberId, List<String> targetMemberIds) {
+    public Map<Long, Boolean> checkFollowStatusByMemberId(Long currentMemberId, List<Long> targetMemberIds) {
         if (targetMemberIds == null || targetMemberIds.isEmpty()) {
             return Map.of();
         }
@@ -80,7 +80,7 @@ public class MemberFollowQueryService {
         }
 
         // 실제로 팔로우하고 있는 대상들을 배치로 조회
-        Set<String> followingIds = followRepository.findFollowingIdsByFollowerId(currentMemberId, targetMemberIds);
+        Set<Long> followingIds = followRepository.findFollowingIdsByFollowerId(currentMemberId, targetMemberIds);
 
         // 모든 대상에 대해 팔로우 상태를 설정 (자기 자신은 항상 true)
         return targetMemberIds.stream()
@@ -97,7 +97,7 @@ public class MemberFollowQueryService {
      * @param memberId 회원 ID
      * @return 팔로우하는 회원 ID 목록
      */
-    public List<String> retrieveFollowingIds(String memberId) {
+    public List<Long> retrieveFollowingIds(Long memberId) {
         return followRepository.getFollowingMemberIds(memberId);
     }
 
@@ -107,7 +107,7 @@ public class MemberFollowQueryService {
      * @param memberId 회원 ID
      * @return 팔로워 수
      */
-    public long countFollowers(String memberId) {
+    public long countFollowers(Long memberId) {
         return followRepository.countByFollowing_Id(memberId);
     }
 
@@ -117,7 +117,7 @@ public class MemberFollowQueryService {
      * @param memberId 회원 ID
      * @return 팔로잉 수
      */
-    public long countFollowings(String memberId) {
+    public long countFollowings(Long memberId) {
         return followRepository.countByFollower_Id(memberId);
     }
 }

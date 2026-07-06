@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MemberBlockRepository extends JpaRepository<MemberBlock, Long>, MemberBlockRepositoryCustom {
 
-    boolean existsByBlocker_IdAndBlocked_Id(String blockerId, String blockedId);
+    boolean existsByBlocker_IdAndBlocked_Id(Long blockerId, Long blockedId);
 
-    Optional<MemberBlock> findByBlocker_IdAndBlocked_Id(String blockerId, String blockedId);
+    Optional<MemberBlock> findByBlocker_IdAndBlocked_Id(Long blockerId, Long blockedId);
 
     @Modifying
     @Query("DELETE FROM MemberBlock mb WHERE mb.blocker.id = :memberId OR mb.blocked.id = :memberId")
-    void deleteAllByMemberId(String memberId);
+    void deleteAllByMemberId(Long memberId);
 }

@@ -1,6 +1,7 @@
 package checkmo.support;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -171,11 +172,17 @@ public abstract class ApiTestSupport {
 
         when(tokenCacheService.isAccessTokenBlacklisted(anyString())).thenReturn(false);
         when(tokenCacheService.getRefreshToken(anyString()))
-                .thenAnswer(invocation -> refreshTokensByUserId.get(invocation.getArgument(0)));
+                .thenAnswer(invocation -> refreshTokensByUserId.get(refreshTokenKey(invocation.getArgument(0))));
+        when(tokenCacheService.getRefreshToken(anyLong()))
+                .thenAnswer(invocation -> refreshTokensByUserId.get(refreshTokenKey(invocation.getArgument(0))));
         doAnswer(invocation -> {
-            refreshTokensByUserId.put(invocation.getArgument(0), invocation.getArgument(1));
+            refreshTokensByUserId.put(refreshTokenKey(invocation.getArgument(0)), invocation.getArgument(1));
             return null;
         }).when(tokenCacheService).saveRefreshToken(anyString(), anyString());
+        doAnswer(invocation -> {
+            refreshTokensByUserId.put(refreshTokenKey(invocation.getArgument(0)), invocation.getArgument(1));
+            return null;
+        }).when(tokenCacheService).saveRefreshToken(anyLong(), anyString());
         when(tokenCacheService.compareAndRotateRefreshToken(
                 anyString(),
                 anyString(),
@@ -187,25 +194,30 @@ public abstract class ApiTestSupport {
                         invocation.getArgument(1),
                         invocation.getArgument(2)
                 ));
+        when(tokenCacheService.compareAndRotateRefreshToken(
+                anyLong(),
+                anyString(),
+                anyString(),
+                org.mockito.ArgumentMatchers.any(Duration.class)
+        ))
+                .thenAnswer(invocation -> rotateRefreshTokenIfCurrent(
+                        invocation.getArgument(0),
+                        invocation.getArgument(1),
+                        invocation.getArgument(2)
+                ));
         when(tokenCacheService.saveBlacklistToken(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
         doAnswer(invocation -> {
-            refreshTokensByUserId.remove(invocation.getArgument(0));
+            refreshTokensByUserId.remove(refreshTokenKey(invocation.getArgument(0)));
             return null;
         }).when(tokenCacheService).deleteRefreshToken(anyString());
+        doAnswer(invocation -> {
+            refreshTokensByUserId.remove(refreshTokenKey(invocation.getArgument(0)));
+            return null;
+        }).when(tokenCacheService).deleteRefreshToken(anyLong());
         when(tokenCacheService.deleteRefreshTokenIfMatches(anyString(), anyString()))
-                .thenAnswer(invocation -> {
-                    String userId = invocation.getArgument(0);
-                    String expectedRefreshToken = invocation.getArgument(1);
-                    AtomicBoolean deleted = new AtomicBoolean(false);
-                    refreshTokensByUserId.compute(userId, (ignored, currentRefreshToken) -> {
-                        if (expectedRefreshToken.equals(currentRefreshToken)) {
-                            deleted.set(true);
-                            return null;
-                        }
-                        return currentRefreshToken;
-                    });
-                    return deleted.get();
-                });
+                .thenAnswer(invocation -> deleteRefreshTokenIfCurrent(invocation.getArgument(0), invocation.getArgument(1)));
+        when(tokenCacheService.deleteRefreshTokenIfMatches(anyLong(), anyString()))
+                .thenAnswer(invocation -> deleteRefreshTokenIfCurrent(invocation.getArgument(0), invocation.getArgument(1)));
     }
 
     @AfterEach
@@ -264,22 +276,27 @@ public abstract class ApiTestSupport {
         return createUserWithId(role, profileCompleted, rawPassword, idPrefix + suffix);
     }
 
-    private TestUser createUserWithId(Role role, boolean profileCompleted, String rawPassword, String id) {
-        String email = id + "@example.com";
-        String nickName = role.name().toLowerCase() + id.substring(Math.max(0, id.length() - 8));
+    private TestUser createUserWithId(Role role, boolean profileCompleted, String rawPassword, String legacyId) {
+        String email = legacyId + "@example.com";
+        String nickName = role.name().toLowerCase() + legacyId.substring(Math.max(0, legacyId.length() - 8));
+        String provider = legacyId.contains("_") ? legacyId.substring(0, legacyId.indexOf("_")) : "LOCAL";
+        String providerUserId = legacyId.contains("_") ? legacyId.substring(legacyId.indexOf("_") + 1) : legacyId;
 
         AuthUser authUser = AuthUser.builder()
-                .id(id)
+                .legacyId(legacyId)
                 .email(email)
                 .password(passwordEncoder.encode(rawPassword))
+                .provider(provider)
+                .providerUserId(providerUserId)
                 .role(role)
                 .profileCompleted(profileCompleted)
                 .nickName(profileCompleted ? nickName : null)
                 .build();
-        authRepository.save(authUser);
+        AuthUser savedAuthUser = authRepository.save(authUser);
 
         Member member = Member.builder()
-                .id(id)
+                .id(savedAuthUser.getId())
+                .legacyId(legacyId)
                 .email(email)
                 .name("테스트")
                 .phoneNumber("01012345678")
@@ -288,8 +305,8 @@ public abstract class ApiTestSupport {
                 .build();
         memberRepository.save(member);
 
-        JwtToken token = jwtTokenProvider.generateToken(jwtTokenProvider.getAuthenticationFromMemberId(id));
-        return new TestUser(id, email, nickName, role, profileCompleted, token.getAccessToken(), token.getRefreshToken());
+        JwtToken token = jwtTokenProvider.generateToken(jwtTokenProvider.getAuthenticationFromMemberId(savedAuthUser.getId()));
+        return new TestUser(String.valueOf(savedAuthUser.getId()), savedAuthUser.getId(), legacyId, email, nickName, role, profileCompleted, token.getAccessToken(), token.getRefreshToken());
     }
 
     protected Cookie accessTokenCookie(TestUser user) {
@@ -318,16 +335,16 @@ public abstract class ApiTestSupport {
     }
 
     protected void saveRefreshTokenInCacheFake(String userId, String refreshToken) {
-        refreshTokensByUserId.put(userId, refreshToken);
+        refreshTokensByUserId.put(refreshTokenKey(userId), refreshToken);
     }
 
     protected boolean rotateRefreshTokenIfCurrent(
-            String userId,
+            Object userId,
             String expectedRefreshToken,
             String newRefreshToken
     ) {
         AtomicBoolean rotated = new AtomicBoolean(false);
-        refreshTokensByUserId.compute(userId, (ignored, currentRefreshToken) -> {
+        refreshTokensByUserId.compute(refreshTokenKey(userId), (ignored, currentRefreshToken) -> {
             if (expectedRefreshToken.equals(currentRefreshToken)) {
                 rotated.set(true);
                 return newRefreshToken;
@@ -337,8 +354,26 @@ public abstract class ApiTestSupport {
         return rotated.get();
     }
 
+    private boolean deleteRefreshTokenIfCurrent(Object userId, String expectedRefreshToken) {
+        AtomicBoolean deleted = new AtomicBoolean(false);
+        refreshTokensByUserId.compute(refreshTokenKey(userId), (ignored, currentRefreshToken) -> {
+            if (expectedRefreshToken.equals(currentRefreshToken)) {
+                deleted.set(true);
+                return null;
+            }
+            return currentRefreshToken;
+        });
+        return deleted.get();
+    }
+
+    private String refreshTokenKey(Object userId) {
+        return String.valueOf(userId);
+    }
+
     protected record TestUser(
             String id,
+            Long memberId,
+            String legacyId,
             String email,
             String nickName,
             Role role,

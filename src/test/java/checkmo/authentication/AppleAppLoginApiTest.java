@@ -44,7 +44,7 @@ class AppleAppLoginApiTest extends ApiTestSupport {
             softly.assertThat(refreshToken).isNotBlank();
             softly.assertThat(response.cookie("refreshToken")).isEqualTo(refreshToken);
             softly.assertThat(response.cookie("accessToken")).isNotBlank();
-            softly.assertThat(authRepository.findById("APPLE_apple-sub")).isPresent();
+            softly.assertThat(authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub")).isPresent();
         });
     }
 
@@ -73,7 +73,7 @@ class AppleAppLoginApiTest extends ApiTestSupport {
 
         assertSoftly(softly -> {
             softly.assertThat(response.jsonPath().getString("result.refreshToken")).isNotBlank();
-            softly.assertThat(authRepository.findById("APPLE_repeat-sub")).isPresent();
+            softly.assertThat(authRepository.findByProviderAndProviderUserId("APPLE", "repeat-sub")).isPresent();
             softly.assertThat(authRepository.findByEmail("repeat-apple-user@example.com")).isPresent();
         });
     }
@@ -94,7 +94,7 @@ class AppleAppLoginApiTest extends ApiTestSupport {
                 .body("isSuccess", equalTo(false))
                 .body("code", equalTo("AUTH_414"));
 
-        assertThat(authRepository.findById("APPLE_new-apple-sub")).isEmpty();
+        assertThat(authRepository.findByProviderAndProviderUserId("APPLE", "new-apple-sub")).isEmpty();
     }
 
     @Test

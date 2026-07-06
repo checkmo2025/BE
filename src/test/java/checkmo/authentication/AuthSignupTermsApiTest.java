@@ -54,7 +54,7 @@ class AuthSignupTermsApiTest extends ApiTestSupport {
                 .then()
                 .statusCode(200);
 
-        String memberId = authRepository.findByEmail(email).orElseThrow().getId();
+        Long memberId = authRepository.findByEmail(email).orElseThrow().getId();
         Map<Long, MemberTerms> latestTerms = memberTermsRepository.findLatestByMemberIdAndTermsIdIn(
                         memberId,
                         List.of(service.getId(), privacy.getId(), marketing.getId())

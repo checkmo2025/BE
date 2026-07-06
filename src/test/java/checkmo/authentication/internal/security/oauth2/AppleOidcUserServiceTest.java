@@ -38,7 +38,7 @@ class AppleOidcUserServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(oidcUser).isInstanceOf(PrincipalDetails.class);
-            softly.assertThat(((PrincipalDetails) oidcUser).getUser().getId()).isEqualTo("APPLE_apple-sub");
+            softly.assertThat(((PrincipalDetails) oidcUser).getUser().getId()).isEqualTo(1L);
             softly.assertThat(((PrincipalDetails) oidcUser).isNewSocialSignUp()).isTrue();
             softly.assertThat(oidcUser.getIdToken()).isSameAs(userRequest.getIdToken());
             softly.assertThat(oidcUser.getClaims()).containsEntry("sub", "apple-sub");
@@ -85,9 +85,12 @@ class AppleOidcUserServiceTest {
 
     private AuthUser user() {
         return AuthUser.builder()
-                .id("APPLE_apple-sub")
+                .id(1L)
+                .legacyId("APPLE_apple-sub")
                 .email("apple-user@example.com")
                 .password("")
+                .provider("APPLE")
+                .providerUserId("apple-sub")
                 .role(Role.USER)
                 .profileCompleted(false)
                 .build();
