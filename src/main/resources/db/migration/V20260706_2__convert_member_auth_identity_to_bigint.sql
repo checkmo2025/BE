@@ -22,11 +22,11 @@ LEFT JOIN auth_user au ON au.id = m.id
 WHERE au.id IS NULL;
 
 INSERT INTO identity_migration_failures (check_name, legacy_id, detail)
-SELECT 'invalid_auth_legacy_id', au.id, 'expected LOCAL, GOOGLE, APPLE, or KAKAO provider prefix, underscore, and provider user id'
+SELECT 'invalid_auth_legacy_id', au.id, 'expected LOCAL, GOOGLE, APPLE, KAKAO, or NAVER provider prefix, underscore, and provider user id'
 FROM auth_user au
 WHERE LOCATE('_', au.id) <= 1
    OR LOCATE('_', au.id) = CHAR_LENGTH(au.id)
-   OR UPPER(SUBSTRING_INDEX(au.id, '_', 1)) NOT IN ('LOCAL', 'GOOGLE', 'APPLE', 'KAKAO');
+   OR UPPER(SUBSTRING_INDEX(au.id, '_', 1)) NOT IN ('LOCAL', 'GOOGLE', 'APPLE', 'KAKAO', 'NAVER');
 
 INSERT INTO identity_migration_failures (check_name, legacy_id, detail)
 SELECT 'duplicate_provider_identity', MIN(parsed.legacy_id),

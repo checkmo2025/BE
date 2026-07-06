@@ -322,14 +322,26 @@ public abstract class ApiTestSupport {
     }
 
     protected String expiredSignedRefreshToken(TestUser user) {
+        return signedTokenWithSubject(user.id(), -1_000L);
+    }
+
+    protected String signedAccessTokenWithSubject(String subject) {
+        return signedTokenWithSubject(subject, 3_600_000L);
+    }
+
+    protected String signedRefreshTokenWithSubject(String subject) {
+        return signedTokenWithSubject(subject, 86_400_000L);
+    }
+
+    private String signedTokenWithSubject(String subject, long expirationOffsetMillis) {
         byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
         Key key = Keys.hmacShaKeyFor(keyBytes);
         long now = System.currentTimeMillis();
 
         return Jwts.builder()
                 .id(UUID.randomUUID().toString())
-                .subject(user.id())
-                .expiration(new Date(now - 1_000L))
+                .subject(subject)
+                .expiration(new Date(now + expirationOffsetMillis))
                 .signWith(key)
                 .compact();
     }

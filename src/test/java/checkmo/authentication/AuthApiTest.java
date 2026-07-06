@@ -456,6 +456,42 @@ class AuthApiTest extends ApiTestSupport {
     }
 
     @Test
+    void protectedRouteRejectsLegacyStringSubjectAccessTokenWithoutServerError() {
+        TestUser user = createUserWithPassword("Pass123!");
+        String legacyAccessToken = signedAccessTokenWithSubject(user.legacyId());
+
+        ExtractableResponse<Response> response = given()
+                .cookie(new Cookie.Builder("accessToken", legacyAccessToken)
+                        .setPath("/")
+                        .build())
+                .when()
+                .get("/api/v1/members/me")
+                .then()
+                .extract();
+
+        assertThat(response.statusCode()).isIn(401, 403);
+        assertThat(response.headers().getValues("Set-Cookie"))
+                .anyMatch(header -> header.startsWith("accessToken=") && header.contains("Max-Age=0"))
+                .anyMatch(header -> header.startsWith("refreshToken=") && header.contains("Max-Age=0"));
+    }
+
+    @Test
+    void appRefreshRejectsLegacyStringSubjectRefreshTokenWithoutServerError() {
+        TestUser user = createUserWithPassword("Pass123!");
+        String legacyRefreshToken = signedRefreshTokenWithSubject(user.legacyId());
+        saveRefreshTokenInCacheFake(user.legacyId(), legacyRefreshToken);
+
+        given()
+                .header("X-Refresh-Token", legacyRefreshToken)
+                .when()
+                .post("/api/v1/auth/app/refresh")
+                .then()
+                .statusCode(401)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("AUTH_412"));
+    }
+
+    @Test
     void loginRejectsWrongPassword() {
         TestUser user = createUserWithPassword("Pass123!");
 

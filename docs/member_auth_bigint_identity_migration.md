@@ -2,7 +2,7 @@
 
 ## 목적과 불변조건
 
-이 문서는 기존 provider-shaped 문자열 식별자(`LOCAL_*`, `GOOGLE_*`, `APPLE_*`, `KAKAO_*`)를 내부 숫자 식별자로 전환하기 위한 운영 preflight, rollout, rollback 절차이다.
+이 문서는 기존 provider-shaped 문자열 식별자(`LOCAL_*`, `GOOGLE_*`, `APPLE_*`, `KAKAO_*`, `NAVER_*`)를 내부 숫자 식별자로 전환하기 위한 운영 preflight, rollout, rollback 절차이다.
 
 - `auth_user.id`만 `BIGINT` 생성 원천이다.
 - `member.id`는 `auth_user.id`와 같은 값을 할당받아 공유한다.
@@ -228,6 +228,7 @@ WITH parsed_auth AS (
        OR id LIKE 'GOOGLE\_%'
        OR id LIKE 'APPLE\_%'
        OR id LIKE 'KAKAO\_%'
+       OR id LIKE 'NAVER\_%'
 )
 SELECT
     provider,
@@ -277,6 +278,15 @@ SELECT
 FROM auth_user
 WHERE id LIKE 'KAKAO\_%'
 GROUP BY SUBSTRING(id, LOCATE('_', id) + 1)
+HAVING COUNT(*) > 1
+UNION ALL
+SELECT
+    'NAVER' AS provider,
+    SUBSTRING(id, LOCATE('_', id) + 1) AS provider_user_id,
+    COUNT(*) AS duplicate_count
+FROM auth_user
+WHERE id LIKE 'NAVER\_%'
+GROUP BY SUBSTRING(id, LOCATE('_', id) + 1)
 HAVING COUNT(*) > 1;
 ```
 
@@ -291,7 +301,7 @@ SELECT
     COUNT(*) AS row_count
 FROM auth_user
 WHERE LOCATE('_', id) = 0
-   OR SUBSTRING_INDEX(id, '_', 1) NOT IN ('LOCAL', 'GOOGLE', 'APPLE', 'KAKAO')
+   OR SUBSTRING_INDEX(id, '_', 1) NOT IN ('LOCAL', 'GOOGLE', 'APPLE', 'KAKAO', 'NAVER')
 GROUP BY legacy_prefix
 ORDER BY row_count DESC, legacy_prefix;
 ```
@@ -373,6 +383,15 @@ ORDER BY b.table_name;
 7. post-cutover validation SQL을 실행한다.
 8. refresh token 저장소를 token invalidation checklist에 따라 처리한다.
 9. smoke test가 끝날 때까지 외부 트래픽을 재개하지 않는다.
+
+## Module boundary decision
+
+회원 프로필 응답의 `social` 여부는 `member` 테이블에 중복 저장하지 않고 `authentication` 모듈의 public `AuthenticationAPI.fetchProvider(memberId)`로 조회한다.
+
+- `member` 모듈은 `package-info.java`에서 `authentication` public API 의존을 명시적으로 허용한다.
+- `member` 모듈은 `authentication.internal` 또는 `authentication.web` 패키지를 직접 참조하지 않는다.
+- provider 값은 로그인 식별자 원천인 `auth_user.provider`에만 저장해 이벤트 지연이나 캐시 불일치로 프로필의 `social` 값이 엇갈리는 상황을 피한다.
+- provider 조회 실패는 회원 프로필 조회 실패로 취급한다. `auth_user`와 `member`의 1:1 정합성은 preflight와 post-cutover validation의 중단 조건이다.
 
 ## Token invalidation checklist
 
@@ -559,7 +578,7 @@ rollback은 smoke 실패가 외부 트래픽 재개 전에 발견된 경우 즉�
 - auth/member one-to-one mismatch가 1건 이상이다.
 - member reference orphan이 1건 이상이다.
 - provider/provider_user_id duplicate가 1건 이상이다.
-- `LOCAL`, `GOOGLE`, `APPLE`, `KAKAO` 외 prefix 또는 `_` 없는 legacy id가 존재한다.
+- `LOCAL`, `GOOGLE`, `APPLE`, `KAKAO`, `NAVER` 외 prefix 또는 `_` 없는 legacy id가 존재한다.
 - `auth_user.id`와 `member.id`가 독립 생성될 수 있는 migration 설계가 발견된다.
 - target schema에 `auth_user.member_id` 또는 `member.auth_user_id`가 추가된다.
 - backup/snapshot 생성 여부가 확인되지 않는다.

@@ -78,6 +78,13 @@ class AdminApiTest extends ApiTestSupport {
                 .body("result.memberList.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
+                .queryParam("keyword", user.id())
+                .when().get("/api/v1/admin/members")
+                .then().statusCode(200)
+                .body("result.memberList.size()", equalTo(1))
+                .body("result.memberList[0].memberId", equalTo(user.memberId().intValue()));
+
+        given().cookie(accessTokenCookie(admin))
                 .when().get("/api/v1/admin/members/{memberNickName}", user.nickName())
                 .then().statusCode(200)
                 .body("result.email", equalTo(user.email()));

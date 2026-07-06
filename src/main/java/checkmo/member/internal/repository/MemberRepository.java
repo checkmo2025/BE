@@ -59,5 +59,15 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     boolean existsByEmail(String email);
 
 
-    Page<Member> findByEmailContainingIgnoreCase(String emailKeyword, Pageable pageable);
+    @Query("""
+            select m
+            from Member m
+            where (:memberId is not null and m.id = :memberId)
+               or lower(m.email) like lower(concat('%', :keyword, '%'))
+            """)
+    Page<Member> findByIdOrEmailContainingIgnoreCase(
+            @Param("memberId") Long memberId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }

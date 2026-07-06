@@ -140,7 +140,20 @@ public class MemberQueryService {
             return memberRepository.findAll(pageable);
         }
 
-        return memberRepository.findByEmailContainingIgnoreCase(keyword, pageable);
+        String normalizedKeyword = keyword.trim();
+        return memberRepository.findByIdOrEmailContainingIgnoreCase(
+                parseMemberIdKeyword(normalizedKeyword),
+                normalizedKeyword,
+                pageable
+        );
+    }
+
+    private Long parseMemberIdKeyword(String keyword) {
+        try {
+            return Long.valueOf(keyword);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
 }

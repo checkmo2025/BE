@@ -1,6 +1,8 @@
 package checkmo.authentication.internal.security.jwt;
 
 import checkmo.authentication.internal.config.properties.JwtProperties;
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.security.auth.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -134,9 +136,17 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
-            return Long.valueOf(subject);
+            return parseMemberIdSubject(subject);
         } catch (ExpiredJwtException e) {
-            return Long.valueOf(e.getClaims().getSubject());
+            return parseMemberIdSubject(e.getClaims().getSubject());
+        }
+    }
+
+    private Long parseMemberIdSubject(String subject) {
+        try {
+            return Long.valueOf(subject);
+        } catch (NumberFormatException e) {
+            throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
         }
     }
 
