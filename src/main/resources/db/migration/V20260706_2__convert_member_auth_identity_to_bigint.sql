@@ -43,6 +43,17 @@ FROM (
 GROUP BY parsed.provider, parsed.provider_user_id
 HAVING COUNT(*) > 1;
 
+CREATE TEMPORARY TABLE notification_sender_identity_candidates (
+    sender_id VARCHAR(255) NOT NULL,
+    PRIMARY KEY (sender_id)
+) ENGINE=InnoDB;
+
+INSERT INTO notification_sender_identity_candidates (sender_id)
+SELECT DISTINCT sender_id
+FROM notification
+WHERE sender_id IS NOT NULL
+  AND sender_id <> 'SYSTEM';
+
 INSERT INTO identity_migration_failures (check_name, legacy_id, detail)
 SELECT 'member_interest_categories.member_id_orphan', r.member_id, NULL
 FROM member_interest_categories r
@@ -108,11 +119,9 @@ LIMIT 1;
 
 INSERT INTO identity_migration_failures (check_name, legacy_id, detail)
 SELECT 'notification.sender_id_orphan', r.sender_id, NULL
-FROM notification r
+FROM notification_sender_identity_candidates r
 LEFT JOIN member m ON m.id = r.sender_id
-WHERE r.sender_id IS NOT NULL
-  AND r.sender_id <> 'SYSTEM'
-  AND m.id IS NULL
+WHERE m.id IS NULL
 LIMIT 1;
 
 INSERT INTO identity_migration_failures (check_name, legacy_id, detail)
@@ -303,15 +312,14 @@ SET r.receiver_id = CAST(mim.new_member_id AS CHAR);
 
 ALTER TABLE notification MODIFY COLUMN sender_id VARCHAR(255) NULL;
 
-UPDATE notification r
-JOIN member_identity_map mim ON mim.old_member_identity = r.sender_id
-SET r.sender_id = CAST(mim.new_member_id AS CHAR)
-WHERE r.sender_id IS NOT NULL
-  AND r.sender_id <> 'SYSTEM';
-
 UPDATE notification
 SET sender_id = NULL
 WHERE sender_id = 'SYSTEM';
+
+UPDATE notification r
+JOIN member_identity_map mim ON mim.old_member_identity = r.sender_id
+SET r.sender_id = CAST(mim.new_member_id AS CHAR)
+WHERE r.sender_id IS NOT NULL;
 
 UPDATE topic r
 JOIN member_identity_map mim ON mim.old_member_identity = r.member_id
@@ -364,6 +372,7 @@ ALTER TABLE member DROP PRIMARY KEY;
 UPDATE member SET id = CAST(new_id AS CHAR);
 ALTER TABLE member MODIFY COLUMN id BIGINT NOT NULL;
 ALTER TABLE member ADD PRIMARY KEY (id);
+ALTER TABLE member MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT;
 ALTER TABLE member
     MODIFY COLUMN legacy_id VARCHAR(255) NOT NULL,
     DROP COLUMN new_id;
