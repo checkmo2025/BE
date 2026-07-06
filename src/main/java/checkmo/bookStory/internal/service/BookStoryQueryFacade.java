@@ -69,7 +69,7 @@ public class BookStoryQueryFacade {
         BookStory bookStory = bookStoryQueryService.retrieveAccessibleBookStory(memberId, bookStoryId);
 
         if (validateBlockRelation) {
-            memberAPI.validateProfileAccessible(toMemberApiId(memberId), toMemberApiId(bookStory.getMemberId()));
+            memberAPI.validateProfileAccessible(memberId, bookStory.getMemberId());
         }
 
         // 2. 사용자 상세 조회에서만 조회 수 카운트 증가
@@ -82,8 +82,8 @@ public class BookStoryQueryFacade {
 
         // 4. 작성자 정보 조회
         BasicInfoWithFollow authorInfo = memberAPI.fetchMemberBasicInfoWithFollow(
-                toMemberApiId(bookStory.getMemberId()),
-                toMemberApiId(memberId)
+                bookStory.getMemberId(),
+                memberId
         );
 
         // 5. 좋아요 여부 조회
@@ -105,12 +105,10 @@ public class BookStoryQueryFacade {
         // 7-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
         Map<Long, MemberExternalDTO.BasicInfo> commentMemberInfoMap =
                 commentMemberIds.isEmpty() ? Map.of() :
-                        toLongKeyMap(memberAPI.fetchMemberBasicInfoByMemberIds(
-                                toMemberApiIds(new ArrayList<>(commentMemberIds))
-                        ));
+                        memberAPI.fetchMemberBasicInfoByMemberIds(new ArrayList<>(commentMemberIds));
 
         // 8. 댓글 DTO 변환
-        Set<Long> blockedMemberIds = toLongSet(memberAPI.fetchBlockRelatedMemberIds(toMemberApiId(memberId)));
+        Set<Long> blockedMemberIds = Set.copyOf(memberAPI.fetchBlockRelatedMemberIds(memberId));
         List<CommentInfo> commentDTOList =
                 BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap, blockedMemberIds);
 
@@ -160,8 +158,8 @@ public class BookStoryQueryFacade {
             String targetNickname,
             Long cursorId
     ) {
-        Long targetMemberId = Long.valueOf(memberAPI.fetchMemberId(targetNickname));
-        memberAPI.validateProfileAccessible(toMemberApiId(memberId), toMemberApiId(targetMemberId));
+        Long targetMemberId = memberAPI.fetchMemberId(targetNickname);
+        memberAPI.validateProfileAccessible(memberId, targetMemberId);
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.TARGET, null, targetMemberId, cursorId);
     }
 
@@ -229,10 +227,10 @@ public class BookStoryQueryFacade {
             Long cursorId
     ) {
         List<Long> excludedMemberIds = memberId != null && requiresBlockFilter(scope)
-                ? toLongList(memberAPI.fetchBlockRelatedMemberIds(toMemberApiId(memberId)))
+                ? memberAPI.fetchBlockRelatedMemberIds(memberId)
                 : List.of();
         List<Long> followingMemberIds = memberId != null && scope == BookStoryRequestDTO.BookStoryScope.FOLLOWING
-                ? toLongList(memberAPI.fetchFollowingIds(toMemberApiId(memberId)))
+                ? memberAPI.fetchFollowingIds(memberId)
                 : List.of();
 
         // 1. BookStory 리스트 조회
@@ -300,10 +298,7 @@ public class BookStoryQueryFacade {
                 .map(checkmo.bookStory.internal.entity.BookStory::getMemberId)
                 .distinct()
                 .toList();
-        return toLongKeyMap(memberAPI.fetchMemberBasicInfoWithFollowByMemberId(
-                toMemberApiIds(targetMemberIds),
-                toMemberApiId(memberId)
-        ));
+        return memberAPI.fetchMemberBasicInfoWithFollowByMemberId(targetMemberIds, memberId);
     }
 
     /**
@@ -344,7 +339,7 @@ public class BookStoryQueryFacade {
         // 1. BookStory 리스트 조회
         List<Long> excludedMemberIds = memberId == null
                 ? List.of()
-                : toLongList(memberAPI.fetchBlockRelatedMemberIds(toMemberApiId(memberId)));
+                : memberAPI.fetchBlockRelatedMemberIds(memberId);
         CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
                 (pageSize) -> bookStoryQueryService.retrieveBookStories(
                         bookId, excludedMemberIds, cursorId, pageSize
@@ -391,7 +386,7 @@ public class BookStoryQueryFacade {
                 .toList();
 
         Map<Long, MemberExternalDTO.DetailInfo> authorInfoMap =
-                toLongKeyMap(memberAPI.fetchMemberDetailInfoByMemberIds(toMemberApiIds(memberIds)));
+                memberAPI.fetchMemberDetailInfoByMemberIds(memberIds);
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap =
                 bookAPI.fetchBookBasicInfoByBookIds(bookIds);
 
@@ -413,39 +408,4 @@ public class BookStoryQueryFacade {
                 .build();
     }
 
-    private List<String> toMemberApiIds(List<Long> memberIds) {
-        return memberIds.stream()
-                .map(String::valueOf)
-                .toList();
-    }
-
-    private String toMemberApiId(Long memberId) {
-        return memberId == null ? null : String.valueOf(memberId);
-    }
-
-    private List<Long> toLongList(List<String> memberApiIds) {
-        if (memberApiIds == null || memberApiIds.isEmpty()) {
-            return List.of();
-        }
-        return memberApiIds.stream()
-                .map(Long::valueOf)
-                .toList();
-    }
-
-    private Set<Long> toLongSet(List<String> memberApiIds) {
-        if (memberApiIds == null || memberApiIds.isEmpty()) {
-            return Set.of();
-        }
-        return memberApiIds.stream()
-                .map(Long::valueOf)
-                .collect(Collectors.toSet());
-    }
-
-    private <T> Map<Long, T> toLongKeyMap(Map<String, T> source) {
-        return source.entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> Long.valueOf(entry.getKey()),
-                        Map.Entry::getValue
-                ));
-    }
 }

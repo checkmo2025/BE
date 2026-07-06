@@ -44,12 +44,11 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
     }
 
     @Override
-    public String fetchNoticeCommentAuthorId(Long noticeCommentId) {
+    public Long fetchNoticeCommentAuthorId(Long noticeCommentId) {
         NoticeComment noticeComment = noticeCommentQueryService.validateNoticeComment(noticeCommentId);
 
         return clubManagementAPI.fetchMembershipInfoByClubMemberIds(Set.of(noticeComment.getClubMemberId()))
                 .get(noticeComment.getClubMemberId())
-                .getMemberId()
-                .toString();
+                .getMemberId();
     }
 }

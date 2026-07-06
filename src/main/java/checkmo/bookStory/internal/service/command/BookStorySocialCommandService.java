@@ -76,13 +76,9 @@ public class BookStorySocialCommandService {
 
     private void validateNotBlockedByAuthor(BookStory bookStory, Long memberId) {
         if (!memberId.equals(bookStory.getMemberId())
-                && memberAPI.hasBlockBetween(toMemberApiId(bookStory.getMemberId()), toMemberApiId(memberId))) {
+                && memberAPI.hasBlockBetween(bookStory.getMemberId(), memberId)) {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_LIKE_BLOCKED);
         }
-    }
-
-    private String toMemberApiId(Long memberId) {
-        return String.valueOf(memberId);
     }
 
     private void deleteBookStoryLiked(BookStory bookStory, BookStoryLiked bookStoryLiked) {

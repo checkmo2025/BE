@@ -73,7 +73,7 @@ public class ReportQueryService {
             String memberNickname,
             Long cursorId
     ) {
-        Long reporterId = Long.valueOf(memberAPI.fetchMemberId(memberNickname));
+        Long reporterId = memberAPI.fetchMemberId(memberNickname);
 
         CursorResult<Report> reportCursorResult = CursorPagingHelper.getPage(
                 size -> reportRepository.findMyReports(reporterId, cursorId, size),
@@ -269,12 +269,12 @@ public class ReportQueryService {
     }
 
     private DisplayInfo resolveMemberDisplayInfoByNickname(String nickname) {
-        String memberId = memberAPI.fetchMemberId(nickname);
+        Long memberId = memberAPI.fetchMemberId(nickname);
 
         return resolveMemberDisplayInfo(memberId);
     }
 
-    private DisplayInfo resolveMemberDisplayInfo(String memberId) {
+    private DisplayInfo resolveMemberDisplayInfo(Long memberId) {
         var memberInfo = memberAPI.fetchMemberBasicInfo(memberId);
 
         return new DisplayInfo(

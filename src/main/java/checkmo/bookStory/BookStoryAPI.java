@@ -5,7 +5,7 @@ public interface BookStoryAPI {
 
     Long fetchBookStoryIdByBookStoryCommentId(Long bookStoryCommentId);
 
-    String fetchBookStoryAuthorId(Long bookStoryId);
+    Long fetchBookStoryAuthorId(Long bookStoryId);
 
-    String fetchBookStoryCommentAuthorId(Long commentId);
+    Long fetchBookStoryCommentAuthorId(Long commentId);
 }

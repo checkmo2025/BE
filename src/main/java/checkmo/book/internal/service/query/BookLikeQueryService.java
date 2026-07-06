@@ -31,8 +31,8 @@ public class BookLikeQueryService {
     }
 
     public BookResponseDTO.LikedBookList retrieveMemberLikedBooks(String memberNickname, Long currentMemberId, Long cursorId) {
-        Long targetMemberId = Long.valueOf(memberAPI.fetchMemberId(memberNickname));
-        memberAPI.validateProfileAccessible(toMemberApiId(currentMemberId), toMemberApiId(targetMemberId));
+        Long targetMemberId = memberAPI.fetchMemberId(memberNickname);
+        memberAPI.validateProfileAccessible(currentMemberId, targetMemberId);
         return retrieveLikedBooksByMemberId(targetMemberId, currentMemberId, cursorId);
     }
 
@@ -72,7 +72,4 @@ public class BookLikeQueryService {
         return BookConverter.toLikedBookInfo(book, likedBookIdSet.contains(book.getId()));
     }
 
-    private String toMemberApiId(Long memberId) {
-        return String.valueOf(memberId);
-    }
 }

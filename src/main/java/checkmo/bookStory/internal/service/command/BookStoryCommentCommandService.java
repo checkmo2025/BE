@@ -97,19 +97,15 @@ public class BookStoryCommentCommandService {
 
     private void validateNotBlockedByCommentTarget(BookStory bookStory, Comment parentComment, Long memberId) {
         if (!memberId.equals(bookStory.getMemberId())
-                && memberAPI.hasBlockBetween(toMemberApiId(bookStory.getMemberId()), toMemberApiId(memberId))) {
+                && memberAPI.hasBlockBetween(bookStory.getMemberId(), memberId)) {
             throw new BookStoryException(BookStoryErrorStatus.COMMENT_BLOCKED);
         }
 
         if (parentComment != null
                 && !memberId.equals(parentComment.getMemberId())
-                && memberAPI.hasBlockBetween(toMemberApiId(parentComment.getMemberId()), toMemberApiId(memberId))) {
+                && memberAPI.hasBlockBetween(parentComment.getMemberId(), memberId)) {
             throw new BookStoryException(BookStoryErrorStatus.COMMENT_BLOCKED);
         }
-    }
-
-    private String toMemberApiId(Long memberId) {
-        return String.valueOf(memberId);
     }
 
     /**

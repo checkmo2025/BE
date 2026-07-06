@@ -14,7 +14,6 @@ import checkmo.notification.web.dto.NotificationResponseDTO.SettingInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -76,7 +75,7 @@ public class NotificationQueryFacade {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
-        return toLongKeyMap(memberAPI.fetchNicknameByMemberIds(toMemberApiIds(senderIds)));
+        return memberAPI.fetchNicknameByMemberIds(senderIds);
     }
 
     private Map<Long, String> fetchClubNameMap(List<Notification> notifications) {
@@ -86,19 +85,5 @@ public class NotificationQueryFacade {
                 .distinct()
                 .toList();
         return clubManagementAPI.fetchClubNamesByClubIds(clubIds);
-    }
-
-    private List<String> toMemberApiIds(List<Long> memberIds) {
-        return memberIds.stream()
-                .map(String::valueOf)
-                .toList();
-    }
-
-    private Map<Long, String> toLongKeyMap(Map<String, String> source) {
-        return source.entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> Long.valueOf(entry.getKey()),
-                        Map.Entry::getValue
-                ));
     }
 }

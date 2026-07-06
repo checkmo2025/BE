@@ -77,7 +77,7 @@ public class ReportCommandService {
     }
 
     private String resolveMember(Long reporterId, String memberNickname) {
-        Long reportedMemberId = Long.valueOf(memberAPI.fetchMemberId(memberNickname));
+        Long reportedMemberId = memberAPI.fetchMemberId(memberNickname);
 
         if (reporterId.equals(reportedMemberId)) {
             throw new ReportException(ReportErrorStatus.CANNOT_REPORT_SELF);

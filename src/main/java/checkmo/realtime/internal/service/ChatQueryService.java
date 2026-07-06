@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,16 +76,6 @@ public class ChatQueryService {
                 .map(TeamChatMessage::getSenderMemberId)
                 .distinct()
                 .toList();
-        return memberAPI.fetchMemberBasicInfoByMemberIds(toMemberApiIds(memberIds)).entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> Long.valueOf(entry.getKey()),
-                        Map.Entry::getValue
-                ));
-    }
-
-    private List<String> toMemberApiIds(List<Long> memberIds) {
-        return memberIds.stream()
-                .map(String::valueOf)
-                .toList();
+        return memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
     }
 }

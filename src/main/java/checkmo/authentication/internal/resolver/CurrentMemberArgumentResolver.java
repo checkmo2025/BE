@@ -19,10 +19,9 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         boolean isCurrentIdAnnotation = parameter.getParameterAnnotation(CurrentId.class) != null;
-        boolean isStringClass = String.class.equals(parameter.getParameterType());
         boolean isLongClass = Long.class.equals(parameter.getParameterType()) || long.class.equals(parameter.getParameterType());
 
-        return isCurrentIdAnnotation && (isStringClass || isLongClass);
+        return isCurrentIdAnnotation && isLongClass;
     }
 
     @Override
@@ -51,9 +50,6 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
 
         if (parameter.getParameterAnnotation(CurrentId.class) != null) {
             log.info("loginId 주입: {}", memberId);
-            if (String.class.equals(parameter.getParameterType())) {
-                return String.valueOf(memberId);
-            }
             return memberId;
         }
 
