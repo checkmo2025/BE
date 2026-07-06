@@ -16,10 +16,24 @@
 
 운영자가 이 문서로 작업할 때도 secret-bearing 값을 읽거나 기록하지 않는다.
 
-- `.env`, AWS credentials, RDS_PASSWORD, AWS_ACCESS_KEY, AWS_SECRET, JWT_SECRET, OAuth secret, GitHub secret 값을 읽지 않는다.
+- local secret files, cloud credentials, database passwords, token signing material, OAuth client secrets, GitHub secrets 값을 읽지 않는다.
 - 터미널, 문서, PR, 이슈, 로그, evidence 파일에 credential, endpoint URL, host name, token 값을 붙여 넣지 않는다.
 - DB 접속은 운영자가 이미 승인된 secret manager 또는 사내 접속 절차로 수행하고, 이 runbook에는 접속 문자열을 기록하지 않는다.
 - preflight와 smoke output은 aggregate/count 또는 필요한 진단 컬럼만 남긴다. 인증 secret 컬럼 값은 출력하지 않는다.
+
+## 운영 산출물
+
+운영자는 아래 산출물을 내부 운영 기록에 남긴다. 이 문서나 PR에는 값을 붙여 넣지 않는다.
+
+- maintenance window 시작/종료 시각
+- 배포 대상 애플리케이션 artifact 식별자
+- 적용 대상 Flyway migration 파일명
+- cutover 직전 snapshot 식별자
+- preflight SQL 실행 결과 요약
+- row-count baseline과 post-cutover row-count 비교 결과
+- smoke test 결과
+- rollback 여부와 판단 사유
+- token invalidation 공지 여부
 
 ## 사전 운영 조건
 
@@ -29,6 +43,16 @@
 - RDS snapshot 또는 동등한 point-in-time restore 가능한 backup을 생성한다.
 - rollback은 migration 역실행이 아니라 snapshot restore 기준으로 수행한다.
 - preflight query 결과가 모두 0건 또는 기대 count 일치일 때만 진행한다.
+- restore는 원본 DB를 직접 덮어쓰는 작업이 아니라 snapshot에서 새 DB instance를 만든 뒤 애플리케이션 연결 대상을 되돌리는 방식으로 계획한다.
+- snapshot restore 시 원본 DB의 VPC, subnet group, security group, parameter group, option group, engine version, encryption/KMS 설정을 확인한다.
+- 다른 Region 또는 계정으로 snapshot을 복사해 restore하는 경우 parameter group과 option group이 자동으로 그대로 따라오지 않을 수 있으므로 별도 확인한다.
+- encrypted shared snapshot은 직접 restore하지 못할 수 있으므로, 필요한 경우 복사본을 만든 뒤 restore하는 절차를 사전에 검증한다.
+
+참고 문서:
+
+- Amazon RDS User Guide: Restoring to a DB instance from a DB snapshot
+- AWS CLI Command Reference: `create-db-snapshot`
+- AWS CLI Command Reference: `restore-db-instance-from-db-snapshot`
 
 ## Preflight SQL
 
@@ -322,19 +346,46 @@ WHERE a.row_count <> b.row_count
 ORDER BY b.table_name;
 ```
 
-## Rollout order
+## Maintenance checklist
 
-1. maintenance window 시작을 공지하고 신규 쓰기 요청과 batch/scheduler 실행을 중지한다.
-2. RDS snapshot 또는 동등한 backup을 생성하고 snapshot 식별자만 내부 운영 기록에 남긴다.
-3. 기존 token은 cutover 후 무효화된다고 공지한다.
-4. 위 preflight SQL을 실행한다. mismatch, orphan, duplicate provider identity, unknown prefix 결과가 있으면 중단한다.
-5. row-count baseline을 캡처한다.
-6. 새 Flyway migration과 애플리케이션 코드를 같은 배포 단위로 반영한다.
-7. migration은 `member_identity_map`을 생성해 old legacy id와 new bigint id 매핑을 고정해야 한다.
-8. migration은 `auth_user.legacy_id`, `member.legacy_id`, `auth_user.provider`, `auth_user.provider_user_id`를 채우고 `UNIQUE(provider, provider_user_id)`를 생성해야 한다.
-9. 모든 member reference column을 `member_identity_map`으로 `BIGINT`에 backfill한 뒤 FK와 unique index를 다시 검증한다. `notification.sender_id = 'SYSTEM'`은 nullable `BIGINT` 컬럼의 `NULL`로 변환한다.
-10. refresh token 저장소는 기존 문자열 subject 기반 key를 제거하거나 만료되도록 둔다. 재로그인 후 numeric subject 기반 token만 유효해야 한다.
-11. smoke test가 끝날 때까지 외부 트래픽을 재개하지 않는다.
+아래 순서를 벗어나면 중단하고 rollback 판단 회의로 전환한다.
+
+1. maintenance window 시작을 공지한다.
+2. 외부 쓰기 트래픽을 차단한다.
+3. 애플리케이션 scheduler, batch, push delivery worker를 중지한다.
+4. 현재 배포 중인 application artifact와 DB migration 버전을 내부 운영 기록에 남긴다.
+5. cutover 대상 새 application artifact와 Flyway migration 파일명을 내부 운영 기록에 남긴다.
+6. RDS manual snapshot 또는 동등한 backup을 생성하고 완료 상태를 확인한다.
+7. snapshot 식별자만 내부 운영 기록에 남긴다.
+8. preflight SQL을 실행한다.
+9. mismatch, orphan, duplicate provider identity, unknown prefix 결과가 있으면 배포하지 않고 maintenance를 종료하거나 데이터 정리 절차로 전환한다.
+10. row-count baseline을 캡처한다.
+11. 기존 token은 cutover 후 무효화되고 사용자가 재로그인해야 한다는 공지를 확정한다.
+
+## Deploy checklist
+
+1. 새 애플리케이션 코드와 Flyway migration을 같은 배포 단위로 반영한다.
+2. migration은 `member_identity_map`을 생성해 old legacy id와 new bigint id 매핑을 고정해야 한다.
+3. migration은 `auth_user.legacy_id`, `member.legacy_id`, `auth_user.provider`, `auth_user.provider_user_id`를 채우고 `UNIQUE(provider, provider_user_id)`를 생성해야 한다.
+4. 모든 member reference column을 `member_identity_map`으로 `BIGINT`에 backfill한 뒤 FK와 unique index를 다시 검증한다.
+5. `notification.sender_id = 'SYSTEM'`은 nullable `BIGINT` 컬럼의 `NULL`로 변환한다.
+6. 애플리케이션 시작 로그에서 Flyway 성공과 Spring Boot startup 성공을 확인한다.
+7. post-cutover validation SQL을 실행한다.
+8. refresh token 저장소를 token invalidation checklist에 따라 처리한다.
+9. smoke test가 끝날 때까지 외부 트래픽을 재개하지 않는다.
+
+## Token invalidation checklist
+
+cutover 후 JWT subject는 numeric `auth_user.id`의 decimal string이어야 한다. 기존 access token은 provider-shaped subject를 담고 있으므로 새 인증 boundary에서 실패해야 한다.
+
+1. 사용자는 cutover 후 재로그인해야 한다고 공지한다.
+2. Redis refresh-token key는 `refreshToken::` prefix를 사용한다.
+3. 운영자가 승인된 Redis 접속 절차로 `refreshToken::` prefix key를 삭제하거나, 모든 기존 key가 만료될 때까지 refresh endpoint를 닫는다.
+4. refresh token 삭제는 운영 Redis 규모에 맞게 `SCAN` 기반으로 수행한다. 운영 DB에서 blocking `KEYS` 명령을 사용하지 않는다.
+5. access token blacklist key는 `blacklist::` prefix를 사용한다. JWT signing material이 유지되는 경우 기존 blacklist는 보존해도 된다.
+6. smoke test에서 stale pre-cutover token으로 인증 요청이 실패하는지 확인한다.
+7. 재로그인 후 발급된 token으로 내 프로필과 대표 authenticated API가 성공하는지 확인한다.
+8. token 또는 Redis value 원문은 운영 기록에 남기지 않는다.
 
 ## Post-cutover validation SQL
 
@@ -465,18 +516,43 @@ WHERE r.sender_member_id IS NOT NULL AND m.id IS NULL;
 - `auth_user.legacy_id`와 `member.legacy_id`는 기존 provider-shaped 값으로 남아야 한다.
 - `auth_user.provider_user_id`는 prefix를 제거한 provider 원본 id여야 한다.
 
+## Reopen traffic checklist
+
+아래 조건을 모두 만족할 때만 maintenance를 종료한다.
+
+- post-cutover validation SQL이 모두 기대 결과다.
+- row-count baseline과 post-cutover row-count가 일치한다.
+- stale token은 실패하고 재로그인 token은 성공한다.
+- 대표 authenticated API smoke가 통과한다.
+- scheduler, batch, push delivery worker를 재개해도 pending 작업이 정상 처리된다.
+- error log와 monitoring에서 migration 관련 신규 예외가 없다.
+- rollback 판단 시간이 지나기 전에 외부 트래픽을 재개하지 않는다.
+
 ## Rollback order
 
-rollback은 smoke 실패가 외부 트래픽 재개 전에 발견된 경우에만 즉시 수행한다.
+rollback은 smoke 실패가 외부 트래픽 재개 전에 발견된 경우 즉시 수행한다. 외부 트래픽 재개 후에는 snapshot restore가 데이터 손실을 만들 수 있으므로 별도 incident 의사결정이 필요하다.
 
 1. 외부 트래픽과 scheduler/batch를 계속 중지한다.
 2. 실패 원인과 마지막 성공 단계, migration 로그, row-count output을 기록한다. secret 값은 기록하지 않는다.
-3. cutover 직전 snapshot으로 DB를 restore한다.
-4. 이전 애플리케이션 artifact로 되돌린다.
-5. restore된 DB에서 preflight row-count baseline과 핵심 auth/member count를 비교한다.
-6. `/health`와 로그인 smoke를 확인한다.
-7. 문제가 없으면 트래픽을 재개하고, 기존 token 정책은 rollback된 코드 기준으로 운영한다.
-8. 이미 numeric token을 발급한 짧은 구간이 있으면 해당 token은 폐기 대상으로 보고 사용자는 다시 로그인하게 한다.
+3. 이전 애플리케이션 artifact로 되돌릴 준비를 완료한다.
+4. cutover 직전 snapshot에서 새 DB instance를 restore한다.
+5. restore된 DB instance가 available 상태가 될 때까지 기다린다.
+6. restore된 DB instance의 network, security group, parameter group, option group, engine version 설정을 원본과 비교한다.
+7. 애플리케이션 연결 대상을 restore된 DB로 되돌린다.
+8. 이전 애플리케이션 artifact를 배포한다.
+9. restore된 DB에서 preflight row-count baseline과 핵심 auth/member count를 비교한다.
+10. `/health`와 로그인 smoke를 확인한다.
+11. 문제가 없으면 scheduler/batch를 재개하고 트래픽을 다시 연다.
+12. 이미 numeric token을 발급한 짧은 구간이 있으면 해당 token은 폐기 대상으로 보고 사용자는 다시 로그인하게 한다.
+
+## Rollback smoke checklist
+
+- `/health`가 정상 응답한다.
+- rollback된 코드 기준 로그인과 refresh token 흐름이 성공한다.
+- auth/member one-to-one count가 rollback 전 baseline과 일치한다.
+- club/bookStory/notification/report 대표 읽기 API가 성공한다.
+- 신규 cutover migration version이 restore된 DB의 Flyway history에 남아 있지 않다.
+- restore 전후 생성된 운영 기록에 credential, endpoint, token 원문이 없다.
 
 ## 중단 조건
 
@@ -488,3 +564,6 @@ rollback은 smoke 실패가 외부 트래픽 재개 전에 발견된 경우에�
 - target schema에 `auth_user.member_id` 또는 `member.auth_user_id`가 추가된다.
 - backup/snapshot 생성 여부가 확인되지 않는다.
 - secret 값이 문서, evidence, terminal transcript에 노출된다.
+- stale token이 cutover 후 인증에 성공한다.
+- 재로그인 token으로 대표 authenticated API가 실패한다.
+- rollback 시 restore 대상 DB 설정이 원본 운영 DB와 다르다.
