@@ -26,7 +26,7 @@ public class TeamChatMessage extends BaseEntity {
     private Long teamId;
 
     @Column(nullable = false)
-    private String senderMemberId;
+    private Long senderMemberId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;

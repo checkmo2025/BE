@@ -22,7 +22,7 @@ public class NotificationQueryService {
      * @param size       페이지 크기
      * @return 조회된 알림 엔티티 목록
      */
-    public List<Notification> retrieveNotifications(String receiverId, Long cursorId, int size) {
+    public List<Notification> retrieveNotifications(Long receiverId, Long cursorId, int size) {
         return notificationRepository.findNotifications(receiverId, cursorId, size);
     }
 
@@ -33,7 +33,7 @@ public class NotificationQueryService {
      * @param size       조회할 알림 개수
      * @return 읽지 않은 알림 엔티티 목록
      */
-    public List<Notification> retrieveUnreadNotifications(String receiverId, int size) {
+    public List<Notification> retrieveUnreadNotifications(Long receiverId, int size) {
         return notificationRepository.findNotificationPreviews(receiverId, size);
     }
 }

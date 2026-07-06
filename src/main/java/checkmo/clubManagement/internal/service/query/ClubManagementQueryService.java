@@ -64,7 +64,7 @@ public class ClubManagementQueryService {
     public List<ClubRecommendation> recommend(
             EnumSet<ClubInterestCategory> interestCategories,
             LocalDateTime lastActivityAt,
-            String memberId
+            Long memberId
     ) {
         return clubRepository.findRecommendations(interestCategories, lastActivityAt, memberId, 3);
     }

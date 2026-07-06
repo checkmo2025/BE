@@ -23,7 +23,7 @@ public class ChatCommandService {
     @Transactional
     public void saveTeamChatMessage(
             Long clubId, Long meetingId, Long teamId,
-            String senderMemberId, String content
+            Long senderMemberId, String content
     ) {
         if (clubMeetingAPI.isChatDisabled(meetingId)) {
             throw new RealtimeException(RealtimeErrorStatus.CHAT_DISABLED);

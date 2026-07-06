@@ -57,10 +57,10 @@ class AladinApiServiceTest {
 
     @Test
     void applyLikedByMePreservesSearchMetadata() {
-        when(bookLikedRepository.findLikedBookIds(eq("member-1"), anyList()))
+        when(bookLikedRepository.findLikedBookIds(eq(1L), anyList()))
                 .thenReturn(List.of("9791169213882"));
 
-        BookResponseDTO.BookList response = aladinApiService.applyLikedByMe(bookList(false, true), "member-1");
+        BookResponseDTO.BookList response = aladinApiService.applyLikedByMe(bookList(false, true), 1L);
 
         assertThat(response.getTotalResults()).isEqualTo(37);
         assertThat(response.getCurrentPage()).isEqualTo(2);
@@ -73,10 +73,10 @@ class AladinApiServiceTest {
     @Test
     void searchBooksUsesCachedRawResultAndAppliesLikedByMe() {
         when(bookSearchCacheService.retrieve("java", 10, 1)).thenReturn(Optional.of(bookList(false, true)));
-        when(bookLikedRepository.findLikedBookIds(eq("member-1"), anyList()))
+        when(bookLikedRepository.findLikedBookIds(eq(1L), anyList()))
                 .thenReturn(List.of("9791169213882"));
 
-        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("java", 1, "member-1");
+        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("java", 1, 1L);
 
         verify(aladinSearchClient, never()).fetchSearchBooks("java", 1);
         assertThat(response.getTotalResults()).isEqualTo(37);
@@ -87,7 +87,7 @@ class AladinApiServiceTest {
 
     @Test
     void searchBooksReturnsEmptyResultWhenKeywordIsBlank() {
-        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("   ", 1, "member-1");
+        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("   ", 1, 1L);
 
         assertThat(response.getTotalResults()).isZero();
         assertThat(response.getCurrentPage()).isEqualTo(1);
@@ -107,10 +107,10 @@ class AladinApiServiceTest {
         BookResponseDTO.BookList rawBookList = bookList(false, true);
         when(bookSearchCacheService.retrieve("java", 10, 1)).thenReturn(Optional.empty());
         when(aladinSearchClient.fetchSearchBooks("java", 1)).thenReturn(rawBookList);
-        when(bookLikedRepository.findLikedBookIds(eq("member-1"), anyList()))
+        when(bookLikedRepository.findLikedBookIds(eq(1L), anyList()))
                 .thenReturn(List.of("9791169213882"));
 
-        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("java", 1, "member-1");
+        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("java", 1, 1L);
 
         verify(bookSearchCacheService).save("java", 10, 1, rawBookList);
         verify(aladinSearchPrefetchService).prefetchNextPage("java", 1);
@@ -125,7 +125,7 @@ class AladinApiServiceTest {
         when(bookSearchCacheService.retrieve("java", 10, 1)).thenReturn(Optional.empty());
         when(aladinSearchClient.fetchSearchBooks("java", 1)).thenReturn(rawBookList);
 
-        aladinApiService.retrieveSearchBooks("java", 1, "member-1");
+        aladinApiService.retrieveSearchBooks("java", 1, 1L);
 
         verify(aladinSearchPrefetchService, never()).prefetchNextPage("java", 1);
     }
@@ -136,10 +136,10 @@ class AladinApiServiceTest {
         when(bookSearchCacheService.retrieve("java", 10, 1))
                 .thenReturn(Optional.empty(), Optional.of(bookList(false, false)));
         when(aladinSearchClient.fetchSearchBooks("java", 1)).thenThrow(failure);
-        when(bookLikedRepository.findLikedBookIds(eq("member-1"), anyList()))
+        when(bookLikedRepository.findLikedBookIds(eq(1L), anyList()))
                 .thenReturn(List.of("9791169213882"));
 
-        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("java", 1, "member-1");
+        BookResponseDTO.BookList response = aladinApiService.retrieveSearchBooks("java", 1, 1L);
 
         verify(sentryCaptureClient).captureException(failure);
         assertThat(response.getTotalResults()).isEqualTo(37);
@@ -154,7 +154,7 @@ class AladinApiServiceTest {
         when(bookSearchCacheService.retrieve("java", 10, 1)).thenReturn(Optional.empty());
         when(aladinSearchClient.fetchSearchBooks("java", 1)).thenThrow(failure);
 
-        assertThatThrownBy(() -> aladinApiService.retrieveSearchBooks("java", 1, "member-1"))
+        assertThatThrownBy(() -> aladinApiService.retrieveSearchBooks("java", 1, 1L))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
                 )

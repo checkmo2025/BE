@@ -45,7 +45,7 @@ public class ClubMeetingConverter {
     public static BookReview toBookReview(
             BookShelfRequestDTO.BookReviewCreate request,
             Long clubMemberId,
-            String memberId
+            Long memberId
     ) {
         return BookReview.builder()
                 .description(request.getDescription())
@@ -57,7 +57,7 @@ public class ClubMeetingConverter {
 
     public static Topic toTopic(
             BookShelfRequestDTO.TopicCreate topicCreateDTO,
-            String memberId,
+            Long memberId,
             Long clubMemberId
     ) {
         return Topic.builder()
@@ -74,7 +74,7 @@ public class ClubMeetingConverter {
     public static BookShelfResponseDTO.TopicDetail toTopicDetailDTO(
             Topic topic,
             MemberExternalDTO.BasicInfo authorInfo,
-            String memberId
+            Long memberId
     ) {
         return BookShelfResponseDTO.TopicDetail.builder()
                 .topicId(topic.getId())
@@ -135,7 +135,7 @@ public class ClubMeetingConverter {
 
     public static MeetingResponseDTO.Topic toTopicDTO(
             Topic topic,
-            Map<String, MemberExternalDTO.BasicInfo> authorInfoMap,
+            Map<Long, MemberExternalDTO.BasicInfo> authorInfoMap,
             Set<Long> selectedTopicIds
     ) {
         return MeetingResponseDTO.Topic.builder()
@@ -194,12 +194,12 @@ public class ClubMeetingConverter {
 
     public static List<MeetingResponseDTO.MeetingMember> toMeetingMembersDTO(
             List<MembershipInfo> clubMemberships,
-            Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
+            Map<Long, MemberExternalDTO.BasicInfo> memberBasicInfoMap,
             Map<Long, Long> clubMemberIdToTeamIdMap,
             Map<Long, Integer> teamIdToTeamNumberMap
     ) {
         List<MembershipInfo> safeMemberships = (clubMemberships != null) ? clubMemberships : List.of();
-        Map<String, MemberExternalDTO.BasicInfo> safeMemberInfoMap =
+        Map<Long, MemberExternalDTO.BasicInfo> safeMemberInfoMap =
                 (memberBasicInfoMap != null) ? memberBasicInfoMap : Map.of();
         Map<Long, Long> safeClubMemberToTeamIdMap =
                 (clubMemberIdToTeamIdMap != null) ? clubMemberIdToTeamIdMap : Map.of();
@@ -209,7 +209,7 @@ public class ClubMeetingConverter {
         return safeMemberships.stream()
                 .map(m -> {
                     Long clubMemberId = m.getClubMemberId();
-                    String memberId = m.getMemberId();
+                    Long memberId = m.getMemberId();
 
                     MemberExternalDTO.BasicInfo basic = safeMemberInfoMap.get(memberId);
 

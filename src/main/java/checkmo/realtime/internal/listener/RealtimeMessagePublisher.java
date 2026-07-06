@@ -35,7 +35,7 @@ public class RealtimeMessagePublisher {
                 .clubId(event.clubId())
                 .meetingId(event.meetingId())
                 .teamId(event.teamId())
-                .senderMemberId(teamChatMessage.getSenderMemberId())
+                .senderMemberId(String.valueOf(teamChatMessage.getSenderMemberId()))
                 .senderNickname(basicInfo.getNickname())
                 .senderProfileImageUrl(basicInfo.getProfileImageUrl())
                 .messageId(teamChatMessage.getId())

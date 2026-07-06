@@ -44,7 +44,7 @@ public class ClubManagementExternalDTO {
     @AllArgsConstructor
     @Builder
     public static class MembershipInfo {
-        private String memberId;
+        private Long memberId;
         private Long clubMemberId;
         private boolean active;
         private boolean staff;

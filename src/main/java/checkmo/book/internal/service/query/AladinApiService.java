@@ -37,7 +37,7 @@ public class AladinApiService {
     private final AladinSearchPrefetchService aladinSearchPrefetchService;
     private final SentryCaptureClient sentryCaptureClient;
 
-    public BookResponseDTO.BookList retrieveSearchBooks(String keyword, int page, String memberId) {
+    public BookResponseDTO.BookList retrieveSearchBooks(String keyword, int page, Long memberId) {
         if (keyword == null || keyword.isBlank()) {
             return emptySearchResult(page);
         }
@@ -232,7 +232,7 @@ public class AladinApiService {
         return value.substring(0, LOG_BODY_MAX_LENGTH) + "...";
     }
 
-    public BookResponseDTO.BookList applyLikedByMe(BookResponseDTO.BookList bookList, String memberId) {
+    public BookResponseDTO.BookList applyLikedByMe(BookResponseDTO.BookList bookList, Long memberId) {
         if (bookList == null || bookList.getDetailInfoList() == null || bookList.getDetailInfoList().isEmpty()) {
             return bookList;
         }

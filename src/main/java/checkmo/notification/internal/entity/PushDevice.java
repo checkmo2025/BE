@@ -22,7 +22,7 @@ public class PushDevice extends BaseEntity {
     private Long id;
 
     @Column(name = "member_id", nullable = false)
-    private String memberId;
+    private Long memberId;
 
     @Column(name = "installation_id", nullable = false, length = 36)
     private String installationId;
@@ -51,7 +51,7 @@ public class PushDevice extends BaseEntity {
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;
 
-    public void update(String expoPushToken, String memberId, PushPlatform platform, String appVersion, String buildNumber) {
+    public void update(String expoPushToken, Long memberId, PushPlatform platform, String appVersion, String buildNumber) {
         this.expoPushToken = expoPushToken;
         this.memberId = memberId;
         this.platform = platform;

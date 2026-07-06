@@ -21,13 +21,12 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
 
     @Override
     public List<Member> findRecommendMembers(
-            String currentMemberId,
+            Long currentMemberId,
             List<MemberInterestCategory> myInterests,
-            List<String> excludedMemberIds,
+            List<Long> excludedMemberIds,
             int limit
     ) {
-        // 1. 이미 팔로우한 사람들의 ID 조회
-        List<String> followingIds = queryFactory
+        List<Long> followingIds = queryFactory
                 .select(follow.following.id)
                 .from(follow)
                 .where(follow.follower.id.eq(currentMemberId))
@@ -67,11 +66,11 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .fetch();
     }
 
-    private BooleanExpression notInFollowingIds(List<String> followingIds) {
+    private BooleanExpression notInFollowingIds(List<Long> followingIds) {
         return followingIds.isEmpty() ? null : member.id.notIn(followingIds);
     }
 
-    private BooleanExpression notInExcludedIds(List<String> excludedMemberIds) {
+    private BooleanExpression notInExcludedIds(List<Long> excludedMemberIds) {
         return excludedMemberIds == null || excludedMemberIds.isEmpty() ? null : member.id.notIn(excludedMemberIds);
     }
 }

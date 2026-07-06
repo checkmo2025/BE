@@ -43,7 +43,7 @@ public class ClubMeetingController {
     @GetMapping("/next")
     public ApiResponse<NextMeetingRedirect> getNextMeetingRedirect(
             @PathVariable Long clubId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveNextMeeting(clubId, memberId));
     }
@@ -63,7 +63,7 @@ public class ClubMeetingController {
     public ApiResponse<MeetingInfo> getMeeting(
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveMeetingInfo(clubId, meetingId, memberId));
     }
@@ -86,7 +86,7 @@ public class ClubMeetingController {
     public ApiResponse<MeetingResponseDTO.MeetingMemberList> getMeetingMembers(
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(
                 clubMeetingQueryFacade.retrieveMeetingMemberList(clubId, meetingId, memberId));
@@ -109,7 +109,7 @@ public class ClubMeetingController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestBody @Valid MeetingRequestDTO.TeamManage request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubMeetingCommandService.manageTeam(clubId, meetingId, memberId, request);
         return ApiResponse.onSuccess(null);
@@ -133,7 +133,7 @@ public class ClubMeetingController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @PathVariable Long teamId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveSelectableTopics(clubId, meetingId, teamId, memberId));
     }

@@ -35,7 +35,7 @@ public class JwtLoginProcessor {
     }
 
     private JwtToken issueToken(Authentication authentication) {
-        String userId = ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
+        Long userId = ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
 
         // 인증 성공 시점에만 계정 자동 복구
         authReactivationCommandService.reactivateIfDeactivated(userId);

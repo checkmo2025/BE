@@ -80,7 +80,7 @@ class MemberApiTest extends ApiTestSupport {
         TestUser user = createIncompleteUser();
         Terms service = saveTerms(TermsType.SERVICE_TERMS, "서비스", true, true);
         Terms marketing = saveTerms(TermsType.MARKETING, "마케팅", true, false);
-        saveMemberTerms(user.id(), marketing, true);
+        saveMemberTerms(user.memberId(), marketing, true);
 
         ExtractableResponse<Response> response = given()
                 .cookie(accessTokenCookie(user))
@@ -268,7 +268,7 @@ class MemberApiTest extends ApiTestSupport {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.jsonPath().getList("result.terms.agreed", Boolean.class))
                     .containsExactly(true);
-            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(user.id(), marketing.getId()))
+            softly.assertThat(memberTermsRepository.countByMember_IdAndTerms_Id(user.memberId(), marketing.getId()))
                     .isEqualTo(3);
         });
     }
@@ -281,7 +281,7 @@ class MemberApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(accessTokenCookie(user))
                 .body(Map.of(
-                        "nickname", "complete" + user.id().substring(user.id().length() - 4).toLowerCase(),
+                        "nickname", "complete" + user.legacyId().substring(user.legacyId().length() - 4).toLowerCase(),
                         "name", "완료",
                         "phoneNumber", "010-1234-5678",
                         "description", "소개",
@@ -364,7 +364,7 @@ class MemberApiTest extends ApiTestSupport {
     @Test
     void 프로필_수정으로_닉네임을_변경하면_Member와_AuthUser가_함께_갱신된다() {
         TestUser user = createUser();
-        String newNickname = "nn" + user.id().substring(user.id().length() - 8);
+        String newNickname = "nn" + user.legacyId().substring(user.legacyId().length() - 8);
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -377,8 +377,8 @@ class MemberApiTest extends ApiTestSupport {
                 .body("isSuccess", equalTo(true))
                 .body("result.nickname", equalTo(newNickname));
 
-        var member = memberRepository.findById(user.id()).orElseThrow();
-        var authUser = authRepository.findById(user.id()).orElseThrow();
+        var member = memberRepository.findById(user.memberId()).orElseThrow();
+        var authUser = authRepository.findById(user.memberId()).orElseThrow();
         assertThat(member.getNickName()).isEqualTo(newNickname);
         assertThat(authUser.getNickName()).isEqualTo(newNickname);
     }
@@ -399,7 +399,7 @@ class MemberApiTest extends ApiTestSupport {
                 .body("isSuccess", equalTo(false))
                 .body("code", equalTo("MEMBER_416"));
 
-        var member = memberRepository.findById(me.id()).orElseThrow();
+        var member = memberRepository.findById(me.memberId()).orElseThrow();
         assertThat(member.getNickName()).isEqualTo(me.nickName());
     }
 
@@ -560,7 +560,9 @@ class MemberApiTest extends ApiTestSupport {
                 .get("/api/v1/members/me/blocks")
                 .then()
                 .statusCode(200)
-                .body("isSuccess", equalTo(true));
+                .body("isSuccess", equalTo(true))
+                .body("result.blocks[0].memberId", equalTo(target.memberId().intValue()))
+                .body("result.blocks[0].nickname", equalTo(target.nickName()));
 
         given()
                 .cookie(accessTokenCookie(me))
@@ -653,7 +655,7 @@ class MemberApiTest extends ApiTestSupport {
     @Test
     void updateEmailSucceedsAfterVerification() {
         TestUser user = createUserWithPassword("Pass123!");
-        String newEmail = "changed-" + user.id().substring(user.id().length() - 4).toLowerCase() + "@example.com";
+        String newEmail = "changed-" + user.legacyId().substring(user.legacyId().length() - 4).toLowerCase() + "@example.com";
         when(redisHashOperations.get("verification:" + newEmail, "code")).thenReturn("123456");
         when(redisHashOperations.get("verification:" + newEmail, "verified")).thenReturn(false);
 
@@ -735,7 +737,7 @@ class MemberApiTest extends ApiTestSupport {
                 .build());
     }
 
-    private void saveMemberTerms(String memberId, Terms terms, boolean agreed) {
+    private void saveMemberTerms(Long memberId, Terms terms, boolean agreed) {
         memberRepository.findById(memberId)
                 .map(member -> MemberTerms.builder()
                         .member(member)

@@ -44,7 +44,7 @@ public class BookController {
     })
     @GetMapping("/search")
     public ApiResponse<BookResponseDTO.BookList> searchBook(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "1")
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
@@ -72,7 +72,7 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
     })
     @GetMapping("/recommend")
-    public ApiResponse<BookResponseDTO.BookList> recommendBooks(@CurrentId String memberId) {
+    public ApiResponse<BookResponseDTO.BookList> recommendBooks(@CurrentId Long memberId) {
         BookResponseDTO.BookList result = bookRecommendationService.retrieveRecommendedBooks(memberId);
         return ApiResponse.onSuccess(result);
     }
@@ -85,7 +85,7 @@ public class BookController {
     })
     @PostMapping("/{isbn}/like")
     public ApiResponse<BookResponseDTO.LikeResult> toggleLikeBook(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String isbn
     ) {
         BookResponseDTO.LikeResult result = bookSocialCommandService.toggleLikeOnBook(memberId, isbn);
@@ -105,7 +105,7 @@ public class BookController {
     })
     @GetMapping("/me/likes")
     public ApiResponse<BookResponseDTO.LikedBookList> getMyLikedBooks(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         BookResponseDTO.LikedBookList result = bookLikeQueryService.retrieveMyLikedBooks(memberId, cursorId);
@@ -124,7 +124,7 @@ public class BookController {
     })
     @GetMapping("/{memberNickname}/likes")
     public ApiResponse<BookResponseDTO.LikedBookList> getMemberLikedBooks(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String memberNickname,
             @RequestParam(required = false) Long cursorId
     ) {

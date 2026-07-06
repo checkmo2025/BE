@@ -29,12 +29,12 @@ public class MemberAPIImpl implements MemberAPI {
     private final MemberBlockQueryService memberBlockQueryService;
 
     @Override
-    public String fetchMemberId(String nickname) {
+    public Long fetchMemberId(String nickname) {
         return memberQueryService.retrieveMemberId(nickname);
     }
 
     @Override
-    public String fetchNickname(String memberId) {
+    public String fetchNickname(Long memberId) {
         if (memberId == null) {
             return WITHDRAWN_MEMBER_NICKNAME;
         }
@@ -44,20 +44,21 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, String> fetchNicknameByMemberIds(List<String> memberIds) {
-        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+    public Map<Long, String> fetchNicknameByMemberIds(List<Long> memberIds) {
+        List<Long> distinctMemberIds = distinctNonNullIds(memberIds);
         if (distinctMemberIds.isEmpty()) {
             return Map.of();
         }
 
-        Map<String, String> result = initializeWithdrawnNicknameMap(distinctMemberIds);
+        Map<Long, String> result = initializeWithdrawnNicknameMap(distinctMemberIds);
 
-        result.putAll(memberQueryService.retrieveActiveMemberNicknameByMemberIds(distinctMemberIds));
+        memberQueryService.retrieveActiveMemberNicknameByMemberIds(distinctMemberIds)
+                .forEach(result::put);
         return result;
     }
 
     @Override
-    public MemberExternalDTO.BasicInfo fetchMemberBasicInfo(String memberId) {
+    public MemberExternalDTO.BasicInfo fetchMemberBasicInfo(Long memberId) {
         if (memberId == null) {
             return withdrawnBasicInfo();
         }
@@ -67,13 +68,13 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<String> memberIds) {
-        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+    public Map<Long, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<Long> memberIds) {
+        List<Long> distinctMemberIds = distinctNonNullIds(memberIds);
         if (distinctMemberIds.isEmpty()) {
             return Map.of();
         }
 
-        Map<String, MemberExternalDTO.BasicInfo> result = initializeWithdrawnBasicInfoMap(distinctMemberIds);
+        Map<Long, MemberExternalDTO.BasicInfo> result = initializeWithdrawnBasicInfoMap(distinctMemberIds);
 
         List<MemberBasicInfoProjection> activeMembers =
                 memberQueryService.retrieveActiveMemberBasicInfos(distinctMemberIds);
@@ -84,13 +85,13 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, DetailInfo> fetchMemberDetailInfoByMemberIds(List<String> memberIds) {
-        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+    public Map<Long, DetailInfo> fetchMemberDetailInfoByMemberIds(List<Long> memberIds) {
+        List<Long> distinctMemberIds = distinctNonNullIds(memberIds);
         if (distinctMemberIds.isEmpty()) {
             return Map.of();
         }
 
-        Map<String, DetailInfo> result = initializeWithdrawnDetailInfoMap(distinctMemberIds);
+        Map<Long, DetailInfo> result = initializeWithdrawnDetailInfoMap(distinctMemberIds);
 
         List<Member> members = memberQueryService.retrieveMemberById(distinctMemberIds);
         members.forEach(member -> result.put(member.getId(), toDetailInfo(member)));
@@ -99,13 +100,13 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberExternalDTO.PersonalInfo> fetchMemberPersonalInfoByMemberIds(List<String> memberIds) {
-        List<String> distinctMemberIds = distinctNonNullIds(memberIds);
+    public Map<Long, MemberExternalDTO.PersonalInfo> fetchMemberPersonalInfoByMemberIds(List<Long> memberIds) {
+        List<Long> distinctMemberIds = distinctNonNullIds(memberIds);
         if (distinctMemberIds.isEmpty()) {
             return Map.of();
         }
 
-        Map<String, MemberExternalDTO.PersonalInfo> result = initializeWithdrawnPersonalInfoMap(distinctMemberIds);
+        Map<Long, MemberExternalDTO.PersonalInfo> result = initializeWithdrawnPersonalInfoMap(distinctMemberIds);
 
         List<Member> members = memberQueryService.retrieveMemberById(distinctMemberIds);
         members.forEach(member -> result.put(member.getId(), toPersonalInfo(member)));
@@ -115,8 +116,8 @@ public class MemberAPIImpl implements MemberAPI {
 
     @Override
     public MemberExternalDTO.BasicInfoWithFollow fetchMemberBasicInfoWithFollow(
-            String targetMemberId,
-            String currentMemberId
+            Long targetMemberId,
+            Long currentMemberId
     ) {
         if (targetMemberId == null) {
             return withdrawnBasicInfoWithFollow();
@@ -124,7 +125,10 @@ public class MemberAPIImpl implements MemberAPI {
 
         var basicInfoDTO = fetchMemberBasicInfo(targetMemberId);
         boolean isWithdrawn = isWithdrawnBasicInfo(basicInfoDTO);
-        boolean isFollowing = !isWithdrawn && memberFollowQueryService.isFollowing(currentMemberId, targetMemberId);
+        boolean isFollowing = !isWithdrawn && memberFollowQueryService.isFollowing(
+                currentMemberId,
+                targetMemberId
+        );
 
         return MemberExternalDTO.BasicInfoWithFollow.builder()
                 .nickname(basicInfoDTO.getNickname())
@@ -134,21 +138,24 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public Map<String, MemberExternalDTO.BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
-            List<String> targetMemberIds,
-            String currentMemberId
+    public Map<Long, MemberExternalDTO.BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
+            List<Long> targetMemberIds,
+            Long currentMemberId
     ) {
-        List<String> distinctTargetIds = distinctNonNullIds(targetMemberIds);
+        List<Long> distinctTargetIds = distinctNonNullIds(targetMemberIds);
         if (distinctTargetIds.isEmpty()) {
             return Map.of();
         }
 
-        Map<String, MemberExternalDTO.BasicInfo> basicInfoMap = fetchMemberBasicInfoByMemberIds(distinctTargetIds);
-        Map<String, Boolean> followStatusMap =
-                memberFollowQueryService.checkFollowStatusByMemberId(currentMemberId, distinctTargetIds);
+        Map<Long, MemberExternalDTO.BasicInfo> basicInfoMap = fetchMemberBasicInfoByMemberIds(distinctTargetIds);
+        Map<Long, Boolean> followStatusMap =
+                memberFollowQueryService.checkFollowStatusByMemberId(
+                        currentMemberId,
+                        distinctTargetIds
+                );
 
-        Map<String, MemberExternalDTO.BasicInfoWithFollow> result = new HashMap<>();
-        for (String targetId : distinctTargetIds) {
+        Map<Long, MemberExternalDTO.BasicInfoWithFollow> result = new HashMap<>();
+        for (Long targetId : distinctTargetIds) {
             result.put(targetId, toBasicInfoWithFollow(targetId, basicInfoMap, followStatusMap));
         }
 
@@ -156,37 +163,37 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public List<String> fetchFollowingIds(String memberId) {
+    public List<Long> fetchFollowingIds(Long memberId) {
         return memberFollowQueryService.retrieveFollowingIds(memberId);
     }
 
     @Override
-    public List<String> fetchBlockedMemberIds(String blockerId) {
+    public List<Long> fetchBlockedMemberIds(Long blockerId) {
         return memberBlockQueryService.retrieveBlockedMemberIds(blockerId);
     }
 
     @Override
-    public List<String> fetchBlockRelatedMemberIds(String memberId) {
+    public List<Long> fetchBlockRelatedMemberIds(Long memberId) {
         return memberBlockQueryService.retrieveBlockRelatedMemberIds(memberId);
     }
 
     @Override
-    public boolean hasBlockBetween(String memberId1, String memberId2) {
+    public boolean hasBlockBetween(Long memberId1, Long memberId2) {
         return memberBlockQueryService.hasBlockBetween(memberId1, memberId2);
     }
 
     @Override
-    public boolean hasBlocked(String blockerId, String blockedId) {
+    public boolean hasBlocked(Long blockerId, Long blockedId) {
         return memberBlockQueryService.hasBlocked(blockerId, blockedId);
     }
 
     @Override
-    public void validateProfileAccessible(String viewerId, String targetMemberId) {
+    public void validateProfileAccessible(Long viewerId, Long targetMemberId) {
         memberBlockQueryService.validateProfileAccessible(viewerId, targetMemberId);
     }
 
     @Override
-    public InterestCategoryInfo fetchInterestCategory(String memberId) {
+    public InterestCategoryInfo fetchInterestCategory(Long memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
         Set<MemberInterestCategory> interestCategories = member.getInterestCategories();
         List<String> categories = (interestCategories == null)
@@ -202,7 +209,7 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     @Override
-    public String fetchMemberEmail(String memberId) {
+    public String fetchMemberEmail(Long memberId) {
         Member member = memberQueryService.retrieveMember(memberId);
         return member.getEmail();
     }
@@ -214,26 +221,26 @@ public class MemberAPIImpl implements MemberAPI {
                 .build();
     }
 
-    private Map<String, String> initializeWithdrawnNicknameMap(List<String> memberIds) {
-        Map<String, String> result = new HashMap<>();
+    private Map<Long, String> initializeWithdrawnNicknameMap(List<Long> memberIds) {
+        Map<Long, String> result = new HashMap<>();
         memberIds.forEach(memberId -> result.put(memberId, WITHDRAWN_MEMBER_NICKNAME));
         return result;
     }
 
-    private Map<String, MemberExternalDTO.PersonalInfo> initializeWithdrawnPersonalInfoMap(List<String> memberIds) {
-        Map<String, MemberExternalDTO.PersonalInfo> result = new HashMap<>();
+    private Map<Long, MemberExternalDTO.PersonalInfo> initializeWithdrawnPersonalInfoMap(List<Long> memberIds) {
+        Map<Long, MemberExternalDTO.PersonalInfo> result = new HashMap<>();
         memberIds.forEach(memberId -> result.put(memberId, withdrawnPersonalInfo()));
         return result;
     }
 
-    private Map<String, MemberExternalDTO.BasicInfo> initializeWithdrawnBasicInfoMap(List<String> memberIds) {
-        Map<String, MemberExternalDTO.BasicInfo> result = new HashMap<>();
+    private Map<Long, MemberExternalDTO.BasicInfo> initializeWithdrawnBasicInfoMap(List<Long> memberIds) {
+        Map<Long, MemberExternalDTO.BasicInfo> result = new HashMap<>();
         memberIds.forEach(memberId -> result.put(memberId, withdrawnBasicInfo()));
         return result;
     }
 
-    private Map<String, MemberExternalDTO.DetailInfo> initializeWithdrawnDetailInfoMap(List<String> memberIds) {
-        Map<String, MemberExternalDTO.DetailInfo> result = new HashMap<>();
+    private Map<Long, MemberExternalDTO.DetailInfo> initializeWithdrawnDetailInfoMap(List<Long> memberIds) {
+        Map<Long, MemberExternalDTO.DetailInfo> result = new HashMap<>();
         memberIds.forEach(memberId -> result.put(memberId, withdrawnDetailInfo()));
         return result;
     }
@@ -263,14 +270,14 @@ public class MemberAPIImpl implements MemberAPI {
                 .build();
     }
 
-    private List<String> distinctNonNullIds(List<String> ids) {
+    private List<Long> distinctNonNullIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
 
         return ids.stream()
                 .filter(Objects::nonNull)
-                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> new java.util.ArrayList<>(new LinkedHashSet<>(list))));
+                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> new ArrayList<>(new LinkedHashSet<>(list))));
     }
 
     private boolean isWithdrawnBasicInfo(MemberExternalDTO.BasicInfo basicInfo) {
@@ -279,9 +286,9 @@ public class MemberAPIImpl implements MemberAPI {
     }
 
     private MemberExternalDTO.BasicInfoWithFollow toBasicInfoWithFollow(
-            String targetId,
-            Map<String, MemberExternalDTO.BasicInfo> basicInfoMap,
-            Map<String, Boolean> followStatusMap
+            Long targetId,
+            Map<Long, MemberExternalDTO.BasicInfo> basicInfoMap,
+            Map<Long, Boolean> followStatusMap
     ) {
         MemberExternalDTO.BasicInfo basicInfo = basicInfoMap.getOrDefault(targetId, withdrawnBasicInfo());
         boolean isWithdrawn = isWithdrawnBasicInfo(basicInfo);

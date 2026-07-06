@@ -65,7 +65,7 @@ public class ClubNoticeQueryFacade {
 
     public ClubNoticePreviewPage retrieveClubNoticeList(
             Long clubId,
-            String memberId,
+            Long memberId,
             int page
     ) {
         clubManagementAPI.validateClub(clubId);
@@ -103,7 +103,7 @@ public class ClubNoticeQueryFacade {
     public ClubNoticeResponseDTO.ClubNoticeDetail retrieveClubNoticeDetail(
             Long clubId,
             Long noticeId,
-            String memberId
+            Long memberId
     ) {
         clubManagementAPI.validateClub(clubId);
         MembershipInfo clubMembershipInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
@@ -124,7 +124,7 @@ public class ClubNoticeQueryFacade {
         return ClubNoticeConverter.toClubNoticeDetail(notice, meetingDetail, voteDetail);
     }
 
-    public NoticeCommentList retrieveNoticeComments(Long clubId, Long noticeId, String memberId, Long cursorId) {
+    public NoticeCommentList retrieveNoticeComments(Long clubId, Long noticeId, Long memberId, Long cursorId) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         clubNoticeQueryService.validateNotice(clubId, noticeId);
@@ -293,14 +293,14 @@ public class ClubNoticeQueryFacade {
         }
         Map<Long, MembershipInfo> membershipMap =
                 clubManagementAPI.fetchMembershipInfoByClubMemberIds(clubMemberIds);
-        List<String> memberIds = ExtractHelper.extractDistinctList(
+        List<Long> memberIds = ExtractHelper.extractDistinctList(
                 membershipMap.values(),
                 MembershipInfo::getMemberId
         );
         if (memberIds.isEmpty()) {
             return Map.of();
         }
-        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap =
+        Map<Long, MemberExternalDTO.BasicInfo> memberBasicInfoMap =
                 memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
         if (memberBasicInfoMap == null || memberBasicInfoMap.isEmpty()) {
             return Map.of();

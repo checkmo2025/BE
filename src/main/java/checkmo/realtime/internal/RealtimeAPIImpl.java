@@ -31,7 +31,7 @@ public class RealtimeAPIImpl implements RealtimeAPI {
     }
 
     @Override
-    public String fetchChatSenderMemberId(Long chatMessageId) {
+    public Long fetchChatSenderMemberId(Long chatMessageId) {
         TeamChatMessage message = teamChatMessageRepository.findById(chatMessageId)
                 .orElseThrow(() -> new RealtimeGeneralException(RealtimeGeneralErrorStatus.MESSAGE_NOT_FOUND));
 

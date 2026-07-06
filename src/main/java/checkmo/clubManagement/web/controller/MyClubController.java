@@ -29,7 +29,7 @@ public class MyClubController {
     })
     @GetMapping
     public ApiResponse<MyClubResponseDTO.MyClubList> getMyClubs(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveMyClubList(memberId));
     }

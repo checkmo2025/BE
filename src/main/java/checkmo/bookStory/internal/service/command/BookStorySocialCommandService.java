@@ -33,7 +33,7 @@ public class BookStorySocialCommandService {
      * @param bookStoryId 토글할 책이야기의 ID
      * @return 좋아요가 추가됐는지/제거됐는지 여부
      */
-    public boolean toggleLikeOnBookStory(String memberId, Long bookStoryId) {
+    public boolean toggleLikeOnBookStory(Long memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findById(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
@@ -74,8 +74,9 @@ public class BookStorySocialCommandService {
                 });
     }
 
-    private void validateNotBlockedByAuthor(BookStory bookStory, String memberId) {
-        if (!memberId.equals(bookStory.getMemberId()) && memberAPI.hasBlockBetween(bookStory.getMemberId(), memberId)) {
+    private void validateNotBlockedByAuthor(BookStory bookStory, Long memberId) {
+        if (!memberId.equals(bookStory.getMemberId())
+                && memberAPI.hasBlockBetween(bookStory.getMemberId(), memberId)) {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_LIKE_BLOCKED);
         }
     }
@@ -85,7 +86,7 @@ public class BookStorySocialCommandService {
         bookStory.removeBookStoryLiked(bookStoryLiked);
     }
 
-    private Optional<BookStoryLiked> createBookStoryLiked(BookStory bookStory, String memberId) {
+    private Optional<BookStoryLiked> createBookStoryLiked(BookStory bookStory, Long memberId) {
         try {
             BookStoryLiked bookStoryLiked = BookStoryLiked.builder()
                     .bookStory(bookStory)

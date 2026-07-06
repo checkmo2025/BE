@@ -45,7 +45,7 @@ public class Topic extends BaseEntity {
     private Long clubMemberId;
 
     @Column(name = "member_id", nullable = false)
-    private String memberId;
+    private Long memberId;
 
     @Builder.Default
     @OneToMany(mappedBy = "topic", cascade = CascadeType.REMOVE, orphanRemoval = true)

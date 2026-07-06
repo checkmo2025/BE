@@ -34,7 +34,7 @@ class SocialAccountResolverTest {
     void createsIncompleteAppleUserWhenFirstLoginHasEmail() {
         OAuth2Attributes attributes = appleAttributes("apple-sub", "apple-user@example.com");
 
-        when(authRepository.findById("APPLE_apple-sub")).thenReturn(Optional.empty());
+        when(authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub")).thenReturn(Optional.empty());
         when(authRepository.findByEmail("apple-user@example.com")).thenReturn(Optional.empty());
         when(socialAccountCreator.create(attributes, "apple"))
                 .thenReturn(user("APPLE_apple-sub", "apple-user@example.com"));
@@ -43,7 +43,7 @@ class SocialAccountResolverTest {
 
         assertSoftly(softly -> {
             softly.assertThat(result.newSocialSignUp()).isTrue();
-            softly.assertThat(result.user().getId()).isEqualTo("APPLE_apple-sub");
+            softly.assertThat(result.user().getLegacyId()).isEqualTo("APPLE_apple-sub");
             softly.assertThat(result.user().getEmail()).isEqualTo("apple-user@example.com");
             softly.assertThat(result.user().isProfileCompleted()).isFalse();
         });
@@ -55,7 +55,7 @@ class SocialAccountResolverTest {
         AuthUser existingUser = user("APPLE_apple-sub", "apple-user@example.com");
         OAuth2Attributes attributes = appleAttributesWithoutEmail("apple-sub");
 
-        when(authRepository.findById("APPLE_apple-sub")).thenReturn(Optional.of(existingUser));
+        when(authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub")).thenReturn(Optional.of(existingUser));
 
         SocialAccountResolution result = resolver.resolve(attributes, "apple");
 
@@ -71,7 +71,7 @@ class SocialAccountResolverTest {
     void rejectsAppleEmailCollisionWithControlledConflict() {
         OAuth2Attributes attributes = appleAttributes("apple-sub", "shared@example.com");
 
-        when(authRepository.findById("APPLE_apple-sub")).thenReturn(Optional.empty());
+        when(authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub")).thenReturn(Optional.empty());
         when(authRepository.findByEmail("shared@example.com"))
                 .thenReturn(Optional.of(user("LOCAL_local-user", "shared@example.com")));
 
@@ -85,7 +85,7 @@ class SocialAccountResolverTest {
     void rejectsNewAppleLoginWithoutEmail() {
         OAuth2Attributes attributes = appleAttributesWithoutEmail("apple-sub");
 
-        when(authRepository.findById("APPLE_apple-sub")).thenReturn(Optional.empty());
+        when(authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub")).thenReturn(Optional.empty());
 
         Throwable thrown = catchThrowable(() -> resolver.resolve(attributes, "apple"));
 
@@ -98,7 +98,7 @@ class SocialAccountResolverTest {
         AuthUser existingUser = user("APPLE_apple-sub", "apple-user@example.com");
         OAuth2Attributes attributes = appleAttributes("apple-sub", "apple-user@example.com");
 
-        when(authRepository.findById("APPLE_apple-sub"))
+        when(authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub"))
                 .thenReturn(Optional.empty(), Optional.of(existingUser));
         when(authRepository.findByEmail("apple-user@example.com")).thenReturn(Optional.empty());
         when(socialAccountCreator.create(attributes, "apple"))
@@ -129,7 +129,7 @@ class SocialAccountResolverTest {
             softly.assertThat(result.user()).isSameAs(existingUser);
             softly.assertThat(result.newSocialSignUp()).isFalse();
         });
-        verify(authRepository, never()).findById(newProviderMemberId);
+        verify(authRepository, never()).findByProviderAndProviderUserId(any(), any());
         verify(socialAccountCreator, never()).create(attributes, registrationId);
     }
 
@@ -145,10 +145,15 @@ class SocialAccountResolverTest {
     }
 
     private AuthUser user(String id, String email) {
+        String provider = id.substring(0, id.indexOf("_"));
+        String providerUserId = id.substring(id.indexOf("_") + 1);
         return AuthUser.builder()
-                .id(id)
+                .id(1L)
+                .legacyId(id)
                 .email(email)
                 .password("")
+                .provider(provider)
+                .providerUserId(providerUserId)
                 .role(Role.USER)
                 .profileCompleted(false)
                 .build();

@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -44,7 +43,7 @@ public class MemberQueryService {
      * @param memberId 회원 ID
      * @return 회원 엔티티
      */
-    public Member retrieveMember(String memberId) {
+    public Member retrieveMember(Long memberId) {
         return memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
@@ -55,7 +54,7 @@ public class MemberQueryService {
      * @param memberIds 회원 ID 목록
      * @return 회원 엔티티 리스트
      */
-    public List<Member> retrieveMemberById(List<String> memberIds) {
+    public List<Member> retrieveMemberById(List<Long> memberIds) {
         return memberRepository.findAllByIdInAndDeactivatedAtIsNull(memberIds);
     }
 
@@ -70,7 +69,7 @@ public class MemberQueryService {
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
-    public List<MemberBasicInfoProjection> retrieveActiveMemberBasicInfos(List<String> memberIds) {
+    public List<MemberBasicInfoProjection> retrieveActiveMemberBasicInfos(List<Long> memberIds) {
         return memberRepository.findActiveIdNicknameAndImgUrlByIdIn(memberIds);
     }
 
@@ -80,16 +79,16 @@ public class MemberQueryService {
      * @param nickname 닉네임
      * @return 회원 ID
      */
-    public String retrieveMemberId(String nickname) {
+    public Long retrieveMemberId(String nickname) {
         return memberRepository.findIdByNickName(nickname)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
-    public Optional<String> retrieveActiveMemberNickname(String memberId) {
+    public Optional<String> retrieveActiveMemberNickname(Long memberId) {
         return memberRepository.findActiveNicknameById(memberId);
     }
 
-    public Map<String, String> retrieveActiveMemberNicknameByMemberIds(List<String> memberIds) {
+    public Map<Long, String> retrieveActiveMemberNicknameByMemberIds(List<Long> memberIds) {
         List<MemberIdAndNicknameProjection> results = memberRepository.findActiveIdAndNicknameByIdIn(memberIds);
         return results.stream()
                 .collect(Collectors.toMap(
@@ -120,9 +119,9 @@ public class MemberQueryService {
     }
 
     public List<Member> retrieveRecommendedMembers(
-            String memberId,
+            Long memberId,
             List<MemberInterestCategory> myInterests,
-            List<String> excludedMemberIds,
+            List<Long> excludedMemberIds,
             int limit
     ) {
         return memberRepository.findRecommendMembers(memberId, myInterests, excludedMemberIds, limit);
@@ -141,11 +140,20 @@ public class MemberQueryService {
             return memberRepository.findAll(pageable);
         }
 
-        return memberRepository.findByIdContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                keyword,
-                keyword,
+        String normalizedKeyword = keyword.trim();
+        return memberRepository.findByIdOrEmailContainingIgnoreCase(
+                parseMemberIdKeyword(normalizedKeyword),
+                normalizedKeyword,
                 pageable
         );
+    }
+
+    private Long parseMemberIdKeyword(String keyword) {
+        try {
+            return Long.valueOf(keyword);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
 }

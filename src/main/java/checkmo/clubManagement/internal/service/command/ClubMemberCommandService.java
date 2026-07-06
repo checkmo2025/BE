@@ -28,7 +28,7 @@ public class ClubMemberCommandService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public void joinClub(Long clubId, String memberId, JoinClub request) {
+    public void joinClub(Long clubId, Long memberId, JoinClub request) {
         Club club = clubManagementQueryService.validateClub(clubId);
         LocalDateTime now = LocalDateTime.now();
 
@@ -48,10 +48,10 @@ public class ClubMemberCommandService {
                         });
     }
 
-    public void updateClubMemberStatus(Long clubId, String actorId, Long targetId, ClubMemberStatusAction request) {
+    public void updateClubMemberStatus(Long clubId, Long actorId, Long targetId, ClubMemberStatusAction request) {
         Club club = clubManagementQueryService.validateClub(clubId);
         ClubMember actor = clubMemberQueryService.validateClubMember(clubId, actorId);
-        ClubMember target = clubMemberQueryService.validateClubMember(clubId, targetId);
+        ClubMember target = clubMemberQueryService.validateClubMemberById(clubId, targetId);
         LocalDateTime now = LocalDateTime.now();
 
         switch (request.getCommand()) {
@@ -63,7 +63,7 @@ public class ClubMemberCommandService {
         }
     }
 
-    public void leaveClub(Long clubId, String memberId) {
+    public void leaveClub(Long clubId, Long memberId) {
         clubManagementQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         clubMember.leave(LocalDateTime.now());
@@ -91,7 +91,7 @@ public class ClubMemberCommandService {
         log.info("{} Club 멤버 강제 탈퇴: actorId={}, targetId={}", club.getName(), actor.getId(), target.getId());
     }
 
-    private void publishJoinClubEvent(String memberId, Club club, ClubMember clubMember) {
+    private void publishJoinClubEvent(Long memberId, Club club, ClubMember clubMember) {
         JoinClubEvent joinClubEvent = new JoinClubEvent(clubMember.getId(), memberId, club.getId(), club.getName());
         eventPublisher.publishEvent(joinClubEvent);
     }

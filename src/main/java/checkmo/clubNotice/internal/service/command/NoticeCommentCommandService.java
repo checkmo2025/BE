@@ -22,7 +22,7 @@ public class NoticeCommentCommandService {
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
 
-    public void createNoticeComment(Long clubId, Long noticeId, String memberId, ClubNoticeRequestDTO.CreateClubNoticeComment request) {
+    public void createNoticeComment(Long clubId, Long noticeId, Long memberId, ClubNoticeRequestDTO.CreateClubNoticeComment request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
@@ -31,7 +31,7 @@ public class NoticeCommentCommandService {
     }
 
     public void updateNoticeComment(
-            Long clubId, Long noticeId, Long commentId, String memberId,
+            Long clubId, Long noticeId, Long commentId, Long memberId,
             ClubNoticeRequestDTO.CreateClubNoticeComment request
     ) {
         clubManagementAPI.validateClub(clubId);
@@ -47,7 +47,7 @@ public class NoticeCommentCommandService {
         noticeComment.updateContent(request.getContent());
     }
 
-    public void deleteNoticeComment(Long clubId, Long noticeId, Long commentId, String memberId) {
+    public void deleteNoticeComment(Long clubId, Long noticeId, Long commentId, Long memberId) {
         clubManagementAPI.validateClub(clubId);
         ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         if (!clubMembership.isActive()) {

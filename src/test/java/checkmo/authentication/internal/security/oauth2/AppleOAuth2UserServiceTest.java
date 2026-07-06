@@ -55,7 +55,7 @@ class AppleOAuth2UserServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(attributes.getProviderId()).isEqualTo("apple-sub");
             softly.assertThat(attributes.getEmail()).isEqualTo("apple-user@example.com");
-            softly.assertThat(principalDetails.getUsername()).isEqualTo("APPLE_apple-sub");
+            softly.assertThat(principalDetails.getUsername()).isEqualTo("1");
             softly.assertThat(principalDetails.isNewSocialSignUp()).isTrue();
             softly.assertThat(principalDetails.getAttributes())
                     .containsEntry("sub", "apple-sub")
@@ -111,9 +111,12 @@ class AppleOAuth2UserServiceTest {
 
     private AuthUser user(String id, String email) {
         return AuthUser.builder()
-                .id(id)
+                .id(1L)
+                .legacyId(id)
                 .email(email)
                 .password("")
+                .provider("APPLE")
+                .providerUserId(id.substring(id.indexOf("_") + 1))
                 .role(Role.USER)
                 .profileCompleted(false)
                 .build();

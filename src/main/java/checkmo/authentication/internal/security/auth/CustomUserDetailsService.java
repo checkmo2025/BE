@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new PrincipalDetails(user);
     }
 
-    public UserDetails loadUserById(String id) {
+    public UserDetails loadUserById(Long id) {
         AuthUser user = authRepository.findById(id)
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
 

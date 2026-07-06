@@ -46,12 +46,12 @@ public class BookStoryQueryService {
      * @return 조회된 책 이야기 엔티티 목록
      */
     public List<BookStory> retrieveBookStories(
-            String memberId,
-            List<String> excludedMemberIds,
-            List<String> followingMemberIds,
+            Long memberId,
+            List<Long> excludedMemberIds,
+            List<Long> followingMemberIds,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId,
-            String targetMemberId,
+            Long targetMemberId,
             Long cursorId,
             int pageSize
     ) {
@@ -62,7 +62,7 @@ public class BookStoryQueryService {
 
     public List<BookStory> retrieveBookStories(
             String bookId,
-            List<String> excludedMemberIds,
+            List<Long> excludedMemberIds,
             Long cursorId,
             int pageSize
     ) {
@@ -94,7 +94,7 @@ public class BookStoryQueryService {
         return bookStory;
     }
 
-    public BookStory retrieveAccessibleBookStory(String memberId, Long bookStoryId) {
+    public BookStory retrieveAccessibleBookStory(Long memberId, Long bookStoryId) {
         BookStory bookStory = bookStoryRepository.findByIdAndDeletedFalse(bookStoryId)
                 .orElseThrow(() -> new BookStoryException(BookStoryErrorStatus.BOOK_STORY_NOT_FOUND));
 
@@ -122,7 +122,7 @@ public class BookStoryQueryService {
      * @param bookStories 조회된 책 이야기 목록
      * @return 책 이야기 ID와 좋아요 여부를 매핑한 Map
      */
-    public Map<Long, Boolean> checkBookStoryLikeByMemberId(String memberId, List<BookStory> bookStories) {
+    public Map<Long, Boolean> checkBookStoryLikeByMemberId(Long memberId, List<BookStory> bookStories) {
         if (bookStories == null || bookStories.isEmpty()) {
             return Map.of();
         }
@@ -153,7 +153,7 @@ public class BookStoryQueryService {
                 ));
     }
 
-    public BookStoryPrevNextProjection retrievePrevNextBookStoryId(String memberId, Long bookStoryId) {
+    public BookStoryPrevNextProjection retrievePrevNextBookStoryId(Long memberId, Long bookStoryId) {
         return bookStoryRepository.findPrevNextBookStoryId(memberId, bookStoryId, BookStoryStatus.PUBLISHED);
     }
 

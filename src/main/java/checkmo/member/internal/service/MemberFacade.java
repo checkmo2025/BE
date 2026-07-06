@@ -25,8 +25,8 @@ public class MemberFacade {
     @Value("${checkmo.terms.enforcement-enabled:false}")
     private boolean termsEnforcementEnabled;
 
-    public void createMember(String memberId, String email, List<TermsAgreementCommand> termsAgreements) {
-        memberCommandService.createMember(memberId, email);
+    public void createMember(Long memberId, String legacyId, String email, List<TermsAgreementCommand> termsAgreements) {
+        memberCommandService.createMember(memberId, legacyId, email);
         memberTermsCommandService.saveSignupAgreements(
                 memberId,
                 termsAgreements,
@@ -34,12 +34,12 @@ public class MemberFacade {
         );
     }
 
-    public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
+    public void addAdditionalInfo(Long memberId, MemberRequestDTO.AdditionalInfo request) {
         validateRequiredTermsBeforeProfileCompletion(memberId);
         memberCommandService.addAdditionalInfo(memberId, request);
     }
 
-    private void validateRequiredTermsBeforeProfileCompletion(String memberId) {
+    private void validateRequiredTermsBeforeProfileCompletion(Long memberId) {
         if (!termsEnforcementEnabled) {
             return;
         }

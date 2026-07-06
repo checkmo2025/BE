@@ -16,7 +16,7 @@ public class NotificationSettingCommandService {
 
     private final NotificationSettingRepository notificationSettingRepository;
 
-    public void createNotificationSetting(String memberId) {
+    public void createNotificationSetting(Long memberId) {
         if (notificationSettingRepository.existsByMemberId(memberId)) {
             return;
         }
@@ -28,7 +28,7 @@ public class NotificationSettingCommandService {
         notificationSettingRepository.save(notificationSetting);
     }
 
-    public void toggleNotificationSetting(String memberId, NotificationSettingType settingType) {
+    public void toggleNotificationSetting(Long memberId, NotificationSettingType settingType) {
         NotificationSetting setting = notificationSettingRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new NotificationException(NotificationErrorStatus.NOTIFICATION_SETTING_NOT_FOUND));
 

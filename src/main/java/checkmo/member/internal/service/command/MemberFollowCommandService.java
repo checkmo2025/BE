@@ -33,7 +33,7 @@ public class MemberFollowCommandService {
      * @param memberId          팔로우할 회원의 ID
      * @param followingNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로잉 처리
      */
-    public void following(String memberId, String followingNickname) {
+    public void following(Long memberId, String followingNickname) {
         // 닉네임으로 팔로잉 대상 조회
         Member following = memberRepository.findByNickName(followingNickname)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
@@ -64,11 +64,15 @@ public class MemberFollowCommandService {
         followRepository.save(follow);
 
         // 팔로잉 이벤트 발행
-        eventPublisher.publishEvent(new MemberEvent.Follow(follow.getId(), memberId, following.getId()));
+        eventPublisher.publishEvent(new MemberEvent.Follow(
+                follow.getId(),
+                memberId,
+                following.getId()
+        ));
     }
 
-    private void lockMemberPair(String memberId1, String memberId2) {
-        List<String> memberIds = List.of(memberId1, memberId2).stream()
+    private void lockMemberPair(Long memberId1, Long memberId2) {
+        List<Long> memberIds = List.of(memberId1, memberId2).stream()
                 .sorted()
                 .toList();
         memberRepository.lockActiveMembersByIdIn(memberIds);
@@ -80,9 +84,9 @@ public class MemberFollowCommandService {
      * @param memberId          언팔로잉할 회원의 ID
      * @param followingNickname 팔로우 대상 회원의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 언팔로잉 처리
      */
-    public void unfollowing(String memberId, String followingNickname) {
+    public void unfollowing(Long memberId, String followingNickname) {
         // 닉네임으로 팔로잉 대상의 Id 조회
-        String followingId = memberRepository.findIdByNickName(followingNickname)
+        Long followingId = memberRepository.findIdByNickName(followingNickname)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로잉 하고 있는지 여부 확인
@@ -100,9 +104,9 @@ public class MemberFollowCommandService {
      * @param memberId         제거할 회원 ID
      * @param followerNickname 팔로워의 nickname -> 서비스 로직에서 닉네임으로 회원의 ID를 조회하여 팔로워 삭제 처리
      */
-    public void deleteFollower(String memberId, String followerNickname) {
+    public void deleteFollower(Long memberId, String followerNickname) {
         // 닉네임으로 팔로워의 Id 조회
-        String followerId = memberRepository.findIdByNickName(followerNickname)
+        Long followerId = memberRepository.findIdByNickName(followerNickname)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로워가 존재하는지 확인

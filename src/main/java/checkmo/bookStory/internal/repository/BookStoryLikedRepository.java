@@ -11,17 +11,17 @@ import org.springframework.data.repository.query.Param;
 public interface BookStoryLikedRepository extends JpaRepository<BookStoryLiked, Long> {
 
     @Query("SELECT COUNT(bsl) > 0 FROM BookStoryLiked bsl WHERE bsl.memberId = :memberId AND bsl.bookStory.id = :bookStoryId")
-    boolean existsByMemberIdAndBookStoryId(@Param("memberId") String memberId, @Param("bookStoryId") Long bookStoryId);
+    boolean existsByMemberIdAndBookStoryId(@Param("memberId") Long memberId, @Param("bookStoryId") Long bookStoryId);
 
     @Query("SELECT bsl.bookStory.id FROM BookStoryLiked bsl WHERE bsl.memberId = :memberId AND bsl.bookStory.id IN :bookStoryIds")
     List<Long> findLikedBookStoryIds(
-            @Param("memberId") String memberId,
+            @Param("memberId") Long memberId,
             @Param("bookStoryIds") List<Long> bookStoryIds
     );
 
     @Query("SELECT bsl FROM BookStoryLiked bsl WHERE bsl.bookStory.id = :bookStoryId AND bsl.memberId = :memberId")
     Optional<BookStoryLiked> findByBookStoryAndMember(@Param("bookStoryId") Long bookStoryId,
-                                                      @Param("memberId") String memberId);
+                                                      @Param("memberId") Long memberId);
 
     @Modifying
     @Query("DELETE FROM BookStoryLiked bsl WHERE bsl.bookStory.id = :bookStoryId")

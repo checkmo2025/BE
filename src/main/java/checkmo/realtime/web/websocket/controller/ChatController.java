@@ -30,6 +30,6 @@ public class ChatController {
         if (principal == null) {
             throw new RealtimeException(RealtimeErrorStatus.UNAUTHENTICATED);
         }
-        chatCommandService.saveTeamChatMessage(clubId, meetingId, teamId, principal.getName(), payload.getContent());
+        chatCommandService.saveTeamChatMessage(clubId, meetingId, teamId, Long.valueOf(principal.getName()), payload.getContent());
     }
 }

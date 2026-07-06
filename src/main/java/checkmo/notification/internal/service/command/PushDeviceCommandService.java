@@ -18,7 +18,7 @@ public class PushDeviceCommandService {
 
     private final PushDeviceRepository pushDeviceRepository;
 
-    public PushDevice upsert(String memberId, PushDeviceRequestDTO request) {
+    public PushDevice upsert(Long memberId, PushDeviceRequestDTO request) {
         String installationId = (request.getInstallationId() != null)
                 ? request.getInstallationId()
                 : UUID.randomUUID().toString();
@@ -59,7 +59,7 @@ public class PushDeviceCommandService {
         return device;
     }
 
-    public void deactivate(String memberId, String installationId) {
+    public void deactivate(Long memberId, String installationId) {
         // 미존재·이미 비활성·타인 소유 모두 성공으로 처리한다
         pushDeviceRepository.findByInstallationId(installationId)
                 .filter(d -> memberId.equals(d.getMemberId()) && d.isActive())

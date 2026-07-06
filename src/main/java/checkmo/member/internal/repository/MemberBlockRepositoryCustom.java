@@ -6,13 +6,13 @@ import java.util.Optional;
 
 public interface MemberBlockRepositoryCustom {
 
-    List<MemberBlock> findBlocks(String blockerId, Long cursorId, int pageSize);
+    List<MemberBlock> findBlocks(Long blockerId, Long cursorId, int pageSize);
 
-    List<String> findBlockedMemberIds(String blockerId);
+    List<Long> findBlockedMemberIds(Long blockerId);
 
-    List<String> findBlockRelatedMemberIds(String memberId);
+    List<Long> findBlockRelatedMemberIds(Long memberId);
 
-    Optional<MemberBlock> findBetween(String memberId1, String memberId2);
+    Optional<MemberBlock> findBetween(Long memberId1, Long memberId2);
 
-    boolean existsBetween(String memberId1, String memberId2);
+    boolean existsBetween(Long memberId1, Long memberId2);
 }

@@ -129,13 +129,13 @@ public class ClubMeetingAPIImpl implements ClubMeetingAPI {
     }
 
     @Override
-    public String fetchTopicAuthorId(Long topicId) {
+    public Long fetchTopicAuthorId(Long topicId) {
         Topic topic = clubTopicQueryService.validateTopic(topicId);
         return topic.getMemberId();
     }
 
     @Override
-    public String fetchBookReviewAuthorId(Long bookReviewId) {
+    public Long fetchBookReviewAuthorId(Long bookReviewId) {
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(bookReviewId);
         return bookReview.getMemberId();
     }

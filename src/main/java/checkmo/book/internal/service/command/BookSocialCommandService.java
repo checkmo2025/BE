@@ -28,7 +28,7 @@ public class BookSocialCommandService {
      * @param isbn  좋아요 대상 책 ISBN
      * @return 토글 결과 DTO
      */
-    public BookResponseDTO.LikeResult toggleLikeOnBook(String memberId, String isbn) {
+    public BookResponseDTO.LikeResult toggleLikeOnBook(Long memberId, String isbn) {
         Book book = retrieveOrCreateBook(isbn);
 
         return bookLikedRepository.findByBook_IdAndMemberId(book.getId(), memberId)
@@ -68,7 +68,7 @@ public class BookSocialCommandService {
         book.removeBookLiked(bookLiked);
     }
 
-    private void addBookLiked(Book book, String memberId) {
+    private void addBookLiked(Book book, Long memberId) {
         BookLiked bookLiked = BookLiked.builder()
                 .book(book)
                 .memberId(memberId)

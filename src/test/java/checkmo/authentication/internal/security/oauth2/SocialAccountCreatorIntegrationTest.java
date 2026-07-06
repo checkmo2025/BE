@@ -65,11 +65,11 @@ class SocialAccountCreatorIntegrationTest {
         ));
 
         AuthUser createdUser = socialAccountCreator.create(attributes, "apple");
-        AuthUser savedUser = authRepository.findById("APPLE_apple-sub").orElseThrow();
+        AuthUser savedUser = authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub").orElseThrow();
 
         assertSoftly(softly -> {
-            softly.assertThat(createdUser.getId()).isEqualTo("APPLE_apple-sub");
-            softly.assertThat(savedUser.getId()).isEqualTo("APPLE_apple-sub");
+            softly.assertThat(createdUser.getLegacyId()).isEqualTo("APPLE_apple-sub");
+            softly.assertThat(savedUser.getLegacyId()).isEqualTo("APPLE_apple-sub");
             softly.assertThat(savedUser.getEmail()).isEqualTo("apple-user@example.com");
             softly.assertThat(savedUser.isProfileCompleted()).isFalse();
         });
@@ -86,7 +86,7 @@ class SocialAccountCreatorIntegrationTest {
         assertThatThrownBy(() -> socialAccountCreator.create(attributes, "apple"))
                 .isInstanceOf(PersistenceException.class);
 
-        AuthUser savedUser = authRepository.findById("APPLE_apple-sub").orElseThrow();
+        AuthUser savedUser = authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub").orElseThrow();
         assertSoftly(softly -> {
             softly.assertThat(savedUser.getEmail()).isEqualTo("existing@example.com");
             softly.assertThat(authRepository.findByEmail("new@example.com")).isEmpty();
@@ -94,10 +94,14 @@ class SocialAccountCreatorIntegrationTest {
     }
 
     private AuthUser user(String id, String email) {
+        String provider = id.substring(0, id.indexOf("_"));
+        String providerUserId = id.substring(id.indexOf("_") + 1);
         return AuthUser.builder()
-                .id(id)
+                .legacyId(id)
                 .email(email)
                 .password("")
+                .provider(provider)
+                .providerUserId(providerUserId)
                 .role(Role.USER)
                 .profileCompleted(false)
                 .build();

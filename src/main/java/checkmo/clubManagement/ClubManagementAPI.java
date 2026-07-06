@@ -40,7 +40,7 @@ public interface ClubManagementAPI {
      * @param clubId 클럽 ID
      * @return 클럽에 속한 회원 ID 목록
      */
-    List<String> fetchActiveMemberIds(Long clubId);
+    List<Long> fetchActiveMemberIds(Long clubId);
 
     /**
      * 특정 모임의 특정 회원이 STAFF 상태인지 여부를 조회
@@ -49,7 +49,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return true (STAFF 상태인 경우), false (STAFF 상태가 아닌 경우)
      */
-    boolean isStaffClubMember(Long clubId, String memberId);
+    boolean isStaffClubMember(Long clubId, Long memberId);
 
     /**
      * 특정 모임의 특정 회원이 STAFF 상태인지 검증
@@ -58,7 +58,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @throws ClubManagementException STAFF 상태가 아닐 경우 예외 발생
      */
-    void validateStaffClubMember(Long clubId, String memberId) throws ClubManagementException;
+    void validateStaffClubMember(Long clubId, Long memberId) throws ClubManagementException;
 
     /**
      * 특정 모임의 특정 회원들이 club에 속하고, ACTIVE 상태인지 검증
@@ -76,7 +76,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return 멤버십 ID (ACTIVE 상태인 경우), null (ACTIVE 상태가 아닌 경우)
      */
-    Long fetchActiveClubMemberId(Long clubId, String memberId);
+    Long fetchActiveClubMemberId(Long clubId, Long memberId);
 
     /**
      * 특정 모임의 특정 회원이 ACTIVE 상태인지 검증
@@ -85,7 +85,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return ClubMemberId
      */
-    Long validateAndFetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException;
+    Long validateAndFetchActiveClubMemberId(Long clubId, Long memberId) throws ClubManagementException;
 
     /**
      * 특정 모임의 특정 회원의 멤버십 정보를 조회
@@ -94,7 +94,7 @@ public interface ClubManagementAPI {
      * @param memberId 회원 ID
      * @return MembershipDTO
      */
-    MembershipInfo fetchMembershipInfo(Long clubId, String memberId)
+    MembershipInfo fetchMembershipInfo(Long clubId, Long memberId)
             throws ClubManagementException;
 
     /**

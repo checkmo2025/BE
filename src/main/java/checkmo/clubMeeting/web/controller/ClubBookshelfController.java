@@ -52,7 +52,7 @@ public class ClubBookshelfController {
     public ApiResponse<BookShelfResponseDTO.BookShelfList> getBookShelfList(
             @PathVariable Long clubId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfList(clubId, memberId, cursorId));
     }
@@ -72,7 +72,7 @@ public class ClubBookshelfController {
     public ApiResponse<BookShelfResponseDTO.BookShelfDetail> getBookShelfDetail(
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelf(clubId, meetingId, memberId));
     }
@@ -91,7 +91,7 @@ public class ClubBookshelfController {
     public ApiResponse<String> createMeeting(
             @PathVariable Long clubId,
             @RequestBody @Valid BookShelfRequestDTO.BookShelfCreate request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubMeetingCommandService.createMeeting(clubId, memberId, request);
         return ApiResponse.onSuccess("책장이 정상적으로 생성되었습니다.");
@@ -112,7 +112,7 @@ public class ClubBookshelfController {
     public ApiResponse<BookShelfResponseDTO.BookShelfUpdate> getBookShelfEditInfo(
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveBookShelfDetail(clubId, meetingId, memberId));
     }
@@ -133,7 +133,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestBody @Valid BookShelfRequestDTO.BookShelfUpdate request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubMeetingCommandService.updateMeeting(clubId, meetingId, memberId, request);
         return ApiResponse.onSuccess("책장이 정상적으로 수정되었습니다.");
@@ -154,7 +154,7 @@ public class ClubBookshelfController {
     public ApiResponse<String> deleteMeeting(
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubMeetingCommandService.deleteMeeting(clubId, meetingId, memberId);
         return ApiResponse.onSuccess("책장이 정상적으로 삭제되었습니다.");
@@ -178,7 +178,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubMeetingQueryFacade.retrieveTopicList(clubId, meetingId, memberId, cursorId));
     }
@@ -199,7 +199,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestBody @Valid BookShelfRequestDTO.TopicCreate request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubTopicCommandService.createTopic(clubId, meetingId, memberId, request);
         return ApiResponse.onSuccess("발제가 정상적으로 생성되었습니다.");
@@ -225,7 +225,7 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
             @RequestBody @Valid BookShelfRequestDTO.TopicCreate request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubTopicCommandService.updateTopic(clubId, meetingId, topicId, memberId, request);
         return ApiResponse.onSuccess("발제가 정상적으로 수정되었습니다.");
@@ -250,7 +250,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @PathVariable Long topicId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubTopicCommandService.deleteTopic(clubId, meetingId, topicId, memberId);
         return ApiResponse.onSuccess("발제가 정상적으로 삭제되었습니다.");
@@ -274,7 +274,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestParam(required = false) @ValidCursor Long cursorId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(
                 clubMeetingQueryFacade.retrieveBookReviewList(clubId, meetingId, memberId, cursorId));
@@ -299,7 +299,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubBookReviewCommandService.createBookReview(clubId, meetingId, memberId, request);
         return ApiResponse.onSuccess("한줄평이 생성되었습니다.");
@@ -328,7 +328,7 @@ public class ClubBookshelfController {
             @PathVariable Long meetingId,
             @PathVariable Long reviewId,
             @RequestBody @Valid BookShelfRequestDTO.BookReviewCreate request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubBookReviewCommandService.updateBookReview(clubId, meetingId, reviewId, memberId, request);
         return ApiResponse.onSuccess("한줄평이 수정되었습니다.");
@@ -353,7 +353,7 @@ public class ClubBookshelfController {
             @PathVariable Long clubId,
             @PathVariable Long meetingId,
             @PathVariable Long reviewId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubBookReviewCommandService.deleteBookReview(clubId, meetingId, reviewId, memberId);
         return ApiResponse.onSuccess("한줄평이 삭제되었습니다.");

@@ -37,7 +37,7 @@ public class BookReview extends BaseEntity {
     private Long clubMemberId;
 
     @Column(name = "member_id", nullable = false)
-    private String memberId;
+    private Long memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")

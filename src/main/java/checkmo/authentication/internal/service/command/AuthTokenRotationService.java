@@ -27,8 +27,8 @@ public class AuthTokenRotationService {
             throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
         }
 
-        String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        if (!StringUtils.hasText(memberId)) {
+        Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+        if (memberId == null) {
             throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
         }
 

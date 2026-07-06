@@ -43,16 +43,6 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BasicInfoWithDescription {
-        private String nickname;
-        private String description;
-        private String profileImageUrl;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     public static class DetailInfo {
         private String nickname;
         private String name;
@@ -106,7 +96,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class BlockedMember {
-        private String memberId;
+        private Long memberId;
         private String nickname;
         private String profileImageUrl;
     }
@@ -157,7 +147,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class AdminBasicInfo {
-        private String memberId;
+        private Long memberId;
         private String nickname;
         private String name;
         private String email;
@@ -169,7 +159,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class AdminMemberDetailInfo {
-        private String memberId;
+        private Long memberId;
         private String nickname;
         private String name;
         private String email;

@@ -136,7 +136,10 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .when().post("/api/v1/clubs/{clubId}/join", club.getId())
                 .then().statusCode(200);
 
-        ClubMember joinedMember = clubMemberRepository.findByClubIdAndMemberId(club.getId(), member.id()).orElseThrow();
+        ClubMember joinedMember = clubMemberRepository.findByClubIdAndMemberId(
+                club.getId(),
+                Long.valueOf(member.id())
+        ).orElseThrow();
 
         given().cookie(accessTokenCookie(owner))
                 .queryParam("status", "ACTIVE")
@@ -259,7 +262,10 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
         TestUser owner = createUser();
         Club club = createClub(owner, "bookshelf" + uniqueSuffix(owner));
         Meeting meeting = createMeeting(owner, club.getId());
-        ClubMember ownerClubMember = clubMemberRepository.findByClubIdAndMemberId(club.getId(), owner.id()).orElseThrow();
+        ClubMember ownerClubMember = clubMemberRepository.findByClubIdAndMemberId(
+                club.getId(),
+                Long.valueOf(owner.id())
+        ).orElseThrow();
 
         given().cookie(accessTokenCookie(owner))
                 .when().get("/api/v1/clubs/{clubId}/bookshelves", club.getId())
@@ -346,7 +352,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .clubId(club.getId())
                 .meetingId(meeting.getId())
                 .teamId(team.getId())
-                .senderMemberId(owner.id())
+                .senderMemberId(Long.valueOf(owner.id()))
                 .content("안녕하세요")
                 .sentAt(LocalDateTime.now())
                 .build());
@@ -510,7 +516,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     }
 
     private String uniqueSuffix(TestUser user) {
-        return user.id().substring(user.id().length() - 4).toLowerCase();
+        return user.legacyId().substring(user.legacyId().length() - 4).toLowerCase();
     }
 
     private Map<String, Object> clubDetailPayload(String name) {

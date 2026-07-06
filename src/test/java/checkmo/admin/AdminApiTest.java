@@ -78,6 +78,13 @@ class AdminApiTest extends ApiTestSupport {
                 .body("result.memberList.size()", greaterThanOrEqualTo(1));
 
         given().cookie(accessTokenCookie(admin))
+                .queryParam("keyword", user.id())
+                .when().get("/api/v1/admin/members")
+                .then().statusCode(200)
+                .body("result.memberList.size()", equalTo(1))
+                .body("result.memberList[0].memberId", equalTo(user.memberId().intValue()));
+
+        given().cookie(accessTokenCookie(admin))
                 .when().get("/api/v1/admin/members/{memberNickName}", user.nickName())
                 .then().statusCode(200)
                 .body("result.email", equalTo(user.email()));
@@ -104,7 +111,7 @@ class AdminApiTest extends ApiTestSupport {
 
         for (int index = 0; index < 21; index++) {
             reportRepository.save(Report.builder()
-                    .reporterId(reporter.id())
+                    .reporterId(Long.valueOf(reporter.id()))
                     .reportTargetType(ReportTargetType.MEMBER)
                     .targetId(target.nickName())
                     .reportReason(ReportReason.GENERAL)
@@ -113,7 +120,7 @@ class AdminApiTest extends ApiTestSupport {
                     .build());
         }
         reportRepository.save(Report.builder()
-                .reporterId(otherReporter.id())
+                .reporterId(Long.valueOf(otherReporter.id()))
                 .reportTargetType(ReportTargetType.MEMBER)
                 .targetId(target.nickName())
                 .reportReason(ReportReason.SPAM)
@@ -161,7 +168,7 @@ class AdminApiTest extends ApiTestSupport {
         TestUser reporter = createUser();
 
         reportRepository.save(Report.builder()
-                .reporterId(reporter.id())
+                .reporterId(Long.valueOf(reporter.id()))
                 .reportTargetType(ReportTargetType.BOOK_STORY)
                 .targetId("999999")
                 .reportReason(ReportReason.INSULT)
@@ -186,7 +193,7 @@ class AdminApiTest extends ApiTestSupport {
         TestUser admin = createAdmin();
         TestUser owner = createUser();
         TestUser nonAdmin = createUser();
-        Club club = createClub(owner, "admin-club-" + owner.id().substring(owner.id().length() - 4).toLowerCase());
+        Club club = createClub(owner, "admin-club-" + owner.legacyId().substring(owner.legacyId().length() - 4).toLowerCase());
 
         given().cookie(accessTokenCookie(admin))
                 .queryParam("keyword", "admin-club")
@@ -299,14 +306,14 @@ class AdminApiTest extends ApiTestSupport {
         TestUser author = createUser();
         TestUser nonAdmin = createUser();
         BookStory story = bookStoryRepository.save(BookStory.builder()
-                .memberId(author.id())
+                .memberId(Long.valueOf(author.id()))
                 .bookId(ISBN)
                 .title("관리자 책 이야기")
                 .description("관리자 테스트용 책 이야기입니다.")
                 .status(BookStoryStatus.PUBLISHED)
                 .build());
         Comment comment = commentRepository.save(Comment.builder()
-                .memberId(author.id())
+                .memberId(Long.valueOf(author.id()))
                 .bookStory(story)
                 .content("관리자 삭제 대상 댓글")
                 .build());
@@ -365,7 +372,7 @@ class AdminApiTest extends ApiTestSupport {
                         .build())))
                 .build();
         Club saved = clubRepository.save(club);
-        ClubMember clubOwner = saved.createOwnerMember(owner.id(), LocalDateTime.now());
+        ClubMember clubOwner = saved.createOwnerMember(Long.valueOf(owner.id()), LocalDateTime.now());
         clubMemberRepository.save(clubOwner);
         return saved;
     }

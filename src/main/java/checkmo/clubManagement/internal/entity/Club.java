@@ -129,11 +129,11 @@ public class Club extends BaseEntity {
     }
 
     // ============= 클럽 멤버 관련 메서드 ==============
-    public ClubMember createOwnerMember(String memberId, LocalDateTime now) {
+    public ClubMember createOwnerMember(Long memberId, LocalDateTime now) {
         return ClubMember.ownerOf(this, memberId, now);
     }
 
-    public ClubMember applyForMembership(String memberId, String joinMessage, LocalDateTime now) {
+    public ClubMember applyForMembership(Long memberId, String joinMessage, LocalDateTime now) {
         ClubMemberStatus status = decideInitialStatus();
         return ClubMember.applyTo(this, memberId, status, joinMessage, now);
     }

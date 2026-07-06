@@ -73,7 +73,7 @@ public class PushMessageFactory {
         return data;
     }
 
-    private String fetchNickname(String memberId) {
+    private String fetchNickname(Long memberId) {
         try {
             return memberAPI.fetchNickname(memberId);
         } catch (Exception e) {

@@ -13,6 +13,7 @@ import checkmo.notification.web.dto.NotificationResponseDTO.BasicInfoPreviewList
 import checkmo.notification.web.dto.NotificationResponseDTO.SettingInfo;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -34,16 +35,16 @@ public class NotificationQueryFacade {
     private final NotificationSettingQueryService notificationSettingQueryService;
 
     @Cacheable(value = "notifications", key = "#memberId")
-    public BasicInfoPreviewList retrieveNotificationPreviews(String memberId) {
+    public BasicInfoPreviewList retrieveNotificationPreviews(Long memberId) {
         List<Notification> notifications = notificationQueryService.retrieveUnreadNotifications(memberId, DEFAULT_PREVIEW_SIZE);
 
-        Map<String, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
+        Map<Long, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
         Map<Long, String> clubNameMap = fetchClubNameMap(notifications);
 
         return NotificationConverter.toPreviewListDTO(notifications, senderNicknameMap, clubNameMap);
     }
 
-    public BasicInfoList retrieveNotifications(String memberId, Long cursorId) {
+    public BasicInfoList retrieveNotifications(Long memberId, Long cursorId) {
         CursorResult<Notification> notificationCursorResult = CursorPagingHelper.getPage(
                 size -> notificationQueryService.retrieveNotifications(memberId, cursorId, size),
                 Notification::getId,
@@ -51,7 +52,7 @@ public class NotificationQueryFacade {
         );
         List<Notification> notifications = notificationCursorResult.content();
 
-        Map<String, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
+        Map<Long, String> senderNicknameMap = fetchSenderNicknameMap(notifications);
         Map<Long, String> clubNameMap = fetchClubNameMap(notifications);
 
         return NotificationConverter.toNotificationListDTO(
@@ -63,14 +64,15 @@ public class NotificationQueryFacade {
         );
     }
 
-    public SettingInfo retrieveNotificationSetting(String memberId) {
+    public SettingInfo retrieveNotificationSetting(Long memberId) {
         return notificationSettingQueryService.getNotificationSetting(memberId);
     }
 
-    private Map<String, String> fetchSenderNicknameMap(List<Notification> notifications) {
-        List<String> senderIds = notifications.stream()
+    private Map<Long, String> fetchSenderNicknameMap(List<Notification> notifications) {
+        List<Long> senderIds = notifications.stream()
                 .filter(n -> !n.getNotificationType().isClubNotification())
                 .map(Notification::getSenderId)
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
         return memberAPI.fetchNicknameByMemberIds(senderIds);

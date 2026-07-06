@@ -65,8 +65,8 @@ class MemberProfileTermsStrictApiTest extends ApiTestSupport {
                 .body("code", equalTo("TERMS_403"));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(authRepository.findById(user.id()).orElseThrow().isProfileCompleted()).isFalse();
-            softly.assertThat(memberRepository.findById(user.id()).orElseThrow().getNickName()).isNull();
+            softly.assertThat(authRepository.findById(user.memberId()).orElseThrow().isProfileCompleted()).isFalse();
+            softly.assertThat(memberRepository.findById(user.memberId()).orElseThrow().getNickName()).isNull();
         });
     }
 
@@ -98,14 +98,14 @@ class MemberProfileTermsStrictApiTest extends ApiTestSupport {
                 .body("isSuccess", equalTo(true));
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(authRepository.findById(user.id()).orElseThrow().isProfileCompleted()).isTrue();
-            softly.assertThat(memberRepository.findById(user.id()).orElseThrow().getNickName()).startsWith("allowed");
+            softly.assertThat(authRepository.findById(user.memberId()).orElseThrow().isProfileCompleted()).isTrue();
+            softly.assertThat(memberRepository.findById(user.memberId()).orElseThrow().getNickName()).startsWith("allowed");
         });
     }
 
     private Map<String, Object> additionalInfoBody(TestUser user, String prefix) {
         return Map.of(
-                "nickname", prefix + user.id().substring(user.id().length() - 4).toLowerCase(),
+                "nickname", prefix + user.legacyId().substring(user.legacyId().length() - 4).toLowerCase(),
                 "name", "완료",
                 "phoneNumber", "010-1234-5678",
                 "description", "소개",

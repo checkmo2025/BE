@@ -26,17 +26,17 @@ public class BookLikeQueryService {
     private final BookLikedRepository bookLikedRepository;
     private final MemberAPI memberAPI;
 
-    public BookResponseDTO.LikedBookList retrieveMyLikedBooks(String memberId, Long cursorId) {
+    public BookResponseDTO.LikedBookList retrieveMyLikedBooks(Long memberId, Long cursorId) {
         return retrieveLikedBooksByMemberId(memberId, memberId, cursorId);
     }
 
-    public BookResponseDTO.LikedBookList retrieveMemberLikedBooks(String memberNickname, String currentMemberId, Long cursorId) {
-        String targetMemberId = memberAPI.fetchMemberId(memberNickname);
+    public BookResponseDTO.LikedBookList retrieveMemberLikedBooks(String memberNickname, Long currentMemberId, Long cursorId) {
+        Long targetMemberId = memberAPI.fetchMemberId(memberNickname);
         memberAPI.validateProfileAccessible(currentMemberId, targetMemberId);
         return retrieveLikedBooksByMemberId(targetMemberId, currentMemberId, cursorId);
     }
 
-    private BookResponseDTO.LikedBookList retrieveLikedBooksByMemberId(String memberId, String currentMemberId, Long cursorId) {
+    private BookResponseDTO.LikedBookList retrieveLikedBooksByMemberId(Long memberId, Long currentMemberId, Long cursorId) {
         CursorResult<BookLiked> cursorResult = CursorPagingHelper.getPage(
                 size -> retrieveBookLikes(memberId, cursorId, size),
                 BookLiked::getId,
@@ -59,7 +59,7 @@ public class BookLikeQueryService {
                 .build();
     }
 
-    private List<BookLiked> retrieveBookLikes(String memberId, Long cursorId, int pageSize) {
+    private List<BookLiked> retrieveBookLikes(Long memberId, Long cursorId, int pageSize) {
         Pageable pageable = PageRequest.of(0, pageSize);
         if (cursorId == null) {
             return bookLikedRepository.findByMemberIdOrderByIdDesc(memberId, pageable);
@@ -71,4 +71,5 @@ public class BookLikeQueryService {
         Book book = liked.getBook();
         return BookConverter.toLikedBookInfo(book, likedBookIdSet.contains(book.getId()));
     }
+
 }

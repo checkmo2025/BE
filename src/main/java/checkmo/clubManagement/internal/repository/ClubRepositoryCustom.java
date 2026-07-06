@@ -17,7 +17,7 @@ public interface ClubRepositoryCustom {
     List<ClubRecommendation> findRecommendations(
             EnumSet<ClubInterestCategory> memberCategories,
             LocalDateTime lastActivityAt,
-            String memberId,
+            Long memberId,
             int size
     );
 }

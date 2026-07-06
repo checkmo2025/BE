@@ -51,16 +51,16 @@ public class BookStoryQueryFacade {
      * @param bookStoryId 조회할 책 이야기 ID
      * @return 조회된 책 이야기 상세 정보 DTO
      */
-    public DetailInfo fetchBookStoryDetailInfo(String memberId, Long bookStoryId) {
+    public DetailInfo fetchBookStoryDetailInfo(Long memberId, Long bookStoryId) {
         return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, true, true);
     }
 
-    public DetailInfo fetchBookStoryDetailInfoForAdmin(String memberId, Long bookStoryId) {
+    public DetailInfo fetchBookStoryDetailInfoForAdmin(Long memberId, Long bookStoryId) {
         return fetchBookStoryDetailInfoInternal(memberId, bookStoryId, false, false);
     }
 
     private DetailInfo fetchBookStoryDetailInfoInternal(
-            String memberId,
+            Long memberId,
             Long bookStoryId,
             boolean increaseViewCount,
             boolean validateBlockRelation
@@ -82,7 +82,9 @@ public class BookStoryQueryFacade {
 
         // 4. 작성자 정보 조회
         BasicInfoWithFollow authorInfo = memberAPI.fetchMemberBasicInfoWithFollow(
-                bookStory.getMemberId(), memberId);
+                bookStory.getMemberId(),
+                memberId
+        );
 
         // 5. 좋아요 여부 조회
         Boolean isLiked = bookStoryQueryService.checkBookStoryLikeByMemberId(memberId, List.of(bookStory))
@@ -93,7 +95,7 @@ public class BookStoryQueryFacade {
 
         // 7. 댓글 작성자들 정보 조회
         // 7-1. 댓글 작성자들 Id 목록 조회 (Set으로 중복 제거)
-        Set<String> commentMemberIds = comments.stream()
+        Set<Long> commentMemberIds = comments.stream()
                 .flatMap(comment -> Stream.concat(
                         Stream.of(comment.getMemberId()),
                         comment.getChildrenComment().stream().map(Comment::getMemberId)
@@ -101,12 +103,12 @@ public class BookStoryQueryFacade {
                 .collect(Collectors.toSet());
 
         // 7-2. 댓글 작성자들 정보를 배치 조회 (6-1에서 조회된 정보를 리스트로 변환 후 한번에 조회)
-        Map<String, MemberExternalDTO.BasicInfo> commentMemberInfoMap =
+        Map<Long, MemberExternalDTO.BasicInfo> commentMemberInfoMap =
                 commentMemberIds.isEmpty() ? Map.of() :
                         memberAPI.fetchMemberBasicInfoByMemberIds(new ArrayList<>(commentMemberIds));
 
         // 8. 댓글 DTO 변환
-        Set<String> blockedMemberIds = Set.copyOf(memberAPI.fetchBlockRelatedMemberIds(memberId));
+        Set<Long> blockedMemberIds = Set.copyOf(memberAPI.fetchBlockRelatedMemberIds(memberId));
         List<CommentInfo> commentDTOList =
                 BookStoryConverter.toCommentDetailList(comments, memberId, commentMemberInfoMap, blockedMemberIds);
 
@@ -130,21 +132,21 @@ public class BookStoryQueryFacade {
     /**
      * 전체 책이야기 목록을 조회합니다.
      */
-    public BookStoryResponseDTO.BookStoryList fetchAllBookStories(String memberId, Long cursorId) {
+    public BookStoryResponseDTO.BookStoryList fetchAllBookStories(Long memberId, Long cursorId) {
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.ALL, null, null, cursorId);
     }
 
     /**
      * 내가 작성한 책이야기 목록을 조회합니다.
      */
-    public BookStoryResponseDTO.BookStoryList fetchMyBookStories(String memberId, Long cursorId) {
+    public BookStoryResponseDTO.BookStoryList fetchMyBookStories(Long memberId, Long cursorId) {
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.MY, null, null, cursorId);
     }
 
     /**
      * 팔로우한 회원들의 책이야기 목록을 조회합니다.
      */
-    public BookStoryResponseDTO.BookStoryList fetchFollowingBookStories(String memberId, Long cursorId) {
+    public BookStoryResponseDTO.BookStoryList fetchFollowingBookStories(Long memberId, Long cursorId) {
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.FOLLOWING, null, null, cursorId);
     }
 
@@ -152,11 +154,11 @@ public class BookStoryQueryFacade {
      * 특정 회원의 책이야기 목록을 조회합니다.
      */
     public BookStoryResponseDTO.BookStoryList fetchMemberBookStories(
-            String memberId,
+            Long memberId,
             String targetNickname,
             Long cursorId
     ) {
-        String targetMemberId = memberAPI.fetchMemberId(targetNickname);
+        Long targetMemberId = memberAPI.fetchMemberId(targetNickname);
         memberAPI.validateProfileAccessible(memberId, targetMemberId);
         return fetchBookStoriesInternal(memberId, BookStoryRequestDTO.BookStoryScope.TARGET, null, targetMemberId, cursorId);
     }
@@ -165,7 +167,7 @@ public class BookStoryQueryFacade {
      * 특정 클럽 멤버들의 책이야기 목록을 조회합니다.
      */
     public BookStoryResponseDTO.BookStoryList fetchClubBookStories(
-            String memberId,
+            Long memberId,
             Long clubId,
             Long cursorId
     ) {
@@ -218,16 +220,16 @@ public class BookStoryQueryFacade {
      * @return scope에 따른 책 이야기 목록 DTO
      */
     private BookStoryResponseDTO.BookStoryList fetchBookStoriesInternal(
-            String memberId,
+            Long memberId,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId,
-            String targetMemberId,
+            Long targetMemberId,
             Long cursorId
     ) {
-        List<String> excludedMemberIds = requiresBlockFilter(scope)
+        List<Long> excludedMemberIds = memberId != null && requiresBlockFilter(scope)
                 ? memberAPI.fetchBlockRelatedMemberIds(memberId)
                 : List.of();
-        List<String> followingMemberIds = scope == BookStoryRequestDTO.BookStoryScope.FOLLOWING
+        List<Long> followingMemberIds = memberId != null && scope == BookStoryRequestDTO.BookStoryScope.FOLLOWING
                 ? memberAPI.fetchFollowingIds(memberId)
                 : List.of();
 
@@ -248,7 +250,7 @@ public class BookStoryQueryFacade {
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
 
         // 4. 작성자 정보 조회
-        Map<String, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
+        Map<Long, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // 5. DTO 변환
         List<BookStoryResponseDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
@@ -270,7 +272,7 @@ public class BookStoryQueryFacade {
     /**
      * 좋아요 정보 배치 조회
      */
-    private Map<Long, Boolean> fetchLikedInfo(String memberId, List<BookStory> bookStories) {
+    private Map<Long, Boolean> fetchLikedInfo(Long memberId, List<BookStory> bookStories) {
         return bookStoryQueryService.checkBookStoryLikeByMemberId(memberId, bookStories);
     }
 
@@ -288,11 +290,11 @@ public class BookStoryQueryFacade {
     /**
      * 작성자 정보 배치 조회
      */
-    private Map<String, BasicInfoWithFollow> fetchAuthorInfo(
-            String memberId,
+    private Map<Long, BasicInfoWithFollow> fetchAuthorInfo(
+            Long memberId,
             List<BookStory> bookStories
     ) {
-        List<String> targetMemberIds = bookStories.stream()
+        List<Long> targetMemberIds = bookStories.stream()
                 .map(checkmo.bookStory.internal.entity.BookStory::getMemberId)
                 .distinct()
                 .toList();
@@ -303,11 +305,11 @@ public class BookStoryQueryFacade {
      * BookStory 엔티티들을 Response DTO로 변환
      */
     private List<BookStoryResponseDTO.BasicInfo> convertToBookStoryResponses(
-            String memberId,
+            Long memberId,
             List<BookStory> bookStoryList,
             Map<Long, Boolean> isLikedMap,
             Map<String, BookExternalDTO.BasicInfo> bookInfoMap,
-            Map<String, BasicInfoWithFollow> authorInfoMap
+            Map<Long, BasicInfoWithFollow> authorInfoMap
     ) {
 
         return bookStoryList.stream()
@@ -329,13 +331,15 @@ public class BookStoryQueryFacade {
      * @return bookId에 따른 책 이야기 목록 DTO
      */
     public BookStoryResponseDTO.BookStoryList fetchBookStoriesByBook(
-            String memberId,
+            Long memberId,
             String bookId,
             Long cursorId
     ) {
 
         // 1. BookStory 리스트 조회
-        List<String> excludedMemberIds = memberAPI.fetchBlockRelatedMemberIds(memberId);
+        List<Long> excludedMemberIds = memberId == null
+                ? List.of()
+                : memberAPI.fetchBlockRelatedMemberIds(memberId);
         CursorResult<BookStory> bookStoryCursorResult = CursorPagingHelper.getPage(
                 (pageSize) -> bookStoryQueryService.retrieveBookStories(
                         bookId, excludedMemberIds, cursorId, pageSize
@@ -352,7 +356,7 @@ public class BookStoryQueryFacade {
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap = fetchBookInfo(bookStories);
 
         // 작성자 정보 조회
-        Map<String, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
+        Map<Long, BasicInfoWithFollow> authorInfoMap = fetchAuthorInfo(memberId, bookStories);
 
         // DTO 변환
         List<BookStoryResponseDTO.BasicInfo> basicInfoList = convertToBookStoryResponses(memberId,
@@ -372,7 +376,7 @@ public class BookStoryQueryFacade {
                 bookStoryQueryService.retrieveBookStoriesForAdmin(keyword, safePage - 1, ADMIN_PAGE_SIZE);
 
         List<BookStory> bookStories = bookStoryPage.getContent();
-        List<String> memberIds = bookStories.stream()
+        List<Long> memberIds = bookStories.stream()
                 .map(BookStory::getMemberId)
                 .distinct()
                 .toList();
@@ -381,7 +385,7 @@ public class BookStoryQueryFacade {
                 .distinct()
                 .toList();
 
-        Map<String, MemberExternalDTO.DetailInfo> authorInfoMap =
+        Map<Long, MemberExternalDTO.DetailInfo> authorInfoMap =
                 memberAPI.fetchMemberDetailInfoByMemberIds(memberIds);
         Map<String, BookExternalDTO.BasicInfo> bookInfoMap =
                 bookAPI.fetchBookBasicInfoByBookIds(bookIds);
@@ -403,4 +407,5 @@ public class BookStoryQueryFacade {
                 .hasNext(bookStoryPage.hasNext())
                 .build();
     }
+
 }

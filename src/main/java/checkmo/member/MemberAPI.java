@@ -14,21 +14,21 @@ public interface MemberAPI {
      * @param nickname 닉네임
      * @return 회원 ID
      */
-    String fetchMemberId(String nickname);
+    Long fetchMemberId(String nickname);
 
     /**
      * 회원 ID로 회원의 닉네임을 조회합니다.
      *
      * @return 회원의 닉네임
      */
-    String fetchNickname(String memberId);
+    String fetchNickname(Long memberId);
 
     /**
      * 회원 ID 목록으로 회원의 닉네임을 조회합니다.
      *
      * @return 회원 ID와 닉네임의 매핑 정보
      */
-    Map<String, String> fetchNicknameByMemberIds(List<String> memberIds);
+    Map<Long, String> fetchNicknameByMemberIds(List<Long> memberIds);
 
     /**
      * 공유용 기본 회원 정보 조회
@@ -36,7 +36,7 @@ public interface MemberAPI {
      * @param memberId 조회할 회원 ID
      * @return MemberExternalDTO.BasicInfo
      */
-    MemberExternalDTO.BasicInfo fetchMemberBasicInfo(String memberId);
+    MemberExternalDTO.BasicInfo fetchMemberBasicInfo(Long memberId);
 
     /**
      * 회원 ID 목록으로 공유용 기본 회원 정보 조회
@@ -44,7 +44,7 @@ public interface MemberAPI {
      * @param memberIds 조회할 회원 ID 목록
      * @return 회원 ID와 기본 정보 매핑 리스트
      */
-    Map<String, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<String> memberIds);
+    Map<Long, MemberExternalDTO.BasicInfo> fetchMemberBasicInfoByMemberIds(List<Long> memberIds);
 
     /**
      * 회원 ID 목록으로 공유용 디테일 회원 정보 조회
@@ -52,7 +52,7 @@ public interface MemberAPI {
      * @param memberIds 조회할 회원 ID 목록
      * @return 회원 ID와 디테일 정보 매핑 리스트
      */
-    Map<String, MemberExternalDTO.DetailInfo> fetchMemberDetailInfoByMemberIds(List<String> memberIds);
+    Map<Long, MemberExternalDTO.DetailInfo> fetchMemberDetailInfoByMemberIds(List<Long> memberIds);
 
     /**
      * 회원 ID 목록으로 공유용 개인 정보 조회
@@ -60,7 +60,7 @@ public interface MemberAPI {
      * @param memberIds 조회할 회원 ID 목록
      * @return 회원 ID와 개인 정보 매핑 리스트
      */
-    Map<String, MemberExternalDTO.PersonalInfo> fetchMemberPersonalInfoByMemberIds(List<String> memberIds);
+    Map<Long, MemberExternalDTO.PersonalInfo> fetchMemberPersonalInfoByMemberIds(List<Long> memberIds);
 
     /**
      * 팔로우 상태를 포함한 공유용 회원 정보 조회
@@ -69,7 +69,7 @@ public interface MemberAPI {
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return MemberExternalDTO.WithFollowStatus
      */
-    BasicInfoWithFollow fetchMemberBasicInfoWithFollow(String targetMemberId, String currentMemberId);
+    BasicInfoWithFollow fetchMemberBasicInfoWithFollow(Long targetMemberId, Long currentMemberId);
 
     /**
      * 회원 ID 목록으로 팔로우 상태를 포함한 공유용 회원 정보를 조회합니다.
@@ -78,9 +78,9 @@ public interface MemberAPI {
      * @param currentMemberId 현재 로그인한 회원 ID
      * @return 회원 ID와 팔로우 상태 포함 정보 매핑
      */
-    Map<String, BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
-            List<String> targetMemberIds,
-            String currentMemberId
+    Map<Long, BasicInfoWithFollow> fetchMemberBasicInfoWithFollowByMemberId(
+            List<Long> targetMemberIds,
+            Long currentMemberId
     );
 
     /**
@@ -89,7 +89,7 @@ public interface MemberAPI {
      * @param memberId 회원 ID
      * @return 팔로우하는 회원 ID 목록
      */
-    List<String> fetchFollowingIds(String memberId);
+    List<Long> fetchFollowingIds(Long memberId);
 
     /**
      * 특정 회원이 차단한 회원 ID 목록을 조회합니다.
@@ -97,7 +97,7 @@ public interface MemberAPI {
      * @param blockerId 차단 주체 회원 ID
      * @return 차단당한 회원 ID 목록
      */
-    List<String> fetchBlockedMemberIds(String blockerId);
+    List<Long> fetchBlockedMemberIds(Long blockerId);
 
     /**
      * 특정 회원과 차단 관계가 있는 모든 회원 ID 목록을 조회합니다.
@@ -105,7 +105,7 @@ public interface MemberAPI {
      * @param memberId 회원 ID
      * @return 내가 차단했거나 나를 차단한 회원 ID 목록
      */
-    List<String> fetchBlockRelatedMemberIds(String memberId);
+    List<Long> fetchBlockRelatedMemberIds(Long memberId);
 
     /**
      * 두 회원 사이에 어느 방향이든 차단 관계가 있는지 조회합니다.
@@ -114,7 +114,7 @@ public interface MemberAPI {
      * @param memberId2 회원 ID
      * @return 차단 관계 존재 여부
      */
-    boolean hasBlockBetween(String memberId1, String memberId2);
+    boolean hasBlockBetween(Long memberId1, Long memberId2);
 
     /**
      * 차단 주체가 특정 회원을 차단했는지 조회합니다.
@@ -123,7 +123,7 @@ public interface MemberAPI {
      * @param blockedId 피차단 회원 ID
      * @return 차단 여부
      */
-    boolean hasBlocked(String blockerId, String blockedId);
+    boolean hasBlocked(Long blockerId, Long blockedId);
 
     /**
      * 공개 프로필/서재/책이야기 직접 조회 가능 여부를 검증합니다.
@@ -131,7 +131,7 @@ public interface MemberAPI {
      * @param viewerId 조회하는 회원 ID
      * @param targetMemberId 조회 대상 회원 ID
      */
-    void validateProfileAccessible(String viewerId, String targetMemberId);
+    void validateProfileAccessible(Long viewerId, Long targetMemberId);
 
     /**
      * 회원의 관심 카테고리 정보를 조회합니다.
@@ -139,7 +139,7 @@ public interface MemberAPI {
      * @param memberId 회원 ID
      * @return 관심 카테고리 정보
      */
-    InterestCategoryInfo fetchInterestCategory(String memberId);
+    InterestCategoryInfo fetchInterestCategory(Long memberId);
 
     /**
      * 회원 ID로 회원의 이메일을 조회합니다.
@@ -147,5 +147,5 @@ public interface MemberAPI {
      * @param memberId 회원 ID
      * @return 회원 이메일
      */
-    String fetchMemberEmail(String memberId);
+    String fetchMemberEmail(Long memberId);
 }

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationSettingRepository extends JpaRepository<NotificationSetting, Long> {
 
-    Optional<NotificationSetting> findByMemberId(String memberId);
+    Optional<NotificationSetting> findByMemberId(Long memberId);
 
-    boolean existsByMemberId(String memberId);
+    boolean existsByMemberId(Long memberId);
 }

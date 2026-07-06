@@ -9,19 +9,19 @@ import org.springframework.data.domain.Pageable;
 
 public interface BookStoryQueryRepository {
     List<BookStory> searchBookStories(
-            String memberId,
-            List<String> excludedMemberIds,
-            List<String> followingMemberIds,
+            Long memberId,
+            List<Long> excludedMemberIds,
+            List<Long> followingMemberIds,
             BookStoryRequestDTO.BookStoryScope scope,
             Long clubId,
-            String targetMemberId,
+            Long targetMemberId,
             Long cursorId,
             int pageSize
     );
 
     List<BookStory> searchBookStories(
             String bookId,
-            List<String> excludedMemberIds,
+            List<Long> excludedMemberIds,
             Long cursorId,
             int pageSize
     );

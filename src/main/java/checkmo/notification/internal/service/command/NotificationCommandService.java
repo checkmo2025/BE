@@ -44,7 +44,9 @@ public class NotificationCommandService {
      */
     public void createNotification(BookStoryEvent.BookStoryLiked event) {
         NotificationType type = NotificationType.LIKE;
-        if (!isNotificationEnabled(event.receiverId(), type)) {
+        Long senderId = event.senderId();
+        Long receiverId = event.receiverId();
+        if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
 
@@ -52,13 +54,13 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(event.eventId())
                 .domainId(event.bookStoryId())
-                .senderId(event.senderId())
-                .receiverId(event.receiverId())
+                .senderId(senderId)
+                .receiverId(receiverId)
                 .build();
         try {
             Notification saved = notificationRepository.save(notification);
-            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.receiverId()));
-            evictNotificationCache(event.receiverId());
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), receiverId));
+            evictNotificationCache(receiverId);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -71,7 +73,9 @@ public class NotificationCommandService {
      */
     public void createNotification(BookStoryEvent.BookStoryComment event) {
         NotificationType type = NotificationType.COMMENT;
-        if (!isNotificationEnabled(event.receiverId(), type)) {
+        Long senderId = event.senderId();
+        Long receiverId = event.receiverId();
+        if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
 
@@ -79,13 +83,13 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(event.eventId())
                 .domainId(event.bookStoryId())
-                .senderId(event.senderId())
-                .receiverId(event.receiverId())
+                .senderId(senderId)
+                .receiverId(receiverId)
                 .build();
         try {
             Notification saved = notificationRepository.save(notification);
-            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.receiverId()));
-            evictNotificationCache(event.receiverId());
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), receiverId));
+            evictNotificationCache(receiverId);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -126,7 +130,8 @@ public class NotificationCommandService {
      */
     public void createNotification(JoinClubEvent event) {
         Notification.NotificationType type = Notification.NotificationType.JOIN_CLUB;
-        if (!isNotificationEnabled(event.memberId(), type)) {
+        Long receiverId = event.memberId();
+        if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
 
@@ -134,13 +139,13 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(event.eventId())
                 .domainId(event.clubId())
-                .senderId("SYSTEM")
-                .receiverId(event.memberId())
+                .senderId(null)
+                .receiverId(receiverId)
                 .build();
         try {
             Notification saved = notificationRepository.save(notification);
-            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.memberId()));
-            evictNotificationCache(event.memberId());
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), receiverId));
+            evictNotificationCache(receiverId);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -155,8 +160,8 @@ public class NotificationCommandService {
         NotificationType type = NotificationType.CLUB_MEETING_CREATED;
         Long sourceId = event.eventId();
 
-        List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
-        for (String memberId : memberIds) {
+        List<Long> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
+        for (Long memberId : memberIds) {
             createClubNotification(type, sourceId, event.clubId(), memberId);
         }
     }
@@ -170,14 +175,14 @@ public class NotificationCommandService {
         NotificationType type = NotificationType.CLUB_NOTICE_CREATED;
         Long sourceId = event.eventId();
 
-        List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
-        for (String memberId : memberIds) {
+        List<Long> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
+        for (Long memberId : memberIds) {
             createClubNotification(type, sourceId, event.clubId(), memberId);
         }
     }
 
     private void createClubNotification(NotificationType type, Long sourceId, Long clubId,
-                                        String receiverId) {
+                                        Long receiverId) {
         if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
@@ -186,7 +191,7 @@ public class NotificationCommandService {
                 .notificationType(type)
                 .sourceId(sourceId)
                 .domainId(clubId)
-                .senderId("SYSTEM")
+                .senderId(null)
                 .receiverId(receiverId)
                 .build();
         try {
@@ -198,14 +203,14 @@ public class NotificationCommandService {
         }
     }
 
-    private void evictNotificationCache(String memberId) {
+    private void evictNotificationCache(Long memberId) {
         Cache cache = cacheManager.getCache("notifications");
         if (cache != null) {
             cache.evict(memberId);
         }
     }
 
-    private boolean isNotificationEnabled(String receiverId, NotificationType type) {
+    private boolean isNotificationEnabled(Long receiverId, NotificationType type) {
         return notificationSettingRepository.findByMemberId(receiverId)
                 .map(setting -> setting.isEnabled(type))
                 .orElse(true);
@@ -218,7 +223,7 @@ public class NotificationCommandService {
      * @param memberId       읽음 처리할 회원 ID (receiverId)
      */
     @CacheEvict(value = "notifications", key = "#memberId")
-    public void markNotificationAsRead(Long notificationId, String memberId) {
+    public void markNotificationAsRead(Long notificationId, Long memberId) {
         Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, memberId)
                 .orElseThrow(() -> new NotificationException(NotificationErrorStatus.NOTIFICATION_NOT_FOUND));
 

@@ -33,9 +33,10 @@ public class MemberCommandService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public void createMember(String memberId, String email) {
+    public void createMember(Long memberId, String legacyId, String email) {
         Member member = Member.builder()
                 .id(memberId)
+                .legacyId(legacyId)
                 .email(email)
                 .name("")
                 .phoneNumber("")
@@ -52,7 +53,7 @@ public class MemberCommandService {
      * @param request 추가 정보 DTO (닉네임, 프로필 이미지, 관심 카테고리)
      * @return void -> 어차피 회원 프로필 정보 완료 후에는 메인 화면에 로그인된 상태로 리다이렉트
      */
-    public void addAdditionalInfo(String memberId, MemberRequestDTO.AdditionalInfo request) {
+    public void addAdditionalInfo(Long memberId, MemberRequestDTO.AdditionalInfo request) {
         Member member = findActiveMember(memberId);
 
         if (!StringUtils.hasText(request.getNickname())) {
@@ -92,7 +93,7 @@ public class MemberCommandService {
      * @return 수정된 회원 프로필 정보 엔티티 - 이때는 관심 카테고리 정보 DTO에 포함 X , -> 반드시 CategoryQueryFacade를 통해 조회해야 함
      */
     public DetailInfo updateProfile(
-            String memberId,
+            Long memberId,
             MemberRequestDTO.MemberProfileUpdate request
     ) {
         // 회원 조회
@@ -126,7 +127,7 @@ public class MemberCommandService {
             member.updateInterestCategories(new HashSet<>(request.getCategories()));
         }
 
-        return MemberConverter.toMemberProfileWithCategory(member);
+        return MemberConverter.toMemberProfileWithCategory(member, isSocialMember(memberId));
     }
 
     /**
@@ -135,7 +136,7 @@ public class MemberCommandService {
      * @param memberId 비밀번호를 변경할 회원의 ID
      * @param request  비밀번호 변경 정보 DTO (현재 비밀번호, 새 비밀번호, 새 비밀번호 확인)
      */
-    public void updatePassword(String memberId, MemberRequestDTO.UpdatePassword request) {
+    public void updatePassword(Long memberId, MemberRequestDTO.UpdatePassword request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new MemberException(MemberErrorStatus.PASSWORD_MISMATCH);
         }
@@ -152,7 +153,7 @@ public class MemberCommandService {
      *
      * @param memberId 비활성화할 회원의 ID
      */
-    public void deactivateMember(String memberId, HttpServletRequest request, HttpServletResponse response) {
+    public void deactivateMember(Long memberId, HttpServletRequest request, HttpServletResponse response) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
@@ -164,7 +165,7 @@ public class MemberCommandService {
         authenticationAPI.deactivateMember(memberId, request, response);
     }
 
-    public void reactivateIfDeactivated(String memberId) {
+    public void reactivateIfDeactivated(Long memberId) {
         memberRepository.findById(memberId)
                 .filter(Member::isDeactivated)
                 .ifPresent(Member::reactivate);
@@ -175,7 +176,7 @@ public class MemberCommandService {
      *
      * @param memberId 삭제할 회원의 ID
      */
-    public void deleteMember(String memberId) {
+    public void deleteMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElse(null);
 
@@ -196,7 +197,7 @@ public class MemberCommandService {
      * @param memberId
      * @param request
      */
-    public void updateEmail(String memberId, MemberRequestDTO.UpdateEmail request) {
+    public void updateEmail(Long memberId, MemberRequestDTO.UpdateEmail request) {
         // 새 이메일 중복 체크
         if (memberRepository.existsByEmail(request.getNewEmail())) {
             throw new MemberException(MemberErrorStatus.EMAIL_ALREADY_EXISTS);
@@ -210,8 +211,12 @@ public class MemberCommandService {
         member.updateEmail(request.getNewEmail());
     }
 
-    private Member findActiveMember(String memberId) {
+    private Member findActiveMember(Long memberId) {
         return memberRepository.findByIdAndDeactivatedAtIsNull(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    private boolean isSocialMember(Long memberId) {
+        return !"LOCAL".equals(authenticationAPI.fetchProvider(memberId));
     }
 }

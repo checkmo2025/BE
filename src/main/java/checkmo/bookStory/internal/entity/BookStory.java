@@ -58,7 +58,7 @@ public class BookStory extends BaseEntity {
     private BookStoryStatus status = BookStoryStatus.PUBLISHED;
 
     @Column(name = "member_id", nullable = false)
-    private String memberId;
+    private Long memberId;
 
     @Column(name = "book_id", nullable = false)
     private String bookId;
@@ -106,7 +106,7 @@ public class BookStory extends BaseEntity {
         }
     }
 
-    public boolean verifyOwner(String memberId) {
+    public boolean verifyOwner(Long memberId) {
         return this.memberId.equals(memberId);
     }
 }

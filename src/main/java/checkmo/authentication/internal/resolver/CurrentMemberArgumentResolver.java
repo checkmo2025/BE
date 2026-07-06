@@ -18,11 +18,10 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        // @CurrentId String 타입 지원
         boolean isCurrentIdAnnotation = parameter.getParameterAnnotation(CurrentId.class) != null;
-        boolean isStringClass = String.class.equals(parameter.getParameterType());
+        boolean isLongClass = Long.class.equals(parameter.getParameterType()) || long.class.equals(parameter.getParameterType());
 
-        return (isCurrentIdAnnotation && isStringClass);
+        return isCurrentIdAnnotation && isLongClass;
     }
 
     @Override
@@ -39,10 +38,9 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
             return null;
         }
 
-        // PrincipalDetails에서 memberId 추출 (Member 엔티티의 id가 memberId로 사용됨)
-        String memberId = null;
+        Long memberId = null;
         if (authentication.getPrincipal() instanceof PrincipalDetails principalDetails) {
-            memberId = principalDetails.getUsername();
+            memberId = principalDetails.getUser().getId();
         }
 
         if (memberId == null) {
@@ -50,7 +48,6 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
             return null;
         }
 
-        // @CurrentId인 경우 memberId 반환
         if (parameter.getParameterAnnotation(CurrentId.class) != null) {
             log.info("loginId 주입: {}", memberId);
             return memberId;

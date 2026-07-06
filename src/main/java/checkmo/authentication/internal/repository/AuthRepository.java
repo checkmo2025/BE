@@ -1,15 +1,16 @@
 package checkmo.authentication.internal.repository;
 
 import checkmo.authentication.internal.entity.AuthUser;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AuthRepository extends JpaRepository<AuthUser, String> {
+public interface AuthRepository extends JpaRepository<AuthUser, Long> {
 
     Optional<AuthUser> findByEmail(String email);
-    Optional<AuthUser> findByIdAndDeactivatedAtIsNotNull(String id);
+    Optional<AuthUser> findByIdAndDeactivatedAtIsNotNull(Long id);
+    Optional<AuthUser> findByProviderAndProviderUserId(String provider, String providerUserId);
 
     boolean existsByEmail(String email);
 

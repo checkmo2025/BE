@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long>, NotificationRepositoryCustom {
 
-    Optional<Notification> findByIdAndReceiverId(Long notificationId, String receiverId);
+    Optional<Notification> findByIdAndReceiverId(Long notificationId, Long receiverId);
 }

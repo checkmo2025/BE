@@ -23,41 +23,48 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     private final AuthRepository authRepository;
 
     @Override
-    public void deleteAuthData(String memberId) {
+    public void deleteAuthData(Long memberId) {
         tokenCacheService.deleteRefreshToken(memberId);
         authRepository.findById(memberId).ifPresent(authRepository::delete);
     }
 
     @Override
-    public void completeProfile(String memberId) {
+    public void completeProfile(Long memberId) {
         authUserCommandService.completeProfile(memberId);
     }
 
     @Override
-    public void deactivateMember(String memberId, HttpServletRequest request, HttpServletResponse response) {
+    public void deactivateMember(Long memberId, HttpServletRequest request, HttpServletResponse response) {
         authSessionCommandService.logout(request, response);
         authUserCommandService.deactivateMember(memberId);
     }
 
     @Override
-    public boolean updatePassword(String memberId, String currentPassword, String newPassword) {
+    public boolean updatePassword(Long memberId, String currentPassword, String newPassword) {
         return authUserCommandService.updatePassword(memberId, currentPassword, newPassword);
     }
 
     @Override
-    public void updateEmail(String memberId, String currentEmail, String newEmail, String verificationCode) {
+    public void updateEmail(Long memberId, String currentEmail, String newEmail, String verificationCode) {
         authUserCommandService.updateEmail(memberId, currentEmail, newEmail, verificationCode);
     }
 
     @Override
-    public void updateNickname(String memberId, String nickname) {
+    public void updateNickname(Long memberId, String nickname) {
         authUserCommandService.updateNickname(memberId, nickname);
     }
 
     @Override
-    public boolean canAccessAdmin(String memberId) {
+    public boolean canAccessAdmin(Long memberId) {
         AuthUser authUser = authRepository.findById(memberId)
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
         return authUser.isAdmin();
+    }
+
+    @Override
+    public String fetchProvider(Long memberId) {
+        return authRepository.findById(memberId)
+                .map(AuthUser::getProvider)
+                .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
     }
 }

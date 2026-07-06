@@ -49,7 +49,7 @@ public class NotificationController {
     })
     @PutMapping("/push-devices")
     public ApiResponse<PushDeviceResponseDTO> registerPushDevice(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestBody @Valid PushDeviceRequestDTO request
     ) {
         var device = pushDeviceCommandService.upsert(memberId, request);
@@ -64,7 +64,7 @@ public class NotificationController {
     })
     @DeleteMapping("/push-devices/{installationId}")
     public ApiResponse<Void> deregisterPushDevice(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String installationId
     ) {
         pushDeviceCommandService.deactivate(memberId, installationId);
@@ -81,7 +81,7 @@ public class NotificationController {
     })
     @GetMapping()
     public ApiResponse<BasicInfoList> getNotifications(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         var notifications = notificationQueryFacade.retrieveNotifications(memberId, cursorId);
@@ -97,7 +97,7 @@ public class NotificationController {
     })
     @GetMapping("/preview")
     public ApiResponse<BasicInfoPreviewList> getUnreadNotifications(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         // Facade를 통해 QueryService의 캐시된 메서드 호출
         var notifications = notificationQueryFacade.retrieveNotificationPreviews(memberId);
@@ -114,7 +114,7 @@ public class NotificationController {
     })
     @PatchMapping("/{notificationId}/read")
     public ApiResponse<Long> markNotificationAsRead(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long notificationId
     ) {
         notificationCommandService.markNotificationAsRead(notificationId, memberId);
@@ -129,7 +129,7 @@ public class NotificationController {
     })
     @GetMapping("/settings")
     public ApiResponse<SettingInfo> getNotificationSetting(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         var setting = notificationQueryFacade.retrieveNotificationSetting(memberId);
         return ApiResponse.onSuccess(setting);
@@ -144,7 +144,7 @@ public class NotificationController {
     })
     @PatchMapping("/settings/{settingType}")
     public ApiResponse<Void> toggleNotificationSetting(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable NotificationSettingType settingType
     ) {
         notificationSettingCommandService.toggleNotificationSetting(memberId, settingType);

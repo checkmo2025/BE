@@ -23,27 +23,27 @@ public class ClubMemberQueryService {
 
     private final ClubMemberRepository clubMemberRepository;
 
-    public ClubMember validateClubMember(Long clubId, String memberId) throws ClubManagementException {
+    public ClubMember validateClubMember(Long clubId, Long memberId) throws ClubManagementException {
         return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId)
                 .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND));
     }
 
-    public ClubMember validateClubMember(Long clubId, Long clubMemberId) throws ClubManagementException {
+    public ClubMember validateClubMemberById(Long clubId, Long clubMemberId) throws ClubManagementException {
         return clubMemberRepository.findByIdAndClubId(clubMemberId, clubId)
                 .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_MEMBER_NOT_FOUND));
     }
 
-    public List<ClubIdAndName> retrieveAllActiveClubsByMemberId(String memberId) {
+    public List<ClubIdAndName> retrieveAllActiveClubsByMemberId(Long memberId) {
         EnumSet<ClubMemberStatus> activeStatuses = ClubMemberStatus.activeStatuses();
         return clubMemberRepository.findClubIdAndNameByMemberIdAndStatuses(memberId, activeStatuses);
     }
 
-    public Optional<ClubMember> findClubMember(Long clubId, String memberId) {
+    public Optional<ClubMember> findClubMember(Long clubId, Long memberId) {
         return clubMemberRepository.findByClubIdAndMemberId(clubId, memberId);
     }
 
     public Map<Long, ClubMemberStatus> retrieveClubMemberStatusByClubIds(
-            String memberId,
+            Long memberId,
             List<Long> clubIds
     ) {
         // clubMemberRepository에서 clubId IN :clubIds AND memberId = :memberId 조건으로 여러 상태를 한 번에 조회
@@ -79,7 +79,7 @@ public class ClubMemberQueryService {
         return clubMemberRepository.countByClubIdAndClubMemberStatusIn(clubId, ClubMemberStatus.activeStatuses());
     }
 
-    public List<String> retrieveActiveMemberIds(Long clubId) {
+    public List<Long> retrieveActiveMemberIds(Long clubId) {
         return clubMemberRepository.findByClubIdAndStatuses(clubId, ClubMemberStatus.activeStatuses(), null,
                         Pageable.unpaged())
                 .stream()

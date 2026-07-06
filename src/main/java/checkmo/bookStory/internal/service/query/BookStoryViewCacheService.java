@@ -24,7 +24,7 @@ public class BookStoryViewCacheService {
      * @param memberId 조회한 유저 ID
      */
     @Async
-    public void incrementViewCount(Long bookStoryId, String memberId) {
+    public void incrementViewCount(Long bookStoryId, Long memberId) {
         String userLogKey = VIEW_USER_LOG_KEY + bookStoryId + ":" + memberId;
         String viewCountKey = VIEW_COUNT_KEY + bookStoryId;
 

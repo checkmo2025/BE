@@ -47,7 +47,7 @@ public class BookStoryController {
     })
     @PostMapping
     public ApiResponse<Long> createBookStory(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @Valid @RequestBody BookStoryRequestDTO.BookStoryCreate request
     ) {
         Long bookStoryId = bookStoryCommandService.createBookStory(memberId, request);
@@ -63,7 +63,7 @@ public class BookStoryController {
     })
     @GetMapping
     public ApiResponse<BookStoryResponseDTO.BookStoryList> getAllBookStories(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         var bookStories = bookStoryQueryFacade.fetchAllBookStories(memberId, cursorId);
@@ -79,7 +79,7 @@ public class BookStoryController {
     })
     @GetMapping("/me")
     public ApiResponse<BookStoryResponseDTO.BookStoryList> getMyBookStories(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         var bookStories = bookStoryQueryFacade.fetchMyBookStories(memberId, cursorId);
@@ -95,7 +95,7 @@ public class BookStoryController {
     })
     @GetMapping("/following")
     public ApiResponse<BookStoryResponseDTO.BookStoryList> getFollowingBookStories(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         var bookStories = bookStoryQueryFacade.fetchFollowingBookStories(memberId, cursorId);
@@ -114,7 +114,7 @@ public class BookStoryController {
     })
     @GetMapping("/members/{nickname}")
     public ApiResponse<BookStoryResponseDTO.BookStoryList> getMemberBookStories(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String nickname,
             @RequestParam(required = false) Long cursorId
     ) {
@@ -134,7 +134,7 @@ public class BookStoryController {
     })
     @GetMapping("/clubs/{clubId}")
     public ApiResponse<BookStoryResponseDTO.BookStoryList> getClubBookStories(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId
     ) {
@@ -166,7 +166,7 @@ public class BookStoryController {
     })
     @GetMapping("/{bookStoryId}")
     public ApiResponse<BookStoryResponseDTO.DetailInfo> getBookStory(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId
     ) {
         var bookStory = bookStoryQueryFacade.fetchBookStoryDetailInfo(memberId, bookStoryId);
@@ -183,7 +183,7 @@ public class BookStoryController {
     })
     @PostMapping("/{bookStoryId}/like")
     public ApiResponse<Long> toggleLikeBookStory(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId
     ) {
         boolean isLiked = bookStorySocialCommandService.toggleLikeOnBookStory(memberId, bookStoryId);
@@ -206,7 +206,7 @@ public class BookStoryController {
     })
     @PatchMapping("/{bookStoryId}")
     public ApiResponse<Long> updateBookStory(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId,
             @Valid @RequestBody BookStoryRequestDTO.BookStoryUpdate request
     ) {
@@ -225,7 +225,7 @@ public class BookStoryController {
     })
     @DeleteMapping("/{bookStoryId}")
     public ApiResponse<String> deleteBookStory(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId
     ) {
         bookStoryCommandService.deleteBookStory(memberId, bookStoryId);
@@ -245,7 +245,7 @@ public class BookStoryController {
     })
     @PostMapping("/{bookStoryId}/comments")
     public ApiResponse<Long> createComment(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId,
             @RequestParam(required = false) Long parentCommentId,
             @Valid @RequestBody BookStoryRequestDTO.CommentCreate request
@@ -269,7 +269,7 @@ public class BookStoryController {
     })
     @PatchMapping("/{bookStoryId}/comments/{commentId}")
     public ApiResponse<Long> updateComment(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId,
             @PathVariable Long commentId,
             @Valid @RequestBody BookStoryRequestDTO.CommentUpdate request
@@ -292,7 +292,7 @@ public class BookStoryController {
     })
     @DeleteMapping("/{bookStoryId}/comments/{commentId}")
     public ApiResponse<Long> deleteComment(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long bookStoryId,
             @PathVariable Long commentId
     ) {
@@ -312,7 +312,7 @@ public class BookStoryController {
     })
     @GetMapping("/search/{bookId}")
     public ApiResponse<BookStoryResponseDTO.BookStoryList> getBookStoriesByBook(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable String bookId,
             @RequestParam(required = false) Long cursorId
     ) {

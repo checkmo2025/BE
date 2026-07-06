@@ -39,7 +39,7 @@ public class ReportQueryService {
     private final ClubMeetingAPI clubMeetingAPI;
     private final RealtimeAPI realtimeAPI;
 
-    public ReportResponseDTO.MyReportList retrieveMyReports(String memberId, Long cursorId) {
+    public ReportResponseDTO.MyReportList retrieveMyReports(Long memberId, Long cursorId) {
         CursorResult<Report> reportCursorResult = CursorPagingHelper.getPage(
                 size -> reportRepository.findMyReports(memberId, cursorId, size),
                 Report::getId,
@@ -73,7 +73,7 @@ public class ReportQueryService {
             String memberNickname,
             Long cursorId
     ) {
-        String reporterId = memberAPI.fetchMemberId(memberNickname);
+        Long reporterId = memberAPI.fetchMemberId(memberNickname);
 
         CursorResult<Report> reportCursorResult = CursorPagingHelper.getPage(
                 size -> reportRepository.findMyReports(reporterId, cursorId, size),
@@ -269,12 +269,12 @@ public class ReportQueryService {
     }
 
     private DisplayInfo resolveMemberDisplayInfoByNickname(String nickname) {
-        String memberId = memberAPI.fetchMemberId(nickname);
+        Long memberId = memberAPI.fetchMemberId(nickname);
 
         return resolveMemberDisplayInfo(memberId);
     }
 
-    private DisplayInfo resolveMemberDisplayInfo(String memberId) {
+    private DisplayInfo resolveMemberDisplayInfo(Long memberId) {
         var memberInfo = memberAPI.fetchMemberBasicInfo(memberId);
 
         return new DisplayInfo(

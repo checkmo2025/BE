@@ -32,7 +32,7 @@ public class ReportCommandService {
 
     private final ReportRepository reportRepository;
 
-    public Long createReport(String reporterId, ReportRequestDTO.Create request) {
+    public Long createReport(Long reporterId, ReportRequestDTO.Create request) {
         String redirectUrl = resolveRedirectUrl(
                 reporterId,
                 request.getTargetType(),
@@ -52,7 +52,7 @@ public class ReportCommandService {
     }
 
     public String resolveRedirectUrl(
-            String reporterId,
+            Long reporterId,
             ReportTargetType targetType,
             String targetId
     ) {
@@ -76,8 +76,8 @@ public class ReportCommandService {
         }
     }
 
-    private String resolveMember(String reporterId, String memberNickname) {
-        String reportedMemberId = memberAPI.fetchMemberId(memberNickname);
+    private String resolveMember(Long reporterId, String memberNickname) {
+        Long reportedMemberId = memberAPI.fetchMemberId(memberNickname);
 
         if (reporterId.equals(reportedMemberId)) {
             throw new ReportException(ReportErrorStatus.CANNOT_REPORT_SELF);

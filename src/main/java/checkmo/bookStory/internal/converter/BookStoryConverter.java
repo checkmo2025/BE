@@ -22,7 +22,7 @@ public class BookStoryConverter {
 
     public static BookStory toBookStory(
             BookStoryRequestDTO.BookStoryCreate request,
-            String memberId,
+            Long memberId,
             String bookId,
             BookStoryStatus status
     ) {
@@ -37,7 +37,7 @@ public class BookStoryConverter {
 
     public static BookStoryResponseDTO.BasicInfo toBookStoryDetailDTO(
             BookStory bookStory,
-            String currentMemberId,
+            Long currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
             BasicInfoWithFollow authorInfo,
             boolean isLiked
@@ -61,7 +61,7 @@ public class BookStoryConverter {
 
     public static BookStoryResponseDTO.DetailInfo toBookStoryDetailWithComment(
             BookStory bookStory,
-            String currentMemberId,
+            Long currentMemberId,
             BookExternalDTO.BasicInfo bookInfo,
             BasicInfoWithFollow authorInfo,
             boolean isLiked,
@@ -105,9 +105,9 @@ public class BookStoryConverter {
 
     public static List<BookStoryResponseDTO.CommentInfo> toCommentDetailList(
             List<Comment> comments,
-            String currentMemberId,
-            Map<String, MemberExternalDTO.BasicInfo> memberInfoMap,
-            Set<String> blockedMemberIds
+            Long currentMemberId,
+            Map<Long, MemberExternalDTO.BasicInfo> memberInfoMap,
+            Set<Long> blockedMemberIds
     ) {
         return comments.stream()
                 .map(comment -> {
@@ -134,7 +134,7 @@ public class BookStoryConverter {
 
     private static BookStoryResponseDTO.CommentInfo fromCommentToResponse(
             Comment comment,
-            String currentMemberId,
+            Long currentMemberId,
             MemberExternalDTO.BasicInfo authorInfo,
             boolean blocked,
             List<BookStoryResponseDTO.CommentInfo> replies
@@ -165,7 +165,7 @@ public class BookStoryConverter {
                 .build();
     }
 
-    private static boolean isBlocked(String memberId, Set<String> blockedMemberIds) {
+    private static boolean isBlocked(Long memberId, Set<Long> blockedMemberIds) {
         return memberId != null && blockedMemberIds != null && blockedMemberIds.contains(memberId);
     }
 

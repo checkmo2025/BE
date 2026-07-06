@@ -14,30 +14,30 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface MemberRepository extends JpaRepository<Member, String>, MemberRepositoryCustom {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     boolean existsByNickNameAndDeactivatedAtIsNull(String nickName);
-    Optional<Member> findByIdAndDeactivatedAtIsNull(String id);
-    List<Member> findAllByIdInAndDeactivatedAtIsNull(List<String> ids);
+    Optional<Member> findByIdAndDeactivatedAtIsNull(Long id);
+    List<Member> findAllByIdInAndDeactivatedAtIsNull(List<Long> ids);
 
     @Query("select m from Member m where m.nickName = :nickName and m.deactivatedAt is null")
     Optional<Member> findByNickName(@Param("nickName") String nickName);
 
     @Query("select m.id from Member m where m.nickName = :nickName and m.deactivatedAt is null")
-    Optional<String> findIdByNickName(@Param("nickName") String nickName);
+    Optional<Long> findIdByNickName(@Param("nickName") String nickName);
 
     @Query("select m.nickName from Member m where m.id = :memberId and m.deactivatedAt is null")
-    Optional<String> findActiveNicknameById(@Param("memberId") String memberId);
+    Optional<String> findActiveNicknameById(@Param("memberId") Long memberId);
 
     @Query("select m.id as id, m.nickName as nickName from Member m where m.id in :memberIds and m.deactivatedAt is null")
-    List<MemberIdAndNicknameProjection> findActiveIdAndNicknameByIdIn(@Param("memberIds") List<String> memberIds);
+    List<MemberIdAndNicknameProjection> findActiveIdAndNicknameByIdIn(@Param("memberIds") List<Long> memberIds);
 
     @Query("select m.id as id, m.nickName as nickName, m.imgUrl as imgUrl from Member m where m.id in :memberIds and m.deactivatedAt is null")
-    List<MemberBasicInfoProjection> findActiveIdNicknameAndImgUrlByIdIn(@Param("memberIds") List<String> memberIds);
+    List<MemberBasicInfoProjection> findActiveIdNicknameAndImgUrlByIdIn(@Param("memberIds") List<Long> memberIds);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select m from Member m where m.id in :memberIds and m.deactivatedAt is null order by m.id asc")
-    List<Member> lockActiveMembersByIdIn(@Param("memberIds") List<String> memberIds);
+    List<Member> lockActiveMembersByIdIn(@Param("memberIds") List<Long> memberIds);
 
     // 생성일시가 특정 시간 이전이고, 추가정보(nickname)가 아직 입력되지 않은(프로필 미완료) 회원 조회
     @Query("SELECT m FROM Member m WHERE m.createdAt < :threshold AND m.nickName IS NULL")
@@ -59,9 +59,15 @@ public interface MemberRepository extends JpaRepository<Member, String>, MemberR
     boolean existsByEmail(String email);
 
 
-    Page<Member> findByIdContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            String idKeyword,
-            String emailKeyword,
+    @Query("""
+            select m
+            from Member m
+            where (:memberId is not null and m.id = :memberId)
+               or lower(m.email) like lower(concat('%', :keyword, '%'))
+            """)
+    Page<Member> findByIdOrEmailContainingIgnoreCase(
+            @Param("memberId") Long memberId,
+            @Param("keyword") String keyword,
             Pageable pageable
     );
 }

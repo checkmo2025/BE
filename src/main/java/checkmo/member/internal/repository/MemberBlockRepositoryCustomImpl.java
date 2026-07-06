@@ -18,7 +18,7 @@ public class MemberBlockRepositoryCustomImpl implements MemberBlockRepositoryCus
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<MemberBlock> findBlocks(String blockerId, Long cursorId, int pageSize) {
+    public List<MemberBlock> findBlocks(Long blockerId, Long cursorId, int pageSize) {
         return queryFactory
                 .selectFrom(memberBlock)
                 .join(memberBlock.blocked).fetchJoin()
@@ -32,7 +32,7 @@ public class MemberBlockRepositoryCustomImpl implements MemberBlockRepositoryCus
     }
 
     @Override
-    public List<String> findBlockedMemberIds(String blockerId) {
+    public List<Long> findBlockedMemberIds(Long blockerId) {
         return queryFactory
                 .select(memberBlock.blocked.id)
                 .from(memberBlock)
@@ -41,7 +41,7 @@ public class MemberBlockRepositoryCustomImpl implements MemberBlockRepositoryCus
     }
 
     @Override
-    public List<String> findBlockRelatedMemberIds(String memberId) {
+    public List<Long> findBlockRelatedMemberIds(Long memberId) {
         return queryFactory
                 .select(new CaseBuilder()
                         .when(memberBlock.blocker.id.eq(memberId))
@@ -55,7 +55,7 @@ public class MemberBlockRepositoryCustomImpl implements MemberBlockRepositoryCus
     }
 
     @Override
-    public Optional<MemberBlock> findBetween(String memberId1, String memberId2) {
+    public Optional<MemberBlock> findBetween(Long memberId1, Long memberId2) {
         return Optional.ofNullable(queryFactory
                 .selectFrom(memberBlock)
                 .where(between(memberId1, memberId2))
@@ -63,7 +63,7 @@ public class MemberBlockRepositoryCustomImpl implements MemberBlockRepositoryCus
     }
 
     @Override
-    public boolean existsBetween(String memberId1, String memberId2) {
+    public boolean existsBetween(Long memberId1, Long memberId2) {
         Integer result = queryFactory
                 .selectOne()
                 .from(memberBlock)
@@ -73,7 +73,7 @@ public class MemberBlockRepositoryCustomImpl implements MemberBlockRepositoryCus
         return result != null;
     }
 
-    private BooleanExpression between(String memberId1, String memberId2) {
+    private BooleanExpression between(Long memberId1, Long memberId2) {
         return memberBlock.blocker.id.eq(memberId1).and(memberBlock.blocked.id.eq(memberId2))
                 .or(memberBlock.blocker.id.eq(memberId2).and(memberBlock.blocked.id.eq(memberId1)));
     }

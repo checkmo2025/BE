@@ -76,7 +76,7 @@ public class AuthSessionCommandService {
         if (StringUtils.hasText(refreshToken)) {
             try {
                 if (jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
-                    String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+                    Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
                     tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken);
                 }
             } catch (Exception e) {
@@ -91,8 +91,8 @@ public class AuthSessionCommandService {
         }
 
         try {
-            String memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-            if (!StringUtils.hasText(memberId)) {
+            Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+            if (memberId == null) {
                 throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
             }
             if (!tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken)) {

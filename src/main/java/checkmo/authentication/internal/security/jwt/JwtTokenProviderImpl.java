@@ -1,6 +1,8 @@
 package checkmo.authentication.internal.security.jwt;
 
 import checkmo.authentication.internal.config.properties.JwtProperties;
+import checkmo.authentication.internal.exception.AuthErrorStatus;
+import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.security.auth.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -79,7 +81,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
     @Override
     public Authentication getAuthentication(String accessToken) {
-        String userId = this.getUserIdFromToken(accessToken);
+        Long userId = this.getUserIdFromToken(accessToken);
 
         UserDetails userDetails = customUserDetailsService.loadUserById(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, "",
@@ -126,21 +128,30 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
-    public String getUserIdFromToken(String token) {
+    public Long getUserIdFromToken(String token) {
         try {
-            return Jwts.parser()
+            String subject = Jwts.parser()
                     .verifyWith((SecretKey) key)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
+            return parseMemberIdSubject(subject);
         } catch (ExpiredJwtException e) {
-            return e.getClaims().getSubject();
+            return parseMemberIdSubject(e.getClaims().getSubject());
+        }
+    }
+
+    private Long parseMemberIdSubject(String subject) {
+        try {
+            return Long.valueOf(subject);
+        } catch (NumberFormatException e) {
+            throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
         }
     }
 
     @Override
-    public Authentication getAuthenticationFromMemberId(String memberId) {
+    public Authentication getAuthenticationFromMemberId(Long memberId) {
         UserDetails userDetails = customUserDetailsService.loadUserById(memberId);
 
         return new UsernamePasswordAuthenticationToken(

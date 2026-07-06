@@ -56,7 +56,7 @@ public class ClubNoticeController {
     })
     @GetMapping
     public ApiResponse<ClubNoticePreviewPage> getNoticeList(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long clubId,
             @RequestParam(defaultValue = "1") int page
     ) {
@@ -74,7 +74,7 @@ public class ClubNoticeController {
     public ApiResponse<ClubNoticeResponseDTO.ClubNoticeDetail> getNoticeDetail(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubNoticeQueryFacade.retrieveClubNoticeDetail(clubId, noticeId, memberId));
     }
@@ -87,7 +87,7 @@ public class ClubNoticeController {
     })
     @PostMapping
     public ApiResponse<String> createPureVote(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @PathVariable Long clubId,
             @RequestBody @Valid ClubNoticeRequestDTO.CreateClubNotice request
     ) {
@@ -106,7 +106,7 @@ public class ClubNoticeController {
     public ApiResponse<String> updateNotice(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestBody @Valid ClubNoticeRequestDTO.UpdateClubNotice request
     ) {
         clubNoticeCommandService.updateNotice(clubId, noticeId, memberId, request);
@@ -124,7 +124,7 @@ public class ClubNoticeController {
     public ApiResponse<String> deletePureNotice(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubNoticeCommandService.deleteNotice(clubId, memberId, noticeId);
         return ApiResponse.onSuccess("공지사항이 삭제되었습니다.");
@@ -141,7 +141,7 @@ public class ClubNoticeController {
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
             @PathVariable Long voteId,
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestBody @Valid ClubNoticeRequestDTO.VoteResult request
     ) {
         Long participatingVoteId = clubNoticeCommandService.haveVote(clubId, noticeId, voteId, memberId, request);
@@ -158,7 +158,7 @@ public class ClubNoticeController {
     public ApiResponse<NoticeCommentList> getNoticeComments(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         return ApiResponse.onSuccess(
@@ -176,7 +176,7 @@ public class ClubNoticeController {
     public ApiResponse<String> createNoticeComment(
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestBody @Valid ClubNoticeRequestDTO.CreateClubNoticeComment request
     ) {
         noticeCommentCommandService.createNoticeComment(clubId, noticeId, memberId, request);
@@ -196,7 +196,7 @@ public class ClubNoticeController {
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
             @PathVariable Long commentId,
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestBody @Valid ClubNoticeRequestDTO.CreateClubNoticeComment request
     ) {
         noticeCommentCommandService.updateNoticeComment(clubId, noticeId, commentId, memberId, request);
@@ -216,7 +216,7 @@ public class ClubNoticeController {
             @PathVariable Long clubId,
             @PathVariable Long noticeId,
             @PathVariable Long commentId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         noticeCommentCommandService.deleteNoticeComment(clubId, noticeId, commentId, memberId);
         return ApiResponse.onSuccess("공지사항 댓글이 삭제되었습니다.");

@@ -29,7 +29,7 @@ public class BookRecommendationService {
     private final AladinRecommendationRefreshClient recommendationRefreshClient;
     private final SentryCaptureClient sentryCaptureClient;
 
-    public BookResponseDTO.BookList retrieveRecommendedBooks(String memberId) {
+    public BookResponseDTO.BookList retrieveRecommendedBooks(Long memberId) {
         BookResponseDTO.BookList cachedBooks = retrieveUsableCachedBooks();
 
         if (cachedBooks != null && !isRecommendedBooksStale()) {

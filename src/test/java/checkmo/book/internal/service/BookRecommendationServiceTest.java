@@ -41,7 +41,7 @@ import org.springframework.web.client.RestClientException;
 
 class BookRecommendationServiceTest {
 
-    private static final String MEMBER_ID = "member-1";
+    private static final Long MEMBER_ID = 1L;
     private static final String REDIS_KEY = "book:recommendations:daily";
     private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:daily:updated_at";
     private static final String SECRET_TTB_KEY = "SECRET_TTB_KEY";

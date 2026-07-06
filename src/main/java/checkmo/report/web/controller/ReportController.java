@@ -22,7 +22,7 @@ public class ReportController {
 
     @PostMapping
     public ApiResponse<Long> createReport(
-            @CurrentId String reporterId,
+            @CurrentId Long reporterId,
             @Valid @RequestBody ReportRequestDTO.Create request
     ) {
         return ApiResponse.onSuccess(reportCommandService.createReport(reporterId, request));
@@ -30,7 +30,7 @@ public class ReportController {
 
     @GetMapping("/me")
     public ApiResponse<ReportResponseDTO.MyReportList> getMyReports(
-            @CurrentId String memberId,
+            @CurrentId Long memberId,
             @RequestParam(required = false) Long cursorId
     ) {
         return ApiResponse.onSuccess(reportQueryService.retrieveMyReports(memberId, cursorId));
