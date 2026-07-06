@@ -126,7 +126,8 @@ public class NotificationCommandService {
      */
     public void createNotification(JoinClubEvent event) {
         Notification.NotificationType type = Notification.NotificationType.JOIN_CLUB;
-        if (!isNotificationEnabled(event.memberId(), type)) {
+        String receiverId = String.valueOf(event.memberId());
+        if (!isNotificationEnabled(receiverId, type)) {
             return;
         }
 
@@ -135,12 +136,12 @@ public class NotificationCommandService {
                 .sourceId(event.eventId())
                 .domainId(event.clubId())
                 .senderId("SYSTEM")
-                .receiverId(event.memberId())
+                .receiverId(receiverId)
                 .build();
         try {
             Notification saved = notificationRepository.save(notification);
-            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), event.memberId()));
-            evictNotificationCache(event.memberId());
+            eventPublisher.publishEvent(new NotificationCreatedForPush(saved.getId(), receiverId));
+            evictNotificationCache(receiverId);
         } catch (DataIntegrityViolationException e) {
             // 다른 인스턴스가 동일 알람을 저장한 경우 -> 무시
         }
@@ -155,9 +156,9 @@ public class NotificationCommandService {
         NotificationType type = NotificationType.CLUB_MEETING_CREATED;
         Long sourceId = event.eventId();
 
-        List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
-        for (String memberId : memberIds) {
-            createClubNotification(type, sourceId, event.clubId(), memberId);
+        List<Long> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
+        for (Long memberId : memberIds) {
+            createClubNotification(type, sourceId, event.clubId(), String.valueOf(memberId));
         }
     }
 
@@ -170,9 +171,9 @@ public class NotificationCommandService {
         NotificationType type = NotificationType.CLUB_NOTICE_CREATED;
         Long sourceId = event.eventId();
 
-        List<String> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
-        for (String memberId : memberIds) {
-            createClubNotification(type, sourceId, event.clubId(), memberId);
+        List<Long> memberIds = clubManagementAPI.fetchActiveMemberIds(event.clubId());
+        for (Long memberId : memberIds) {
+            createClubNotification(type, sourceId, event.clubId(), String.valueOf(memberId));
         }
     }
 

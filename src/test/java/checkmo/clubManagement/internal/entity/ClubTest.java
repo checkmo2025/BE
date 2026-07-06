@@ -18,7 +18,7 @@ class ClubTest {
     void 클럽장을_추가하면_클럽을_참조하는_클럽장_회원이_생성된다() {
         Club club = club(1L, true);
 
-        ClubMember owner = club.createOwnerMember("owner-1", APPLIED_AT);
+        ClubMember owner = club.createOwnerMember(1L, APPLIED_AT);
 
         assertSoftly(softly -> {
             softly.assertThat(owner.getClubMemberStatus()).isEqualTo(ClubMemberStatus.OWNER);
@@ -31,7 +31,7 @@ class ClubTest {
     void 공개_클럽에_가입을_신청하면_활성_회원으로_추가된다() {
         Club club = club(1L, true);
 
-        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = club.applyForMembership(1L, "join", APPLIED_AT);
 
         assertSoftly(softly -> {
             softly.assertThat(clubMember.getClubMemberStatus()).isEqualTo(ClubMemberStatus.MEMBER);
@@ -44,7 +44,7 @@ class ClubTest {
     void 비공개_클럽에_가입을_신청하면_대기_회원으로_추가된다() {
         Club club = club(1L, false);
 
-        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = club.applyForMembership(1L, "join", APPLIED_AT);
 
         assertSoftly(softly -> {
             softly.assertThat(clubMember.getClubMemberStatus()).isEqualTo(ClubMemberStatus.PENDING);
@@ -57,7 +57,7 @@ class ClubTest {
     void 대기_회원의_가입을_거절할_수_있다() {
         Club club = club(1L, false);
         ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
-        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = club.applyForMembership(1L, "join", APPLIED_AT);
 
         assertThatCode(() -> club.validateJoinRejection(actor, clubMember))
                 .doesNotThrowAnyException();
@@ -67,7 +67,7 @@ class ClubTest {
     void 이미_가입된_회원은_가입을_거절할_수_없다() {
         Club club = club(1L, true);
         ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
-        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = club.applyForMembership(1L, "join", APPLIED_AT);
 
         assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -80,7 +80,7 @@ class ClubTest {
     void 비운영진은_가입을_거절할_수_없다() {
         Club club = club(1L, true);
         ClubMember actor = clubMember(club, 99L, ClubMemberStatus.MEMBER);
-        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = club.applyForMembership(1L, "join", APPLIED_AT);
 
         assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -94,7 +94,7 @@ class ClubTest {
         Club club = club(1L, true);
         ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
         Club anotherClub = club(2L, false);
-        ClubMember clubMember = anotherClub.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = anotherClub.applyForMembership(1L, "join", APPLIED_AT);
 
         assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -107,7 +107,7 @@ class ClubTest {
     void 식별자가_없는_클럽도_자신의_가입_요청을_검증할_수_있다() {
         Club club = club(null, false);
         ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
-        ClubMember clubMember = club.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = club.applyForMembership(1L, "join", APPLIED_AT);
 
         assertThatCode(() -> club.validateJoinRejection(actor, clubMember))
                 .doesNotThrowAnyException();
@@ -118,7 +118,7 @@ class ClubTest {
         Club club = club(null, true);
         ClubMember actor = clubMember(club, 99L, ClubMemberStatus.STAFF);
         Club anotherClub = club(null, false);
-        ClubMember clubMember = anotherClub.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = anotherClub.applyForMembership(1L, "join", APPLIED_AT);
 
         assertThatThrownBy(() -> club.validateJoinRejection(actor, clubMember))
                 .isInstanceOfSatisfying(ClubManagementException.class, exception ->
@@ -131,7 +131,7 @@ class ClubTest {
     void 다른_클럽의_회원은_재신청할_수_없다() {
         Club club = club(1L, true);
         Club anotherClub = club(2L, true);
-        ClubMember clubMember = anotherClub.applyForMembership("member-1", "join", APPLIED_AT);
+        ClubMember clubMember = anotherClub.applyForMembership(1L, "join", APPLIED_AT);
         clubMember.leave(APPLIED_AT);
 
         assertThatThrownBy(() -> club.reApplyMember(clubMember, "again", APPLIED_AT))
@@ -342,7 +342,7 @@ class ClubTest {
         return ClubMember.builder()
                 .id(id)
                 .club(club)
-                .memberId("member-" + id)
+                .memberId(id)
                 .clubMemberStatus(status)
                 .appliedAt(APPLIED_AT)
                 .joinedAt(status.isActive() ? APPLIED_AT : null)

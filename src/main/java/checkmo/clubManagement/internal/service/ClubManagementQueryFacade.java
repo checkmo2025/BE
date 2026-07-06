@@ -43,7 +43,7 @@ public class ClubManagementQueryFacade {
     private final ClubManagementQueryService clubManagementQueryService;
     private final ClubMemberQueryService clubMemberQueryService;
 
-    public ClubResponseDTO.ClubDetail retrieveClubDetail(Long clubId, String memberId) {
+    public ClubResponseDTO.ClubDetail retrieveClubDetail(Long clubId, Long memberId) {
         Club club = clubManagementQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         boolean isStaff = clubMember.isStaff();
@@ -60,7 +60,7 @@ public class ClubManagementQueryFacade {
     }
 
     public ClubResponseDTO.ClubList retrieveClubList(
-            String memberId,
+            Long memberId,
             ClubRequestDTO.ClubSearchFilter filter,
             Long cursorId
     ) {
@@ -75,7 +75,7 @@ public class ClubManagementQueryFacade {
 
         // 클럽별 멤버 상태 배치 조회
         Map<Long, ClubMemberStatus> statusMap
-                = (memberId == null || memberId.isBlank()) ?
+                = (memberId == null) ?
                 Map.of() : clubMemberQueryService.retrieveClubMemberStatusByClubIds(memberId, clubIds);
 
         List<ClubDetailWithMyStatus> clubList = clubs.stream()
@@ -139,7 +139,7 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public MyClubResponseDTO.MyClubList retrieveMyClubList(String memberId) {
+    public MyClubResponseDTO.MyClubList retrieveMyClubList(Long memberId) {
         List<ClubIdAndName> clubIdAndNames = clubMemberQueryService.retrieveAllActiveClubsByMemberId(memberId);
         List<MyClubResponseDTO.ClubInfo> clubInfoList = clubIdAndNames.stream()
                 .map(c -> MyClubResponseDTO.ClubInfo.builder()
@@ -154,7 +154,7 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    public ClubResponseDTO.MyMembership retrieveMyMembership(Long clubId, String memberId) {
+    public ClubResponseDTO.MyMembership retrieveMyMembership(Long clubId, Long memberId) {
         clubManagementQueryService.validateClub(clubId);
         Optional<ClubMember> clubMemberOpt = clubMemberQueryService.findClubMember(clubId, memberId);
         if (clubMemberOpt.isEmpty()) {
@@ -182,7 +182,7 @@ public class ClubManagementQueryFacade {
 
     public ClubResponseDTO.ClubMemberList retrieveClubMemberList(
             Long clubId,
-            String memberId,
+            Long memberId,
             ClubMemberStatusFilter statusFilter,
             Long cursorId
     ) {
@@ -198,9 +198,10 @@ public class ClubManagementQueryFacade {
                 DEFAULT_PAGE_SIZE
         );
         List<ClubMember> clubMembers = clubMemberCursorResult.content();
-        List<String> memberIds = ExtractHelper.extractDistinctList(clubMembers, ClubMember::getMemberId);
+        List<Long> memberIds = ExtractHelper.extractDistinctList(clubMembers, ClubMember::getMemberId);
 
-        Map<String, MemberExternalDTO.DetailInfo> memberInfoMap = memberAPI.fetchMemberDetailInfoByMemberIds(memberIds);
+        Map<Long, MemberExternalDTO.DetailInfo> memberInfoMap =
+                toLongKeyMap(memberAPI.fetchMemberDetailInfoByMemberIds(toMemberApiIds(memberIds)));
 
         List<ClubResponseDTO.ClubMember> dtoList = clubMembers.stream()
                 .map(cm -> {
@@ -218,7 +219,7 @@ public class ClubManagementQueryFacade {
 
     public ClubResponseDTO.ClubParticipantList retrieveClubParticipantList(
             Long clubId,
-            String requesterId,
+            Long requesterId,
             Long cursorId
     ) {
         Club club = clubManagementQueryService.validateClub(clubId);
@@ -230,10 +231,13 @@ public class ClubManagementQueryFacade {
                 DEFAULT_PAGE_SIZE
         );
         List<ClubMember> clubMembers = clubMemberCursorResult.content();
-        List<String> memberIds = ExtractHelper.extractDistinctList(clubMembers, ClubMember::getMemberId);
+        List<Long> memberIds = ExtractHelper.extractDistinctList(clubMembers, ClubMember::getMemberId);
 
-        Map<String, MemberExternalDTO.BasicInfoWithFollow> memberInfoMap =
-                memberAPI.fetchMemberBasicInfoWithFollowByMemberId(memberIds, requesterId);
+        Map<Long, MemberExternalDTO.BasicInfoWithFollow> memberInfoMap =
+                toLongKeyMap(memberAPI.fetchMemberBasicInfoWithFollowByMemberId(
+                        toMemberApiIds(memberIds),
+                        toMemberApiId(requesterId)
+                ));
 
         List<ClubResponseDTO.ClubParticipant> dtoList = clubMembers.stream()
                 .map(cm -> ClubManagementConverter.toClubParticipantDTO(cm, memberInfoMap.get(cm.getMemberId())))
@@ -247,7 +251,7 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    private void validateClubParticipantListAccess(Club club, Long clubId, String requesterId) {
+    private void validateClubParticipantListAccess(Club club, Long clubId, Long requesterId) {
         if (club.isOpen()) {
             return;
         }
@@ -260,8 +264,8 @@ public class ClubManagementQueryFacade {
         }
     }
 
-    public ClubRecommendationList recommend(String memberId) {
-        List<String> memberInterestCategories = memberAPI.fetchInterestCategory(memberId).getCategories();
+    public ClubRecommendationList recommend(Long memberId) {
+        List<String> memberInterestCategories = memberAPI.fetchInterestCategory(toMemberApiId(memberId)).getCategories();
         EnumSet<ClubInterestCategory> interestCategories = mapToClubInterestCategories(memberInterestCategories);
 
         LocalDateTime lastActivityAt = LocalDateTime.now().minusYears(1);
@@ -320,7 +324,7 @@ public class ClubManagementQueryFacade {
     }
 
     public ClubPreviewList retrieveClubListByMemberNickname(String memberNickname) {
-        String memberId = memberAPI.fetchMemberId(memberNickname);
+        Long memberId = Long.valueOf(memberAPI.fetchMemberId(memberNickname));
         List<ClubIdAndName> clubIdAndNames = clubMemberQueryService.retrieveAllActiveClubsByMemberId(memberId);
         List<ClubInfo> clubInfoList = clubIdAndNames.stream()
                 .map(c -> ClubInfo.builder()
@@ -364,7 +368,7 @@ public class ClubManagementQueryFacade {
                 .filter(ClubMember::isOwner)
                 .findFirst()
                 .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_NOT_FOUND));
-        String ownerEmail = memberAPI.fetchMemberEmail(owner.getMemberId());
+        String ownerEmail = memberAPI.fetchMemberEmail(toMemberApiId(owner.getMemberId()));
 
         long activeMemberCount = clubMembers.stream()
                 .filter(ClubMember::isActive)
@@ -393,8 +397,9 @@ public class ClubManagementQueryFacade {
                 ADMIN_PAGE_SIZE
         );
 
-        List<String> memberIds = ExtractHelper.extractDistinctList(pageResult.content(), ClubMember::getMemberId);
-        Map<String, MemberExternalDTO.PersonalInfo> memberInfoMap = memberAPI.fetchMemberPersonalInfoByMemberIds(memberIds);
+        List<Long> memberIds = ExtractHelper.extractDistinctList(pageResult.content(), ClubMember::getMemberId);
+        Map<Long, MemberExternalDTO.PersonalInfo> memberInfoMap =
+                toLongKeyMap(memberAPI.fetchMemberPersonalInfoByMemberIds(toMemberApiIds(memberIds)));
 
         List<ClubAdminResponseDTO.ClubActiveMemberPreview> members = pageResult.content().stream()
                 .map(clubMember -> toClubActiveMemberPreview(
@@ -426,5 +431,23 @@ public class ClubManagementQueryFacade {
                 .joinedAt(clubMember.getJoinedAt())
                 .role(ClubAdminResponseDTO.ActiveClubMemberStatus.of(clubMember.getClubMemberStatus()))
                 .build();
+    }
+
+    private List<String> toMemberApiIds(List<Long> memberIds) {
+        return memberIds.stream()
+                .map(String::valueOf)
+                .toList();
+    }
+
+    private String toMemberApiId(Long memberId) {
+        return String.valueOf(memberId);
+    }
+
+    private <T> Map<Long, T> toLongKeyMap(Map<String, T> source) {
+        return source.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> Long.valueOf(entry.getKey()),
+                        Map.Entry::getValue
+                ));
     }
 }

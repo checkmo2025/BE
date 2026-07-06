@@ -36,7 +36,7 @@ public class ClubManagementCommandService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void createClub(String memberId, ClubDetail request) {
+    public void createClub(Long memberId, ClubDetail request) {
         if (clubManagementQueryService.isDuplicateClubName(request.getName().trim())) {
             throw new ClubManagementException(ClubManagementErrorStatus.CLUB_DUPLICATED_NAME);
         }
@@ -50,7 +50,7 @@ public class ClubManagementCommandService {
         clubMemberRepository.save(owner);
     }
 
-    public void updateClub(Long clubId, String memberId, ClubDetail request) {
+    public void updateClub(Long clubId, Long memberId, ClubDetail request) {
         Club club = clubManagementQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         if (!clubMember.isStaff()) {
@@ -73,7 +73,7 @@ public class ClubManagementCommandService {
         }
     }
 
-    public void deleteClub(Long clubId, String memberId) {
+    public void deleteClub(Long clubId, Long memberId) {
         Club club = clubManagementQueryService.validateClub(clubId);
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         if (!clubMember.isOwner()) {

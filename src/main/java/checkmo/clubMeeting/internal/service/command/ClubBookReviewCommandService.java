@@ -37,7 +37,7 @@ public class ClubBookReviewCommandService {
             maxAttempts = 5,
             backoff = @Backoff(delay = 300)
     )
-    public void createBookReview(Long clubId, Long meetingId, String memberId, BookReviewCreate request) {
+    public void createBookReview(Long clubId, Long meetingId, Long memberId, BookReviewCreate request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
@@ -55,7 +55,7 @@ public class ClubBookReviewCommandService {
             maxAttempts = 5,
             backoff = @Backoff(delay = 300)
     )
-    public void updateBookReview(Long clubId, Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
+    public void updateBookReview(Long clubId, Long meetingId, Long reviewId, Long memberId, BookReviewCreate request) {
         clubManagementAPI.validateClub(clubId);
         ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         if (!clubMembership.isActive()) {
@@ -88,7 +88,7 @@ public class ClubBookReviewCommandService {
             maxAttempts = 5,
             backoff = @Backoff(delay = 300)
     )
-    public void deleteBookReview(Long clubId, Long meetingId, Long reviewId, String memberId) {
+    public void deleteBookReview(Long clubId, Long meetingId, Long reviewId, Long memberId) {
         clubManagementAPI.validateClub(clubId);
         ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         if (!clubMembership.isActive()) {

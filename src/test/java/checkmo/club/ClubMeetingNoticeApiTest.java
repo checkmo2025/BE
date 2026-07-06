@@ -136,7 +136,10 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .when().post("/api/v1/clubs/{clubId}/join", club.getId())
                 .then().statusCode(200);
 
-        ClubMember joinedMember = clubMemberRepository.findByClubIdAndMemberId(club.getId(), member.id()).orElseThrow();
+        ClubMember joinedMember = clubMemberRepository.findByClubIdAndMemberId(
+                club.getId(),
+                Long.valueOf(member.id())
+        ).orElseThrow();
 
         given().cookie(accessTokenCookie(owner))
                 .queryParam("status", "ACTIVE")
@@ -259,7 +262,10 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
         TestUser owner = createUser();
         Club club = createClub(owner, "bookshelf" + uniqueSuffix(owner));
         Meeting meeting = createMeeting(owner, club.getId());
-        ClubMember ownerClubMember = clubMemberRepository.findByClubIdAndMemberId(club.getId(), owner.id()).orElseThrow();
+        ClubMember ownerClubMember = clubMemberRepository.findByClubIdAndMemberId(
+                club.getId(),
+                Long.valueOf(owner.id())
+        ).orElseThrow();
 
         given().cookie(accessTokenCookie(owner))
                 .when().get("/api/v1/clubs/{clubId}/bookshelves", club.getId())

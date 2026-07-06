@@ -49,6 +49,7 @@ public class ClubNoticeAPIImpl implements ClubNoticeAPI {
 
         return clubManagementAPI.fetchMembershipInfoByClubMemberIds(Set.of(noticeComment.getClubMemberId()))
                 .get(noticeComment.getClubMemberId())
-                .getMemberId();
+                .getMemberId()
+                .toString();
     }
 }

@@ -365,7 +365,7 @@ class AdminApiTest extends ApiTestSupport {
                         .build())))
                 .build();
         Club saved = clubRepository.save(club);
-        ClubMember clubOwner = saved.createOwnerMember(owner.id(), LocalDateTime.now());
+        ClubMember clubOwner = saved.createOwnerMember(Long.valueOf(owner.id()), LocalDateTime.now());
         clubMemberRepository.save(clubOwner);
         return saved;
     }

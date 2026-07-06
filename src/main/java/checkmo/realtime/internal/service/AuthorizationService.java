@@ -14,6 +14,7 @@ public class AuthorizationService {
     private final ClubMeetingAPI clubMeetingAPI;
 
     public void authorizeTeamAccess(Long clubId, Long meetingId, Long teamId, String memberId) {
+        Long memberLongId = Long.valueOf(memberId);
         if (clubMeetingAPI.isNotMeetingBelongsToClub(clubId, meetingId)) {
             throw new RealtimeException(RealtimeErrorStatus.MEETING_NOT_IN_CLUB);
         }
@@ -22,12 +23,13 @@ public class AuthorizationService {
             throw new RealtimeException(RealtimeErrorStatus.TEAM_NOT_IN_ClUB);
         }
 
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberId);
+        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(clubId, memberLongId);
         if (clubMemberId == null) {
             throw new RealtimeException(RealtimeErrorStatus.NOT_ACTIVE_CLUB_MEMBER);
         }
 
-        if (!clubManagementAPI.isStaffClubMember(clubId, memberId) && clubMeetingAPI.isNotTeamMember(teamId, clubMemberId)) {
+        if (!clubManagementAPI.isStaffClubMember(clubId, memberLongId)
+                && clubMeetingAPI.isNotTeamMember(teamId, clubMemberId)) {
             throw new RealtimeException(RealtimeErrorStatus.NOT_TEAM_MEMBER_OR_STAFF);
         }
     }

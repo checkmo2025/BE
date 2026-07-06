@@ -96,7 +96,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
     public List<ClubRecommendation> findRecommendations(
             EnumSet<ClubInterestCategory> memberCategories,
             LocalDateTime lastActivityAt,
-            String memberId,
+            Long memberId,
             int size
     ) {
         // 공통 조건: 공개 여부 + 최근 활동 + 이미 클럽 가입 이력(어떤 상태이든) 제외
@@ -190,7 +190,7 @@ public class ClubRepositoryCustomImpl implements ClubRepositoryCustom {
         return club.lastActivityAt.goe(lastActivityAt);
     }
 
-    private BooleanExpression notRelated(String memberId) {
+    private BooleanExpression notRelated(Long memberId) {
         QClubMember subClubMember = new QClubMember("subClubMember");
         return JPAExpressions.selectOne()
                 .from(subClubMember)

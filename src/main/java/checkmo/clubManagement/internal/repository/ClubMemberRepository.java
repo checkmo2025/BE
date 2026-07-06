@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
-    Optional<ClubMember> findByClubIdAndMemberId(Long clubId, String memberId);
+    Optional<ClubMember> findByClubIdAndMemberId(Long clubId, Long memberId);
 
     Optional<ClubMember> findByIdAndClubId(Long id, Long clubId);
 
@@ -24,7 +24,7 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
             + "WHERE cm.memberId = :memberId "
             + "AND cm.clubMemberStatus IN :statuses "
             + "ORDER BY cm.id ASC")
-    List<ClubIdAndName> findClubIdAndNameByMemberIdAndStatuses(String memberId, EnumSet<ClubMemberStatus> statuses);
+    List<ClubIdAndName> findClubIdAndNameByMemberIdAndStatuses(Long memberId, EnumSet<ClubMemberStatus> statuses);
 
     @Query("SELECT cm FROM ClubMember cm "
             + "WHERE cm.club.id = :clubId "
@@ -39,7 +39,7 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
             + "ORDER BY cm.id DESC")
     List<ClubMember> findByClubIdAndStatuses(Long clubId, EnumSet<ClubMemberStatus> statuses, Long cursorId, Pageable pageable);
 
-    List<ClubMember> findAllByMemberIdAndClubIdIn(String memberId, List<Long> clubIds);
+    List<ClubMember> findAllByMemberIdAndClubIdIn(Long memberId, List<Long> clubIds);
 
     long countByClubIdAndClubMemberStatusIn(Long clubId, EnumSet<ClubMemberStatus> statuses);
 }

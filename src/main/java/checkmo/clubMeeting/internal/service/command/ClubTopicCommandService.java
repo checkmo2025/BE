@@ -37,7 +37,7 @@ public class ClubTopicCommandService {
     private final TopicRepository topicRepository;
     private final TeamTopicRepository teamTopicRepository;
 
-    public void createTopic(Long clubId, Long meetingId, String memberId, TopicCreate request) {
+    public void createTopic(Long clubId, Long meetingId, Long memberId, TopicCreate request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
@@ -48,7 +48,7 @@ public class ClubTopicCommandService {
         topicRepository.save(topic);
     }
 
-    public void updateTopic(Long clubId, Long meetingId, Long topicId, String memberId, TopicCreate request) {
+    public void updateTopic(Long clubId, Long meetingId, Long topicId, Long memberId, TopicCreate request) {
         clubManagementAPI.validateClub(clubId);
         ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         if (!clubMembership.isActive()) {
@@ -66,7 +66,7 @@ public class ClubTopicCommandService {
         );
     }
 
-    public void deleteTopic(Long clubId, Long meetingId, Long topicId, String memberId) {
+    public void deleteTopic(Long clubId, Long meetingId, Long topicId, Long memberId) {
         clubManagementAPI.validateClub(clubId);
         ClubManagementExternalDTO.MembershipInfo clubMembership = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         if (!clubMembership.isActive()) {

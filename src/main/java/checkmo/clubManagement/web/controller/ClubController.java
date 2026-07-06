@@ -58,7 +58,7 @@ public class ClubController {
     @PostMapping
     public ApiResponse<String> createClub(
             @RequestBody @Valid ClubRequestDTO.ClubDetail request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubManagementCommandService.createClub(memberId, request);
         return ApiResponse.onSuccess("독서 모임이 정상적으로 생성되었습니다.");
@@ -77,7 +77,7 @@ public class ClubController {
     public ApiResponse<String> updateClub(
             @PathVariable Long clubId,
             @RequestBody @Valid ClubRequestDTO.ClubDetail request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubManagementCommandService.updateClub(clubId, memberId, request);
         return ApiResponse.onSuccess("독서모임이 정상적으로 수정되었습니다.");
@@ -108,7 +108,7 @@ public class ClubController {
     @GetMapping("/{clubId}")
     public ApiResponse<ClubResponseDTO.ClubDetail> getClubDetail(
             @PathVariable Long clubId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubDetail(clubId, memberId));
     }
@@ -125,7 +125,7 @@ public class ClubController {
     @DeleteMapping("/{clubId}")
     public ApiResponse<String> deleteClub(
             @PathVariable Long clubId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubManagementCommandService.deleteClub(clubId, memberId);
         return ApiResponse.onSuccess("독서모임이 정상적으로 삭제되었습니다.");
@@ -143,7 +143,7 @@ public class ClubController {
     public ApiResponse<ClubResponseDTO.ClubList> searchClubs(
             @ModelAttribute @ParameterObject ClubRequestDTO.ClubSearchFilter filter,
             @RequestParam(required = false) Long cursorId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubList(memberId, filter, cursorId));
     }
@@ -154,7 +154,7 @@ public class ClubController {
     })
     @GetMapping("/recommendations")
     public ApiResponse<ClubResponseDTO.ClubRecommendationList> recommendClubs(
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.recommend(memberId));
     }
@@ -187,7 +187,7 @@ public class ClubController {
     public ApiResponse<String> joinClub(
             @PathVariable Long clubId,
             @RequestBody @Valid ClubRequestDTO.JoinClub request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubMemberCommandService.joinClub(clubId, memberId, request);
         return ApiResponse.onSuccess("독서 모임 가입 신청이 완료되었습니다.");
@@ -204,7 +204,7 @@ public class ClubController {
     @GetMapping("/{clubId}/me")
     public ApiResponse<ClubResponseDTO.MyMembership> checkMyStatusInClub(
             @PathVariable Long clubId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveMyMembership(clubId, memberId));
     }
@@ -234,7 +234,7 @@ public class ClubController {
             @PathVariable Long clubId,
             @RequestParam ClubMemberStatusFilter status,
             @RequestParam(required = false) Long cursorId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubMemberList(clubId, memberId, status, cursorId));
     }
@@ -254,7 +254,7 @@ public class ClubController {
     public ApiResponse<ClubResponseDTO.ClubParticipantList> getClubParticipants(
             @PathVariable Long clubId,
             @RequestParam(required = false) Long cursorId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         return ApiResponse.onSuccess(clubManagementQueryFacade.retrieveClubParticipantList(clubId, memberId, cursorId));
     }
@@ -274,7 +274,7 @@ public class ClubController {
             @PathVariable Long clubId,
             @PathVariable Long clubMemberId,
             @RequestBody @Valid ClubRequestDTO.ClubMemberStatusAction request,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubMemberCommandService.updateClubMemberStatus(clubId, memberId, clubMemberId, request);
         return ApiResponse.onSuccess("독서 모임 회원 등급이 정상적으로 수정되었습니다.");
@@ -289,7 +289,7 @@ public class ClubController {
     @DeleteMapping("/{clubId}/leave")
     public ApiResponse<String> leaveClub(
             @PathVariable Long clubId,
-            @CurrentId String memberId
+            @CurrentId Long memberId
     ) {
         clubMemberCommandService.leaveClub(clubId, memberId);
         return ApiResponse.onSuccess("독서모임에서 탈퇴되었습니다.");

@@ -165,7 +165,7 @@ class ClubMemberTest {
     private ClubMember clubMember(Club club, Long id, ClubMemberStatus status) {
         return ClubMember.builder()
                 .id(id)
-                .memberId("member-" + id)
+                .memberId(id)
                 .club(club)
                 .clubMemberStatus(status)
                 .appliedAt(APPLIED_AT)

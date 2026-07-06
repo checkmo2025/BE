@@ -163,8 +163,9 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
         TestUser author = createUser();
         TestUser other = createUser();
         Long clubId = 77L;
-        when(clubManagementAPI.validateAndFetchActiveClubMemberId(eq(clubId), eq(author.id()))).thenReturn(1L);
-        when(clubManagementAPI.fetchActiveMemberIds(clubId)).thenReturn(List.of(author.id()));
+        Long authorId = Long.valueOf(author.id());
+        when(clubManagementAPI.validateAndFetchActiveClubMemberId(eq(clubId), eq(authorId))).thenReturn(1L);
+        when(clubManagementAPI.fetchActiveMemberIds(clubId)).thenReturn(List.of(authorId));
 
         Number storyIdNumber = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

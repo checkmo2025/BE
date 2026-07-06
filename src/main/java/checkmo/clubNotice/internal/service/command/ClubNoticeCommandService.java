@@ -41,7 +41,7 @@ public class ClubNoticeCommandService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public Notice createNotice(Long clubId, String memberId, CreateClubNotice request) {
+    public Notice createNotice(Long clubId, Long memberId, CreateClubNotice request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
         NoticeTag tag = NoticeTag.decideTag(request.getVote() != null, request.getMeetingId() != null);
@@ -88,7 +88,7 @@ public class ClubNoticeCommandService {
         applicationEventPublisher.publishEvent(event);
     }
 
-    public void updateNotice(Long clubId, Long noticeId, String memberId, UpdateClubNotice request) {
+    public void updateNotice(Long clubId, Long noticeId, Long memberId, UpdateClubNotice request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
@@ -124,7 +124,7 @@ public class ClubNoticeCommandService {
         }
     }
 
-    public void deleteNotice(Long clubId, String memberId, Long noticeId) {
+    public void deleteNotice(Long clubId, Long memberId, Long noticeId) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
@@ -134,7 +134,7 @@ public class ClubNoticeCommandService {
         noticeRepository.delete(notice);
     }
 
-    public Long haveVote(Long clubId, Long noticeId, Long voteId, String memberId, VoteResult request) {
+    public Long haveVote(Long clubId, Long noticeId, Long voteId, Long memberId, VoteResult request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
 

@@ -266,10 +266,12 @@ public class BookStoryQueryRepositoryImpl implements BookStoryQueryRepository {
     }
 
     private void validateClubMember(String memberId, Long clubId) {
-        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
+        clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, Long.valueOf(memberId));
     }
 
     private List<String> getClubMemberIds(Long clubId) {
-        return clubManagementAPI.fetchActiveMemberIds(clubId);
+        return clubManagementAPI.fetchActiveMemberIds(clubId).stream()
+                .map(String::valueOf)
+                .toList();
     }
 }

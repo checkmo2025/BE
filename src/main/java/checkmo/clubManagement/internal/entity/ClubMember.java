@@ -49,14 +49,14 @@ public class ClubMember extends BaseEntity {
     private Club club;
 
     @Column(name = "member_id", nullable = false)
-    private String memberId;
+    private Long memberId;
 
     /**
      * package-private으로 엔티티 외부에서 함부로 호출 불가능하게 설정
      *
      * 클럽장 전용 메서드
      */
-    static ClubMember ownerOf(Club club, String memberId, LocalDateTime now) {
+    static ClubMember ownerOf(Club club, Long memberId, LocalDateTime now) {
         return ClubMember.builder()
                 .club(club)
                 .memberId(memberId)
@@ -71,7 +71,7 @@ public class ClubMember extends BaseEntity {
      *
      * 신규 가입 신청 전용 메서드
      */
-    static ClubMember applyTo(Club club, String memberId, ClubMemberStatus status, String message, LocalDateTime now) {
+    static ClubMember applyTo(Club club, Long memberId, ClubMemberStatus status, String message, LocalDateTime now) {
         return ClubMember.builder()
                 .club(club)
                 .memberId(memberId)

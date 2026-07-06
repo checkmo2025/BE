@@ -51,19 +51,19 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public List<String> fetchActiveMemberIds(Long clubId) {
+    public List<Long> fetchActiveMemberIds(Long clubId) {
         return clubMemberQueryService.retrieveActiveMemberIds(clubId);
     }
 
     @Override
-    public boolean isStaffClubMember(Long clubId, String memberId) {
+    public boolean isStaffClubMember(Long clubId, Long memberId) {
         return clubMemberQueryService.findClubMember(clubId, memberId)
                 .map(ClubMember::isStaff)
                 .orElse(false);
     }
 
     @Override
-    public void validateStaffClubMember(Long clubId, String memberId) throws ClubManagementException {
+    public void validateStaffClubMember(Long clubId, Long memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         if (!clubMember.isStaff()) {
@@ -94,7 +94,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public Long fetchActiveClubMemberId(Long clubId, String memberId) {
+    public Long fetchActiveClubMemberId(Long clubId, Long memberId) {
         try {
             ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
@@ -109,7 +109,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public Long validateAndFetchActiveClubMemberId(Long clubId, String memberId) throws ClubManagementException {
+    public Long validateAndFetchActiveClubMemberId(Long clubId, Long memberId) throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
 
         if (!clubMember.isActive()) {
@@ -120,7 +120,7 @@ public class ClubManagementAPIImpl implements ClubManagementAPI {
     }
 
     @Override
-    public MembershipInfo fetchMembershipInfo(Long clubId, String memberId)
+    public MembershipInfo fetchMembershipInfo(Long clubId, Long memberId)
             throws ClubManagementException {
         ClubMember clubMember = clubMemberQueryService.validateClubMember(clubId, memberId);
         return ClubManagementConverter.toMembershipDTO(clubMember);

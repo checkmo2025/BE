@@ -42,7 +42,7 @@ public class ClubMeetingCommandService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void createMeeting(Long clubId, String memberId, BookShelfCreate request) {
+    public void createMeeting(Long clubId, Long memberId, BookShelfCreate request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
 
@@ -66,7 +66,7 @@ public class ClubMeetingCommandService {
         applicationEventPublisher.publishEvent(event);
     }
 
-    public void updateMeeting(Long clubId, Long meetingId, String memberId, BookShelfUpdate request) {
+    public void updateMeeting(Long clubId, Long meetingId, Long memberId, BookShelfUpdate request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
@@ -83,7 +83,7 @@ public class ClubMeetingCommandService {
         clubManagementAPI.touchLastActivity(clubId, LocalDateTime.now());
     }
 
-    public void deleteMeeting(Long clubId, Long meetingId, String memberId) {
+    public void deleteMeeting(Long clubId, Long meetingId, Long memberId) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
@@ -96,7 +96,7 @@ public class ClubMeetingCommandService {
         applicationEventPublisher.publishEvent(event);
     }
 
-    public void manageTeam(Long clubId, Long meetingId, String memberId, MeetingRequestDTO.TeamManage request) {
+    public void manageTeam(Long clubId, Long meetingId, Long memberId, MeetingRequestDTO.TeamManage request) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.validateStaffClubMember(clubId, memberId);
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);

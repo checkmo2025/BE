@@ -65,7 +65,7 @@ public class ClubNoticeQueryFacade {
 
     public ClubNoticePreviewPage retrieveClubNoticeList(
             Long clubId,
-            String memberId,
+            Long memberId,
             int page
     ) {
         clubManagementAPI.validateClub(clubId);
@@ -103,7 +103,7 @@ public class ClubNoticeQueryFacade {
     public ClubNoticeResponseDTO.ClubNoticeDetail retrieveClubNoticeDetail(
             Long clubId,
             Long noticeId,
-            String memberId
+            Long memberId
     ) {
         clubManagementAPI.validateClub(clubId);
         MembershipInfo clubMembershipInfo = clubManagementAPI.fetchMembershipInfo(clubId, memberId);
@@ -124,7 +124,7 @@ public class ClubNoticeQueryFacade {
         return ClubNoticeConverter.toClubNoticeDetail(notice, meetingDetail, voteDetail);
     }
 
-    public NoticeCommentList retrieveNoticeComments(Long clubId, Long noticeId, String memberId, Long cursorId) {
+    public NoticeCommentList retrieveNoticeComments(Long clubId, Long noticeId, Long memberId, Long cursorId) {
         clubManagementAPI.validateClub(clubId);
         clubManagementAPI.fetchMembershipInfo(clubId, memberId);
         clubNoticeQueryService.validateNotice(clubId, noticeId);
@@ -293,15 +293,15 @@ public class ClubNoticeQueryFacade {
         }
         Map<Long, MembershipInfo> membershipMap =
                 clubManagementAPI.fetchMembershipInfoByClubMemberIds(clubMemberIds);
-        List<String> memberIds = ExtractHelper.extractDistinctList(
+        List<Long> memberIds = ExtractHelper.extractDistinctList(
                 membershipMap.values(),
                 MembershipInfo::getMemberId
         );
         if (memberIds.isEmpty()) {
             return Map.of();
         }
-        Map<String, MemberExternalDTO.BasicInfo> memberBasicInfoMap =
-                memberAPI.fetchMemberBasicInfoByMemberIds(memberIds);
+        Map<Long, MemberExternalDTO.BasicInfo> memberBasicInfoMap =
+                toLongKeyMap(memberAPI.fetchMemberBasicInfoByMemberIds(toMemberApiIds(memberIds)));
         if (memberBasicInfoMap == null || memberBasicInfoMap.isEmpty()) {
             return Map.of();
         }
@@ -310,6 +310,20 @@ public class ClubNoticeQueryFacade {
                         MembershipInfo::getClubMemberId,
                         m -> memberBasicInfoMap.get(m.getMemberId()),
                         (a, b) -> a
+                ));
+    }
+
+    private List<String> toMemberApiIds(List<Long> memberIds) {
+        return memberIds.stream()
+                .map(String::valueOf)
+                .toList();
+    }
+
+    private <T> Map<Long, T> toLongKeyMap(Map<String, T> source) {
+        return source.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> Long.valueOf(entry.getKey()),
+                        Map.Entry::getValue
                 ));
     }
 }
