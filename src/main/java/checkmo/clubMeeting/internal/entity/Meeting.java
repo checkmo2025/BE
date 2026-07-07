@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Meeting extends BaseEntity {
+    private static final int CHAT_AVAILABLE_DAYS_AFTER_MEETING = 180;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -88,7 +89,7 @@ public class Meeting extends BaseEntity {
     }
 
     public LocalDateTime getChatDeadline() {
-        return this.getMeetingTime().plusDays(3);
+        return this.getMeetingTime().plusDays(CHAT_AVAILABLE_DAYS_AFTER_MEETING);
     }
 
     // ========= 연관관계 메서드 =========
