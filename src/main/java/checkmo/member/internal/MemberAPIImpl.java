@@ -214,6 +214,20 @@ public class MemberAPIImpl implements MemberAPI {
         return member.getEmail();
     }
 
+    @Override
+    public Map<Long, String> fetchMemberEmailByMemberIdsIncludingDeactivated(List<Long> memberIds) {
+        List<Long> distinctMemberIds = distinctNonNullIds(memberIds);
+        if (distinctMemberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return memberQueryService.retrieveMembersIncludingDeactivatedById(distinctMemberIds).stream()
+                .collect(Collectors.toMap(
+                        Member::getId,
+                        Member::getEmail
+                ));
+    }
+
     private MemberExternalDTO.BasicInfo withdrawnBasicInfo() {
         return MemberExternalDTO.BasicInfo.builder()
                 .nickname(WITHDRAWN_MEMBER_NICKNAME)

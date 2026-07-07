@@ -58,6 +58,10 @@ public class MemberQueryService {
         return memberRepository.findAllByIdInAndDeactivatedAtIsNull(memberIds);
     }
 
+    public List<Member> retrieveMembersIncludingDeactivatedById(List<Long> memberIds) {
+        return memberRepository.findAllById(memberIds);
+    }
+
     /**
      * 회원 기본 정보 조회
      *
