@@ -39,6 +39,12 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
             + "ORDER BY cm.id DESC")
     List<ClubMember> findByClubIdAndStatuses(Long clubId, EnumSet<ClubMemberStatus> statuses, Long cursorId, Pageable pageable);
 
+    @Query("SELECT cm FROM ClubMember cm "
+            + "WHERE cm.club.id IN :clubIds "
+            + "AND cm.clubMemberStatus IN :statuses "
+            + "ORDER BY cm.club.id ASC, cm.id DESC")
+    List<ClubMember> findByClubIdInAndStatuses(List<Long> clubIds, EnumSet<ClubMemberStatus> statuses);
+
     List<ClubMember> findAllByMemberIdAndClubIdIn(Long memberId, List<Long> clubIds);
 
     long countByClubIdAndClubMemberStatusIn(Long clubId, EnumSet<ClubMemberStatus> statuses);

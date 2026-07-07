@@ -344,11 +344,12 @@ public class ClubManagementQueryFacade {
                 ADMIN_PAGE_SIZE
         );
 
-        Map<Long, List<ClubMember>> clubMembersByClubId = pageResult.content().stream()
-                .collect(Collectors.toMap(
-                        Club::getId,
-                        club -> clubMemberQueryService.retrieveClubMembers(club.getId(), ClubMemberStatus.activeStatuses())
-                ));
+        List<Long> clubIds = pageResult.content().stream()
+                .map(Club::getId)
+                .toList();
+        Map<Long, List<ClubMember>> clubMembersByClubId =
+                clubMemberQueryService.retrieveClubMembersByClubIds(clubIds, ClubMemberStatus.activeStatuses()).stream()
+                        .collect(Collectors.groupingBy(clubMember -> clubMember.getClub().getId()));
 
         List<Long> ownerMemberIds = clubMembersByClubId.values().stream()
                 .flatMap(List::stream)
