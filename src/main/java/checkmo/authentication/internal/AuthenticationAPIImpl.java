@@ -6,11 +6,14 @@ import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.authentication.internal.security.jwt.TokenCacheService;
+import checkmo.authentication.internal.security.jwt.AppRefreshTokenAuthenticationService;
 import checkmo.authentication.internal.service.command.AuthSessionCommandService;
 import checkmo.authentication.internal.service.command.AuthUserCommandService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     private final AuthSessionCommandService authSessionCommandService;
     private final TokenCacheService tokenCacheService;
     private final AuthRepository authRepository;
+    private final AppRefreshTokenAuthenticationService appRefreshTokenAuthenticationService;
 
     @Override
     public void deleteAuthData(Long memberId) {
@@ -66,5 +70,10 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
         return authRepository.findById(memberId)
                 .map(AuthUser::getProvider)
                 .orElseThrow(() -> new AuthException(AuthErrorStatus.MEMBER_NOT_FOUND));
+    }
+
+    @Override
+    public Optional<Authentication> authenticateAppRefreshToken(String refreshToken) {
+        return appRefreshTokenAuthenticationService.authenticate(refreshToken);
     }
 }
