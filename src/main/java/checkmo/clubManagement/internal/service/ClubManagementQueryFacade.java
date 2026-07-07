@@ -344,8 +344,29 @@ public class ClubManagementQueryFacade {
                 ADMIN_PAGE_SIZE
         );
 
+        List<Long> clubIds = pageResult.content().stream()
+                .map(Club::getId)
+                .toList();
+        Map<Long, List<ClubMember>> clubMembersByClubId =
+                clubMemberQueryService.retrieveClubMembersByClubIds(clubIds, ClubMemberStatus.activeStatuses()).stream()
+                        .collect(Collectors.groupingBy(clubMember -> clubMember.getClub().getId()));
+
+        List<Long> ownerMemberIds = clubMembersByClubId.values().stream()
+                .flatMap(List::stream)
+                .filter(ClubMember::isOwner)
+                .map(ClubMember::getMemberId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Map<Long, String> ownerEmailByMemberId =
+                memberAPI.fetchMemberEmailByMemberIdsIncludingDeactivated(ownerMemberIds);
+
         List<ClubAdminResponseDTO.ClubPreview> clubs = pageResult.content().stream()
-                .map(this::toAdminClubPreview)
+                .map(club -> toAdminClubPreview(
+                        club,
+                        clubMembersByClubId.getOrDefault(club.getId(), Collections.emptyList()),
+                        ownerEmailByMemberId
+                ))
                 .toList();
 
         return ClubAdminResponseDTO.ClubPreviewPage.builder()
@@ -358,14 +379,18 @@ public class ClubManagementQueryFacade {
                 .build();
     }
 
-    private ClubAdminResponseDTO.ClubPreview toAdminClubPreview(Club club) {
-        List<ClubMember> clubMembers = clubMemberQueryService.retrieveClubMembers(club.getId(), ClubMemberStatus.activeStatuses());
-
-        ClubMember owner = clubMembers.stream()
+    private ClubAdminResponseDTO.ClubPreview toAdminClubPreview(
+            Club club,
+            List<ClubMember> clubMembers,
+            Map<Long, String> ownerEmailByMemberId
+    ) {
+        Optional<ClubMember> owner = clubMembers.stream()
                 .filter(ClubMember::isOwner)
-                .findFirst()
-                .orElseThrow(() -> new ClubManagementException(ClubManagementErrorStatus.CLUB_OWNER_NOT_FOUND));
-        String ownerEmail = memberAPI.fetchMemberEmail(owner.getMemberId());
+                .findFirst();
+        String ownerEmail = owner
+                .map(ClubMember::getMemberId)
+                .map(ownerEmailByMemberId::get)
+                .orElse(null);
 
         long activeMemberCount = clubMembers.stream()
                 .filter(ClubMember::isActive)

@@ -148,4 +148,12 @@ public interface MemberAPI {
      * @return 회원 이메일
      */
     String fetchMemberEmail(Long memberId);
+
+    /**
+     * 회원 ID 목록으로 회원의 이메일을 조회합니다. 비활성 회원도 포함하며, 삭제된 회원은 결과에서 제외합니다.
+     *
+     * @param memberIds 회원 ID 목록
+     * @return 회원 ID와 이메일의 매핑 정보
+     */
+    Map<Long, String> fetchMemberEmailByMemberIdsIncludingDeactivated(List<Long> memberIds);
 }

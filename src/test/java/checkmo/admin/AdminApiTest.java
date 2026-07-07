@@ -242,6 +242,39 @@ class AdminApiTest extends ApiTestSupport {
     }
 
     @Test
+    void clubAdminListToleratesInactiveOrDeletedOwner() {
+        TestUser admin = createAdmin();
+        TestUser deactivatedOwner = createUser();
+        TestUser deletedOwner = createUser();
+        Club deactivatedOwnerClub = createClub(deactivatedOwner, "admin-club-deactivated-owner");
+        Club deletedOwnerClub = createClub(deletedOwner, "admin-club-deleted-owner");
+
+        var deactivatedMember = memberRepository.findById(deactivatedOwner.memberId()).orElseThrow();
+        deactivatedMember.deactivate();
+        memberRepository.save(deactivatedMember);
+        memberRepository.deleteById(deletedOwner.memberId());
+        memberRepository.flush();
+
+        given().cookie(accessTokenCookie(admin))
+                .queryParam("keyword", deactivatedOwnerClub.getName())
+                .queryParam("page", 1)
+                .when().get("/api/v1/admin/clubs")
+                .then().statusCode(200)
+                .body("result.clubs.size()", equalTo(1))
+                .body("result.clubs[0].clubId", equalTo(deactivatedOwnerClub.getId().intValue()))
+                .body("result.clubs[0].ownerEmail", equalTo(deactivatedOwner.email()));
+
+        given().cookie(accessTokenCookie(admin))
+                .queryParam("keyword", deletedOwnerClub.getName())
+                .queryParam("page", 1)
+                .when().get("/api/v1/admin/clubs")
+                .then().statusCode(200)
+                .body("result.clubs.size()", equalTo(1))
+                .body("result.clubs[0].clubId", equalTo(deletedOwnerClub.getId().intValue()))
+                .body("result.clubs[0].ownerEmail", nullValue());
+    }
+
+    @Test
     void newsAdminEndpointsCoverCrudMemberLookupValidationAndSecurity() {
         TestUser admin = createAdmin();
         TestUser requester = createUser();
