@@ -20,7 +20,9 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -78,7 +80,30 @@ class SecurityContextHandshakeInterceptorTest {
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
         );
         assertThat(context.getAuthentication()).isSameAs(authentication);
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isSameAs(authentication);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
+
+    @Test
+    void ignoresAnonymousSecurityContextAndAuthenticatesAppRefreshTokenHeader() {
+        Authentication anonymous = new AnonymousAuthenticationToken(
+                "key",
+                "anonymousUser",
+                AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
+        );
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(anonymous);
+        SecurityContextHolder.setContext(context);
+        when(authenticationAPI.authenticateAppRefreshToken("refresh-token"))
+                .thenReturn(Optional.of(authentication));
+        Map<String, Object> attributes = new HashMap<>();
+
+        interceptor.beforeHandshake(request("refresh-token"), response(), webSocketHandler, attributes);
+
+        SecurityContext storedContext = (SecurityContext) attributes.get(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
+        );
+        assertThat(storedContext.getAuthentication()).isSameAs(authentication);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isSameAs(anonymous);
     }
 
     @Test

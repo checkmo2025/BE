@@ -4,6 +4,7 @@ import checkmo.authentication.AuthenticationAPI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,7 +48,9 @@ public class SecurityContextHandshakeInterceptor implements HandshakeInterceptor
 
     private boolean copyAuthenticatedContext(SecurityContext context, Map<String, Object> attributes) {
         Authentication authentication = context.getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
             return false;
         }
         attributes.put(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
@@ -57,7 +60,6 @@ public class SecurityContextHandshakeInterceptor implements HandshakeInterceptor
     private void storeAuthentication(Authentication authentication, Map<String, Object> attributes) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
         attributes.put(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
     }
 }

@@ -61,6 +61,17 @@ class AppRefreshTokenAuthenticationServiceTest {
     }
 
     @Test
+    void missingMemberIdDoesNotQueryTokenCache() {
+        when(jwtTokenProvider.isRefreshTokenValid("refresh-token")).thenReturn(true);
+        when(jwtTokenProvider.getUserIdFromToken("refresh-token")).thenReturn(null);
+
+        Optional<Authentication> result = authenticationService.authenticate("refresh-token");
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(tokenCacheService);
+    }
+
+    @Test
     void matchingStoredTokenAuthenticatesWithoutRotation() {
         when(jwtTokenProvider.isRefreshTokenValid("refresh-token")).thenReturn(true);
         when(jwtTokenProvider.getUserIdFromToken("refresh-token")).thenReturn(7L);

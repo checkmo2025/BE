@@ -29,6 +29,11 @@ public class AppRefreshTokenAuthenticationService {
             }
 
             Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+            if (memberId == null) {
+                log.warn("[앱 WS 인증] Refresh Token에서 memberId를 추출할 수 없음");
+                return Optional.empty();
+            }
+
             String storedRefreshToken = tokenCacheService.getRefreshToken(memberId);
             if (!matchesStoredToken(refreshToken, storedRefreshToken)) {
                 log.warn("[앱 WS 인증] Redis Refresh Token 불일치 - memberId={}", memberId);
