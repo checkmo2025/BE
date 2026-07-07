@@ -2,6 +2,8 @@ package checkmo.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
+import org.springframework.security.core.Authentication;
 
 public interface AuthenticationAPI {
 
@@ -49,4 +51,9 @@ public interface AuthenticationAPI {
     boolean canAccessAdmin(Long memberId);
 
     String fetchProvider(Long memberId);
+
+    /**
+     * 앱 WebSocket 핸드셰이크에서 전달한 Refresh Token을 회전 없이 검증하고 인증 정보를 반환합니다.
+     */
+    Optional<Authentication> authenticateAppRefreshToken(String refreshToken);
 }
