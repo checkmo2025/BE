@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ClubManagementQueryService {
 
+    private static final int RECOMMENDATION_SIZE = 6;
+
     private final ClubRepository clubRepository;
 
     public List<Club> retrieveClubs(ClubRequestDTO.ClubSearchFilter filter, Long cursorId, int pageSize) {
@@ -66,7 +68,7 @@ public class ClubManagementQueryService {
             LocalDateTime lastActivityAt,
             Long memberId
     ) {
-        return clubRepository.findRecommendations(interestCategories, lastActivityAt, memberId, 3);
+        return clubRepository.findRecommendations(interestCategories, lastActivityAt, memberId, RECOMMENDATION_SIZE);
     }
 
     public Page<Club> retrieveAdminClubs(String keyword, Pageable pageable) {
