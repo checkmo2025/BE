@@ -183,6 +183,24 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     }
 
     @Test
+    void clubRecommendationsReturnSixClubs() {
+        TestUser owner = createUser();
+        TestUser requester = createUser();
+
+        for (int index = 0; index < 7; index++) {
+            createClub(owner, "recommend-" + index + "-" + uniqueSuffix(owner));
+        }
+
+        Response response = given().cookie(accessTokenCookie(requester))
+                .when().get("/api/v1/clubs/recommendations")
+                .then().statusCode(200)
+                .extract().response();
+
+        List<Map<String, Object>> recommendations = response.jsonPath().getList("result.recommendations");
+        assertThat(recommendations).hasSize(6);
+    }
+
+    @Test
     void publicClubParticipantsCanBeViewedByLoggedInNonMemberWithFollowStatus() {
         TestUser owner = createUser();
         TestUser member = createUser();
