@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -31,7 +32,7 @@ public class PushDeviceCommandService {
             device = existing.get();
             // token이 바뀐 경우에만 다른 installation에 같은 token이 있는지 확인한다.
             // token이 동일하면 자기 자신만 존재할 수 있으므로 DB 조회를 생략한다.
-            if (!device.getExpoPushToken().equals(token)) {
+            if (!Objects.equals(device.getExpoPushToken(), token)) {
                 deactivateTokenConflict(token, installationId);
             }
             device.update(token, memberId, request.getPlatform(), request.getAppVersion(), request.getBuildNumber());
