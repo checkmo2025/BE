@@ -33,10 +33,15 @@ public class AppRefreshTokenAuthenticationService {
                 log.warn("[앱 WS 인증] Refresh Token에서 memberId를 추출할 수 없음");
                 return Optional.empty();
             }
+            String sessionId = jwtTokenProvider.getSessionIdFromToken(refreshToken);
 
-            String storedRefreshToken = tokenCacheService.getRefreshToken(memberId);
+            String storedRefreshToken = tokenCacheService.getRefreshToken(memberId, sessionId);
             if (!matchesStoredToken(refreshToken, storedRefreshToken)) {
-                log.warn("[앱 WS 인증] Redis Refresh Token 불일치 - memberId={}", memberId);
+                log.warn(
+                        "[앱 WS 인증] Redis Refresh Token 불일치 - memberId={}, sessionId={}",
+                        memberId,
+                        sessionId
+                );
                 return Optional.empty();
             }
 

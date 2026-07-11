@@ -67,6 +67,7 @@ class OAuth2AuthenticationSuccessHandlerTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         when(jwtTokenProvider.generateToken(authentication)).thenReturn(JwtToken.builder()
+                .sessionId("session-1")
                 .accessToken("access-token")
                 .refreshToken("refresh-token")
                 .build());
@@ -88,7 +89,7 @@ class OAuth2AuthenticationSuccessHandlerTest {
                             && header.contains("SameSite=None"));
         });
         verify(authReactivationCommandService).reactivateIfDeactivated(1L);
-        verify(tokenCacheService).saveRefreshToken(1L, "refresh-token");
+        verify(tokenCacheService).saveRefreshToken(1L, "session-1", "refresh-token");
     }
 
     @Test
@@ -120,6 +121,7 @@ class OAuth2AuthenticationSuccessHandlerTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         when(jwtTokenProvider.generateToken(authentication)).thenReturn(JwtToken.builder()
+                .sessionId("session-2")
                 .accessToken("access-token")
                 .refreshToken("refresh-token")
                 .build());
@@ -141,6 +143,6 @@ class OAuth2AuthenticationSuccessHandlerTest {
             softly.assertThat(codeCaptor.getValue()).isNotBlank();
         });
         verify(authReactivationCommandService).reactivateIfDeactivated(2L);
-        verify(tokenCacheService).saveRefreshToken(2L, "refresh-token");
+        verify(tokenCacheService).saveRefreshToken(2L, "session-2", "refresh-token");
     }
 }

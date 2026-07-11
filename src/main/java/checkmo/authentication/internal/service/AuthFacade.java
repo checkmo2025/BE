@@ -50,6 +50,12 @@ public class AuthFacade {
         return jwtLoginProcessor.processLogin(response, authentication);
     }
 
+    public String loginApp(AuthRequestDTO.Login request, HttpServletResponse response) {
+        Authentication authentication = authSessionCommandService.login(request);
+
+        return jwtLoginProcessor.processAppLogin(response, authentication);
+    }
+
     public String loginWithApple(AuthRequestDTO.AppleAppLogin request, HttpServletResponse response) {
         return appleAppLoginService.login(request.getIdentityToken(), request.getRawNonce(), response);
     }
@@ -75,7 +81,7 @@ public class AuthFacade {
 
     public String refreshAppToken(String refreshToken, HttpServletResponse response) {
         AuthTokenRotationResult rotationResult = authTokenRotationService.rotateRefreshToken(refreshToken);
-        authTokenRotationService.writeTokenCookies(response, rotationResult.getJwtToken());
+        authTokenRotationService.writeAppTokenCookie(response, rotationResult.getJwtToken());
         return rotationResult.getJwtToken().getRefreshToken();
     }
 

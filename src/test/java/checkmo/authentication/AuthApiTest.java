@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -222,11 +223,12 @@ class AuthApiTest extends ApiTestSupport {
                 .statusCode(200)
                 .extract();
 
-        assertJwtCookiesWereSet(response);
+        assertAppTokenCookieWasSet(response);
         String responseRefreshToken = response.jsonPath().getString("result.refreshToken");
         assertSoftly(softly -> {
             softly.assertThat(responseRefreshToken).isNotBlank();
-            softly.assertThat(response.cookie("refreshToken")).isEqualTo(responseRefreshToken);
+            softly.assertThat(response.headers().getValues("Set-Cookie"))
+                    .anyMatch(header -> header.startsWith("refreshToken=") && header.contains("Max-Age=0"));
         });
     }
 
@@ -330,7 +332,7 @@ class AuthApiTest extends ApiTestSupport {
                 .statusCode(200)
                 .extract();
 
-        assertJwtCookiesWereSet(refreshResponse);
+        assertAppTokenCookieWasSet(refreshResponse);
         String newRefreshToken = refreshResponse.jsonPath().getString("result.refreshToken");
         assertThat(newRefreshToken).isNotBlank();
         assertThat(newRefreshToken).isNotEqualTo(oldRefreshToken);
@@ -342,6 +344,94 @@ class AuthApiTest extends ApiTestSupport {
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
+    }
+
+    @Test
+    void sameMemberAppSessionsRotateIndependently() {
+        TestUser user = createUserWithPassword("Pass123!");
+        String firstRefreshToken = appLoginRefreshToken(user);
+        String secondRefreshToken = appLoginRefreshToken(user);
+
+        String rotatedFirstToken = refreshAppToken(firstRefreshToken);
+        String rotatedSecondToken = refreshAppToken(secondRefreshToken);
+
+        assertSoftly(softly -> {
+            softly.assertThat(firstRefreshToken).isNotEqualTo(secondRefreshToken);
+            softly.assertThat(rotatedFirstToken).isNotEqualTo(firstRefreshToken);
+            softly.assertThat(rotatedSecondToken).isNotEqualTo(secondRefreshToken);
+            softly.assertThat(appRefreshStatus(firstRefreshToken)).isEqualTo(401);
+            softly.assertThat(appRefreshStatus(secondRefreshToken)).isEqualTo(401);
+            softly.assertThat(appRefreshStatus(rotatedFirstToken)).isEqualTo(200);
+            softly.assertThat(appRefreshStatus(rotatedSecondToken)).isEqualTo(200);
+        });
+    }
+
+    @Test
+    void appAndWebSessionsDoNotInvalidateEachOther() {
+        TestUser user = createUserWithPassword("Pass123!");
+        ExtractableResponse<Response> webLoginResponse = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("identifier", user.email(), "password", "Pass123!"))
+                .when()
+                .post("/api/v1/auth/login")
+                .then()
+                .statusCode(200)
+                .extract();
+        String webRefreshToken = webLoginResponse.cookie("refreshToken");
+        String appRefreshToken = appLoginRefreshToken(user);
+
+        assertSoftly(softly -> {
+            softly.assertThat(appRefreshStatus(webRefreshToken)).isEqualTo(200);
+            softly.assertThat(appRefreshStatus(appRefreshToken)).isEqualTo(200);
+        });
+    }
+
+    @Test
+    void appLogoutRevokesOnlyTargetSession() {
+        TestUser user = createUserWithPassword("Pass123!");
+        String firstRefreshToken = appLoginRefreshToken(user);
+        String secondRefreshToken = appLoginRefreshToken(user);
+
+        given()
+                .header("X-Refresh-Token", firstRefreshToken)
+                .when()
+                .post("/api/v1/auth/app/logout")
+                .then()
+                .statusCode(200);
+
+        assertSoftly(softly -> {
+            softly.assertThat(appRefreshStatus(firstRefreshToken)).isEqualTo(401);
+            softly.assertThat(appRefreshStatus(secondRefreshToken)).isEqualTo(200);
+        });
+    }
+
+    @Test
+    void webLogoutRevokesOnlyWebSession() {
+        TestUser user = createUserWithPassword("Pass123!");
+        ExtractableResponse<Response> webLoginResponse = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("identifier", user.email(), "password", "Pass123!"))
+                .when()
+                .post("/api/v1/auth/login")
+                .then()
+                .statusCode(200)
+                .extract();
+        String webAccessToken = webLoginResponse.cookie("accessToken");
+        String webRefreshToken = webLoginResponse.cookie("refreshToken");
+        String appRefreshToken = appLoginRefreshToken(user);
+
+        given()
+                .cookie("accessToken", webAccessToken)
+                .cookie("refreshToken", webRefreshToken)
+                .when()
+                .post("/api/v1/auth/logout")
+                .then()
+                .statusCode(200);
+
+        assertSoftly(softly -> {
+            softly.assertThat(appRefreshStatus(webRefreshToken)).isEqualTo(401);
+            softly.assertThat(appRefreshStatus(appRefreshToken)).isEqualTo(200);
+        });
     }
 
     @Test
@@ -364,11 +454,13 @@ class AuthApiTest extends ApiTestSupport {
                 throw new AssertionError("concurrent refresh requests did not reach token rotation together");
             }
 
-            String userId = invocation.getArgument(0);
-            String expectedRefreshToken = invocation.getArgument(1);
-            String newRefreshToken = invocation.getArgument(2);
-            return rotateRefreshTokenIfCurrent(userId, expectedRefreshToken, newRefreshToken);
+            Long userId = invocation.getArgument(0);
+            String sessionId = invocation.getArgument(1);
+            String expectedRefreshToken = invocation.getArgument(2);
+            String newRefreshToken = invocation.getArgument(3);
+            return rotateRefreshTokenIfCurrent(userId, sessionId, expectedRefreshToken, newRefreshToken);
         }).when(tokenCacheService).compareAndRotateRefreshToken(
+                anyLong(),
                 anyString(),
                 anyString(),
                 anyString(),
@@ -387,6 +479,26 @@ class AuthApiTest extends ApiTestSupport {
                     .toList();
 
             assertThat(statuses).containsExactlyInAnyOrder(200, 401);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void differentSessionsCanRefreshConcurrently() {
+        TestUser user = createUserWithPassword("Pass123!");
+        String firstRefreshToken = appLoginRefreshToken(user);
+        String secondRefreshToken = appLoginRefreshToken(user);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            List<Future<Integer>> responses = List.of(
+                    executor.submit(() -> appRefreshStatus(firstRefreshToken)),
+                    executor.submit(() -> appRefreshStatus(secondRefreshToken))
+            );
+
+            assertThat(responses.stream().map(this::getFutureStatus).toList())
+                    .containsExactlyInAnyOrder(200, 200);
         } finally {
             executor.shutdownNow();
         }
@@ -698,6 +810,12 @@ class AuthApiTest extends ApiTestSupport {
                 .anyMatch(header -> header.startsWith("refreshToken=") && header.contains("HttpOnly"));
     }
 
+    private void assertAppTokenCookieWasSet(ExtractableResponse<Response> response) {
+        assertThat(response.headers().getValues("Set-Cookie"))
+                .anyMatch(header -> header.startsWith("accessToken=") && header.contains("HttpOnly"))
+                .anyMatch(header -> header.startsWith("refreshToken=") && header.contains("Max-Age=0"));
+    }
+
     private String appLoginRefreshToken(TestUser user) {
         return given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -719,6 +837,18 @@ class AuthApiTest extends ApiTestSupport {
                 .then()
                 .extract()
                 .statusCode();
+    }
+
+    private String refreshAppToken(String refreshToken) {
+        return given()
+                .header("X-Refresh-Token", refreshToken)
+                .when()
+                .post("/api/v1/auth/app/refresh")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getString("result.refreshToken");
     }
 
     private int getFutureStatus(Future<Integer> future) {

@@ -103,7 +103,7 @@ public class AuthController {
             @Valid @RequestBody AuthRequestDTO.Login request,
             HttpServletResponse response
     ) {
-        String refreshToken = authFacade.login(request, response);
+        String refreshToken = authFacade.loginApp(request, response);
         return ApiResponse.onSuccess(AuthResponseDTO.Login.builder().refreshToken(refreshToken).build());
     }
 

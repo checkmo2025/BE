@@ -28,6 +28,8 @@ import org.springframework.util.StringUtils;
 @Component
 public class JwtTokenProviderImpl implements JwtTokenProvider {
 
+    private static final String SESSION_ID_CLAIM = "sid";
+
     private final Key key;
     private final JwtProperties jwtProperties;
     private final CustomUserDetailsService customUserDetailsService;
@@ -44,6 +46,15 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
     @Override
     public JwtToken generateToken(Authentication authentication) {
+        return generateToken(authentication, UUID.randomUUID().toString());
+    }
+
+    @Override
+    public JwtToken generateToken(Authentication authentication, String sessionId) {
+        if (!StringUtils.hasText(sessionId)) {
+            throw new IllegalArgumentException("sessionId는 비어 있을 수 없습니다.");
+        }
+
         // 권한 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -61,6 +72,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .id(UUID.randomUUID().toString())
                 .subject(authentication.getName())
                 .claim("role", authorities)
+                .claim(SESSION_ID_CLAIM, sessionId)
                 .expiration(new Date(now + accessTokenValidity))
                 .signWith(key)
                 .compact();
@@ -69,11 +81,13 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         String refreshToken = Jwts.builder()
                 .id(UUID.randomUUID().toString())
                 .subject(authentication.getName())
+                .claim(SESSION_ID_CLAIM, sessionId)
                 .expiration(new Date(now + refreshTokenValidity))
                 .signWith(key)
                 .compact();
 
         return JwtToken.builder()
+                .sessionId(sessionId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -140,6 +154,33 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         } catch (ExpiredJwtException e) {
             return parseMemberIdSubject(e.getClaims().getSubject());
         }
+    }
+
+    @Override
+    public String getSessionIdFromToken(String token) {
+        try {
+            var claims = Jwts.parser()
+                    .verifyWith((SecretKey) key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return resolveSessionId(claims.get(SESSION_ID_CLAIM, String.class), claims.getId());
+        } catch (ExpiredJwtException e) {
+            return resolveSessionId(
+                    e.getClaims().get(SESSION_ID_CLAIM, String.class),
+                    e.getClaims().getId()
+            );
+        }
+    }
+
+    private String resolveSessionId(String sessionId, String tokenId) {
+        if (StringUtils.hasText(sessionId)) {
+            return sessionId;
+        }
+        if (StringUtils.hasText(tokenId)) {
+            return tokenId;
+        }
+        throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
     }
 
     private Long parseMemberIdSubject(String subject) {

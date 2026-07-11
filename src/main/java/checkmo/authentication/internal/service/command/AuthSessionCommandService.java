@@ -77,7 +77,8 @@ public class AuthSessionCommandService {
             try {
                 if (jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
                     Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-                    tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken);
+                    String sessionId = jwtTokenProvider.getSessionIdFromToken(refreshToken);
+                    tokenCacheService.deleteRefreshTokenIfMatches(memberId, sessionId, refreshToken);
                 }
             } catch (Exception e) {
                 log.error("[로그아웃] RefreshToken 삭제 실패", e);
@@ -90,12 +91,15 @@ public class AuthSessionCommandService {
             throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
         }
 
+        Long memberId;
+        String sessionId;
         try {
-            Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+            memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
             if (memberId == null) {
                 throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
             }
-            if (!tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken)) {
+            sessionId = jwtTokenProvider.getSessionIdFromToken(refreshToken);
+            if (!tokenCacheService.deleteRefreshTokenIfMatches(memberId, sessionId, refreshToken)) {
                 throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
             }
         } catch (AuthException e) {
@@ -110,12 +114,21 @@ public class AuthSessionCommandService {
         jwtCookieUtil.deleteTokenFromCookie(response, "accessToken");
         jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
 
-        if (StringUtils.hasText(accessToken)) {
+        if (StringUtils.hasText(accessToken) && belongsToMember(accessToken, memberId)) {
             try {
                 tokenCacheService.saveBlacklistToken(accessToken);
             } catch (Exception e) {
                 log.error("[앱 로그아웃] AccessToken 블랙리스트 저장 실패", e);
             }
+        }
+    }
+
+    private boolean belongsToMember(String accessToken, Long memberId) {
+        try {
+            return memberId.equals(jwtTokenProvider.getUserIdFromToken(accessToken));
+        } catch (RuntimeException e) {
+            log.warn("[앱 로그아웃] AccessToken 회원 확인 실패: {}", e.getMessage());
+            return false;
         }
     }
 

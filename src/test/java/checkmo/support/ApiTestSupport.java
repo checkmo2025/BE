@@ -113,7 +113,7 @@ public abstract class ApiTestSupport {
     protected HashOperations<String, Object, Object> redisHashOperations;
     protected ValueOperations<String, String> stringRedisValueOperations;
     private final Map<String, Cache> testCaches = new ConcurrentHashMap<>();
-    private final Map<String, String> refreshTokensByUserId = new ConcurrentHashMap<>();
+    private final Map<String, String> refreshTokensBySession = new ConcurrentHashMap<>();
 
     @BeforeEach
     void setUpApiTestSupport() {
@@ -123,7 +123,7 @@ public abstract class ApiTestSupport {
         redisValueOperations = mock();
         redisHashOperations = mock();
         stringRedisValueOperations = mock();
-        refreshTokensByUserId.clear();
+        refreshTokensBySession.clear();
 
         when(redisTemplate.opsForValue()).thenReturn(redisValueOperations);
         when(redisTemplate.opsForHash()).thenReturn(redisHashOperations);
@@ -171,19 +171,32 @@ public abstract class ApiTestSupport {
         });
 
         when(tokenCacheService.isAccessTokenBlacklisted(anyString())).thenReturn(false);
-        when(tokenCacheService.getRefreshToken(anyString()))
-                .thenAnswer(invocation -> refreshTokensByUserId.get(refreshTokenKey(invocation.getArgument(0))));
-        when(tokenCacheService.getRefreshToken(anyLong()))
-                .thenAnswer(invocation -> refreshTokensByUserId.get(refreshTokenKey(invocation.getArgument(0))));
+        when(tokenCacheService.getRefreshToken(anyString(), anyString()))
+                .thenAnswer(invocation -> refreshTokensBySession.get(refreshTokenKey(
+                        invocation.getArgument(0),
+                        invocation.getArgument(1)
+                )));
+        when(tokenCacheService.getRefreshToken(anyLong(), anyString()))
+                .thenAnswer(invocation -> refreshTokensBySession.get(refreshTokenKey(
+                        invocation.getArgument(0),
+                        invocation.getArgument(1)
+                )));
         doAnswer(invocation -> {
-            refreshTokensByUserId.put(refreshTokenKey(invocation.getArgument(0)), invocation.getArgument(1));
+            refreshTokensBySession.put(
+                    refreshTokenKey(invocation.getArgument(0), invocation.getArgument(1)),
+                    invocation.getArgument(2)
+            );
             return null;
-        }).when(tokenCacheService).saveRefreshToken(anyString(), anyString());
+        }).when(tokenCacheService).saveRefreshToken(anyString(), anyString(), anyString());
         doAnswer(invocation -> {
-            refreshTokensByUserId.put(refreshTokenKey(invocation.getArgument(0)), invocation.getArgument(1));
+            refreshTokensBySession.put(
+                    refreshTokenKey(invocation.getArgument(0), invocation.getArgument(1)),
+                    invocation.getArgument(2)
+            );
             return null;
-        }).when(tokenCacheService).saveRefreshToken(anyLong(), anyString());
+        }).when(tokenCacheService).saveRefreshToken(anyLong(), anyString(), anyString());
         when(tokenCacheService.compareAndRotateRefreshToken(
+                anyString(),
                 anyString(),
                 anyString(),
                 anyString(),
@@ -192,32 +205,43 @@ public abstract class ApiTestSupport {
                 .thenAnswer(invocation -> rotateRefreshTokenIfCurrent(
                         invocation.getArgument(0),
                         invocation.getArgument(1),
-                        invocation.getArgument(2)
+                        invocation.getArgument(2),
+                        invocation.getArgument(3)
                 ));
         when(tokenCacheService.compareAndRotateRefreshToken(
                 anyLong(),
                 anyString(),
                 anyString(),
+                anyString(),
                 org.mockito.ArgumentMatchers.any(Duration.class)
         ))
                 .thenAnswer(invocation -> rotateRefreshTokenIfCurrent(
                         invocation.getArgument(0),
                         invocation.getArgument(1),
-                        invocation.getArgument(2)
+                        invocation.getArgument(2),
+                        invocation.getArgument(3)
                 ));
         when(tokenCacheService.saveBlacklistToken(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
         doAnswer(invocation -> {
-            refreshTokensByUserId.remove(refreshTokenKey(invocation.getArgument(0)));
+            deleteAllRefreshTokens(invocation.getArgument(0));
             return null;
         }).when(tokenCacheService).deleteRefreshToken(anyString());
         doAnswer(invocation -> {
-            refreshTokensByUserId.remove(refreshTokenKey(invocation.getArgument(0)));
+            deleteAllRefreshTokens(invocation.getArgument(0));
             return null;
         }).when(tokenCacheService).deleteRefreshToken(anyLong());
-        when(tokenCacheService.deleteRefreshTokenIfMatches(anyString(), anyString()))
-                .thenAnswer(invocation -> deleteRefreshTokenIfCurrent(invocation.getArgument(0), invocation.getArgument(1)));
-        when(tokenCacheService.deleteRefreshTokenIfMatches(anyLong(), anyString()))
-                .thenAnswer(invocation -> deleteRefreshTokenIfCurrent(invocation.getArgument(0), invocation.getArgument(1)));
+        when(tokenCacheService.deleteRefreshTokenIfMatches(anyString(), anyString(), anyString()))
+                .thenAnswer(invocation -> deleteRefreshTokenIfCurrent(
+                        invocation.getArgument(0),
+                        invocation.getArgument(1),
+                        invocation.getArgument(2)
+                ));
+        when(tokenCacheService.deleteRefreshTokenIfMatches(anyLong(), anyString(), anyString()))
+                .thenAnswer(invocation -> deleteRefreshTokenIfCurrent(
+                        invocation.getArgument(0),
+                        invocation.getArgument(1),
+                        invocation.getArgument(2)
+                ));
     }
 
     @AfterEach
@@ -347,16 +371,18 @@ public abstract class ApiTestSupport {
     }
 
     protected void saveRefreshTokenInCacheFake(String userId, String refreshToken) {
-        refreshTokensByUserId.put(refreshTokenKey(userId), refreshToken);
+        String sessionId = jwtTokenProvider.getSessionIdFromToken(refreshToken);
+        refreshTokensBySession.put(refreshTokenKey(userId, sessionId), refreshToken);
     }
 
     protected boolean rotateRefreshTokenIfCurrent(
             Object userId,
+            String sessionId,
             String expectedRefreshToken,
             String newRefreshToken
     ) {
         AtomicBoolean rotated = new AtomicBoolean(false);
-        refreshTokensByUserId.compute(refreshTokenKey(userId), (ignored, currentRefreshToken) -> {
+        refreshTokensBySession.compute(refreshTokenKey(userId, sessionId), (ignored, currentRefreshToken) -> {
             if (expectedRefreshToken.equals(currentRefreshToken)) {
                 rotated.set(true);
                 return newRefreshToken;
@@ -366,9 +392,13 @@ public abstract class ApiTestSupport {
         return rotated.get();
     }
 
-    private boolean deleteRefreshTokenIfCurrent(Object userId, String expectedRefreshToken) {
+    private boolean deleteRefreshTokenIfCurrent(
+            Object userId,
+            String sessionId,
+            String expectedRefreshToken
+    ) {
         AtomicBoolean deleted = new AtomicBoolean(false);
-        refreshTokensByUserId.compute(refreshTokenKey(userId), (ignored, currentRefreshToken) -> {
+        refreshTokensBySession.compute(refreshTokenKey(userId, sessionId), (ignored, currentRefreshToken) -> {
             if (expectedRefreshToken.equals(currentRefreshToken)) {
                 deleted.set(true);
                 return null;
@@ -378,8 +408,13 @@ public abstract class ApiTestSupport {
         return deleted.get();
     }
 
-    private String refreshTokenKey(Object userId) {
-        return String.valueOf(userId);
+    private void deleteAllRefreshTokens(Object userId) {
+        String prefix = String.valueOf(userId) + "::";
+        refreshTokensBySession.keySet().removeIf(key -> key.startsWith(prefix));
+    }
+
+    private String refreshTokenKey(Object userId, Object sessionId) {
+        return userId + "::" + sessionId;
     }
 
     protected record TestUser(

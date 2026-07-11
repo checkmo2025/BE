@@ -14,7 +14,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import checkmo.authentication.internal.config.properties.JwtProperties;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -63,7 +65,7 @@ class TokenCacheServiceTest {
             verify(scriptingCommands).eval(
                     any(byte[].class),
                     org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
-                    org.mockito.ArgumentMatchers.eq(1),
+                    org.mockito.ArgumentMatchers.eq(3),
                     keysAndArgsCaptor.capture()
             );
             byte[][] keysAndArgs = keysAndArgsCaptor.getValue();
@@ -71,7 +73,9 @@ class TokenCacheServiceTest {
                     .map(value -> new String(value, StandardCharsets.UTF_8))
                     .toList())
                     .containsExactly(
+                            "refreshToken::member-1::session-1",
                             "refreshToken::member-1",
+                            "refreshTokenSessions::member-1",
                             "old-token",
                             new String(legacySerializer.serialize("old-token"), StandardCharsets.UTF_8),
                             "new-token",
@@ -82,6 +86,7 @@ class TokenCacheServiceTest {
 
         boolean rotated = tokenCacheService.compareAndRotateRefreshToken(
                 "member-1",
+                "session-1",
                 "old-token",
                 "new-token",
                 Duration.ofMillis(1_234L)
@@ -113,16 +118,17 @@ class TokenCacheServiceTest {
             verify(scriptingCommands).eval(
                     any(byte[].class),
                     org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
-                    org.mockito.ArgumentMatchers.eq(1),
+                    org.mockito.ArgumentMatchers.eq(3),
                     keysAndArgsCaptor.capture()
             );
-            assertThat(keysAndArgsCaptor.getValue()[2])
+            assertThat(keysAndArgsCaptor.getValue()[4])
                     .isEqualTo(legacySerializer.serialize("old-token"));
             return result;
         });
 
         boolean rotated = tokenCacheService.compareAndRotateRefreshToken(
                 "member-1",
+                "session-1",
                 "old-token",
                 "new-token",
                 Duration.ofMillis(1_234L)
@@ -154,20 +160,28 @@ class TokenCacheServiceTest {
             verify(scriptingCommands).eval(
                     any(byte[].class),
                     org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
-                    org.mockito.ArgumentMatchers.eq(1),
+                    org.mockito.ArgumentMatchers.eq(3),
                     keysAndArgsCaptor.capture()
             );
             byte[][] keysAndArgs = keysAndArgsCaptor.getValue();
             assertThat(new String(keysAndArgs[0], StandardCharsets.UTF_8))
+                    .isEqualTo("refreshToken::member-1::session-1");
+            assertThat(new String(keysAndArgs[1], StandardCharsets.UTF_8))
                     .isEqualTo("refreshToken::member-1");
-            assertThat(keysAndArgs[1])
+            assertThat(new String(keysAndArgs[2], StandardCharsets.UTF_8))
+                    .isEqualTo("refreshTokenSessions::member-1");
+            assertThat(keysAndArgs[3])
                     .isEqualTo("old-token".getBytes(StandardCharsets.UTF_8));
-            assertThat(keysAndArgs[2])
+            assertThat(keysAndArgs[4])
                     .isEqualTo(legacySerializer.serialize("old-token"));
             return result;
         });
 
-        boolean deleted = tokenCacheService.deleteRefreshTokenIfMatches("member-1", "old-token");
+        boolean deleted = tokenCacheService.deleteRefreshTokenIfMatches(
+                "member-1",
+                "session-1",
+                "old-token"
+        );
 
         assertThat(deleted).isTrue();
     }
@@ -177,13 +191,18 @@ class TokenCacheServiceTest {
         tokenCacheService = tokenCacheServiceWithRefreshTtl(1_234L);
         RedisSerializer<Object> legacySerializer = legacyValueSerializer();
         doReturn(legacySerializer).when(redisTemplate).getValueSerializer();
+        List<String> requestedKeys = new ArrayList<>();
 
         when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
             RedisCallback<?> callback = invocation.getArgument(0);
             RedisConnection connection = mock(RedisConnection.class);
             RedisStringCommands stringCommands = mock(RedisStringCommands.class, getInvocation -> {
                 if ("get".equals(getInvocation.getMethod().getName())) {
-                    return legacySerializer.serialize("old-token");
+                    String key = new String(getInvocation.getArgument(0), StandardCharsets.UTF_8);
+                    requestedKeys.add(key);
+                    return key.endsWith("::session-1")
+                            ? null
+                            : legacySerializer.serialize("old-token");
                 }
                 return org.mockito.Mockito.RETURNS_DEFAULTS.answer(getInvocation);
             });
@@ -192,47 +211,89 @@ class TokenCacheServiceTest {
             return callback.doInRedis(connection);
         });
 
-        String refreshToken = tokenCacheService.getRefreshToken("member-1");
+        String refreshToken = tokenCacheService.getRefreshToken("member-1", "session-1");
 
         assertThat(refreshToken).isEqualTo("old-token");
+        assertThat(requestedKeys).containsExactly(
+                "refreshToken::member-1::session-1",
+                "refreshToken::member-1"
+        );
     }
 
     @Test
-    void saveRefreshTokenUsesRawStringValueWithMillisecondTtl() {
+    void saveRefreshTokenUsesSessionKeyAndMillisecondTtl() {
         tokenCacheService = tokenCacheServiceWithRefreshTtl(5_678L);
 
         when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
             RedisCallback<?> callback = invocation.getArgument(0);
             RedisConnection connection = mock(RedisConnection.class);
-            RedisStringCommands stringCommands = mock(RedisStringCommands.class, setInvocation -> {
-                if ("set".equals(setInvocation.getMethod().getName())) {
-                    return true;
+            RedisScriptingCommands scriptingCommands = mock(RedisScriptingCommands.class, evalInvocation -> {
+                if ("eval".equals(evalInvocation.getMethod().getName())) {
+                    return 1L;
                 }
-                return org.mockito.Mockito.RETURNS_DEFAULTS.answer(setInvocation);
+                return org.mockito.Mockito.RETURNS_DEFAULTS.answer(evalInvocation);
             });
-            when(connection.stringCommands()).thenReturn(stringCommands);
+            when(connection.scriptingCommands()).thenReturn(scriptingCommands);
 
             Object result = callback.doInRedis(connection);
 
-            ArgumentCaptor<byte[]> keyCaptor = ArgumentCaptor.forClass(byte[].class);
-            ArgumentCaptor<byte[]> valueCaptor = ArgumentCaptor.forClass(byte[].class);
-            ArgumentCaptor<Expiration> expirationCaptor = ArgumentCaptor.forClass(Expiration.class);
-            verify(stringCommands).set(
-                    keyCaptor.capture(),
-                    valueCaptor.capture(),
-                    expirationCaptor.capture(),
-                    org.mockito.ArgumentMatchers.eq(RedisStringCommands.SetOption.upsert())
+            ArgumentCaptor<byte[][]> keysAndArgsCaptor = ArgumentCaptor.forClass(byte[][].class);
+            verify(scriptingCommands).eval(
+                    any(byte[].class),
+                    org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
+                    org.mockito.ArgumentMatchers.eq(2),
+                    keysAndArgsCaptor.capture()
             );
-            assertThat(new String(keyCaptor.getValue(), StandardCharsets.UTF_8))
-                    .isEqualTo("refreshToken::member-1");
-            assertThat(new String(valueCaptor.getValue(), StandardCharsets.UTF_8))
-                    .isEqualTo("refresh-token");
-            assertThat(expirationCaptor.getValue().getExpirationTimeInMilliseconds())
-                    .isEqualTo(5_678L);
+            assertThat(Arrays.stream(keysAndArgsCaptor.getValue())
+                    .map(value -> new String(value, StandardCharsets.UTF_8))
+                    .toList())
+                    .containsExactly(
+                            "refreshToken::member-1::session-1",
+                            "refreshTokenSessions::member-1",
+                            "refresh-token",
+                            "5678"
+                    );
             return result;
         });
 
-        tokenCacheService.saveRefreshToken("member-1", "refresh-token");
+        tokenCacheService.saveRefreshToken("member-1", "session-1", "refresh-token");
+    }
+
+    @Test
+    void deleteRefreshTokenDeletesSessionIndexAndLegacyKey() {
+        tokenCacheService = tokenCacheServiceWithRefreshTtl(5_678L);
+
+        when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
+            RedisCallback<?> callback = invocation.getArgument(0);
+            RedisConnection connection = mock(RedisConnection.class);
+            RedisScriptingCommands scriptingCommands = mock(RedisScriptingCommands.class, evalInvocation -> {
+                if ("eval".equals(evalInvocation.getMethod().getName())) {
+                    return 2L;
+                }
+                return org.mockito.Mockito.RETURNS_DEFAULTS.answer(evalInvocation);
+            });
+            when(connection.scriptingCommands()).thenReturn(scriptingCommands);
+
+            Object result = callback.doInRedis(connection);
+
+            ArgumentCaptor<byte[][]> keysCaptor = ArgumentCaptor.forClass(byte[][].class);
+            verify(scriptingCommands).eval(
+                    any(byte[].class),
+                    org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
+                    org.mockito.ArgumentMatchers.eq(2),
+                    keysCaptor.capture()
+            );
+            assertThat(Arrays.stream(keysCaptor.getValue())
+                    .map(value -> new String(value, StandardCharsets.UTF_8))
+                    .toList())
+                    .containsExactly(
+                            "refreshTokenSessions::member-1",
+                            "refreshToken::member-1"
+                    );
+            return result;
+        });
+
+        tokenCacheService.deleteRefreshToken("member-1");
     }
 
     @Test

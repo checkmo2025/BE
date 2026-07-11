@@ -46,7 +46,7 @@ public class AppleAppLoginService {
                 principalDetails.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return jwtLoginProcessor.processLogin(response, authentication);
+        return jwtLoginProcessor.processAppLogin(response, authentication);
     }
 
     private AppleIdentity verifyIdentity(String identityToken, String rawNonce) {

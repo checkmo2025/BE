@@ -42,8 +42,9 @@ class AppleAppLoginApiTest extends ApiTestSupport {
         String refreshToken = response.jsonPath().getString("result.refreshToken");
         assertSoftly(softly -> {
             softly.assertThat(refreshToken).isNotBlank();
-            softly.assertThat(response.cookie("refreshToken")).isEqualTo(refreshToken);
             softly.assertThat(response.cookie("accessToken")).isNotBlank();
+            softly.assertThat(response.headers().getValues("Set-Cookie"))
+                    .anyMatch(header -> header.startsWith("refreshToken=") && header.contains("Max-Age=0"));
             softly.assertThat(authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub")).isPresent();
         });
     }
