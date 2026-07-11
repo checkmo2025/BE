@@ -40,6 +40,7 @@ public class AuthenticationAPIImpl implements AuthenticationAPI {
     @Override
     public void deactivateMember(Long memberId, HttpServletRequest request, HttpServletResponse response) {
         authSessionCommandService.logout(request, response);
+        tokenCacheService.deleteRefreshToken(memberId);
         authUserCommandService.deactivateMember(memberId);
     }
 

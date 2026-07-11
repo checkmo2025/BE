@@ -29,6 +29,17 @@ public class JwtLoginProcessor {
         return jwtToken.getRefreshToken();
     }
 
+    // 앱 로그인은 Refresh Token을 응답 본문으로 전달하므로 쿠키에는 Access Token만 유지한다.
+    public String processAppLogin(HttpServletResponse response, Authentication authentication) {
+        JwtToken jwtToken = issueToken(authentication);
+
+        int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
+        jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), accessTokenMaxAge);
+        jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
+
+        return jwtToken.getRefreshToken();
+    }
+
     public String processLoginWithoutCookies(Authentication authentication) {
         JwtToken jwtToken = issueToken(authentication);
         return jwtToken.getRefreshToken();
@@ -44,7 +55,7 @@ public class JwtLoginProcessor {
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
         // RefreshToken Redis에 저장
-        tokenCacheService.saveRefreshToken(userId, jwtToken.getRefreshToken());
+        tokenCacheService.saveRefreshToken(userId, jwtToken.getSessionId(), jwtToken.getRefreshToken());
         return jwtToken;
     }
 }

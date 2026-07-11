@@ -31,11 +31,13 @@ public class AuthTokenRotationService {
         if (memberId == null) {
             throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
         }
+        String sessionId = jwtTokenProvider.getSessionIdFromToken(refreshToken);
 
         Authentication authentication = jwtTokenProvider.getAuthenticationFromMemberId(memberId);
-        JwtToken newJwtToken = jwtTokenProvider.generateToken(authentication);
+        JwtToken newJwtToken = jwtTokenProvider.generateToken(authentication, sessionId);
         boolean rotated = tokenCacheService.compareAndRotateRefreshToken(
                 memberId,
+                sessionId,
                 refreshToken,
                 newJwtToken.getRefreshToken(),
                 Duration.ofMillis(jwtTokenProvider.getRefreshTokenExpirationTime())
@@ -53,5 +55,12 @@ public class AuthTokenRotationService {
 
         jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), accessTokenMaxAge);
         jwtCookieUtil.addTokenToCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenMaxAge);
+    }
+
+    public void writeAppTokenCookie(HttpServletResponse response, JwtToken jwtToken) {
+        int accessTokenMaxAge = (int) (jwtTokenProvider.getAccessTokenExpirationTime() / 1000L);
+
+        jwtCookieUtil.addTokenToCookie(response, "accessToken", jwtToken.getAccessToken(), accessTokenMaxAge);
+        jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
     }
 }

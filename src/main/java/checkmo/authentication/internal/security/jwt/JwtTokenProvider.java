@@ -1,5 +1,6 @@
 package checkmo.authentication.internal.security.jwt;
 
+import java.util.Optional;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -13,11 +14,17 @@ public interface JwtTokenProvider {
 
     JwtToken generateToken(Authentication authentication);
 
+    JwtToken generateToken(Authentication authentication, String sessionId);
+
     Authentication getAuthentication(String accessToken);
 
     boolean validateToken(String token);
 
     Long getUserIdFromToken(String token);
+
+    String getSessionIdFromToken(String token);
+
+    Optional<String> getExplicitSessionIdFromToken(String token);
 
     boolean isRefreshTokenValid(String refreshToken);
 

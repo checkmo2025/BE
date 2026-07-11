@@ -52,7 +52,8 @@ class AppRefreshTokenAuthenticationServiceTest {
     void mismatchedStoredTokenDoesNotAuthenticate() {
         when(jwtTokenProvider.isRefreshTokenValid("refresh-token")).thenReturn(true);
         when(jwtTokenProvider.getUserIdFromToken("refresh-token")).thenReturn(7L);
-        when(tokenCacheService.getRefreshToken(7L)).thenReturn("other-token");
+        when(jwtTokenProvider.getSessionIdFromToken("refresh-token")).thenReturn("session-1");
+        when(tokenCacheService.getRefreshToken(7L, "session-1")).thenReturn("other-token");
 
         Optional<Authentication> result = authenticationService.authenticate("refresh-token");
 
@@ -75,7 +76,8 @@ class AppRefreshTokenAuthenticationServiceTest {
     void matchingStoredTokenAuthenticatesWithoutRotation() {
         when(jwtTokenProvider.isRefreshTokenValid("refresh-token")).thenReturn(true);
         when(jwtTokenProvider.getUserIdFromToken("refresh-token")).thenReturn(7L);
-        when(tokenCacheService.getRefreshToken(7L)).thenReturn("refresh-token");
+        when(jwtTokenProvider.getSessionIdFromToken("refresh-token")).thenReturn("session-1");
+        when(tokenCacheService.getRefreshToken(7L, "session-1")).thenReturn("refresh-token");
         when(jwtTokenProvider.getAuthenticationFromMemberId(7L)).thenReturn(authentication);
 
         Optional<Authentication> result = authenticationService.authenticate("refresh-token");
@@ -83,6 +85,7 @@ class AppRefreshTokenAuthenticationServiceTest {
         assertThat(result).containsSame(authentication);
         verify(tokenCacheService, never()).compareAndRotateRefreshToken(
                 org.mockito.ArgumentMatchers.anyLong(),
+                org.mockito.ArgumentMatchers.anyString(),
                 org.mockito.ArgumentMatchers.anyString(),
                 org.mockito.ArgumentMatchers.anyString(),
                 org.mockito.ArgumentMatchers.any()

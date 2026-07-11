@@ -8,6 +8,7 @@ import checkmo.authentication.internal.security.jwt.TokenCacheService;
 import checkmo.authentication.web.dto.AuthRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -77,7 +78,8 @@ public class AuthSessionCommandService {
             try {
                 if (jwtTokenProvider.isRefreshTokenValid(refreshToken)) {
                     Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-                    tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken);
+                    String sessionId = jwtTokenProvider.getSessionIdFromToken(refreshToken);
+                    tokenCacheService.deleteRefreshTokenIfMatches(memberId, sessionId, refreshToken);
                 }
             } catch (Exception e) {
                 log.error("[로그아웃] RefreshToken 삭제 실패", e);
@@ -90,12 +92,17 @@ public class AuthSessionCommandService {
             throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
         }
 
+        Long memberId;
+        String sessionId;
+        Optional<String> explicitRefreshSessionId;
         try {
-            Long memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+            memberId = jwtTokenProvider.getUserIdFromToken(refreshToken);
             if (memberId == null) {
                 throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
             }
-            if (!tokenCacheService.deleteRefreshTokenIfMatches(memberId, refreshToken)) {
+            sessionId = jwtTokenProvider.getSessionIdFromToken(refreshToken);
+            explicitRefreshSessionId = jwtTokenProvider.getExplicitSessionIdFromToken(refreshToken);
+            if (!tokenCacheService.deleteRefreshTokenIfMatches(memberId, sessionId, refreshToken)) {
                 throw new AuthException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
             }
         } catch (AuthException e) {
@@ -110,12 +117,33 @@ public class AuthSessionCommandService {
         jwtCookieUtil.deleteTokenFromCookie(response, "accessToken");
         jwtCookieUtil.deleteTokenFromCookie(response, "refreshToken");
 
-        if (StringUtils.hasText(accessToken)) {
+        if (StringUtils.hasText(accessToken)
+                && belongsToLogoutSession(accessToken, memberId, explicitRefreshSessionId)) {
             try {
                 tokenCacheService.saveBlacklistToken(accessToken);
             } catch (Exception e) {
                 log.error("[앱 로그아웃] AccessToken 블랙리스트 저장 실패", e);
             }
+        }
+    }
+
+    private boolean belongsToLogoutSession(
+            String accessToken,
+            Long memberId,
+            Optional<String> refreshSessionId
+    ) {
+        try {
+            if (!memberId.equals(jwtTokenProvider.getUserIdFromToken(accessToken))) {
+                return false;
+            }
+
+            Optional<String> accessSessionId = jwtTokenProvider.getExplicitSessionIdFromToken(accessToken);
+            // 구버전 토큰 쌍은 둘 다 sid가 없으므로 기존 회원 단위 로그아웃을 유지한다.
+            // 신·구 토큰이 섞이거나 신형 세션끼리 sid가 다르면 다른 세션으로 판단한다.
+            return refreshSessionId.equals(accessSessionId);
+        } catch (RuntimeException e) {
+            log.warn("[앱 로그아웃] AccessToken 세션 확인 실패: {}", e.getMessage());
+            return false;
         }
     }
 
