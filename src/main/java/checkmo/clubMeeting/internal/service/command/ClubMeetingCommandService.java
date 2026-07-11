@@ -5,7 +5,6 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingDeleted;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
-import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
@@ -141,13 +140,7 @@ public class ClubMeetingCommandService {
             List<Long> clubMemberIds = e.getValue();
 
             Team team = existingTeamNumberToTeam.get(teamNumber);
-            team.removeAllClubMemberTeams(); // 기존 팀원 제거 (중복 방지)
-            for (Long cmId : e.getValue()) { // 요청 팀원으로 다시 채우기
-                ClubMemberTeam mt = ClubMemberTeam.builder()
-                        .clubMemberId(cmId)
-                        .build();
-                team.addClubMemberTeam(mt);
-            }
+            team.replaceMembers(clubMemberIds);
         }
 
         meetingRepository.save(meeting);

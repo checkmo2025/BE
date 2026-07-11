@@ -76,23 +76,35 @@ public class Team extends BaseEntity {
         }
     }
 
-    public void addClubMemberTeam(ClubMemberTeam clubMemberTeam) {
+    public void replaceMembers(List<Long> clubMemberIds) {
+        if (hasSameMembers(clubMemberIds)) {
+            return;
+        }
+        this.clubMemberTeams.clear();
+        for (Long clubMemberId : clubMemberIds) {
+            addClubMemberTeam(ClubMemberTeam.builder()
+                    .clubMemberId(clubMemberId)
+                    .build());
+        }
+    }
+
+    private boolean hasSameMembers(List<Long> clubMemberIds) {
+        if (clubMemberTeams.size() != clubMemberIds.size()) {
+            return false;
+        }
+        List<Long> unmatchedClubMemberIds = new ArrayList<>(clubMemberIds);
+        for (ClubMemberTeam clubMemberTeam : clubMemberTeams) {
+            if (!unmatchedClubMemberIds.remove(clubMemberTeam.getClubMemberId())) {
+                return false;
+            }
+        }
+        return unmatchedClubMemberIds.isEmpty();
+    }
+
+    private void addClubMemberTeam(ClubMemberTeam clubMemberTeam) {
         if (clubMemberTeam == null) {
             return;
         }
         clubMemberTeam.setTeam(this);
-    }
-
-    public void removeAllClubMemberTeams() {
-        for (ClubMemberTeam cmt : new ArrayList<>(this.clubMemberTeams)) {
-            removeClubMemberTeam(cmt);
-        }
-    }
-
-    private void removeClubMemberTeam(ClubMemberTeam clubMemberTeam) {
-        if (clubMemberTeam == null || !clubMemberTeams.contains(clubMemberTeam)) {
-            return;
-        }
-        this.clubMemberTeams.remove(clubMemberTeam);
     }
 }

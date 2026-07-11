@@ -194,9 +194,7 @@ class ClubMeetingCommandServiceTest {
     private Team team(int teamNumber, Long... clubMemberIds) {
         Team team = Team.builder().teamNumber(teamNumber).build();
         meeting.addTeam(team);
-        for (Long clubMemberId : clubMemberIds) {
-            team.addClubMemberTeam(ClubMemberTeam.builder().clubMemberId(clubMemberId).build());
-        }
+        team.replaceMembers(Arrays.asList(clubMemberIds));
         return team;
     }
 
