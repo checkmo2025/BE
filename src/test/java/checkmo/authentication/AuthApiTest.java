@@ -674,14 +674,7 @@ class AuthApiTest extends ApiTestSupport {
     @Test
     void appLogoutInvalidatesHeaderOnlyRefreshToken() {
         TestUser user = createUserWithPassword("Pass123!");
-        ExtractableResponse<Response> loginResponse = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(Map.of("identifier", user.email(), "password", "Pass123!"))
-                .when()
-                .post("/api/v1/auth/app/login")
-                .then()
-                .statusCode(200)
-                .extract();
+        ExtractableResponse<Response> loginResponse = appLogin(user);
         String refreshToken = loginResponse.jsonPath().getString("result.refreshToken");
 
         given()
@@ -698,6 +691,67 @@ class AuthApiTest extends ApiTestSupport {
                 .then()
                 .statusCode(401)
                 .body("isSuccess", equalTo(false));
+    }
+
+    @Test
+    void appLogoutBlacklistsAccessTokenFromMatchingSession() {
+        TestUser user = createUserWithPassword("Pass123!");
+        ExtractableResponse<Response> loginResponse = appLogin(user);
+        String accessToken = loginResponse.cookie("accessToken");
+        String refreshToken = loginResponse.jsonPath().getString("result.refreshToken");
+
+        given()
+                .header("X-Refresh-Token", refreshToken)
+                .cookie("accessToken", accessToken)
+                .when()
+                .post("/api/v1/auth/app/logout")
+                .then()
+                .statusCode(200);
+
+        verify(tokenCacheService).saveBlacklistToken(accessToken);
+    }
+
+    @Test
+    void appLogoutDoesNotBlacklistAccessTokenFromAnotherSessionOfSameMember() {
+        TestUser user = createUserWithPassword("Pass123!");
+        ExtractableResponse<Response> firstLoginResponse = appLogin(user);
+        ExtractableResponse<Response> secondLoginResponse = appLogin(user);
+        String firstRefreshToken = firstLoginResponse.jsonPath().getString("result.refreshToken");
+        String secondAccessToken = secondLoginResponse.cookie("accessToken");
+        String secondRefreshToken = secondLoginResponse.jsonPath().getString("result.refreshToken");
+
+        given()
+                .header("X-Refresh-Token", firstRefreshToken)
+                .cookie("accessToken", secondAccessToken)
+                .when()
+                .post("/api/v1/auth/app/logout")
+                .then()
+                .statusCode(200);
+
+        verify(tokenCacheService, never()).saveBlacklistToken(secondAccessToken);
+        assertSoftly(softly -> {
+            softly.assertThat(appRefreshStatus(firstRefreshToken)).isEqualTo(401);
+            softly.assertThat(appRefreshStatus(secondRefreshToken)).isEqualTo(200);
+        });
+    }
+
+    @Test
+    void appLogoutKeepsSidlessLegacyTokenCompatibility() {
+        TestUser user = createUserWithPassword("Pass123!");
+        String legacyAccessToken = signedAccessTokenWithSubject(user.id());
+        String legacyRefreshToken = signedRefreshTokenWithSubject(user.id());
+        saveRefreshTokenInCacheFake(user.id(), legacyRefreshToken);
+
+        given()
+                .header("X-Refresh-Token", legacyRefreshToken)
+                .cookie("accessToken", legacyAccessToken)
+                .when()
+                .post("/api/v1/auth/app/logout")
+                .then()
+                .statusCode(200);
+
+        verify(tokenCacheService).saveBlacklistToken(legacyAccessToken);
+        assertThat(appRefreshStatus(legacyRefreshToken)).isEqualTo(401);
     }
 
     @Test
@@ -817,6 +871,12 @@ class AuthApiTest extends ApiTestSupport {
     }
 
     private String appLoginRefreshToken(TestUser user) {
+        return appLogin(user)
+                .jsonPath()
+                .getString("result.refreshToken");
+    }
+
+    private ExtractableResponse<Response> appLogin(TestUser user) {
         return given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("identifier", user.email(), "password", "Pass123!"))
@@ -824,9 +884,7 @@ class AuthApiTest extends ApiTestSupport {
                 .post("/api/v1/auth/app/login")
                 .then()
                 .statusCode(200)
-                .extract()
-                .jsonPath()
-                .getString("result.refreshToken");
+                .extract();
     }
 
     private int appRefreshStatus(String refreshToken) {

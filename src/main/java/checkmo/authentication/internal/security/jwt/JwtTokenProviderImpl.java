@@ -13,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import java.security.Key;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
@@ -171,6 +172,25 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                     e.getClaims().getId()
             );
         }
+    }
+
+    @Override
+    public Optional<String> getExplicitSessionIdFromToken(String token) {
+        try {
+            String sessionId = Jwts.parser()
+                    .verifyWith((SecretKey) key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get(SESSION_ID_CLAIM, String.class);
+            return optionalSessionId(sessionId);
+        } catch (ExpiredJwtException e) {
+            return optionalSessionId(e.getClaims().get(SESSION_ID_CLAIM, String.class));
+        }
+    }
+
+    private Optional<String> optionalSessionId(String sessionId) {
+        return StringUtils.hasText(sessionId) ? Optional.of(sessionId) : Optional.empty();
     }
 
     private String resolveSessionId(String sessionId, String tokenId) {

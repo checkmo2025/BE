@@ -55,6 +55,10 @@ class JwtTokenProviderImplTest {
                     .isEqualTo(first.getSessionId());
             softly.assertThat(jwtTokenProvider.getSessionIdFromToken(first.getRefreshToken()))
                     .isEqualTo(first.getSessionId());
+            softly.assertThat(jwtTokenProvider.getExplicitSessionIdFromToken(first.getAccessToken()))
+                    .contains(first.getSessionId());
+            softly.assertThat(jwtTokenProvider.getExplicitSessionIdFromToken(first.getRefreshToken()))
+                    .contains(first.getSessionId());
             softly.assertThat(second.getSessionId()).isNotEqualTo(first.getSessionId());
         });
     }
@@ -82,7 +86,11 @@ class JwtTokenProviderImplTest {
                 .signWith(secretKey)
                 .compact();
 
-        assertThat(jwtTokenProvider.getSessionIdFromToken(legacyToken))
-                .isEqualTo("legacy-token-id");
+        assertSoftly(softly -> {
+            softly.assertThat(jwtTokenProvider.getSessionIdFromToken(legacyToken))
+                    .isEqualTo("legacy-token-id");
+            softly.assertThat(jwtTokenProvider.getExplicitSessionIdFromToken(legacyToken))
+                    .isEmpty();
+        });
     }
 }
