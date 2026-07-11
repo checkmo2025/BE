@@ -61,13 +61,20 @@ class TokenCacheServiceTest {
 
             Object result = callback.doInRedis(connection);
 
+            ArgumentCaptor<byte[]> scriptCaptor = ArgumentCaptor.forClass(byte[].class);
             ArgumentCaptor<byte[][]> keysAndArgsCaptor = ArgumentCaptor.forClass(byte[][].class);
             verify(scriptingCommands).eval(
-                    any(byte[].class),
+                    scriptCaptor.capture(),
                     org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
                     org.mockito.ArgumentMatchers.eq(3),
                     keysAndArgsCaptor.capture()
             );
+            String script = new String(scriptCaptor.getValue(), StandardCharsets.UTF_8);
+            assertThat(script)
+                    .contains("if redis.call('EXISTS', sessionKey) == 0 then")
+                    .contains("redis.call('SREM', sessionIndexKey, sessionKey)");
+            assertThat(occurrencesOf(script, "pruneMissingSessionKeys(KEYS[3])"))
+                    .isEqualTo(2);
             byte[][] keysAndArgs = keysAndArgsCaptor.getValue();
             assertThat(Arrays.stream(keysAndArgs)
                     .map(value -> new String(value, StandardCharsets.UTF_8))
@@ -156,13 +163,21 @@ class TokenCacheServiceTest {
 
             Object result = callback.doInRedis(connection);
 
+            ArgumentCaptor<byte[]> scriptCaptor = ArgumentCaptor.forClass(byte[].class);
             ArgumentCaptor<byte[][]> keysAndArgsCaptor = ArgumentCaptor.forClass(byte[][].class);
             verify(scriptingCommands).eval(
-                    any(byte[].class),
+                    scriptCaptor.capture(),
                     org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
                     org.mockito.ArgumentMatchers.eq(3),
                     keysAndArgsCaptor.capture()
             );
+            String script = new String(scriptCaptor.getValue(), StandardCharsets.UTF_8);
+            assertThat(script)
+                    .contains("if redis.call('EXISTS', sessionKey) == 0 then")
+                    .contains("redis.call('SREM', sessionIndexKey, sessionKey)")
+                    .doesNotContain("PEXPIRE");
+            assertThat(occurrencesOf(script, "cleanupSessionIndex(KEYS[3])"))
+                    .isEqualTo(2);
             byte[][] keysAndArgs = keysAndArgsCaptor.getValue();
             assertThat(new String(keysAndArgs[0], StandardCharsets.UTF_8))
                     .isEqualTo("refreshToken::member-1::session-1");
@@ -237,13 +252,23 @@ class TokenCacheServiceTest {
 
             Object result = callback.doInRedis(connection);
 
+            ArgumentCaptor<byte[]> scriptCaptor = ArgumentCaptor.forClass(byte[].class);
             ArgumentCaptor<byte[][]> keysAndArgsCaptor = ArgumentCaptor.forClass(byte[][].class);
             verify(scriptingCommands).eval(
-                    any(byte[].class),
+                    scriptCaptor.capture(),
                     org.mockito.ArgumentMatchers.eq(ReturnType.INTEGER),
                     org.mockito.ArgumentMatchers.eq(2),
                     keysAndArgsCaptor.capture()
             );
+            String script = new String(scriptCaptor.getValue(), StandardCharsets.UTF_8);
+            assertThat(script)
+                    .contains("if redis.call('EXISTS', sessionKey) == 0 then")
+                    .contains("redis.call('SREM', sessionIndexKey, sessionKey)")
+                    .containsSubsequence(
+                            "redis.call('SADD', KEYS[2], KEYS[1])",
+                            "pruneMissingSessionKeys(KEYS[2])",
+                            "redis.call('PEXPIRE', KEYS[2], ARGV[2])"
+                    );
             assertThat(Arrays.stream(keysAndArgsCaptor.getValue())
                     .map(value -> new String(value, StandardCharsets.UTF_8))
                     .toList())
@@ -257,6 +282,16 @@ class TokenCacheServiceTest {
         });
 
         tokenCacheService.saveRefreshToken("member-1", "session-1", "refresh-token");
+    }
+
+    private int occurrencesOf(String text, String fragment) {
+        int count = 0;
+        int index = 0;
+        while ((index = text.indexOf(fragment, index)) >= 0) {
+            count++;
+            index += fragment.length();
+        }
+        return count;
     }
 
     @Test

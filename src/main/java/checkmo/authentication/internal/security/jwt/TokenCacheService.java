@@ -26,16 +26,36 @@ public class TokenCacheService {
     private static final String OAUTH_CODE_PREFIX = "oauthCode::";
     private static final long OAUTH_CODE_TTL_MS = 120_000L;
     private static final String SAVE_REFRESH_TOKEN_SCRIPT = """
+            local function pruneMissingSessionKeys(sessionIndexKey)
+                local sessionKeys = redis.call('SMEMBERS', sessionIndexKey)
+                for _, sessionKey in ipairs(sessionKeys) do
+                    if redis.call('EXISTS', sessionKey) == 0 then
+                        redis.call('SREM', sessionIndexKey, sessionKey)
+                    end
+                end
+            end
+
             redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
             redis.call('SADD', KEYS[2], KEYS[1])
+            pruneMissingSessionKeys(KEYS[2])
             redis.call('PEXPIRE', KEYS[2], ARGV[2])
             return 1
             """;
     private static final String COMPARE_AND_ROTATE_REFRESH_TOKEN_SCRIPT = """
+            local function pruneMissingSessionKeys(sessionIndexKey)
+                local sessionKeys = redis.call('SMEMBERS', sessionIndexKey)
+                for _, sessionKey in ipairs(sessionKeys) do
+                    if redis.call('EXISTS', sessionKey) == 0 then
+                        redis.call('SREM', sessionIndexKey, sessionKey)
+                    end
+                end
+            end
+
             local current = redis.call('GET', KEYS[1])
             if current == ARGV[1] or current == ARGV[2] then
                 redis.call('SET', KEYS[1], ARGV[3], 'PX', ARGV[4])
                 redis.call('SADD', KEYS[3], KEYS[1])
+                pruneMissingSessionKeys(KEYS[3])
                 redis.call('PEXPIRE', KEYS[3], ARGV[4])
                 return 1
             end
@@ -45,25 +65,37 @@ public class TokenCacheService {
                 redis.call('SET', KEYS[1], ARGV[3], 'PX', ARGV[4])
                 redis.call('DEL', KEYS[2])
                 redis.call('SADD', KEYS[3], KEYS[1])
+                pruneMissingSessionKeys(KEYS[3])
                 redis.call('PEXPIRE', KEYS[3], ARGV[4])
                 return 1
             end
             return 0
             """;
     private static final String DELETE_REFRESH_TOKEN_IF_MATCHES_SCRIPT = """
+            local function cleanupSessionIndex(sessionIndexKey)
+                local sessionKeys = redis.call('SMEMBERS', sessionIndexKey)
+                for _, sessionKey in ipairs(sessionKeys) do
+                    if redis.call('EXISTS', sessionKey) == 0 then
+                        redis.call('SREM', sessionIndexKey, sessionKey)
+                    end
+                end
+                if redis.call('SCARD', sessionIndexKey) == 0 then
+                    redis.call('DEL', sessionIndexKey)
+                end
+            end
+
             local current = redis.call('GET', KEYS[1])
             if current == ARGV[1] or current == ARGV[2] then
                 redis.call('DEL', KEYS[1])
                 redis.call('SREM', KEYS[3], KEYS[1])
-                if redis.call('SCARD', KEYS[3]) == 0 then
-                    redis.call('DEL', KEYS[3])
-                end
+                cleanupSessionIndex(KEYS[3])
                 return 1
             end
 
             local legacy = redis.call('GET', KEYS[2])
             if legacy == ARGV[1] or legacy == ARGV[2] then
                 redis.call('DEL', KEYS[2])
+                cleanupSessionIndex(KEYS[3])
                 return 1
             end
             return 0
