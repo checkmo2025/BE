@@ -50,4 +50,17 @@ class MeetingTest {
                 .doesNotContain("addTeam", "removeTeam", "getTeams", "getTopics", "getBookReviews");
     }
 
+    @Test
+    void 차감할_별점보다_합계가_작으면_현재_한줄평_합계를_다시_계산한_뒤_차감한다() {
+        Meeting meeting = Meeting.builder().clubId(1L).bookId("book").sumRate(1.0).build();
+        BookReview.builder().id(1L).description("첫 번째").rate(3.0).clubMemberId(1L).memberId(1L).build()
+                .setMeeting(meeting);
+        BookReview.builder().id(2L).description("두 번째").rate(4.0).clubMemberId(2L).memberId(2L).build()
+                .setMeeting(meeting);
+
+        meeting.subtractSumRate(3.0);
+
+        assertThat(meeting.getSumRate()).isEqualTo(4.0);
+    }
+
 }
