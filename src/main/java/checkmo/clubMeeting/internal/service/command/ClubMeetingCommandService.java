@@ -110,38 +110,11 @@ public class ClubMeetingCommandService {
 
         // 요청 정리: teamNumber -> distinct ClubMemberIds
         Map<Integer, List<Long>> requestTeamNumberToClubMemberIds = normalizeTeamManageRequest(request);
-        Set<Integer> requestTeamNumbers = requestTeamNumberToClubMemberIds.keySet();
-
         // 요청 clubMemberIds 배치 검증
         validateRequestClubMembers(clubId, requestTeamNumberToClubMemberIds);
 
-        // 기존 팀 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
         List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meeting.getId());
-        Map<Integer, Team> existingTeamNumberToTeam = existingTeams.stream()
-                .collect(Collectors.toMap(Team::getTeamNumber, t -> t));
-
-        // 요청에 있는데 아직 없는 teamNumber는 Team 생성 후 meeting에 추가
-        for (Integer teamNumber : requestTeamNumbers) {
-            if (!existingTeamNumberToTeam.containsKey(teamNumber)) {
-                Team team = Team.builder()
-                        .teamNumber(teamNumber)
-                        .build();
-                meeting.addTeam(team);
-                existingTeamNumberToTeam.put(teamNumber, team);
-            }
-        }
-
-        // 요청에는 없는데 존재하는 팀(팀 발제, 팀원) 제거
-        removeTeamsNotInRequest(existingTeams, requestTeamNumbers, meeting);
-
-        // 요청 ClubMemberTeam 재생성
-        for (Map.Entry<Integer, List<Long>> e : requestTeamNumberToClubMemberIds.entrySet()) {
-            Integer teamNumber = e.getKey();
-            List<Long> clubMemberIds = e.getValue();
-
-            Team team = existingTeamNumberToTeam.get(teamNumber);
-            team.replaceMembers(clubMemberIds);
-        }
+        meeting.reconfigureTeams(existingTeams, requestTeamNumberToClubMemberIds);
 
         meetingRepository.save(meeting);
     }
@@ -160,13 +133,6 @@ public class ClubMeetingCommandService {
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
         clubManagementAPI.validateActiveClubMembers(clubId, requestedClubMemberIds);
-    }
-
-    private void removeTeamsNotInRequest(List<Team> existingTeams, Set<Integer> requestTeamNumbers, Meeting meeting) {
-        List<Team> toRemove = existingTeams.stream()
-                .filter(t -> !requestTeamNumbers.contains(t.getTeamNumber()))
-                .toList();
-        toRemove.forEach(meeting::removeTeam);
     }
 
     public void deleteAll(Long clubId) {

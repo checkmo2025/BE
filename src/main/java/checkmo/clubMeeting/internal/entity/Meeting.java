@@ -1,12 +1,25 @@
 package checkmo.clubMeeting.internal.entity;
 
 import checkmo.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
 @Getter
@@ -113,4 +126,28 @@ public class Meeting extends BaseEntity {
         team.removeMeeting();
     }
 
+    public void reconfigureTeams(
+            List<Team> existingTeams,
+            Map<Integer, List<Long>> requestedMembersByTeamNumber
+    ) {
+        Map<Integer, Team> existingTeamsByTeamNumber = existingTeams.stream()
+                .collect(Collectors.toMap(Team::getTeamNumber, Function.identity()));
+
+        for (Map.Entry<Integer, List<Long>> entry : requestedMembersByTeamNumber.entrySet()) {
+            Team team = existingTeamsByTeamNumber.get(entry.getKey());
+            if (team == null) {
+                team = Team.builder()
+                        .teamNumber(entry.getKey())
+                        .build();
+                addTeam(team);
+            }
+            team.replaceMembers(entry.getValue());
+        }
+
+        for (Team team : new ArrayList<>(existingTeams)) {
+            if (!requestedMembersByTeamNumber.containsKey(team.getTeamNumber())) {
+                removeTeam(team);
+            }
+        }
+    }
 }
