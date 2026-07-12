@@ -3,9 +3,21 @@ package checkmo.clubMeeting.internal.entity;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.hibernate.annotations.BatchSize;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TeamTest {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"clubMemberTeams", "teamTopics"})
+    void 자식_컬렉션은_팀_최대_개수_단위로_batch_fetch한다(String fieldName) throws NoSuchFieldException {
+        BatchSize batchSize = Team.class.getDeclaredField(fieldName).getAnnotation(BatchSize.class);
+
+        assertThat(batchSize).isNotNull();
+        assertThat(batchSize.size()).isEqualTo(12);
+    }
 
     @Test
     void 기존_팀원을_요청_순서대로_새_팀원으로_교체하고_역방향_연관을_연결한다() {
