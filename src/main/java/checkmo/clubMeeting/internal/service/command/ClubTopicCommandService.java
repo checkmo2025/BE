@@ -3,6 +3,7 @@ package checkmo.clubMeeting.internal.service.command;
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
+import checkmo.clubMeeting.internal.entity.ClubMeetingActor;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.entity.TeamTopic;
@@ -54,16 +55,14 @@ public class ClubTopicCommandService {
         if (!clubMembership.isActive()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
+        ClubMeetingActor actor = new ClubMeetingActor(
+                clubMembership.getClubMemberId(),
+                clubMembership.isStaff()
+        );
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
-        if (!topic.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_FORBIDDEN);
-        }
-
-        topic.updateTopic(
-                request.getDescription()
-        );
+        topic.updateBy(actor, request.getDescription());
     }
 
     public void deleteTopic(Long clubId, Long meetingId, Long topicId, Long memberId) {
@@ -72,15 +71,14 @@ public class ClubTopicCommandService {
         if (!clubMembership.isActive()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
+        ClubMeetingActor actor = new ClubMeetingActor(
+                clubMembership.getClubMemberId(),
+                clubMembership.isStaff()
+        );
         clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         Topic topic = clubTopicQueryService.validateTopic(topicId, meetingId);
-        if (!topic.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_FORBIDDEN);
-        }
-
-        // 발제 삭제(Meeting의 orphanRemoval로 처리)
-        topic.removeMeeting();
+        topic.removeBy(actor);
     }
 
     public boolean toggleTopic(

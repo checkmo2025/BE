@@ -2,6 +2,7 @@ package checkmo.clubMeeting.internal.service.command;
 
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO.MembershipInfo;
+import checkmo.clubMeeting.internal.entity.ClubMeetingActor;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.entity.Topic;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
@@ -107,8 +109,7 @@ class ClubTopicCommandServiceTest {
                 () -> execute(operation)
         );
 
-        verifyForbiddenOrder(membership, topic, ANOTHER_CLUB_MEMBER_ID);
-        verifyNoMutation(operation, topic);
+        verifyForbiddenOrder(membership, topic, ANOTHER_CLUB_MEMBER_ID, operation);
         assertFailureState(thrown, ClubMeetingErrorStatus.TOPIC_FORBIDDEN, topic);
     }
 
@@ -148,25 +149,21 @@ class ClubTopicCommandServiceTest {
             boolean staffAuthorization,
             Operation operation
     ) {
-        InOrder order = verifyLookupAndOwnershipOrder(membership, topic, actorClubMemberId);
-        if (staffAuthorization) {
-            order.verify(membership).isStaff();
-        } else {
-            verify(membership, never()).isStaff();
-        }
-        verifyMutation(order, operation, topic);
+        InOrder order = verifyLookupAndActorOrder(membership, topic);
+        verifyMutation(order, operation, topic, new ClubMeetingActor(actorClubMemberId, staffAuthorization));
     }
 
-    private void verifyForbiddenOrder(MembershipInfo membership, Topic topic, Long actorClubMemberId) {
-        InOrder order = verifyLookupAndOwnershipOrder(membership, topic, actorClubMemberId);
-        order.verify(membership).isStaff();
-    }
-
-    private InOrder verifyLookupAndOwnershipOrder(
+    private void verifyForbiddenOrder(
             MembershipInfo membership,
             Topic topic,
-            Long actorClubMemberId
+            Long actorClubMemberId,
+            Operation operation
     ) {
+        InOrder order = verifyLookupAndActorOrder(membership, topic);
+        verifyMutation(order, operation, topic, new ClubMeetingActor(actorClubMemberId, false));
+    }
+
+    private InOrder verifyLookupAndActorOrder(MembershipInfo membership, Topic topic) {
         InOrder order = inOrder(
                 clubManagementAPI,
                 membership,
@@ -177,27 +174,32 @@ class ClubTopicCommandServiceTest {
         order.verify(clubManagementAPI).validateClub(CLUB_ID);
         order.verify(clubManagementAPI).fetchMembershipInfo(CLUB_ID, MEMBER_ID);
         order.verify(membership).isActive();
+        order.verify(membership).getClubMemberId();
+        order.verify(membership).isStaff();
         order.verify(clubMeetingQueryService).validateMeeting(CLUB_ID, MEETING_ID);
         order.verify(clubTopicQueryService).validateTopic(TOPIC_ID, MEETING_ID);
-        order.verify(membership).getClubMemberId();
-        order.verify(topic).isOwnedBy(actorClubMemberId);
         return order;
     }
 
-    private void verifyMutation(InOrder order, Operation operation, Topic topic) {
+    private void verifyMutation(
+            InOrder order,
+            Operation operation,
+            Topic topic,
+            ClubMeetingActor actor
+    ) {
         if (operation == Operation.UPDATE) {
-            order.verify(topic).updateTopic(UPDATED_DESCRIPTION);
+            order.verify(topic).updateBy(actor, UPDATED_DESCRIPTION);
             return;
         }
-        order.verify(topic).removeMeeting();
+        order.verify(topic).removeBy(actor);
     }
 
     private void verifyNoMutation(Operation operation, Topic topic) {
         if (operation == Operation.UPDATE) {
-            verify(topic, never()).updateTopic(UPDATED_DESCRIPTION);
+            verify(topic, never()).updateBy(any(), any());
             return;
         }
-        verify(topic, never()).removeMeeting();
+        verify(topic, never()).removeBy(any());
     }
 
     private void assertSuccessState(Operation operation, Topic topic) {

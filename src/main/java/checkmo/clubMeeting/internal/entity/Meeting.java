@@ -1,5 +1,7 @@
 package checkmo.clubMeeting.internal.entity;
 
+import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
+import checkmo.clubMeeting.internal.exception.ClubMeetingException;
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -92,7 +94,28 @@ public class Meeting extends BaseEntity {
         addSumRate(review.getRate());
     }
 
-    public void reviseBookReview(BookReview review, String description, double newRate) {
+    public void reviseBookReviewBy(
+            ClubMeetingActor actor,
+            BookReview review,
+            String description,
+            double newRate
+    ) {
+        validateBookReviewAuthorOrStaff(actor, review);
+        reviseBookReview(review, description, newRate);
+    }
+
+    public void removeBookReviewBy(ClubMeetingActor actor, BookReview review) {
+        validateBookReviewAuthorOrStaff(actor, review);
+        removeBookReview(review);
+    }
+
+    private void validateBookReviewAuthorOrStaff(ClubMeetingActor actor, BookReview review) {
+        if (!review.isOwnedBy(actor.clubMemberId()) && !actor.staff()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
+        }
+    }
+
+    private void reviseBookReview(BookReview review, String description, double newRate) {
         double oldRate = review.getRate();
         review.updateBookReview(description, newRate);
 
@@ -102,16 +125,16 @@ public class Meeting extends BaseEntity {
         }
     }
 
-    public void removeBookReview(BookReview review) {
+    private void removeBookReview(BookReview review) {
         subtractSumRate(review.getRate());
         review.removeMeeting();
     }
 
-    public void addSumRate(double rate) {
+    private void addSumRate(double rate) {
         this.sumRate += rate;
     }
 
-    public void subtractSumRate(double rate) {
+    private void subtractSumRate(double rate) {
         if (this.sumRate < rate) {
             this.sumRate = this.bookReviews.stream()
                     .mapToDouble(BookReview::getRate)

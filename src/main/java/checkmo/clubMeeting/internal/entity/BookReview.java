@@ -43,7 +43,7 @@ public class BookReview extends BaseEntity {
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;
 
-    public void updateBookReview(String description, double rate) {
+    void updateBookReview(String description, double rate) {
         this.description = description;
         this.rate = rate;
     }
@@ -52,7 +52,7 @@ public class BookReview extends BaseEntity {
         return this.clubMemberId.equals(clubMemberId);
     }
 
-    public void setMeeting(Meeting meeting) {
+    void setMeeting(Meeting meeting) {
         if (this.meeting == meeting) {
             return;
         }
@@ -68,7 +68,7 @@ public class BookReview extends BaseEntity {
         }
     }
 
-    public void removeMeeting() {
+    void removeMeeting() {
         if (this.meeting != null) {
             this.meeting.getBookReviews().remove(this);
             this.meeting = null;

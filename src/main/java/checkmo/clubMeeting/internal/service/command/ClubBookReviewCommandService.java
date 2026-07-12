@@ -4,6 +4,7 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.entity.ClubMeetingActor;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
@@ -59,14 +60,15 @@ public class ClubBookReviewCommandService {
         if (!clubMembership.isActive()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
+        ClubMeetingActor actor = new ClubMeetingActor(
+                clubMembership.getClubMemberId(),
+                clubMembership.isStaff()
+        );
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
-        if (!bookReview.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
-        }
-
-        meeting.reviseBookReview(
+        meeting.reviseBookReviewBy(
+                actor,
                 bookReview,
                 request.getDescription(),
                 request.getRate()
@@ -84,14 +86,14 @@ public class ClubBookReviewCommandService {
         if (!clubMembership.isActive()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
+        ClubMeetingActor actor = new ClubMeetingActor(
+                clubMembership.getClubMemberId(),
+                clubMembership.isStaff()
+        );
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
-        if (!bookReview.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
-        }
-
-        meeting.removeBookReview(bookReview);
+        meeting.removeBookReviewBy(actor, bookReview);
     }
 
 }
