@@ -6,9 +6,7 @@ import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingDeleted;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
-import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfUpdate;
@@ -37,7 +35,6 @@ public class ClubMeetingCommandService {
     private final ClubMeetingQueryService clubMeetingQueryService;
 
     private final MeetingRepository meetingRepository;
-    private final TeamRepository teamRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -113,8 +110,7 @@ public class ClubMeetingCommandService {
         // 요청 clubMemberIds 배치 검증
         validateRequestClubMembers(clubId, requestTeamNumberToClubMemberIds);
 
-        List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meeting.getId());
-        meeting.reconfigureTeams(existingTeams, requestTeamNumberToClubMemberIds);
+        meeting.organizeTeams(requestTeamNumberToClubMemberIds);
 
         meetingRepository.save(meeting);
     }

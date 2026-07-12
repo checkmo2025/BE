@@ -1,5 +1,6 @@
 package checkmo.clubMeeting.internal.entity;
 
+import static checkmo.clubMeeting.internal.entity.MeetingTeamTestFixture.addTeam;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -87,12 +88,11 @@ class MeetingTeamPersistenceTest {
         entityManager.clear();
 
         Meeting reloadedMeeting = meetingRepository.findById(meetingId).orElseThrow();
-        List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meetingId);
         Map<Integer, List<Long>> requestedMembersByTeamNumber = new LinkedHashMap<>();
         requestedMembersByTeamNumber.put(2, List.of(21L, 22L));
         requestedMembersByTeamNumber.put(3, List.of(31L));
 
-        reloadedMeeting.reconfigureTeams(existingTeams, requestedMembersByTeamNumber);
+        reloadedMeeting.organizeTeams(requestedMembersByTeamNumber);
         meetingRepository.save(reloadedMeeting);
         entityManager.flush();
         entityManager.clear();
@@ -117,10 +117,4 @@ class MeetingTeamPersistenceTest {
                 .containsExactly(2, 3);
     }
 
-    private Team addTeam(Meeting meeting, int teamNumber, Long... clubMemberIds) {
-        Team team = Team.builder().teamNumber(teamNumber).build();
-        meeting.addTeam(team);
-        team.replaceMembers(List.of(clubMemberIds));
-        return team;
-    }
 }

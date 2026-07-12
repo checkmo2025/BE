@@ -57,14 +57,17 @@ public class Meeting extends BaseEntity {
     @Column(name = "book_id", nullable = false)
     private String bookId;
 
+    @Getter(AccessLevel.PACKAGE)
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Team> teams = new ArrayList<>();
 
+    @Getter(AccessLevel.PACKAGE)
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Topic> topics = new ArrayList<>();
 
+    @Getter(AccessLevel.PACKAGE)
     @Builder.Default
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<BookReview> bookReviews = new ArrayList<>();
@@ -105,32 +108,8 @@ public class Meeting extends BaseEntity {
         return this.getMeetingTime().plusDays(CHAT_AVAILABLE_DAYS_AFTER_MEETING);
     }
 
-    // ========= 연관관계 메서드 =========
-    public void addTeam(Team team) {
-        if (team == null) {
-            return;
-        }
-        team.setMeeting(this);
-    }
-
-    public void removeAllTeams() {
-        for (Team team : new ArrayList<>(this.teams)) {
-            removeTeam(team);
-        }
-    }
-
-    public void removeTeam(Team team) {
-        if (team == null) {
-            return;
-        }
-        team.removeMeeting();
-    }
-
-    public void reconfigureTeams(
-            List<Team> existingTeams,
-            Map<Integer, List<Long>> requestedMembersByTeamNumber
-    ) {
-        Map<Integer, Team> existingTeamsByTeamNumber = existingTeams.stream()
+    public void organizeTeams(Map<Integer, List<Long>> requestedMembersByTeamNumber) {
+        Map<Integer, Team> existingTeamsByTeamNumber = this.teams.stream()
                 .collect(Collectors.toMap(Team::getTeamNumber, Function.identity()));
 
         for (Map.Entry<Integer, List<Long>> entry : requestedMembersByTeamNumber.entrySet()) {
@@ -144,10 +123,31 @@ public class Meeting extends BaseEntity {
             team.replaceMembers(entry.getValue());
         }
 
-        for (Team team : new ArrayList<>(existingTeams)) {
+        for (Team team : new ArrayList<>(this.teams)) {
             if (!requestedMembersByTeamNumber.containsKey(team.getTeamNumber())) {
                 removeTeam(team);
             }
         }
+    }
+
+    // ========= 연관관계 메서드 =========
+    private void addTeam(Team team) {
+        if (team == null) {
+            return;
+        }
+        team.setMeeting(this);
+    }
+
+    public void removeAllTeams() {
+        for (Team team : new ArrayList<>(this.teams)) {
+            removeTeam(team);
+        }
+    }
+
+    private void removeTeam(Team team) {
+        if (team == null) {
+            return;
+        }
+        team.removeMeeting();
     }
 }
