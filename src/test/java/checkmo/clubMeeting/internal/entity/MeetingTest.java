@@ -63,4 +63,60 @@ class MeetingTest {
         assertThat(meeting.getSumRate()).isEqualTo(4.0);
     }
 
+    @Test
+    void 한줄평을_추가하면_모임에_연결하고_별점_합계를_더한다() {
+        Meeting meeting = Meeting.builder().clubId(1L).bookId("book").build();
+        BookReview review = bookReview(1L, 4.0);
+
+        meeting.addBookReview(review);
+
+        assertSoftly(softly -> {
+            softly.assertThat(review.getMeeting()).isSameAs(meeting);
+            softly.assertThat(meeting.getSumRate()).isEqualTo(4.0);
+            softly.assertThat(meeting.calculateAverageRate()).isEqualTo(4.0);
+        });
+    }
+
+    @Test
+    void 한줄평_수정은_내용과_별점을_먼저_바꾼_뒤_기존_별점을_차감하고_새_별점을_더한다() {
+        Meeting meeting = Meeting.builder().clubId(1L).bookId("book").sumRate(1.0).build();
+        BookReview review = bookReview(1L, 4.0);
+        review.setMeeting(meeting);
+        bookReview(2L, 6.0).setMeeting(meeting);
+
+        meeting.reviseBookReview(review, "수정", 2.0);
+
+        assertSoftly(softly -> {
+            softly.assertThat(review.getDescription()).isEqualTo("수정");
+            softly.assertThat(review.getRate()).isEqualTo(2.0);
+            softly.assertThat(meeting.getSumRate()).isEqualTo(6.0);
+        });
+    }
+
+    @Test
+    void 한줄평을_삭제하면_별점을_먼저_차감한_뒤_모임_연관을_해제한다() {
+        Meeting meeting = Meeting.builder().clubId(1L).bookId("book").sumRate(1.0).build();
+        BookReview review = bookReview(1L, 4.0);
+        review.setMeeting(meeting);
+        bookReview(2L, 6.0).setMeeting(meeting);
+
+        meeting.removeBookReview(review);
+
+        assertSoftly(softly -> {
+            softly.assertThat(review.getMeeting()).isNull();
+            softly.assertThat(meeting.getSumRate()).isEqualTo(6.0);
+            softly.assertThat(meeting.calculateAverageRate()).isEqualTo(6.0);
+        });
+    }
+
+    private BookReview bookReview(Long id, double rate) {
+        return BookReview.builder()
+                .id(id)
+                .description("한줄평")
+                .rate(rate)
+                .clubMemberId(id)
+                .memberId(id)
+                .build();
+    }
+
 }

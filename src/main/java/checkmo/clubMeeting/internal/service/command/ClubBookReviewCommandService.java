@@ -43,9 +43,7 @@ public class ClubBookReviewCommandService {
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);
-        bookReview.setMeeting(meeting);
-
-        meeting.addSumRate(bookReview.getRate());
+        meeting.addBookReview(bookReview);
 
         bookReviewRepository.save(bookReview);
     }
@@ -68,19 +66,11 @@ public class ClubBookReviewCommandService {
             throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
-        double oldRate = bookReview.getRate();
-        double newRate = request.getRate();
-
-        bookReview.updateBookReview(
+        meeting.reviseBookReview(
+                bookReview,
                 request.getDescription(),
                 request.getRate()
         );
-
-        // 별점이 변경된 경우에만 미팅의 별점 합산
-        if (oldRate != newRate) {
-            meeting.subtractSumRate(oldRate);
-            meeting.addSumRate(newRate);
-        }
     }
 
     @Retryable(
@@ -101,9 +91,7 @@ public class ClubBookReviewCommandService {
             throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
         }
 
-        meeting.subtractSumRate(bookReview.getRate());
-
-        bookReview.removeMeeting();
+        meeting.removeBookReview(bookReview);
     }
 
 }

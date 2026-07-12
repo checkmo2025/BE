@@ -87,6 +87,26 @@ public class Meeting extends BaseEntity {
         this.tag = tag;
     }
 
+    public void addBookReview(BookReview review) {
+        review.setMeeting(this);
+        addSumRate(review.getRate());
+    }
+
+    public void reviseBookReview(BookReview review, String description, double newRate) {
+        double oldRate = review.getRate();
+        review.updateBookReview(description, newRate);
+
+        if (oldRate != newRate) {
+            subtractSumRate(oldRate);
+            addSumRate(newRate);
+        }
+    }
+
+    public void removeBookReview(BookReview review) {
+        subtractSumRate(review.getRate());
+        review.removeMeeting();
+    }
+
     public void addSumRate(double rate) {
         this.sumRate += rate;
     }
