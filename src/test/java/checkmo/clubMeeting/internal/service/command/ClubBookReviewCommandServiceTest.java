@@ -1,6 +1,5 @@
 package checkmo.clubMeeting.internal.service.command;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.verify;
@@ -22,7 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -78,9 +79,9 @@ class ClubBookReviewCommandServiceTest {
     @Test
     void 같은_별점으로_수정하면_내용만_바꾸고_별점_합계는_유지한다() {
         meeting = meetingWithSumRate(4.0);
-        BookReview review = review("이전", 4.0, CLUB_MEMBER_ID);
+        BookReview review = Mockito.spy(review("이전", 4.0, CLUB_MEMBER_ID));
         review.setMeeting(meeting);
-        allowOwner(review);
+        MembershipInfo ownerMembership = allowOwner(review);
 
         service.updateBookReview(CLUB_ID, MEETING_ID, REVIEW_ID, MEMBER_ID, request("수정", 4.0));
 
@@ -88,16 +89,19 @@ class ClubBookReviewCommandServiceTest {
             softly.assertThat(review.getDescription()).isEqualTo("수정");
             softly.assertThat(review.getRate()).isEqualTo(4.0);
             softly.assertThat(meeting.getSumRate()).isEqualTo(4.0);
+            softly.assertThat(review.getMeeting()).isSameAs(meeting);
         });
+        verifyAuthorizedValidationOrder(ownerMembership, review, false);
+        verifyNoInteractions(bookReviewRepository);
     }
 
     @Test
     void 별점_수정은_review를_먼저_변경한_뒤_기존_별점을_차감하고_새_별점을_더한다() {
         meeting = meetingWithSumRate(1.0);
-        BookReview review = review("이전", 4.0, CLUB_MEMBER_ID);
+        BookReview review = Mockito.spy(review("이전", 4.0, CLUB_MEMBER_ID));
         review.setMeeting(meeting);
         review("다른 한줄평", 6.0, 99L).setMeeting(meeting);
-        allowOwner(review);
+        MembershipInfo ownerMembership = allowOwner(review);
 
         service.updateBookReview(CLUB_ID, MEETING_ID, REVIEW_ID, MEMBER_ID, request("수정", 2.0));
 
@@ -105,24 +109,69 @@ class ClubBookReviewCommandServiceTest {
             softly.assertThat(review.getDescription()).isEqualTo("수정");
             softly.assertThat(review.getRate()).isEqualTo(2.0);
             softly.assertThat(meeting.getSumRate()).isEqualTo(6.0);
+            softly.assertThat(review.getMeeting()).isSameAs(meeting);
         });
+        verifyAuthorizedValidationOrder(ownerMembership, review, false);
+        verifyNoInteractions(bookReviewRepository);
+    }
+
+    @Test
+    void 운영진은_다른_회원의_한줄평을_수정할_수_있다() {
+        meeting = meetingWithSumRate(4.0);
+        BookReview review = Mockito.spy(review("기존", 4.0, 99L));
+        review.setMeeting(meeting);
+        MembershipInfo staffMembership = allowStaff(review);
+
+        service.updateBookReview(CLUB_ID, MEETING_ID, REVIEW_ID, MEMBER_ID, request("운영진 수정", 2.0));
+
+        assertSoftly(softly -> {
+            softly.assertThat(review.getDescription()).isEqualTo("운영진 수정");
+            softly.assertThat(review.getRate()).isEqualTo(2.0);
+            softly.assertThat(meeting.getSumRate()).isEqualTo(2.0);
+            softly.assertThat(review.getMeeting()).isSameAs(meeting);
+        });
+        verifyAuthorizedValidationOrder(staffMembership, review, true);
+        verifyNoInteractions(bookReviewRepository);
     }
 
     @Test
     void 한줄평_삭제는_별점을_먼저_차감한_뒤_모임_연관을_해제한다() {
         meeting = meetingWithSumRate(1.0);
-        BookReview review = review("삭제 대상", 4.0, CLUB_MEMBER_ID);
+        BookReview review = Mockito.spy(review("삭제 대상", 4.0, CLUB_MEMBER_ID));
         review.setMeeting(meeting);
         review("남는 한줄평", 6.0, 99L).setMeeting(meeting);
-        allowOwner(review);
+        MembershipInfo ownerMembership = allowOwner(review);
 
         service.deleteBookReview(CLUB_ID, MEETING_ID, REVIEW_ID, MEMBER_ID);
 
         assertSoftly(softly -> {
+            softly.assertThat(review.getDescription()).isEqualTo("삭제 대상");
+            softly.assertThat(review.getRate()).isEqualTo(4.0);
             softly.assertThat(review.getMeeting()).isNull();
             softly.assertThat(meeting.getSumRate()).isEqualTo(6.0);
             softly.assertThat(meeting.calculateAverageRate()).isEqualTo(6.0);
         });
+        verifyAuthorizedValidationOrder(ownerMembership, review, false);
+        verifyNoInteractions(bookReviewRepository);
+    }
+
+    @Test
+    void 운영진은_다른_회원의_한줄평을_삭제할_수_있다() {
+        meeting = meetingWithSumRate(4.0);
+        BookReview review = Mockito.spy(review("삭제 대상", 4.0, 99L));
+        review.setMeeting(meeting);
+        MembershipInfo staffMembership = allowStaff(review);
+
+        service.deleteBookReview(CLUB_ID, MEETING_ID, REVIEW_ID, MEMBER_ID);
+
+        assertSoftly(softly -> {
+            softly.assertThat(review.getDescription()).isEqualTo("삭제 대상");
+            softly.assertThat(review.getRate()).isEqualTo(4.0);
+            softly.assertThat(meeting.getSumRate()).isZero();
+            softly.assertThat(review.getMeeting()).isNull();
+        });
+        verifyAuthorizedValidationOrder(staffMembership, review, true);
+        verifyNoInteractions(bookReviewRepository);
     }
 
     @Test
@@ -130,8 +179,9 @@ class ClubBookReviewCommandServiceTest {
         meeting = meetingWithSumRate(4.0);
         BookReview review = review("기존", 4.0, CLUB_MEMBER_ID);
         review.setMeeting(meeting);
+        MembershipInfo inactiveMembership = Mockito.spy(membership(CLUB_MEMBER_ID, false, false));
         when(clubManagementAPI.fetchMembershipInfo(CLUB_ID, MEMBER_ID))
-                .thenReturn(membership(CLUB_MEMBER_ID, false, false));
+                .thenReturn(inactiveMembership);
 
         ClubMeetingException thrown = catchThrowableOfType(
                 ClubMeetingException.class,
@@ -143,19 +193,68 @@ class ClubBookReviewCommandServiceTest {
             softly.assertThat(review.getDescription()).isEqualTo("기존");
             softly.assertThat(review.getRate()).isEqualTo(4.0);
             softly.assertThat(meeting.getSumRate()).isEqualTo(4.0);
+            softly.assertThat(review.getMeeting()).isSameAs(meeting);
         });
+        verifyInactiveValidationOrder(inactiveMembership);
         verifyNoInteractions(clubMeetingQueryService, clubBookReviewQueryService);
+        verifyNoInteractions(bookReviewRepository);
+    }
+
+    @Test
+    void inactive_회원은_한줄평_삭제_시_모임과_한줄평을_조회하기_전에_실패한다() {
+        meeting = meetingWithSumRate(4.0);
+        BookReview review = review("기존", 4.0, CLUB_MEMBER_ID);
+        review.setMeeting(meeting);
+        MembershipInfo inactiveMembership = Mockito.spy(membership(CLUB_MEMBER_ID, false, false));
+        when(clubManagementAPI.fetchMembershipInfo(CLUB_ID, MEMBER_ID))
+                .thenReturn(inactiveMembership);
+
+        ClubMeetingException thrown = catchThrowableOfType(
+                ClubMeetingException.class,
+                () -> service.deleteBookReview(CLUB_ID, MEETING_ID, REVIEW_ID, MEMBER_ID)
+        );
+
+        assertSoftly(softly -> {
+            softly.assertThat(thrown.getErrorCode()).isEqualTo(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
+            softly.assertThat(review.getDescription()).isEqualTo("기존");
+            softly.assertThat(review.getRate()).isEqualTo(4.0);
+            softly.assertThat(meeting.getSumRate()).isEqualTo(4.0);
+            softly.assertThat(review.getMeeting()).isSameAs(meeting);
+        });
+        verifyInactiveValidationOrder(inactiveMembership);
+        verifyNoInteractions(clubMeetingQueryService, clubBookReviewQueryService);
+        verifyNoInteractions(bookReviewRepository);
+    }
+
+    @Test
+    void 작성자도_운영진도_아닌_활성_회원은_한줄평을_수정할_수_없다() {
+        meeting = meetingWithSumRate(4.0);
+        BookReview review = Mockito.spy(review("기존", 4.0, CLUB_MEMBER_ID));
+        review.setMeeting(meeting);
+        MembershipInfo ordinaryMembership = denyOrdinaryMember(review);
+
+        ClubMeetingException thrown = catchThrowableOfType(
+                ClubMeetingException.class,
+                () -> service.updateBookReview(CLUB_ID, MEETING_ID, REVIEW_ID, MEMBER_ID, request("수정", 2.0))
+        );
+
+        assertSoftly(softly -> {
+            softly.assertThat(thrown.getErrorCode()).isEqualTo(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
+            softly.assertThat(review.getDescription()).isEqualTo("기존");
+            softly.assertThat(review.getRate()).isEqualTo(4.0);
+            softly.assertThat(meeting.getSumRate()).isEqualTo(4.0);
+            softly.assertThat(review.getMeeting()).isSameAs(meeting);
+        });
+        verifyForbiddenValidationOrder(ordinaryMembership, review);
+        verifyNoInteractions(bookReviewRepository);
     }
 
     @Test
     void 작성자도_운영진도_아니면_대상을_조회한_뒤_권한_오류로_실패하고_상태를_유지한다() {
         meeting = meetingWithSumRate(4.0);
-        BookReview review = review("기존", 4.0, CLUB_MEMBER_ID);
+        BookReview review = Mockito.spy(review("기존", 4.0, CLUB_MEMBER_ID));
         review.setMeeting(meeting);
-        when(clubManagementAPI.fetchMembershipInfo(CLUB_ID, MEMBER_ID))
-                .thenReturn(membership(99L, true, false));
-        when(clubMeetingQueryService.validateMeeting(CLUB_ID, MEETING_ID)).thenReturn(meeting);
-        when(clubBookReviewQueryService.validateBookReview(REVIEW_ID, MEETING_ID)).thenReturn(review);
+        MembershipInfo ordinaryMembership = denyOrdinaryMember(review);
 
         ClubMeetingException thrown = catchThrowableOfType(
                 ClubMeetingException.class,
@@ -164,17 +263,91 @@ class ClubBookReviewCommandServiceTest {
 
         assertSoftly(softly -> {
             softly.assertThat(thrown.getErrorCode()).isEqualTo(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
+            softly.assertThat(review.getDescription()).isEqualTo("기존");
+            softly.assertThat(review.getRate()).isEqualTo(4.0);
             softly.assertThat(review.getMeeting()).isSameAs(meeting);
             softly.assertThat(meeting.getSumRate()).isEqualTo(4.0);
         });
-        verify(clubBookReviewQueryService).validateBookReview(REVIEW_ID, MEETING_ID);
+        verifyForbiddenValidationOrder(ordinaryMembership, review);
+        verifyNoInteractions(bookReviewRepository);
     }
 
-    private void allowOwner(BookReview review) {
+    private MembershipInfo allowOwner(BookReview review) {
+        MembershipInfo ownerMembership = Mockito.spy(membership(CLUB_MEMBER_ID, true, false));
         when(clubManagementAPI.fetchMembershipInfo(CLUB_ID, MEMBER_ID))
-                .thenReturn(membership(CLUB_MEMBER_ID, true, false));
+                .thenReturn(ownerMembership);
         when(clubMeetingQueryService.validateMeeting(CLUB_ID, MEETING_ID)).thenReturn(meeting);
         when(clubBookReviewQueryService.validateBookReview(REVIEW_ID, MEETING_ID)).thenReturn(review);
+        return ownerMembership;
+    }
+
+    private MembershipInfo allowStaff(BookReview review) {
+        MembershipInfo staffMembership = Mockito.spy(membership(CLUB_MEMBER_ID, true, true));
+        when(clubManagementAPI.fetchMembershipInfo(CLUB_ID, MEMBER_ID))
+                .thenReturn(staffMembership);
+        when(clubMeetingQueryService.validateMeeting(CLUB_ID, MEETING_ID)).thenReturn(meeting);
+        when(clubBookReviewQueryService.validateBookReview(REVIEW_ID, MEETING_ID)).thenReturn(review);
+        return staffMembership;
+    }
+
+    private MembershipInfo denyOrdinaryMember(BookReview review) {
+        MembershipInfo ordinaryMembership = Mockito.spy(membership(99L, true, false));
+        when(clubManagementAPI.fetchMembershipInfo(CLUB_ID, MEMBER_ID))
+                .thenReturn(ordinaryMembership);
+        when(clubMeetingQueryService.validateMeeting(CLUB_ID, MEETING_ID)).thenReturn(meeting);
+        when(clubBookReviewQueryService.validateBookReview(REVIEW_ID, MEETING_ID)).thenReturn(review);
+        return ordinaryMembership;
+    }
+
+    private void verifyAuthorizedValidationOrder(
+            MembershipInfo membership,
+            BookReview review,
+            boolean staffAuthorizationRequired
+    ) {
+        InOrder inOrder = Mockito.inOrder(
+                clubManagementAPI,
+                membership,
+                clubMeetingQueryService,
+                clubBookReviewQueryService,
+                review
+        );
+        inOrder.verify(clubManagementAPI).validateClub(CLUB_ID);
+        inOrder.verify(clubManagementAPI).fetchMembershipInfo(CLUB_ID, MEMBER_ID);
+        inOrder.verify(membership).isActive();
+        inOrder.verify(clubMeetingQueryService).validateMeeting(CLUB_ID, MEETING_ID);
+        inOrder.verify(clubBookReviewQueryService).validateBookReview(REVIEW_ID, MEETING_ID);
+        inOrder.verify(membership).getClubMemberId();
+        inOrder.verify(review).isOwnedBy(CLUB_MEMBER_ID);
+        if (staffAuthorizationRequired) {
+            inOrder.verify(membership).isStaff();
+        } else {
+            verify(membership, Mockito.never()).isStaff();
+        }
+    }
+
+    private void verifyInactiveValidationOrder(MembershipInfo inactiveMembership) {
+        InOrder inOrder = Mockito.inOrder(clubManagementAPI, inactiveMembership);
+        inOrder.verify(clubManagementAPI).validateClub(CLUB_ID);
+        inOrder.verify(clubManagementAPI).fetchMembershipInfo(CLUB_ID, MEMBER_ID);
+        inOrder.verify(inactiveMembership).isActive();
+    }
+
+    private void verifyForbiddenValidationOrder(MembershipInfo ordinaryMembership, BookReview review) {
+        InOrder inOrder = Mockito.inOrder(
+                clubManagementAPI,
+                ordinaryMembership,
+                clubMeetingQueryService,
+                clubBookReviewQueryService,
+                review
+        );
+        inOrder.verify(clubManagementAPI).validateClub(CLUB_ID);
+        inOrder.verify(clubManagementAPI).fetchMembershipInfo(CLUB_ID, MEMBER_ID);
+        inOrder.verify(ordinaryMembership).isActive();
+        inOrder.verify(clubMeetingQueryService).validateMeeting(CLUB_ID, MEETING_ID);
+        inOrder.verify(clubBookReviewQueryService).validateBookReview(REVIEW_ID, MEETING_ID);
+        inOrder.verify(ordinaryMembership).getClubMemberId();
+        inOrder.verify(review).isOwnedBy(99L);
+        inOrder.verify(ordinaryMembership).isStaff();
     }
 
     private MembershipInfo membership(Long clubMemberId, boolean active, boolean staff) {
