@@ -117,10 +117,14 @@ public class Meeting extends BaseEntity {
 
     private void reviseBookReview(BookReview review, String description, double newRate) {
         double oldRate = review.getRate();
-        review.updateBookReview(description, newRate);
 
         if (oldRate != newRate) {
             subtractSumRate(oldRate);
+        }
+
+        review.updateBookReview(description, newRate);
+
+        if (oldRate != newRate) {
             addSumRate(newRate);
         }
     }

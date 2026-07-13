@@ -93,7 +93,7 @@ class MeetingTest {
     }
 
     @Test
-    void 한줄평_수정은_내용과_별점을_먼저_바꾼_뒤_기존_별점을_차감하고_새_별점을_더한다() {
+    void 한줄평_수정은_기존_별점을_차감한_뒤_내용과_별점을_바꾸고_새_별점을_더한다() {
         Meeting meeting = Meeting.builder().clubId(1L).bookId("book").sumRate(-9.0).build();
         BookReview review = bookReview(1L, 4.0);
         meeting.addBookReview(review);
@@ -104,7 +104,7 @@ class MeetingTest {
         assertSoftly(softly -> {
             softly.assertThat(review.getDescription()).isEqualTo("수정");
             softly.assertThat(review.getRate()).isEqualTo(2.0);
-            softly.assertThat(meeting.getSumRate()).isEqualTo(6.0);
+            softly.assertThat(meeting.getSumRate()).isEqualTo(8.0);
         });
     }
 

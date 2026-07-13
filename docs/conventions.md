@@ -121,37 +121,69 @@ public class ClubBookReviewCommandService {
     private final ClubManagementAPI clubManagementAPI;
     private final ClubMeetingQueryService clubMeetingQueryService;
     private final ClubBookReviewQueryService clubBookReviewQueryService;
-    private final BookReviewRepository bookReviewRepository;
 
     @Retryable(
             retryFor = OptimisticLockingFailureException.class,
             maxAttempts = 5,
             backoff = @Backoff(delay = 300)
     )
-    public Long updateBookReview(Long meetingId, Long reviewId, String memberId, BookReviewCreate request) {
-        Meeting meeting = clubMeetingQueryService.validateMeeting(meetingId);
-        Long clubMemberId = clubManagementAPI.fetchActiveClubMemberId(meeting.getClubId(), memberId);
+    public void updateBookReview(
+            Long clubId,
+            Long meetingId,
+            Long reviewId,
+            Long memberId,
+            BookReviewCreate request
+    ) {
+        clubManagementAPI.validateClub(clubId);
+        ClubManagementExternalDTO.MembershipInfo membership =
+                clubManagementAPI.fetchMembershipInfo(clubId, memberId);
+        if (!membership.isActive()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
+        }
+        ClubMeetingActor actor = new ClubMeetingActor(
+                membership.getClubMemberId(),
+                membership.isStaff()
+        );
+        Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
-        if (!bookReview.getClubMemberId().equals(clubMemberId)) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
-        }
-
-        double oldRate = bookReview.getRate();
-        double newRate = request.getRate();
-
-        bookReview.updateBookReview(
+        meeting.reviseBookReviewBy(
+                actor,
+                bookReview,
                 request.getDescription(),
                 request.getRate()
         );
+    }
+}
+```
 
-        // 별점이 변경된 경우에만 미팅의 별점 합산
+서비스는 조회와 외부 모듈 협력을 조율하고, 한줄평 수정 권한과 별점 합계 변경 순서는 `Meeting`이 책임집니다.
+
+```java
+
+public class Meeting {
+    public void reviseBookReviewBy(
+            ClubMeetingActor actor,
+            BookReview review,
+            String description,
+            double newRate
+    ) {
+        validateBookReviewAuthorOrStaff(actor, review);
+        reviseBookReview(review, description, newRate);
+    }
+
+    private void reviseBookReview(BookReview review, String description, double newRate) {
+        double oldRate = review.getRate();
+
         if (oldRate != newRate) {
-            meeting.subtractSumRate(oldRate);
-            meeting.addSumRate(newRate);
+            subtractSumRate(oldRate);
         }
 
-        return bookReview.getId();
+        review.updateBookReview(description, newRate);
+
+        if (oldRate != newRate) {
+            addSumRate(newRate);
+        }
     }
 }
 ```

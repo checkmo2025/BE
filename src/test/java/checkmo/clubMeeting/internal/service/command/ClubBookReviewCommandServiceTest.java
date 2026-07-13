@@ -103,7 +103,7 @@ class ClubBookReviewCommandServiceTest {
     }
 
     @Test
-    void 별점_수정은_review를_먼저_변경한_뒤_기존_별점을_차감하고_새_별점을_더한다() {
+    void 별점_수정은_기존_별점을_차감한_뒤_review를_변경하고_새_별점을_더한다() {
         meeting = meetingWithSumRate(-9.0);
         BookReview review = Mockito.spy(review("이전", 4.0, CLUB_MEMBER_ID));
         meeting.addBookReview(review);
@@ -115,7 +115,7 @@ class ClubBookReviewCommandServiceTest {
         assertSoftly(softly -> {
             softly.assertThat(review.getDescription()).isEqualTo("수정");
             softly.assertThat(review.getRate()).isEqualTo(2.0);
-            softly.assertThat(meeting.getSumRate()).isEqualTo(6.0);
+            softly.assertThat(meeting.getSumRate()).isEqualTo(8.0);
             softly.assertThat(review.getMeeting()).isSameAs(meeting);
         });
         verifyUpdateOrder(
