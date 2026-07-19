@@ -13,6 +13,7 @@ spring:
       - jwt
       - oauth2
       - s3
+      - monitoring
   modulith:
     events:
       completion-mode: DELETE

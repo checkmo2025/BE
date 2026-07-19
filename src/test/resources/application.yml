@@ -4,6 +4,8 @@ spring:
       completion-mode: DELETE
   profiles:
     active: test
+    include:
+      - monitoring
 
 server:
   forward-headers-strategy: NATIVE

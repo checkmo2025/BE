@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Checkmo
+    orgId: 1
+    folder: Checkmo
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
