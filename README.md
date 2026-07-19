@@ -30,6 +30,8 @@
   </a>
 </div>
 
+* **[📊 Prometheus/Grafana 백엔드 모니터링 가이드](./docs/prometheus_grafana_monitoring.md)**
+
 ---
 
 ## 🚀 Deployment Architecture
