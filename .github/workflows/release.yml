@@ -62,7 +62,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "compose.yml,nginx/,.env"
+          source: "compose.yml,nginx/,monitoring/,.env"
           target: "/home/ubuntu/app"
 
       # 6. EC2 접속 및 배포 실행 (SSH)

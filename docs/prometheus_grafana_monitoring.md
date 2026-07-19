@@ -29,6 +29,20 @@ ssh ubuntu@<ec2-host>
 cd /home/ubuntu/app
 ```
 
+서버에는 아래가 준비되어 있어야 한다.
+
+| 필요 항목 | 이유 |
+| --- | --- |
+| Docker Engine | `app`, `prometheus`, `grafana`, `nginx` 컨테이너 실행 |
+| Docker Compose plugin | `docker compose up -d` 실행 |
+| AWS CLI | 배포 workflow가 EC2에서 ECR 로그인할 때 사용 |
+| ECR 접근 권한 | 백엔드 앱 이미지를 pull할 때 필요 |
+| Docker Hub 접근 가능 네트워크 | `prom/prometheus`, `grafana/grafana-oss` 이미지를 pull할 때 필요 |
+| `/home/ubuntu/app/monitoring` 디렉토리 | Prometheus/Grafana 설정 파일 마운트 |
+| 충분한 디스크 공간 | Prometheus/Grafana 데이터 volume 저장 |
+
+Prometheus와 Grafana를 서버 OS에 직접 설치할 필요는 없다. Docker Compose가 이미지를 받아서 컨테이너로 실행한다.
+
 Grafana 실행에는 `.env` 또는 배포 환경에 아래 값이 있어야 한다.
 
 ```text
