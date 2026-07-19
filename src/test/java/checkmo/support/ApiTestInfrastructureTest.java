@@ -38,6 +38,28 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
     }
 
     @Test
+    void prometheusEndpointExposesBackendMetricsWithoutAuthentication() {
+        given()
+                .when()
+                .get("/api/v1/news")
+                .then()
+                .statusCode(200);
+
+        String body = given()
+                .when()
+                .get("/actuator/prometheus")
+                .then()
+                .statusCode(200)
+                .extract()
+                .asString();
+
+        assertThat(body)
+                .contains("jvm_memory_used_bytes")
+                .contains("checkmo_banner_api_duration_seconds_count")
+                .contains("application=\"checkmo-backend\"");
+    }
+
+    @Test
     void authenticatedFixtureCanCallProfileCompletedApi() {
         TestUser user = createUser();
 

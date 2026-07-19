@@ -16,7 +16,9 @@ import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.repository.BookLikedRepository;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import checkmo.common.monitoring.CheckmoMetrics;
 import checkmo.common.monitoring.SentryCaptureClient;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +53,8 @@ class AladinApiServiceTest {
                 bookSearchCacheService,
                 aladinSearchClient,
                 aladinSearchPrefetchService,
-                sentryCaptureClient
+                sentryCaptureClient,
+                new CheckmoMetrics(new SimpleMeterRegistry())
         );
     }
 

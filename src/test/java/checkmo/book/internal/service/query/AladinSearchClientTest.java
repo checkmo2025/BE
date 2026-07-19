@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 
 import checkmo.book.internal.config.properties.AladinProperties;
 import checkmo.book.web.dto.AladinApiResponseDTO;
+import checkmo.common.monitoring.CheckmoMetrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -17,7 +19,11 @@ class AladinSearchClientTest {
     @Test
     void fetchSearchBooksThrowsSanitizedExceptionWhenRestTemplateFails() {
         RestTemplate restTemplate = mock(RestTemplate.class);
-        AladinSearchClient client = new AladinSearchClient(restTemplate, aladinProperties());
+        AladinSearchClient client = new AladinSearchClient(
+                restTemplate,
+                aladinProperties(),
+                new CheckmoMetrics(new SimpleMeterRegistry())
+        );
         RestClientException failure = new RestClientException(
                 "I/O error on GET request for \"https://example.com/ItemSearch.aspx?ttbkey=secret-key&Query=자바\""
         );

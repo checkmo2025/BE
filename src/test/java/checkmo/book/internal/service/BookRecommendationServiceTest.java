@@ -21,7 +21,9 @@ import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import checkmo.common.monitoring.CheckmoMetrics;
 import checkmo.common.monitoring.RecordingSentryCaptureClient;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -53,6 +55,7 @@ class BookRecommendationServiceTest {
     private ValueOperations<String, Object> valueOperations;
     private AladinApiService aladinApiService;
     private RecordingSentryCaptureClient captureClient;
+    private CheckmoMetrics checkmoMetrics;
     private BookRecommendationService service;
 
     @BeforeEach
@@ -62,13 +65,15 @@ class BookRecommendationServiceTest {
         valueOperations = mock(ValueOperations.class);
         aladinApiService = mock(AladinApiService.class);
         captureClient = new RecordingSentryCaptureClient();
+        checkmoMetrics = new CheckmoMetrics(new SimpleMeterRegistry());
         AladinRecommendationRefreshClient refreshClient = new AladinRecommendationRefreshClient(
                 aladinApiService,
                 retryProperties(),
+                checkmoMetrics,
                 backOffPeriod -> {
                 }
         );
-        service = new BookRecommendationService(redisTemplate, aladinApiService, refreshClient, captureClient);
+        service = new BookRecommendationService(redisTemplate, aladinApiService, refreshClient, captureClient, checkmoMetrics);
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }

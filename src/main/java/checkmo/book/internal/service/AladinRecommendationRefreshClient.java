@@ -6,6 +6,7 @@ import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.web.dto.BookResponseDTO;
+import checkmo.common.monitoring.CheckmoMetrics;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,28 +24,33 @@ import org.springframework.web.client.RestClientException;
 public class AladinRecommendationRefreshClient {
 
     private final AladinApiService aladinApiService;
+    private final CheckmoMetrics checkmoMetrics;
     private final RetryTemplate retryTemplate;
 
     @Autowired
     public AladinRecommendationRefreshClient(
             AladinApiService aladinApiService,
-            AladinProperties aladinProperties
+            AladinProperties aladinProperties,
+            CheckmoMetrics checkmoMetrics
     ) {
-        this(aladinApiService, aladinProperties, Thread::sleep);
+        this(aladinApiService, aladinProperties, checkmoMetrics, Thread::sleep);
     }
 
     AladinRecommendationRefreshClient(
             AladinApiService aladinApiService,
             AladinProperties aladinProperties,
+            CheckmoMetrics checkmoMetrics,
             Sleeper sleeper
     ) {
         this.aladinApiService = aladinApiService;
+        this.checkmoMetrics = checkmoMetrics;
         this.retryTemplate = buildRetryTemplate(aladinProperties.getRecommendation().getRefresh().getRetry(), sleeper);
     }
 
     public BookResponseDTO.BookList retrieveRecommendedBooks() {
         return retryTemplate.execute(context -> {
             if (context.getRetryCount() > 0) {
+                checkmoMetrics.incrementAladinRecommendationRetry("retry");
                 log.warn("알라딘 추천 책 갱신 재시도. attempt={}", context.getRetryCount() + 1);
             }
             return aladinApiService.retrieveRecommendedBooks();
