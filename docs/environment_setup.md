@@ -7,6 +7,17 @@
 1.  프로젝트 루트 디렉토리에 `.env` 파일을 생성하고 해당 파일에 환경변수들을 추가하기. (`.gitignore`에 등록되어 있어 깃허브에는 따로 올라가지 않음.)
 2.  백엔드 `[Notion 페이지]` -> `[필요한 자료들]` -> `.env` 페이지에 추가한 환경 변수들 업데이트하기.
 
+### 모니터링 환경 변수
+
+운영 compose에서 Grafana를 함께 실행하려면 아래 환경 변수가 필요하다. 값은 `.env` 또는 배포 환경에만 설정하고 저장소에는 커밋하지 않는다.
+
+| 변수 | 설명 |
+| --- | --- |
+| `GRAFANA_ADMIN_USER` | Grafana 관리자 계정 ID |
+| `GRAFANA_ADMIN_PASSWORD` | Grafana 관리자 계정 비밀번호 |
+| `GRAFANA_PORT` | Grafana localhost 바인딩 포트. 생략 시 `3000` |
+| `GRAFANA_ROOT_URL` | Grafana 외부 접근 URL. 생략 시 `http://localhost:3000` |
+
 ## 2. Spring 설정 파일 (application.yml)
 
 새로운 설정 정보(예: `aws`, `oauth`)를 추가할 때는 `application.yml`에 직접 작성하지 않기
