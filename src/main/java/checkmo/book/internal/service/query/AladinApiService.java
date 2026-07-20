@@ -8,7 +8,9 @@ import checkmo.book.internal.repository.BookLikedRepository;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import checkmo.common.monitoring.CheckmoMetrics;
 import checkmo.common.monitoring.SentryCaptureClient;
+import io.micrometer.core.instrument.Timer;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class AladinApiService {
     private final AladinSearchClient aladinSearchClient;
     private final AladinSearchPrefetchService aladinSearchPrefetchService;
     private final SentryCaptureClient sentryCaptureClient;
+    private final CheckmoMetrics checkmoMetrics;
 
     public BookResponseDTO.BookList retrieveSearchBooks(String keyword, int page, Long memberId) {
         if (keyword == null || keyword.isBlank()) {
@@ -91,6 +94,9 @@ public class AladinApiService {
 
     public DetailInfo retrieveBookDetailInfo(String isbn) {
         String url = buildHttpUrl(isbn);
+        Timer.Sample sample = checkmoMetrics.startTimer();
+        String result = "success";
+        Exception failure = null;
         try {
             var response = restTemplate.getForObject(
                     url,
@@ -98,22 +104,34 @@ public class AladinApiService {
             );
 
             if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+                result = "invalid_response";
                 throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);
             }
 
             return BookConverter.toBookInfoDetail(response);
 
         } catch (BookException e) {
+            failure = e;
+            if ("success".equals(result)) {
+                result = checkmoMetrics.classifyAladinResult(e);
+            }
             logAladinFailure("retrieveBookDetailInfo", url, e);
             throw new BookException(BookErrorStatus.BOOK_NOT_FOUND, e);
         } catch (Exception e) {
+            failure = e;
+            result = checkmoMetrics.classifyAladinResult(e);
             logAladinFailure("retrieveBookDetailInfo", url, e);
             throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
+        } finally {
+            checkmoMetrics.recordAladinClientResult(sample, "detail", result, failure);
         }
     }
 
     public BookResponseDTO.BookList retrieveRecommendedBooks() {
         String url = buildHttpUrl();
+        Timer.Sample sample = checkmoMetrics.startTimer();
+        String result = "success";
+        Exception failure = null;
         try {
             var response = restTemplate.getForObject(
                     url,
@@ -121,14 +139,21 @@ public class AladinApiService {
             );
 
             if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+                result = "invalid_response";
                 throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
             }
 
             return BookConverter.toBookList(response, 1);
 
         } catch (Exception e) {
+            failure = e;
+            if ("success".equals(result)) {
+                result = checkmoMetrics.classifyAladinResult(e);
+            }
             logAladinFailure("retrieveRecommendedBooks", url, e);
             throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
+        } finally {
+            checkmoMetrics.recordAladinClientResult(sample, "recommendation", result, failure);
         }
     }
 

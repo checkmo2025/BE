@@ -22,6 +22,7 @@ import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.scheduler.MemberCleanupScheduler;
 import checkmo.member.internal.service.command.MemberCommandService;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +39,7 @@ class SentryBackgroundCaptureTest {
         ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
         AladinApiService aladinApiService = mock(AladinApiService.class);
         RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
+        CheckmoMetrics checkmoMetrics = new CheckmoMetrics(new SimpleMeterRegistry());
         RuntimeException failure = new RuntimeException("aladin unavailable");
         BookResponseDTO.BookList staleCache = BookResponseDTO.BookList.builder()
                 .detailInfoList(List.of(BookResponseDTO.DetailInfo.builder()
@@ -59,8 +61,9 @@ class SentryBackgroundCaptureTest {
         BookRecommendationService service = new BookRecommendationService(
                 redisTemplate,
                 aladinApiService,
-                new AladinRecommendationRefreshClient(aladinApiService, new AladinProperties()),
-                captureClient
+                new AladinRecommendationRefreshClient(aladinApiService, new AladinProperties(), checkmoMetrics),
+                captureClient,
+                checkmoMetrics
         );
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("book:recommendations:daily")).thenReturn(staleCache);

@@ -59,6 +59,10 @@ events:
   retry:
     enabled: false
 
+management:
+  server:
+    port: 0
+
 app:
   oauth2:
     redirect:

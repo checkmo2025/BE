@@ -2,6 +2,7 @@ package checkmo.news.internal.service;
 
 import checkmo.common.template.CursorPagingHelper;
 import checkmo.common.template.CursorResult;
+import checkmo.common.monitoring.CheckmoMetrics;
 import checkmo.member.MemberAPI;
 import checkmo.news.internal.converter.NewsConverter;
 import checkmo.news.internal.entity.News;
@@ -10,6 +11,7 @@ import checkmo.news.internal.exception.NewsException;
 import checkmo.news.internal.repository.projection.NewsSitemapProjection;
 import checkmo.news.internal.service.query.NewsQueryService;
 import checkmo.news.web.dto.NewsResponseDTO;
+import io.micrometer.core.instrument.Timer;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -30,24 +32,35 @@ public class NewsQueryFacade {
 
     private final NewsQueryService newsQueryService;
     private final MemberAPI memberAPI;
+    private final CheckmoMetrics checkmoMetrics;
 
     public NewsResponseDTO.NewsList fetchNewsList(Long cursorId) {
-        CursorResult<News> newsCursorResult = CursorPagingHelper.getPage(
-                (pageSize) -> newsQueryService.retrieveNewsList(cursorId, pageSize),
-                News::getId,
-                DEFAULT_PAGE_SIZE
-        );
+        Timer.Sample sample = checkmoMetrics.startTimer();
+        String result = "success";
+        try {
+            checkmoMetrics.incrementBannerCacheRequest("miss");
+            CursorResult<News> newsCursorResult = CursorPagingHelper.getPage(
+                    (pageSize) -> newsQueryService.retrieveNewsList(cursorId, pageSize),
+                    News::getId,
+                    DEFAULT_PAGE_SIZE
+            );
 
-        List<NewsResponseDTO.BasicInfo> basicInfoList = newsCursorResult.content().stream()
-                .map(NewsConverter::toBasicInfo)
-                .toList();
+            List<NewsResponseDTO.BasicInfo> basicInfoList = newsCursorResult.content().stream()
+                    .map(NewsConverter::toBasicInfo)
+                    .toList();
 
-        return NewsResponseDTO.NewsList.builder()
-                .basicInfoList(basicInfoList)
-                .hasNext(newsCursorResult.hasNext())
-                .nextCursor(newsCursorResult.nextCursor())
-                .pageSize(DEFAULT_PAGE_SIZE)
-                .build();
+            return NewsResponseDTO.NewsList.builder()
+                    .basicInfoList(basicInfoList)
+                    .hasNext(newsCursorResult.hasNext())
+                    .nextCursor(newsCursorResult.nextCursor())
+                    .pageSize(DEFAULT_PAGE_SIZE)
+                    .build();
+        } catch (RuntimeException e) {
+            result = "error";
+            throw e;
+        } finally {
+            checkmoMetrics.recordBannerApiDuration(sample, result);
+        }
     }
 
     public NewsResponseDTO.DetailInfo fetchNewsDetail(Long newsId) {

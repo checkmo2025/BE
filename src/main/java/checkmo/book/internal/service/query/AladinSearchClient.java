@@ -4,6 +4,8 @@ import checkmo.book.internal.config.properties.AladinProperties;
 import checkmo.book.internal.converter.BookConverter;
 import checkmo.book.web.dto.AladinApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
+import checkmo.common.monitoring.CheckmoMetrics;
+import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -17,8 +19,10 @@ public class AladinSearchClient {
 
     private final RestTemplate restTemplate;
     private final AladinProperties aladinProperties;
+    private final CheckmoMetrics checkmoMetrics;
 
     public BookResponseDTO.BookList fetchSearchBooks(String keyword, int page) {
+        Timer.Sample sample = checkmoMetrics.startTimer();
         AladinApiResponseDTO.BookList response;
         try {
             response = restTemplate.getForObject(
@@ -26,9 +30,16 @@ public class AladinSearchClient {
                     AladinApiResponseDTO.BookList.class
             );
         } catch (RestClientException e) {
+            checkmoMetrics.recordAladinClientResult(
+                    sample,
+                    "search",
+                    checkmoMetrics.classifyAladinResult(e),
+                    e
+            );
             throw new IllegalStateException(sanitizedFailureMessage(e));
         }
 
+        checkmoMetrics.recordAladinClientResult(sample, "search", "success", null);
         return BookConverter.toBookList(response, page);
     }
 

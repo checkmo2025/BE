@@ -7,7 +7,9 @@ import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
+import checkmo.common.monitoring.CheckmoMetrics;
 import checkmo.common.monitoring.SentryCaptureClient;
+import io.micrometer.core.instrument.Timer;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -28,16 +30,19 @@ public class BookRecommendationService {
     private final AladinApiService aladinApiService;
     private final AladinRecommendationRefreshClient recommendationRefreshClient;
     private final SentryCaptureClient sentryCaptureClient;
+    private final CheckmoMetrics checkmoMetrics;
 
     public BookResponseDTO.BookList retrieveRecommendedBooks(Long memberId) {
-        BookResponseDTO.BookList cachedBooks = retrieveUsableCachedBooks();
+        CacheLookup cacheLookup = retrieveUsableCachedBooks();
+        BookResponseDTO.BookList cachedBooks = cacheLookup.bookList();
+        checkmoMetrics.incrementRecommendationCacheRequest(cacheLookup.result());
 
         if (cachedBooks != null && !isRecommendedBooksStale()) {
             return aladinApiService.applyLikedByMe(cachedBooks, memberId);
         }
 
         try {
-            BookResponseDTO.BookList refreshedBooks = retrieveAndSaveRecommendedBooksFromAladin();
+            BookResponseDTO.BookList refreshedBooks = retrieveAndSaveRecommendedBooksFromAladin("user_request");
             return aladinApiService.applyLikedByMe(refreshedBooks, memberId);
         } catch (Exception e) {
             if (cachedBooks != null) {
@@ -59,7 +64,7 @@ public class BookRecommendationService {
 
     public BookResponseDTO.BookList refreshDailyRecommendedBooks() {
         try {
-            return retrieveAndSaveRecommendedBooksFromAladin();
+            return retrieveAndSaveRecommendedBooksFromAladin("background");
         } catch (Exception e) {
             log.error(
                     "API에서 추천 책 가져오기 중 오류. exceptionType={}, errorStatus={}, message={}, causeType={}, causeMessage={}",
@@ -74,44 +79,61 @@ public class BookRecommendationService {
         }
     }
 
-    private BookResponseDTO.BookList retrieveUsableCachedBooks() {
+    private CacheLookup retrieveUsableCachedBooks() {
         try {
             Object cachedData = redisTemplate.opsForValue().get(REDIS_KEY);
 
             if (cachedData instanceof BookResponseDTO.BookList bookList && isUsableBookList(bookList)) {
-                return bookList;
+                String result = isRecommendedBooksStale() ? "stale" : "fresh";
+                return new CacheLookup(bookList, result);
             }
         } catch (Exception e) {
             log.error("Redis에서 추천 책 조회 중 오류 발생. API에서 데이터를 가져오기.", e);
+            return new CacheLookup(null, "redis_error");
         }
 
-        return null;
+        return new CacheLookup(null, "miss");
     }
 
-    private BookResponseDTO.BookList retrieveAndSaveRecommendedBooksFromAladin() {
-        BookResponseDTO.BookList bookList = recommendationRefreshClient.retrieveRecommendedBooks();
+    private BookResponseDTO.BookList retrieveAndSaveRecommendedBooksFromAladin(String source) {
+        Timer.Sample sample = checkmoMetrics.startTimer();
+        String result = "success";
+        try {
+            BookResponseDTO.BookList bookList = recommendationRefreshClient.retrieveRecommendedBooks();
 
-        if (!isUsableBookList(bookList)) {
-            log.error("알라딘 API에서 추천 책을 가져오지 못했습니다.");
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            if (!isUsableBookList(bookList)) {
+                result = "invalid_response";
+                log.error("알라딘 API에서 추천 책을 가져오지 못했습니다.");
+                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            }
+
+            int startIndex = DayOfWeekUtils.calculateStartIndexByDayOfWeek();
+            var allBooks = bookList.getDetailInfoList();
+            checkmoMetrics.recordRecommendationBooksCount("aladin", allBooks.size());
+
+            if (allBooks.size() < startIndex + 4) {
+                result = "invalid_response";
+                log.error("추천 책 목록 부족, 전체: {}개, 필요: {}개", allBooks.size(), startIndex + 4);
+                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            }
+
+            List<DetailInfo> booksForToday = List.copyOf(allBooks.subList(startIndex, startIndex + 4));
+            checkmoMetrics.recordRecommendationBooksCount("returned", booksForToday.size());
+            saveRecommendedBooks(booksForToday);
+
+            return BookResponseDTO.BookList.builder()
+                    .detailInfoList(booksForToday)
+                    .hasNext(false)
+                    .currentPage(null)
+                    .build();
+        } catch (RuntimeException e) {
+            if ("success".equals(result)) {
+                result = checkmoMetrics.classifyAladinResult(e);
+            }
+            throw e;
+        } finally {
+            checkmoMetrics.recordAladinRecommendationRefresh(sample, result, source);
         }
-
-        int startIndex = DayOfWeekUtils.calculateStartIndexByDayOfWeek();
-        var allBooks = bookList.getDetailInfoList();
-
-        if (allBooks.size() < startIndex + 4) {
-            log.error("추천 책 목록 부족, 전체: {}개, 필요: {}개", allBooks.size(), startIndex + 4);
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
-        }
-
-        List<DetailInfo> booksForToday = List.copyOf(allBooks.subList(startIndex, startIndex + 4));
-        saveRecommendedBooks(booksForToday);
-
-        return BookResponseDTO.BookList.builder()
-                .detailInfoList(booksForToday)
-                .hasNext(false)
-                .currentPage(null)
-                .build();
     }
 
     private boolean isUsableBookList(BookResponseDTO.BookList bookList) {
@@ -172,6 +194,9 @@ public class BookRecommendationService {
                 .hasNext(false)
                 .currentPage(null)
                 .build();
+    }
+
+    private record CacheLookup(BookResponseDTO.BookList bookList, String result) {
     }
 
     private String safeErrorStatus(Exception exception) {

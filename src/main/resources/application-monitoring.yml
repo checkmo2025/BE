@@ -1,0 +1,30 @@
+management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT:8081}
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: checkmo-backend
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        checkmo.aladin.client.duration: true
+        checkmo.aladin.recommendation.refresh.duration: true
+        checkmo.banner.api.duration: true
+        checkmo.book.recommendation.books.count: true
+      slo:
+        http.server.requests: 100ms,300ms,500ms,1s,2s,5s
+        checkmo.aladin.client.duration: 100ms,300ms,500ms,1s,2s,5s
+        checkmo.banner.api.duration: 100ms,300ms,500ms,1s,2s
