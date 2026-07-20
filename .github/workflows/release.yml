@@ -46,7 +46,7 @@ jobs:
       - name: Create .env file
         run: |
           printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
-          awk '!/^(SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE|SENTRY_AUTH_TOKEN|SENTRY_TRACES_SAMPLE_RATE)=/' .env > .env.tmp
+          awk '!/^(SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE|SENTRY_AUTH_TOKEN|SENTRY_TRACES_SAMPLE_RATE|GRAFANA_ADMIN_USER|GRAFANA_ADMIN_PASSWORD|GRAFANA_PORT|GRAFANA_ROOT_URL)=/' .env > .env.tmp
           mv .env.tmp .env
           printf 'SENTRY_ENABLED=%s\n' "${{ secrets.SENTRY_ENABLED }}" >> .env
           printf 'SENTRY_DSN=%s\n' "${{ secrets.SENTRY_DSN }}" >> .env
@@ -54,6 +54,16 @@ jobs:
           printf 'SENTRY_RELEASE=checkmo-backend@%s\n' "${GITHUB_SHA}" >> .env
           SENTRY_TRACES_SAMPLE_RATE="${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}"
           printf 'SENTRY_TRACES_SAMPLE_RATE=%s\n' "${SENTRY_TRACES_SAMPLE_RATE:-0.0}" >> .env
+          printf 'GRAFANA_ADMIN_USER=%s\n' "${{ secrets.GRAFANA_ADMIN_USER }}" >> .env
+          printf 'GRAFANA_ADMIN_PASSWORD=%s\n' "${{ secrets.GRAFANA_ADMIN_PASSWORD }}" >> .env
+          GRAFANA_PORT="${{ secrets.GRAFANA_PORT }}"
+          GRAFANA_ROOT_URL="${{ secrets.GRAFANA_ROOT_URL }}"
+          if [ -n "${GRAFANA_PORT}" ]; then
+            printf 'GRAFANA_PORT=%s\n' "${GRAFANA_PORT}" >> .env
+          fi
+          if [ -n "${GRAFANA_ROOT_URL}" ]; then
+            printf 'GRAFANA_ROOT_URL=%s\n' "${GRAFANA_ROOT_URL}" >> .env
+          fi
 
       # 5. 설정 파일 전송 (SCP)
       - name: Copy files to EC2

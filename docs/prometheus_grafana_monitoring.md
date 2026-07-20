@@ -53,6 +53,15 @@ GRAFANA_PORT=3000
 
 `GRAFANA_PORT`는 없으면 기본값 `3000`을 사용한다.
 
+GitHub Actions 배포를 사용할 때는 repository Actions secrets에 최소한 아래 두 값을 추가한다.
+
+```text
+GRAFANA_ADMIN_USER
+GRAFANA_ADMIN_PASSWORD
+```
+
+`GRAFANA_PORT`, `GRAFANA_ROOT_URL`은 필요할 때만 Actions secrets에 추가한다. 배포 workflow가 이 값들을 `.env`에 기록한 뒤 EC2로 전송한다.
+
 ## 1. 컨테이너 실행 확인
 
 ```bash
