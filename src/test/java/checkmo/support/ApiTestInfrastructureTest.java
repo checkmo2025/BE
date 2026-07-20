@@ -3,9 +3,11 @@ package checkmo.support;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.restassured.response.Response;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.core.env.Environment;
 
 class ApiTestInfrastructureTest extends ApiTestSupport {
@@ -15,6 +17,9 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
 
     @Autowired
     Environment environment;
+
+    @LocalManagementPort
+    int managementPort;
 
     @Test
     void testProfileUsesH2AndDoesNotIncludeProductionProfiles() throws Exception {
@@ -38,7 +43,20 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
     }
 
     @Test
-    void prometheusEndpointExposesBackendMetricsWithoutAuthentication() {
+    void prometheusEndpointDoesNotExposeMetricsOnApplicationPort() {
+        Response response = given()
+                .when()
+                .get("/actuator/prometheus")
+                .then()
+                .extract()
+                .response();
+
+        assertThat(response.statusCode()).isNotEqualTo(200);
+        assertThat(response.asString()).doesNotContain("jvm_memory_used_bytes");
+    }
+
+    @Test
+    void prometheusEndpointExposesBackendMetricsOnManagementPort() {
         given()
                 .when()
                 .get("/api/v1/news")
@@ -46,6 +64,7 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
                 .statusCode(200);
 
         String body = given()
+                .port(managementPort)
                 .when()
                 .get("/actuator/prometheus")
                 .then()

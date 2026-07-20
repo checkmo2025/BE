@@ -10,8 +10,10 @@ import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationFailu
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import checkmo.authentication.internal.security.oauth2.SocialOAuth2UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -43,6 +45,21 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(EndpointRequest.to("health", "prometheus"))
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain filterChain(
             HttpSecurity http,
             ClientRegistrationRepository clientRegistrationRepository,
@@ -57,7 +74,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/").permitAll() // 홈페이지 접근 허용
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/health").permitAll() // Swagger UI 접근 허용
-                        .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
                         .requestMatchers("/oauth2/authorization/**","/login/oauth2/**").permitAll() // OAuth2 로그인 허용
                         .requestMatchers(HttpMethod.GET, "/api/v1/books/me/likes").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()

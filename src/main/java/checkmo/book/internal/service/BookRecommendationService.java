@@ -128,7 +128,7 @@ public class BookRecommendationService {
                     .build();
         } catch (RuntimeException e) {
             if ("success".equals(result)) {
-                result = "unknown_error";
+                result = checkmoMetrics.classifyAladinResult(e);
             }
             throw e;
         } finally {

@@ -9,8 +9,8 @@ Branch: `feat/296/prometheus-grafana-monitoring`
 
 ```text
 1. Docker 컨테이너가 떠 있는지 확인
-2. Spring Boot가 /actuator/prometheus를 내보내는지 확인
-3. Prometheus가 app:8080/actuator/prometheus를 수집하는지 확인
+2. Spring Boot가 management port에서 /actuator/prometheus를 내보내는지 확인
+3. Prometheus가 app:8081/actuator/prometheus를 수집하는지 확인
 4. Grafana에 접속해서 대시보드가 보이는지 확인
 5. 실제 API를 한 번 호출하고 Grafana 숫자가 바뀌는지 확인
 ```
@@ -92,10 +92,10 @@ docker compose logs grafana
 
 ## 2. 백엔드 메트릭 endpoint 확인
 
-앱 컨테이너 안에서 `/actuator/prometheus`가 열리는지 확인한다.
+앱 컨테이너 안에서 management port의 `/actuator/prometheus`가 열리는지 확인한다.
 
 ```bash
-docker compose exec app curl -fsS http://localhost:8080/actuator/prometheus | head
+docker compose exec app curl -fsS http://localhost:8081/actuator/prometheus | head
 ```
 
 정상이면 이런 형태의 텍스트가 나온다.
@@ -138,7 +138,7 @@ docker compose exec prometheus promtool query instant http://localhost:9090 'up{
 정상 예시는 다음과 같다.
 
 ```text
-up{instance="app:8080", job="checkmo-app"} => 1
+up{instance="app:8081", job="checkmo-app"} => 1
 ```
 
 의미는 다음과 같다.
@@ -163,7 +163,7 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     static_configs:
       - targets:
-          - app:8080
+          - app:8081
 ```
 
 그 다음 Prometheus 로그를 확인한다.
@@ -352,7 +352,7 @@ http://<ec2-public-ip>:9090
 http://<api-domain>/actuator/prometheus
 ```
 
-Grafana도 현재는 EC2 localhost에만 바인딩되어 있으므로, SSH 터널 없이 외부에서 바로 열리지 않는 것이 정상이다.
+Grafana도 현재는 EC2 localhost에만 바인딩되어 있으므로, SSH 터널 없이 외부에서 바로 열리지 않는 것이 정상이다. `/actuator/prometheus`는 app port `8080`이 아니라 management port `8081`에서만 제공되며, `8081`은 Docker 내부 network에서 Prometheus가 수집하는 용도로만 사용한다.
 
 운영자가 Grafana를 상시 접속해야 한다면 SSH 터널, VPN, 인증 reverse proxy, SSO 중 하나를 별도 결정해야 한다.
 
