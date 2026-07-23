@@ -24,7 +24,11 @@ public class S3Controller {
 
     private final S3Service s3Service;
 
-    @Operation(summary = "이미지 업로드 URL 발급", description = "이미지 업로드를 위한 presigned URL을 발급합니다. (type: PROFILE, CLUB, NOTICE)")
+    @Operation(
+            summary = "이미지 업로드 URL 발급",
+            description = "이미지 업로드를 위한 presigned URL을 발급합니다. "
+                    + "(type: PROFILE, CLUB, NOTICE, BOOK_STORY, BOOK_STORY_COMMENT, NOTICE_COMMENT)"
+    )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),

@@ -155,6 +155,7 @@ public class ClubNoticeResponseDTO {
         private Long commentId;
         private MemberExternalDTO.BasicInfo authorInfo;
         private String content;
+        private List<String> imageUrls;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
     }

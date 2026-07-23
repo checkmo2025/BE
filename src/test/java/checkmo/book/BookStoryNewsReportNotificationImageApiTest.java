@@ -95,6 +95,11 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                         .build());
         when(s3Service.generatePresignedUploadUrl("profile.txt", "text/plain", FileUploadType.PROFILE))
                 .thenThrow(new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE));
+        when(s3Service.generatePresignedUploadUrl("story.jpg", "image/jpeg", FileUploadType.BOOK_STORY))
+                .thenReturn(S3ResponseDTO.PresignedUrl.builder()
+                        .presignedUrl("https://upload.example.com/story.jpg")
+                        .imageUrl("https://cdn.example.com/story.jpg")
+                        .build());
     }
 
     @Test
@@ -262,6 +267,146 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 ))
                 .when()
                 .post("/api/v1/book-stories")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void bookStoryAndCommentImagesSupportFiveOrderedUrlsAndUpdateSemantics() {
+        TestUser author = createUser();
+        TestUser commenter = createUser();
+        List<String> storyImages = imageUrls("story", 5);
+
+        Number storyIdNumber = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "isbn", ISBN,
+                        "title", "사진이 있는 책 이야기",
+                        "description", "사진 다섯 장을 첨부한 책 이야기입니다.",
+                        "imageUrls", storyImages,
+                        "status", "PUBLISHED"
+                ))
+                .when()
+                .post("/api/v1/book-stories")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("result");
+        Long storyId = storyIdNumber.longValue();
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.imageUrls", equalTo(storyImages));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "title", "사진 유지 수정",
+                        "description", "imageUrls 필드를 생략하면 기존 사진을 유지합니다.",
+                        "status", "PUBLISHED"
+                ))
+                .when()
+                .patch("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200);
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.imageUrls", equalTo(storyImages));
+
+        List<String> commentImages = imageUrls("comment", 5);
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of(
+                        "content", "사진이 있는 댓글입니다.",
+                        "imageUrls", commentImages
+                ))
+                .when()
+                .post("/api/v1/book-stories/{bookStoryId}/comments", storyId)
+                .then()
+                .statusCode(200);
+        Long commentId = commentRepository.findAll().getFirst().getId();
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.comments[0].imageUrls", equalTo(commentImages));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of("content", "사진은 유지하는 댓글 수정입니다."))
+                .when()
+                .patch("/api/v1/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
+                .then()
+                .statusCode(200);
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.comments[0].imageUrls", equalTo(commentImages));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of(
+                        "content", "사진을 모두 제거한 댓글입니다.",
+                        "imageUrls", List.of()
+                ))
+                .when()
+                .patch("/api/v1/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
+                .then()
+                .statusCode(200);
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.comments[0].imageUrls", equalTo(List.of()));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "isbn", ISBN,
+                        "title", "사진 제한 초과",
+                        "description", "사진을 여섯 장 첨부할 수 없습니다.",
+                        "imageUrls", imageUrls("too-many", 6),
+                        "status", "PUBLISHED"
+                ))
+                .when()
+                .post("/api/v1/book-stories")
+                .then()
+                .statusCode(400);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of(
+                        "content", "사진 제한을 초과한 댓글입니다.",
+                        "imageUrls", imageUrls("too-many-comment", 6)
+                ))
+                .when()
+                .post("/api/v1/book-stories/{bookStoryId}/comments", storyId)
                 .then()
                 .statusCode(400);
     }
@@ -569,6 +714,16 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("originalFileName", "story.jpg", "contentType", "image/jpeg"))
+                .when()
+                .post("/api/v1/image/{type}/upload-url", "BOOK_STORY")
+                .then()
+                .statusCode(200)
+                .body("result.imageUrl", equalTo("https://cdn.example.com/story.jpg"));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("originalFileName", "profile.png", "contentType", "image/png"))
                 .when()
                 .post("/api/v1/image/{type}/upload-url", "PROFILE")
@@ -593,6 +748,12 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .post("/api/v1/image/{type}/upload-url", "CLUB")
                 .then()
                 .statusCode(403);
+    }
+
+    private List<String> imageUrls(String prefix, int count) {
+        return IntStream.rangeClosed(1, count)
+                .mapToObj(index -> "https://example.com/%s-%d.jpg".formatted(prefix, index))
+                .toList();
     }
 
     private DetailInfo bookDetail(String isbn) {

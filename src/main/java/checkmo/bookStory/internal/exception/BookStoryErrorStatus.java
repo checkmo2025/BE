@@ -15,6 +15,7 @@ public enum BookStoryErrorStatus implements BaseErrorCode {
     BOOK_STORY_INVALID_STATUS(HttpStatus.BAD_REQUEST, "BOOK_STORY_406", "책 이야기 상태 변경 요청이 올바르지 않습니다."),
     BOOK_STORY_DESCRIPTION_REQUIRED(HttpStatus.BAD_REQUEST, "BOOK_STORY_407", "책 이야기에 내용을 입력해주세요."),
     BOOK_STORY_LIKE_BLOCKED(HttpStatus.FORBIDDEN, "BOOK_STORY_408", "차단 관계가 있는 회원의 책 이야기에는 좋아요를 누를 수 없습니다."),
+    BOOK_STORY_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "BOOK_STORY_IMAGE_400", "책 이야기 이미지는 최대 5개까지 업로드할 수 있습니다."),
 
     // 책 이야기 댓글
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_404", "댓글을 찾을 수 없습니다."),
@@ -22,6 +23,7 @@ public enum BookStoryErrorStatus implements BaseErrorCode {
     INVALID_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "COMMENT_401", "부모 댓글이 해당 책 이야기에 속하지 않습니다."),
     COMMENT_DEPTH_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "COMMENT_402", "댓글은 2단계까지만 허용됩니다."),
     COMMENT_BLOCKED(HttpStatus.FORBIDDEN, "COMMENT_405", "차단 관계가 있는 회원에게는 댓글을 작성할 수 없습니다."),
+    COMMENT_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "COMMENT_IMAGE_400", "책 이야기 댓글 이미지는 최대 5개까지 업로드할 수 있습니다."),
 
     //
     CLUB_ACCESS_DENIED(HttpStatus.FORBIDDEN, "BOOK_STORY_403", "해당 독서클럽에 접근할 수 없습니다.");

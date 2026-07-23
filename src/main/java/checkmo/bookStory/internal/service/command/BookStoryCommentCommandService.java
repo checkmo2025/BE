@@ -9,6 +9,7 @@ import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
 import checkmo.member.MemberAPI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,7 @@ public class BookStoryCommentCommandService {
                 .bookStory(bookStory)
                 .parentComment(parentComment)
                 .build();
+        comment.replaceImages(request.getImageUrls());
 
         // 4. 부모 댓글의 자식 리스트에 추가 (대댓글인 경우)
         if (parentComment != null) {
@@ -138,6 +140,7 @@ public class BookStoryCommentCommandService {
 
         // 5. 댓글 내용 수정
         comment.updateContent(request.getContent());
+        publishDeletedImages(comment.replaceImages(request.getImageUrls()));
 
         // 6. 수정된 댓글 ID 반환
         return commentId;
@@ -170,7 +173,9 @@ public class BookStoryCommentCommandService {
         comment.verifyOwner(memberId);
 
         // 5. 소프트 삭제 처리
+        List<String> removedImages = comment.replaceImages(List.of());
         comment.softDelete();
+        publishDeletedImages(removedImages);
 
         // 6. 삭제된 댓글 ID 반환
         return commentId;
@@ -198,7 +203,9 @@ public class BookStoryCommentCommandService {
         comment.verifyBookStory(bookStoryId);
 
         // 4. 소프트 삭제 처리
+        List<String> removedImages = comment.replaceImages(List.of());
         comment.softDelete();
+        publishDeletedImages(removedImages);
 
         // 5. 삭제된 댓글 ID 반환
         return commentId;
@@ -211,5 +218,16 @@ public class BookStoryCommentCommandService {
      */
     public void softDeleteAllByMemberId(Long memberId) {
         commentRepository.softDeleteAllByMemberId(memberId);
+    }
+
+    private void publishDeletedImages(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+        eventPublisher.publishEvent(
+                BookStoryEvent.DeleteBookStoryImage.builder()
+                        .imageUrls(imageUrls)
+                        .build()
+        );
     }
 }

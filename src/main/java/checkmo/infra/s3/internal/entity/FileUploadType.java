@@ -8,7 +8,10 @@ import lombok.Getter;
 public enum FileUploadType {
     PROFILE("profiles"),
     CLUB("clubs"),
-    NOTICE("notices");
+    NOTICE("notices"),
+    BOOK_STORY("book-stories"),
+    BOOK_STORY_COMMENT("book-story-comments"),
+    NOTICE_COMMENT("notice-comments");
 
     private final String path;
 }

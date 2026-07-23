@@ -427,20 +427,64 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(Map.of("content", "댓글"))
+                .body(Map.of(
+                        "content", "댓글",
+                        "imageUrls", List.of(
+                                "https://example.com/notice-comment-1.jpg",
+                                "https://example.com/notice-comment-2.jpg"
+                        )
+                ))
                 .when().post("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
                 .then().statusCode(200);
         Long commentId = noticeCommentRepository.findAll().getFirst().getId();
 
         given().cookie(accessTokenCookie(owner))
                 .when().get("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
-                .then().statusCode(200);
+                .then()
+                .statusCode(200)
+                .body(
+                        "result.comments[0].imageUrls",
+                        equalTo(List.of(
+                                "https://example.com/notice-comment-1.jpg",
+                                "https://example.com/notice-comment-2.jpg"
+                        ))
+                );
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("content", "수정댓글"))
                 .when().patch("/api/v1/clubs/{clubId}/notices/{noticeId}/comments/{commentId}", club.getId(), notice.getId(), commentId)
                 .then().statusCode(200);
+
+        given().cookie(accessTokenCookie(owner))
+                .when().get("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
+                .then()
+                .statusCode(200)
+                .body(
+                        "result.comments[0].imageUrls",
+                        equalTo(List.of(
+                                "https://example.com/notice-comment-1.jpg",
+                                "https://example.com/notice-comment-2.jpg"
+                        ))
+                );
+
+        given().cookie(accessTokenCookie(owner))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of(
+                        "content", "사진 제거 댓글",
+                        "imageUrls", List.of()
+                ))
+                .when().patch("/api/v1/clubs/{clubId}/notices/{noticeId}/comments/{commentId}", club.getId(), notice.getId(), commentId)
+                .then().statusCode(200);
+
+        given().cookie(accessTokenCookie(owner))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of(
+                        "content", "사진 제한 초과 댓글",
+                        "imageUrls", List.of("1", "2", "3", "4", "5", "6")
+                ))
+                .when().post("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
+                .then().statusCode(400);
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

@@ -31,7 +31,8 @@ public enum ClubNoticeErrorStatus implements BaseErrorCode {
     NOTICE_COMMENT_UNAUTHORIZED(HttpStatus.FORBIDDEN, "NOTICE_COMMENT_401", "공지사항 댓글 수정/삭제 권한이 없습니다."),
 
     // 이미지
-    NOTICE_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "NOTICE_IMAGE_400", "공지사항 이미지 최대 업로드 개수를 초과했습니다.");
+    NOTICE_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "NOTICE_IMAGE_400", "공지사항 이미지 최대 업로드 개수를 초과했습니다."),
+    NOTICE_COMMENT_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "NOTICE_COMMENT_IMAGE_400", "공지사항 댓글 이미지는 최대 5개까지 업로드할 수 있습니다.");
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

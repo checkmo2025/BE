@@ -3,6 +3,7 @@ package checkmo.bookStory.internal.entity;
 import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.common.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,6 +30,8 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Comment extends BaseEntity {
 
+    private static final int MAX_IMAGE_COUNT = 5;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,6 +54,11 @@ public class Comment extends BaseEntity {
     @OneToMany(mappedBy = "parentComment")
     @OrderBy("createdAt ASC")
     private List<Comment> childrenComment = new ArrayList<>(); // 대댓글 리스트들
+
+    @Builder.Default
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<CommentImage> images = new ArrayList<>();
 
     @Builder.Default
     private boolean deleted = false;
@@ -86,5 +94,40 @@ public class Comment extends BaseEntity {
     public void softDelete() {
         this.deleted = true;
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public List<String> replaceImages(List<String> imageUrls) {
+        if (imageUrls == null) {
+            return List.of();
+        }
+
+        if (imageUrls.size() > MAX_IMAGE_COUNT) {
+            throw new BookStoryException(BookStoryErrorStatus.COMMENT_IMAGE_LIMIT_EXCEEDED);
+        }
+
+        List<String> removedImages = getImageUrls().stream()
+                .filter(url -> !imageUrls.contains(url))
+                .toList();
+
+        int commonSize = Math.min(this.images.size(), imageUrls.size());
+        for (int i = 0; i < commonSize; i++) {
+            this.images.get(i).update(imageUrls.get(i), i);
+        }
+
+        for (int i = commonSize; i < imageUrls.size(); i++) {
+            this.images.add(CommentImage.of(this, imageUrls.get(i), i));
+        }
+
+        for (int i = this.images.size() - 1; i >= imageUrls.size(); i--) {
+            this.images.remove(i);
+        }
+
+        return removedImages;
+    }
+
+    public List<String> getImageUrls() {
+        return this.images.stream()
+                .map(CommentImage::getImageUrl)
+                .toList();
     }
 }

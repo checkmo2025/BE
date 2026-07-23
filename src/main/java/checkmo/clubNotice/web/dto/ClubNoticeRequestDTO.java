@@ -129,5 +129,8 @@ public class ClubNoticeRequestDTO {
         @NotBlank(message = "공지사항 댓글 내용은 필수입니다.")
         @Size(max = 300, message = "공지사항 댓글은 300자 이하로 입력해주세요.")
         private String content;
+
+        @Size(max = 5, message = "공지사항 댓글 이미지는 최대 5개까지 가능합니다.")
+        private List<@NotBlank(message = "공지사항 댓글 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
     }
 }

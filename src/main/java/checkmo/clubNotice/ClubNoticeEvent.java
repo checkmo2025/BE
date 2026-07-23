@@ -12,4 +12,8 @@ public class ClubNoticeEvent {
     @Builder
     public record DeleteNoticeImage(List<String> imageUrls) {
     }
+
+    @Builder
+    public record DeleteNoticeCommentImage(List<String> imageUrls) {
+    }
 }

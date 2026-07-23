@@ -123,6 +123,7 @@ public class ClubNoticeConverter {
         return ClubNoticeResponseDTO.NoticeComment.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
+                .imageUrls(comment.getImageUrls())
                 .authorInfo(memberInfo)
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
