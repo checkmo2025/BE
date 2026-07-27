@@ -78,6 +78,26 @@ public class CheckmoMetrics {
                 .increment();
     }
 
+    public void incrementChatbotModelCall(String modelName, boolean escalated) {
+        Counter.builder("checkmo.chatbot.model.calls")
+                .tag("model", modelName)
+                .tag("escalated", String.valueOf(escalated))
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void incrementChatbotUnresolvedSession() {
+        Counter.builder("checkmo.chatbot.session.unresolved")
+                .register(meterRegistry)
+                .increment();
+    }
+
+    public void incrementChatbotPromptLeakDetected() {
+        Counter.builder("checkmo.chatbot.prompt_leak.detected")
+                .register(meterRegistry)
+                .increment();
+    }
+
     public String classifyAladinResult(Throwable throwable) {
         if (throwable == null) {
             return "success";

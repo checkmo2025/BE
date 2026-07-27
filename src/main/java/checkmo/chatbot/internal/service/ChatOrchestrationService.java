@@ -11,6 +11,7 @@ import checkmo.chatbot.internal.repository.ChatMessageRepository;
 import checkmo.chatbot.internal.repository.ChatSessionRepository;
 import checkmo.chatbot.internal.service.dto.GeminiApiDTO.Content;
 import checkmo.chatbot.internal.service.dto.GeminiApiDTO.Part;
+import checkmo.common.monitoring.CheckmoMetrics;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,10 +40,13 @@ public class ChatOrchestrationService {
     private final GeminiApiService geminiApiService;
     private final EscalationDecider escalationDecider;
     private final UnresolvedSessionTagger unresolvedSessionTagger;
+    private final PromptLeakGuard promptLeakGuard;
     private final ChatbotProperties chatbotProperties;
+    private final CheckmoMetrics checkmoMetrics;
 
     public ChatReply respond(String sessionToken, Long memberId, String rawUserMessage) {
         ChatSession chatSession = resolveSession(sessionToken, memberId);
+        boolean wasUnresolved = chatSession.isUnresolved();
         chatSession.recordActivity();
 
         String maskedUserMessage = piiMaskingService.mask(rawUserMessage, memberId);
@@ -59,11 +63,17 @@ public class ChatOrchestrationService {
         String modelName = escalated
                 ? chatbotProperties.getEscalationModel().getName()
                 : chatbotProperties.getDefaultModel().getName();
+        checkmoMetrics.incrementChatbotModelCall(modelName, escalated);
 
         // 봇 응답에는 마스킹을 적용하지 않는다. 모델은 이미 마스킹된 사용자 입력만 봤으므로 실제 PII를
         // 답변에 포함시킬 방법이 없고(구조적으로 안전), 반대로 "비밀번호는 6~12자..." 같은 정상 안내
         // 문장을 정규식이 PII로 오탐해 훼손하는 위험이 더 크다(실제 QA에서 확인됨).
         String reply = geminiApiService.generateReply(ChatbotSystemPrompt.SYSTEM_PROMPT, contents, modelName);
+
+        if (promptLeakGuard.isLeaked(reply)) {
+            checkmoMetrics.incrementChatbotPromptLeakDetected();
+            reply = PromptLeakGuard.SAFE_FALLBACK_REPLY;
+        }
 
         boolean botUncertain = unresolvedSessionTagger.isBotUncertain(reply);
         if (botUncertain) {
@@ -73,6 +83,10 @@ public class ChatOrchestrationService {
         chatMessageRepository.save(
                 ChatMessage.assistantMessage(chatSession.getId(), reply, modelName, escalated, botUncertain));
         chatSessionRepository.save(chatSession);
+
+        if (!wasUnresolved && chatSession.isUnresolved()) {
+            checkmoMetrics.incrementChatbotUnresolvedSession();
+        }
 
         return new ChatReply(
                 chatSession.getSessionToken(),
