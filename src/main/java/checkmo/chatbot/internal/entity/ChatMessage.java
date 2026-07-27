@@ -8,7 +8,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +29,8 @@ public class ChatMessage extends BaseEntity {
     private ChatRole role;
 
     // 마스킹된 텍스트만 저장한다. 원문(PII 포함 가능)은 어떤 컬럼에도 저장하지 않는다.
-    @Lob
-    @Column(nullable = false)
+    // @Lob만 쓰면 기본 length(255) 때문에 Hibernate가 TINYTEXT를 기대해 TEXT 컬럼과 스키마 검증이 어긋난다.
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String maskedContent;
 
     @Column(length = 100)
