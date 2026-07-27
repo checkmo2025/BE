@@ -83,6 +83,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/news/sitemap", "/api/v1/news/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/app/version").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/terms").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/chatbot/messages").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/members/me", "/api/v1/members/me/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/members/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/members/find-email").permitAll()
