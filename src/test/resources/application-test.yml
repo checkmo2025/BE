@@ -88,6 +88,20 @@ mail:
     password: test-password
     enable: false
 
+chatbot:
+  gemini:
+    api-key: test-gemini-api-key
+    base-url: http://localhost
+    api-version: v1beta
+    timeout-ms: 1000
+    default-model:
+      name: gemini-3.1-flash-lite
+    escalation-model:
+      name: gemini-3.6-flash
+    handoff:
+      support-url: http://localhost/support
+      inquiry-form-url: http://localhost/inquiry
+
 aladin:
   api:
     url:
