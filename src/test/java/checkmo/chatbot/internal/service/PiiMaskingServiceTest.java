@@ -51,7 +51,15 @@ class PiiMaskingServiceTest {
     void masksPasswordValueAfterKeyword() {
         String result = piiMaskingService.maskPatterns("비밀번호는 abc1234!입니다");
 
-        assertThat(result).isEqualTo("비밀번호는 [비밀번호]");
+        assertThat(result).isEqualTo("비밀번호는 [비밀번호]입니다");
+    }
+
+    @Test
+    void doesNotMaskPasswordQuestionWithoutAValue() {
+        assertThat(piiMaskingService.maskPatterns("비밀번호가 기억이 안나요"))
+                .isEqualTo("비밀번호가 기억이 안나요");
+        assertThat(piiMaskingService.maskPatterns("비밀번호 변경은 어디서 해요?"))
+                .isEqualTo("비밀번호 변경은 어디서 해요?");
     }
 
     @Test

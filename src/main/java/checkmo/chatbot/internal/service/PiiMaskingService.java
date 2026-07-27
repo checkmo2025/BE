@@ -29,10 +29,12 @@ public class PiiMaskingService {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("[\\w.+-]+@[\\w-]+\\.[\\w.-]+");
 
-    // "비밀번호는/비번은/pw는/password:" 등 키워드 뒤에 오는 값 하나를 마스킹한다.
+    // "비밀번호는/비번은/pw는/password:" 등 키워드 뒤에 실제 값처럼 보이는 토큰(영문/숫자/기호 조합,
+    // 4자 이상)만 마스킹한다. 값 부분을 일반 \S+로 잡으면 "비밀번호가 기억이 안나요", "비밀번호 변경은
+    // 어디서 해요?" 같은 정상 질문/설명 문장까지 오탐해 훼손하므로, 한글은 매칭 대상에서 제외한다.
     // 완전한 일반화는 불가능한 휴리스틱이다.
     private static final Pattern PASSWORD_VALUE_PATTERN =
-            Pattern.compile("(?i)(비밀번호|비번|패스워드|password|pw)(\\s*[:은는이가]?\\s*)(\\S+)");
+            Pattern.compile("(?i)(비밀번호|비번|패스워드|password|pw)(\\s*[:은는이가]?\\s*)([A-Za-z0-9!@#$%^&*()_+=\\-]{4,})");
 
     private final MemberAPI memberAPI;
 
