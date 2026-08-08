@@ -1,6 +1,7 @@
 package checkmo.member.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.common.validation.NicknamePolicy;
 import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import jakarta.persistence.CascadeType;
@@ -15,6 +16,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,6 +61,9 @@ public class Member extends BaseEntity {
     @Column(length = 20)
     private String nickName;
 
+    @Column(length = 20, unique = true)
+    private String nickNameKey;
+
     @Column(length = 40)
     private String description;
 
@@ -88,14 +94,29 @@ public class Member extends BaseEntity {
     private Set<MemberInterestCategory> interestCategories = new HashSet<>();
 
     public void updateAdditionalInfo(String nickName, String name, String phoneNumber, String description) {
-        this.nickName = nickName;
+        updateNickname(nickName);
         this.name = name != null ? name : "";
         this.phoneNumber = phoneNumber != null ? phoneNumber : "";
         this.description = description;
     }
 
     public void updateNickname(String nickName) {
-        this.nickName = nickName;
+        this.nickName = NicknamePolicy.normalize(nickName);
+        this.nickNameKey = NicknamePolicy.comparisonKey(nickName);
+    }
+
+    public boolean hasSameNicknameIdentity(String nickName) {
+        return NicknamePolicy.isSameIdentity(this.nickName, nickName);
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void synchronizeNicknameIdentity() {
+        if (nickName == null) {
+            nickNameKey = null;
+            return;
+        }
+        updateNickname(nickName);
     }
 
     public void updateProfile(String description, String imgUrl, String phoneNumber) {

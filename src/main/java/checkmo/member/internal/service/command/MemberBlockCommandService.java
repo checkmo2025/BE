@@ -1,5 +1,6 @@
 package checkmo.member.internal.service.command;
 
+import checkmo.common.validation.NicknamePolicy;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberBlock;
 import checkmo.member.internal.exception.MemberErrorStatus;
@@ -25,7 +26,7 @@ public class MemberBlockCommandService {
     public void block(Long blockerId, String blockedNickname) {
         Member blocker = memberRepository.findByIdAndDeactivatedAtIsNull(blockerId)
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        Member blocked = memberRepository.findByNickName(blockedNickname)
+        Member blocked = memberRepository.findByNickNameKey(NicknamePolicy.comparisonKey(blockedNickname))
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         if (Member.isSameMember(blocker.getId(), blocked.getId())) {
@@ -50,7 +51,7 @@ public class MemberBlockCommandService {
     }
 
     public void unblock(Long blockerId, String blockedNickname) {
-        Long blockedId = memberRepository.findIdByNickName(blockedNickname)
+        Long blockedId = memberRepository.findIdByNickNameKey(NicknamePolicy.comparisonKey(blockedNickname))
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         MemberBlock memberBlock = memberBlockRepository.findByBlocker_IdAndBlocked_Id(blockerId, blockedId)

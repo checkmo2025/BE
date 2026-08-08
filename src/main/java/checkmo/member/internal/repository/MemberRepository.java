@@ -16,15 +16,15 @@ import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
-    boolean existsByNickNameAndDeactivatedAtIsNull(String nickName);
+    boolean existsByNickNameKeyAndDeactivatedAtIsNull(String nickNameKey);
     Optional<Member> findByIdAndDeactivatedAtIsNull(Long id);
     List<Member> findAllByIdInAndDeactivatedAtIsNull(List<Long> ids);
 
-    @Query("select m from Member m where m.nickName = :nickName and m.deactivatedAt is null")
-    Optional<Member> findByNickName(@Param("nickName") String nickName);
+    @Query("select m from Member m where m.nickNameKey = :nickNameKey and m.deactivatedAt is null")
+    Optional<Member> findByNickNameKey(@Param("nickNameKey") String nickNameKey);
 
-    @Query("select m.id from Member m where m.nickName = :nickName and m.deactivatedAt is null")
-    Optional<Long> findIdByNickName(@Param("nickName") String nickName);
+    @Query("select m.id from Member m where m.nickNameKey = :nickNameKey and m.deactivatedAt is null")
+    Optional<Long> findIdByNickNameKey(@Param("nickNameKey") String nickNameKey);
 
     @Query("select m.nickName from Member m where m.id = :memberId and m.deactivatedAt is null")
     Optional<String> findActiveNicknameById(@Param("memberId") Long memberId);

@@ -1,5 +1,6 @@
 package checkmo.member.internal.service.command;
 
+import checkmo.common.validation.NicknamePolicy;
 import checkmo.member.MemberEvent;
 import checkmo.member.internal.entity.Follow;
 import checkmo.member.internal.entity.Member;
@@ -35,7 +36,7 @@ public class MemberFollowCommandService {
      */
     public void following(Long memberId, String followingNickname) {
         // 닉네임으로 팔로잉 대상 조회
-        Member following = memberRepository.findByNickName(followingNickname)
+        Member following = memberRepository.findByNickNameKey(NicknamePolicy.comparisonKey(followingNickname))
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 자기 자신을 팔로우할 수 없음
@@ -86,7 +87,7 @@ public class MemberFollowCommandService {
      */
     public void unfollowing(Long memberId, String followingNickname) {
         // 닉네임으로 팔로잉 대상의 Id 조회
-        Long followingId = memberRepository.findIdByNickName(followingNickname)
+        Long followingId = memberRepository.findIdByNickNameKey(NicknamePolicy.comparisonKey(followingNickname))
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로잉 하고 있는지 여부 확인
@@ -106,7 +107,7 @@ public class MemberFollowCommandService {
      */
     public void deleteFollower(Long memberId, String followerNickname) {
         // 닉네임으로 팔로워의 Id 조회
-        Long followerId = memberRepository.findIdByNickName(followerNickname)
+        Long followerId = memberRepository.findIdByNickNameKey(NicknamePolicy.comparisonKey(followerNickname))
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
 
         // 팔로워가 존재하는지 확인

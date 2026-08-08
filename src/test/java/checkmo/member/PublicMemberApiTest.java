@@ -4,8 +4,11 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
 import checkmo.support.ApiTestSupport;
+import java.util.Locale;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 
 class PublicMemberApiTest extends ApiTestSupport {
@@ -24,9 +27,34 @@ class PublicMemberApiTest extends ApiTestSupport {
     }
 
     @Test
-    void checkNicknameRejectsHangulNickname() {
+    void checkNicknameAllowsHangulAndUppercaseNickname() {
         given()
-                .queryParam("nickname", "한글닉네임")
+                .queryParam("nickname", "한글NickName")
+                .when()
+                .post("/api/v1/members/check-nickname")
+                .then()
+                .statusCode(200)
+                .body("result", equalTo(false));
+    }
+
+    @Test
+    void checkNicknameTreatsCaseVariantsAsDuplicate() {
+        TestUser user = createUser();
+
+        given()
+                .queryParam("nickname", user.nickName().toUpperCase(Locale.ROOT))
+                .when()
+                .post("/api/v1/members/check-nickname")
+                .then()
+                .statusCode(200)
+                .body("result", equalTo(true));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"책 모", "책\t모", "책\n모", "책\u00A0모", "책`모", "책~모", "책📚모"})
+    void checkNicknameRejectsWhitespaceAndUnsupportedCharacters(String nickname) {
+        given()
+                .queryParam("nickname", nickname)
                 .when()
                 .post("/api/v1/members/check-nickname")
                 .then()

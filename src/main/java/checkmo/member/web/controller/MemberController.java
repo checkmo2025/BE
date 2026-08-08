@@ -2,6 +2,7 @@ package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.common.validation.ValidNickname;
 import checkmo.member.internal.service.MemberFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;
@@ -25,9 +26,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -76,9 +74,7 @@ public class MemberController {
     })
     public ApiResponse<Boolean> checkNickname(
             @RequestParam
-            @NotBlank(message = "닉네임은 필수입니다")
-            @Size(max = 20, message = "닉네임은 최대 20자까지 가능합니다")
-            @Pattern(regexp = "^[a-z0-9\\p{Punct}]+$", message = "닉네임은 영어 소문자, 숫자, 특수문자만 사용할 수 있습니다")
+            @ValidNickname(required = true)
             String nickname
     ) {
         boolean isDuplicated = memberQueryService.isNicknameDuplicated(nickname);
