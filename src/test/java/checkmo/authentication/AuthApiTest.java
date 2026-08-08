@@ -211,6 +211,40 @@ class AuthApiTest extends ApiTestSupport {
     }
 
     @Test
+    void 닉네임_로그인은_대소문자를_구분하지_않는다() {
+        TestUser user = createUserWithPassword("Pass123!");
+        var authUser = authRepository.findById(user.memberId()).orElseThrow();
+        authUser.updateNickname("BookMo");
+        authRepository.saveAndFlush(authUser);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("identifier", "bookmo", "password", "Pass123!"))
+                .when()
+                .post("/api/v1/auth/login")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true));
+    }
+
+    @Test
+    void 한글_닉네임_로그인은_NFC와_대소문자를_무시한다() {
+        TestUser user = createUserWithPassword("Pass123!");
+        var authUser = authRepository.findById(user.memberId()).orElseThrow();
+        authUser.updateNickname("책Mo");
+        authRepository.saveAndFlush(authUser);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of("identifier", "책mo", "password", "Pass123!"))
+                .when()
+                .post("/api/v1/auth/login")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true));
+    }
+
+    @Test
     void appLoginSucceedsWithRefreshTokenInResponse() {
         TestUser user = createUserWithPassword("Pass123!");
 

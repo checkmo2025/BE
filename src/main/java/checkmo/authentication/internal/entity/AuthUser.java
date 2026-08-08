@@ -1,6 +1,7 @@
 package checkmo.authentication.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.common.validation.NicknamePolicy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -51,6 +54,9 @@ public class AuthUser extends BaseEntity {
     @Column(length = 20)
     private String nickName;
 
+    @Column(length = 20, unique = true)
+    private String nickNameKey;
+
     private LocalDateTime deactivatedAt;
 
     public void deactivate() {
@@ -82,7 +88,14 @@ public class AuthUser extends BaseEntity {
     }
 
     public void updateNickname(String nickName) {
-        this.nickName = nickName;
+        this.nickName = NicknamePolicy.normalize(nickName);
+        this.nickNameKey = NicknamePolicy.comparisonKey(nickName);
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void synchronizeNicknameIdentity() {
+        updateNickname(nickName);
     }
 
     public boolean isAdmin() {

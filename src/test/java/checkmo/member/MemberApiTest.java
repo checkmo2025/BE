@@ -446,6 +446,7 @@ class MemberApiTest extends ApiTestSupport {
         assertThat(member.getNickName()).isEqualTo("bookMo");
         assertThat(member.getNickNameKey()).isEqualTo("bookmo");
         assertThat(authUser.getNickName()).isEqualTo("bookMo");
+        assertThat(authUser.getNickNameKey()).isEqualTo("bookmo");
     }
 
     @Test
