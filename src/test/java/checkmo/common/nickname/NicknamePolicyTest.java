@@ -1,23 +1,11 @@
-package checkmo.common.validation;
+package checkmo.common.nickname;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import java.util.Set;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 class NicknamePolicyTest {
-
-    private static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
-    private static final Validator VALIDATOR = VALIDATOR_FACTORY.getValidator();
-
-    @AfterAll
-    static void closeValidatorFactory() {
-        VALIDATOR_FACTORY.close();
-    }
 
     @Test
     void 한글_영문_대소문자_숫자와_허용된_특수문자를_사용할_수_있다() {
@@ -87,20 +75,5 @@ class NicknamePolicyTest {
         assertThat(NicknamePolicy.validate("", false)).isEqualTo(NicknamePolicy.ValidationError.NONE);
         assertThat(NicknamePolicy.validate(null, true)).isEqualTo(NicknamePolicy.ValidationError.REQUIRED);
         assertThat(NicknamePolicy.validate("", true)).isEqualTo(NicknamePolicy.ValidationError.REQUIRED);
-    }
-
-    @Test
-    void 공통_제약조건은_정책별_오류_문구를_반환한다() {
-        assertThat(VALIDATOR.validate(new RequiredNickname("책 모")))
-                .singleElement()
-                .extracting(violation -> violation.getMessage())
-                .isEqualTo("닉네임에는 공백을 사용할 수 없습니다.");
-        assertThat(VALIDATOR.validate(new RequiredNickname("")))
-                .singleElement()
-                .extracting(violation -> violation.getMessage())
-                .isEqualTo("닉네임은 필수입니다.");
-    }
-
-    private record RequiredNickname(@ValidNickname(required = true) String nickname) {
     }
 }

@@ -1,6 +1,6 @@
 package checkmo.member.internal.service.query;
 
-import checkmo.common.validation.NicknamePolicy;
+import checkmo.common.nickname.NicknamePolicy;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.exception.MemberErrorStatus;

@@ -4,7 +4,7 @@ import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
-import checkmo.common.validation.NicknamePolicy;
+import checkmo.common.nickname.NicknamePolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,7 +1,7 @@
 package checkmo.member.internal.entity;
 
 import checkmo.common.BaseEntity;
-import checkmo.common.validation.NicknamePolicy;
+import checkmo.common.nickname.NicknamePolicy;
 import checkmo.member.internal.exception.MemberErrorStatus;
 import checkmo.member.internal.exception.MemberException;
 import jakarta.persistence.CascadeType;

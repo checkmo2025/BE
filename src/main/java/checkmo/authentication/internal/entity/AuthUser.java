@@ -1,7 +1,7 @@
 package checkmo.authentication.internal.entity;
 
 import checkmo.common.BaseEntity;
-import checkmo.common.validation.NicknamePolicy;
+import checkmo.common.nickname.NicknamePolicy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

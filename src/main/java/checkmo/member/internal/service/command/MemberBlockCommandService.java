@@ -1,6 +1,6 @@
 package checkmo.member.internal.service.command;
 
-import checkmo.common.validation.NicknamePolicy;
+import checkmo.common.nickname.NicknamePolicy;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberBlock;
 import checkmo.member.internal.exception.MemberErrorStatus;

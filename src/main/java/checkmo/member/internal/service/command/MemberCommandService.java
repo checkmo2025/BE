@@ -1,7 +1,7 @@
 package checkmo.member.internal.service.command;
 
 import checkmo.authentication.AuthenticationAPI;
-import checkmo.common.validation.NicknamePolicy;
+import checkmo.common.nickname.NicknamePolicy;
 import checkmo.member.MemberEvent;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;

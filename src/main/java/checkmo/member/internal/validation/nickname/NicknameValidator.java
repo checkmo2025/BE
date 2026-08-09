@@ -1,5 +1,6 @@
-package checkmo.common.validation;
+package checkmo.member.internal.validation.nickname;
 
+import checkmo.common.nickname.NicknamePolicy;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

@@ -2,7 +2,7 @@ package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
-import checkmo.common.validation.ValidNickname;
+import checkmo.member.internal.validation.nickname.ValidNickname;
 import checkmo.member.internal.service.MemberFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;

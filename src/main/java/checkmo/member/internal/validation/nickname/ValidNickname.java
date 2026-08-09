@@ -1,4 +1,4 @@
-package checkmo.common.validation;
+package checkmo.member.internal.validation.nickname;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

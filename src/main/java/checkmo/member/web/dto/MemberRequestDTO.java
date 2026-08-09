@@ -1,6 +1,6 @@
 package checkmo.member.web.dto;
 
-import checkmo.common.validation.ValidNickname;
+import checkmo.member.internal.validation.nickname.ValidNickname;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;

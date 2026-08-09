@@ -1,4 +1,4 @@
-package checkmo.common.validation;
+package checkmo.common.nickname;
 
 import java.text.Normalizer;
 import java.util.Locale;
