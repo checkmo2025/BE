@@ -297,7 +297,8 @@ class MemberApiTest extends ApiTestSupport {
     @Test
     void additionalInfoPersistsNicknameForSignupCreatedIncompleteUser() {
         String email = "additional-info-null-nickname@example.com";
-        String nickname = "completeinfo";
+        String decomposedNickname = "\u110E\u1162\u11A8\u1106\u1169ABC";
+        String normalizedNickname = "책모ABC";
         when(redisHashOperations.get("verification:" + email, "verified")).thenReturn(true);
 
         ExtractableResponse<Response> signUpResponse = given()
@@ -313,7 +314,7 @@ class MemberApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie("accessToken", signUpResponse.cookie("accessToken"))
                 .body(Map.of(
-                        "nickname", nickname,
+                        "nickname", decomposedNickname,
                         "name", "완료",
                         "phoneNumber", "010-1234-5678",
                         "description", "소개",
@@ -328,8 +329,9 @@ class MemberApiTest extends ApiTestSupport {
         var authUser = authRepository.findByEmail(email).orElseThrow();
         var member = memberRepository.findById(authUser.getId()).orElseThrow();
 
-        assertThat(authUser.getNickName()).isEqualTo(nickname);
-        assertThat(member.getNickName()).isEqualTo(nickname);
+        assertThat(authUser.getNickName()).isEqualTo(normalizedNickname);
+        assertThat(member.getNickName()).isEqualTo(normalizedNickname);
+        assertThat(member.getNickNameKey()).isEqualTo("책모abc");
         assertThat(authUser.isProfileCompleted()).isTrue();
     }
 
@@ -420,6 +422,77 @@ class MemberApiTest extends ApiTestSupport {
                 .statusCode(200)
                 .body("isSuccess", equalTo(true))
                 .body("result.nickname", equalTo(user.nickName()));
+    }
+
+    @Test
+    void 프로필_수정에서_본인의_닉네임_대소문자만_변경하면_표시값을_갱신한다() {
+        TestUser user = createUser();
+
+        updateNickname(user, "BookMo");
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("nickname", "bookMo"))
+                .when()
+                .patch("/api/v1/members/me")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true))
+                .body("result.nickname", equalTo("bookMo"));
+
+        var member = memberRepository.findById(user.memberId()).orElseThrow();
+        var authUser = authRepository.findById(user.memberId()).orElseThrow();
+        assertThat(member.getNickName()).isEqualTo("bookMo");
+        assertThat(member.getNickNameKey()).isEqualTo("bookmo");
+        assertThat(authUser.getNickName()).isEqualTo("bookMo");
+        assertThat(authUser.getNickNameKey()).isEqualTo("bookmo");
+    }
+
+    @Test
+    void 프로필_수정에서_타인의_닉네임과_대소문자만_다르면_중복으로_거부한다() {
+        TestUser me = createUser();
+        TestUser other = createUser();
+        updateNickname(other, "BookMo");
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(me))
+                .body(Map.of("nickname", "bookmo"))
+                .when()
+                .patch("/api/v1/members/me")
+                .then()
+                .statusCode(400)
+                .body("isSuccess", equalTo(false))
+                .body("code", equalTo("MEMBER_416"));
+    }
+
+    @Test
+    void 다른_회원_프로필을_한글과_대소문자를_무시하고_조회한다() {
+        TestUser viewer = createUser();
+        TestUser target = createUser();
+        updateNickname(target, "책모ABC");
+
+        given()
+                .cookie(accessTokenCookie(viewer))
+                .when()
+                .get("/api/v1/members/{memberNickname}", "책모abc")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true))
+                .body("result.nickname", equalTo("책모ABC"));
+    }
+
+    private void updateNickname(TestUser user, String nickname) {
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("nickname", nickname))
+                .when()
+                .patch("/api/v1/members/me")
+                .then()
+                .statusCode(200)
+                .body("isSuccess", equalTo(true));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package checkmo.member.web.dto;
 
+import checkmo.member.internal.validation.nickname.ValidNickname;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -16,10 +17,11 @@ public class MemberRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class MemberProfileUpdate {
-        @Size(max = 20, message = "닉네임은 최대 20자까지 가능합니다")
-        @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
-                message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")
-        @Schema(description = "변경할 닉네임(미전송/빈 값이면 변경 없음). 영어 소문자 및 특수문자 최대 20자", example = "new_nick")
+        @ValidNickname
+        @Schema(
+                description = "변경할 닉네임(미전송/빈 값이면 변경 없음). 한글, 영문 대소문자, 숫자, 허용 특수문자 최대 20자. 공백은 사용할 수 없으며 대소문자만 다른 닉네임은 중복으로 처리",
+                example = "책모Book"
+        )
         private String nickname;
 
         @Size(max = 40, message = "소개는 40자 이하여야 합니다")
@@ -51,11 +53,11 @@ public class MemberRequestDTO {
     @Getter
     @NoArgsConstructor
     public static class AdditionalInfo {
-        @NotBlank(message = "닉네임은 필수입니다")
-        @Size(max = 20, message = "닉네임은 최대 20자까지 가능합니다")
-        @Pattern(regexp = "^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$",
-                message = "닉네임은 영어 소문자 및 특수문자만 사용 가능합니다")
-        @Schema(description = "닉네임(영어 소문자 및 특수문자 최대 20자)", example = "nick")
+        @ValidNickname(required = true)
+        @Schema(
+                description = "닉네임(한글, 영문 대소문자, 숫자, 허용 특수문자 최대 20자). 공백은 사용할 수 없으며 대소문자만 다른 닉네임은 중복으로 처리",
+                example = "책모Book"
+        )
         private String nickname;
 
         @NotBlank(message = "이름은 필수입니다")

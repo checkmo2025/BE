@@ -1,6 +1,7 @@
 package checkmo.member.internal.service.command;
 
 import checkmo.authentication.AuthenticationAPI;
+import checkmo.common.nickname.NicknamePolicy;
 import checkmo.member.MemberEvent;
 import checkmo.member.internal.converter.MemberConverter;
 import checkmo.member.internal.entity.Member;
@@ -14,8 +15,10 @@ import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashSet;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,6 +27,8 @@ import org.springframework.util.StringUtils;
 @Transactional
 @Service
 public class MemberCommandService {
+
+    private static final String NICKNAME_KEY_CONSTRAINT = "UK_member_nickname_key";
 
     private final AuthenticationAPI authenticationAPI;
 
@@ -60,6 +65,9 @@ public class MemberCommandService {
             throw new MemberException(MemberErrorStatus.NICKNAME_REQUIRED);
         }
 
+        String nicknameKey = NicknamePolicy.comparisonKey(request.getNickname());
+        ensureNicknameAvailable(nicknameKey);
+
         member.updateAdditionalInfo(
                 request.getNickname(),
                 request.getName(),
@@ -72,7 +80,8 @@ public class MemberCommandService {
                 new HashSet<>(request.getCategories())
         );
 
-        authenticationAPI.updateNickname(memberId, request.getNickname());
+        flushNicknameChange();
+        authenticationAPI.updateNickname(memberId, member.getNickName());
 
         // 프로필 완료 상태로 변경
         authenticationAPI.completeProfile(memberId);
@@ -100,13 +109,18 @@ public class MemberCommandService {
         Member member = findActiveMember(memberId);
 
         // 닉네임 변경: 값이 있고 현재 닉네임과 다를 때만 처리(중복 검사 후 Member + AuthUser 동기 갱신)
-        String newNickname = request.getNickname();
-        if (StringUtils.hasText(newNickname) && !newNickname.equals(member.getNickName())) {
-            if (memberRepository.existsByNickNameAndDeactivatedAtIsNull(newNickname)) {
-                throw new MemberException(MemberErrorStatus.NICKNAME_ALREADY_EXISTS);
+        String requestedNickname = request.getNickname();
+        if (StringUtils.hasText(requestedNickname)) {
+            String normalizedNickname = NicknamePolicy.normalize(requestedNickname);
+            boolean sameIdentity = member.hasSameNicknameIdentity(normalizedNickname);
+            if (!sameIdentity) {
+                ensureNicknameAvailable(NicknamePolicy.comparisonKey(normalizedNickname));
             }
-            member.updateNickname(newNickname);
-            authenticationAPI.updateNickname(memberId, newNickname);
+            if (!normalizedNickname.equals(member.getNickName())) {
+                member.updateNickname(normalizedNickname);
+                flushNicknameChange();
+                authenticationAPI.updateNickname(memberId, member.getNickName());
+            }
         }
 
         String existingImageUrl = member.getImgUrl();
@@ -128,6 +142,46 @@ public class MemberCommandService {
         }
 
         return MemberConverter.toMemberProfileWithCategory(member, isSocialMember(memberId));
+    }
+
+    private void ensureNicknameAvailable(String nicknameKey) {
+        if (memberRepository.existsByNickNameKey(nicknameKey)) {
+            throw new MemberException(MemberErrorStatus.NICKNAME_ALREADY_EXISTS);
+        }
+    }
+
+    private void flushNicknameChange() {
+        try {
+            memberRepository.flush();
+        } catch (DataIntegrityViolationException exception) {
+            if (isNicknameKeyConstraintViolation(exception)) {
+                throw new MemberException(MemberErrorStatus.NICKNAME_ALREADY_EXISTS);
+            }
+            throw exception;
+        }
+    }
+
+    private boolean isNicknameKeyConstraintViolation(DataIntegrityViolationException exception) {
+        Throwable cause = exception;
+        while (cause != null) {
+            if (cause instanceof org.hibernate.exception.ConstraintViolationException constraintViolation) {
+                String constraintName = constraintViolation.getConstraintName();
+                if (constraintName != null
+                        && constraintName.toLowerCase(Locale.ROOT)
+                        .contains(NICKNAME_KEY_CONSTRAINT.toLowerCase(Locale.ROOT))) {
+                    return true;
+                }
+            }
+
+            String message = cause.getMessage();
+            if (message != null
+                    && message.toLowerCase(Locale.ROOT)
+                    .contains(NICKNAME_KEY_CONSTRAINT.toLowerCase(Locale.ROOT))) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     /**
