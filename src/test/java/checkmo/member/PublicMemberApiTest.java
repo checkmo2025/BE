@@ -50,6 +50,22 @@ class PublicMemberApiTest extends ApiTestSupport {
                 .body("result", equalTo(true));
     }
 
+    @Test
+    void checkNicknameKeepsDeactivatedUsersNicknameReserved() {
+        TestUser user = createUser();
+        var member = memberRepository.findById(user.memberId()).orElseThrow();
+        member.deactivate();
+        memberRepository.saveAndFlush(member);
+
+        given()
+                .queryParam("nickname", user.nickName().toUpperCase(Locale.ROOT))
+                .when()
+                .post("/api/v1/members/check-nickname")
+                .then()
+                .statusCode(200)
+                .body("result", equalTo(true));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"책 모", "책\t모", "책\n모", "책\u00A0모", "책`모", "책~모", "책📚모"})
     void checkNicknameRejectsWhitespaceAndUnsupportedCharacters(String nickname) {

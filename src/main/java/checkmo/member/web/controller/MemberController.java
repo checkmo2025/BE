@@ -66,7 +66,10 @@ public class MemberController {
         return ApiResponse.onSuccess(null);
     }
 
-    @Operation(summary = "닉네임 중복 확인", description = "회원가입 시 닉네임 중복을 확인합니다.")
+    @Operation(
+            summary = "닉네임 중복 확인",
+            description = "NFC 정규화 및 영문 대소문자를 구분하지 않는 기준으로 닉네임 중복을 확인합니다."
+    )
     @PostMapping("/check-nickname")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),

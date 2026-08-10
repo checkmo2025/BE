@@ -35,7 +35,7 @@ public class MemberQueryService {
      * @return 중복 여부 (true: 중복됨, false: 사용 가능)
      */
     public boolean isNicknameDuplicated(String nickname) {
-        return memberRepository.existsByNickNameKeyAndDeactivatedAtIsNull(
+        return memberRepository.existsByNickNameKey(
                 NicknamePolicy.comparisonKey(nickname)
         );
     }

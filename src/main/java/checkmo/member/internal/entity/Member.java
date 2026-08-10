@@ -19,6 +19,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.time.LocalDateTime;
@@ -38,6 +39,9 @@ import lombok.NoArgsConstructor;
 @Table(
         indexes = {
                 @Index(name = "idx_member_deactivated_at", columnList = "deactivated_at")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UK_member_nickname_key", columnNames = "nick_name_key")
         }
 )
 public class Member extends BaseEntity {
@@ -61,7 +65,7 @@ public class Member extends BaseEntity {
     @Column(length = 20)
     private String nickName;
 
-    @Column(length = 20, unique = true)
+    @Column(name = "nick_name_key", length = 20)
     private String nickNameKey;
 
     @Column(length = 40)
@@ -101,8 +105,8 @@ public class Member extends BaseEntity {
     }
 
     public void updateNickname(String nickName) {
-        this.nickName = NicknamePolicy.normalize(nickName);
-        this.nickNameKey = NicknamePolicy.comparisonKey(nickName);
+        this.nickName = NicknamePolicy.normalizeForStorage(nickName);
+        this.nickNameKey = NicknamePolicy.comparisonKey(this.nickName);
     }
 
     public boolean hasSameNicknameIdentity(String nickName) {
@@ -112,10 +116,6 @@ public class Member extends BaseEntity {
     @PrePersist
     @PreUpdate
     private void synchronizeNicknameIdentity() {
-        if (nickName == null) {
-            nickNameKey = null;
-            return;
-        }
         updateNickname(nickName);
     }
 

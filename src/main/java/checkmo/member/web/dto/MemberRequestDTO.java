@@ -18,7 +18,10 @@ public class MemberRequestDTO {
     @NoArgsConstructor
     public static class MemberProfileUpdate {
         @ValidNickname
-        @Schema(description = "변경할 닉네임(미전송/빈 값이면 변경 없음). 한글, 영문, 숫자, 허용 특수문자 최대 20자", example = "책모Book")
+        @Schema(
+                description = "변경할 닉네임(미전송/빈 값이면 변경 없음). 한글, 영문 대소문자, 숫자, 허용 특수문자 최대 20자. 공백은 사용할 수 없으며 대소문자만 다른 닉네임은 중복으로 처리",
+                example = "책모Book"
+        )
         private String nickname;
 
         @Size(max = 40, message = "소개는 40자 이하여야 합니다")
@@ -51,7 +54,10 @@ public class MemberRequestDTO {
     @NoArgsConstructor
     public static class AdditionalInfo {
         @ValidNickname(required = true)
-        @Schema(description = "닉네임(한글, 영문, 숫자, 허용 특수문자 최대 20자)", example = "책모Book")
+        @Schema(
+                description = "닉네임(한글, 영문 대소문자, 숫자, 허용 특수문자 최대 20자). 공백은 사용할 수 없으며 대소문자만 다른 닉네임은 중복으로 처리",
+                example = "책모Book"
+        )
         private String nickname;
 
         @NotBlank(message = "이름은 필수입니다")

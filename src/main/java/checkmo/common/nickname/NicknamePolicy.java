@@ -20,15 +20,25 @@ public final class NicknamePolicy {
 
     public static String comparisonKey(String nickname) {
         String normalized = normalize(nickname);
-        if (normalized == null) {
+        if (normalized == null || normalized.isEmpty()) {
             return null;
         }
         return normalized.toLowerCase(Locale.ROOT);
     }
 
+    public static String normalizeForStorage(String nickname) {
+        ValidationError validationError = validate(nickname, false);
+        if (validationError != ValidationError.NONE) {
+            throw new IllegalArgumentException(validationError.getMessage());
+        }
+
+        String normalized = normalize(nickname);
+        return normalized == null || normalized.isEmpty() ? null : normalized;
+    }
+
     public static boolean isSameIdentity(String first, String second) {
         String firstKey = comparisonKey(first);
-        return firstKey != null && !firstKey.isEmpty() && firstKey.equals(comparisonKey(second));
+        return firstKey != null && firstKey.equals(comparisonKey(second));
     }
 
     public static ValidationError validate(String nickname, boolean required) {

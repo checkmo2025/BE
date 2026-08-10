@@ -11,6 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -23,6 +25,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UK_auth_user_nickname_key", columnNames = "nick_name_key")
+        }
+)
 public class AuthUser extends BaseEntity {
 
     @Id
@@ -54,7 +61,7 @@ public class AuthUser extends BaseEntity {
     @Column(length = 20)
     private String nickName;
 
-    @Column(length = 20, unique = true)
+    @Column(name = "nick_name_key", length = 20)
     private String nickNameKey;
 
     private LocalDateTime deactivatedAt;
@@ -88,8 +95,8 @@ public class AuthUser extends BaseEntity {
     }
 
     public void updateNickname(String nickName) {
-        this.nickName = NicknamePolicy.normalize(nickName);
-        this.nickNameKey = NicknamePolicy.comparisonKey(nickName);
+        this.nickName = NicknamePolicy.normalizeForStorage(nickName);
+        this.nickNameKey = NicknamePolicy.comparisonKey(this.nickName);
     }
 
     @PrePersist

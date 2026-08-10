@@ -15,6 +15,7 @@ import checkmo.member.web.dto.MemberResponseDTO.DetailInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashSet;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +27,8 @@ import org.springframework.util.StringUtils;
 @Transactional
 @Service
 public class MemberCommandService {
+
+    private static final String NICKNAME_KEY_CONSTRAINT = "UK_member_nickname_key";
 
     private final AuthenticationAPI authenticationAPI;
 
@@ -142,7 +145,7 @@ public class MemberCommandService {
     }
 
     private void ensureNicknameAvailable(String nicknameKey) {
-        if (memberRepository.existsByNickNameKeyAndDeactivatedAtIsNull(nicknameKey)) {
+        if (memberRepository.existsByNickNameKey(nicknameKey)) {
             throw new MemberException(MemberErrorStatus.NICKNAME_ALREADY_EXISTS);
         }
     }
@@ -151,8 +154,34 @@ public class MemberCommandService {
         try {
             memberRepository.flush();
         } catch (DataIntegrityViolationException exception) {
-            throw new MemberException(MemberErrorStatus.NICKNAME_ALREADY_EXISTS);
+            if (isNicknameKeyConstraintViolation(exception)) {
+                throw new MemberException(MemberErrorStatus.NICKNAME_ALREADY_EXISTS);
+            }
+            throw exception;
         }
+    }
+
+    private boolean isNicknameKeyConstraintViolation(DataIntegrityViolationException exception) {
+        Throwable cause = exception;
+        while (cause != null) {
+            if (cause instanceof org.hibernate.exception.ConstraintViolationException constraintViolation) {
+                String constraintName = constraintViolation.getConstraintName();
+                if (constraintName != null
+                        && constraintName.toLowerCase(Locale.ROOT)
+                        .contains(NICKNAME_KEY_CONSTRAINT.toLowerCase(Locale.ROOT))) {
+                    return true;
+                }
+            }
+
+            String message = cause.getMessage();
+            if (message != null
+                    && message.toLowerCase(Locale.ROOT)
+                    .contains(NICKNAME_KEY_CONSTRAINT.toLowerCase(Locale.ROOT))) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     /**

@@ -1,6 +1,7 @@
 package checkmo.common.nickname;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,7 @@ class NicknamePolicyTest {
         assertThat(NicknamePolicy.comparisonKey("책모ABC")).isEqualTo("책모abc");
         assertThat(NicknamePolicy.isSameIdentity("BookMo", "bookMO")).isTrue();
         assertThat(NicknamePolicy.isSameIdentity("\u1100\u1161", "가")).isTrue();
+        assertThat(NicknamePolicy.comparisonKey("")).isNull();
         assertThat(NicknamePolicy.isSameIdentity(null, null)).isFalse();
         assertThat(NicknamePolicy.isSameIdentity("", "")).isFalse();
     }
@@ -75,5 +77,15 @@ class NicknamePolicyTest {
         assertThat(NicknamePolicy.validate("", false)).isEqualTo(NicknamePolicy.ValidationError.NONE);
         assertThat(NicknamePolicy.validate(null, true)).isEqualTo(NicknamePolicy.ValidationError.REQUIRED);
         assertThat(NicknamePolicy.validate("", true)).isEqualTo(NicknamePolicy.ValidationError.REQUIRED);
+        assertThat(NicknamePolicy.normalizeForStorage(null)).isNull();
+        assertThat(NicknamePolicy.normalizeForStorage("")).isNull();
+    }
+
+    @Test
+    void 저장_직전에도_정규화하고_잘못된_문자는_거부한다() {
+        assertThat(NicknamePolicy.normalizeForStorage("\u110E\u1162\u11A8Mo")).isEqualTo("책Mo");
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> NicknamePolicy.normalizeForStorage("책 모"))
+                .withMessage("닉네임에는 공백을 사용할 수 없습니다.");
     }
 }

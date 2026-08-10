@@ -16,7 +16,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
-    boolean existsByNickNameKeyAndDeactivatedAtIsNull(String nickNameKey);
+    boolean existsByNickNameKey(String nickNameKey);
     Optional<Member> findByIdAndDeactivatedAtIsNull(Long id);
     List<Member> findAllByIdInAndDeactivatedAtIsNull(List<Long> ids);
 
