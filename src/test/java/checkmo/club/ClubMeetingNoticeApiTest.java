@@ -21,6 +21,7 @@ import checkmo.clubMeeting.internal.repository.TopicRepository;
 import checkmo.clubNotice.internal.entity.Notice;
 import checkmo.clubNotice.internal.repository.NoticeCommentRepository;
 import checkmo.clubNotice.internal.repository.NoticeRepository;
+import checkmo.infra.s3.internal.entity.FileUploadType;
 import checkmo.realtime.internal.entity.TeamChatMessage;
 import checkmo.realtime.internal.repository.TeamChatMessageRepository;
 import checkmo.support.ApiTestSupport;
@@ -395,6 +396,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
     @Test
     void noticeVoteAndCommentFlowCoversNoticeEndpoints() {
         TestUser owner = createUser();
+        List<String> noticeCommentImages = ownedImageUrls(owner, FileUploadType.NOTICE_COMMENT, 2);
         Club club = createClub(owner, "notice" + uniqueSuffix(owner));
 
         given().cookie(accessTokenCookie(owner))
@@ -429,10 +431,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of(
                         "content", "댓글",
-                        "imageUrls", List.of(
-                                "https://example.com/notice-comment-1.jpg",
-                                "https://example.com/notice-comment-2.jpg"
-                        )
+                        "imageUrls", noticeCommentImages
                 ))
                 .when().post("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
                 .then().statusCode(200);
@@ -444,10 +443,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .statusCode(200)
                 .body(
                         "result.comments[0].imageUrls",
-                        equalTo(List.of(
-                                "https://example.com/notice-comment-1.jpg",
-                                "https://example.com/notice-comment-2.jpg"
-                        ))
+                        equalTo(noticeCommentImages)
                 );
 
         given().cookie(accessTokenCookie(owner))
@@ -462,10 +458,7 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 .statusCode(200)
                 .body(
                         "result.comments[0].imageUrls",
-                        equalTo(List.of(
-                                "https://example.com/notice-comment-1.jpg",
-                                "https://example.com/notice-comment-2.jpg"
-                        ))
+                        equalTo(noticeCommentImages)
                 );
 
         given().cookie(accessTokenCookie(owner))
@@ -485,6 +478,21 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
                 ))
                 .when().post("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
                 .then().statusCode(400);
+
+        given().cookie(accessTokenCookie(owner))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(Map.of(
+                        "content", "다른 회원 이미지 첨부 차단",
+                        "imageUrls", List.of(ownedImageUrl(
+                                owner.memberId() + 1,
+                                FileUploadType.NOTICE_COMMENT,
+                                1
+                        ))
+                ))
+                .when().post("/api/v1/clubs/{clubId}/notices/{noticeId}/comments", club.getId(), notice.getId())
+                .then()
+                .statusCode(400)
+                .body("code", equalTo("NOTICE_COMMENT_IMAGE_401"));
 
         given().cookie(accessTokenCookie(owner))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -579,6 +587,17 @@ class ClubMeetingNoticeApiTest extends ApiTestSupport {
 
     private String uniqueSuffix(TestUser user) {
         return user.legacyId().substring(user.legacyId().length() - 4).toLowerCase();
+    }
+
+    private List<String> ownedImageUrls(TestUser owner, FileUploadType type, int count) {
+        return java.util.stream.IntStream.rangeClosed(1, count)
+                .mapToObj(index -> ownedImageUrl(owner.memberId(), type, index))
+                .toList();
+    }
+
+    private String ownedImageUrl(Long memberId, FileUploadType type, int index) {
+        return "https://test-bucket.s3.ap-northeast-2.amazonaws.com/images/%s/%d/00000000-0000-0000-0000-%012d.jpg"
+                .formatted(type.getPath(), memberId, index);
     }
 
     private Map<String, Object> clubDetailPayload(String name) {

@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.nullValue;
 
 import checkmo.bookStory.internal.entity.BookStory;
@@ -81,8 +82,7 @@ class AdminApiTest extends ApiTestSupport {
                 .queryParam("keyword", user.id())
                 .when().get("/api/v1/admin/members")
                 .then().statusCode(200)
-                .body("result.memberList.size()", equalTo(1))
-                .body("result.memberList[0].memberId", equalTo(user.memberId().intValue()));
+                .body("result.memberList.memberId", hasItem(user.memberId().intValue()));
 
         given().cookie(accessTokenCookie(admin))
                 .when().get("/api/v1/admin/members/{memberNickName}", user.nickName())

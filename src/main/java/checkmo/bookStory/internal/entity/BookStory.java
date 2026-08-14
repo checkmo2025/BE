@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @Getter
 @Builder
@@ -79,6 +80,7 @@ public class BookStory extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "bookStory", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
+    @BatchSize(size = 50)
     private List<BookStoryImage> images = new ArrayList<>();
 
     public Long update(String title, String description, String bookId, BookStoryStatus status) {

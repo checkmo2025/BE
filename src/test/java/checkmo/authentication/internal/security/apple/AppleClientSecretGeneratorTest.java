@@ -262,6 +262,7 @@ class AppleClientSecretGeneratorTest {
 
     private Claims parseClaims(String clientSecret, PublicKey publicKey) {
         return Jwts.parser()
+                .clock(() -> Date.from(NOW))
                 .verifyWith(publicKey)
                 .build()
                 .parseSignedClaims(clientSecret)

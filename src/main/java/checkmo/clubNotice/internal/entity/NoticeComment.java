@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @Getter
 @Builder
@@ -48,6 +49,7 @@ public class NoticeComment extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "noticeComment", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
+    @BatchSize(size = 50)
     private List<NoticeCommentImage> images = new ArrayList<>();
 
     public void setNotice(Notice notice) {

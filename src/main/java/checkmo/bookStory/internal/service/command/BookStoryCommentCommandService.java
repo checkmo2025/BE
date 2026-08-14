@@ -8,6 +8,8 @@ import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.common.image.OwnedImageType;
+import checkmo.common.image.OwnedImageUrlPolicy;
 import checkmo.member.MemberAPI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class BookStoryCommentCommandService {
     private final CommentRepository commentRepository;
     private final MemberAPI memberAPI;
     private final ApplicationEventPublisher eventPublisher;
+    private final OwnedImageUrlPolicy ownedImageUrlPolicy;
 
     /**
      * 댓글/대댓글 작성
@@ -57,6 +60,7 @@ public class BookStoryCommentCommandService {
         }
 
         validateNotBlockedByCommentTarget(bookStory, parentComment, memberId);
+        validateOwnedImages(memberId, request.getImageUrls());
 
         // 3. 댓글 생성
         Comment comment = Comment.builder()
@@ -137,6 +141,7 @@ public class BookStoryCommentCommandService {
 
         // 4. 댓글 작성자 검증
         comment.verifyOwner(memberId);
+        validateOwnedImages(memberId, request.getImageUrls());
 
         // 5. 댓글 내용 수정
         comment.updateContent(request.getContent());
@@ -224,10 +229,18 @@ public class BookStoryCommentCommandService {
         if (imageUrls == null || imageUrls.isEmpty()) {
             return;
         }
-        eventPublisher.publishEvent(
-                BookStoryEvent.DeleteBookStoryImage.builder()
-                        .imageUrls(imageUrls)
-                        .build()
-        );
+        imageUrls.stream()
+                .distinct()
+                .forEach(imageUrl -> eventPublisher.publishEvent(
+                        BookStoryEvent.DeleteBookStoryImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
+    }
+
+    private void validateOwnedImages(Long memberId, List<String> imageUrls) {
+        if (!ownedImageUrlPolicy.isOwnedBy(imageUrls, memberId, OwnedImageType.BOOK_STORY_COMMENT)) {
+            throw new BookStoryException(BookStoryErrorStatus.COMMENT_IMAGE_INVALID);
+        }
     }
 }

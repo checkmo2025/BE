@@ -207,21 +207,28 @@ public class ClubNoticeCommandService {
     }
 
     private void publishNoticeImageDeletedEvent(List<String> removedImages) {
-        applicationEventPublisher.publishEvent(
-                ClubNoticeEvent.DeleteNoticeImage.builder()
-                        .imageUrls(removedImages)
-                        .build()
-        );
+        if (removedImages == null || removedImages.isEmpty()) {
+            return;
+        }
+        removedImages.stream()
+                .distinct()
+                .forEach(imageUrl -> applicationEventPublisher.publishEvent(
+                        ClubNoticeEvent.DeleteNoticeImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
     }
 
     private void publishNoticeCommentImageDeletedEvent(List<String> removedImages) {
         if (removedImages == null || removedImages.isEmpty()) {
             return;
         }
-        applicationEventPublisher.publishEvent(
-                ClubNoticeEvent.DeleteNoticeCommentImage.builder()
-                        .imageUrls(removedImages)
-                        .build()
-        );
+        removedImages.stream()
+                .distinct()
+                .forEach(imageUrl -> applicationEventPublisher.publishEvent(
+                        ClubNoticeEvent.DeleteNoticeCommentImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
     }
 }

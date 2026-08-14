@@ -36,3 +36,6 @@ CREATE TABLE IF NOT EXISTS notice_comment_image (
         FOREIGN KEY (notice_comment_id) REFERENCES notice_comment(id) ON DELETE CASCADE,
     UNIQUE KEY uk_notice_comment_image_order (notice_comment_id, sort_order)
 ) ENGINE=InnoDB;
+
+ALTER TABLE event_publication
+    MODIFY COLUMN serialized_event TEXT;

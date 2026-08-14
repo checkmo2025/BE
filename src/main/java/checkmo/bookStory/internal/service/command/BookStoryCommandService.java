@@ -12,6 +12,8 @@ import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.bookStory.internal.repository.CommentImageRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.common.image.OwnedImageType;
+import checkmo.common.image.OwnedImageUrlPolicy;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class BookStoryCommandService {
     private final CommentImageRepository commentImageRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final OwnedImageUrlPolicy ownedImageUrlPolicy;
 
     /**
      * 책이야기를 작성
@@ -42,6 +45,7 @@ public class BookStoryCommandService {
     public Long createBookStory(Long memberId, BookStoryRequestDTO.BookStoryCreate request) {
         BookStoryStatus status = resolveStatus(request.getStatus());
         validateDescriptionForPublished(status, request.getDescription());
+        validateOwnedImages(memberId, request.getImageUrls());
 
         String bookId = bookAPI.fetchOrCreateBook(request.getIsbn());
 
@@ -70,6 +74,7 @@ public class BookStoryCommandService {
         BookStoryStatus requestedStatus = resolveStatus(request.getStatus());
         validateStatusTransition(bookStory, requestedStatus);
         validateDescriptionForPublished(requestedStatus, request.getDescription());
+        validateOwnedImages(memberId, request.getImageUrls());
 
         String bookId = request.getIsbn() == null ? null : bookAPI.fetchOrCreateBook(request.getIsbn());
         Long updatedBookStoryId = bookStory.update(request.getTitle(), request.getDescription(), bookId, requestedStatus);
@@ -155,10 +160,18 @@ public class BookStoryCommandService {
         if (imageUrls == null || imageUrls.isEmpty()) {
             return;
         }
-        eventPublisher.publishEvent(
-                BookStoryEvent.DeleteBookStoryImage.builder()
-                        .imageUrls(imageUrls)
-                        .build()
-        );
+        imageUrls.stream()
+                .distinct()
+                .forEach(imageUrl -> eventPublisher.publishEvent(
+                        BookStoryEvent.DeleteBookStoryImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
+    }
+
+    private void validateOwnedImages(Long memberId, List<String> imageUrls) {
+        if (!ownedImageUrlPolicy.isOwnedBy(imageUrls, memberId, OwnedImageType.BOOK_STORY)) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_IMAGE_INVALID);
+        }
     }
 }

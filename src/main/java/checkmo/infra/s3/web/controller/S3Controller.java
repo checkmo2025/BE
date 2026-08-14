@@ -1,5 +1,6 @@
 package checkmo.infra.s3.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.infra.s3.internal.entity.FileUploadType;
 import checkmo.infra.s3.internal.service.S3Service;
@@ -36,6 +37,7 @@ public class S3Controller {
     })
     @PostMapping("/{type}/upload-url")
     public ApiResponse<S3ResponseDTO.PresignedUrl> getImageUploadUrl(
+            @CurrentId Long memberId,
             @PathVariable FileUploadType type,
             @Valid @RequestBody S3RequestDTO.ImageUpload request
     ) {
@@ -43,7 +45,8 @@ public class S3Controller {
                 s3Service.generatePresignedUploadUrl(
                         request.getOriginalFileName(),
                         request.getContentType(),
-                        type
+                        type,
+                        memberId
                 ));
     }
 }
