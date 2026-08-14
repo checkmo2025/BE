@@ -2,6 +2,7 @@ package checkmo.member.web.controller;
 
 import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
+import checkmo.member.internal.validation.nickname.ValidNickname;
 import checkmo.member.internal.service.MemberFacade;
 import checkmo.member.internal.service.MemberQueryFacade;
 import checkmo.member.internal.service.command.MemberBlockCommandService;
@@ -25,9 +26,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +66,10 @@ public class MemberController {
         return ApiResponse.onSuccess(null);
     }
 
-    @Operation(summary = "닉네임 중복 확인", description = "회원가입 시 닉네임 중복을 확인합니다.")
+    @Operation(
+            summary = "닉네임 중복 확인",
+            description = "NFC 정규화 및 영문 대소문자를 구분하지 않는 기준으로 닉네임 중복을 확인합니다."
+    )
     @PostMapping("/check-nickname")
     @io.swagger.v3.oas.annotations.responses.ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
@@ -76,9 +77,7 @@ public class MemberController {
     })
     public ApiResponse<Boolean> checkNickname(
             @RequestParam
-            @NotBlank(message = "닉네임은 필수입니다")
-            @Size(max = 20, message = "닉네임은 최대 20자까지 가능합니다")
-            @Pattern(regexp = "^[a-z0-9\\p{Punct}]+$", message = "닉네임은 영어 소문자, 숫자, 특수문자만 사용할 수 있습니다")
+            @ValidNickname(required = true)
             String nickname
     ) {
         boolean isDuplicated = memberQueryService.isNicknameDuplicated(nickname);

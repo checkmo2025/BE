@@ -4,6 +4,7 @@ import checkmo.authentication.internal.entity.AuthUser;
 import checkmo.authentication.internal.exception.AuthErrorStatus;
 import checkmo.authentication.internal.exception.AuthException;
 import checkmo.authentication.internal.repository.AuthRepository;
+import checkmo.common.nickname.NicknamePolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +24,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
-        AuthUser user = authRepository.findByIdentifier(identifier)
+        AuthUser user = authRepository.findByEmailIgnoreCase(identifier)
+                .or(() -> authRepository.findByNickNameKey(NicknamePolicy.comparisonKey(identifier)))
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "해당 이메일 또는 아이디를 가진 사용자를 찾을 수 없습니다: " + identifier));
 

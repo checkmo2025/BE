@@ -1,6 +1,7 @@
 package checkmo.authentication.internal.entity;
 
 import checkmo.common.BaseEntity;
+import checkmo.common.nickname.NicknamePolicy;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +9,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,6 +25,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UK_auth_user_nickname_key", columnNames = "nick_name_key")
+        }
+)
 public class AuthUser extends BaseEntity {
 
     @Id
@@ -50,6 +60,9 @@ public class AuthUser extends BaseEntity {
 
     @Column(length = 20)
     private String nickName;
+
+    @Column(name = "nick_name_key", length = 20)
+    private String nickNameKey;
 
     private LocalDateTime deactivatedAt;
 
@@ -82,7 +95,14 @@ public class AuthUser extends BaseEntity {
     }
 
     public void updateNickname(String nickName) {
-        this.nickName = nickName;
+        this.nickName = NicknamePolicy.normalizeForStorage(nickName);
+        this.nickNameKey = NicknamePolicy.comparisonKey(this.nickName);
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void synchronizeNicknameIdentity() {
+        updateNickname(nickName);
     }
 
     public boolean isAdmin() {

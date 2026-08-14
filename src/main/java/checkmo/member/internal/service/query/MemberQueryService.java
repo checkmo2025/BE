@@ -1,5 +1,6 @@
 package checkmo.member.internal.service.query;
 
+import checkmo.common.nickname.NicknamePolicy;
 import checkmo.member.internal.entity.Member;
 import checkmo.member.internal.entity.MemberInterestCategory;
 import checkmo.member.internal.exception.MemberErrorStatus;
@@ -34,7 +35,9 @@ public class MemberQueryService {
      * @return 중복 여부 (true: 중복됨, false: 사용 가능)
      */
     public boolean isNicknameDuplicated(String nickname) {
-        return memberRepository.existsByNickNameAndDeactivatedAtIsNull(nickname);
+        return memberRepository.existsByNickNameKey(
+                NicknamePolicy.comparisonKey(nickname)
+        );
     }
 
     /**
@@ -69,7 +72,7 @@ public class MemberQueryService {
      * @return targetMember의 프로필 정보 DTO - 이때는 관심 카테고리 정보 DTO에 포함 X
      */
     public Member retrieveMemberByNickname(String targetMemberNickname) {
-        return memberRepository.findByNickName(targetMemberNickname)
+        return memberRepository.findByNickNameKey(NicknamePolicy.comparisonKey(targetMemberNickname))
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
@@ -84,7 +87,7 @@ public class MemberQueryService {
      * @return 회원 ID
      */
     public Long retrieveMemberId(String nickname) {
-        return memberRepository.findIdByNickName(nickname)
+        return memberRepository.findIdByNickNameKey(NicknamePolicy.comparisonKey(nickname))
                 .orElseThrow(() -> new MemberException(MemberErrorStatus.MEMBER_NOT_FOUND));
     }
 
