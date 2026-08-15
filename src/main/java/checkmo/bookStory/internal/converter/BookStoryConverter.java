@@ -26,13 +26,15 @@ public class BookStoryConverter {
             String bookId,
             BookStoryStatus status
     ) {
-        return BookStory.builder()
+        BookStory bookStory = BookStory.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .status(status)
                 .memberId(memberId)
                 .bookId(bookId)
                 .build();
+        bookStory.replaceImages(request.getImageUrls());
+        return bookStory;
     }
 
     public static BookStoryResponseDTO.BasicInfo toBookStoryDetailDTO(
@@ -48,6 +50,7 @@ public class BookStoryConverter {
                 .authorInfo(authorInfo)
                 .bookStoryTitle(bookStory.getTitle())
                 .description(bookStory.getDescription())
+                .imageUrls(bookStory.getImageUrls())
                 .likes(bookStory.getLikes())
                 .status(bookStory.getStatus())
                 .canContinue(bookStory.isDraft() && bookStory.getMemberId().equals(currentMemberId))
@@ -74,6 +77,7 @@ public class BookStoryConverter {
                 .authorInfo(authorInfo)
                 .bookStoryTitle(bookStory.getTitle())
                 .description(bookStory.getDescription())
+                .imageUrls(bookStory.getImageUrls())
                 .likes(bookStory.getLikes())
                 .status(bookStory.getStatus())
                 .canContinue(bookStory.isDraft() && bookStory.getMemberId().equals(currentMemberId))
@@ -143,6 +147,7 @@ public class BookStoryConverter {
             return BookStoryResponseDTO.CommentInfo.builder()
                     .commentId(comment.getId())
                     .content(null)
+                    .imageUrls(List.of())
                     .authorInfo(null)
                     .createdAt(comment.getCreatedAt())
                     .writtenByMe(false)
@@ -153,10 +158,12 @@ public class BookStoryConverter {
 
         MemberExternalDTO.BasicInfo displayAuthorInfo = blocked ? blockedBasicInfo() : authorInfo;
         String displayContent = blocked ? BLOCKED_USER_MESSAGE : comment.getContent();
+        List<String> displayImageUrls = blocked ? List.of() : comment.getImageUrls();
 
         return BookStoryResponseDTO.CommentInfo.builder()
                 .commentId(comment.getId())
                 .content(displayContent)
+                .imageUrls(displayImageUrls)
                 .authorInfo(displayAuthorInfo)
                 .createdAt(comment.getCreatedAt())
                 .writtenByMe(comment.getMemberId().equals(currentMemberId))

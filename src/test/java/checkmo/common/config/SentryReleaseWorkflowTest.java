@@ -72,7 +72,7 @@ class SentryReleaseWorkflowTest {
 
         assertThat(workflow)
                 .contains("SENTRY_ENABLED|SENTRY_DSN|SENTRY_ENVIRONMENT|SENTRY_RELEASE|SENTRY_AUTH_TOKEN|SENTRY_TRACES_SAMPLE_RATE");
-        assertThat(workflow).contains("SENTRY_TRACES_SAMPLE_RATE=\"${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}\"");
+        assertThat(workflow).contains("SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}");
         assertThat(workflow).contains("printf 'SENTRY_TRACES_SAMPLE_RATE=%s\\n' \"${SENTRY_TRACES_SAMPLE_RATE:-0.0}\"");
         assertThat(workflow).doesNotContain("printf 'SENTRY_TRACES_SAMPLE_RATE=0.1");
     }

@@ -5,6 +5,7 @@ import checkmo.infra.s3.internal.entity.FileUploadType;
 import checkmo.infra.s3.internal.exception.S3ErrorStatus;
 import checkmo.infra.s3.internal.exception.S3InfraException;
 import checkmo.infra.s3.web.dto.S3ResponseDTO;
+import java.net.URI;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +34,19 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Properties s3Properties;
 
-    public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(String fileName, String contentType, FileUploadType uploadType) {
+    public S3ResponseDTO.PresignedUrl generatePresignedUploadUrl(
+            String fileName,
+            String contentType,
+            FileUploadType uploadType,
+            Long memberId
+    ) {
         // Content-Type 검증
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
             throw new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE);
         }
 
         // S3에 저장될 파일의 고유 경로(key) 생성
-        String key = generateUniqueKey(fileName, uploadType);
+        String key = generateUniqueKey(fileName, uploadType, memberId);
 
         // 생성된 key를 기반으로 presigned url 생성
         String presignedUrl = generatePresignedUrl(key, contentType);
@@ -85,22 +91,28 @@ public class S3Service {
             return null;
         }
 
-        // S3에 저장된 것이 맞는지 확읺
-        if (!url.contains("amazonaws.com/") || !url.startsWith("https://")) {
+        try {
+            URI uri = URI.create(url);
+            String expectedHost = "%s.s3.%s.amazonaws.com".formatted(
+                    s3Properties.getS3().getBucket(),
+                    s3Properties.getRegion().getName()
+            );
+            if (!"https".equalsIgnoreCase(uri.getScheme())
+                    || !expectedHost.equalsIgnoreCase(uri.getHost())
+                    || uri.getUserInfo() != null
+                    || uri.getPort() != -1
+                    || uri.getFragment() != null) {
+                return null;
+            }
+
+            String rawPath = uri.getRawPath();
+            if (rawPath == null || !rawPath.startsWith("/") || rawPath.length() == 1 || rawPath.contains("%")) {
+                return null;
+            }
+            return rawPath.substring(1);
+        } catch (IllegalArgumentException exception) {
             return null;
         }
-
-        // amazonaws.com/ 기준으로 분할 -> 이 바로 다음 부분이 key
-        String[] parts = url.split("amazonaws.com/");
-        if (parts.length <= 1) {
-            return null;
-        }
-
-        String key = parts[1];
-
-        // 만약 key 뒤에 쿼리 스트링이 있을 경우 제거
-        int queryIndex = key.indexOf('?');
-        return queryIndex > 0 ? key.substring(0, queryIndex) : key;
     }
 
     private String generatePresignedUrl(String key, String contentType) {
@@ -132,13 +144,13 @@ public class S3Service {
         }
     }
 
-    private String generateUniqueKey(String originalFileName, FileUploadType uploadType) {
+    private String generateUniqueKey(String originalFileName, FileUploadType uploadType, Long memberId) {
         String extension = getFileExtension(originalFileName);
 
         String uniqueId = UUID.randomUUID().toString();
 
         // S3 버킷에 저장될 경로와 UUID 파일명.확장자 -> 이게 Key가 됨
-        return String.format("images/%s/%s%s", uploadType.getPath(), uniqueId, extension);
+        return String.format("images/%s/%d/%s%s", uploadType.getPath(), memberId, uniqueId, extension);
     }
 
     private String getFileExtension(String fileName) {

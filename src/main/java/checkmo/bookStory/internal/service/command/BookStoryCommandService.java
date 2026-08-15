@@ -1,6 +1,7 @@
 package checkmo.bookStory.internal.service.command;
 
 import checkmo.book.BookAPI;
+import checkmo.bookStory.BookStoryEvent;
 import checkmo.bookStory.internal.converter.BookStoryConverter;
 import checkmo.bookStory.internal.entity.BookStory;
 import checkmo.bookStory.internal.entity.BookStoryStatus;
@@ -8,10 +9,15 @@ import checkmo.bookStory.internal.exception.BookStoryErrorStatus;
 import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.BookStoryLikedRepository;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
+import checkmo.bookStory.internal.repository.CommentImageRepository;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.common.image.OwnedImageType;
+import checkmo.common.image.OwnedImageUrlPolicy;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +31,10 @@ public class BookStoryCommandService {
 
     private final BookStoryRepository bookStoryRepository;
     private final CommentRepository commentRepository;
+    private final CommentImageRepository commentImageRepository;
     private final BookStoryLikedRepository bookStoryLikedRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final OwnedImageUrlPolicy ownedImageUrlPolicy;
 
     /**
      * 책이야기를 작성
@@ -36,6 +45,7 @@ public class BookStoryCommandService {
     public Long createBookStory(Long memberId, BookStoryRequestDTO.BookStoryCreate request) {
         BookStoryStatus status = resolveStatus(request.getStatus());
         validateDescriptionForPublished(status, request.getDescription());
+        validateOwnedImages(memberId, request.getImageUrls());
 
         String bookId = bookAPI.fetchOrCreateBook(request.getIsbn());
 
@@ -64,9 +74,11 @@ public class BookStoryCommandService {
         BookStoryStatus requestedStatus = resolveStatus(request.getStatus());
         validateStatusTransition(bookStory, requestedStatus);
         validateDescriptionForPublished(requestedStatus, request.getDescription());
+        validateOwnedImages(memberId, request.getImageUrls());
 
         String bookId = request.getIsbn() == null ? null : bookAPI.fetchOrCreateBook(request.getIsbn());
         Long updatedBookStoryId = bookStory.update(request.getTitle(), request.getDescription(), bookId, requestedStatus);
+        publishDeletedImages(bookStory.replaceImages(request.getImageUrls()));
 
         if (requestedStatus == BookStoryStatus.DRAFT || wasDraft && requestedStatus == BookStoryStatus.PUBLISHED) {
             bookStoryRepository.updateCreatedAtToNow(bookStoryId);
@@ -105,10 +117,18 @@ public class BookStoryCommandService {
 
     private void deleteBookStoryInternal(BookStory bookStory) {
         Long bookStoryId = bookStory.getId();
+        List<String> imageUrls = java.util.stream.Stream.concat(
+                        bookStory.getImageUrls().stream(),
+                        commentImageRepository.findImageUrlsByBookStoryId(bookStoryId).stream()
+                )
+                .distinct()
+                .toList();
+
         commentRepository.deleteChildCommentsByBookStoryId(bookStoryId);
         commentRepository.deleteParentCommentsByBookStoryId(bookStoryId);
         bookStoryLikedRepository.deleteByBookStoryId(bookStoryId);
         bookStoryRepository.delete(bookStory);
+        publishDeletedImages(imageUrls);
     }
 
     /**
@@ -133,6 +153,25 @@ public class BookStoryCommandService {
     private void validateDescriptionForPublished(BookStoryStatus status, String description) {
         if (status == BookStoryStatus.PUBLISHED && (description == null || description.isBlank())) {
             throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_DESCRIPTION_REQUIRED);
+        }
+    }
+
+    private void publishDeletedImages(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+        imageUrls.stream()
+                .distinct()
+                .forEach(imageUrl -> eventPublisher.publishEvent(
+                        BookStoryEvent.DeleteBookStoryImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
+    }
+
+    private void validateOwnedImages(Long memberId, List<String> imageUrls) {
+        if (!ownedImageUrlPolicy.isOwnedBy(imageUrls, memberId, OwnedImageType.BOOK_STORY)) {
+            throw new BookStoryException(BookStoryErrorStatus.BOOK_STORY_IMAGE_INVALID);
         }
     }
 }

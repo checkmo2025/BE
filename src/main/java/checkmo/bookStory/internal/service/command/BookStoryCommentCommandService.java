@@ -8,7 +8,10 @@ import checkmo.bookStory.internal.exception.BookStoryException;
 import checkmo.bookStory.internal.repository.CommentRepository;
 import checkmo.bookStory.internal.service.query.BookStoryQueryService;
 import checkmo.bookStory.web.dto.BookStoryRequestDTO;
+import checkmo.common.image.OwnedImageType;
+import checkmo.common.image.OwnedImageUrlPolicy;
 import checkmo.member.MemberAPI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ public class BookStoryCommentCommandService {
     private final CommentRepository commentRepository;
     private final MemberAPI memberAPI;
     private final ApplicationEventPublisher eventPublisher;
+    private final OwnedImageUrlPolicy ownedImageUrlPolicy;
 
     /**
      * 댓글/대댓글 작성
@@ -56,6 +60,7 @@ public class BookStoryCommentCommandService {
         }
 
         validateNotBlockedByCommentTarget(bookStory, parentComment, memberId);
+        validateOwnedImages(memberId, request.getImageUrls());
 
         // 3. 댓글 생성
         Comment comment = Comment.builder()
@@ -64,6 +69,7 @@ public class BookStoryCommentCommandService {
                 .bookStory(bookStory)
                 .parentComment(parentComment)
                 .build();
+        comment.replaceImages(request.getImageUrls());
 
         // 4. 부모 댓글의 자식 리스트에 추가 (대댓글인 경우)
         if (parentComment != null) {
@@ -135,9 +141,11 @@ public class BookStoryCommentCommandService {
 
         // 4. 댓글 작성자 검증
         comment.verifyOwner(memberId);
+        validateOwnedImages(memberId, request.getImageUrls());
 
         // 5. 댓글 내용 수정
         comment.updateContent(request.getContent());
+        publishDeletedImages(comment.replaceImages(request.getImageUrls()));
 
         // 6. 수정된 댓글 ID 반환
         return commentId;
@@ -170,7 +178,9 @@ public class BookStoryCommentCommandService {
         comment.verifyOwner(memberId);
 
         // 5. 소프트 삭제 처리
+        List<String> removedImages = comment.replaceImages(List.of());
         comment.softDelete();
+        publishDeletedImages(removedImages);
 
         // 6. 삭제된 댓글 ID 반환
         return commentId;
@@ -198,7 +208,9 @@ public class BookStoryCommentCommandService {
         comment.verifyBookStory(bookStoryId);
 
         // 4. 소프트 삭제 처리
+        List<String> removedImages = comment.replaceImages(List.of());
         comment.softDelete();
+        publishDeletedImages(removedImages);
 
         // 5. 삭제된 댓글 ID 반환
         return commentId;
@@ -211,5 +223,24 @@ public class BookStoryCommentCommandService {
      */
     public void softDeleteAllByMemberId(Long memberId) {
         commentRepository.softDeleteAllByMemberId(memberId);
+    }
+
+    private void publishDeletedImages(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+        imageUrls.stream()
+                .distinct()
+                .forEach(imageUrl -> eventPublisher.publishEvent(
+                        BookStoryEvent.DeleteBookStoryImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
+    }
+
+    private void validateOwnedImages(Long memberId, List<String> imageUrls) {
+        if (!ownedImageUrlPolicy.isOwnedBy(imageUrls, memberId, OwnedImageType.BOOK_STORY_COMMENT)) {
+            throw new BookStoryException(BookStoryErrorStatus.COMMENT_IMAGE_INVALID);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package checkmo.infra.s3.internal.listener;
 
+import checkmo.bookStory.BookStoryEvent;
 import checkmo.clubManagement.ClubManagementEvent.DeleteClubImageEvent;
 import checkmo.clubNotice.ClubNoticeEvent;
 import checkmo.common.monitoring.SentryCaptureClient;
@@ -32,13 +33,27 @@ public class S3EventListener {
 
     @ApplicationModuleListener
     public void handleDeleteNoticeImageEvent(ClubNoticeEvent.DeleteNoticeImage event) {
-        List<String> imageUrls = (event.imageUrls() == null) ? List.of() : event.imageUrls();
+        deleteUrls(event.imageUrls(), "공지사항 이미지", event);
+    }
+
+    @ApplicationModuleListener
+    public void handleDeleteNoticeCommentImageEvent(ClubNoticeEvent.DeleteNoticeCommentImage event) {
+        deleteUrls(event.imageUrls(), "공지사항 댓글 이미지", event);
+    }
+
+    @ApplicationModuleListener
+    public void handleDeleteBookStoryImageEvent(BookStoryEvent.DeleteBookStoryImage event) {
+        deleteUrls(event.imageUrls(), "책 이야기 이미지", event);
+    }
+
+    private void deleteUrls(List<String> urls, String label, Object event) {
+        List<String> imageUrls = (urls == null) ? List.of() : urls;
         if (imageUrls.isEmpty()) {
             return;
         }
         imageUrls.stream()
                 .filter(Objects::nonNull)
-                .forEach(imageUrl -> deleteSingleUrl(imageUrl, "공지사항 이미지", event));
+                .forEach(imageUrl -> deleteSingleUrl(imageUrl, label, event));
     }
 
     // URL이 유효하지 않거나 S3 삭제 실패해도 로그만 남기고 무시

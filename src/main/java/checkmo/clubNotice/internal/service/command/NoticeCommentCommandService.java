@@ -10,7 +10,11 @@ import checkmo.clubNotice.internal.exception.ClubNoticeException;
 import checkmo.clubNotice.internal.service.query.ClubNoticeQueryService;
 import checkmo.clubNotice.internal.service.query.NoticeCommentQueryService;
 import checkmo.clubNotice.web.dto.ClubNoticeRequestDTO;
+import checkmo.common.image.OwnedImageType;
+import checkmo.common.image.OwnedImageUrlPolicy;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +25,16 @@ public class NoticeCommentCommandService {
     private final ClubManagementAPI clubManagementAPI;
     private final ClubNoticeQueryService clubNoticeQueryService;
     private final NoticeCommentQueryService noticeCommentQueryService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final OwnedImageUrlPolicy ownedImageUrlPolicy;
 
     public void createNoticeComment(Long clubId, Long noticeId, Long memberId, ClubNoticeRequestDTO.CreateClubNoticeComment request) {
         clubManagementAPI.validateClub(clubId);
         Long clubMemberId = clubManagementAPI.validateAndFetchActiveClubMemberId(clubId, memberId);
+        validateOwnedImages(memberId, request.getImageUrls());
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         NoticeComment noticeComment = ClubNoticeConverter.toNoticeComment(request, clubMemberId);
+        noticeComment.replaceImages(request.getImageUrls());
         notice.addComment(noticeComment);
     }
 
@@ -44,7 +52,9 @@ public class NoticeCommentCommandService {
         if (!noticeComment.isAuthor(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_COMMENT_UNAUTHORIZED);
         }
+        validateNewImages(memberId, noticeComment.getImageUrls(), request.getImageUrls());
         noticeComment.updateContent(request.getContent());
+        publishDeletedImages(noticeComment.replaceImages(request.getImageUrls()));
     }
 
     public void deleteNoticeComment(Long clubId, Long noticeId, Long commentId, Long memberId) {
@@ -58,6 +68,36 @@ public class NoticeCommentCommandService {
         if (!noticeComment.isAuthor(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
             throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_COMMENT_UNAUTHORIZED);
         }
+        publishDeletedImages(noticeComment.getImageUrls());
         notice.removeComment(noticeComment);
+    }
+
+    private void publishDeletedImages(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+        imageUrls.stream()
+                .distinct()
+                .forEach(imageUrl -> eventPublisher.publishEvent(
+                        checkmo.clubNotice.ClubNoticeEvent.DeleteNoticeCommentImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
+    }
+
+    private void validateNewImages(Long memberId, List<String> existingImageUrls, List<String> requestedImageUrls) {
+        if (requestedImageUrls == null) {
+            return;
+        }
+        List<String> newImageUrls = requestedImageUrls.stream()
+                .filter(imageUrl -> !existingImageUrls.contains(imageUrl))
+                .toList();
+        validateOwnedImages(memberId, newImageUrls);
+    }
+
+    private void validateOwnedImages(Long memberId, List<String> imageUrls) {
+        if (!ownedImageUrlPolicy.isOwnedBy(imageUrls, memberId, OwnedImageType.NOTICE_COMMENT)) {
+            throw new ClubNoticeException(ClubNoticeErrorStatus.NOTICE_COMMENT_IMAGE_INVALID);
+        }
     }
 }

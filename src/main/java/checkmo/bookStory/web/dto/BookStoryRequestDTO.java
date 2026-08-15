@@ -4,6 +4,7 @@ import checkmo.bookStory.internal.entity.BookStoryStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,6 +28,9 @@ public class BookStoryRequestDTO {
         @Size(max = 5000, message = "책 이야기 본문은 5000자 이하로 입력해주세요.")
         private String description;
 
+        @Size(max = 5, message = "책 이야기 이미지는 최대 5개까지 가능합니다.")
+        private List<@NotBlank(message = "책 이야기 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
+
         private BookStoryStatus status;
     }
 
@@ -43,6 +47,9 @@ public class BookStoryRequestDTO {
         @Size(max = 5000, message = "책 이야기 본문은 5000자 이하로 입력해주세요.")
         private String description;
 
+        @Size(max = 5, message = "책 이야기 이미지는 최대 5개까지 가능합니다.")
+        private List<@NotBlank(message = "책 이야기 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
+
         private BookStoryStatus status;
     }
 
@@ -52,6 +59,9 @@ public class BookStoryRequestDTO {
         @NotBlank(message = "댓글 내용을 입력해주세요.")
         @Size(max = 300, message = "댓글은 300자 이하로 입력해주세요.")
         private String content;
+
+        @Size(max = 5, message = "댓글 이미지는 최대 5개까지 가능합니다.")
+        private List<@NotBlank(message = "댓글 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
     }
 
     @Getter
@@ -60,5 +70,8 @@ public class BookStoryRequestDTO {
         @NotBlank(message = "수정할 댓글 내용을 입력해주세요.")
         @Size(max = 300, message = "댓글은 300자 이하로 입력해주세요.")
         private String content;
+
+        @Size(max = 5, message = "댓글 이미지는 최대 5개까지 가능합니다.")
+        private List<@NotBlank(message = "댓글 이미지 URL은 비어있을 수 없습니다.") String> imageUrls;
     }
 }

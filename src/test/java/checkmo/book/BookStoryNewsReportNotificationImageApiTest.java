@@ -88,13 +88,18 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         when(clubManagementAPI.fetchClubNamesByClubIds(anyList())).thenReturn(Map.of(77L, "테스트 독서모임"));
-        when(s3Service.generatePresignedUploadUrl("profile.png", "image/png", FileUploadType.PROFILE))
+        when(s3Service.generatePresignedUploadUrl(eq("profile.png"), eq("image/png"), eq(FileUploadType.PROFILE), anyLong()))
                 .thenReturn(S3ResponseDTO.PresignedUrl.builder()
                         .presignedUrl("https://upload.example.com/profile.png")
                         .imageUrl("https://cdn.example.com/profile.png")
                         .build());
-        when(s3Service.generatePresignedUploadUrl("profile.txt", "text/plain", FileUploadType.PROFILE))
+        when(s3Service.generatePresignedUploadUrl(eq("profile.txt"), eq("text/plain"), eq(FileUploadType.PROFILE), anyLong()))
                 .thenThrow(new S3InfraException(S3ErrorStatus.INVALID_FILE_TYPE));
+        when(s3Service.generatePresignedUploadUrl(eq("story.jpg"), eq("image/jpeg"), eq(FileUploadType.BOOK_STORY), anyLong()))
+                .thenReturn(S3ResponseDTO.PresignedUrl.builder()
+                        .presignedUrl("https://upload.example.com/story.jpg")
+                        .imageUrl("https://cdn.example.com/story.jpg")
+                        .build());
     }
 
     @Test
@@ -225,6 +230,19 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(accessTokenCookie(author))
                 .body(Map.of(
+                        "content", "다른 회원 댓글 이미지 첨부 차단",
+                        "imageUrls", imageUrls(other, FileUploadType.BOOK_STORY_COMMENT, 1)
+                ))
+                .when()
+                .post("/api/v1/book-stories/{bookStoryId}/comments", storyId)
+                .then()
+                .statusCode(400)
+                .body("code", equalTo("COMMENT_IMAGE_401"));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
                         "isbn", ISBN,
                         "title", "수정된 책 이야기",
                         "description", "수정된 내용을 충분히 작성합니다.",
@@ -264,6 +282,162 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .post("/api/v1/book-stories")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void bookStoryAndCommentImagesSupportFiveOrderedUrlsAndUpdateSemantics() {
+        TestUser author = createUser();
+        TestUser commenter = createUser();
+        List<String> storyImages = imageUrls(author, FileUploadType.BOOK_STORY, 5);
+
+        Number storyIdNumber = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "isbn", ISBN,
+                        "title", "사진이 있는 책 이야기",
+                        "description", "사진 다섯 장을 첨부한 책 이야기입니다.",
+                        "imageUrls", storyImages,
+                        "status", "PUBLISHED"
+                ))
+                .when()
+                .post("/api/v1/book-stories")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("result");
+        Long storyId = storyIdNumber.longValue();
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.imageUrls", equalTo(storyImages));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "title", "사진 유지 수정",
+                        "description", "imageUrls 필드를 생략하면 기존 사진을 유지합니다.",
+                        "status", "PUBLISHED"
+                ))
+                .when()
+                .patch("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200);
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.imageUrls", equalTo(storyImages));
+
+        List<String> commentImages = imageUrls(commenter, FileUploadType.BOOK_STORY_COMMENT, 5);
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of(
+                        "content", "사진이 있는 댓글입니다.",
+                        "imageUrls", commentImages
+                ))
+                .when()
+                .post("/api/v1/book-stories/{bookStoryId}/comments", storyId)
+                .then()
+                .statusCode(200);
+        Long commentId = commentRepository.findAll().getFirst().getId();
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.comments[0].imageUrls", equalTo(commentImages));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of("content", "사진은 유지하는 댓글 수정입니다."))
+                .when()
+                .patch("/api/v1/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
+                .then()
+                .statusCode(200);
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.comments[0].imageUrls", equalTo(commentImages));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of(
+                        "content", "사진을 모두 제거한 댓글입니다.",
+                        "imageUrls", List.of()
+                ))
+                .when()
+                .patch("/api/v1/book-stories/{bookStoryId}/comments/{commentId}", storyId, commentId)
+                .then()
+                .statusCode(200);
+
+        given()
+                .cookie(accessTokenCookie(author))
+                .when()
+                .get("/api/v1/book-stories/{bookStoryId}", storyId)
+                .then()
+                .statusCode(200)
+                .body("result.comments[0].imageUrls", equalTo(List.of()));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "isbn", ISBN,
+                        "title", "사진 제한 초과",
+                        "description", "사진을 여섯 장 첨부할 수 없습니다.",
+                        "imageUrls", imageUrls(author, FileUploadType.BOOK_STORY, 6),
+                        "status", "PUBLISHED"
+                ))
+                .when()
+                .post("/api/v1/book-stories")
+                .then()
+                .statusCode(400);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(commenter))
+                .body(Map.of(
+                        "content", "사진 제한을 초과한 댓글입니다.",
+                        "imageUrls", imageUrls(commenter, FileUploadType.BOOK_STORY_COMMENT, 6)
+                ))
+                .when()
+                .post("/api/v1/book-stories/{bookStoryId}/comments", storyId)
+                .then()
+                .statusCode(400);
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(author))
+                .body(Map.of(
+                        "isbn", ISBN,
+                        "title", "다른 회원 이미지 첨부 차단",
+                        "description", "다른 회원이 업로드한 이미지는 첨부할 수 없습니다.",
+                        "imageUrls", imageUrls(commenter, FileUploadType.BOOK_STORY, 1),
+                        "status", "PUBLISHED"
+                ))
+                .when()
+                .post("/api/v1/book-stories")
+                .then()
+                .statusCode(400)
+                .body("code", equalTo("BOOK_STORY_IMAGE_401"));
     }
 
     @Test
@@ -569,6 +743,16 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(accessTokenCookie(user))
+                .body(Map.of("originalFileName", "story.jpg", "contentType", "image/jpeg"))
+                .when()
+                .post("/api/v1/image/{type}/upload-url", "BOOK_STORY")
+                .then()
+                .statusCode(200)
+                .body("result.imageUrl", equalTo("https://cdn.example.com/story.jpg"));
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(Map.of("originalFileName", "profile.png", "contentType", "image/png"))
                 .when()
                 .post("/api/v1/image/{type}/upload-url", "PROFILE")
@@ -593,6 +777,13 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .post("/api/v1/image/{type}/upload-url", "CLUB")
                 .then()
                 .statusCode(403);
+    }
+
+    private List<String> imageUrls(TestUser owner, FileUploadType type, int count) {
+        return IntStream.rangeClosed(1, count)
+                .mapToObj(index -> "https://test-bucket.s3.ap-northeast-2.amazonaws.com/images/%s/%d/00000000-0000-0000-0000-%012d.jpg"
+                        .formatted(type.getPath(), owner.memberId(), index))
+                .toList();
     }
 
     private DetailInfo bookDetail(String isbn) {

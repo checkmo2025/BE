@@ -1,5 +1,6 @@
 package checkmo.infra.s3.web.controller;
 
+import checkmo.authentication.CurrentId;
 import checkmo.common.apiPayload.ApiResponse;
 import checkmo.infra.s3.internal.entity.FileUploadType;
 import checkmo.infra.s3.internal.service.S3Service;
@@ -24,7 +25,11 @@ public class S3Controller {
 
     private final S3Service s3Service;
 
-    @Operation(summary = "이미지 업로드 URL 발급", description = "이미지 업로드를 위한 presigned URL을 발급합니다. (type: PROFILE, CLUB, NOTICE)")
+    @Operation(
+            summary = "이미지 업로드 URL 발급",
+            description = "이미지 업로드를 위한 presigned URL을 발급합니다. "
+                    + "(type: PROFILE, CLUB, NOTICE, BOOK_STORY, BOOK_STORY_COMMENT, NOTICE_COMMENT)"
+    )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청입니다."),
@@ -32,6 +37,7 @@ public class S3Controller {
     })
     @PostMapping("/{type}/upload-url")
     public ApiResponse<S3ResponseDTO.PresignedUrl> getImageUploadUrl(
+            @CurrentId Long memberId,
             @PathVariable FileUploadType type,
             @Valid @RequestBody S3RequestDTO.ImageUpload request
     ) {
@@ -39,7 +45,8 @@ public class S3Controller {
                 s3Service.generatePresignedUploadUrl(
                         request.getOriginalFileName(),
                         request.getContentType(),
-                        type
+                        type,
+                        memberId
                 ));
     }
 }

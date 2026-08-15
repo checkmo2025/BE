@@ -130,6 +130,10 @@ public class ClubNoticeCommandService {
 
         Notice notice = clubNoticeQueryService.validateNotice(clubId, noticeId);
         publishNoticeImageDeletedEvent(notice.getImageUrls());
+        publishNoticeCommentImageDeletedEvent(notice.getComments().stream()
+                .flatMap(comment -> comment.getImageUrls().stream())
+                .distinct()
+                .toList());
 
         noticeRepository.delete(notice);
     }
@@ -193,13 +197,38 @@ public class ClubNoticeCommandService {
         if (!imageUrls.isEmpty()) {
             publishNoticeImageDeletedEvent(imageUrls);
         }
+
+        List<String> commentImageUrls = notices.stream()
+                .flatMap(notice -> notice.getComments().stream())
+                .flatMap(comment -> comment.getImageUrls().stream())
+                .distinct()
+                .toList();
+        publishNoticeCommentImageDeletedEvent(commentImageUrls);
     }
 
     private void publishNoticeImageDeletedEvent(List<String> removedImages) {
-        applicationEventPublisher.publishEvent(
-                ClubNoticeEvent.DeleteNoticeImage.builder()
-                        .imageUrls(removedImages)
-                        .build()
-        );
+        if (removedImages == null || removedImages.isEmpty()) {
+            return;
+        }
+        removedImages.stream()
+                .distinct()
+                .forEach(imageUrl -> applicationEventPublisher.publishEvent(
+                        ClubNoticeEvent.DeleteNoticeImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
+    }
+
+    private void publishNoticeCommentImageDeletedEvent(List<String> removedImages) {
+        if (removedImages == null || removedImages.isEmpty()) {
+            return;
+        }
+        removedImages.stream()
+                .distinct()
+                .forEach(imageUrl -> applicationEventPublisher.publishEvent(
+                        ClubNoticeEvent.DeleteNoticeCommentImage.builder()
+                                .imageUrls(List.of(imageUrl))
+                                .build()
+                ));
     }
 }

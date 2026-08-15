@@ -55,6 +55,7 @@ public class BookStoryResponseDTO {
         private BasicInfoWithFollow authorInfo;
         private String bookStoryTitle;
         private String description;
+        private List<String> imageUrls;
         private int likes;
         private BookStoryStatus status;
         private boolean canContinue;
@@ -79,6 +80,7 @@ public class BookStoryResponseDTO {
         private BasicInfoWithFollow authorInfo;
         private String bookStoryTitle;
         private String description;
+        private List<String> imageUrls;
         private int likes;
         private BookStoryStatus status;
         private boolean canContinue;
@@ -133,6 +135,7 @@ public class BookStoryResponseDTO {
     public static class CommentInfo {
         private Long commentId;
         private String content;
+        private List<String> imageUrls;
         private MemberExternalDTO.BasicInfo authorInfo;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
