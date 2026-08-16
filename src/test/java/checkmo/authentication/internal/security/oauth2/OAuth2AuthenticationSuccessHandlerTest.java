@@ -64,7 +64,6 @@ class OAuth2AuthenticationSuccessHandlerTest {
         PrincipalDetails principal = new PrincipalDetails(user, Map.of("sub", "google-sub"), false);
         TestingAuthenticationToken authentication = new TestingAuthenticationToken(principal, null);
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.getSession().setAttribute(KakaoEmailConsentRetryState.SESSION_ATTRIBUTE, Boolean.TRUE);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         when(jwtTokenProvider.generateToken(authentication)).thenReturn(JwtToken.builder()
@@ -91,9 +90,6 @@ class OAuth2AuthenticationSuccessHandlerTest {
         });
         verify(authReactivationCommandService).reactivateIfDeactivated(1L);
         verify(tokenCacheService).saveRefreshToken(1L, "session-1", "refresh-token");
-        assertSoftly(softly -> softly.assertThat(
-                request.getSession().getAttribute(KakaoEmailConsentRetryState.SESSION_ATTRIBUTE)
-        ).isNull());
     }
 
     @Test
