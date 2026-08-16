@@ -14,6 +14,7 @@ class OAuth2AuthenticationFailureHandlerTest {
     @Test
     void redirectsWithoutSecretQuery() throws Exception {
         OAuth2AuthenticationFailureHandler handler = new OAuth2AuthenticationFailureHandler();
+        ReflectionTestUtils.setField(handler, "baseUri", "https://web.checkmo.test");
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         OAuth2AuthenticationException exception = new OAuth2AuthenticationException(
@@ -23,7 +24,8 @@ class OAuth2AuthenticationFailureHandlerTest {
         handler.onAuthenticationFailure(request, response, exception);
 
         assertSoftly(softly -> {
-            softly.assertThat(response.getRedirectedUrl()).isEqualTo("/login?error=true");
+            softly.assertThat(response.getRedirectedUrl())
+                    .isEqualTo("https://web.checkmo.test/?error=login_failed");
             softly.assertThat(response.getRedirectedUrl()).doesNotContain("secret-value");
             softly.assertThat(response.getRedirectedUrl()).doesNotContain("token=");
         });
@@ -80,6 +82,7 @@ class OAuth2AuthenticationFailureHandlerTest {
     @Test
     void redirectsNormallyWhenKakaoEmailConsentRetryIsExhausted() throws Exception {
         OAuth2AuthenticationFailureHandler handler = new OAuth2AuthenticationFailureHandler();
+        ReflectionTestUtils.setField(handler, "baseUri", "https://web.checkmo.test/");
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRequestURI("/login/oauth2/code/kakao");
         request.getSession().setAttribute(KakaoEmailConsentRetryState.SESSION_ATTRIBUTE, Boolean.TRUE);
@@ -92,7 +95,8 @@ class OAuth2AuthenticationFailureHandlerTest {
         );
 
         assertSoftly(softly -> {
-            softly.assertThat(response.getRedirectedUrl()).isEqualTo("/login?error=true");
+            softly.assertThat(response.getRedirectedUrl())
+                    .isEqualTo("https://web.checkmo.test/?error=login_failed");
             softly.assertThat(request.getSession().getAttribute(KakaoEmailConsentRetryState.SESSION_ATTRIBUTE))
                     .isNull();
         });

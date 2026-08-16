@@ -23,6 +23,9 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
     private static final String KAKAO_AUTHORIZATION_URI = "/oauth2/authorization/kakao";
 
+    @Value("${app.oauth2.redirect.base-uri}")
+    private String baseUri;
+
     @Value("${app.oauth2.redirect.app-uri}")
     private String appUri;
 
@@ -46,8 +49,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         KakaoEmailConsentRetryState.clear(request);
 
-        // 실패 시 리다이렉트 URL 설정
-        getRedirectStrategy().sendRedirect(request, response, "/login?error=true");
+        getRedirectStrategy().sendRedirect(request, response, webFailureUri());
     }
 
     private boolean shouldRetryKakaoEmailConsent(
@@ -68,14 +70,13 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
     private void logAuthenticationFailure(HttpServletRequest request, AuthenticationException exception) {
         if (exception instanceof OAuth2AuthenticationException oauth2Exception) {
             OAuth2Error error = oauth2Exception.getError();
-            log.error(
+            log.warn(
                     "소셜 로그인 인증 실패: type={}, uri={}, errorCode={}, description={}, message={}",
                     oauth2Exception.getClass().getSimpleName(),
                     request.getRequestURI(),
                     error.getErrorCode(),
                     sanitize(error.getDescription()),
-                    sanitize(exception.getMessage()),
-                    exception
+                    sanitize(exception.getMessage())
             );
             return;
         }
@@ -84,8 +85,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                 "소셜 로그인 인증 실패: type={}, uri={}, message={}",
                 exception.getClass().getSimpleName(),
                 request.getRequestURI(),
-                sanitize(exception.getMessage()),
-                exception
+                sanitize(exception.getMessage())
         );
     }
 
@@ -97,6 +97,15 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                 "(?i)(client_secret|code|id_token|access_token|refresh_token|token)=([^\\s&]+)",
                 "$1=***"
         );
+    }
+
+    private String webFailureUri() {
+        String normalizedBaseUri = baseUri.endsWith("/") ? baseUri : baseUri + "/";
+        return UriComponentsBuilder.fromUriString(normalizedBaseUri)
+                .queryParam("error", "login_failed")
+                .build()
+                .encode()
+                .toUriString();
     }
 
     private void redirectAppFailure(HttpServletRequest request, HttpServletResponse response) throws IOException {
