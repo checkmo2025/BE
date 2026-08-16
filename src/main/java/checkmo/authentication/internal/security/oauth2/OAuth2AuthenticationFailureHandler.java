@@ -21,6 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
+    private static final String KAKAO_AUTHORIZATION_URI = "/oauth2/authorization/kakao";
+
     @Value("${app.oauth2.redirect.app-uri}")
     private String appUri;
 
@@ -32,12 +34,35 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         logAuthenticationFailure(request, exception);
 
         if (AppleOAuth2AuthorizationRequestResolver.consumeAppClientType(request)) {
+            KakaoEmailConsentRetryState.clear(request);
             redirectAppFailure(request, response);
             return;
         }
 
+        if (shouldRetryKakaoEmailConsent(request, exception)) {
+            getRedirectStrategy().sendRedirect(request, response, KAKAO_AUTHORIZATION_URI);
+            return;
+        }
+
+        KakaoEmailConsentRetryState.clear(request);
+
         // 실패 시 리다이렉트 URL 설정
         getRedirectStrategy().sendRedirect(request, response, "/login?error=true");
+    }
+
+    private boolean shouldRetryKakaoEmailConsent(
+            HttpServletRequest request,
+            AuthenticationException exception
+    ) {
+        if (!(exception instanceof OAuth2AuthenticationException oauth2Exception)) {
+            return false;
+        }
+        if (!OAuth2ErrorCodes.KAKAO_EMAIL_CONSENT_REQUIRED.equals(
+                oauth2Exception.getError().getErrorCode()
+        )) {
+            return false;
+        }
+        return KakaoEmailConsentRetryState.beginRetry(request);
     }
 
     private void logAuthenticationFailure(HttpServletRequest request, AuthenticationException exception) {

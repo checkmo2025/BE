@@ -1,7 +1,8 @@
 package checkmo.authentication.internal.security.oauth2;
 
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -55,5 +56,52 @@ class OAuth2AttributesTest {
     void rejectsAppleWithoutSubject() {
         assertThatThrownBy(() -> OAuth2Attributes.of("apple", Map.of("email", "apple-user@example.com")))
                 .isInstanceOf(OAuth2AuthenticationException.class);
+    }
+
+    @Test
+    void rejectsKakaoWithoutAccountInformation() {
+        assertOAuthErrorCode(
+                () -> OAuth2Attributes.of("kakao", Map.of("id", 12345L)),
+                OAuth2ErrorCodes.INVALID_KAKAO_USER_INFO
+        );
+    }
+
+    @Test
+    void rejectsKakaoWithoutProviderId() {
+        assertOAuthErrorCode(
+                () -> OAuth2Attributes.of("kakao", Map.of(
+                        "kakao_account", Map.of("email", "kakao-user@example.com")
+                )),
+                OAuth2ErrorCodes.INVALID_KAKAO_USER_INFO
+        );
+    }
+
+    @Test
+    void requestsAdditionalConsentWhenKakaoEmailNeedsAgreement() {
+        assertOAuthErrorCode(
+                () -> OAuth2Attributes.of("kakao", Map.of(
+                        "id", 12345L,
+                        "kakao_account", Map.of("email_needs_agreement", true)
+                )),
+                OAuth2ErrorCodes.KAKAO_EMAIL_CONSENT_REQUIRED
+        );
+    }
+
+    @Test
+    void rejectsKakaoAccountWhenEmailIsUnavailable() {
+        assertOAuthErrorCode(
+                () -> OAuth2Attributes.of("kakao", Map.of(
+                        "id", 12345L,
+                        "kakao_account", Map.of("email_needs_agreement", false)
+                )),
+                OAuth2ErrorCodes.KAKAO_EMAIL_UNAVAILABLE
+        );
+    }
+
+    private void assertOAuthErrorCode(Runnable action, String errorCode) {
+        assertThatThrownBy(action::run)
+                .isInstanceOfSatisfying(OAuth2AuthenticationException.class, exception ->
+                        assertThat(exception.getError().getErrorCode()).isEqualTo(errorCode)
+                );
     }
 }
