@@ -50,7 +50,6 @@ class MemberCommandServiceTest {
         private TestFixture(String constraintName) {
             Member member = Member.builder()
                     .id(1L)
-                    .nickName("기존Nick")
                     .build();
             member.updateNickname("기존Nick");
 

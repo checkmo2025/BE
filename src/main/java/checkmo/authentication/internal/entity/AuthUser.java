@@ -9,8 +9,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
@@ -97,12 +95,6 @@ public class AuthUser extends BaseEntity {
     public void updateNickname(String nickName) {
         this.nickName = NicknamePolicy.normalizeForStorage(nickName);
         this.nickNameKey = NicknamePolicy.comparisonKey(this.nickName);
-    }
-
-    @PrePersist
-    @PreUpdate
-    private void synchronizeNicknameIdentity() {
-        updateNickname(nickName);
     }
 
     public boolean isAdmin() {

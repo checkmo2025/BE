@@ -314,8 +314,10 @@ public abstract class ApiTestSupport {
                 .providerUserId(providerUserId)
                 .role(role)
                 .profileCompleted(profileCompleted)
-                .nickName(profileCompleted ? nickName : null)
                 .build();
+        if (profileCompleted) {
+            authUser.updateNickname(nickName);
+        }
         AuthUser savedAuthUser = authRepository.save(authUser);
 
         Member member = Member.builder()
@@ -324,9 +326,11 @@ public abstract class ApiTestSupport {
                 .email(email)
                 .name("테스트")
                 .phoneNumber("01012345678")
-                .nickName(profileCompleted ? nickName : null)
                 .description("api test fixture")
                 .build();
+        if (profileCompleted) {
+            member.updateNickname(nickName);
+        }
         memberRepository.save(member);
 
         JwtToken token = jwtTokenProvider.generateToken(jwtTokenProvider.getAuthenticationFromMemberId(savedAuthUser.getId()));
