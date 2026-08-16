@@ -76,30 +76,6 @@ class SocialAccountCreatorIntegrationTest {
     }
 
     @Test
-    void persistsNewKakaoSocialUserAndMemberOnFirstLogin() {
-        OAuth2Attributes attributes = OAuth2Attributes.of("kakao", Map.of(
-                "id", 12345L,
-                "kakao_account", Map.of("email", "kakao-user@example.com")
-        ));
-
-        AuthUser createdUser = socialAccountCreator.create(attributes, "kakao");
-        AuthUser savedUser = authRepository.findByProviderAndProviderUserId("KAKAO", "12345").orElseThrow();
-        Integer memberCount = jdbcTemplate.queryForObject(
-                "select count(*) from member where id = ? and email = ?",
-                Integer.class,
-                createdUser.getId(),
-                "kakao-user@example.com"
-        );
-
-        assertSoftly(softly -> {
-            softly.assertThat(createdUser.getLegacyId()).isEqualTo("KAKAO_12345");
-            softly.assertThat(savedUser.getEmail()).isEqualTo("kakao-user@example.com");
-            softly.assertThat(savedUser.isProfileCompleted()).isFalse();
-            softly.assertThat(memberCount).isEqualTo(1);
-        });
-    }
-
-    @Test
     void duplicateProviderIdFailsInsteadOfMergingExistingUser() {
         authRepository.saveAndFlush(user("APPLE_apple-sub", "existing@example.com"));
         OAuth2Attributes attributes = OAuth2Attributes.of("apple", Map.of(

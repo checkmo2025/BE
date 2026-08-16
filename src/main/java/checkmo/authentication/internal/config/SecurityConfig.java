@@ -8,12 +8,9 @@ import checkmo.authentication.internal.security.oauth2.AppleOidcUserService;
 import checkmo.authentication.internal.security.oauth2.AppleOAuth2AuthorizationRequestResolver;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationFailureHandler;
 import checkmo.authentication.internal.security.oauth2.OAuth2AuthenticationSuccessHandler;
-import checkmo.authentication.internal.security.oauth2.OAuth2CallbackExceptionFilter;
 import checkmo.authentication.internal.security.oauth2.SocialOAuth2UserService;
-import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -29,7 +26,6 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResp
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -47,7 +43,6 @@ public class SecurityConfig {
     private final AppleOidcUserService appleOidcUserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
-    private final OAuth2CallbackExceptionFilter oAuth2CallbackExceptionFilter;
 
     @Bean
     @Order(1)
@@ -77,7 +72,6 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/").permitAll() // 홈페이지 접근 허용
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/health").permitAll() // Swagger UI 접근 허용
                         .requestMatchers("/oauth2/authorization/**","/login/oauth2/**").permitAll() // OAuth2 로그인 허용
@@ -107,8 +101,6 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class) // JWT 인증 필터 추가
-                .addFilterBefore(oAuth2CallbackExceptionFilter,
-                        OAuth2LoginAuthenticationFilter.class)
                 .addFilterAfter(profileCompletionAuthorizationFilter,
                         JwtAuthenticationFilter.class); // 프로필 완료 필터 추가
 
@@ -132,15 +124,6 @@ public class SecurityConfig {
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public FilterRegistrationBean<OAuth2CallbackExceptionFilter> disableOAuth2CallbackFilterAutoRegistration(
-            OAuth2CallbackExceptionFilter filter
-    ) {
-        FilterRegistrationBean<OAuth2CallbackExceptionFilter> registration = new FilterRegistrationBean<>(filter);
-        registration.setEnabled(false);
-        return registration;
     }
 
     @Bean
