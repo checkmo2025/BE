@@ -39,6 +39,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             Authentication authentication
     ) throws IOException {
 
+        KakaoEmailConsentRetryState.clear(request);
+
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         AuthUser user = principalDetails.getUser();
 

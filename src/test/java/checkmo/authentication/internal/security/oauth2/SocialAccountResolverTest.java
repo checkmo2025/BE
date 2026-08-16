@@ -112,6 +112,27 @@ class SocialAccountResolverTest {
         });
     }
 
+    @Test
+    void createsIncompleteKakaoUserOnFirstLogin() {
+        OAuth2Attributes attributes = OAuth2Attributes.of("kakao", Map.of(
+                "id", 12345L,
+                "kakao_account", Map.of("email", "kakao-user@example.com")
+        ));
+        AuthUser createdUser = user("KAKAO_12345", "kakao-user@example.com");
+
+        when(authRepository.findByEmail("kakao-user@example.com")).thenReturn(Optional.empty());
+        when(socialAccountCreator.create(attributes, "kakao")).thenReturn(createdUser);
+
+        SocialAccountResolution result = resolver.resolve(attributes, "kakao");
+
+        assertSoftly(softly -> {
+            softly.assertThat(result.user()).isSameAs(createdUser);
+            softly.assertThat(result.newSocialSignUp()).isTrue();
+            softly.assertThat(result.user().isProfileCompleted()).isFalse();
+        });
+        verify(socialAccountCreator).create(attributes, "kakao");
+    }
+
     @ParameterizedTest
     @MethodSource("emailBasedSocialAttributes")
     void resolvesEmailBasedSocialLoginByEmailEvenWhenProviderIdDiffers(
