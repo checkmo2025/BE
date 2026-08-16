@@ -16,8 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
@@ -111,12 +109,6 @@ public class Member extends BaseEntity {
 
     public boolean hasSameNicknameIdentity(String nickName) {
         return NicknamePolicy.isSameIdentity(this.nickName, nickName);
-    }
-
-    @PrePersist
-    @PreUpdate
-    private void synchronizeNicknameIdentity() {
-        updateNickname(nickName);
     }
 
     public void updateProfile(String description, String imgUrl, String phoneNumber) {

@@ -1,5 +1,6 @@
 package checkmo.authentication.internal.security.oauth2;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -8,9 +9,12 @@ import checkmo.authentication.internal.entity.Role;
 import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.book.internal.scheduler.BookRecommendationScheduler;
 import checkmo.bookStory.internal.scheduler.BookStoryViewScheduler;
+import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.repository.MemberRepository;
 import checkmo.member.internal.scheduler.MemberCleanupScheduler;
 import checkmo.support.SpringTest;
 import jakarta.persistence.PersistenceException;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +32,9 @@ class SocialAccountCreatorIntegrationTest {
 
     @Autowired
     private AuthRepository authRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -58,21 +65,37 @@ class SocialAccountCreatorIntegrationTest {
     }
 
     @Test
-    void persistsNewSocialUserWithAssignedProviderId() {
-        OAuth2Attributes attributes = OAuth2Attributes.of("apple", Map.of(
-                "sub", "apple-sub",
-                "email", "apple-user@example.com"
-        ));
+    void persistsNewSocialUsersForEveryProviderWithoutNicknameIdentity() {
+        List<SocialAccountFixture> fixtures = List.of(
+                new SocialAccountFixture("google", "google-sub", "google-user@example.com", OAuth2Attributes.of(
+                        "google",
+                        Map.of("sub", "google-sub", "email", "google-user@example.com")
+                )),
+                new SocialAccountFixture("kakao", "12345", "kakao-user@example.com", OAuth2Attributes.of(
+                        "kakao",
+                        Map.of(
+                                "id", 12345L,
+                                "kakao_account", Map.of("email", "kakao-user@example.com")
+                        )
+                )),
+                new SocialAccountFixture("naver", "naver-id", "naver-user@example.com", OAuth2Attributes.of(
+                        "naver",
+                        Map.of("response", Map.of(
+                                "id", "naver-id",
+                                "email", "naver-user@example.com"
+                        ))
+                )),
+                new SocialAccountFixture("apple", "apple-sub", "apple-user@example.com", OAuth2Attributes.of(
+                        "apple",
+                        Map.of("sub", "apple-sub", "email", "apple-user@example.com")
+                ))
+        );
 
-        AuthUser createdUser = socialAccountCreator.create(attributes, "apple");
-        AuthUser savedUser = authRepository.findByProviderAndProviderUserId("APPLE", "apple-sub").orElseThrow();
+        fixtures.forEach(fixture -> socialAccountCreator.create(fixture.attributes(), fixture.registrationId()));
 
-        assertSoftly(softly -> {
-            softly.assertThat(createdUser.getLegacyId()).isEqualTo("APPLE_apple-sub");
-            softly.assertThat(savedUser.getLegacyId()).isEqualTo("APPLE_apple-sub");
-            softly.assertThat(savedUser.getEmail()).isEqualTo("apple-user@example.com");
-            softly.assertThat(savedUser.isProfileCompleted()).isFalse();
-        });
+        assertThat(authRepository.count()).isEqualTo(fixtures.size());
+        assertThat(memberRepository.count()).isEqualTo(fixtures.size());
+        fixtures.forEach(this::assertIncompleteSocialAccountPersisted);
     }
 
     @Test
@@ -107,7 +130,34 @@ class SocialAccountCreatorIntegrationTest {
                 .build();
     }
 
+    private void assertIncompleteSocialAccountPersisted(SocialAccountFixture fixture) {
+        String provider = fixture.registrationId().toUpperCase();
+        AuthUser savedUser = authRepository
+                .findByProviderAndProviderUserId(provider, fixture.providerUserId())
+                .orElseThrow();
+        Member savedMember = memberRepository.findById(savedUser.getId()).orElseThrow();
+
+        assertSoftly(softly -> {
+            softly.assertThat(savedUser.getLegacyId()).isEqualTo(provider + "_" + fixture.providerUserId());
+            softly.assertThat(savedUser.getEmail()).isEqualTo(fixture.email());
+            softly.assertThat(savedUser.getNickName()).isNull();
+            softly.assertThat(savedUser.getNickNameKey()).isNull();
+            softly.assertThat(savedUser.isProfileCompleted()).isFalse();
+            softly.assertThat(savedMember.getEmail()).isEqualTo(fixture.email());
+            softly.assertThat(savedMember.getNickName()).isNull();
+            softly.assertThat(savedMember.getNickNameKey()).isNull();
+        });
+    }
+
     private String quoteIdentifier(String identifier) {
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
+    }
+
+    private record SocialAccountFixture(
+            String registrationId,
+            String providerUserId,
+            String email,
+            OAuth2Attributes attributes
+    ) {
     }
 }

@@ -216,15 +216,16 @@ class TermsDomainServiceTest {
 
     private Member saveMember() {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
-        return memberRepository.save(Member.builder()
+        Member member = Member.builder()
                 .id(Math.abs(UUID.randomUUID().getMostSignificantBits()))
                 .legacyId("LOCAL_" + suffix)
                 .email(suffix + "@example.com")
                 .name("테스트")
                 .phoneNumber("01000000000")
-                .nickName("terms" + suffix)
                 .description("")
-                .build());
+                .build();
+        member.updateNickname("terms" + suffix);
+        return memberRepository.save(member);
     }
 
     private MemberTerms saveMemberTerms(Member member, Terms terms, boolean agreed) {
