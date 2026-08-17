@@ -51,7 +51,7 @@ public class Topic extends BaseEntity {
     @OneToMany(mappedBy = "topic", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<TeamTopic> teamTopics = new ArrayList<>();
 
-    public boolean isOwnedBy(String anotherMemberId) {
+    public boolean isAuthoredBy(Long anotherMemberId) {
         return this.memberId.equals(anotherMemberId);
     }
 
@@ -59,8 +59,23 @@ public class Topic extends BaseEntity {
         return this.clubMemberId.equals(anotherClubMemberId);
     }
 
-    public void updateTopic(String description) {
+    public void updateBy(ClubMeetingActor actor, String description) {
+        validateAuthorOrStaff(actor);
         this.description = description;
+    }
+
+    public void removeBy(ClubMeetingActor actor) {
+        validateAuthorOrStaff(actor);
+        if (this.meeting != null) {
+            this.meeting.getTopics().remove(this);
+            this.meeting = null;
+        }
+    }
+
+    private void validateAuthorOrStaff(ClubMeetingActor actor) {
+        if (!isOwnedBy(actor.clubMemberId()) && !actor.staff()) {
+            throw new ClubMeetingException(ClubMeetingErrorStatus.TOPIC_FORBIDDEN);
+        }
     }
 
     // == 연관관계 메서드 == //
@@ -77,13 +92,6 @@ public class Topic extends BaseEntity {
         this.meeting = meeting;
         if (!meeting.getTopics().contains(this)) {
             meeting.getTopics().add(this);
-        }
-    }
-
-    public void removeMeeting() {
-        if (this.meeting != null) {
-            this.meeting.getTopics().remove(this);
-            this.meeting = null;
         }
     }
 }

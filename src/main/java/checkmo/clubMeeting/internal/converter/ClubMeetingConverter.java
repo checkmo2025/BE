@@ -80,7 +80,7 @@ public class ClubMeetingConverter {
                 .topicId(topic.getId())
                 .content(topic.getDescription())
                 .authorInfo(authorInfo)
-                .author(topic.isOwnedBy(memberId))
+                .author(topic.isAuthoredBy(memberId))
                 .build();
     }
 

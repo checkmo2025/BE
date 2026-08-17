@@ -4,6 +4,7 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubManagement.ClubManagementExternalDTO;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
 import checkmo.clubMeeting.internal.entity.BookReview;
+import checkmo.clubMeeting.internal.entity.ClubMeetingActor;
 import checkmo.clubMeeting.internal.entity.Meeting;
 import checkmo.clubMeeting.internal.exception.ClubMeetingErrorStatus;
 import checkmo.clubMeeting.internal.exception.ClubMeetingException;
@@ -43,9 +44,7 @@ public class ClubBookReviewCommandService {
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = ClubMeetingConverter.toBookReview(request, clubMemberId, memberId);
-        bookReview.setMeeting(meeting);
-
-        meeting.addSumRate(bookReview.getRate());
+        meeting.addBookReview(bookReview);
 
         bookReviewRepository.save(bookReview);
     }
@@ -61,26 +60,19 @@ public class ClubBookReviewCommandService {
         if (!clubMembership.isActive()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
+        ClubMeetingActor actor = new ClubMeetingActor(
+                clubMembership.getClubMemberId(),
+                clubMembership.isStaff()
+        );
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
-        if (!bookReview.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
-        }
-
-        double oldRate = bookReview.getRate();
-        double newRate = request.getRate();
-
-        bookReview.updateBookReview(
+        meeting.reviseBookReviewBy(
+                actor,
+                bookReview,
                 request.getDescription(),
                 request.getRate()
         );
-
-        // 별점이 변경된 경우에만 미팅의 별점 합산
-        if (oldRate != newRate) {
-            meeting.subtractSumRate(oldRate);
-            meeting.addSumRate(newRate);
-        }
     }
 
     @Retryable(
@@ -94,16 +86,14 @@ public class ClubBookReviewCommandService {
         if (!clubMembership.isActive()) {
             throw new ClubMeetingException(ClubMeetingErrorStatus.CLUB_MEMBER_INACTIVE);
         }
+        ClubMeetingActor actor = new ClubMeetingActor(
+                clubMembership.getClubMemberId(),
+                clubMembership.isStaff()
+        );
         Meeting meeting = clubMeetingQueryService.validateMeeting(clubId, meetingId);
 
         BookReview bookReview = clubBookReviewQueryService.validateBookReview(reviewId, meeting.getId());
-        if (!bookReview.isOwnedBy(clubMembership.getClubMemberId()) && !clubMembership.isStaff()) {
-            throw new ClubMeetingException(ClubMeetingErrorStatus.BOOK_REVIEW_FORBIDDEN);
-        }
-
-        meeting.subtractSumRate(bookReview.getRate());
-
-        bookReview.removeMeeting();
+        meeting.removeBookReviewBy(actor, bookReview);
     }
 
 }

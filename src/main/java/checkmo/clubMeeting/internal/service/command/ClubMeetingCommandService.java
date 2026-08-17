@@ -5,11 +5,8 @@ import checkmo.clubManagement.ClubManagementAPI;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingCreated;
 import checkmo.clubMeeting.ClubMeetingEvent.ClubMeetingDeleted;
 import checkmo.clubMeeting.internal.converter.ClubMeetingConverter;
-import checkmo.clubMeeting.internal.entity.ClubMemberTeam;
 import checkmo.clubMeeting.internal.entity.Meeting;
-import checkmo.clubMeeting.internal.entity.Team;
 import checkmo.clubMeeting.internal.repository.MeetingRepository;
-import checkmo.clubMeeting.internal.repository.TeamRepository;
 import checkmo.clubMeeting.internal.service.query.ClubMeetingQueryService;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfCreate;
 import checkmo.clubMeeting.web.dto.bookshelf.BookShelfRequestDTO.BookShelfUpdate;
@@ -38,7 +35,6 @@ public class ClubMeetingCommandService {
     private final ClubMeetingQueryService clubMeetingQueryService;
 
     private final MeetingRepository meetingRepository;
-    private final TeamRepository teamRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -111,44 +107,10 @@ public class ClubMeetingCommandService {
 
         // 요청 정리: teamNumber -> distinct ClubMemberIds
         Map<Integer, List<Long>> requestTeamNumberToClubMemberIds = normalizeTeamManageRequest(request);
-        Set<Integer> requestTeamNumbers = requestTeamNumberToClubMemberIds.keySet();
-
         // 요청 clubMemberIds 배치 검증
         validateRequestClubMembers(clubId, requestTeamNumberToClubMemberIds);
 
-        // 기존 팀 조회 후 teamNumber -> Team Map (TeamTopic이 유지되도록 Team은 유지)
-        List<Team> existingTeams = teamRepository.findAllByMeetingIdOrderByTeamNumberAsc(meeting.getId());
-        Map<Integer, Team> existingTeamNumberToTeam = existingTeams.stream()
-                .collect(Collectors.toMap(Team::getTeamNumber, t -> t));
-
-        // 요청에 있는데 아직 없는 teamNumber는 Team 생성 후 meeting에 추가
-        for (Integer teamNumber : requestTeamNumbers) {
-            if (!existingTeamNumberToTeam.containsKey(teamNumber)) {
-                Team team = Team.builder()
-                        .teamNumber(teamNumber)
-                        .build();
-                meeting.addTeam(team);
-                existingTeamNumberToTeam.put(teamNumber, team);
-            }
-        }
-
-        // 요청에는 없는데 존재하는 팀(팀 발제, 팀원) 제거
-        removeTeamsNotInRequest(existingTeams, requestTeamNumbers, meeting);
-
-        // 요청 ClubMemberTeam 재생성
-        for (Map.Entry<Integer, List<Long>> e : requestTeamNumberToClubMemberIds.entrySet()) {
-            Integer teamNumber = e.getKey();
-            List<Long> clubMemberIds = e.getValue();
-
-            Team team = existingTeamNumberToTeam.get(teamNumber);
-            team.removeAllClubMemberTeams(); // 기존 팀원 제거 (중복 방지)
-            for (Long cmId : e.getValue()) { // 요청 팀원으로 다시 채우기
-                ClubMemberTeam mt = ClubMemberTeam.builder()
-                        .clubMemberId(cmId)
-                        .build();
-                team.addClubMemberTeam(mt);
-            }
-        }
+        meeting.organizeTeams(requestTeamNumberToClubMemberIds);
 
         meetingRepository.save(meeting);
     }
@@ -167,13 +129,6 @@ public class ClubMeetingCommandService {
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
         clubManagementAPI.validateActiveClubMembers(clubId, requestedClubMemberIds);
-    }
-
-    private void removeTeamsNotInRequest(List<Team> existingTeams, Set<Integer> requestTeamNumbers, Meeting meeting) {
-        List<Team> toRemove = existingTeams.stream()
-                .filter(t -> !requestTeamNumbers.contains(t.getTeamNumber()))
-                .toList();
-        toRemove.forEach(meeting::removeTeam);
     }
 
     public void deleteAll(Long clubId) {
