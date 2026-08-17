@@ -24,6 +24,9 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
     @Value("${app.oauth2.redirect.app-uri}")
     private String appUri;
 
+    @Value("${app.oauth2.redirect.base-uri}")
+    private String baseUri;
+
     @Override
     public void onAuthenticationFailure(
             HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
@@ -36,8 +39,13 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             return;
         }
 
-        // 실패 시 리다이렉트 URL 설정
-        getRedirectStrategy().sendRedirect(request, response, "/login?error=true");
+        String targetUrl = UriComponentsBuilder.fromUriString(baseUri)
+                .path("/")
+                .queryParam("error", "login_failed")
+                .build()
+                .encode()
+                .toUriString();
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
     private void logAuthenticationFailure(HttpServletRequest request, AuthenticationException exception) {
@@ -47,10 +55,9 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                     "소셜 로그인 인증 실패: type={}, uri={}, errorCode={}, description={}, message={}",
                     oauth2Exception.getClass().getSimpleName(),
                     request.getRequestURI(),
-                    error.getErrorCode(),
+                    sanitize(error.getErrorCode()),
                     sanitize(error.getDescription()),
-                    sanitize(exception.getMessage()),
-                    exception
+                    sanitize(exception.getMessage())
             );
             return;
         }
@@ -59,8 +66,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                 "소셜 로그인 인증 실패: type={}, uri={}, message={}",
                 exception.getClass().getSimpleName(),
                 request.getRequestURI(),
-                sanitize(exception.getMessage()),
-                exception
+                sanitize(exception.getMessage())
         );
     }
 
