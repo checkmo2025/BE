@@ -60,6 +60,7 @@ public class AuthUserCommandService {
                         .legacyId(savedUser.getLegacyId())
                         .email(savedUser.getEmail())
                         .agreements(toTermsAgreements(request))
+                        .requireRequiredTermsAgreement(true)
                         .build());
 
         deleteEmailVerificationAfterCommit(redisKey);

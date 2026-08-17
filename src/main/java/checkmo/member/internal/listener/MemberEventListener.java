@@ -25,7 +25,8 @@ public class MemberEventListener {
                 event.id(),
                 event.legacyId(),
                 event.email(),
-                toTermsAgreementCommands(event.agreements())
+                toTermsAgreementCommands(event.agreements()),
+                event.requireRequiredTermsAgreement()
         );
     }
 

@@ -10,7 +10,10 @@ import checkmo.authentication.internal.repository.AuthRepository;
 import checkmo.book.internal.scheduler.BookRecommendationScheduler;
 import checkmo.bookStory.internal.scheduler.BookStoryViewScheduler;
 import checkmo.member.internal.entity.Member;
+import checkmo.member.internal.entity.Terms;
+import checkmo.member.internal.entity.TermsType;
 import checkmo.member.internal.repository.MemberRepository;
+import checkmo.member.internal.repository.TermsRepository;
 import checkmo.member.internal.scheduler.MemberCleanupScheduler;
 import checkmo.support.SpringTest;
 import jakarta.persistence.PersistenceException;
@@ -24,7 +27,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringTest
-@TestPropertySource(properties = "aladin.api.recommendation.refresh.background.fixed-delay=60000")
+@TestPropertySource(properties = {
+        "aladin.api.recommendation.refresh.background.fixed-delay=60000",
+        "checkmo.terms.enforcement-enabled=true"
+})
 class SocialAccountCreatorIntegrationTest {
 
     @Autowired
@@ -35,6 +41,9 @@ class SocialAccountCreatorIntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private TermsRepository termsRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -66,6 +75,15 @@ class SocialAccountCreatorIntegrationTest {
 
     @Test
     void persistsNewSocialUsersForEveryProviderWithoutNicknameIdentity() {
+        termsRepository.save(Terms.builder()
+                .termsType(TermsType.SERVICE_TERMS)
+                .title("필수 서비스 약관")
+                .termUrl("https://example.com/required-terms")
+                .version(1)
+                .active(true)
+                .required(true)
+                .build());
+
         List<SocialAccountFixture> fixtures = List.of(
                 new SocialAccountFixture("google", "google-sub", "google-user@example.com", OAuth2Attributes.of(
                         "google",

@@ -6,7 +6,13 @@ import lombok.Builder;
 public class AuthenticationEvent {
 
     @Builder
-    public record CreateMember(Long id, String legacyId, String email, List<TermsAgreement> agreements) {
+    public record CreateMember(
+            Long id,
+            String legacyId,
+            String email,
+            List<TermsAgreement> agreements,
+            boolean requireRequiredTermsAgreement
+    ) {
     }
 
     public record TermsAgreement(Long termsId, boolean agreed) {

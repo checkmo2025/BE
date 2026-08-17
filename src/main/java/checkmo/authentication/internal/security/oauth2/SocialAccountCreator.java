@@ -28,6 +28,7 @@ class SocialAccountCreator {
                         .id(newUser.getId())
                         .legacyId(newUser.getLegacyId())
                         .email(newUser.getEmail())
+                        .requireRequiredTermsAgreement(false)
                         .build());
 
         return newUser;

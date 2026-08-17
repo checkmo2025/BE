@@ -25,12 +25,18 @@ public class MemberFacade {
     @Value("${checkmo.terms.enforcement-enabled:false}")
     private boolean termsEnforcementEnabled;
 
-    public void createMember(Long memberId, String legacyId, String email, List<TermsAgreementCommand> termsAgreements) {
+    public void createMember(
+            Long memberId,
+            String legacyId,
+            String email,
+            List<TermsAgreementCommand> termsAgreements,
+            boolean requireRequiredTermsAgreement
+    ) {
         memberCommandService.createMember(memberId, legacyId, email);
         memberTermsCommandService.saveSignupAgreements(
                 memberId,
                 termsAgreements,
-                termsEnforcementEnabled
+                termsEnforcementEnabled && requireRequiredTermsAgreement
         );
     }
 
