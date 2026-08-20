@@ -1,0 +1,13 @@
+chatbot:
+  gemini:
+    api-key: ${GEMINI_API_KEY}
+    base-url: https://generativelanguage.googleapis.com
+    api-version: v1beta
+    timeout-ms: 15000
+    default-model:
+      name: gemini-3.1-flash-lite
+    escalation-model:
+      name: gemini-3.6-flash
+    handoff:
+      support-url: https://www.checkmo.co.kr/support
+      inquiry-form-url: https://docs.google.com/forms/d/e/1FAIpQLSfcY9nWElffO0gbjRlxFzEV4YKCOznMsv4PqfFO8MjgR1xaBg/viewform
