@@ -13,20 +13,28 @@ import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.support.ApiTestSupport;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Arrays;
+import org.junit.jupiter.api.BeforeEach;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class BookRecommendationApiTest extends ApiTestSupport {
 
-    private static final String REDIS_KEY = "book:recommendations:daily";
-    private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:daily:updated_at";
+    private static final String REDIS_KEY = "book:recommendations:{yes24}:daily";
+    private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:{yes24}:daily:updated_at";
 
     @MockitoBean
     AladinRecommendationRefreshClient recommendationRefreshClient;
 
     @MockitoBean
     AladinApiService aladinApiService;
+
+    @BeforeEach
+    void mockAtomicCacheRead() {
+        when(redisValueOperations.multiGet(List.of(REDIS_KEY, REDIS_UPDATED_AT_KEY)))
+                .thenAnswer(invocation -> Arrays.asList(redisValueOperations.get(REDIS_KEY), redisValueOperations.get(REDIS_UPDATED_AT_KEY)));
+    }
 
     @Test
     void recommendBooksReturnsStaleCacheWhenAladinRefreshFails() {

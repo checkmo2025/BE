@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,8 +46,8 @@ import org.springframework.web.client.RestClientException;
 class BookRecommendationServiceTest {
 
     private static final Long MEMBER_ID = 1L;
-    private static final String REDIS_KEY = "book:recommendations:daily";
-    private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:daily:updated_at";
+    private static final String REDIS_KEY = RecommendationRefreshGuard.DATA_KEY;
+    private static final String REDIS_UPDATED_AT_KEY = RecommendationRefreshGuard.DATE_KEY;
     private static final String SECRET_TTB_KEY = "SECRET_TTB_KEY";
     private static final String SECRET_REFRESH_TOKEN = "SECRET_REFRESH_TOKEN";
     private static final String SECRET_AUTHORIZATION = "Bearer SECRET_AUTHORIZATION";
@@ -57,6 +59,7 @@ class BookRecommendationServiceTest {
     private RecordingSentryCaptureClient captureClient;
     private CheckmoMetrics checkmoMetrics;
     private BookRecommendationService service;
+    private RecommendationRefreshGuard guard;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
@@ -73,9 +76,24 @@ class BookRecommendationServiceTest {
                 backOffPeriod -> {
                 }
         );
-        service = new BookRecommendationService(redisTemplate, aladinApiService, refreshClient, captureClient, checkmoMetrics);
+        guard = mock(RecommendationRefreshGuard.class);
+        when(guard.acquire()).thenReturn("token");
+        service = new BookRecommendationService(redisTemplate, aladinApiService, refreshClient, captureClient, checkmoMetrics, guard);
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.multiGet(List.of(REDIS_KEY, REDIS_UPDATED_AT_KEY)))
+                .thenAnswer(invocation -> Arrays.asList(valueOperations.get(REDIS_KEY), valueOperations.get(REDIS_UPDATED_AT_KEY)));
+    }
+
+    @Test
+    void busySharedRefreshReturnsStaleCacheWithoutAnotherProviderCall() {
+        var stale = bookList("9788936434595", false);
+        when(valueOperations.get(REDIS_KEY)).thenReturn(stale);
+        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn("2000-01-01");
+        when(guard.acquire()).thenThrow(new BookException(BookErrorStatus.ALADIN_API_ERROR));
+        when(aladinApiService.applyLikedByMe(stale, MEMBER_ID)).thenReturn(stale);
+        assertThat(service.retrieveRecommendedBooks(MEMBER_ID)).isSameAs(stale);
+        verify(aladinApiService, never()).retrieveRecommendedBooks();
     }
 
     @Test
@@ -101,8 +119,8 @@ class BookRecommendationServiceTest {
 
         assertThat(response.getDetailInfoList()).hasSize(4);
         verify(aladinApiService, times(3)).retrieveRecommendedBooks();
-        verify(valueOperations).set(eq(REDIS_KEY), any(BookResponseDTO.BookList.class));
-        verify(valueOperations).set(REDIS_UPDATED_AT_KEY, LocalDate.now().toString());
+        verify(guard).publish(eq("token"), any(BookResponseDTO.BookList.class), eq(LocalDate.now(ZoneId.of("Asia/Seoul")).toString()));
+        verify(guard).release("token");
         verify(valueOperations, never()).set(eq(REDIS_KEY), any(BookResponseDTO.BookList.class), any(Duration.class));
         verify(valueOperations, never()).set(eq(REDIS_UPDATED_AT_KEY), any(String.class), any(Duration.class));
         assertThat(captureClient.count()).isZero();
@@ -130,7 +148,7 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
         upstreamBooks.set(startIndex, replacementBook);
 
-        verify(valueOperations).set(eq(REDIS_KEY), savedBookListCaptor.capture());
+        verify(guard).publish(eq("token"), savedBookListCaptor.capture(), any(String.class));
         BookResponseDTO.BookList savedBookList = savedBookListCaptor.getValue();
         assertThat(response.getDetailInfoList())
                 .hasSize(4)
@@ -220,7 +238,7 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList likedStaleCache = bookList("9791169213882", true);
         RuntimeException failure = new RuntimeException("aladin unavailable");
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
-        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().minusDays(1).toString());
+        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
         when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
         when(aladinApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
 
@@ -237,7 +255,7 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList likedStaleCache = bookList("9791169213882", true);
         RuntimeException failure = credentialBearingFailure();
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
-        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().minusDays(1).toString());
+        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
         when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
         when(aladinApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
         ListAppender<ILoggingEvent> appender = attachServiceLogAppender();
@@ -276,7 +294,7 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList staleCache = bookList("9791169213882", false);
         BookResponseDTO.BookList likedStaleCache = bookList("9791169213882", true);
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
-        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().minusDays(1).toString());
+        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
         when(aladinApiService.retrieveRecommendedBooks()).thenReturn(emptyBookList());
         when(aladinApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
 
@@ -339,7 +357,7 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList freshCache = bookList("9791169213882", false);
         BookResponseDTO.BookList likedFreshCache = bookList("9791169213882", true);
         when(valueOperations.get(REDIS_KEY)).thenReturn(freshCache);
-        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().toString());
+        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).toString());
         when(aladinApiService.applyLikedByMe(freshCache, MEMBER_ID)).thenReturn(likedFreshCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
@@ -351,11 +369,11 @@ class BookRecommendationServiceTest {
 
     private static Stream<Arguments> unusableCacheCases() {
         return Stream.of(
-                Arguments.of("missing key is not usable", null, LocalDate.now().minusDays(1).toString(), false),
-                Arguments.of("wrong type is not usable", "not a book list", LocalDate.now().toString(), false),
-                Arguments.of("null detail info list with today's timestamp is not usable", bookListWithNullDetailInfoList(), LocalDate.now().toString(), false),
-                Arguments.of("null detail info list with stale timestamp is not usable", bookListWithNullDetailInfoList(), LocalDate.now().minusDays(1).toString(), false),
-                Arguments.of("empty book list is not usable", emptyBookList(), LocalDate.now().toString(), false),
+                Arguments.of("missing key is not usable", null, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString(), false),
+                Arguments.of("wrong type is not usable", "not a book list", LocalDate.now(ZoneId.of("Asia/Seoul")).toString(), false),
+                Arguments.of("null detail info list with today's timestamp is not usable", bookListWithNullDetailInfoList(), LocalDate.now(ZoneId.of("Asia/Seoul")).toString(), false),
+                Arguments.of("null detail info list with stale timestamp is not usable", bookListWithNullDetailInfoList(), LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString(), false),
+                Arguments.of("empty book list is not usable", emptyBookList(), LocalDate.now(ZoneId.of("Asia/Seoul")).toString(), false),
                 Arguments.of("redis read exception is not usable", null, null, true)
         );
     }

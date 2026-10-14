@@ -12,6 +12,7 @@ import checkmo.authentication.AuthenticationAPI;
 import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.internal.service.AladinRecommendationRefreshClient;
 import checkmo.book.internal.service.BookRecommendationService;
+import checkmo.book.internal.service.RecommendationRefreshGuard;
 import checkmo.book.internal.service.query.AladinApiService;
 import checkmo.book.internal.scheduler.BookRecommendationScheduler;
 import checkmo.book.web.dto.BookResponseDTO;
@@ -58,12 +59,15 @@ class SentryBackgroundCaptureTest {
                 .hasNext(false)
                 .currentPage(null)
                 .build();
+        var guard = mock(RecommendationRefreshGuard.class);
+        when(guard.acquire()).thenReturn("token");
         BookRecommendationService service = new BookRecommendationService(
                 redisTemplate,
                 aladinApiService,
                 new AladinRecommendationRefreshClient(aladinApiService, new Yes24Properties(), checkmoMetrics),
                 captureClient,
-                checkmoMetrics
+                checkmoMetrics,
+                guard
         );
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("book:recommendations:daily")).thenReturn(staleCache);
