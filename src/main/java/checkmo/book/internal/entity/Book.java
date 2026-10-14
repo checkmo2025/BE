@@ -2,6 +2,7 @@ package checkmo.book.internal.entity;
 
 import checkmo.common.BaseEntity;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -32,6 +33,7 @@ public class Book extends BaseEntity {
 
     private String publisher;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
 
     @Builder.Default
