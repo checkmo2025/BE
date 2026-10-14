@@ -5,7 +5,8 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_PROFILES_ACTIVE: aladin,jwt,mail,prod,redis,oauth2,s3
+      SPRING_PROFILES_ACTIVE: yes24,jwt,mail,prod,redis,oauth2,s3
+      YES24_API_KEY: ${YES24_API_KEY:?YES24_API_KEY is required}
       TZ: Asia/Seoul
     restart: unless-stopped
     healthcheck:
