@@ -2,6 +2,10 @@ yes24:
   api:
     base-url: https://apis.yes24.com/v1
     api-key: ${YES24_API_KEY}
+    # 같은 계정을 사용하는 모든 인스턴스는 동일 Redis와 scope를 사용한다.
+    account-scope: ${YES24_ACCOUNT_SCOPE:checkmo}
+    requests-per-second: 10
+    requests-per-day: 20000
     search:
       max-results: 10
       timeout-ms: 15000

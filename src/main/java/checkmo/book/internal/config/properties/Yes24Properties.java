@@ -11,15 +11,24 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 @Getter
 @Setter
 @Component
+@Validated
 @ConfigurationProperties(prefix = "yes24.api")
 public class Yes24Properties {
 
     private String baseUrl = "https://apis.yes24.com/v1";
     private String apiKey;
+    private String accountScope = "checkmo";
+    @Min(1)
+    @Max(50)
+    private int requestsPerSecond = 10;
+    @Min(1)
+    @Max(500000)
+    private int requestsPerDay = 20000;
     @Valid
     private Search search = new Search();
     @Valid

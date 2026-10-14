@@ -18,6 +18,7 @@ import org.springframework.retry.context.RetryContextSupport;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Service
@@ -117,6 +118,8 @@ public class AladinRecommendationRefreshClient {
                     if (current.getCause() == null) {
                         return false;
                     }
+                } else if (current instanceof RestClientResponseException responseException) {
+                    return responseException.getStatusCode().is5xxServerError();
                 } else if (current instanceof RestClientException || current instanceof IOException) {
                     return true;
                 } else if (!wrappedByAladinBookException) {

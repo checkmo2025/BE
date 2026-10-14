@@ -1,6 +1,8 @@
 package checkmo.book.internal.service.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
@@ -28,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 class Yes24ClientTest {
     private static final String ISBN = "9788936434595";
     private Yes24Client client;
+    private Yes24RateLimiter limiter;
     private MockRestServiceServer server;
     private Yes24Properties properties;
 
@@ -37,7 +40,8 @@ class Yes24ClientTest {
         server = MockRestServiceServer.bindTo(restTemplate).build();
         properties = new Yes24Properties();
         properties.setApiKey("test-only-secret");
-        client = new Yes24Client(restTemplate, properties, new ObjectMapper());
+        limiter = mock(Yes24RateLimiter.class);
+        client = new Yes24Client(restTemplate, properties, new ObjectMapper(), limiter);
     }
 
     @Test
@@ -59,6 +63,7 @@ class Yes24ClientTest {
         server.expect(requestTo("https://apis.yes24.com/v1/category/bestseller?detail=N&categoryId=001&page=1&pageSize=28"))
                 .andRespond(withSuccess(payload(items, 1, 28, 1000), MediaType.APPLICATION_JSON));
         assertThat(client.retrieveRecommendedBooks().getDetailInfoList()).hasSize(28);
+        verify(limiter).acquire();
         server.verify();
     }
 

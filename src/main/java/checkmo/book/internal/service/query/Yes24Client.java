@@ -26,6 +26,7 @@ public class Yes24Client {
     private final RestTemplate restTemplate;
     private final Yes24Properties properties;
     private final ObjectMapper objectMapper;
+    private final Yes24RateLimiter rateLimiter;
 
     public BookResponseDTO.BookList retrieveSearchBooks(String keyword, int page) {
         var uri = endpoint("/goods/itemList")
@@ -61,10 +62,15 @@ public class Yes24Client {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Api-Key", properties.getApiKey());
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        rateLimiter.acquire();
         try {
             return restTemplate.exchange(uri.encode().buildAndExpand(values).toUri(), HttpMethod.GET,
                     new HttpEntity<>(headers), Yes24ApiResponseDTO.Response.class).getBody();
         } catch (RestClientResponseException e) {
+            if (e.getStatusCode().value() == 429 || e.getStatusCode().value() == 503) {
+                rateLimiter.defer(e.getResponseHeaders() == null ? null
+                        : e.getResponseHeaders().getFirst(HttpHeaders.RETRY_AFTER));
+            }
             String code = errorCode(e);
             if (e.getStatusCode().value() == 404) {
                 if ("search".equals(operation) && "SEARCH_001".equals(code)) {
