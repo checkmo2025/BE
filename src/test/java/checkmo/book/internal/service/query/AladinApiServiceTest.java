@@ -2,6 +2,7 @@ package checkmo.book.internal.service.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -10,9 +11,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
+import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.repository.BookLikedRepository;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
@@ -23,13 +25,16 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
-import org.springframework.web.client.RestTemplate;
+import checkmo.book.internal.repository.BookRepository;
 
 class AladinApiServiceTest {
 
-    private RestTemplate restTemplate;
-    private AladinProperties aladinProperties;
+    private Yes24Client yes24Client;
+    private BookRepository bookRepository;
+    private Yes24Properties aladinProperties;
     private BookLikedRepository bookLikedRepository;
     private BookSearchCacheService bookSearchCacheService;
     private AladinSearchClient aladinSearchClient;
@@ -39,7 +44,8 @@ class AladinApiServiceTest {
 
     @BeforeEach
     void setUp() {
-        restTemplate = mock(RestTemplate.class);
+        yes24Client = mock(Yes24Client.class);
+        bookRepository = mock(BookRepository.class);
         aladinProperties = aladinProperties();
         bookLikedRepository = mock(BookLikedRepository.class, Answers.CALLS_REAL_METHODS);
         bookSearchCacheService = mock(BookSearchCacheService.class);
@@ -47,7 +53,8 @@ class AladinApiServiceTest {
         aladinSearchPrefetchService = mock(AladinSearchPrefetchService.class);
         sentryCaptureClient = mock(SentryCaptureClient.class);
         aladinApiService = new AladinApiService(
-                restTemplate,
+                yes24Client,
+                bookRepository,
                 aladinProperties,
                 bookLikedRepository,
                 bookSearchCacheService,
@@ -164,10 +171,49 @@ class AladinApiServiceTest {
                 .hasCause(failure);
     }
 
-    private AladinProperties aladinProperties() {
-        AladinProperties properties = new AladinProperties();
+    private Yes24Properties aladinProperties() {
+        Yes24Properties properties = new Yes24Properties();
         properties.getSearch().setMaxResults(10);
         return properties;
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BookErrorStatus.class, names = {"BOOK_NOT_FOUND", "ALADIN_API_ERROR"})
+    void detailFailureReturnsStoredBookWithoutFabricatingLink(BookErrorStatus status) {
+        String isbn = "9788936434595";
+        var failure = new BookException(status);
+        when(yes24Client.retrieveBookDetail(isbn)).thenThrow(failure);
+        when(bookRepository.findById(isbn)).thenReturn(Optional.of(Book.builder()
+                .id(isbn).title("기존 책").author("기존 저자").publisher("기존 출판사")
+                .description("기존 소개").imgUrl("https://image.aladin.co.kr/old.jpg").build()));
+
+        var result = aladinApiService.retrieveBookDetailInfo(isbn);
+
+        assertThat(result.getIsbn()).isEqualTo(isbn);
+        assertThat(result.getTitle()).isEqualTo("기존 책");
+        assertThat(result.getDescription()).isEqualTo("기존 소개");
+        assertThat(result.getImgUrl()).isEqualTo("https://image.aladin.co.kr/old.jpg");
+        assertThat(result.getLink()).isNull();
+        verify(sentryCaptureClient).captureException(failure);
+        verify(bookRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BookErrorStatus.class, names = {"BOOK_NOT_FOUND", "ALADIN_API_ERROR"})
+    void detailWithoutStoredBookPreservesMissingVersusUnavailableError(BookErrorStatus status) {
+        var failure = new BookException(status);
+        when(yes24Client.retrieveBookDetail("9788936434595")).thenThrow(failure);
+        when(bookRepository.findById("9788936434595")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> aladinApiService.retrieveBookDetailInfo("9788936434595"))
+                .isSameAs(failure);
+    }
+
+    @Test
+    void successfulDetailDoesNotOverwriteOrReadStoredBook() {
+        var detail = DetailInfo.builder().isbn("9788936434595").title("예스24 책").build();
+        when(yes24Client.retrieveBookDetail(detail.getIsbn())).thenReturn(detail);
+        assertThat(aladinApiService.retrieveBookDetailInfo(detail.getIsbn())).isSameAs(detail);
+        verifyNoInteractions(bookRepository);
     }
 
     private BookResponseDTO.BookList bookList(boolean likedByMe, boolean hasNext) {

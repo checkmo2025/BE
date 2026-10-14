@@ -1,0 +1,16 @@
+yes24:
+  api:
+    base-url: https://apis.yes24.com/v1
+    api-key: ${YES24_API_KEY}
+    search:
+      max-results: 10
+      timeout-ms: 15000
+    recommendation:
+      refresh:
+        retry:
+          attempts: 3
+          initial-backoff: 1s
+          multiplier: 2
+          max-backoff: 5s
+        background:
+          fixed-delay: 5m

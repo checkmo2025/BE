@@ -1,52 +1,27 @@
 package checkmo.book.internal.service.query;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import checkmo.book.internal.config.properties.AladinProperties;
-import checkmo.book.web.dto.AladinApiResponseDTO;
+import checkmo.book.internal.exception.BookErrorStatus;
+import checkmo.book.internal.exception.BookException;
+import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.common.monitoring.CheckmoMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 class AladinSearchClientTest {
-
     @Test
-    void fetchSearchBooksThrowsSanitizedExceptionWhenRestTemplateFails() {
-        RestTemplate restTemplate = mock(RestTemplate.class);
-        AladinSearchClient client = new AladinSearchClient(
-                restTemplate,
-                aladinProperties(),
-                new CheckmoMetrics(new SimpleMeterRegistry())
-        );
-        RestClientException failure = new RestClientException(
-                "I/O error on GET request for \"https://example.com/ItemSearch.aspx?ttbkey=secret-key&Query=자바\""
-        );
-        when(restTemplate.getForObject(anyString(), eq(AladinApiResponseDTO.BookList.class))).thenThrow(failure);
-
-        assertThatThrownBy(() -> client.fetchSearchBooks("자바", 1))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Aladin API request failed for search books")
-                .hasMessageContaining(RestClientException.class.getName())
-                .hasMessageNotContaining("secret-key")
-                .hasMessageNotContaining("자바")
-                .hasNoCause();
-    }
-
-    private AladinProperties aladinProperties() {
-        AladinProperties properties = new AladinProperties();
-        properties.getUrl().setBase("https://example.com");
-        properties.getUrl().setItemSearch("/ItemSearch.aspx");
-        properties.getAuth().setTtbKey("secret-key");
-        properties.getAuth().setVersion("20131101");
-        properties.getSearch().setSearchQueryType("Keyword");
-        properties.getSearch().setMaxResults(10);
-        properties.getSearch().setOutput("js");
-        return properties;
+    void delegatesSearchAndPreservesProviderFailure() {
+        var provider = mock(Yes24Client.class);
+        var client = new AladinSearchClient(provider, new CheckmoMetrics(new SimpleMeterRegistry()));
+        var result = BookResponseDTO.BookList.builder().build();
+        when(provider.retrieveSearchBooks("책", 2)).thenReturn(result);
+        assertThat(client.fetchSearchBooks("책", 2)).isSameAs(result);
+        var failure = new BookException(BookErrorStatus.ALADIN_API_ERROR);
+        when(provider.retrieveSearchBooks("책", 3)).thenThrow(failure);
+        assertThatThrownBy(() -> client.fetchSearchBooks("책", 3)).isSameAs(failure);
     }
 }

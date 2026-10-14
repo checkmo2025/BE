@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import checkmo.authentication.AuthenticationAPI;
-import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.internal.service.AladinRecommendationRefreshClient;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.query.AladinApiService;
@@ -61,7 +61,7 @@ class SentryBackgroundCaptureTest {
         BookRecommendationService service = new BookRecommendationService(
                 redisTemplate,
                 aladinApiService,
-                new AladinRecommendationRefreshClient(aladinApiService, new AladinProperties(), checkmoMetrics),
+                new AladinRecommendationRefreshClient(aladinApiService, new Yes24Properties(), checkmoMetrics),
                 captureClient,
                 checkmoMetrics
         );

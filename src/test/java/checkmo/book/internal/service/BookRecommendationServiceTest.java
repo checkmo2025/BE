@@ -14,7 +14,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.service.query.AladinApiService;
@@ -368,8 +368,8 @@ class BookRecommendationServiceTest {
         );
     }
 
-    private static AladinProperties retryProperties() {
-        AladinProperties properties = new AladinProperties();
+    private static Yes24Properties retryProperties() {
+        Yes24Properties properties = new Yes24Properties();
         properties.getRecommendation().getRefresh().getRetry().setAttempts(3);
         properties.getRecommendation().getRefresh().getRetry().setInitialBackoff(java.time.Duration.ofSeconds(1));
         properties.getRecommendation().getRefresh().getRetry().setMultiplier(2);

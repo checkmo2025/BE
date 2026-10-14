@@ -8,7 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.common.monitoring.SentryCaptureClient;
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class AladinSearchPrefetchServiceTest {
 
-    private AladinProperties aladinProperties;
+    private Yes24Properties aladinProperties;
     private BookSearchCacheService bookSearchCacheService;
     private AladinSearchClient aladinSearchClient;
     private SentryCaptureClient sentryCaptureClient;
@@ -27,7 +27,7 @@ class AladinSearchPrefetchServiceTest {
 
     @BeforeEach
     void setUp() {
-        aladinProperties = new AladinProperties();
+        aladinProperties = new Yes24Properties();
         aladinProperties.getSearch().setMaxResults(10);
         bookSearchCacheService = mock(BookSearchCacheService.class);
         aladinSearchClient = mock(AladinSearchClient.class);

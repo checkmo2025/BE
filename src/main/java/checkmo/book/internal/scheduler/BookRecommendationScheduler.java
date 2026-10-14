@@ -28,7 +28,7 @@ public class BookRecommendationScheduler {
         guardedRefreshRecommendedBooks();
     }
 
-    @Scheduled(fixedDelayString = "${aladin.api.recommendation.refresh.background.fixed-delay}")
+    @Scheduled(fixedDelayString = "${yes24.api.recommendation.refresh.background.fixed-delay}")
     public void retryRecommendedBooksRefresh() {
         if (recommendationService.hasRecommendedBooks() && !recommendationService.isRecommendedBooksStale()) {
             log.debug("추천 책 캐시가 최신 상태라 background retry를 건너뜁니다.");

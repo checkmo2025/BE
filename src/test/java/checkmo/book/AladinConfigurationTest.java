@@ -2,7 +2,7 @@ package checkmo.book;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import jakarta.validation.Validation;
 import java.io.IOException;
 import java.util.Map;
@@ -14,10 +14,9 @@ class AladinConfigurationTest {
     @Test
     void aladinApiBaseUrlUsesHttps() throws IOException {
         Map<String, Object> api = aladinApiConfiguration();
-        Map<String, Object> url = nestedMap(api, "url");
 
-        assertThat(url.get("base"))
-                .isEqualTo("https://www.aladin.co.kr/ttb/api");
+        assertThat(api.get("base-url"))
+                .isEqualTo("https://apis.yes24.com/v1");
     }
 
     @Test
@@ -44,7 +43,7 @@ class AladinConfigurationTest {
 
     @Test
     void recommendationRefreshRetryAttemptsRejectsValuesAboveTen() {
-        var retry = new AladinProperties.Retry();
+        var retry = new Yes24Properties.Retry();
         retry.setAttempts(11);
 
         var violations = Validation.buildDefaultValidatorFactory()
@@ -60,7 +59,7 @@ class AladinConfigurationTest {
 
     @Test
     void recommendationRefreshRetryMultiplierRejectsValuesBelowOne() {
-        var retry = new AladinProperties.Retry();
+        var retry = new Yes24Properties.Retry();
         retry.setMultiplier(0.5);
 
         var violations = Validation.buildDefaultValidatorFactory()
@@ -82,10 +81,10 @@ class AladinConfigurationTest {
     }
 
     private Map<String, Object> aladinApiConfiguration() throws IOException {
-        try (var input = getClass().getClassLoader().getResourceAsStream("application-aladin.yml")) {
+        try (var input = getClass().getClassLoader().getResourceAsStream("application-yes24.yml")) {
             assertThat(input).isNotNull();
             Map<String, Object> configuration = new Yaml().load(input);
-            Map<String, Object> aladin = nestedMap(configuration, "aladin");
+            Map<String, Object> aladin = nestedMap(configuration, "yes24");
             return nestedMap(aladin, "api");
         }
     }

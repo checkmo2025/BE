@@ -1,6 +1,6 @@
 package checkmo.book.internal.service.query;
 
-import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.common.monitoring.SentryCaptureClient;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AladinSearchPrefetchService {
 
-    private final AladinProperties aladinProperties;
+    private final Yes24Properties aladinProperties;
     private final BookSearchCacheService bookSearchCacheService;
     private final AladinSearchClient aladinSearchClient;
     private final SentryCaptureClient sentryCaptureClient;

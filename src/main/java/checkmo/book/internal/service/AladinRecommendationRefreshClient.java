@@ -1,7 +1,7 @@
 package checkmo.book.internal.service;
 
-import checkmo.book.internal.config.properties.AladinProperties;
-import checkmo.book.internal.config.properties.AladinProperties.Retry;
+import checkmo.book.internal.config.properties.Yes24Properties;
+import checkmo.book.internal.config.properties.Yes24Properties.Retry;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.service.query.AladinApiService;
@@ -30,7 +30,7 @@ public class AladinRecommendationRefreshClient {
     @Autowired
     public AladinRecommendationRefreshClient(
             AladinApiService aladinApiService,
-            AladinProperties aladinProperties,
+            Yes24Properties aladinProperties,
             CheckmoMetrics checkmoMetrics
     ) {
         this(aladinApiService, aladinProperties, checkmoMetrics, Thread::sleep);
@@ -38,7 +38,7 @@ public class AladinRecommendationRefreshClient {
 
     AladinRecommendationRefreshClient(
             AladinApiService aladinApiService,
-            AladinProperties aladinProperties,
+            Yes24Properties aladinProperties,
             CheckmoMetrics checkmoMetrics,
             Sleeper sleeper
     ) {

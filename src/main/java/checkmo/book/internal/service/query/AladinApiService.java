@@ -1,11 +1,10 @@
 package checkmo.book.internal.service.query;
 
-import checkmo.book.internal.config.properties.AladinProperties;
-import checkmo.book.internal.converter.BookConverter;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.repository.BookLikedRepository;
-import checkmo.book.web.dto.AladinApiResponseDTO;
+import checkmo.book.internal.repository.BookRepository;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.common.monitoring.CheckmoMetrics;
@@ -18,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Service
@@ -27,12 +24,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Transactional(readOnly = true)
 public class AladinApiService {
 
-    private static final int RECOMMENDED_MAX_RESULTS = 28;
     private static final int LOG_BODY_MAX_LENGTH = 500;
 
-    private final RestTemplate restTemplate;
+    private final Yes24Client yes24Client;
+    private final BookRepository bookRepository;
 
-    private final AladinProperties aladinProperties;
+    private final Yes24Properties aladinProperties;
     private final BookLikedRepository bookLikedRepository;
     private final BookSearchCacheService bookSearchCacheService;
     private final AladinSearchClient aladinSearchClient;
@@ -87,133 +84,52 @@ public class AladinApiService {
         try {
             aladinSearchPrefetchService.prefetchNextPage(keyword, page);
         } catch (Exception e) {
-            log.warn("알라딘 검색 다음 페이지 prefetch 요청 실패. page={}", page + 1, e);
+            log.warn("예스24 검색 다음 페이지 prefetch 요청 실패. page={}", page + 1, e);
             sentryCaptureClient.captureException(e);
         }
     }
 
     public DetailInfo retrieveBookDetailInfo(String isbn) {
-        String url = buildHttpUrl(isbn);
         Timer.Sample sample = checkmoMetrics.startTimer();
         String result = "success";
         Exception failure = null;
         try {
-            var response = restTemplate.getForObject(
-                    url,
-                    AladinApiResponseDTO.BookList.class
-            );
-
-            if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
-                result = "invalid_response";
-                throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);
-            }
-
-            return BookConverter.toBookInfoDetail(response);
-
+            return yes24Client.retrieveBookDetail(isbn);
         } catch (BookException e) {
             failure = e;
-            if ("success".equals(result)) {
-                result = checkmoMetrics.classifyAladinResult(e);
-            }
-            logAladinFailure("retrieveBookDetailInfo", url, e);
-            throw new BookException(BookErrorStatus.BOOK_NOT_FOUND, e);
-        } catch (Exception e) {
-            failure = e;
             result = checkmoMetrics.classifyAladinResult(e);
-            logAladinFailure("retrieveBookDetailInfo", url, e);
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
+            if (isbn != null) {
+                var stored = bookRepository.findById(isbn);
+                if (stored.isPresent()) {
+                    var book = stored.get();
+                    sentryCaptureClient.captureException(e);
+                    return BookResponseDTO.DetailInfo.builder()
+                            .isbn(book.getId()).title(book.getTitle()).author(book.getAuthor())
+                            .publisher(book.getPublisher()).imgUrl(book.getImgUrl())
+                            .description(book.getDescription()).link(null).likedByMe(false).build();
+                }
+            }
+            throw e;
         } finally {
             checkmoMetrics.recordAladinClientResult(sample, "detail", result, failure);
         }
     }
 
     public BookResponseDTO.BookList retrieveRecommendedBooks() {
-        String url = buildHttpUrl();
         Timer.Sample sample = checkmoMetrics.startTimer();
-        String result = "success";
-        Exception failure = null;
         try {
-            var response = restTemplate.getForObject(
-                    url,
-                    AladinApiResponseDTO.BookList.class
-            );
-
-            if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
-                result = "invalid_response";
-                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
-            }
-
-            return BookConverter.toBookList(response, 1);
-
-        } catch (Exception e) {
-            failure = e;
-            if ("success".equals(result)) {
-                result = checkmoMetrics.classifyAladinResult(e);
-            }
-            logAladinFailure("retrieveRecommendedBooks", url, e);
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
-        } finally {
-            checkmoMetrics.recordAladinClientResult(sample, "recommendation", result, failure);
-        }
-    }
-
-    private String buildHttpUrl() {
-        return UriComponentsBuilder
-                .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemList())
-                .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
-                .queryParam("QueryType", aladinProperties.getSearch().getRecommendQueryType())
-                .queryParam("MaxResults", RECOMMENDED_MAX_RESULTS)
-                .queryParam("SearchTarget", aladinProperties.getSearch().getSearchTarget())
-                .queryParam("output", aladinProperties.getSearch().getOutput())
-                .queryParam("Version", aladinProperties.getAuth().getVersion())
-                .build()
-                .toUriString();
-    }
-
-    private String buildHttpUrl(String isbn) {
-        return UriComponentsBuilder
-                .fromUriString(aladinProperties.getUrl().getBase() + aladinProperties.getUrl().getItemLookup())
-                .queryParam("ttbkey", aladinProperties.getAuth().getTtbKey())
-                .queryParam("itemIdType", aladinProperties.getSearch().getItemIdType())
-                .queryParam("ItemId", isbn)
-                .queryParam("output", aladinProperties.getSearch().getOutput())
-                .queryParam("Version", aladinProperties.getAuth().getVersion())
-                .build()
-                .toUriString();
-    }
-
-    private void logAladinFailure(String operation, String url, Exception exception) {
-        log.error(
-                "Aladin API request failed. operation={}, url={}, exceptionType={}, message={}",
-                operation,
-                maskTtbKey(url),
-                exception.getClass().getName(),
-                sanitize(exception.getMessage())
-        );
-
-        Throwable cause = exception.getCause();
-        if (cause != null) {
-            log.error(
-                    "Aladin API failure cause. operation={}, causeType={}, causeMessage={}",
-                    operation,
-                    cause.getClass().getName(),
-                    sanitize(cause.getMessage())
-            );
-        }
-
-        if (exception instanceof RestClientResponseException responseException) {
-            log.error(
-                    "Aladin API response failure. operation={}, statusCode={}, responseBody={}",
-                    operation,
-                    responseException.getStatusCode(),
-                    trimForLog(sanitize(responseException.getResponseBodyAsString()))
-            );
+            var response = yes24Client.retrieveRecommendedBooks();
+            checkmoMetrics.recordAladinClientResult(sample, "recommendation", "success", null);
+            return response;
+        } catch (RuntimeException e) {
+            checkmoMetrics.recordAladinClientResult(sample, "recommendation", checkmoMetrics.classifyAladinResult(e), e);
+            throw e;
         }
     }
 
     private void logAladinSearchFailure(Exception exception) {
         log.error(
-                "Aladin API request failed. operation={}, exceptionType={}, message={}",
+                "Yes24 API request failed. operation={}, exceptionType={}, message={}",
                 "retrieveSearchBooks",
                 exception.getClass().getName(),
                 sanitize(exception.getMessage())
@@ -222,7 +138,7 @@ public class AladinApiService {
         Throwable cause = exception.getCause();
         if (cause != null) {
             log.error(
-                    "Aladin API failure cause. operation={}, causeType={}, causeMessage={}",
+                    "Yes24 API failure cause. operation={}, causeType={}, causeMessage={}",
                     "retrieveSearchBooks",
                     cause.getClass().getName(),
                     sanitize(cause.getMessage())
@@ -231,7 +147,7 @@ public class AladinApiService {
 
         if (exception instanceof RestClientResponseException responseException) {
             log.error(
-                    "Aladin API response failure. operation={}, statusCode={}, responseBody={}",
+                    "Yes24 API response failure. operation={}, statusCode={}, responseBody={}",
                     "retrieveSearchBooks",
                     responseException.getStatusCode(),
                     trimForLog(sanitize(responseException.getResponseBodyAsString()))

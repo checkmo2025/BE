@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import java.time.Duration;
 import lombok.Getter;
@@ -16,13 +15,11 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "aladin.api")
-public class AladinProperties {
+@ConfigurationProperties(prefix = "yes24.api")
+public class Yes24Properties {
 
-    @Valid
-    private Url url = new Url();
-    @Valid
-    private Auth auth = new Auth();
+    private String baseUrl = "https://apis.yes24.com/v1";
+    private String apiKey;
     @Valid
     private Search search = new Search();
     @Valid
@@ -30,56 +27,15 @@ public class AladinProperties {
 
     @Getter
     @Setter
-    public static class Url {
-        @NotBlank(message = "Aladin API 기본 URL은 필수입니다")
-        private String base;
-
-        @NotBlank(message = "Item Search URL은 필수입니다")
-        private String itemSearch;
-
-        @NotBlank(message = "Item Lookup URL은 필수입니다")
-        private String itemLookup;
-
-        @NotBlank(message = "Item List URL은 필수입니다")
-        private String itemList;
-    }
-
-    @Getter
-    @Setter
-    public static class Auth {
-        @NotBlank(message = "TTB Key는 필수입니다")
-        private String ttbKey;
-
-        @NotBlank(message = "API 버전은 필수입니다")
-        private String version;
-    }
-
-    @Getter
-    @Setter
     public static class Search {
-        @NotBlank(message = "검색 타입은 필수입니다")
-        private String searchQueryType;
-
-        @NotBlank(message = "검색 타입은 필수입니다")
-        private String recommendQueryType;
-
-        @NotBlank(message = "검색 대상은 필수입니다")
-        private String searchTarget;
-
-        @NotBlank(message = "출력 형식은 필수입니다")
-        private String output;
-
         @Positive(message = "최대 결과 수는 양수여야 합니다")
         @Min(value = 1, message = "최대 결과 수는 1 이상이어야 합니다")
         @Max(value = 100, message = "최대 결과 수는 100 이하여야 합니다")
-        private int maxResults;
-
-        @NotBlank(message = "아이템 ID 타입은 필수입니다")
-        private String itemIdType;
+        private int maxResults = 10;
 
         @Positive(message = "타임아웃은 양수여야 합니다")
         @Min(value = 1000, message = "타임아웃은 1000ms 이상이어야 합니다")
-        private int timeoutMs;
+        private int timeoutMs = 15000;
     }
 
     @Getter

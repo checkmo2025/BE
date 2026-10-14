@@ -21,7 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringTest
-@TestPropertySource(properties = "aladin.api.recommendation.refresh.background.fixed-delay=5m")
+@TestPropertySource(properties = "yes24.api.recommendation.refresh.background.fixed-delay=5m")
 class SentryConfigurationTest {
 
     @Autowired
