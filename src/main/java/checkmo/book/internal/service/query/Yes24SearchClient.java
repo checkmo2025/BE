@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AladinSearchClient {
+public class Yes24SearchClient {
 
     private final Yes24Client yes24Client;
     private final CheckmoMetrics checkmoMetrics;
@@ -16,10 +16,10 @@ public class AladinSearchClient {
         var sample = checkmoMetrics.startTimer();
         try {
             var response = yes24Client.retrieveSearchBooks(keyword, page);
-            checkmoMetrics.recordAladinClientResult(sample, "search", "success", null);
+            checkmoMetrics.recordYes24ClientResult(sample, "search", "success", null);
             return response;
         } catch (RuntimeException e) {
-            checkmoMetrics.recordAladinClientResult(sample, "search", checkmoMetrics.classifyAladinResult(e), e);
+            checkmoMetrics.recordYes24ClientResult(sample, "search", checkmoMetrics.classifyYes24Result(e), e);
             throw e;
         }
     }

@@ -6,7 +6,7 @@ import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.repository.BookRepository;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookCommandService {
 
     private final BookRepository bookRepository;
-    private final AladinApiService aladinApiService;
+    private final Yes24ApiService yes24ApiService;
 
     public String fetchOrCreateBook(String isbn) {
         if (isbn == null || isbn.isBlank()) {
@@ -29,7 +29,7 @@ public class BookCommandService {
             return isbn;
         }
 
-        var detail = aladinApiService.retrieveBookDetailInfo(isbn);
+        var detail = yes24ApiService.retrieveBookDetailInfo(isbn);
         if (detail == null || !isbn.equals(detail.getIsbn())) {
             throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);
         }

@@ -12,11 +12,11 @@ import checkmo.common.monitoring.CheckmoMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
-class AladinSearchClientTest {
+class Yes24SearchClientTest {
     @Test
     void delegatesSearchAndPreservesProviderFailure() {
         var provider = mock(Yes24Client.class);
-        var client = new AladinSearchClient(provider, new CheckmoMetrics(new SimpleMeterRegistry()));
+        var client = new Yes24SearchClient(provider, new CheckmoMetrics(new SimpleMeterRegistry()));
         var result = BookResponseDTO.BookList.builder().build();
         when(provider.retrieveSearchBooks("책", 2)).thenReturn(result);
         assertThat(client.fetchSearchBooks("책", 2)).isSameAs(result);

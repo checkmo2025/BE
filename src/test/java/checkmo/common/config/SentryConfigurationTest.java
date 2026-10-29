@@ -2,7 +2,7 @@ package checkmo.common.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import checkmo.book.internal.service.AladinRecommendationRefreshClient;
+import checkmo.book.internal.service.Yes24RecommendationRefreshClient;
 import checkmo.common.monitoring.SentryCaptureClient;
 import checkmo.common.monitoring.SentrySdkCaptureClient;
 import checkmo.support.SpringTest;
@@ -37,7 +37,7 @@ class SentryConfigurationTest {
     private ListableBeanFactory beanFactory;
 
     @MockitoBean
-    private AladinRecommendationRefreshClient aladinRecommendationRefreshClient;
+    private Yes24RecommendationRefreshClient yes24RecommendationRefreshClient;
 
     @Test
     void contextStartsWhenSentryDsnIsMissing() {

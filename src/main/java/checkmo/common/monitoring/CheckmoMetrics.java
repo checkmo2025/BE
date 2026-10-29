@@ -23,7 +23,7 @@ public class CheckmoMetrics {
         return Timer.start(meterRegistry);
     }
 
-    public void recordAladinClientResult(Timer.Sample sample, String operation, String result, Throwable throwable) {
+    public void recordYes24ClientResult(Timer.Sample sample, String operation, String result, Throwable throwable) {
         Counter.builder("checkmo.aladin.client.requests")
                 .tag("operation", operation)
                 .tag("result", result)
@@ -37,14 +37,14 @@ public class CheckmoMetrics {
                 .register(meterRegistry));
     }
 
-    public void recordAladinRecommendationRefresh(Timer.Sample sample, String result, String source) {
+    public void recordYes24RecommendationRefresh(Timer.Sample sample, String result, String source) {
         sample.stop(Timer.builder("checkmo.aladin.recommendation.refresh.duration")
                 .tag("result", result)
                 .tag("source", source)
                 .register(meterRegistry));
     }
 
-    public void incrementAladinRecommendationRetry(String result) {
+    public void incrementYes24RecommendationRetry(String result) {
         Counter.builder("checkmo.aladin.recommendation.retry.count")
                 .tag("result", result)
                 .register(meterRegistry)
@@ -78,7 +78,7 @@ public class CheckmoMetrics {
                 .increment();
     }
 
-    public String classifyAladinResult(Throwable throwable) {
+    public String classifyYes24Result(Throwable throwable) {
         if (throwable == null) {
             return "success";
         }

@@ -10,7 +10,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.bookStory.internal.repository.CommentRepository;
@@ -45,7 +45,7 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
     private static final String ISBN = "9791169213882";
 
     @MockitoBean
-    AladinApiService aladinApiService;
+    Yes24ApiService yes24ApiService;
 
     @MockitoBean
     ClubManagementAPI clubManagementAPI;
@@ -75,16 +75,16 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
                 .totalResults(123)
                 .build();
 
-        when(aladinApiService.retrieveSearchBooks(eq("자바"), eq(1), anyLong())).thenReturn(oneBookList);
-        when(aladinApiService.retrieveBookDetailInfo(ISBN)).thenReturn(detail);
-        when(aladinApiService.retrieveRecommendedBooks()).thenReturn(BookResponseDTO.BookList.builder()
+        when(yes24ApiService.retrieveSearchBooks(eq("자바"), eq(1), anyLong())).thenReturn(oneBookList);
+        when(yes24ApiService.retrieveBookDetailInfo(ISBN)).thenReturn(detail);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(BookResponseDTO.BookList.builder()
                 .detailInfoList(IntStream.rangeClosed(1, 28)
                         .mapToObj(index -> bookDetail("979116921%04d".formatted(index)))
                         .toList())
                 .currentPage(1)
                 .hasNext(false)
                 .build());
-        when(aladinApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), any()))
+        when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         when(clubManagementAPI.fetchClubNamesByClubIds(anyList())).thenReturn(Map.of(77L, "테스트 독서모임"));

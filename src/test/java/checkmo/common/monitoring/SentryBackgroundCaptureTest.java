@@ -10,10 +10,10 @@ import static org.mockito.Mockito.when;
 
 import checkmo.authentication.AuthenticationAPI;
 import checkmo.book.internal.config.properties.Yes24Properties;
-import checkmo.book.internal.service.AladinRecommendationRefreshClient;
+import checkmo.book.internal.service.Yes24RecommendationRefreshClient;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.RecommendationRefreshGuard;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.internal.scheduler.BookRecommendationScheduler;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.infra.s3.internal.listener.S3EventListener;
@@ -38,7 +38,7 @@ class SentryBackgroundCaptureTest {
     void capturesRecommendationRefreshFailureWhileReturningStaleFallback() {
         RedisTemplate<String, Object> redisTemplate = mock(RedisTemplate.class);
         ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
-        AladinApiService aladinApiService = mock(AladinApiService.class);
+        Yes24ApiService yes24ApiService = mock(Yes24ApiService.class);
         RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
         CheckmoMetrics checkmoMetrics = new CheckmoMetrics(new SimpleMeterRegistry());
         RuntimeException failure = new RuntimeException("aladin unavailable");
@@ -63,8 +63,8 @@ class SentryBackgroundCaptureTest {
         when(guard.acquire()).thenReturn("token");
         BookRecommendationService service = new BookRecommendationService(
                 redisTemplate,
-                aladinApiService,
-                new AladinRecommendationRefreshClient(aladinApiService, new Yes24Properties(), checkmoMetrics),
+                yes24ApiService,
+                new Yes24RecommendationRefreshClient(yes24ApiService, new Yes24Properties(), checkmoMetrics),
                 captureClient,
                 checkmoMetrics,
                 guard
@@ -73,8 +73,8 @@ class SentryBackgroundCaptureTest {
         when(valueOperations.get("book:recommendations:daily")).thenReturn(staleCache);
         when(valueOperations.get("book:recommendations:daily:updated_at"))
                 .thenReturn(LocalDate.now().minusDays(1).toString());
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
-        when(aladinApiService.applyLikedByMe(staleCache, 1L)).thenReturn(likedStaleCache);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.applyLikedByMe(staleCache, 1L)).thenReturn(likedStaleCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(1L);
 

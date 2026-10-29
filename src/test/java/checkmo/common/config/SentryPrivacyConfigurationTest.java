@@ -2,7 +2,7 @@ package checkmo.common.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import checkmo.book.internal.service.AladinRecommendationRefreshClient;
+import checkmo.book.internal.service.Yes24RecommendationRefreshClient;
 import checkmo.support.SpringTest;
 import io.sentry.SentryEvent;
 import io.sentry.SentryOptions;
@@ -28,7 +28,7 @@ class SentryPrivacyConfigurationTest {
     private SentryOptions.BeforeSendCallback beforeSendCallback;
 
     @MockitoBean
-    private AladinRecommendationRefreshClient aladinRecommendationRefreshClient;
+    private Yes24RecommendationRefreshClient yes24RecommendationRefreshClient;
 
     @Test
     void sentrySanitizerIsRegisteredAsBeforeSendCallbackBean() {

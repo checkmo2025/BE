@@ -3,7 +3,7 @@ package checkmo.book.web.controller;
 import checkmo.authentication.CurrentId;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.command.BookSocialCommandService;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.internal.service.query.BookLikeQueryService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "책 검색", description = "예스24 API를 이용한 책 검색 API")
 public class BookController {
 
-    private final AladinApiService aladinApiService;
+    private final Yes24ApiService yes24ApiService;
     private final BookRecommendationService bookRecommendationService;
     private final BookSocialCommandService bookSocialCommandService;
     private final BookLikeQueryService bookLikeQueryService;
@@ -50,7 +50,7 @@ public class BookController {
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
             int page
     ) {
-        BookResponseDTO.BookList result = aladinApiService.retrieveSearchBooks(keyword, page, memberId);
+        BookResponseDTO.BookList result = yes24ApiService.retrieveSearchBooks(keyword, page, memberId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -62,7 +62,7 @@ public class BookController {
     })
     @GetMapping({"/{isbn}"})
     public ApiResponse<DetailInfo> getBookDetail(@PathVariable String isbn) {
-        DetailInfo result = aladinApiService.retrieveBookDetailInfo(isbn);
+        DetailInfo result = yes24ApiService.retrieveBookDetailInfo(isbn);
         return ApiResponse.onSuccess(result);
     }
 

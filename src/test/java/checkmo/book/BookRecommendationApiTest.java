@@ -6,8 +6,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import checkmo.book.internal.service.AladinRecommendationRefreshClient;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.Yes24RecommendationRefreshClient;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.support.ApiTestSupport;
@@ -25,10 +25,10 @@ class BookRecommendationApiTest extends ApiTestSupport {
     private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:{yes24}:daily:updated_at";
 
     @MockitoBean
-    AladinRecommendationRefreshClient recommendationRefreshClient;
+    Yes24RecommendationRefreshClient recommendationRefreshClient;
 
     @MockitoBean
-    AladinApiService aladinApiService;
+    Yes24ApiService yes24ApiService;
 
     @BeforeEach
     void mockAtomicCacheRead() {
@@ -37,7 +37,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
     }
 
     @Test
-    void recommendBooksReturnsStaleCacheWhenAladinRefreshFails() {
+    void recommendBooksReturnsStaleCacheWhenYes24RefreshFails() {
         TestUser user = createUser();
         BookResponseDTO.BookList staleCache = bookList("stale", 4);
 
@@ -45,7 +45,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
         when(redisValueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().minusDays(1).toString());
         when(recommendationRefreshClient.retrieveRecommendedBooks())
                 .thenThrow(new RuntimeException("aladin unavailable"));
-        when(aladinApiService.applyLikedByMe(staleCache, Long.valueOf(user.id()))).thenReturn(staleCache);
+        when(yes24ApiService.applyLikedByMe(staleCache, Long.valueOf(user.id()))).thenReturn(staleCache);
 
         given()
                 .cookie(accessTokenCookie(user))
@@ -61,7 +61,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
     }
 
     @Test
-    void recommendBooksReturnsBook500WhenNoCacheAndAladinRefreshFails() {
+    void recommendBooksReturnsBook500WhenNoCacheAndYes24RefreshFails() {
         TestUser user = createUser();
 
         when(redisValueOperations.get(REDIS_KEY)).thenReturn(null);
@@ -79,13 +79,13 @@ class BookRecommendationApiTest extends ApiTestSupport {
     }
 
     @Test
-    void recommendBooksReturnsFreshCacheWithoutRefreshingAladin() {
+    void recommendBooksReturnsFreshCacheWithoutRefreshingYes24() {
         TestUser user = createUser();
         BookResponseDTO.BookList freshCache = bookList("fresh", 4);
 
         when(redisValueOperations.get(REDIS_KEY)).thenReturn(freshCache);
         when(redisValueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().toString());
-        when(aladinApiService.applyLikedByMe(freshCache, Long.valueOf(user.id()))).thenReturn(freshCache);
+        when(yes24ApiService.applyLikedByMe(freshCache, Long.valueOf(user.id()))).thenReturn(freshCache);
 
         given()
                 .cookie(accessTokenCookie(user))

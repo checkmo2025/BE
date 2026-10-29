@@ -12,7 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.repository.BookRepository;
 import checkmo.book.internal.service.command.BookCommandService;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.web.dto.BookResponseDTO;
 import java.time.LocalDateTime;
@@ -40,7 +40,7 @@ class BookPersistenceTest {
     @Autowired BookRepository repository;
     @Autowired EntityManager entityManager;
     @Autowired BookCommandService service;
-    @MockitoBean AladinApiService catalog;
+    @MockitoBean Yes24ApiService catalog;
     @MockitoBean ClubManagementAPI clubManagementAPI;
 
     @AfterEach

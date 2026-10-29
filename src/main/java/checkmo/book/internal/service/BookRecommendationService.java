@@ -3,7 +3,7 @@ package checkmo.book.internal.service;
 import checkmo.book.internal.RecommendationLogSanitizer;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
@@ -28,8 +28,8 @@ public class BookRecommendationService {
     private static final String REDIS_UPDATED_AT_KEY = RecommendationRefreshGuard.DATE_KEY;
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final AladinApiService aladinApiService;
-    private final AladinRecommendationRefreshClient recommendationRefreshClient;
+    private final Yes24ApiService yes24ApiService;
+    private final Yes24RecommendationRefreshClient recommendationRefreshClient;
     private final SentryCaptureClient sentryCaptureClient;
     private final CheckmoMetrics checkmoMetrics;
     private final RecommendationRefreshGuard refreshGuard;
@@ -40,12 +40,12 @@ public class BookRecommendationService {
         checkmoMetrics.incrementRecommendationCacheRequest(cacheLookup.result());
 
         if (cachedBooks != null && "fresh".equals(cacheLookup.result())) {
-            return aladinApiService.applyLikedByMe(cachedBooks, memberId);
+            return yes24ApiService.applyLikedByMe(cachedBooks, memberId);
         }
 
         try {
-            BookResponseDTO.BookList refreshedBooks = retrieveAndSaveRecommendedBooksFromAladin("user_request");
-            return aladinApiService.applyLikedByMe(refreshedBooks, memberId);
+            BookResponseDTO.BookList refreshedBooks = retrieveAndSaveRecommendedBooksFromYes24("user_request");
+            return yes24ApiService.applyLikedByMe(refreshedBooks, memberId);
         } catch (Exception e) {
             if (cachedBooks != null) {
                 log.warn(
@@ -57,7 +57,7 @@ public class BookRecommendationService {
                         safeCauseMessage(e)
                 );
                 sentryCaptureClient.captureException(e);
-                return aladinApiService.applyLikedByMe(cachedBooks, memberId);
+                return yes24ApiService.applyLikedByMe(cachedBooks, memberId);
             }
 
             throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
@@ -66,7 +66,7 @@ public class BookRecommendationService {
 
     public BookResponseDTO.BookList refreshDailyRecommendedBooks() {
         try {
-            return retrieveAndSaveRecommendedBooksFromAladin("background");
+            return retrieveAndSaveRecommendedBooksFromYes24("background");
         } catch (Exception e) {
             log.error(
                     "API에서 추천 책 가져오기 중 오류. exceptionType={}, errorStatus={}, message={}, causeType={}, causeMessage={}",
@@ -102,7 +102,7 @@ public class BookRecommendationService {
         return new CacheLookup(null, "miss");
     }
 
-    private BookResponseDTO.BookList retrieveAndSaveRecommendedBooksFromAladin(String source) {
+    private BookResponseDTO.BookList retrieveAndSaveRecommendedBooksFromYes24(String source) {
         String token = refreshGuard.acquire();
         try {
             var cached = retrieveUsableCachedBooks();
@@ -147,11 +147,11 @@ public class BookRecommendationService {
                     .build();
         } catch (RuntimeException e) {
             if ("success".equals(result)) {
-                result = checkmoMetrics.classifyAladinResult(e);
+                result = checkmoMetrics.classifyYes24Result(e);
             }
             throw e;
         } finally {
-            checkmoMetrics.recordAladinRecommendationRefresh(sample, result, source);
+            checkmoMetrics.recordYes24RecommendationRefresh(sample, result, source);
         }
     }
 

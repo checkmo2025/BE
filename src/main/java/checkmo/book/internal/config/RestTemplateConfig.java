@@ -12,13 +12,13 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class RestTemplateConfig {
 
-    private final Yes24Properties aladinProperties;
+    private final Yes24Properties yes24Properties;
 
     @Bean
     public RestTemplate restTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(aladinProperties.getSearch().getTimeoutMs());
-        factory.setReadTimeout(aladinProperties.getSearch().getTimeoutMs());
+        factory.setConnectTimeout(yes24Properties.getSearch().getTimeoutMs());
+        factory.setReadTimeout(yes24Properties.getSearch().getTimeoutMs());
 
         return new RestTemplate(factory);
     }

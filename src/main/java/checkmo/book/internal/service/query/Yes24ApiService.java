@@ -22,18 +22,18 @@ import org.springframework.web.client.RestClientResponseException;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class AladinApiService {
+public class Yes24ApiService {
 
     private static final int LOG_BODY_MAX_LENGTH = 500;
 
     private final Yes24Client yes24Client;
     private final BookRepository bookRepository;
 
-    private final Yes24Properties aladinProperties;
+    private final Yes24Properties yes24Properties;
     private final BookLikedRepository bookLikedRepository;
     private final BookSearchCacheService bookSearchCacheService;
-    private final AladinSearchClient aladinSearchClient;
-    private final AladinSearchPrefetchService aladinSearchPrefetchService;
+    private final Yes24SearchClient yes24SearchClient;
+    private final Yes24SearchPrefetchService yes24SearchPrefetchService;
     private final SentryCaptureClient sentryCaptureClient;
     private final CheckmoMetrics checkmoMetrics;
 
@@ -42,7 +42,7 @@ public class AladinApiService {
             return emptySearchResult(page);
         }
 
-        int maxResults = aladinProperties.getSearch().getMaxResults();
+        int maxResults = yes24Properties.getSearch().getMaxResults();
 
         var cachedBookList = bookSearchCacheService.retrieve(keyword, maxResults, page);
         if (cachedBookList.isPresent()) {
@@ -50,14 +50,14 @@ public class AladinApiService {
         }
 
         try {
-            BookResponseDTO.BookList bookList = aladinSearchClient.fetchSearchBooks(keyword, page);
+            BookResponseDTO.BookList bookList = yes24SearchClient.fetchSearchBooks(keyword, page);
             bookSearchCacheService.save(keyword, maxResults, page, bookList);
 
             prefetchNextPageIfNeeded(keyword, page, bookList);
             return applyLikedByMe(bookList, memberId);
 
         } catch (Exception e) {
-            logAladinSearchFailure(e);
+            logYes24SearchFailure(e);
             var fallbackBookList = bookSearchCacheService.retrieve(keyword, maxResults, page);
             if (fallbackBookList.isPresent()) {
                 sentryCaptureClient.captureException(e);
@@ -82,7 +82,7 @@ public class AladinApiService {
         }
 
         try {
-            aladinSearchPrefetchService.prefetchNextPage(keyword, page);
+            yes24SearchPrefetchService.prefetchNextPage(keyword, page);
         } catch (Exception e) {
             log.warn("예스24 검색 다음 페이지 prefetch 요청 실패. page={}", page + 1, e);
             sentryCaptureClient.captureException(e);
@@ -97,7 +97,7 @@ public class AladinApiService {
             return yes24Client.retrieveBookDetail(isbn);
         } catch (BookException e) {
             failure = e;
-            result = checkmoMetrics.classifyAladinResult(e);
+            result = checkmoMetrics.classifyYes24Result(e);
             if (isbn != null) {
                 var stored = bookRepository.findById(isbn);
                 if (stored.isPresent()) {
@@ -111,7 +111,7 @@ public class AladinApiService {
             }
             throw e;
         } finally {
-            checkmoMetrics.recordAladinClientResult(sample, "detail", result, failure);
+            checkmoMetrics.recordYes24ClientResult(sample, "detail", result, failure);
         }
     }
 
@@ -119,15 +119,15 @@ public class AladinApiService {
         Timer.Sample sample = checkmoMetrics.startTimer();
         try {
             var response = yes24Client.retrieveRecommendedBooks();
-            checkmoMetrics.recordAladinClientResult(sample, "recommendation", "success", null);
+            checkmoMetrics.recordYes24ClientResult(sample, "recommendation", "success", null);
             return response;
         } catch (RuntimeException e) {
-            checkmoMetrics.recordAladinClientResult(sample, "recommendation", checkmoMetrics.classifyAladinResult(e), e);
+            checkmoMetrics.recordYes24ClientResult(sample, "recommendation", checkmoMetrics.classifyYes24Result(e), e);
             throw e;
         }
     }
 
-    private void logAladinSearchFailure(Exception exception) {
+    private void logYes24SearchFailure(Exception exception) {
         log.error(
                 "Yes24 API request failed. operation={}, exceptionType={}, message={}",
                 "retrieveSearchBooks",

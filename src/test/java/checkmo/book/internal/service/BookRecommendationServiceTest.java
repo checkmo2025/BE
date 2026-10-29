@@ -17,7 +17,7 @@ import ch.qos.logback.core.read.ListAppender;
 import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
@@ -55,7 +55,7 @@ class BookRecommendationServiceTest {
 
     private RedisTemplate<String, Object> redisTemplate;
     private ValueOperations<String, Object> valueOperations;
-    private AladinApiService aladinApiService;
+    private Yes24ApiService yes24ApiService;
     private RecordingSentryCaptureClient captureClient;
     private CheckmoMetrics checkmoMetrics;
     private BookRecommendationService service;
@@ -66,11 +66,11 @@ class BookRecommendationServiceTest {
     void setUp() {
         redisTemplate = mock(RedisTemplate.class);
         valueOperations = mock(ValueOperations.class);
-        aladinApiService = mock(AladinApiService.class);
+        yes24ApiService = mock(Yes24ApiService.class);
         captureClient = new RecordingSentryCaptureClient();
         checkmoMetrics = new CheckmoMetrics(new SimpleMeterRegistry());
-        AladinRecommendationRefreshClient refreshClient = new AladinRecommendationRefreshClient(
-                aladinApiService,
+        Yes24RecommendationRefreshClient refreshClient = new Yes24RecommendationRefreshClient(
+                yes24ApiService,
                 retryProperties(),
                 checkmoMetrics,
                 backOffPeriod -> {
@@ -78,7 +78,7 @@ class BookRecommendationServiceTest {
         );
         guard = mock(RecommendationRefreshGuard.class);
         when(guard.acquire()).thenReturn("token");
-        service = new BookRecommendationService(redisTemplate, aladinApiService, refreshClient, captureClient, checkmoMetrics, guard);
+        service = new BookRecommendationService(redisTemplate, yes24ApiService, refreshClient, captureClient, checkmoMetrics, guard);
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.multiGet(List.of(REDIS_KEY, REDIS_UPDATED_AT_KEY)))
@@ -91,13 +91,13 @@ class BookRecommendationServiceTest {
         when(valueOperations.get(REDIS_KEY)).thenReturn(stale);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn("2000-01-01");
         when(guard.acquire()).thenThrow(new BookException(BookErrorStatus.ALADIN_API_ERROR));
-        when(aladinApiService.applyLikedByMe(stale, MEMBER_ID)).thenReturn(stale);
+        when(yes24ApiService.applyLikedByMe(stale, MEMBER_ID)).thenReturn(stale);
         assertThat(service.retrieveRecommendedBooks(MEMBER_ID)).isSameAs(stale);
-        verify(aladinApiService, never()).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).retrieveRecommendedBooks();
     }
 
     @Test
-    void retrieveRecommendedBooksRetriesTransientAladinAccessFailuresThenSavesTodayRecommendationWhenRefreshEventuallySucceeds() {
+    void retrieveRecommendedBooksRetriesTransientYes24AccessFailuresThenSavesTodayRecommendationWhenRefreshEventuallySucceeds() {
         BookResponseDTO.BookList aladinBooks = bookListOfSize(todayRequiredBookCount());
         BookException firstFailure = new BookException(
                 BookErrorStatus.ALADIN_API_ERROR,
@@ -108,17 +108,17 @@ class BookRecommendationServiceTest {
                 new IOException("second transient failure")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks())
+        when(yes24ApiService.retrieveRecommendedBooks())
                 .thenThrow(firstFailure)
                 .thenThrow(secondFailure)
                 .thenReturn(aladinBooks);
-        when(aladinApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
+        when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
 
         assertThat(response.getDetailInfoList()).hasSize(4);
-        verify(aladinApiService, times(3)).retrieveRecommendedBooks();
+        verify(yes24ApiService, times(3)).retrieveRecommendedBooks();
         verify(guard).publish(eq("token"), any(BookResponseDTO.BookList.class), eq(LocalDate.now(ZoneId.of("Asia/Seoul")).toString()));
         verify(guard).release("token");
         verify(valueOperations, never()).set(eq(REDIS_KEY), any(BookResponseDTO.BookList.class), any(Duration.class));
@@ -141,8 +141,8 @@ class BookRecommendationServiceTest {
         ArgumentCaptor<BookResponseDTO.BookList> savedBookListCaptor =
                 ArgumentCaptor.forClass(BookResponseDTO.BookList.class);
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks()).thenReturn(aladinBooks);
-        when(aladinApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
+        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(aladinBooks);
+        when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
@@ -169,15 +169,15 @@ class BookRecommendationServiceTest {
                 new RestClientException("aladin unavailable")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(finalFailure);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(finalFailure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
                 )
                 .hasCause(finalFailure);
-        verify(aladinApiService, times(3)).retrieveRecommendedBooks();
-        verify(aladinApiService, never()).applyLikedByMe(any(), any());
+        verify(yes24ApiService, times(3)).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
 
@@ -185,15 +185,15 @@ class BookRecommendationServiceTest {
     void retrieveRecommendedBooksDoesNotRetryGenericRuntimeFailureWhenCacheIsNotUsable() {
         RuntimeException failure = new RuntimeException("local mapping failure");
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
                 )
                 .hasCause(failure);
-        verify(aladinApiService).retrieveRecommendedBooks();
-        verify(aladinApiService, never()).applyLikedByMe(any(), any());
+        verify(yes24ApiService).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
 
@@ -204,15 +204,15 @@ class BookRecommendationServiceTest {
                 new RuntimeException("non-transient recommendation failure")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
                 )
                 .hasCause(failure);
-        verify(aladinApiService).retrieveRecommendedBooks();
-        verify(aladinApiService, never()).applyLikedByMe(any(), any());
+        verify(yes24ApiService).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
 
@@ -220,15 +220,15 @@ class BookRecommendationServiceTest {
     void retrieveRecommendedBooksDoesNotRetryLocalValidationFailureWhenCacheIsNotUsable() {
         IllegalArgumentException failure = new IllegalArgumentException("invalid recommendation request");
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
                 )
                 .hasCause(failure);
-        verify(aladinApiService).retrieveRecommendedBooks();
-        verify(aladinApiService, never()).applyLikedByMe(any(), any());
+        verify(yes24ApiService).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
 
@@ -239,14 +239,14 @@ class BookRecommendationServiceTest {
         RuntimeException failure = new RuntimeException("aladin unavailable");
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
-        when(aladinApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
 
         assertThat(response).isSameAs(likedStaleCache);
         assertThat(captureClient.captured()).containsExactly(failure);
-        verify(aladinApiService).applyLikedByMe(staleCache, MEMBER_ID);
+        verify(yes24ApiService).applyLikedByMe(staleCache, MEMBER_ID);
     }
 
     @Test
@@ -256,8 +256,8 @@ class BookRecommendationServiceTest {
         RuntimeException failure = credentialBearingFailure();
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
-        when(aladinApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
         ListAppender<ILoggingEvent> appender = attachServiceLogAppender();
 
         try {
@@ -275,7 +275,7 @@ class BookRecommendationServiceTest {
     void refreshDailyRecommendedBooksDoesNotLogRawCredentialBearingRefreshFailureWhenReturningEmptyFallback() {
         RuntimeException failure = credentialBearingFailure();
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
         ListAppender<ILoggingEvent> appender = attachServiceLogAppender();
 
         try {
@@ -295,8 +295,8 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList likedStaleCache = bookList("9791169213882", true);
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
-        when(aladinApiService.retrieveRecommendedBooks()).thenReturn(emptyBookList());
-        when(aladinApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(emptyBookList());
+        when(yes24ApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
 
@@ -306,7 +306,7 @@ class BookRecommendationServiceTest {
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
                 );
-        verify(aladinApiService).applyLikedByMe(staleCache, MEMBER_ID);
+        verify(yes24ApiService).applyLikedByMe(staleCache, MEMBER_ID);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -324,7 +324,7 @@ class BookRecommendationServiceTest {
             when(valueOperations.get(REDIS_KEY)).thenReturn(cachedData);
             when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(updatedAt);
         }
-        when(aladinApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
@@ -332,24 +332,24 @@ class BookRecommendationServiceTest {
                 )
                 .hasCause(failure);
         assertThat(captureClient.count()).isZero();
-        verify(aladinApiService, never()).applyLikedByMe(any(), any());
+        verify(yes24ApiService, never()).applyLikedByMe(any(), any());
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("unusableAladinResponseCases")
+    @MethodSource("unusableYes24ResponseCases")
     void retrieveRecommendedBooksThrowsBook500AndDoesNotCaptureWhenNoUsableCacheAndRefreshReturnsUnusableBookList(
             String displayName,
             BookResponseDTO.BookList aladinResponse
     ) {
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(aladinApiService.retrieveRecommendedBooks()).thenReturn(aladinResponse);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(aladinResponse);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
                 );
         assertThat(captureClient.count()).isZero();
-        verify(aladinApiService, never()).applyLikedByMe(any(), any());
+        verify(yes24ApiService, never()).applyLikedByMe(any(), any());
     }
 
     @Test
@@ -358,12 +358,12 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList likedFreshCache = bookList("9791169213882", true);
         when(valueOperations.get(REDIS_KEY)).thenReturn(freshCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).toString());
-        when(aladinApiService.applyLikedByMe(freshCache, MEMBER_ID)).thenReturn(likedFreshCache);
+        when(yes24ApiService.applyLikedByMe(freshCache, MEMBER_ID)).thenReturn(likedFreshCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
 
         assertThat(response).isSameAs(likedFreshCache);
-        verify(aladinApiService, never()).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).retrieveRecommendedBooks();
         verify(valueOperations, never()).set(any(String.class), any());
     }
 
@@ -378,7 +378,7 @@ class BookRecommendationServiceTest {
         );
     }
 
-    private static Stream<Arguments> unusableAladinResponseCases() {
+    private static Stream<Arguments> unusableYes24ResponseCases() {
         return Stream.of(
                 Arguments.of("null aladin response is not usable", null),
                 Arguments.of("empty aladin response is not usable", emptyBookList()),
