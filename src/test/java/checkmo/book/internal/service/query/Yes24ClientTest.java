@@ -1,9 +1,12 @@
 package checkmo.book.internal.service.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
@@ -14,8 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.stream.IntStream;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,13 +59,23 @@ class Yes24ClientTest {
     }
 
     @Test
-    void retrievesTwentyEightRecommendationsInOneRequest() {
-        String items = IntStream.range(0, 28).mapToObj(i -> "{\"isbn13\":\"" + ISBN + "\"}")
-                .collect(Collectors.joining(","));
-        server.expect(requestTo("https://apis.yes24.com/v1/category/bestseller?detail=N&categoryId=001&page=1&pageSize=28"))
-                .andRespond(withSuccess(payload(items, 1, 28, 1000), MediaType.APPLICATION_JSON));
-        assertThat(client.retrieveRecommendedBooks().getDetailInfoList()).hasSize(28);
+    void retrievesOneMonthlyRecommendationWithExplicitCategoryDateAndRank() {
+        server.expect(requestTo("https://apis.yes24.com/v1/category/bestsellerMonthly?detail=N&categoryId=001001046&date=2026-10-01&page=31&pageSize=1"))
+                .andRespond(withSuccess(payload("{\"isbn13\":\"" + ISBN + "\"}", 31, 1, 100), MediaType.APPLICATION_JSON));
+        assertThat(client.retrieveRecommendedBooks("001001046", LocalDate.of(2026, 10, 1), 31).getDetailInfoList()).hasSize(1);
         verify(limiter).acquire();
+        server.verify();
+    }
+
+    @Test
+    void monthlyMissingResultReturnsEmptyButUnknown404StillFails() {
+        server.expect(anything()).andRespond(withStatus(HttpStatus.NOT_FOUND)
+                .body("{\"errorCode\":\"BEST_001\"}").contentType(MediaType.APPLICATION_JSON));
+        server.expect(anything()).andRespond(withStatus(HttpStatus.NOT_FOUND)
+                .body("{\"errorCode\":\"UNKNOWN\"}").contentType(MediaType.APPLICATION_JSON));
+        assertThat(client.retrieveRecommendedBooks("001001007", LocalDate.of(2026, 10, 1), 31).getDetailInfoList()).isEmpty();
+        assertThatThrownBy(() -> client.retrieveRecommendedBooks("001001007", LocalDate.of(2026, 10, 1), 31))
+                .isInstanceOf(BookException.class);
         server.verify();
     }
 
@@ -126,7 +138,7 @@ class Yes24ClientTest {
     @Test
     void missingKeyFailsWithoutMakingARequest() {
         properties.setApiKey("");
-        assertThatThrownBy(client::retrieveRecommendedBooks).isInstanceOf(BookException.class);
+        assertThatThrownBy(() -> client.retrieveRecommendedBooks("001001046", LocalDate.of(2026, 10, 1), 1)).isInstanceOf(BookException.class);
         server.verify();
     }
 

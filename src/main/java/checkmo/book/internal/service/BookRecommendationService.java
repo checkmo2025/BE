@@ -4,7 +4,6 @@ import checkmo.book.internal.RecommendationLogSanitizer;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.service.query.Yes24ApiService;
-import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.common.monitoring.CheckmoMetrics;
@@ -12,8 +11,11 @@ import checkmo.common.monitoring.SentryCaptureClient;
 import io.micrometer.core.instrument.Timer;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,6 +25,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BookRecommendationService {
+
+    static final int MAX_CANDIDATES_PER_CATEGORY = 5;
+    private static final List<String> CATEGORY_IDS = List.of("001001046", "001001019", "001001022", "001001007");
 
     private static final String REDIS_KEY = RecommendationRefreshGuard.DATA_KEY;
     private static final String REDIS_UPDATED_AT_KEY = RecommendationRefreshGuard.DATE_KEY;
@@ -89,11 +94,6 @@ public class BookRecommendationService {
                 boolean fresh = today().toString().equals(pair.get(1));
                 return new CacheLookup(bookList, fresh ? "fresh" : "stale");
             }
-            // 전환 첫날에만 구 공급자 캐시를 장애 fallback으로 사용한다. 최신으로 취급하지 않는다.
-            Object legacy = redisTemplate.opsForValue().get("book:recommendations:daily");
-            if (legacy instanceof BookResponseDTO.BookList bookList && isUsableBookList(bookList)) {
-                return new CacheLookup(bookList, "stale");
-            }
         } catch (Exception e) {
             log.error("Redis에서 추천 책 조회 중 오류 발생. API에서 데이터를 가져오기.", e);
             return new CacheLookup(null, "redis_error");
@@ -117,26 +117,16 @@ public class BookRecommendationService {
         Timer.Sample sample = checkmoMetrics.startTimer();
         String result = "success";
         try {
-            BookResponseDTO.BookList bookList = recommendationRefreshClient.retrieveRecommendedBooks();
-
-            if (!isUsableBookList(bookList)) {
-                result = "invalid_response";
-                log.error("예스24 API에서 추천 책을 가져오지 못했습니다.");
-                throw new BookException(BookErrorStatus.YES24_API_ERROR);
-            }
-
             LocalDate day = today();
-            int startIndex = DayOfWeekUtils.calculateStartIndexByDayOfWeek(day);
-            var allBooks = bookList.getDetailInfoList();
-            checkmoMetrics.recordRecommendationBooksCount("yes24", allBooks.size());
-
-            if (allBooks.size() < startIndex + 4) {
-                result = "invalid_response";
-                log.error("추천 책 목록 부족, 전체: {}개, 필요: {}개", allBooks.size(), startIndex + 4);
-                throw new BookException(BookErrorStatus.YES24_API_ERROR);
+            LocalDate referenceDate = day.withDayOfMonth(1).minusMonths(1);
+            List<DetailInfo> booksForToday = new ArrayList<>();
+            Set<String> selectedIsbns = new HashSet<>();
+            for (String categoryId : CATEGORY_IDS) {
+                DetailInfo book = retrieveCategoryRecommendation(categoryId, referenceDate, day.getDayOfMonth(), selectedIsbns);
+                booksForToday.add(book);
+                selectedIsbns.add(book.getIsbn());
             }
-
-            List<DetailInfo> booksForToday = List.copyOf(allBooks.subList(startIndex, startIndex + 4));
+            booksForToday = List.copyOf(booksForToday);
             checkmoMetrics.recordRecommendationBooksCount("returned", booksForToday.size());
             saveRecommendedBooks(token, booksForToday, day);
 
@@ -155,10 +145,30 @@ public class BookRecommendationService {
         }
     }
 
+    private DetailInfo retrieveCategoryRecommendation(String categoryId, LocalDate date, int rank, Set<String> selectedIsbns) {
+        Set<Integer> visitedPages = new HashSet<>();
+        int page = rank;
+        for (int attempt = 0; attempt < MAX_CANDIDATES_PER_CATEGORY && visitedPages.add(page); attempt++) {
+            var candidates = recommendationRefreshClient.retrieveRecommendedBooks(categoryId, date, page);
+            if (candidates == null || candidates.getDetailInfoList() == null) {
+                throw new BookException(BookErrorStatus.YES24_API_ERROR);
+            }
+            var books = candidates.getDetailInfoList();
+            checkmoMetrics.recordRecommendationBooksCount("yes24", books.size());
+            if (books.size() == 1 && !selectedIsbns.contains(books.getFirst().getIsbn())) {
+                return books.getFirst();
+            }
+            page = candidates.isHasNext() ? page + 1 : 1;
+        }
+        throw new BookException(BookErrorStatus.YES24_API_ERROR);
+    }
+
     private boolean isUsableBookList(BookResponseDTO.BookList bookList) {
         return bookList != null
                 && bookList.getDetailInfoList() != null
-                && !bookList.getDetailInfoList().isEmpty();
+                && bookList.getDetailInfoList().size() == CATEGORY_IDS.size()
+                && bookList.getDetailInfoList().stream().allMatch(book -> book != null && book.getIsbn() != null)
+                && bookList.getDetailInfoList().stream().map(DetailInfo::getIsbn).distinct().count() == CATEGORY_IDS.size();
     }
 
     private void saveRecommendedBooks(String token, List<DetailInfo> books, LocalDate day) {
@@ -189,7 +199,7 @@ public class BookRecommendationService {
         return !"fresh".equals(retrieveUsableCachedBooks().result());
     }
 
-    private LocalDate today() {
+    LocalDate today() {
         return LocalDate.now(ZoneId.of("Asia/Seoul"));
     }
 

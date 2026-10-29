@@ -10,6 +10,7 @@ import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.common.monitoring.CheckmoMetrics;
 import checkmo.common.monitoring.SentryCaptureClient;
 import io.micrometer.core.instrument.Timer;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -115,10 +116,10 @@ public class Yes24ApiService {
         }
     }
 
-    public BookResponseDTO.BookList retrieveRecommendedBooks() {
+    public BookResponseDTO.BookList retrieveRecommendedBooks(String categoryId, LocalDate date, int page) {
         Timer.Sample sample = checkmoMetrics.startTimer();
         try {
-            var response = yes24Client.retrieveRecommendedBooks();
+            var response = yes24Client.retrieveRecommendedBooks(categoryId, date, page);
             checkmoMetrics.recordYes24ClientResult(sample, "recommendation", "success", null);
             return response;
         } catch (RuntimeException e) {

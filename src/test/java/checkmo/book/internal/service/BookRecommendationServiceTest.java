@@ -3,9 +3,13 @@ package checkmo.book.internal.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +22,6 @@ import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.service.query.Yes24ApiService;
-import checkmo.book.internal.util.DayOfWeekUtils;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.common.monitoring.CheckmoMetrics;
@@ -27,15 +30,17 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
@@ -93,12 +98,12 @@ class BookRecommendationServiceTest {
         when(guard.acquire()).thenThrow(new BookException(BookErrorStatus.YES24_API_ERROR));
         when(yes24ApiService.applyLikedByMe(stale, MEMBER_ID)).thenReturn(stale);
         assertThat(service.retrieveRecommendedBooks(MEMBER_ID)).isSameAs(stale);
-        verify(yes24ApiService, never()).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
     }
 
     @Test
     void retrieveRecommendedBooksRetriesTransientYes24AccessFailuresThenSavesTodayRecommendationWhenRefreshEventuallySucceeds() {
-        BookResponseDTO.BookList yes24Books = bookListOfSize(todayRequiredBookCount());
+        BookResponseDTO.BookList yes24Books = bookListOfSize(4);
         BookException firstFailure = new BookException(
                 BookErrorStatus.YES24_API_ERROR,
                 new RestClientException("first transient failure")
@@ -108,17 +113,20 @@ class BookRecommendationServiceTest {
                 new IOException("second transient failure")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks())
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
                 .thenThrow(firstFailure)
                 .thenThrow(secondFailure)
-                .thenReturn(yes24Books);
+                .thenAnswer(invocation -> BookResponseDTO.BookList.builder()
+                        .detailInfoList(List.of(yes24Books.getDetailInfoList().get(
+                                List.of("001001046", "001001019", "001001022", "001001007").indexOf(invocation.getArgument(0)))))
+                        .hasNext(false).build());
         when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
 
         assertThat(response.getDetailInfoList()).hasSize(4);
-        verify(yes24ApiService, times(3)).retrieveRecommendedBooks();
+        verify(yes24ApiService, times(6)).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
         verify(guard).publish(eq("token"), any(BookResponseDTO.BookList.class), eq(LocalDate.now(ZoneId.of("Asia/Seoul")).toString()));
         verify(guard).release("token");
         verify(valueOperations, never()).set(eq(REDIS_KEY), any(BookResponseDTO.BookList.class), any(Duration.class));
@@ -127,9 +135,9 @@ class BookRecommendationServiceTest {
     }
 
     @Test
-    void retrieveRecommendedBooksCopiesTodayRecommendationSliceBeforeSavingAndReturning() {
-        int startIndex = DayOfWeekUtils.calculateStartIndexByDayOfWeek();
-        List<DetailInfo> upstreamBooks = mutableDetailInfoList(todayRequiredBookCount());
+    void retrieveRecommendedBooksCopiesFourSelectedBooksBeforeSavingAndReturning() {
+        int startIndex = 0;
+        List<DetailInfo> upstreamBooks = mutableDetailInfoList(4);
         DetailInfo originalFirstRecommendation = upstreamBooks.get(startIndex);
         DetailInfo replacementBook = detailInfo("mutated-isbn", "변경된 책");
         BookResponseDTO.BookList yes24Books = BookResponseDTO.BookList.builder()
@@ -141,7 +149,10 @@ class BookRecommendationServiceTest {
         ArgumentCaptor<BookResponseDTO.BookList> savedBookListCaptor =
                 ArgumentCaptor.forClass(BookResponseDTO.BookList.class);
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(yes24Books);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenAnswer(invocation -> BookResponseDTO.BookList.builder()
+                        .detailInfoList(List.of(yes24Books.getDetailInfoList().get(
+                                List.of("001001046", "001001019", "001001022", "001001007").indexOf(invocation.getArgument(0)))))
+                        .hasNext(false).build());
         when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -169,14 +180,14 @@ class BookRecommendationServiceTest {
                 new RestClientException("yes24 unavailable")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(finalFailure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(finalFailure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(finalFailure);
-        verify(yes24ApiService, times(3)).retrieveRecommendedBooks();
+        verify(yes24ApiService, times(3)).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
         verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
@@ -185,14 +196,14 @@ class BookRecommendationServiceTest {
     void retrieveRecommendedBooksDoesNotRetryGenericRuntimeFailureWhenCacheIsNotUsable() {
         RuntimeException failure = new RuntimeException("local mapping failure");
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
-        verify(yes24ApiService).retrieveRecommendedBooks();
+        verify(yes24ApiService).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
         verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
@@ -204,14 +215,14 @@ class BookRecommendationServiceTest {
                 new RuntimeException("non-transient recommendation failure")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
-        verify(yes24ApiService).retrieveRecommendedBooks();
+        verify(yes24ApiService).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
         verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
@@ -220,14 +231,14 @@ class BookRecommendationServiceTest {
     void retrieveRecommendedBooksDoesNotRetryLocalValidationFailureWhenCacheIsNotUsable() {
         IllegalArgumentException failure = new IllegalArgumentException("invalid recommendation request");
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
-        verify(yes24ApiService).retrieveRecommendedBooks();
+        verify(yes24ApiService).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
         verify(yes24ApiService, never()).applyLikedByMe(any(), any());
         assertThat(captureClient.count()).isZero();
     }
@@ -239,7 +250,7 @@ class BookRecommendationServiceTest {
         RuntimeException failure = new RuntimeException("yes24 unavailable");
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
         when(yes24ApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
@@ -256,7 +267,7 @@ class BookRecommendationServiceTest {
         RuntimeException failure = credentialBearingFailure();
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
         when(yes24ApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
         ListAppender<ILoggingEvent> appender = attachServiceLogAppender();
 
@@ -275,7 +286,7 @@ class BookRecommendationServiceTest {
     void refreshDailyRecommendedBooksDoesNotLogRawCredentialBearingRefreshFailureWhenReturningEmptyFallback() {
         RuntimeException failure = credentialBearingFailure();
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
         ListAppender<ILoggingEvent> appender = attachServiceLogAppender();
 
         try {
@@ -295,7 +306,7 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList likedStaleCache = bookList("9791169213882", true);
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
-        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(emptyBookList());
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenReturn(emptyBookList());
         when(yes24ApiService.applyLikedByMe(staleCache, MEMBER_ID)).thenReturn(likedStaleCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
@@ -324,7 +335,7 @@ class BookRecommendationServiceTest {
             when(valueOperations.get(REDIS_KEY)).thenReturn(cachedData);
             when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(updatedAt);
         }
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
@@ -342,7 +353,7 @@ class BookRecommendationServiceTest {
             BookResponseDTO.BookList yes24Response
     ) {
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(yes24Response);
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenReturn(yes24Response);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
@@ -363,8 +374,104 @@ class BookRecommendationServiceTest {
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(MEMBER_ID);
 
         assertThat(response).isSameAs(likedFreshCache);
-        verify(yes24ApiService, never()).retrieveRecommendedBooks();
+        verify(yes24ApiService, never()).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
         verify(valueOperations, never()).set(any(String.class), any());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "2026-01-01,2025-12-01,1",
+            "2026-03-31,2026-02-01,31",
+            "2024-02-29,2024-01-01,29"
+    })
+    void usesPreviousCalendarMonthAndCurrentDayRank(String today, String previousMonth, int rank) {
+        service = spy(service);
+        doReturn(LocalDate.parse(today)).when(service).today();
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
+                .thenAnswer(invocation -> candidate("isbn-" + invocation.getArgument(0), false));
+        when(yes24ApiService.applyLikedByMe(any(), eq(MEMBER_ID))).thenAnswer(invocation -> invocation.getArgument(0));
+        var response = service.retrieveRecommendedBooks(MEMBER_ID);
+        assertThat(response.getDetailInfoList()).extracting(DetailInfo::getIsbn)
+                .containsExactly("isbn-001001046", "isbn-001001019", "isbn-001001022", "isbn-001001007");
+        for (String category : List.of("001001046", "001001019", "001001022", "001001007")) {
+            verify(yes24ApiService).retrieveRecommendedBooks(category, LocalDate.parse(previousMonth), rank);
+        }
+        verify(guard).publish(eq("token"), any(), eq(today));
+        verify(service).today();
+    }
+
+    @Test
+    void skipsDuplicateIsbnAndWrapsMissingRankToFirstPage() {
+        service = spy(service);
+        doReturn(LocalDate.of(2026, 11, 5)).when(service).today();
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
+                .thenAnswer(invocation -> {
+                    String category = invocation.getArgument(0);
+                    int page = invocation.getArgument(2);
+                    if (category.equals("001001019") && page == 5) return candidate("shared", true);
+                    if (category.equals("001001022") && page == 5) return emptyBookList();
+                    return candidate(category.equals("001001046") ? "shared" : category + page, false);
+                });
+        when(yes24ApiService.applyLikedByMe(any(), eq(MEMBER_ID))).thenAnswer(invocation -> invocation.getArgument(0));
+        assertThat(service.retrieveRecommendedBooks(MEMBER_ID).getDetailInfoList())
+                .extracting(DetailInfo::getIsbn).containsExactly("shared", "0010010196", "0010010221", "0010010075");
+        verify(yes24ApiService, times(6)).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
+    }
+
+    @Test
+    void stopsAfterFiveCandidatesAndDoesNotPublishPartialRecommendations() {
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
+                .thenReturn(candidate("shared", true));
+        assertThat(service.refreshDailyRecommendedBooks().getDetailInfoList()).isEmpty();
+        verify(yes24ApiService, times(6)).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
+        verify(guard, never()).publish(anyString(), any(), anyString());
+        verify(guard).release("token");
+    }
+
+    @Test
+    void failureInLastCategoryKeepsPreviousFourBooks() {
+        var stale = bookList("previous", false);
+        when(valueOperations.get(REDIS_KEY)).thenReturn(stale);
+        when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn("2000-01-01");
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
+                .thenAnswer(invocation -> {
+                    String category = invocation.getArgument(0);
+                    if (category.equals("001001007")) throw new IllegalArgumentException("failed category");
+                    return candidate(category, false);
+                });
+        when(yes24ApiService.applyLikedByMe(stale, MEMBER_ID)).thenReturn(stale);
+        assertThat(service.retrieveRecommendedBooks(MEMBER_ID)).isSameAs(stale);
+        verify(guard, never()).publish(anyString(), any(), anyString());
+    }
+
+    @Test
+    void ignoresPreviousPolicyCacheEvenWhenMarkedToday() {
+        when(valueOperations.get("book:recommendations:daily")).thenReturn(bookList("legacy", false));
+        when(valueOperations.get("book:recommendations:{yes24}:daily")).thenReturn(bookList("old-yes24", false));
+        when(valueOperations.get("book:recommendations:{yes24}:daily:updated_at")).thenReturn(LocalDate.now().toString());
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
+                .thenThrow(new IllegalArgumentException("unavailable"));
+        assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID)).isInstanceOf(BookException.class);
+        verify(valueOperations, never()).get("book:recommendations:daily");
+        verify(valueOperations, never()).get("book:recommendations:{yes24}:daily");
+    }
+
+    @Test
+    void stopsWhenWrappingWouldVisitTheSamePageAgain() {
+        service = spy(service);
+        doReturn(LocalDate.of(2026, 11, 5)).when(service).today();
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
+                .thenReturn(emptyBookList());
+        assertThat(service.refreshDailyRecommendedBooks().getDetailInfoList()).isEmpty();
+        verify(yes24ApiService).retrieveRecommendedBooks("001001046", LocalDate.of(2026, 10, 1), 5);
+        verify(yes24ApiService).retrieveRecommendedBooks("001001046", LocalDate.of(2026, 10, 1), 1);
+        verify(yes24ApiService, times(2)).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
+        verify(guard, never()).publish(anyString(), any(), anyString());
+    }
+
+    private static BookResponseDTO.BookList candidate(String isbn, boolean hasNext) {
+        return BookResponseDTO.BookList.builder().detailInfoList(List.of(detailInfo(isbn, "책")))
+                .hasNext(hasNext).totalResults(100).build();
     }
 
     private static Stream<Arguments> unusableCacheCases() {
@@ -382,7 +489,7 @@ class BookRecommendationServiceTest {
         return Stream.of(
                 Arguments.of("null yes24 response is not usable", null),
                 Arguments.of("empty yes24 response is not usable", emptyBookList()),
-                Arguments.of("fewer than today's four-book window is not usable", bookListOfSize(todayRequiredBookCount() - 1))
+                Arguments.of("multiple items for a one-item request are not usable", bookListOfSize(4 - 1))
         );
     }
 
@@ -395,30 +502,15 @@ class BookRecommendationServiceTest {
         return properties;
     }
 
-    private static int todayRequiredBookCount() {
-        return DayOfWeekUtils.calculateStartIndexByDayOfWeek() + 4;
-    }
-
     private static BookResponseDTO.BookList bookList(String isbn, boolean likedByMe) {
         return BookResponseDTO.BookList.builder()
-                .detailInfoList(List.of(DetailInfo.builder()
-                        .isbn(isbn)
-                        .title("테스트 책")
-                        .author("테스트 저자")
-                        .imgUrl("https://example.com/book.jpg")
-                        .publisher("테스트 출판사")
-                        .description("테스트 설명")
-                        .link("https://example.com/book")
-                        .likedByMe(likedByMe)
-                        .build()))
-                .hasNext(false)
-                .currentPage(null)
-                .totalResults(1)
-                .build();
+                .detailInfoList(IntStream.range(0, 4).mapToObj(index -> DetailInfo.builder()
+                        .isbn(isbn + index).title("테스트 책").likedByMe(likedByMe).build()).toList())
+                .hasNext(false).currentPage(null).totalResults(4).build();
     }
 
     private static BookResponseDTO.BookList bookListOfSize(int size) {
-        List<DetailInfo> books = java.util.stream.IntStream.range(0, size)
+        List<DetailInfo> books = IntStream.range(0, size)
                 .mapToObj(index -> detailInfo("isbn-" + index, "테스트 책 " + index))
                 .toList();
 

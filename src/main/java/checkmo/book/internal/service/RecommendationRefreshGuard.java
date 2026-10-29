@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RecommendationRefreshGuard {
-    public static final String DATA_KEY = "book:recommendations:{yes24}:daily";
+    public static final String DATA_KEY = "book:recommendations:{yes24-monthly-v1}:daily";
     public static final String DATE_KEY = DATA_KEY + ":updated_at";
     private static final String LOCK_KEY = DATA_KEY + ":lock";
     private static final DefaultRedisScript<Long> RELEASE = new DefaultRedisScript<>(
@@ -32,7 +32,7 @@ public class RecommendationRefreshGuard {
     public String acquire() {
         String token = UUID.randomUUID().toString();
         var retry = properties.getRecommendation().getRefresh().getRetry();
-        long lease = retry.getAttempts() * (2L * properties.getSearch().getTimeoutMs()
+        long lease = 4L * BookRecommendationService.MAX_CANDIDATES_PER_CATEGORY * retry.getAttempts() * (2L * properties.getSearch().getTimeoutMs()
                 + 1500 + retry.getMaxBackoff().toMillis()) + 10000;
         try {
             if (Boolean.TRUE.equals(redis.opsForValue().setIfAbsent(LOCK_KEY, token, Duration.ofMillis(lease)))) {
