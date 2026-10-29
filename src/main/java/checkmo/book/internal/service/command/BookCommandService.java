@@ -6,9 +6,9 @@ import checkmo.book.internal.exception.BookErrorStatus;
 import checkmo.book.internal.exception.BookException;
 import checkmo.book.internal.entity.Book;
 import checkmo.book.internal.repository.BookRepository;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookCommandService {
 
     private final BookRepository bookRepository;
-    private final AladinApiService aladinApiService;
+    private final Yes24ApiService yes24ApiService;
 
     public String fetchOrCreateBook(String isbn) {
         if (isbn == null || isbn.isBlank()) {
@@ -29,7 +29,10 @@ public class BookCommandService {
             return isbn;
         }
 
-        var detail = aladinApiService.retrieveBookDetailInfo(isbn);
+        var detail = yes24ApiService.retrieveBookDetailInfo(isbn);
+        if (detail == null || !isbn.equals(detail.getIsbn())) {
+            throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);
+        }
         BookExternalDTO.BookCreate request = BookConverter.toBookCreate(detail);
         return saveBook(request);
     }
@@ -39,12 +42,9 @@ public class BookCommandService {
             return request.getIsbn();
         }
 
-        try {
-            Book book = BookConverter.toBook(request);
-            return bookRepository.save(book).getId();
-        } catch (DataIntegrityViolationException e) {
-            // 동시성으로 같은 ISBN이 먼저 생성된 경우
-            return request.getIsbn();
-        }
+        Book book = BookConverter.toBook(request);
+        // 중복 ISBN만 원자적으로 재사용한다. 길이/무결성 오류는 성공으로 숨기지 않는다.
+        bookRepository.insertIfAbsent(book, LocalDateTime.now());
+        return book.getId();
     }
 }

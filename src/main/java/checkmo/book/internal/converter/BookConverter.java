@@ -2,7 +2,10 @@ package checkmo.book.internal.converter;
 
 import checkmo.book.BookExternalDTO;
 import checkmo.book.internal.entity.Book;
+import checkmo.book.internal.exception.BookErrorStatus;
+import checkmo.book.internal.exception.BookException;
 import checkmo.book.web.dto.AladinApiResponseDTO;
+import checkmo.book.web.dto.Yes24ApiResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import java.util.List;
@@ -14,6 +17,87 @@ import org.springframework.web.util.HtmlUtils;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookConverter {
+
+    public static BookResponseDTO.BookList toYes24BookList(Yes24ApiResponseDTO.Response response) {
+        var data = requireYes24Data(response);
+        if (data.currentPage() == null || data.currentPage() < 1
+                || data.pageSize() == null || data.pageSize() < 1
+                || data.totalCount() == null || data.totalCount() < 0) {
+            throw new BookException(BookErrorStatus.YES24_API_ERROR);
+        }
+        if (data.totalCount() == 0 && data.items().isEmpty()) {
+            return createEmptyBookListResponse();
+        }
+        return BookResponseDTO.BookList.builder()
+                .detailInfoList(data.items().stream()
+                        .filter(item -> item != null && isValidIsbn13(item.isbn13()))
+                        .map(BookConverter::toYes24Detail)
+                        .toList())
+                .currentPage(data.currentPage())
+                .totalResults(data.totalCount())
+                .hasNext((long) data.currentPage() * data.pageSize() < data.totalCount())
+                .build();
+    }
+
+    public static DetailInfo toYes24BookDetail(Yes24ApiResponseDTO.Response response, String isbn) {
+        var data = requireYes24Data(response);
+        // 상품번호나 다른 판본으로 대체하지 않는다. 동일 ISBN의 복수 상품은 공급자 순서로 선택한다.
+        return data.items().stream()
+                .filter(item -> item != null && isValidIsbn13(item.isbn13()) && item.isbn13().equals(isbn))
+                .findFirst()
+                .map(BookConverter::toYes24Detail)
+                .orElseThrow(() -> new BookException(BookErrorStatus.BOOK_NOT_FOUND));
+    }
+
+    private static Yes24ApiResponseDTO.Data requireYes24Data(Yes24ApiResponseDTO.Response response) {
+        if (response == null || !Boolean.TRUE.equals(response.success())
+                || response.data() == null || response.data().items() == null) {
+            throw new BookException(BookErrorStatus.YES24_API_ERROR);
+        }
+        return response.data();
+    }
+
+    private static boolean isValidIsbn13(String isbn) {
+        if (isbn == null || !isbn.matches("97[89][0-9]{10}")) {
+            return false;
+        }
+        int sum = 0;
+        for (int i = 0; i < isbn.length(); i++) {
+            sum += (isbn.charAt(i) - '0') * (i % 2 == 0 ? 1 : 3);
+        }
+        return sum % 10 == 0;
+    }
+
+    private static DetailInfo toYes24Detail(Yes24ApiResponseDTO.Item item) {
+        var content = item.contentDetail();
+        String description = content == null ? "" : content.bookIntroduction();
+        if (content != null && (description == null || description.isBlank())) {
+            description = content.bookSummary();
+        }
+        return DetailInfo.builder()
+                .isbn(item.isbn13())
+                .title(item.title())
+                .author(item.author())
+                .publisher(item.publisher())
+                .imgUrl(item.cover())
+                .link(item.link())
+                .description(plainDescription(description))
+                .likedByMe(false)
+                .build();
+    }
+
+    private static String plainDescription(String value) {
+        if (value == null) {
+            return "";
+        }
+        return HtmlUtils.htmlUnescape(value)
+                .replaceAll("(?is)<(script|style)\\b[^>]*>.*?</\\1\\s*>", " ")
+                .replaceAll("(?s)<[^>]*>", " ")
+                .replace("\\n", " ")
+                .replace('\u00a0', ' ')
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
 
     public static BookExternalDTO.BasicInfo toBasicInfoDTO(Book book) {
         return BookExternalDTO.BasicInfo.builder()

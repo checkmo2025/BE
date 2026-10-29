@@ -25,7 +25,7 @@ class ApiTestInfrastructureTest extends ApiTestSupport {
     void testProfileUsesH2AndDoesNotIncludeProductionProfiles() throws Exception {
         assertThat(environment.getActiveProfiles()).contains("test");
         assertThat(environment.getActiveProfiles())
-                .doesNotContain("prod", "redis", "aladin", "mail", "jwt", "oauth2", "s3");
+                .doesNotContain("prod", "redis", "aladin", "yes24", "mail", "jwt", "oauth2", "s3");
         assertThat(environment.getProperty("spring.flyway.enabled")).isEqualTo("false");
 
         try (var connection = dataSource.getConnection()) {

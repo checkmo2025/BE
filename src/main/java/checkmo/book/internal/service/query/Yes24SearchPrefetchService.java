@@ -1,6 +1,6 @@
 package checkmo.book.internal.service.query;
 
-import checkmo.book.internal.config.properties.AladinProperties;
+import checkmo.book.internal.config.properties.Yes24Properties;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.common.monitoring.SentryCaptureClient;
 import lombok.RequiredArgsConstructor;
@@ -11,27 +11,27 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AladinSearchPrefetchService {
+public class Yes24SearchPrefetchService {
 
-    private final AladinProperties aladinProperties;
+    private final Yes24Properties yes24Properties;
     private final BookSearchCacheService bookSearchCacheService;
-    private final AladinSearchClient aladinSearchClient;
+    private final Yes24SearchClient yes24SearchClient;
     private final SentryCaptureClient sentryCaptureClient;
 
     @Async
     public void prefetchNextPage(String keyword, int currentPage) {
         int nextPage = currentPage + 1;
-        int maxResults = aladinProperties.getSearch().getMaxResults();
+        int maxResults = yes24Properties.getSearch().getMaxResults();
 
         try {
             if (bookSearchCacheService.retrieve(keyword, maxResults, nextPage).isPresent()) {
                 return;
             }
 
-            BookResponseDTO.BookList bookList = aladinSearchClient.fetchSearchBooks(keyword, nextPage);
+            BookResponseDTO.BookList bookList = yes24SearchClient.fetchSearchBooks(keyword, nextPage);
             bookSearchCacheService.save(keyword, maxResults, nextPage, bookList);
         } catch (Exception e) {
-            log.warn("알라딘 검색 다음 페이지 prefetch 실패. page={}", nextPage, e);
+            log.warn("예스24 검색 다음 페이지 prefetch 실패. page={}", nextPage, e);
             sentryCaptureClient.captureException(e);
         }
     }

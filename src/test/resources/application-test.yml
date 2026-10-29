@@ -88,23 +88,12 @@ mail:
     password: test-password
     enable: false
 
-aladin:
+yes24:
   api:
-    url:
-      base: http://localhost
-      item-search: /ItemSearch.aspx
-      item-lookup: /ItemLookUp.aspx
-      item-list: /ItemList.aspx
-    auth:
-      ttb-key: test-ttb-key
-      version: 20131101
+    base-url: http://localhost
+    api-key: test-yes24-key
     search:
-      search-query-type: Keyword
-      recommend-query-type: BlogBest
-      search-target: Book
-      output: xml
       max-results: 10
-      item-id-type: ISBN13
       timeout-ms: 1000
 
 cloud:

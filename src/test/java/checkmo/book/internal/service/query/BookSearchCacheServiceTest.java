@@ -39,7 +39,7 @@ class BookSearchCacheServiceTest {
         assertThat(bookSearchCacheService.buildKey("java spring", 10, 2)).isNotEqualTo(normalizedKey);
         assertThat(bookSearchCacheService.buildKey("java spring", 20, 1)).isNotEqualTo(normalizedKey);
         assertThat(normalizedKey)
-                .startsWith("book:search:v1:")
+                .startsWith("book:search:yes24:v1:")
                 .doesNotContain("Java")
                 .doesNotContain("java")
                 .doesNotContain("Spring")

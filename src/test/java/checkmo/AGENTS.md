@@ -38,7 +38,7 @@ Tests are integration-heavy and run under the `test` profile. API tests use a re
 ## ANTI-PATTERNS
 
 - Do not read `.env` to make tests pass.
-- Do not activate production profiles (`prod`, `redis`, `aladin`, `mail`, `jwt`, `oauth2`, `s3`) from tests.
+- Do not activate production profiles (`prod`, `redis`, `aladin`, `yes24`, `mail`, `jwt`, `oauth2`, `s3`) from tests.
 - Do not weaken or remove `ApplicationModules.verify()` when a module boundary fails.
 - Do not add network, Redis, S3, mail, or scheduler dependencies to API tests unless the test explicitly owns that boundary.
 - Do not leave persistent test data; rely on `ApiTestSupport` cleanup or add local cleanup for new tables.

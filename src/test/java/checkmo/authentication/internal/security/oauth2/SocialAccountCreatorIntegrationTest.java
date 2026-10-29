@@ -28,7 +28,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringTest
 @TestPropertySource(properties = {
-        "aladin.api.recommendation.refresh.background.fixed-delay=60000",
+        "yes24.api.recommendation.refresh.background.fixed-delay=60000",
         "checkmo.terms.enforcement-enabled=true"
 })
 class SocialAccountCreatorIntegrationTest {

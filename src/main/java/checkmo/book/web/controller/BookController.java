@@ -3,7 +3,7 @@ package checkmo.book.web.controller;
 import checkmo.authentication.CurrentId;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.command.BookSocialCommandService;
-import checkmo.book.internal.service.query.AladinApiService;
+import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.internal.service.query.BookLikeQueryService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
@@ -25,15 +25,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
-@Tag(name = "책 검색", description = "알라딘 API를 이용한 책 검색 API")
+@Tag(name = "책 검색", description = "예스24 API를 이용한 책 검색 API")
 public class BookController {
 
-    private final AladinApiService aladinApiService;
+    private final Yes24ApiService yes24ApiService;
     private final BookRecommendationService bookRecommendationService;
     private final BookSocialCommandService bookSocialCommandService;
     private final BookLikeQueryService bookLikeQueryService;
 
-    @Operation(summary = "책 검색 API", description = "키워드를 이용해 알라딘에서 책 목록을 검색합니다.")
+    @Operation(summary = "책 검색 API", description = "키워드를 이용해 예스24에서 책 목록을 검색합니다.")
     @Parameters({
             @Parameter(name = "keyword", description = "검색할 키워드 (책 제목, 저자)", required = true, example = "자바"),
             @Parameter(name = "page", description = "페이지 번호 (값 넣지 않으면 1부터 시작 그 다음 요청은 반드시 2!!)", example = "1")
@@ -50,7 +50,7 @@ public class BookController {
             @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
             int page
     ) {
-        BookResponseDTO.BookList result = aladinApiService.retrieveSearchBooks(keyword, page, memberId);
+        BookResponseDTO.BookList result = yes24ApiService.retrieveSearchBooks(keyword, page, memberId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -62,11 +62,11 @@ public class BookController {
     })
     @GetMapping({"/{isbn}"})
     public ApiResponse<DetailInfo> getBookDetail(@PathVariable String isbn) {
-        DetailInfo result = aladinApiService.retrieveBookDetailInfo(isbn);
+        DetailInfo result = yes24ApiService.retrieveBookDetailInfo(isbn);
         return ApiResponse.onSuccess(result);
     }
 
-    @Operation(summary = "책 추천 API", description = "블로그 베스트 추천 책 목록을 가져옵니다.")
+    @Operation(summary = "책 추천 API", description = "국내도서 종합 베스트셀러 추천 책 목록을 가져옵니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "책 정보를 찾을 수 없음"),
@@ -77,7 +77,7 @@ public class BookController {
         return ApiResponse.onSuccess(result);
     }
 
-    @Operation(summary = "책 좋아요/취소 API", description = "ISBN으로 좋아요를 추가하거나 취소합니다. DB에 없는 책이면 알라딘 조회 후 생성하여 처리합니다.")
+    @Operation(summary = "책 좋아요/취소 API", description = "ISBN으로 좋아요를 추가하거나 취소합니다. DB에 없는 책이면 예스24 조회 후 생성하여 처리합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인이 필요한 서비스 입니다."),

@@ -28,7 +28,7 @@ public class BookRecommendationScheduler {
         guardedRefreshRecommendedBooks();
     }
 
-    @Scheduled(fixedDelayString = "${aladin.api.recommendation.refresh.background.fixed-delay}")
+    @Scheduled(fixedDelayString = "${yes24.api.recommendation.refresh.background.fixed-delay}")
     public void retryRecommendedBooksRefresh() {
         if (recommendationService.hasRecommendedBooks() && !recommendationService.isRecommendedBooksStale()) {
             log.debug("추천 책 캐시가 최신 상태라 background retry를 건너뜁니다.");
@@ -42,7 +42,7 @@ public class BookRecommendationScheduler {
     @EventListener(ApplicationReadyEvent.class)
     public void initializeRecommendedBooks() {
         if (!recommendationService.hasRecommendedBooks() || recommendationService.isRecommendedBooksStale()) {
-            log.info("서버 시작 시 Redis에 추천 책 데이터가 없거나 오래됨. 알라딘에 요청 시작");
+            log.info("서버 시작 시 Redis에 추천 책 데이터가 없거나 오래됨. 예스24에 요청 시작");
             guardedRefreshRecommendedBooks();
             return;
         }

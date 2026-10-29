@@ -27,7 +27,7 @@
 | AuthController | POST | `/api/v1/auth/logout` | 완료 | JWT 쿠키 기반 로그아웃과 인증 누락 처리를 검증한다. |
 | AuthController | POST | `/api/v1/auth/app/logout` | 완료 | `AuthApiTest`에서 `POST /api/v1/auth/app/logout`의 `X-Refresh-Token` 기반 앱 로그아웃과 이후 refresh token 무효화를 검증한다. |
 | AuthController | POST | `/api/v1/auth/temp-password` | 완료 | 임시 비밀번호 발급, 미존재 이메일, 메일 경계 더블을 검증한다. |
-| BookController | GET | `/api/v1/books/search` | 완료 | 알라딘 검색 경계의 deterministic 응답과 공개 조회 계약을 검증한다. |
+| BookController | GET | `/api/v1/books/search` | 완료 | 예스24 검색 경계의 deterministic 응답과 공개 조회 계약을 검증한다. |
 | BookController | GET | `/api/v1/books/{isbn}` | 완료 | 도서 상세 조회 성공과 외부 조회 실패를 검증한다. |
 | BookController | GET | `/api/v1/books/recommend` | 완료 | 추천 도서 조회와 캐시/외부 경계 fallback을 검증한다. |
 | BookController | POST | `/api/v1/books/{isbn}/like` | 완료 | 인증 사용자 좋아요 토글, 401, 중복/해제 상태를 검증한다. |

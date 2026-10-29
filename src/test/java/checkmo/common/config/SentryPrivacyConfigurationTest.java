@@ -2,7 +2,7 @@ package checkmo.common.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import checkmo.book.internal.service.AladinRecommendationRefreshClient;
+import checkmo.book.internal.service.Yes24RecommendationRefreshClient;
 import checkmo.support.SpringTest;
 import io.sentry.SentryEvent;
 import io.sentry.SentryOptions;
@@ -18,7 +18,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringTest
-@TestPropertySource(properties = "aladin.api.recommendation.refresh.background.fixed-delay=5m")
+@TestPropertySource(properties = "yes24.api.recommendation.refresh.background.fixed-delay=5m")
 class SentryPrivacyConfigurationTest {
 
     @Autowired
@@ -28,7 +28,7 @@ class SentryPrivacyConfigurationTest {
     private SentryOptions.BeforeSendCallback beforeSendCallback;
 
     @MockitoBean
-    private AladinRecommendationRefreshClient aladinRecommendationRefreshClient;
+    private Yes24RecommendationRefreshClient yes24RecommendationRefreshClient;
 
     @Test
     void sentrySanitizerIsRegisteredAsBeforeSendCallbackBean() {
@@ -130,7 +130,7 @@ class SentryPrivacyConfigurationTest {
 
     @Test
     void beforeSendRemovesBookSearchKeywordAndQueryString() {
-        SentryEvent event = new SentryEvent(new RuntimeException("aladin unavailable"));
+        SentryEvent event = new SentryEvent(new RuntimeException("yes24 unavailable"));
         Request request = new Request();
         request.setQueryString("keyword=자바&page=1&refreshToken=secret");
         request.setUrl("https://api.checkmo.kr/api/v1/books/search?keyword=%EC%9E%90%EB%B0%94&page=1&refreshToken=secret");

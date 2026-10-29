@@ -51,6 +51,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.RestTemplate;
+import checkmo.book.internal.service.RecommendationRefreshGuard;
 
 @ApiTest
 public abstract class ApiTestSupport {
@@ -81,6 +82,9 @@ public abstract class ApiTestSupport {
 
     @MockitoBean
     protected RestTemplate restTemplate;
+
+    @MockitoBean
+    protected RecommendationRefreshGuard recommendationRefreshGuard;
 
     @MockitoBean
     protected RedisTemplate<String, Object> redisTemplate;
@@ -117,6 +121,7 @@ public abstract class ApiTestSupport {
 
     @BeforeEach
     void setUpApiTestSupport() {
+        when(recommendationRefreshGuard.acquire()).thenReturn("test-token");
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 

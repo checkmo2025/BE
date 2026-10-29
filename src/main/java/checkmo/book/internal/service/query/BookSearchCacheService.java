@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BookSearchCacheService {
 
-    private static final String KEY_PREFIX = "book:search:v1:";
+    private static final String KEY_PREFIX = "book:search:yes24:v1:";
     private static final Duration TTL = Duration.ofMinutes(10);
 
     private final RedisTemplate<String, Object> redisTemplate;

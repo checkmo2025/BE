@@ -311,12 +311,12 @@
       "id": 11,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(checkmo_aladin_client_duration_seconds_bucket{job=\"checkmo-app\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, operation) (rate(checkmo_yes24_client_duration_seconds_bucket{job=\"checkmo-app\"}[5m])))",
           "legendFormat": "{{operation}}",
           "refId": "A"
         }
       ],
-      "title": "Aladin Client p95",
+      "title": "Yes24 Client p95",
       "type": "timeseries"
     },
     {
@@ -339,12 +339,12 @@
       "id": 12,
       "targets": [
         {
-          "expr": "sum(rate(checkmo_aladin_client_requests_total{job=\"checkmo-app\",result=\"timeout\"}[5m])) / clamp_min(sum(rate(checkmo_aladin_client_requests_total{job=\"checkmo-app\"}[5m])), 1)",
+          "expr": "sum(rate(checkmo_yes24_client_requests_total{job=\"checkmo-app\",result=\"timeout\"}[5m])) / clamp_min(sum(rate(checkmo_yes24_client_requests_total{job=\"checkmo-app\"}[5m])), 1)",
           "legendFormat": "timeout ratio",
           "refId": "A"
         }
       ],
-      "title": "Aladin Timeout Ratio",
+      "title": "Yes24 Timeout Ratio",
       "type": "timeseries"
     },
     {

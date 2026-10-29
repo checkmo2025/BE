@@ -9,7 +9,7 @@ This tree is the Spring Modulith application surface. Top-level packages under `
 ```text
 checkmo/
 ├── authentication/     # auth, OAuth2/JWT, current member resolution
-├── book/               # book lookup, Aladin integration, book social actions
+├── book/               # book lookup, Yes24 integration, book social actions
 ├── bookStory/          # book story domain
 ├── clubManagement/     # clubs and membership
 ├── clubMeeting/        # meetings, bookshelf, topics, reviews

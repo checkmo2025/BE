@@ -23,29 +23,29 @@ public class CheckmoMetrics {
         return Timer.start(meterRegistry);
     }
 
-    public void recordAladinClientResult(Timer.Sample sample, String operation, String result, Throwable throwable) {
-        Counter.builder("checkmo.aladin.client.requests")
+    public void recordYes24ClientResult(Timer.Sample sample, String operation, String result, Throwable throwable) {
+        Counter.builder("checkmo.yes24.client.requests")
                 .tag("operation", operation)
                 .tag("result", result)
                 .tag("exception", exceptionName(throwable))
                 .register(meterRegistry)
                 .increment();
 
-        sample.stop(Timer.builder("checkmo.aladin.client.duration")
+        sample.stop(Timer.builder("checkmo.yes24.client.duration")
                 .tag("operation", operation)
                 .tag("result", result)
                 .register(meterRegistry));
     }
 
-    public void recordAladinRecommendationRefresh(Timer.Sample sample, String result, String source) {
-        sample.stop(Timer.builder("checkmo.aladin.recommendation.refresh.duration")
+    public void recordYes24RecommendationRefresh(Timer.Sample sample, String result, String source) {
+        sample.stop(Timer.builder("checkmo.yes24.recommendation.refresh.duration")
                 .tag("result", result)
                 .tag("source", source)
                 .register(meterRegistry));
     }
 
-    public void incrementAladinRecommendationRetry(String result) {
-        Counter.builder("checkmo.aladin.recommendation.retry.count")
+    public void incrementYes24RecommendationRetry(String result) {
+        Counter.builder("checkmo.yes24.recommendation.retry.count")
                 .tag("result", result)
                 .register(meterRegistry)
                 .increment();
@@ -78,7 +78,7 @@ public class CheckmoMetrics {
                 .increment();
     }
 
-    public String classifyAladinResult(Throwable throwable) {
+    public String classifyYes24Result(Throwable throwable) {
         if (throwable == null) {
             return "success";
         }

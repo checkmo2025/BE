@@ -8,7 +8,7 @@ spring:
     include:
       - prod
       - redis
-      - aladin
+      - yes24
       - mail
       - jwt
       - oauth2

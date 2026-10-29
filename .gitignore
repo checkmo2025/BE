@@ -49,3 +49,6 @@ out/
 .omo/evidence/
 .omo/plans/
 .omo/start-work/
+
+# Local-only YES24 optimization notes
+/docs/optimization/ponytail-yes24-preservation-2026-10-14-1804.md
