@@ -7,6 +7,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
@@ -17,6 +19,7 @@ import checkmo.book.internal.repository.BookRepository;
 import checkmo.book.internal.service.command.BookCommandService;
 import checkmo.book.internal.service.query.BookQueryService;
 import checkmo.book.internal.service.query.Yes24RateLimiter;
+import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.Yes24ApiResponseDTO;
 import checkmo.bookStory.internal.repository.BookStoryRepository;
 import checkmo.clubManagement.internal.repository.ClubRepository;
@@ -24,13 +27,16 @@ import checkmo.clubMeeting.internal.repository.MeetingRepository;
 import checkmo.support.ApiTestSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -128,6 +134,34 @@ class Yes24BookFlowApiTest extends ApiTestSupport {
                 .then().statusCode(500);
         assertThat(books.count()).isZero();
         assertThat(likes.count()).isZero();
+        provider.verify();
+    }
+
+    @Test
+    void dailyRecommendationMakesFourMonthlyRequestsAndPublishesCompleteList() throws Exception {
+        TestUser user = createUser();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        String previousMonth = today.withDayOfMonth(1).minusMonths(1).toString();
+        var categories = List.of("001001046", "001001019", "001001022", "001001007");
+        var isbns = List.of(ISBN, "9788966260959", "9791169213882", "9788936434267");
+        for (int index = 0; index < categories.size(); index++) {
+            var item = new Yes24ApiResponseDTO.Item(isbns.get(index), "책 " + index, "저자", "출판사", "표지", "링크", null);
+            var response = new Yes24ApiResponseDTO.Response(true, null,
+                    new Yes24ApiResponseDTO.Data(List.of(item), today.getDayOfMonth(), 1, 100));
+            provider.expect(requestTo(org.hamcrest.Matchers.containsString("/category/bestsellerMonthly")))
+                    .andExpect(queryParam("categoryId", categories.get(index)))
+                    .andExpect(queryParam("date", previousMonth))
+                    .andExpect(queryParam("page", Integer.toString(today.getDayOfMonth())))
+                    .andExpect(queryParam("pageSize", "1"))
+                    .andRespond(withSuccess(mapper.writeValueAsString(response), MediaType.APPLICATION_JSON));
+        }
+        given().cookie(accessTokenCookie(user)).get("/api/v1/books/recommend")
+                .then().statusCode(200).body("result.detailInfoList.size()", equalTo(4))
+                .body("result.detailInfoList.isbn", equalTo(isbns));
+        var saved = ArgumentCaptor.forClass(BookResponseDTO.BookList.class);
+        verify(recommendationRefreshGuard).publish(eq("test-token"), saved.capture(), eq(today.toString()));
+        assertThat(saved.getValue().getDetailInfoList()).extracting(BookResponseDTO.DetailInfo::getIsbn).containsExactlyElementsOf(isbns);
+        verify(limiter, times(4)).acquire();
         provider.verify();
     }
 

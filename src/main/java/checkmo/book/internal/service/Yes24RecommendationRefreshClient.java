@@ -8,6 +8,7 @@ import checkmo.book.internal.service.query.Yes24ApiService;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.common.monitoring.CheckmoMetrics;
 import java.io.IOException;
+import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.RetryContext;
@@ -48,13 +49,13 @@ public class Yes24RecommendationRefreshClient {
         this.retryTemplate = buildRetryTemplate(yes24Properties.getRecommendation().getRefresh().getRetry(), sleeper);
     }
 
-    public BookResponseDTO.BookList retrieveRecommendedBooks() {
+    public BookResponseDTO.BookList retrieveRecommendedBooks(String categoryId, LocalDate date, int page) {
         return retryTemplate.execute(context -> {
             if (context.getRetryCount() > 0) {
                 checkmoMetrics.incrementYes24RecommendationRetry("retry");
                 log.warn("예스24 추천 책 갱신 재시도. attempt={}", context.getRetryCount() + 1);
             }
-            return yes24ApiService.retrieveRecommendedBooks();
+            return yes24ApiService.retrieveRecommendedBooks(categoryId, date, page);
         });
     }
 

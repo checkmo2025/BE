@@ -2,6 +2,9 @@ package checkmo.book;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,17 +15,17 @@ import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.BookResponseDTO.DetailInfo;
 import checkmo.support.ApiTestSupport;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Arrays;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class BookRecommendationApiTest extends ApiTestSupport {
 
-    private static final String REDIS_KEY = "book:recommendations:{yes24}:daily";
-    private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:{yes24}:daily:updated_at";
+    private static final String REDIS_KEY = "book:recommendations:{yes24-monthly-v1}:daily";
+    private static final String REDIS_UPDATED_AT_KEY = "book:recommendations:{yes24-monthly-v1}:daily:updated_at";
 
     @MockitoBean
     Yes24RecommendationRefreshClient recommendationRefreshClient;
@@ -43,7 +46,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
 
         when(redisValueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(redisValueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().minusDays(1).toString());
-        when(recommendationRefreshClient.retrieveRecommendedBooks())
+        when(recommendationRefreshClient.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
                 .thenThrow(new RuntimeException("yes24 unavailable"));
         when(yes24ApiService.applyLikedByMe(staleCache, Long.valueOf(user.id()))).thenReturn(staleCache);
 
@@ -57,7 +60,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
                 .body("code", equalTo("COMMON200"))
                 .body("result.detailInfoList.size()", equalTo(4));
 
-        verify(recommendationRefreshClient).retrieveRecommendedBooks();
+        verify(recommendationRefreshClient).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
     }
 
     @Test
@@ -65,7 +68,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
         TestUser user = createUser();
 
         when(redisValueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(recommendationRefreshClient.retrieveRecommendedBooks())
+        when(recommendationRefreshClient.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
                 .thenThrow(new RuntimeException("yes24 unavailable"));
 
         given()
@@ -97,7 +100,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
                 .body("code", equalTo("COMMON200"))
                 .body("result.detailInfoList.size()", equalTo(4));
 
-        verify(recommendationRefreshClient, never()).retrieveRecommendedBooks();
+        verify(recommendationRefreshClient, never()).retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt());
     }
 
     private static BookResponseDTO.BookList bookList(String prefix, int size) {

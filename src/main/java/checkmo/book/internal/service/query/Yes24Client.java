@@ -7,6 +7,7 @@ import checkmo.book.internal.exception.BookException;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.book.web.dto.Yes24ApiResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -45,10 +46,11 @@ public class Yes24Client {
         return BookConverter.toYes24BookDetail(response, isbn);
     }
 
-    public BookResponseDTO.BookList retrieveRecommendedBooks() {
-        return BookConverter.toYes24BookList(request(endpoint("/category/bestseller")
-                .queryParam("categoryId", "001").queryParam("page", 1)
-                .queryParam("pageSize", 28), "recommendation"));
+    public BookResponseDTO.BookList retrieveRecommendedBooks(String categoryId, LocalDate date, int page) {
+        return BookConverter.toYes24BookList(request(endpoint("/category/bestsellerMonthly")
+                .queryParam("categoryId", categoryId).queryParam("date", date)
+                .queryParam("page", page)
+                .queryParam("pageSize", 1), "recommendation"));
     }
 
     private UriComponentsBuilder endpoint(String path) {
@@ -76,6 +78,10 @@ public class Yes24Client {
                 if ("search".equals(operation) && "SEARCH_001".equals(code)) {
                     return new Yes24ApiResponseDTO.Response(true, null,
                             new Yes24ApiResponseDTO.Data(List.of(), 1, properties.getSearch().getMaxResults(), 0));
+                }
+                if ("recommendation".equals(operation) && "BEST_001".equals(code)) {
+                    return new Yes24ApiResponseDTO.Response(true, null,
+                            new Yes24ApiResponseDTO.Data(List.of(), 1, 1, 0));
                 }
                 if ("detail".equals(operation) && ("GOODS_001".equals(code) || "GOODS_002".equals(code))) {
                     throw new BookException(BookErrorStatus.BOOK_NOT_FOUND);

@@ -3,6 +3,8 @@ package checkmo.common.monitoring;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,11 +12,11 @@ import static org.mockito.Mockito.when;
 
 import checkmo.authentication.AuthenticationAPI;
 import checkmo.book.internal.config.properties.Yes24Properties;
-import checkmo.book.internal.service.Yes24RecommendationRefreshClient;
+import checkmo.book.internal.scheduler.BookRecommendationScheduler;
 import checkmo.book.internal.service.BookRecommendationService;
 import checkmo.book.internal.service.RecommendationRefreshGuard;
+import checkmo.book.internal.service.Yes24RecommendationRefreshClient;
 import checkmo.book.internal.service.query.Yes24ApiService;
-import checkmo.book.internal.scheduler.BookRecommendationScheduler;
 import checkmo.book.web.dto.BookResponseDTO;
 import checkmo.infra.s3.internal.listener.S3EventListener;
 import checkmo.infra.s3.internal.service.S3Service;
@@ -26,7 +28,9 @@ import checkmo.member.internal.service.command.MemberCommandService;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -43,19 +47,19 @@ class SentryBackgroundCaptureTest {
         CheckmoMetrics checkmoMetrics = new CheckmoMetrics(new SimpleMeterRegistry());
         RuntimeException failure = new RuntimeException("yes24 unavailable");
         BookResponseDTO.BookList staleCache = BookResponseDTO.BookList.builder()
-                .detailInfoList(List.of(BookResponseDTO.DetailInfo.builder()
-                        .isbn("9791169213882")
+                .detailInfoList(IntStream.range(0, 4).mapToObj(index -> BookResponseDTO.DetailInfo.builder()
+                        .isbn("9791169213882" + index)
                         .title("테스트 책")
-                        .build()))
+                        .build()).toList())
                 .hasNext(false)
                 .currentPage(null)
                 .build();
         BookResponseDTO.BookList likedStaleCache = BookResponseDTO.BookList.builder()
-                .detailInfoList(List.of(BookResponseDTO.DetailInfo.builder()
-                        .isbn("9791169213882")
+                .detailInfoList(IntStream.range(0, 4).mapToObj(index -> BookResponseDTO.DetailInfo.builder()
+                        .isbn("9791169213882" + index)
                         .title("테스트 책")
                         .likedByMe(true)
-                        .build()))
+                        .build()).toList())
                 .hasNext(false)
                 .currentPage(null)
                 .build();
@@ -70,10 +74,9 @@ class SentryBackgroundCaptureTest {
                 guard
         );
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get("book:recommendations:daily")).thenReturn(staleCache);
-        when(valueOperations.get("book:recommendations:daily:updated_at"))
-                .thenReturn(LocalDate.now().minusDays(1).toString());
-        when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
+        when(valueOperations.multiGet(List.of(RecommendationRefreshGuard.DATA_KEY, RecommendationRefreshGuard.DATE_KEY)))
+                .thenReturn(Arrays.asList(staleCache, LocalDate.now().minusDays(1).toString()));
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt())).thenThrow(failure);
         when(yes24ApiService.applyLikedByMe(staleCache, 1L)).thenReturn(likedStaleCache);
 
         BookResponseDTO.BookList response = service.retrieveRecommendedBooks(1L);

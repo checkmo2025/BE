@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -77,13 +79,10 @@ class BookStoryNewsReportNotificationImageApiTest extends ApiTestSupport {
 
         when(yes24ApiService.retrieveSearchBooks(eq("자바"), eq(1), anyLong())).thenReturn(oneBookList);
         when(yes24ApiService.retrieveBookDetailInfo(ISBN)).thenReturn(detail);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(BookResponseDTO.BookList.builder()
-                .detailInfoList(IntStream.rangeClosed(1, 28)
-                        .mapToObj(index -> bookDetail("979116921%04d".formatted(index)))
-                        .toList())
-                .currentPage(1)
-                .hasNext(false)
-                .build());
+        when(yes24ApiService.retrieveRecommendedBooks(anyString(), any(LocalDate.class), anyInt()))
+                .thenAnswer(invocation -> BookResponseDTO.BookList.builder()
+                        .detailInfoList(List.of(bookDetail("isbn-" + invocation.getArgument(0))))
+                        .currentPage(1).hasNext(false).build());
         when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
