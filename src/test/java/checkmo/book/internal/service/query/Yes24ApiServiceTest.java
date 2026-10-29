@@ -142,7 +142,7 @@ class Yes24ApiServiceTest {
 
     @Test
     void searchBooksReturnsCachedFallbackAndCapturesYes24Failure() {
-        RuntimeException failure = new RuntimeException("aladin unavailable");
+        RuntimeException failure = new RuntimeException("yes24 unavailable");
         when(bookSearchCacheService.retrieve("java", 10, 1))
                 .thenReturn(Optional.empty(), Optional.of(bookList(false, false)));
         when(yes24SearchClient.fetchSearchBooks("java", 1)).thenThrow(failure);
@@ -160,13 +160,13 @@ class Yes24ApiServiceTest {
 
     @Test
     void searchBooksThrowsBook500WhenYes24FailsAndCacheMissing() {
-        RuntimeException failure = new RuntimeException("aladin unavailable");
+        RuntimeException failure = new RuntimeException("yes24 unavailable");
         when(bookSearchCacheService.retrieve("java", 10, 1)).thenReturn(Optional.empty());
         when(yes24SearchClient.fetchSearchBooks("java", 1)).thenThrow(failure);
 
         assertThatThrownBy(() -> yes24ApiService.retrieveSearchBooks("java", 1, 1L))
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
     }
@@ -178,7 +178,7 @@ class Yes24ApiServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = BookErrorStatus.class, names = {"BOOK_NOT_FOUND", "ALADIN_API_ERROR"})
+    @EnumSource(value = BookErrorStatus.class, names = {"BOOK_NOT_FOUND", "YES24_API_ERROR"})
     void detailFailureReturnsStoredBookWithoutFabricatingLink(BookErrorStatus status) {
         String isbn = "9788936434595";
         var failure = new BookException(status);
@@ -199,7 +199,7 @@ class Yes24ApiServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = BookErrorStatus.class, names = {"BOOK_NOT_FOUND", "ALADIN_API_ERROR"})
+    @EnumSource(value = BookErrorStatus.class, names = {"BOOK_NOT_FOUND", "YES24_API_ERROR"})
     void detailWithoutStoredBookPreservesMissingVersusUnavailableError(BookErrorStatus status) {
         var failure = new BookException(status);
         when(yes24Client.retrieveBookDetail("9788936434595")).thenThrow(failure);

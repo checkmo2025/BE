@@ -31,13 +31,13 @@ public class Yes24RateLimiter {
             if (wait != null && wait == 0) return;
             if (wait == null || wait < 0 || wait > 1500
                     || System.nanoTime() + Duration.ofMillis(wait).toNanos() > deadline) {
-                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+                throw new BookException(BookErrorStatus.YES24_API_ERROR);
             }
             try {
                 Thread.sleep(wait);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+                throw new BookException(BookErrorStatus.YES24_API_ERROR);
             }
         }
     }
@@ -63,7 +63,7 @@ public class Yes24RateLimiter {
             return redis.execute(script, List.of("yes24:account:" + properties.getAccountScope()), (Object[]) args);
         } catch (RuntimeException e) {
             // Redis 장애 때 무제한 호출로 전환하지 않는다. 상위 계층이 기존 캐시/DB로 대체한다.
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            throw new BookException(BookErrorStatus.YES24_API_ERROR);
         }
     }
 

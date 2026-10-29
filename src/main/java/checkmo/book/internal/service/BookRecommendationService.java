@@ -60,7 +60,7 @@ public class BookRecommendationService {
                 return yes24ApiService.applyLikedByMe(cachedBooks, memberId);
             }
 
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
+            throw new BookException(BookErrorStatus.YES24_API_ERROR, e);
         }
     }
 
@@ -121,19 +121,19 @@ public class BookRecommendationService {
 
             if (!isUsableBookList(bookList)) {
                 result = "invalid_response";
-                log.error("알라딘 API에서 추천 책을 가져오지 못했습니다.");
-                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+                log.error("예스24 API에서 추천 책을 가져오지 못했습니다.");
+                throw new BookException(BookErrorStatus.YES24_API_ERROR);
             }
 
             LocalDate day = today();
             int startIndex = DayOfWeekUtils.calculateStartIndexByDayOfWeek(day);
             var allBooks = bookList.getDetailInfoList();
-            checkmoMetrics.recordRecommendationBooksCount("aladin", allBooks.size());
+            checkmoMetrics.recordRecommendationBooksCount("yes24", allBooks.size());
 
             if (allBooks.size() < startIndex + 4) {
                 result = "invalid_response";
                 log.error("추천 책 목록 부족, 전체: {}개, 필요: {}개", allBooks.size(), startIndex + 4);
-                throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+                throw new BookException(BookErrorStatus.YES24_API_ERROR);
             }
 
             List<DetailInfo> booksForToday = List.copyOf(allBooks.subList(startIndex, startIndex + 4));

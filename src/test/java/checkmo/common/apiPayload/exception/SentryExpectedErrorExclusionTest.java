@@ -54,7 +54,7 @@ class SentryExpectedErrorExclusionTest {
         RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
         ExceptionAdvice advice = new ExceptionAdvice(captureClient);
         AuthException authException = new AuthException(AuthErrorStatus.INTERNAL_SERVER_ERROR);
-        BookException bookException = new BookException(BookErrorStatus.ALADIN_API_ERROR);
+        BookException bookException = new BookException(BookErrorStatus.YES24_API_ERROR);
         S3InfraException s3DeleteException = new S3InfraException(S3ErrorStatus.S3_FILE_DELETE_FAILED);
         S3InfraException s3PresignedUrlException = new S3InfraException(S3ErrorStatus.S3_PRESIGNED_URL_GENERATION_FAILED);
 

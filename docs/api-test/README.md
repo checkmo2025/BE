@@ -21,7 +21,7 @@
 
 - `src/test/resources/application.yml`이 메인 `application.yml`을 테스트 classpath에서 가린다.
 - `test` 프로파일만 활성화한다.
-- 운영 프로파일인 `prod`, `redis`, `aladin`, `mail`, `jwt`, `oauth2`, `s3`는 테스트 active profile에 포함하지 않는다.
+- 운영 프로파일인 `prod`, `redis`, `aladin`, `yes24`, `mail`, `jwt`, `oauth2`, `s3`는 테스트 active profile에 포함하지 않는다.
 - H2는 `MODE=MySQL`로 실행해 MySQL 문법과 최대한 가깝게 동작시킨다.
 
 ## 테스트 메타 어노테이션
@@ -48,7 +48,7 @@ HTTP 서버가 필요 없는 일반 스프링 컨텍스트 통합 테스트에�
 테스트 기반 클래스 `ApiTestSupport`는 다음 경계를 테스트 더블로 고정한다.
 
 - Redis 토큰 캐시와 RedisTemplate 계열 빈
-- 알라딘 호출용 RestTemplate
+- 예스24 호출용 RestTemplate
 - 메일 발송 서비스
 - S3 서비스
 - ApplicationReadyEvent 또는 `@Scheduled`로 실행될 수 있는 스케줄러

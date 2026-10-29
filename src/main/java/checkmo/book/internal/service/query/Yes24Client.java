@@ -57,7 +57,7 @@ public class Yes24Client {
 
     private Yes24ApiResponseDTO.Response request(UriComponentsBuilder uri, String operation, Object... values) {
         if (properties.getApiKey() == null || properties.getApiKey().isBlank()) {
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            throw new BookException(BookErrorStatus.YES24_API_ERROR);
         }
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Api-Key", properties.getApiKey());
@@ -89,11 +89,11 @@ public class Yes24Client {
                     safeHeaders.set(HttpHeaders.RETRY_AFTER, retryAfter);
                 }
             }
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR,
+            throw new BookException(BookErrorStatus.YES24_API_ERROR,
                     new RestClientResponseException("Yes24 " + operation + " request failed",
                             e.getStatusCode(), "", safeHeaders, null, null));
         } catch (RestClientException e) {
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR,
+            throw new BookException(BookErrorStatus.YES24_API_ERROR,
                     new RestClientException("Yes24 " + operation + " request failed"));
         }
     }

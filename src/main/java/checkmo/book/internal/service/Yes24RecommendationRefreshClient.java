@@ -52,7 +52,7 @@ public class Yes24RecommendationRefreshClient {
         return retryTemplate.execute(context -> {
             if (context.getRetryCount() > 0) {
                 checkmoMetrics.incrementYes24RecommendationRetry("retry");
-                log.warn("알라딘 추천 책 갱신 재시도. attempt={}", context.getRetryCount() + 1);
+                log.warn("예스24 추천 책 갱신 재시도. attempt={}", context.getRetryCount() + 1);
             }
             return yes24ApiService.retrieveRecommendedBooks();
         });
@@ -111,7 +111,7 @@ public class Yes24RecommendationRefreshClient {
                 }
 
                 if (current instanceof BookException bookException) {
-                    if (bookException.getErrorCode() != BookErrorStatus.ALADIN_API_ERROR) {
+                    if (bookException.getErrorCode() != BookErrorStatus.YES24_API_ERROR) {
                         return false;
                     }
                     wrappedByYes24BookException = true;

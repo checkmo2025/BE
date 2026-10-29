@@ -122,7 +122,7 @@ class Yes24BookConverterTest {
                 response(List.of(), null, 10, 1), response(List.of(), 1, 0, 1))) {
             assertThatThrownBy(() -> BookConverter.toYes24BookList(source))
                     .isInstanceOfSatisfying(BookException.class,
-                            e -> assertThat(e.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR));
+                            e -> assertThat(e.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR));
         }
     }
 

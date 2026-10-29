@@ -31,7 +31,7 @@ public class Yes24SearchPrefetchService {
             BookResponseDTO.BookList bookList = yes24SearchClient.fetchSearchBooks(keyword, nextPage);
             bookSearchCacheService.save(keyword, maxResults, nextPage, bookList);
         } catch (Exception e) {
-            log.warn("알라딘 검색 다음 페이지 prefetch 실패. page={}", nextPage, e);
+            log.warn("예스24 검색 다음 페이지 prefetch 실패. page={}", nextPage, e);
             sentryCaptureClient.captureException(e);
         }
     }

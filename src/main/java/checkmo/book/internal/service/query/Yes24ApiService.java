@@ -63,7 +63,7 @@ public class Yes24ApiService {
                 sentryCaptureClient.captureException(e);
                 return applyLikedByMe(fallbackBookList.get(), memberId);
             }
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR, e);
+            throw new BookException(BookErrorStatus.YES24_API_ERROR, e);
         }
     }
 

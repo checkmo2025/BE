@@ -41,7 +41,7 @@ public class RecommendationRefreshGuard {
         } catch (RuntimeException ignored) {
             // 공유 잠금이 없으면 호출하지 않는다.
         }
-        throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+        throw new BookException(BookErrorStatus.YES24_API_ERROR);
     }
 
     @SuppressWarnings("unchecked")
@@ -50,7 +50,7 @@ public class RecommendationRefreshGuard {
         Long written = redis.execute(PUBLISH, List.of(LOCK_KEY, DATA_KEY, DATE_KEY), token,
                 new String(serializer.serialize(books), StandardCharsets.UTF_8),
                 new String(serializer.serialize(day), StandardCharsets.UTF_8));
-        if (!Long.valueOf(1).equals(written)) throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+        if (!Long.valueOf(1).equals(written)) throw new BookException(BookErrorStatus.YES24_API_ERROR);
     }
 
     public void release(String token) {

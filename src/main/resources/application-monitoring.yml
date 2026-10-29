@@ -20,11 +20,11 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
-        checkmo.aladin.client.duration: true
-        checkmo.aladin.recommendation.refresh.duration: true
+        checkmo.yes24.client.duration: true
+        checkmo.yes24.recommendation.refresh.duration: true
         checkmo.banner.api.duration: true
         checkmo.book.recommendation.books.count: true
       slo:
         http.server.requests: 100ms,300ms,500ms,1s,2s,5s
-        checkmo.aladin.client.duration: 100ms,300ms,500ms,1s,2s,5s
+        checkmo.yes24.client.duration: 100ms,300ms,500ms,1s,2s,5s
         checkmo.banner.api.duration: 100ms,300ms,500ms,1s,2s

@@ -258,10 +258,10 @@ curl -fsS https://<api-domain>/health
 
 Custom metric은 해당 기능을 실제로 호출해야 생긴다.
 
-Prometheus에서 Aladin API metric이 쌓였는지 확인한다.
+Prometheus에서 Yes24 API metric이 쌓였는지 확인한다.
 
 ```bash
-docker compose exec prometheus promtool query instant http://localhost:9090 'checkmo_aladin_client_requests_total'
+docker compose exec prometheus promtool query instant http://localhost:9090 'checkmo_yes24_client_requests_total'
 ```
 
 추천 cache metric을 확인한다.
@@ -301,7 +301,7 @@ Checkmo Backend Overview
 
 | 같이 볼 것 | 판단 |
 | --- | --- |
-| Aladin API duration | 외부 API 때문에 느린지 확인 |
+| Yes24 API duration | 외부 API 때문에 느린지 확인 |
 | Recommendation cache hit/miss | cache miss 때문에 느린지 확인 |
 | HikariCP pending | DB connection을 기다리는지 확인 |
 | JVM memory / GC | Java 메모리나 GC 문제인지 확인 |
@@ -317,15 +317,15 @@ Sentry: 같은 시간대의 예외 상세 확인
 
 Grafana는 "어디서 얼마나 자주 터졌는지"를 보고, Sentry는 "왜 터졌는지"를 본다.
 
-### Aladin timeout이 의심된다
+### Yes24 timeout이 의심된다
 
 Prometheus에서 timeout 결과만 확인한다.
 
 ```bash
-docker compose exec prometheus promtool query instant http://localhost:9090 'checkmo_aladin_client_requests_total{result="timeout"}'
+docker compose exec prometheus promtool query instant http://localhost:9090 'checkmo_yes24_client_requests_total{result="timeout"}'
 ```
 
-값이 계속 증가하면 Aladin API timeout이 실제로 발생하고 있는 것이다.
+값이 계속 증가하면 Yes24 API timeout이 실제로 발생하고 있는 것이다.
 
 ## 9. 최종 정상 기준
 
@@ -339,7 +339,7 @@ docker compose exec prometheus promtool query instant http://localhost:9090 'che
 | Grafana 접속 | SSH 터널 후 `http://localhost:3000` 로그인 가능 |
 | Dashboard | `Checkmo Backend Overview` 표시 |
 | 기본 metric | 요청 수, 응답 시간, JVM, HikariCP 값 표시 |
-| custom metric | 관련 API 호출 후 Aladin/cache/banner metric 표시 |
+| custom metric | 관련 API 호출 후 Yes24/cache/banner metric 표시 |
 
 ## 외부 공개 여부 확인
 

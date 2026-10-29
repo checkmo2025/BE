@@ -85,7 +85,7 @@
 
 | 테스트 | 추가 이유 |
 | --- | --- |
-| `bookSearchDetailRecommendLikeAndLikedListsSucceed` | 알라딘 경계 더블, 추천 캐시 fallback, 도서 좋아요 토글, 내/타인 좋아요 목록, 401을 한 번에 검증한다. |
+| `bookSearchDetailRecommendLikeAndLikedListsSucceed` | 예스24 경계 더블, 추천 캐시 fallback, 도서 좋아요 토글, 내/타인 좋아요 목록, 401을 한 번에 검증한다. |
 | `bookStoryCrudListsLikeCommentAndFailuresSucceed` | 책 이야기 작성, 목록, 상세, 좋아요, 댓글, 수정/삭제, 소유권 403, validation을 실제 H2 상태 전이로 검증한다. |
 | `newsListMyListAndDetailUseH2Rows` | 공개 뉴스, 내 뉴스, 상세 조회가 H2에 저장된 게시 기간과 요청자 이메일을 기준으로 동작하는지 검증한다. |
 | `reportCreateListValidationAndBusinessFailuresSucceed` | 신고 생성, 내 신고 목록, 자기 자신 신고 금지, validation, 401을 검증한다. |

@@ -23,7 +23,7 @@ public class BookConverter {
         if (data.currentPage() == null || data.currentPage() < 1
                 || data.pageSize() == null || data.pageSize() < 1
                 || data.totalCount() == null || data.totalCount() < 0) {
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            throw new BookException(BookErrorStatus.YES24_API_ERROR);
         }
         if (data.totalCount() == 0 && data.items().isEmpty()) {
             return createEmptyBookListResponse();
@@ -52,7 +52,7 @@ public class BookConverter {
     private static Yes24ApiResponseDTO.Data requireYes24Data(Yes24ApiResponseDTO.Response response) {
         if (response == null || !Boolean.TRUE.equals(response.success())
                 || response.data() == null || response.data().items() == null) {
-            throw new BookException(BookErrorStatus.ALADIN_API_ERROR);
+            throw new BookException(BookErrorStatus.YES24_API_ERROR);
         }
         return response.data();
     }

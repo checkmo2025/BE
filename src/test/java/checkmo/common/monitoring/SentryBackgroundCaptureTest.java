@@ -41,7 +41,7 @@ class SentryBackgroundCaptureTest {
         Yes24ApiService yes24ApiService = mock(Yes24ApiService.class);
         RecordingSentryCaptureClient captureClient = new RecordingSentryCaptureClient();
         CheckmoMetrics checkmoMetrics = new CheckmoMetrics(new SimpleMeterRegistry());
-        RuntimeException failure = new RuntimeException("aladin unavailable");
+        RuntimeException failure = new RuntimeException("yes24 unavailable");
         BookResponseDTO.BookList staleCache = BookResponseDTO.BookList.builder()
                 .detailInfoList(List.of(BookResponseDTO.DetailInfo.builder()
                         .isbn("9791169213882")

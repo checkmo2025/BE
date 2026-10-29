@@ -89,8 +89,8 @@ class Yes24ClientTest {
 
     @ParameterizedTest
     @CsvSource({"404,GOODS_001,BOOK_NOT_FOUND", "404,GOODS_002,BOOK_NOT_FOUND",
-            "404,SEARCH_002,ALADIN_API_ERROR", "401,AUTH_002,ALADIN_API_ERROR",
-            "429,RATE_LIMIT,ALADIN_API_ERROR", "503,UPSTREAM_UNAVAILABLE,ALADIN_API_ERROR"})
+            "404,SEARCH_002,YES24_API_ERROR", "401,AUTH_002,YES24_API_ERROR",
+            "429,RATE_LIMIT,YES24_API_ERROR", "503,UPSTREAM_UNAVAILABLE,YES24_API_ERROR"})
     void distinguishesMissingDetailFromProviderFailure(int status, String code, BookErrorStatus expected) {
         server.expect(anything()).andRespond(withStatus(HttpStatus.valueOf(status))
                 .body("{\"errorCode\":\"" + code + "\",\"message\":\"test-only-secret\"}")
@@ -110,7 +110,7 @@ class Yes24ClientTest {
     void unknownSearch404IsNotReportedAsAnEmptySuccess() {
         server.expect(anything()).andRespond(withStatus(HttpStatus.NOT_FOUND).body("not json"));
         assertThatThrownBy(() -> client.retrieveSearchBooks("책", 1)).isInstanceOfSatisfying(BookException.class,
-                e -> assertThat(e.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR));
+                e -> assertThat(e.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR));
         server.verify();
     }
 

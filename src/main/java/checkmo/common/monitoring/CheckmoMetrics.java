@@ -24,28 +24,28 @@ public class CheckmoMetrics {
     }
 
     public void recordYes24ClientResult(Timer.Sample sample, String operation, String result, Throwable throwable) {
-        Counter.builder("checkmo.aladin.client.requests")
+        Counter.builder("checkmo.yes24.client.requests")
                 .tag("operation", operation)
                 .tag("result", result)
                 .tag("exception", exceptionName(throwable))
                 .register(meterRegistry)
                 .increment();
 
-        sample.stop(Timer.builder("checkmo.aladin.client.duration")
+        sample.stop(Timer.builder("checkmo.yes24.client.duration")
                 .tag("operation", operation)
                 .tag("result", result)
                 .register(meterRegistry));
     }
 
     public void recordYes24RecommendationRefresh(Timer.Sample sample, String result, String source) {
-        sample.stop(Timer.builder("checkmo.aladin.recommendation.refresh.duration")
+        sample.stop(Timer.builder("checkmo.yes24.recommendation.refresh.duration")
                 .tag("result", result)
                 .tag("source", source)
                 .register(meterRegistry));
     }
 
     public void incrementYes24RecommendationRetry(String result) {
-        Counter.builder("checkmo.aladin.recommendation.retry.count")
+        Counter.builder("checkmo.yes24.recommendation.retry.count")
                 .tag("result", result)
                 .register(meterRegistry)
                 .increment();

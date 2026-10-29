@@ -90,7 +90,7 @@ class BookRecommendationServiceTest {
         var stale = bookList("9788936434595", false);
         when(valueOperations.get(REDIS_KEY)).thenReturn(stale);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn("2000-01-01");
-        when(guard.acquire()).thenThrow(new BookException(BookErrorStatus.ALADIN_API_ERROR));
+        when(guard.acquire()).thenThrow(new BookException(BookErrorStatus.YES24_API_ERROR));
         when(yes24ApiService.applyLikedByMe(stale, MEMBER_ID)).thenReturn(stale);
         assertThat(service.retrieveRecommendedBooks(MEMBER_ID)).isSameAs(stale);
         verify(yes24ApiService, never()).retrieveRecommendedBooks();
@@ -98,20 +98,20 @@ class BookRecommendationServiceTest {
 
     @Test
     void retrieveRecommendedBooksRetriesTransientYes24AccessFailuresThenSavesTodayRecommendationWhenRefreshEventuallySucceeds() {
-        BookResponseDTO.BookList aladinBooks = bookListOfSize(todayRequiredBookCount());
+        BookResponseDTO.BookList yes24Books = bookListOfSize(todayRequiredBookCount());
         BookException firstFailure = new BookException(
-                BookErrorStatus.ALADIN_API_ERROR,
+                BookErrorStatus.YES24_API_ERROR,
                 new RestClientException("first transient failure")
         );
         BookException secondFailure = new BookException(
-                BookErrorStatus.ALADIN_API_ERROR,
+                BookErrorStatus.YES24_API_ERROR,
                 new IOException("second transient failure")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
         when(yes24ApiService.retrieveRecommendedBooks())
                 .thenThrow(firstFailure)
                 .thenThrow(secondFailure)
-                .thenReturn(aladinBooks);
+                .thenReturn(yes24Books);
         when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -132,7 +132,7 @@ class BookRecommendationServiceTest {
         List<DetailInfo> upstreamBooks = mutableDetailInfoList(todayRequiredBookCount());
         DetailInfo originalFirstRecommendation = upstreamBooks.get(startIndex);
         DetailInfo replacementBook = detailInfo("mutated-isbn", "변경된 책");
-        BookResponseDTO.BookList aladinBooks = BookResponseDTO.BookList.builder()
+        BookResponseDTO.BookList yes24Books = BookResponseDTO.BookList.builder()
                 .detailInfoList(upstreamBooks)
                 .hasNext(false)
                 .currentPage(null)
@@ -141,7 +141,7 @@ class BookRecommendationServiceTest {
         ArgumentCaptor<BookResponseDTO.BookList> savedBookListCaptor =
                 ArgumentCaptor.forClass(BookResponseDTO.BookList.class);
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(aladinBooks);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(yes24Books);
         when(yes24ApiService.applyLikedByMe(any(BookResponseDTO.BookList.class), eq(MEMBER_ID)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -165,15 +165,15 @@ class BookRecommendationServiceTest {
     @Test
     void retrieveRecommendedBooksThrowsBook500AfterThreeFailedRetryAttemptsWhenCacheIsNotUsable() {
         BookException finalFailure = new BookException(
-                BookErrorStatus.ALADIN_API_ERROR,
-                new RestClientException("aladin unavailable")
+                BookErrorStatus.YES24_API_ERROR,
+                new RestClientException("yes24 unavailable")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
         when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(finalFailure);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(finalFailure);
         verify(yes24ApiService, times(3)).retrieveRecommendedBooks();
@@ -189,7 +189,7 @@ class BookRecommendationServiceTest {
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
         verify(yes24ApiService).retrieveRecommendedBooks();
@@ -200,7 +200,7 @@ class BookRecommendationServiceTest {
     @Test
     void retrieveRecommendedBooksDoesNotRetryBookApiErrorWhenCauseIsGenericRuntimeFailureAndCacheIsNotUsable() {
         BookException failure = new BookException(
-                BookErrorStatus.ALADIN_API_ERROR,
+                BookErrorStatus.YES24_API_ERROR,
                 new RuntimeException("non-transient recommendation failure")
         );
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
@@ -208,7 +208,7 @@ class BookRecommendationServiceTest {
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
         verify(yes24ApiService).retrieveRecommendedBooks();
@@ -224,7 +224,7 @@ class BookRecommendationServiceTest {
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
         verify(yes24ApiService).retrieveRecommendedBooks();
@@ -236,7 +236,7 @@ class BookRecommendationServiceTest {
     void retrieveRecommendedBooksReturnsStaleCacheAndCapturesFailureWhenRefreshFails() {
         BookResponseDTO.BookList staleCache = bookList("9791169213882", false);
         BookResponseDTO.BookList likedStaleCache = bookList("9791169213882", true);
-        RuntimeException failure = new RuntimeException("aladin unavailable");
+        RuntimeException failure = new RuntimeException("yes24 unavailable");
         when(valueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(valueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1).toString());
         when(yes24ApiService.retrieveRecommendedBooks()).thenThrow(failure);
@@ -304,7 +304,7 @@ class BookRecommendationServiceTest {
         assertThat(captureClient.captured())
                 .singleElement()
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 );
         verify(yes24ApiService).applyLikedByMe(staleCache, MEMBER_ID);
     }
@@ -317,7 +317,7 @@ class BookRecommendationServiceTest {
             String updatedAt,
             boolean redisReadFails
     ) {
-        RuntimeException failure = new RuntimeException("aladin unavailable");
+        RuntimeException failure = new RuntimeException("yes24 unavailable");
         if (redisReadFails) {
             when(valueOperations.get(REDIS_KEY)).thenThrow(new IllegalStateException("redis read failed"));
         } else {
@@ -328,7 +328,7 @@ class BookRecommendationServiceTest {
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 )
                 .hasCause(failure);
         assertThat(captureClient.count()).isZero();
@@ -339,14 +339,14 @@ class BookRecommendationServiceTest {
     @MethodSource("unusableYes24ResponseCases")
     void retrieveRecommendedBooksThrowsBook500AndDoesNotCaptureWhenNoUsableCacheAndRefreshReturnsUnusableBookList(
             String displayName,
-            BookResponseDTO.BookList aladinResponse
+            BookResponseDTO.BookList yes24Response
     ) {
         when(valueOperations.get(REDIS_KEY)).thenReturn(null);
-        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(aladinResponse);
+        when(yes24ApiService.retrieveRecommendedBooks()).thenReturn(yes24Response);
 
         assertThatThrownBy(() -> service.retrieveRecommendedBooks(MEMBER_ID))
                 .isInstanceOfSatisfying(BookException.class, exception ->
-                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.ALADIN_API_ERROR)
+                        assertThat(exception.getErrorCode()).isEqualTo(BookErrorStatus.YES24_API_ERROR)
                 );
         assertThat(captureClient.count()).isZero();
         verify(yes24ApiService, never()).applyLikedByMe(any(), any());
@@ -380,8 +380,8 @@ class BookRecommendationServiceTest {
 
     private static Stream<Arguments> unusableYes24ResponseCases() {
         return Stream.of(
-                Arguments.of("null aladin response is not usable", null),
-                Arguments.of("empty aladin response is not usable", emptyBookList()),
+                Arguments.of("null yes24 response is not usable", null),
+                Arguments.of("empty yes24 response is not usable", emptyBookList()),
                 Arguments.of("fewer than today's four-book window is not usable", bookListOfSize(todayRequiredBookCount() - 1))
         );
     }

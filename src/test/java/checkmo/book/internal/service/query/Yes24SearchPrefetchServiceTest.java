@@ -65,7 +65,7 @@ class Yes24SearchPrefetchServiceTest {
 
     @Test
     void prefetchNextPageCapturesFailureWithoutThrowing() {
-        RuntimeException failure = new RuntimeException("aladin unavailable");
+        RuntimeException failure = new RuntimeException("yes24 unavailable");
         when(bookSearchCacheService.retrieve("java", 10, 2)).thenReturn(Optional.empty());
         when(yes24SearchClient.fetchSearchBooks("java", 2)).thenThrow(failure);
 

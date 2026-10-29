@@ -20,7 +20,7 @@ class Yes24SearchClientTest {
         var result = BookResponseDTO.BookList.builder().build();
         when(provider.retrieveSearchBooks("책", 2)).thenReturn(result);
         assertThat(client.fetchSearchBooks("책", 2)).isSameAs(result);
-        var failure = new BookException(BookErrorStatus.ALADIN_API_ERROR);
+        var failure = new BookException(BookErrorStatus.YES24_API_ERROR);
         when(provider.retrieveSearchBooks("책", 3)).thenThrow(failure);
         assertThatThrownBy(() -> client.fetchSearchBooks("책", 3)).isSameAs(failure);
     }

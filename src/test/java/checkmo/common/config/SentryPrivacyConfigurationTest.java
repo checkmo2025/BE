@@ -130,7 +130,7 @@ class SentryPrivacyConfigurationTest {
 
     @Test
     void beforeSendRemovesBookSearchKeywordAndQueryString() {
-        SentryEvent event = new SentryEvent(new RuntimeException("aladin unavailable"));
+        SentryEvent event = new SentryEvent(new RuntimeException("yes24 unavailable"));
         Request request = new Request();
         request.setQueryString("keyword=자바&page=1&refreshToken=secret");
         request.setUrl("https://api.checkmo.kr/api/v1/books/search?keyword=%EC%9E%90%EB%B0%94&page=1&refreshToken=secret");

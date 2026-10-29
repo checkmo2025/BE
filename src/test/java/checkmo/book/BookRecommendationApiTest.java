@@ -44,7 +44,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
         when(redisValueOperations.get(REDIS_KEY)).thenReturn(staleCache);
         when(redisValueOperations.get(REDIS_UPDATED_AT_KEY)).thenReturn(LocalDate.now().minusDays(1).toString());
         when(recommendationRefreshClient.retrieveRecommendedBooks())
-                .thenThrow(new RuntimeException("aladin unavailable"));
+                .thenThrow(new RuntimeException("yes24 unavailable"));
         when(yes24ApiService.applyLikedByMe(staleCache, Long.valueOf(user.id()))).thenReturn(staleCache);
 
         given()
@@ -66,7 +66,7 @@ class BookRecommendationApiTest extends ApiTestSupport {
 
         when(redisValueOperations.get(REDIS_KEY)).thenReturn(null);
         when(recommendationRefreshClient.retrieveRecommendedBooks())
-                .thenThrow(new RuntimeException("aladin unavailable"));
+                .thenThrow(new RuntimeException("yes24 unavailable"));
 
         given()
                 .cookie(accessTokenCookie(user))
